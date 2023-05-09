@@ -22,6 +22,10 @@
 		39EB514029F0C05C00885CEF /* GolfCounter_Watch_AppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39EB513F29F0C05C00885CEF /* GolfCounter_Watch_AppTests.swift */; };
 		39EB514A29F0C05C00885CEF /* GolfCounter_Watch_AppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39EB514929F0C05C00885CEF /* GolfCounter_Watch_AppUITests.swift */; };
 		39EB514C29F0C05C00885CEF /* GolfCounter_Watch_AppUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39EB514B29F0C05C00885CEF /* GolfCounter_Watch_AppUITestsLaunchTests.swift */; };
+		39F630572A08D40900EC8EFB /* Score.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39F630562A08D40900EC8EFB /* Score.swift */; };
+		39F6305D2A08E55800EC8EFB /* ScoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39F6305C2A08E55800EC8EFB /* ScoreView.swift */; };
+		39F630632A09D99B00EC8EFB /* Score.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39F630622A09D99B00EC8EFB /* Score.swift */; };
+		39F630652A09D9C800EC8EFB /* ScoreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39F630642A09D9C800EC8EFB /* ScoreView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -97,6 +101,10 @@
 		39EB514529F0C05C00885CEF /* GolfCounter Watch AppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "GolfCounter Watch AppUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		39EB514929F0C05C00885CEF /* GolfCounter_Watch_AppUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GolfCounter_Watch_AppUITests.swift; sourceTree = "<group>"; };
 		39EB514B29F0C05C00885CEF /* GolfCounter_Watch_AppUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GolfCounter_Watch_AppUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		39F630562A08D40900EC8EFB /* Score.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Score.swift; sourceTree = "<group>"; };
+		39F6305C2A08E55800EC8EFB /* ScoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreView.swift; sourceTree = "<group>"; };
+		39F630622A09D99B00EC8EFB /* Score.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Score.swift; sourceTree = "<group>"; };
+		39F630642A09D9C800EC8EFB /* ScoreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -174,8 +182,9 @@
 		39EB510529F0C05B00885CEF /* GolfCounter */ = {
 			isa = PBXGroup;
 			children = (
+				39F630552A08D3EB00EC8EFB /* Model */,
+				39F630542A08D23000EC8EFB /* Views */,
 				39EB510629F0C05B00885CEF /* GolfCounterApp.swift */,
-				39EB510829F0C05B00885CEF /* ContentView.swift */,
 				39EB510A29F0C05C00885CEF /* Assets.xcassets */,
 				39EB510C29F0C05C00885CEF /* Preview Content */,
 			);
@@ -210,8 +219,9 @@
 		39EB512D29F0C05C00885CEF /* GolfCounter Watch App */ = {
 			isa = PBXGroup;
 			children = (
+				39F630612A09D98200EC8EFB /* Views */,
+				39F630602A09D97C00EC8EFB /* Model */,
 				39EB512E29F0C05C00885CEF /* GolfCounterApp.swift */,
-				39EB513029F0C05C00885CEF /* ContentView.swift */,
 				39EB513229F0C05C00885CEF /* Assets.xcassets */,
 				39EB513429F0C05C00885CEF /* Preview Content */,
 			);
@@ -241,6 +251,40 @@
 				39EB514B29F0C05C00885CEF /* GolfCounter_Watch_AppUITestsLaunchTests.swift */,
 			);
 			path = "GolfCounter Watch AppUITests";
+			sourceTree = "<group>";
+		};
+		39F630542A08D23000EC8EFB /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				39EB510829F0C05B00885CEF /* ContentView.swift */,
+				39F6305C2A08E55800EC8EFB /* ScoreView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		39F630552A08D3EB00EC8EFB /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				39F630562A08D40900EC8EFB /* Score.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		39F630602A09D97C00EC8EFB /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				39F630622A09D99B00EC8EFB /* Score.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		39F630612A09D98200EC8EFB /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				39EB513029F0C05C00885CEF /* ContentView.swift */,
+				39F630642A09D9C800EC8EFB /* ScoreView.swift */,
+			);
+			path = Views;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -466,7 +510,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				39EB510929F0C05B00885CEF /* ContentView.swift in Sources */,
+				39F630572A08D40900EC8EFB /* Score.swift in Sources */,
 				39EB510729F0C05B00885CEF /* GolfCounterApp.swift in Sources */,
+				39F6305D2A08E55800EC8EFB /* ScoreView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -492,6 +538,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				39EB513129F0C05C00885CEF /* ContentView.swift in Sources */,
+				39F630652A09D9C800EC8EFB /* ScoreView.swift in Sources */,
+				39F630632A09D99B00EC8EFB /* Score.swift in Sources */,
 				39EB512F29F0C05C00885CEF /* GolfCounterApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
