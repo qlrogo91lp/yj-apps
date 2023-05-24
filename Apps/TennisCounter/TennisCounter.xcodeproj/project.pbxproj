@@ -16,6 +16,10 @@
 		399701042A1D9BC900D0D486 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 399701032A1D9BC900D0D486 /* ContentView.swift */; };
 		399701062A1D9BCA00D0D486 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 399701052A1D9BCA00D0D486 /* Assets.xcassets */; };
 		399701092A1D9BCA00D0D486 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 399701082A1D9BCA00D0D486 /* Preview Assets.xcassets */; };
+		399701162A1D9C2C00D0D486 /* Score.swift in Sources */ = {isa = PBXBuildFile; fileRef = 399701152A1D9C2C00D0D486 /* Score.swift */; };
+		399701182A1D9C7100D0D486 /* CounterButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 399701172A1D9C7100D0D486 /* CounterButtonView.swift */; };
+		3997011C2A1D9D1100D0D486 /* Score.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3997011B2A1D9D1100D0D486 /* Score.swift */; };
+		3997011E2A1D9D2C00D0D486 /* CounterButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3997011D2A1D9D2C00D0D486 /* CounterButtonView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,6 +57,10 @@
 		399701032A1D9BC900D0D486 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		399701052A1D9BCA00D0D486 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		399701082A1D9BCA00D0D486 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		399701152A1D9C2C00D0D486 /* Score.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Score.swift; sourceTree = "<group>"; };
+		399701172A1D9C7100D0D486 /* CounterButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CounterButtonView.swift; sourceTree = "<group>"; };
+		3997011B2A1D9D1100D0D486 /* Score.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Score.swift; sourceTree = "<group>"; };
+		3997011D2A1D9D2C00D0D486 /* CounterButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CounterButtonView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -94,8 +102,9 @@
 		399700EE2A1D9BC800D0D486 /* TennisCounter */ = {
 			isa = PBXGroup;
 			children = (
+				399701142A1D9BFA00D0D486 /* Models */,
+				399701132A1D9BF500D0D486 /* Views */,
 				399700EF2A1D9BC800D0D486 /* TennisCounterApp.swift */,
-				399700F12A1D9BC800D0D486 /* ContentView.swift */,
 				399700F32A1D9BC900D0D486 /* Assets.xcassets */,
 				399700F52A1D9BC900D0D486 /* Preview Content */,
 			);
@@ -113,8 +122,9 @@
 		399701002A1D9BC900D0D486 /* TennisCounter Watch App */ = {
 			isa = PBXGroup;
 			children = (
+				3997011A2A1D9CFA00D0D486 /* Models */,
+				399701192A1D9CF100D0D486 /* Views */,
 				399701012A1D9BC900D0D486 /* TennisCounterApp.swift */,
-				399701032A1D9BC900D0D486 /* ContentView.swift */,
 				399701052A1D9BCA00D0D486 /* Assets.xcassets */,
 				399701072A1D9BCA00D0D486 /* Preview Content */,
 			);
@@ -127,6 +137,40 @@
 				399701082A1D9BCA00D0D486 /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		399701132A1D9BF500D0D486 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				399700F12A1D9BC800D0D486 /* ContentView.swift */,
+				399701172A1D9C7100D0D486 /* CounterButtonView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		399701142A1D9BFA00D0D486 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				399701152A1D9C2C00D0D486 /* Score.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		399701192A1D9CF100D0D486 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				399701032A1D9BC900D0D486 /* ContentView.swift */,
+				3997011D2A1D9D2C00D0D486 /* CounterButtonView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		3997011A2A1D9CFA00D0D486 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				3997011B2A1D9D1100D0D486 /* Score.swift */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -232,6 +276,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				399700F22A1D9BC800D0D486 /* ContentView.swift in Sources */,
+				399701182A1D9C7100D0D486 /* CounterButtonView.swift in Sources */,
+				399701162A1D9C2C00D0D486 /* Score.swift in Sources */,
 				399700F02A1D9BC800D0D486 /* TennisCounterApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -241,6 +287,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				399701042A1D9BC900D0D486 /* ContentView.swift in Sources */,
+				3997011E2A1D9D2C00D0D486 /* CounterButtonView.swift in Sources */,
+				3997011C2A1D9D1100D0D486 /* Score.swift in Sources */,
 				399701022A1D9BC900D0D486 /* TennisCounterApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -371,7 +419,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 202305242;
 				DEVELOPMENT_ASSET_PATHS = "\"TennisCounter Watch App/Preview Content\"";
 				DEVELOPMENT_TEAM = P2TU28W32L;
 				ENABLE_PREVIEWS = YES;
@@ -379,11 +427,12 @@
 				INFOPLIST_KEY_CFBundleDisplayName = TennisCounter;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.yj.TennisCounter;
+				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.yj.TennisCounter.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -391,7 +440,7 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 9.4;
+				WATCHOS_DEPLOYMENT_TARGET = 8.0;
 			};
 			name = Debug;
 		};
@@ -401,7 +450,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 202305242;
 				DEVELOPMENT_ASSET_PATHS = "\"TennisCounter Watch App/Preview Content\"";
 				DEVELOPMENT_TEAM = P2TU28W32L;
 				ENABLE_PREVIEWS = YES;
@@ -409,11 +458,12 @@
 				INFOPLIST_KEY_CFBundleDisplayName = TennisCounter;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.yj.TennisCounter;
+				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.yj.TennisCounter.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -422,7 +472,7 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
 				VALIDATE_PRODUCT = YES;
-				WATCHOS_DEPLOYMENT_TARGET = 9.4;
+				WATCHOS_DEPLOYMENT_TARGET = 8.0;
 			};
 			name = Release;
 		};
@@ -432,30 +482,36 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 202305242;
 				DEVELOPMENT_ASSET_PATHS = "\"TennisCounter/Preview Content\"";
 				DEVELOPMENT_TEAM = P2TU28W32L;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = TennisCounter;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.sports";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.yj.TennisCounter;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -465,30 +521,36 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 202305242;
 				DEVELOPMENT_ASSET_PATHS = "\"TennisCounter/Preview Content\"";
 				DEVELOPMENT_TEAM = P2TU28W32L;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = TennisCounter;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.sports";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.yj.TennisCounter;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
