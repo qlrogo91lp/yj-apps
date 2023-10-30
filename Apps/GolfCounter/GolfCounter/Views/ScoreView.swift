@@ -55,11 +55,11 @@ struct ScoreView: View {
                     if scoreDetail.score == 0 {
                         Text("-")
                             .bold()
-                            .foregroundColor(.black)
+                            .foregroundColor(.gray)
                     } else {
                         Text("+ \(scoreDetail.score)")
                             .bold()
-                            .foregroundColor(.black)
+                            .foregroundColor(.gray)
                     }
                 }
             }
