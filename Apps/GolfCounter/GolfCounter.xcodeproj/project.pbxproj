@@ -7,6 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		398DF1732AEF498E00B217F6 /* ScoreListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 398DF1722AEF498E00B217F6 /* ScoreListView.swift */; };
+		398DF1752AEF505F00B217F6 /* ScoreDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 398DF1742AEF505F00B217F6 /* ScoreDetail.swift */; };
+		398DF1792AEF586300B217F6 /* ScoreSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 398DF1782AEF586300B217F6 /* ScoreSetupView.swift */; };
+		398DF17C2AEF935300B217F6 /* SingleGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 398DF17B2AEF935300B217F6 /* SingleGameView.swift */; };
+		398DF17E2AEF93AD00B217F6 /* SingleGameCounterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 398DF17D2AEF93AD00B217F6 /* SingleGameCounterView.swift */; };
+		398DF1802AEF983D00B217F6 /* ScoreDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 398DF17F2AEF983D00B217F6 /* ScoreDetail.swift */; };
+		398DF1822AEF986700B217F6 /* ScoreListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 398DF1812AEF986700B217F6 /* ScoreListView.swift */; };
+		398DF1842AEF987B00B217F6 /* ScoreSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 398DF1832AEF987B00B217F6 /* ScoreSetupView.swift */; };
+		398DF1872AEF989400B217F6 /* SinglegGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 398DF1862AEF989400B217F6 /* SinglegGameView.swift */; };
+		398DF1892AEF98A200B217F6 /* SingleGameCounterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 398DF1882AEF98A200B217F6 /* SingleGameCounterView.swift */; };
 		39EB510729F0C05B00885CEF /* GolfCounterApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39EB510629F0C05B00885CEF /* GolfCounterApp.swift */; };
 		39EB510929F0C05B00885CEF /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39EB510829F0C05B00885CEF /* ContentView.swift */; };
 		39EB510B29F0C05C00885CEF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 39EB510A29F0C05C00885CEF /* Assets.xcassets */; };
@@ -81,6 +91,16 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		398DF1722AEF498E00B217F6 /* ScoreListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreListView.swift; sourceTree = "<group>"; };
+		398DF1742AEF505F00B217F6 /* ScoreDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreDetail.swift; sourceTree = "<group>"; };
+		398DF1782AEF586300B217F6 /* ScoreSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreSetupView.swift; sourceTree = "<group>"; };
+		398DF17B2AEF935300B217F6 /* SingleGameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingleGameView.swift; sourceTree = "<group>"; };
+		398DF17D2AEF93AD00B217F6 /* SingleGameCounterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingleGameCounterView.swift; sourceTree = "<group>"; };
+		398DF17F2AEF983D00B217F6 /* ScoreDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreDetail.swift; sourceTree = "<group>"; };
+		398DF1812AEF986700B217F6 /* ScoreListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreListView.swift; sourceTree = "<group>"; };
+		398DF1832AEF987B00B217F6 /* ScoreSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreSetupView.swift; sourceTree = "<group>"; };
+		398DF1862AEF989400B217F6 /* SinglegGameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SinglegGameView.swift; sourceTree = "<group>"; };
+		398DF1882AEF98A200B217F6 /* SingleGameCounterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingleGameCounterView.swift; sourceTree = "<group>"; };
 		39EB510329F0C05B00885CEF /* GolfCounter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GolfCounter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		39EB510629F0C05B00885CEF /* GolfCounterApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GolfCounterApp.swift; sourceTree = "<group>"; };
 		39EB510829F0C05B00885CEF /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -153,6 +173,24 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		398DF17A2AEF933D00B217F6 /* Single */ = {
+			isa = PBXGroup;
+			children = (
+				398DF17B2AEF935300B217F6 /* SingleGameView.swift */,
+				398DF17D2AEF93AD00B217F6 /* SingleGameCounterView.swift */,
+			);
+			path = Single;
+			sourceTree = "<group>";
+		};
+		398DF1852AEF987E00B217F6 /* Single */ = {
+			isa = PBXGroup;
+			children = (
+				398DF1862AEF989400B217F6 /* SinglegGameView.swift */,
+				398DF1882AEF98A200B217F6 /* SingleGameCounterView.swift */,
+			);
+			path = Single;
+			sourceTree = "<group>";
+		};
 		39EB50FA29F0C05B00885CEF = {
 			isa = PBXGroup;
 			children = (
@@ -256,8 +294,11 @@
 		39F630542A08D23000EC8EFB /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				398DF1852AEF987E00B217F6 /* Single */,
 				39EB510829F0C05B00885CEF /* ContentView.swift */,
 				39F6305C2A08E55800EC8EFB /* ScoreView.swift */,
+				398DF1812AEF986700B217F6 /* ScoreListView.swift */,
+				398DF1832AEF987B00B217F6 /* ScoreSetupView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -266,6 +307,7 @@
 			isa = PBXGroup;
 			children = (
 				39F630562A08D40900EC8EFB /* Score.swift */,
+				398DF17F2AEF983D00B217F6 /* ScoreDetail.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -274,6 +316,7 @@
 			isa = PBXGroup;
 			children = (
 				39F630622A09D99B00EC8EFB /* Score.swift */,
+				398DF1742AEF505F00B217F6 /* ScoreDetail.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -281,8 +324,11 @@
 		39F630612A09D98200EC8EFB /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				398DF17A2AEF933D00B217F6 /* Single */,
 				39EB513029F0C05C00885CEF /* ContentView.swift */,
 				39F630642A09D9C800EC8EFB /* ScoreView.swift */,
+				398DF1722AEF498E00B217F6 /* ScoreListView.swift */,
+				398DF1782AEF586300B217F6 /* ScoreSetupView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -509,10 +555,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				398DF1842AEF987B00B217F6 /* ScoreSetupView.swift in Sources */,
 				39EB510929F0C05B00885CEF /* ContentView.swift in Sources */,
 				39F630572A08D40900EC8EFB /* Score.swift in Sources */,
+				398DF1892AEF98A200B217F6 /* SingleGameCounterView.swift in Sources */,
 				39EB510729F0C05B00885CEF /* GolfCounterApp.swift in Sources */,
+				398DF1822AEF986700B217F6 /* ScoreListView.swift in Sources */,
 				39F6305D2A08E55800EC8EFB /* ScoreView.swift in Sources */,
+				398DF1872AEF989400B217F6 /* SinglegGameView.swift in Sources */,
+				398DF1802AEF983D00B217F6 /* ScoreDetail.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -538,9 +589,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				39EB513129F0C05C00885CEF /* ContentView.swift in Sources */,
+				398DF1752AEF505F00B217F6 /* ScoreDetail.swift in Sources */,
 				39F630652A09D9C800EC8EFB /* ScoreView.swift in Sources */,
+				398DF17C2AEF935300B217F6 /* SingleGameView.swift in Sources */,
+				398DF17E2AEF93AD00B217F6 /* SingleGameCounterView.swift in Sources */,
 				39F630632A09D99B00EC8EFB /* Score.swift in Sources */,
 				39EB512F29F0C05C00885CEF /* GolfCounterApp.swift in Sources */,
+				398DF1732AEF498E00B217F6 /* ScoreListView.swift in Sources */,
+				398DF1792AEF586300B217F6 /* ScoreSetupView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -714,11 +770,12 @@
 				INFOPLIST_KEY_CFBundleDisplayName = GolfCounter;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.yj.GolfCounter;
+				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.yj.GolfCounter.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -726,7 +783,7 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 9.4;
+				WATCHOS_DEPLOYMENT_TARGET = 9.0;
 			};
 			name = Debug;
 		};
@@ -743,11 +800,12 @@
 				INFOPLIST_KEY_CFBundleDisplayName = GolfCounter;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.yj.GolfCounter;
+				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.yj.GolfCounter.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -756,7 +814,7 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
 				VALIDATE_PRODUCT = YES;
-				WATCHOS_DEPLOYMENT_TARGET = 9.4;
+				WATCHOS_DEPLOYMENT_TARGET = 9.0;
 			};
 			name = Release;
 		};
@@ -782,13 +840,16 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.yj.GolfCounter;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -814,13 +875,16 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.yj.GolfCounter;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
