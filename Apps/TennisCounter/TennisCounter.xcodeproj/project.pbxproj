@@ -3,10 +3,13 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3974B8F52EBCDFA5002D0EA7 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 39BF174F2EBA37F60026184E /* WidgetKit.framework */; };
+		3974B8F62EBCDFA5002D0EA7 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 39BF17512EBA37F60026184E /* SwiftUI.framework */; };
+		3974B9032EBCDFA6002D0EA7 /* ComplicationAppExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3974B8F42EBCDFA5002D0EA7 /* ComplicationAppExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		399289F82EB8EC9E005F1856 /* WatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 399289F62EB8EC9E005F1856 /* WatchApp.swift */; };
 		399289F92EB8EC9E005F1856 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 399289F22EB8EC9E005F1856 /* ContentView.swift */; };
 		399289FA2EB8EC9E005F1856 /* CounterButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 399289F32EB8EC9E005F1856 /* CounterButtonView.swift */; };
@@ -23,6 +26,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		3974B9012EBCDFA6002D0EA7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 399700E42A1D9BC800D0D486 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3974B8F32EBCDFA5002D0EA7;
+			remoteInfo = ComplicationAppExtension;
+		};
 		399700FE2A1D9BC900D0D486 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 399700E42A1D9BC800D0D486 /* Project object */;
@@ -44,9 +54,21 @@
 			name = "Embed Watch Content";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		39BF17602EBA37F70026184E /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				3974B9032EBCDFA6002D0EA7 /* ComplicationAppExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		3974B8F42EBCDFA5002D0EA7 /* ComplicationAppExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ComplicationAppExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		399289F02EB8EC9E005F1856 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		399289F22EB8EC9E005F1856 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		399289F32EB8EC9E005F1856 /* CounterButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CounterButtonView.swift; sourceTree = "<group>"; };
@@ -60,9 +82,34 @@
 		399700F62A1D9BC900D0D486 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		399700FC2A1D9BC900D0D486 /* TennisCounter Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "TennisCounter Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		399701172A1D9C7100D0D486 /* CounterButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CounterButtonView.swift; sourceTree = "<group>"; };
+		39BF174F2EBA37F60026184E /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		39BF17512EBA37F60026184E /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		3974B9042EBCDFA6002D0EA7 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 3974B8F32EBCDFA5002D0EA7 /* ComplicationAppExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		3974B8F72EBCDFA5002D0EA7 /* ComplicationApp */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (3974B9042EBCDFA6002D0EA7 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = ComplicationApp; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
+
 /* Begin PBXFrameworksBuildPhase section */
+		3974B8F12EBCDFA5002D0EA7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3974B8F62EBCDFA5002D0EA7 /* SwiftUI.framework in Frameworks */,
+				3974B8F52EBCDFA5002D0EA7 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		399700E92A1D9BC800D0D486 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -137,6 +184,8 @@
 			children = (
 				39928A012EB95F0D005F1856 /* Shared */,
 				399700EE2A1D9BC800D0D486 /* iOSApp */,
+				3974B8F72EBCDFA5002D0EA7 /* ComplicationApp */,
+				39BF174E2EBA37F60026184E /* Frameworks */,
 				399700ED2A1D9BC800D0D486 /* Products */,
 				399289F72EB8EC9E005F1856 /* WatchApp */,
 			);
@@ -147,6 +196,7 @@
 			children = (
 				399700EC2A1D9BC800D0D486 /* TennisCounter.app */,
 				399700FC2A1D9BC900D0D486 /* TennisCounter Watch App.app */,
+				3974B8F42EBCDFA5002D0EA7 /* ComplicationAppExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -179,9 +229,40 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
+		39BF174E2EBA37F60026184E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				39BF174F2EBA37F60026184E /* WidgetKit.framework */,
+				39BF17512EBA37F60026184E /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		3974B8F32EBCDFA5002D0EA7 /* ComplicationAppExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3974B9052EBCDFA6002D0EA7 /* Build configuration list for PBXNativeTarget "ComplicationAppExtension" */;
+			buildPhases = (
+				3974B8F02EBCDFA5002D0EA7 /* Sources */,
+				3974B8F12EBCDFA5002D0EA7 /* Frameworks */,
+				3974B8F22EBCDFA5002D0EA7 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				3974B8F72EBCDFA5002D0EA7 /* ComplicationApp */,
+			);
+			name = ComplicationAppExtension;
+			packageProductDependencies = (
+			);
+			productName = ComplicationAppExtension;
+			productReference = 3974B8F42EBCDFA5002D0EA7 /* ComplicationAppExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		399700EB2A1D9BC800D0D486 /* TennisCounter */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 399701102A1D9BCA00D0D486 /* Build configuration list for PBXNativeTarget "TennisCounter" */;
@@ -208,10 +289,12 @@
 				399700F82A1D9BC900D0D486 /* Sources */,
 				399700F92A1D9BC900D0D486 /* Frameworks */,
 				399700FA2A1D9BC900D0D486 /* Resources */,
+				39BF17602EBA37F70026184E /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				3974B9022EBCDFA6002D0EA7 /* PBXTargetDependency */,
 			);
 			name = "TennisCounter Watch App";
 			productName = "TennisCounter Watch App";
@@ -225,9 +308,12 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1430;
+				LastSwiftUpdateCheck = 2610;
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
+					3974B8F32EBCDFA5002D0EA7 = {
+						CreatedOnToolsVersion = 26.1;
+					};
 					399700EB2A1D9BC800D0D486 = {
 						CreatedOnToolsVersion = 14.3;
 					};
@@ -251,11 +337,19 @@
 			targets = (
 				399700EB2A1D9BC800D0D486 /* TennisCounter */,
 				399700FB2A1D9BC900D0D486 /* TennisCounter Watch App */,
+				3974B8F32EBCDFA5002D0EA7 /* ComplicationAppExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		3974B8F22EBCDFA5002D0EA7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		399700EA2A1D9BC800D0D486 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -277,6 +371,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		3974B8F02EBCDFA5002D0EA7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		399700E82A1D9BC800D0D486 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -302,6 +403,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		3974B9022EBCDFA6002D0EA7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3974B8F32EBCDFA5002D0EA7 /* ComplicationAppExtension */;
+			targetProxy = 3974B9012EBCDFA6002D0EA7 /* PBXContainerItemProxy */;
+		};
 		399700FF2A1D9BC900D0D486 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 399700FB2A1D9BC900D0D486 /* TennisCounter Watch App */;
@@ -310,6 +416,82 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		3974B9062EBCDFA6002D0EA7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = P2TU28W32L;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ComplicationApp/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = TennisCounter;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yj.TennisCounter.watch.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Debug;
+		};
+		3974B9072EBCDFA6002D0EA7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = P2TU28W32L;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ComplicationApp/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = TennisCounter;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yj.TennisCounter.watch.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Release;
+		};
 		3997010A2A1D9BCA00D0D486 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -425,7 +607,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 202305242;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"WatchApp/Preview Content\"";
 				DEVELOPMENT_TEAM = P2TU28W32L;
 				ENABLE_PREVIEWS = YES;
@@ -438,15 +620,15 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.yj.TennisCounter.watchkitapp;
+				MARKETING_VERSION = 1.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yj.TennisCounter.watch;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 8.0;
+				WATCHOS_DEPLOYMENT_TARGET = 9.0;
 			};
 			name = Debug;
 		};
@@ -456,7 +638,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 202305242;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"WatchApp/Preview Content\"";
 				DEVELOPMENT_TEAM = P2TU28W32L;
 				ENABLE_PREVIEWS = YES;
@@ -469,8 +651,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.yj.TennisCounter.watchkitapp;
+				MARKETING_VERSION = 1.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yj.TennisCounter.watch;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
@@ -478,7 +660,7 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 4;
 				VALIDATE_PRODUCT = YES;
-				WATCHOS_DEPLOYMENT_TARGET = 8.0;
+				WATCHOS_DEPLOYMENT_TARGET = 9.0;
 			};
 			name = Release;
 		};
@@ -562,6 +744,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		3974B9052EBCDFA6002D0EA7 /* Build configuration list for PBXNativeTarget "ComplicationAppExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3974B9062EBCDFA6002D0EA7 /* Debug */,
+				3974B9072EBCDFA6002D0EA7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		399700E72A1D9BC800D0D486 /* Build configuration list for PBXProject "TennisCounter" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
