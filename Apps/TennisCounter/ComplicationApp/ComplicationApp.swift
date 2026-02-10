@@ -10,49 +10,55 @@ import SwiftUI
 
 struct Provider: TimelineProvider {
     func placeholder(in context: Context) -> SimpleEntry {
-        SimpleEntry(date: Date(), emoji: "😀")
+        SimpleEntry(date: Date())
     }
 
     func getSnapshot(in context: Context, completion: @escaping (SimpleEntry) -> ()) {
-        let entry = SimpleEntry(date: Date(), emoji: "😀")
-        completion(entry)
+        completion(SimpleEntry(date: Date()))
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> ()) {
-        var entries: [SimpleEntry] = []
-
-        // Generate a timeline consisting of five entries an hour apart, starting from the current date.
-        let currentDate = Date()
-        for hourOffset in 0 ..< 5 {
-            let entryDate = Calendar.current.date(byAdding: .hour, value: hourOffset, to: currentDate)!
-            let entry = SimpleEntry(date: entryDate, emoji: "😀")
-            entries.append(entry)
-        }
-
-        let timeline = Timeline(entries: entries, policy: .atEnd)
+        let entry = SimpleEntry(date: Date())
+        let timeline = Timeline(entries: [entry], policy: .never)
         completion(timeline)
     }
-
-//    func relevances() async -> WidgetRelevances<Void> {
-//        // Generate a list containing the contexts this widget is relevant in.
-//    }
 }
 
 struct SimpleEntry: TimelineEntry {
     let date: Date
-    let emoji: String
 }
 
 struct ComplicationAppEntryView : View {
+    @Environment(\.widgetFamily) var widgetFamily
     var entry: Provider.Entry
 
     var body: some View {
-        Image("AppIcon")
-            .renderingMode(.original)
-            .resizable()
-            .scaledToFit()
-            .padding(6)
-            .clipShape(Circle())
+        switch widgetFamily {
+        case .accessoryCorner:
+            Image("AppIcon")
+                .renderingMode(.original)
+                .resizable()
+                .scaledToFit()
+        case .accessoryRectangular:
+            HStack(spacing: 6) {
+                Image("AppIcon")
+                    .renderingMode(.original)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 24, height: 24)
+                    .clipShape(Circle())
+                Text("Tennis Counter")
+                    .font(.headline)
+                    .widgetAccentable()
+            }
+        default:
+            Image("AppIcon")
+                .renderingMode(.original)
+                .resizable()
+                .scaledToFit()
+                .padding(6)
+                .clipShape(Circle())
+        }
     }
 }
 
@@ -72,12 +78,24 @@ struct ComplicationApp: Widget {
         }
         .configurationDisplayName("Tennis Counter")
         .description("Tennis score counter complication.")
-        .supportedFamilies([.accessoryCircular, .accessoryCorner])
+        .supportedFamilies([.accessoryCircular, .accessoryCorner, .accessoryRectangular])
     }
 }
 
 #Preview(as: .accessoryCircular) {
     ComplicationApp()
 } timeline: {
-    SimpleEntry(date: .now, emoji: "😀")
+    SimpleEntry(date: .now)
+}
+
+#Preview(as: .accessoryRectangular) {
+    ComplicationApp()
+} timeline: {
+    SimpleEntry(date: .now)
+}
+
+#Preview(as: .accessoryCorner) {
+    ComplicationApp()
+} timeline: {
+    SimpleEntry(date: .now)
 }
