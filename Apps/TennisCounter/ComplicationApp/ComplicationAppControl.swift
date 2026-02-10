@@ -35,8 +35,7 @@ extension ComplicationAppControl {
         }
 
         func currentValue() async throws -> Bool {
-            let isRunning = true // Check if the timer is running
-            return isRunning
+            true // Check if the timer is running
         }
     }
 }
@@ -49,6 +48,6 @@ struct StartTimerIntent: SetValueIntent {
 
     func perform() async throws -> some IntentResult {
         // Start / stop the timer based on `value`.
-        return .result()
+        .result()
     }
 }

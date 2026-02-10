@@ -12,11 +12,11 @@ class Score: ObservableObject {
     @Published var yourScore: Int = 0
     @Published var myIndex: Int = 0
     @Published var yourIndex: Int = 0
-    
+
     func resetData() {
-        self.myScore = 0
-        self.yourScore = 0
-        self.myIndex = 0
-        self.yourIndex = 0
+        myScore = 0
+        yourScore = 0
+        myIndex = 0
+        yourIndex = 0
     }
 }

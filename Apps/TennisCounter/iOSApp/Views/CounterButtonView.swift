@@ -11,14 +11,14 @@ struct CounterButtonView: View {
     var flag: Int
     var scoreArr = [0, 15, 30, 40, 50]
     @ObservedObject var score: Score
-    
+
     var body: some View {
 
         HStack {
             // flag가 0이면 myScore, 1이면 yourScore
             if flag == 0 {
-                
-                VStack() {
+
+                VStack {
                     Button(action: {
                         if score.myIndex < 4 {
                             score.myIndex += 1
@@ -28,16 +28,16 @@ struct CounterButtonView: View {
                         Circle()
                             .fill(Color.white)
                             .frame(width: 70, height: 70)
-                            .overlay() {
+                            .overlay {
                                 Circle().stroke(.gray, lineWidth: 3)
                             }
-                            .overlay() {
+                            .overlay {
                                 Image(systemName: "plus")
                                     .imageScale(.large)
                                     .foregroundColor(.gray)
                             }
                     }).buttonStyle(.borderless)
-                    
+
                     Button(action: {
                         if score.myIndex > 0 {
                             score.myIndex -= 1
@@ -47,19 +47,19 @@ struct CounterButtonView: View {
                         Circle()
                             .fill(Color.white)
                             .frame(width: 70, height: 70)
-                            .overlay() {
+                            .overlay {
                                 Circle().stroke(.gray, lineWidth: 3)
                             }
-                            .overlay() {
+                            .overlay {
                                 Image(systemName: "minus")
                                     .imageScale(.large)
                                     .foregroundColor(.gray)
                             }
                     }).buttonStyle(.borderless)
                 }
-                
+
                 Spacer()
-                
+
                 if score.myScore == 50 {
                     Text("Win")
                         .font(.system(size: 40))
@@ -71,9 +71,9 @@ struct CounterButtonView: View {
                         .bold()
                         .foregroundColor(.green)
                 }
-                
+
             } else {
-                
+
                 if score.yourScore == 50 {
                     Text("Win")
                         .font(.system(size: 40))
@@ -85,10 +85,10 @@ struct CounterButtonView: View {
                         .bold()
                         .foregroundColor(.orange)
                 }
-                
+
                 Spacer()
-                
-                VStack() {
+
+                VStack {
                     Button(action: {
                         if score.yourIndex < 4 {
                             score.yourIndex += 1
@@ -98,16 +98,16 @@ struct CounterButtonView: View {
                         Circle()
                             .fill(Color.white)
                             .frame(width: 70, height: 70)
-                            .overlay() {
+                            .overlay {
                                 Circle().stroke(.gray, lineWidth: 3)
                             }
-                            .overlay() {
+                            .overlay {
                                 Image(systemName: "plus")
                                     .imageScale(.large)
                                     .foregroundColor(.gray)
                             }
                     }).buttonStyle(.borderless)
-                    
+
                     Button(action: {
                         if score.yourIndex > 0 {
                             score.yourIndex -= 1
@@ -117,10 +117,10 @@ struct CounterButtonView: View {
                         Circle()
                             .fill(Color.white)
                             .frame(width: 70, height: 70)
-                            .overlay() {
+                            .overlay {
                                 Circle().stroke(.gray, lineWidth: 3)
                             }
-                            .overlay() {
+                            .overlay {
                                 Image(systemName: "minus")
                                     .imageScale(.large)
                                     .foregroundColor(.gray)
@@ -128,7 +128,7 @@ struct CounterButtonView: View {
                     }).buttonStyle(.borderless)
                 }
             }
-            
+
         }
     }
 }
@@ -138,4 +138,3 @@ struct CounterButtonView_Previews: PreviewProvider {
         CounterButtonView(flag: 0, score: Score())
     }
 }
-

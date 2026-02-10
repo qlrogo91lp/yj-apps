@@ -8,15 +8,15 @@
 import SwiftUI
 
 struct ContentView: View {
-    
+
     @State var myGameScore: Int = 0
     @State var yourGameScore: Int = 0
-    @StateObject var score: Score = Score()
-    
+    @StateObject var score: Score = .init()
+
     var body: some View {
         ZStack {
             Color.black.edgesIgnoringSafeArea(.all)
-            
+
             VStack {
                 HStack {
                     Text("Score")
@@ -24,24 +24,24 @@ struct ContentView: View {
                         .bold()
                         .padding(.trailing)
                         .foregroundColor(.white)
-                    
+
                     Text("\(myGameScore)")
                         .font(.system(size: 50))
                         .bold()
                         .foregroundColor(.green)
-                    
+
                     Text(" : ")
                         .font(.system(size: 30))
                         .bold()
                         .foregroundColor(.white)
-                    
+
                     Text("\(yourGameScore)")
                         .font(.system(size: 50))
                         .bold()
                         .foregroundColor(.orange)
-                    
+
                     Spacer()
-                    
+
                     Button(action: {
                         myGameScore = 0
                         yourGameScore = 0
@@ -53,22 +53,22 @@ struct ContentView: View {
                             .foregroundColor(.blue)
                     }).buttonStyle(.borderless).padding(.leading)
                 }
-                
+
                 HStack {
                     CounterButtonView(flag: 0, score: score)
-                    
+
                     Spacer()
-                    
+
                     Text(" : ")
                         .font(.system(size: 25))
                         .bold()
                         .foregroundColor(.white)
-                    
+
                     Spacer()
-                    
+
                     CounterButtonView(flag: 1, score: score)
                 }.padding(.vertical)
-                
+
                 Button(action: {
 
                     if score.myScore != score.yourScore {
@@ -77,7 +77,7 @@ struct ContentView: View {
                                 myGameScore += 1
                             }
                             score.resetData()
-                            
+
                         } else if score.yourScore == 50 {
                             if yourGameScore < 6 {
                                 yourGameScore += 1
@@ -85,7 +85,7 @@ struct ContentView: View {
                             score.resetData()
                         }
                     }
-                    
+
                 }, label: {
                     Text("Confirm")
                         .font(.system(size: 30))
@@ -95,7 +95,7 @@ struct ContentView: View {
             }
             .padding()
         }
-        
+
     }
 }
 

@@ -5,8 +5,8 @@
 //  Created by 윤재 on 11/6/25.
 //
 
-import WidgetKit
 import SwiftUI
+import WidgetKit
 
 @main
 struct ComplicationAppBundle: WidgetBundle {
