@@ -35,13 +35,13 @@ struct ComplicationAppEntryView: View {
     var body: some View {
         switch widgetFamily {
         case .accessoryCorner:
-            Image("AppIcon")
+            Image("Complication/circular40")
                 .renderingMode(.original)
                 .resizable()
                 .scaledToFit()
         case .accessoryRectangular:
             HStack(spacing: 6) {
-                Image("AppIcon")
+                Image("Complication/circular40")
                     .renderingMode(.original)
                     .resizable()
                     .scaledToFit()
@@ -52,11 +52,10 @@ struct ComplicationAppEntryView: View {
                     .widgetAccentable()
             }
         default:
-            Image("AppIcon")
+            Image("Complication/circular44")
                 .renderingMode(.original)
                 .resizable()
-                .scaledToFit()
-                .padding(6)
+                .scaledToFill()
                 .clipShape(Circle())
         }
     }
