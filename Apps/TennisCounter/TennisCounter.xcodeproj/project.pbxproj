@@ -7,12 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		390E3BDF2F3B7A00003599BF /* MatchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 390E3BDE2F3B7A00003599BF /* MatchView.swift */; };
 		3974B8F52EBCDFA5002D0EA7 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 39BF174F2EBA37F60026184E /* WidgetKit.framework */; };
 		3974B8F62EBCDFA5002D0EA7 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 39BF17512EBA37F60026184E /* SwiftUI.framework */; };
 		3974B9032EBCDFA6002D0EA7 /* ComplicationAppExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3974B8F42EBCDFA5002D0EA7 /* ComplicationAppExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		399289F82EB8EC9E005F1856 /* WatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 399289F62EB8EC9E005F1856 /* WatchApp.swift */; };
 		399289F92EB8EC9E005F1856 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 399289F22EB8EC9E005F1856 /* ContentView.swift */; };
-		399289FA2EB8EC9E005F1856 /* CounterButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 399289F32EB8EC9E005F1856 /* CounterButtonView.swift */; };
 		399289FC2EB8EC9E005F1856 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 399289F02EB8EC9E005F1856 /* Preview Assets.xcassets */; };
 		399289FD2EB8EC9E005F1856 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 399289F52EB8EC9E005F1856 /* Assets.xcassets */; };
 		39928A052EB9614C005F1856 /* Score.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39928A042EB96022005F1856 /* Score.swift */; };
@@ -68,10 +68,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		390E3BDE2F3B7A00003599BF /* MatchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchView.swift; sourceTree = "<group>"; };
 		3974B8F42EBCDFA5002D0EA7 /* ComplicationAppExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ComplicationAppExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		399289F02EB8EC9E005F1856 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		399289F22EB8EC9E005F1856 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		399289F32EB8EC9E005F1856 /* CounterButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CounterButtonView.swift; sourceTree = "<group>"; };
 		399289F52EB8EC9E005F1856 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		399289F62EB8EC9E005F1856 /* WatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchApp.swift; sourceTree = "<group>"; };
 		39928A042EB96022005F1856 /* Score.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Score.swift; sourceTree = "<group>"; };
@@ -139,7 +139,7 @@
 			isa = PBXGroup;
 			children = (
 				399289F22EB8EC9E005F1856 /* ContentView.swift */,
-				399289F32EB8EC9E005F1856 /* CounterButtonView.swift */,
+				390E3BDE2F3B7A00003599BF /* MatchView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -417,7 +417,7 @@
 				399289F82EB8EC9E005F1856 /* WatchApp.swift in Sources */,
 				399289F92EB8EC9E005F1856 /* ContentView.swift in Sources */,
 				39928A062EB9614C005F1856 /* Score.swift in Sources */,
-				399289FA2EB8EC9E005F1856 /* CounterButtonView.swift in Sources */,
+				390E3BDF2F3B7A00003599BF /* MatchView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
