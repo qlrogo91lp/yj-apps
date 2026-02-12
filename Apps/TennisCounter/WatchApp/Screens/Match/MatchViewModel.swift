@@ -5,6 +5,7 @@
 //  Created by 윤재 on 2023/05/24.
 //
 
+import Combine
 import SwiftUI
 
 class MatchViewModel: ObservableObject {
@@ -13,6 +14,14 @@ class MatchViewModel: ObservableObject {
     @Published var yourGameScore: Int = 0
     @Published var isMatchOver: Bool = false
     @Published var didWin: Bool = false
+
+    private var cancellable: AnyCancellable?
+
+    init() {
+        cancellable = score.objectWillChange.sink { [weak self] _ in
+            self?.objectWillChange.send()
+        }
+    }
 
     func addMyPoint() {
         score.addMyPoint()

@@ -5,12 +5,21 @@
 //  Created by 윤재 on 2023/05/24.
 //
 
+import Combine
 import SwiftUI
 
 class MatchViewModel: ObservableObject {
     @Published var score = Score()
     @Published var myGameScore: Int = 0
     @Published var yourGameScore: Int = 0
+
+    private var cancellable: AnyCancellable?
+
+    init() {
+        cancellable = score.objectWillChange.sink { [weak self] _ in
+            self?.objectWillChange.send()
+        }
+    }
 
     func confirmScore() {
         if score.myScore != score.yourScore {
