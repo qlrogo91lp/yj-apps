@@ -1,5 +1,5 @@
 //
-//  ContentView.swift
+//  HomeView.swift
 //  TennisCounter Watch App
 //
 //  Created by 윤재 on 2023/05/24.
@@ -7,9 +7,7 @@
 
 import SwiftUI
 
-struct ContentView: View {
-
-    @State private var showMatch = false
+struct HomeView: View {
 
     var body: some View {
         NavigationStack {
@@ -34,8 +32,8 @@ struct ContentView: View {
     }
 }
 
-struct ContentView_Previews: PreviewProvider {
+struct HomeView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        HomeView()
     }
 }

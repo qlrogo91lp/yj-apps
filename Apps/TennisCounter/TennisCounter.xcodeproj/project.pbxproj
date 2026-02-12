@@ -12,17 +12,19 @@
 		3974B8F62EBCDFA5002D0EA7 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 39BF17512EBA37F60026184E /* SwiftUI.framework */; };
 		3974B9032EBCDFA6002D0EA7 /* ComplicationAppExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3974B8F42EBCDFA5002D0EA7 /* ComplicationAppExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		399289F82EB8EC9E005F1856 /* WatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 399289F62EB8EC9E005F1856 /* WatchApp.swift */; };
-		399289F92EB8EC9E005F1856 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 399289F22EB8EC9E005F1856 /* ContentView.swift */; };
+		399289F92EB8EC9E005F1856 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 399289F22EB8EC9E005F1856 /* HomeView.swift */; };
 		399289FC2EB8EC9E005F1856 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 399289F02EB8EC9E005F1856 /* Preview Assets.xcassets */; };
 		399289FD2EB8EC9E005F1856 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 399289F52EB8EC9E005F1856 /* Assets.xcassets */; };
 		39928A052EB9614C005F1856 /* Score.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39928A042EB96022005F1856 /* Score.swift */; };
 		39928A062EB9614C005F1856 /* Score.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39928A042EB96022005F1856 /* Score.swift */; };
 		399700F02A1D9BC800D0D486 /* iOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 399700EF2A1D9BC800D0D486 /* iOSApp.swift */; };
-		399700F22A1D9BC800D0D486 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 399700F12A1D9BC800D0D486 /* ContentView.swift */; };
+		399700F22A1D9BC800D0D486 /* MatchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 399700F12A1D9BC800D0D486 /* MatchView.swift */; };
 		399700F42A1D9BC900D0D486 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 399700F32A1D9BC900D0D486 /* Assets.xcassets */; };
 		399700F72A1D9BC900D0D486 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 399700F62A1D9BC900D0D486 /* Preview Assets.xcassets */; };
 		399700FD2A1D9BC900D0D486 /* TennisCounter Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 399700FC2A1D9BC900D0D486 /* TennisCounter Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		399701182A1D9C7100D0D486 /* CounterButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 399701172A1D9C7100D0D486 /* CounterButtonView.swift */; };
+		390E3BE22F3B7B02003599BF /* MatchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 390E3BE02F3B7B00003599BF /* MatchViewModel.swift */; };
+		390E3BE32F3B7B03003599BF /* MatchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 390E3BE12F3B7B01003599BF /* MatchViewModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -71,19 +73,21 @@
 		390E3BDE2F3B7A00003599BF /* MatchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchView.swift; sourceTree = "<group>"; };
 		3974B8F42EBCDFA5002D0EA7 /* ComplicationAppExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ComplicationAppExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		399289F02EB8EC9E005F1856 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		399289F22EB8EC9E005F1856 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		399289F22EB8EC9E005F1856 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		399289F52EB8EC9E005F1856 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		399289F62EB8EC9E005F1856 /* WatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchApp.swift; sourceTree = "<group>"; };
 		39928A042EB96022005F1856 /* Score.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Score.swift; sourceTree = "<group>"; };
 		399700EC2A1D9BC800D0D486 /* TennisCounter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TennisCounter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		399700EF2A1D9BC800D0D486 /* iOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSApp.swift; sourceTree = "<group>"; };
-		399700F12A1D9BC800D0D486 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		399700F12A1D9BC800D0D486 /* MatchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchView.swift; sourceTree = "<group>"; };
 		399700F32A1D9BC900D0D486 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		399700F62A1D9BC900D0D486 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		399700FC2A1D9BC900D0D486 /* TennisCounter Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "TennisCounter Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		399701172A1D9C7100D0D486 /* CounterButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CounterButtonView.swift; sourceTree = "<group>"; };
 		39BF174F2EBA37F60026184E /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		39BF17512EBA37F60026184E /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		390E3BE02F3B7B00003599BF /* MatchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchViewModel.swift; sourceTree = "<group>"; };
+		390E3BE12F3B7B01003599BF /* MatchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchViewModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -135,20 +139,37 @@
 			path = "Preview Content";
 			sourceTree = "<group>";
 		};
-		399289F42EB8EC9E005F1856 /* Views */ = {
+		390E3BE72F3B7B07003599BF /* Screens */ = {
 			isa = PBXGroup;
 			children = (
-				399289F22EB8EC9E005F1856 /* ContentView.swift */,
-				390E3BDE2F3B7A00003599BF /* MatchView.swift */,
+				390E3BE82F3B7B08003599BF /* Home */,
+				390E3BE92F3B7B09003599BF /* Match */,
 			);
-			path = Views;
+			path = Screens;
+			sourceTree = "<group>";
+		};
+		390E3BE82F3B7B08003599BF /* Home */ = {
+			isa = PBXGroup;
+			children = (
+				399289F22EB8EC9E005F1856 /* HomeView.swift */,
+			);
+			path = Home;
+			sourceTree = "<group>";
+		};
+		390E3BE92F3B7B09003599BF /* Match */ = {
+			isa = PBXGroup;
+			children = (
+				390E3BDE2F3B7A00003599BF /* MatchView.swift */,
+				390E3BE12F3B7B01003599BF /* MatchViewModel.swift */,
+			);
+			path = Match;
 			sourceTree = "<group>";
 		};
 		399289F72EB8EC9E005F1856 /* WatchApp */ = {
 			isa = PBXGroup;
 			children = (
 				399289F12EB8EC9E005F1856 /* Preview Content */,
-				399289F42EB8EC9E005F1856 /* Views */,
+				390E3BE72F3B7B07003599BF /* Screens */,
 				399289F52EB8EC9E005F1856 /* Assets.xcassets */,
 				399289F62EB8EC9E005F1856 /* WatchApp.swift */,
 			);
@@ -159,16 +180,8 @@
 			isa = PBXGroup;
 			children = (
 				39928A032EB95F79005F1856 /* Models */,
-				39928A022EB95F3D005F1856 /* ViewModels */,
 			);
 			path = Shared;
-			sourceTree = "<group>";
-		};
-		39928A022EB95F3D005F1856 /* ViewModels */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = ViewModels;
 			sourceTree = "<group>";
 		};
 		39928A032EB95F79005F1856 /* Models */ = {
@@ -204,7 +217,7 @@
 		399700EE2A1D9BC800D0D486 /* iOSApp */ = {
 			isa = PBXGroup;
 			children = (
-				399701132A1D9BF500D0D486 /* Views */,
+				390E3BE42F3B7B04003599BF /* Screens */,
 				399700EF2A1D9BC800D0D486 /* iOSApp.swift */,
 				399700F32A1D9BC900D0D486 /* Assets.xcassets */,
 				399700F52A1D9BC900D0D486 /* Preview Content */,
@@ -220,13 +233,30 @@
 			path = "Preview Content";
 			sourceTree = "<group>";
 		};
-		399701132A1D9BF500D0D486 /* Views */ = {
+		390E3BE42F3B7B04003599BF /* Screens */ = {
 			isa = PBXGroup;
 			children = (
-				399700F12A1D9BC800D0D486 /* ContentView.swift */,
+				390E3BE52F3B7B05003599BF /* Match */,
+			);
+			path = Screens;
+			sourceTree = "<group>";
+		};
+		390E3BE52F3B7B05003599BF /* Match */ = {
+			isa = PBXGroup;
+			children = (
+				399700F12A1D9BC800D0D486 /* MatchView.swift */,
+				390E3BE02F3B7B00003599BF /* MatchViewModel.swift */,
+				390E3BE62F3B7B06003599BF /* Components */,
+			);
+			path = Match;
+			sourceTree = "<group>";
+		};
+		390E3BE62F3B7B06003599BF /* Components */ = {
+			isa = PBXGroup;
+			children = (
 				399701172A1D9C7100D0D486 /* CounterButtonView.swift */,
 			);
-			path = Views;
+			path = Components;
 			sourceTree = "<group>";
 		};
 		39BF174E2EBA37F60026184E /* Frameworks */ = {
@@ -403,7 +433,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				399700F22A1D9BC800D0D486 /* ContentView.swift in Sources */,
+				399700F22A1D9BC800D0D486 /* MatchView.swift in Sources */,
+				390E3BE22F3B7B02003599BF /* MatchViewModel.swift in Sources */,
 				399701182A1D9C7100D0D486 /* CounterButtonView.swift in Sources */,
 				39928A052EB9614C005F1856 /* Score.swift in Sources */,
 				399700F02A1D9BC800D0D486 /* iOSApp.swift in Sources */,
@@ -415,7 +446,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				399289F82EB8EC9E005F1856 /* WatchApp.swift in Sources */,
-				399289F92EB8EC9E005F1856 /* ContentView.swift in Sources */,
+				399289F92EB8EC9E005F1856 /* HomeView.swift in Sources */,
+				390E3BE32F3B7B03003599BF /* MatchViewModel.swift in Sources */,
 				39928A062EB9614C005F1856 /* Score.swift in Sources */,
 				390E3BDF2F3B7A00003599BF /* MatchView.swift in Sources */,
 			);

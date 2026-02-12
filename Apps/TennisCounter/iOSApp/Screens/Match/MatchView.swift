@@ -1,5 +1,5 @@
 //
-//  ContentView.swift
+//  MatchView.swift
 //  TennisCounter
 //
 //  Created by 윤재 on 2023/05/24.
@@ -7,11 +7,9 @@
 
 import SwiftUI
 
-struct ContentView: View {
+struct MatchView: View {
 
-    @State var myGameScore: Int = 0
-    @State var yourGameScore: Int = 0
-    @StateObject var score: Score = .init()
+    @StateObject var viewModel = MatchViewModel()
 
     var body: some View {
         ZStack {
@@ -25,7 +23,7 @@ struct ContentView: View {
                         .padding(.trailing)
                         .foregroundColor(.white)
 
-                    Text("\(myGameScore)")
+                    Text("\(viewModel.myGameScore)")
                         .font(.system(size: 50))
                         .bold()
                         .foregroundColor(.green)
@@ -35,7 +33,7 @@ struct ContentView: View {
                         .bold()
                         .foregroundColor(.white)
 
-                    Text("\(yourGameScore)")
+                    Text("\(viewModel.yourGameScore)")
                         .font(.system(size: 50))
                         .bold()
                         .foregroundColor(.orange)
@@ -43,9 +41,7 @@ struct ContentView: View {
                     Spacer()
 
                     Button(action: {
-                        myGameScore = 0
-                        yourGameScore = 0
-                        score.resetData()
+                        viewModel.resetAll()
                     }, label: {
                         Text("Reset")
                             .font(.system(size: 30))
@@ -55,7 +51,7 @@ struct ContentView: View {
                 }
 
                 HStack {
-                    CounterButtonView(flag: 0, score: score)
+                    CounterButtonView(flag: 0, score: viewModel.score)
 
                     Spacer()
 
@@ -66,26 +62,11 @@ struct ContentView: View {
 
                     Spacer()
 
-                    CounterButtonView(flag: 1, score: score)
+                    CounterButtonView(flag: 1, score: viewModel.score)
                 }.padding(.vertical)
 
                 Button(action: {
-
-                    if score.myScore != score.yourScore {
-                        if score.myScore == 50 {
-                            if myGameScore < 6 {
-                                myGameScore += 1
-                            }
-                            score.resetData()
-
-                        } else if score.yourScore == 50 {
-                            if yourGameScore < 6 {
-                                yourGameScore += 1
-                            }
-                            score.resetData()
-                        }
-                    }
-
+                    viewModel.confirmScore()
                 }, label: {
                     Text("Confirm")
                         .font(.system(size: 30))
@@ -99,8 +80,8 @@ struct ContentView: View {
     }
 }
 
-struct ContentView_Previews: PreviewProvider {
+struct MatchView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView(score: Score())
+        MatchView()
     }
 }

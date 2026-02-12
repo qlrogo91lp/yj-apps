@@ -9,38 +9,31 @@ import SwiftUI
 
 struct MatchView: View {
 
-    @State var myGameScore: Int = 0
-    @State var yourGameScore: Int = 0
-    @State var isMatchOver: Bool = false
-    @State var didWin: Bool = false
-    @StateObject var score: Score = .init()
+    @StateObject var viewModel = MatchViewModel()
 
     var body: some View {
-        if isMatchOver {
+        if viewModel.isMatchOver {
             // 경기 결과 화면
             VStack(spacing: 12) {
-                Text(didWin ? "Victory!" : "Defeat")
+                Text(viewModel.didWin ? "Victory!" : "Defeat")
                     .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(didWin ? .green : .orange)
+                    .foregroundColor(viewModel.didWin ? .green : .orange)
 
                 HStack {
-                    Text("\(myGameScore)")
+                    Text("\(viewModel.myGameScore)")
                         .font(.system(size: 32, weight: .bold))
                         .foregroundColor(.green)
 
                     Text(":")
                         .font(.system(size: 26, weight: .bold))
 
-                    Text("\(yourGameScore)")
+                    Text("\(viewModel.yourGameScore)")
                         .font(.system(size: 32, weight: .bold))
                         .foregroundColor(.orange)
                 }
 
                 Button(action: {
-                    myGameScore = 0
-                    yourGameScore = 0
-                    score.resetData()
-                    isMatchOver = false
+                    viewModel.startNewMatch()
                 }, label: {
                     HStack(spacing: 4) {
                         Image(systemName: "arrow.counterclockwise")
@@ -60,8 +53,7 @@ struct MatchView: View {
                 HStack(spacing: 0) {
                     // 왼쪽: ME 영역
                     Button(action: {
-                        score.addMyPoint()
-                        checkGameUpdate()
+                        viewModel.addMyPoint()
                     }, label: {
                         ZStack {
                             Color.green.opacity(0.15)
@@ -71,7 +63,7 @@ struct MatchView: View {
                                     .font(.system(size: 14, weight: .semibold))
                                     .foregroundColor(.green)
 
-                                Text(score.myScore == 50 ? "W" : "\(score.myScore)")
+                                Text(viewModel.score.myScore == 50 ? "W" : "\(viewModel.score.myScore)")
                                     .font(.system(size: 48, weight: .bold))
                                     .foregroundColor(.green)
                                     .contentTransition(.numericText())
@@ -82,8 +74,7 @@ struct MatchView: View {
 
                     // 오른쪽: OPP 영역
                     Button(action: {
-                        score.addYourPoint()
-                        checkGameUpdate()
+                        viewModel.addYourPoint()
                     }, label: {
                         ZStack {
                             Color.orange.opacity(0.15)
@@ -93,7 +84,7 @@ struct MatchView: View {
                                     .font(.system(size: 14, weight: .semibold))
                                     .foregroundColor(.orange)
 
-                                Text(score.yourScore == 50 ? "W" : "\(score.yourScore)")
+                                Text(viewModel.score.yourScore == 50 ? "W" : "\(viewModel.score.yourScore)")
                                     .font(.system(size: 48, weight: .bold))
                                     .foregroundColor(.orange)
                                     .contentTransition(.numericText())
@@ -107,12 +98,12 @@ struct MatchView: View {
                 // SET 라벨 (상단 중앙)
                 VStack {
                     HStack(spacing: 10) {
-                        Text("\(myGameScore)")
+                        Text("\(viewModel.myGameScore)")
                             .foregroundColor(.green)
                             .contentTransition(.numericText())
                         Text("SET")
                             .foregroundColor(.white)
-                        Text("\(yourGameScore)")
+                        Text("\(viewModel.yourGameScore)")
                             .foregroundColor(.orange)
                             .contentTransition(.numericText())
                     }
@@ -126,9 +117,9 @@ struct MatchView: View {
                     Spacer()
 
                     // Floating Undo 버튼 (하단 중앙)
-                    if score.lastAction != .none {
+                    if viewModel.score.lastAction != .none {
                         Button(action: {
-                            score.undo()
+                            viewModel.undo()
                         }, label: {
                             HStack(spacing: 6) {
                                 Image(systemName: "arrow.uturn.backward")
@@ -149,29 +140,7 @@ struct MatchView: View {
                 }
                 .padding(.vertical, 25)
                 .ignoresSafeArea()
-                .animation(.easeInOut(duration: 0.2), value: score.lastAction)
-            }
-        }
-    }
-
-    private func checkGameUpdate() {
-        if score.myScore == 50 {
-            withAnimation(.bouncy) {
-                myGameScore += 1
-            }
-            score.resetData()
-            if myGameScore >= 6 {
-                didWin = true
-                isMatchOver = true
-            }
-        } else if score.yourScore == 50 {
-            withAnimation(.bouncy) {
-                yourGameScore += 1
-            }
-            score.resetData()
-            if yourGameScore >= 6 {
-                didWin = false
-                isMatchOver = true
+                .animation(.easeInOut(duration: 0.2), value: viewModel.score.lastAction)
             }
         }
     }
