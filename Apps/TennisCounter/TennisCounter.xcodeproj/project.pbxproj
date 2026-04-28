@@ -139,13 +139,13 @@
 			path = "Preview Content";
 			sourceTree = "<group>";
 		};
-		390E3BE72F3B7B07003599BF /* Screens */ = {
+		390E3BE72F3B7B07003599BF /* Features */ = {
 			isa = PBXGroup;
 			children = (
 				390E3BE82F3B7B08003599BF /* Home */,
 				390E3BE92F3B7B09003599BF /* Match */,
 			);
-			path = Screens;
+			path = Features;
 			sourceTree = "<group>";
 		};
 		390E3BE82F3B7B08003599BF /* Home */ = {
@@ -169,7 +169,7 @@
 			isa = PBXGroup;
 			children = (
 				399289F12EB8EC9E005F1856 /* Preview Content */,
-				390E3BE72F3B7B07003599BF /* Screens */,
+				390E3BE72F3B7B07003599BF /* Features */,
 				399289F52EB8EC9E005F1856 /* Assets.xcassets */,
 				399289F62EB8EC9E005F1856 /* WatchApp.swift */,
 			);
@@ -217,7 +217,7 @@
 		399700EE2A1D9BC800D0D486 /* iOSApp */ = {
 			isa = PBXGroup;
 			children = (
-				390E3BE42F3B7B04003599BF /* Screens */,
+				390E3BE42F3B7B04003599BF /* Features */,
 				399700EF2A1D9BC800D0D486 /* iOSApp.swift */,
 				399700F32A1D9BC900D0D486 /* Assets.xcassets */,
 				399700F52A1D9BC900D0D486 /* Preview Content */,
@@ -233,25 +233,33 @@
 			path = "Preview Content";
 			sourceTree = "<group>";
 		};
-		390E3BE42F3B7B04003599BF /* Screens */ = {
+		390E3BE42F3B7B04003599BF /* Features */ = {
 			isa = PBXGroup;
 			children = (
 				390E3BE52F3B7B05003599BF /* Match */,
 			);
-			path = Screens;
+			path = Features;
 			sourceTree = "<group>";
 		};
 		390E3BE52F3B7B05003599BF /* Match */ = {
 			isa = PBXGroup;
 			children = (
-				399700F12A1D9BC800D0D486 /* MatchView.swift */,
-				390E3BE02F3B7B00003599BF /* MatchViewModel.swift */,
-				390E3BE62F3B7B06003599BF /* Components */,
+				390E3BE62F3B7B06003599BF /* Score */,
 			);
 			path = Match;
 			sourceTree = "<group>";
 		};
-		390E3BE62F3B7B06003599BF /* Components */ = {
+		390E3BE62F3B7B06003599BF /* Score */ = {
+			isa = PBXGroup;
+			children = (
+				399700F12A1D9BC800D0D486 /* MatchView.swift */,
+				390E3BE02F3B7B00003599BF /* MatchViewModel.swift */,
+				390E3BEA2F3B7B0A003599BF /* Components */,
+			);
+			path = Score;
+			sourceTree = "<group>";
+		};
+		390E3BEA2F3B7B0A003599BF /* Components */ = {
 			isa = PBXGroup;
 			children = (
 				399701172A1D9C7100D0D486 /* CounterButtonView.swift */,
