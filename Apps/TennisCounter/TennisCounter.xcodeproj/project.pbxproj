@@ -27,6 +27,7 @@
 		399700F72A1D9BC900D0D486 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 399700F62A1D9BC900D0D486 /* Preview Assets.xcassets */; };
 		399700FD2A1D9BC900D0D486 /* TennisCounter Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 399700FC2A1D9BC900D0D486 /* TennisCounter Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		399701182A1D9C7100D0D486 /* CounterButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 399701172A1D9C7100D0D486 /* CounterButtonView.swift */; };
+		BB90A8473F72F3F0D1750710 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C3E921D699AC713143D3899E /* Localizable.strings */; };
 		BD37DBF73DEBB829069C6CA9 /* SetRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FBAE1C4E98435069306D5C2 /* SetRecord.swift */; };
 		F7FECED75D1C7B9F7A1DD051 /* Match.swift in Sources */ = {isa = PBXBuildFile; fileRef = 814B692B11B6F01FBDEA7B04 /* Match.swift */; };
 /* End PBXBuildFile section */
@@ -74,6 +75,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		08A9F453B9B2A19F49679C88 /* en */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		390E3BDE2F3B7A00003599BF /* MatchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchView.swift; sourceTree = "<group>"; };
 		390E3BE02F3B7B00003599BF /* MatchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchViewModel.swift; sourceTree = "<group>"; };
 		390E3BE12F3B7B01003599BF /* MatchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchViewModel.swift; sourceTree = "<group>"; };
@@ -274,6 +276,7 @@
 				399700EF2A1D9BC800D0D486 /* iOSApp.swift */,
 				399700F32A1D9BC900D0D486 /* Assets.xcassets */,
 				399700F52A1D9BC900D0D486 /* Preview Content */,
+				C3E921D699AC713143D3899E /* Localizable.strings */,
 			);
 			path = iOSApp;
 			sourceTree = "<group>";
@@ -412,6 +415,7 @@
 			files = (
 				399700F72A1D9BC900D0D486 /* Preview Assets.xcassets in Resources */,
 				399700F42A1D9BC900D0D486 /* Assets.xcassets in Resources */,
+				BB90A8473F72F3F0D1750710 /* Localizable.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -496,6 +500,17 @@
 			targetProxy = 399700FE2A1D9BC900D0D486 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		C3E921D699AC713143D3899E /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				08A9F453B9B2A19F49679C88 /* en */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		3974B9062EBCDFA6002D0EA7 /* Debug */ = {

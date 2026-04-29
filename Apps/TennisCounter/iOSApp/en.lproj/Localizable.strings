@@ -1,0 +1,47 @@
+/* Tabs */
+"tab_summary" = "Summary";
+"tab_match" = "Match";
+"tab_history" = "History";
+
+/* Match Format */
+"match_format_one_set" = "One Set";
+"match_format_best_of_3" = "Best of 3";
+"match_format_one_set_desc" = "Quick practice, one set";
+"match_format_best_of_3_desc" = "Official match, first to win 2 sets";
+
+/* Match Screen */
+"new_match" = "New Match";
+"score_label_me" = "ME";
+"score_label_opp" = "OPP";
+"btn_confirm" = "Confirm";
+"btn_reset" = "Reset";
+"btn_undo" = "Undo";
+"btn_end_match" = "End Match";
+"btn_end_set" = "End Set";
+"btn_new_match" = "New Match";
+"set_indicator_format" = "Set %d";
+"match_over_win" = "Victory!";
+"match_over_lose" = "Defeat";
+"game_score_label" = "Games";
+
+/* Summary */
+"summary_period_today" = "Today";
+"summary_period_week" = "This Week";
+"summary_period_month" = "This Month";
+"summary_period_all" = "All Time";
+"summary_total_matches" = "Matches";
+"summary_win_rate" = "Win Rate";
+"summary_streak" = "Day Streak";
+"summary_recent_matches" = "Recent Matches";
+"summary_no_matches" = "No matches this period";
+
+/* History */
+"history_title" = "History";
+"history_empty" = "No matches recorded yet";
+"history_view_calendar" = "Calendar";
+"history_view_list" = "List";
+
+/* Common */
+"btn_cancel" = "Cancel";
+"btn_save" = "Save";
+"vs_label" = "vs";
