@@ -1,0 +1,47 @@
+/* Tabs */
+"tab_summary" = "요약";
+"tab_match" = "경기";
+"tab_history" = "기록";
+
+/* Match Format */
+"match_format_one_set" = "한 세트";
+"match_format_best_of_3" = "3세트 매치";
+"match_format_one_set_desc" = "빠른 연습, 한 세트만 기록";
+"match_format_best_of_3_desc" = "정식 경기, 2세트 선취 시 종료";
+
+/* Match Screen */
+"new_match" = "새 경기";
+"score_label_me" = "나";
+"score_label_opp" = "상대";
+"btn_confirm" = "확인";
+"btn_reset" = "초기화";
+"btn_undo" = "되돌리기";
+"btn_end_match" = "경기 종료";
+"btn_end_set" = "세트 종료";
+"btn_new_match" = "새 경기";
+"set_indicator_format" = "%d세트";
+"match_over_win" = "승리!";
+"match_over_lose" = "패배";
+"game_score_label" = "게임";
+
+/* Summary */
+"summary_period_today" = "오늘";
+"summary_period_week" = "이번 주";
+"summary_period_month" = "이번 달";
+"summary_period_all" = "전체";
+"summary_total_matches" = "경기 수";
+"summary_win_rate" = "승률";
+"summary_streak" = "연속 플레이";
+"summary_recent_matches" = "최근 경기";
+"summary_no_matches" = "이 기간에 경기가 없습니다";
+
+/* History */
+"history_title" = "기록";
+"history_empty" = "저장된 경기가 없습니다";
+"history_view_calendar" = "달력";
+"history_view_list" = "목록";
+
+/* Common */
+"btn_cancel" = "취소";
+"btn_save" = "저장";
+"vs_label" = "vs";
