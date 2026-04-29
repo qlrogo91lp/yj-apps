@@ -20,7 +20,8 @@ make format    # SwiftFormat --lint check
 make fix       # Auto-fix: swiftformat + swiftlint --fix
 ```
 
-No test targets exist in this project.
+No unit test targets. Integration testing via simulator pairing:
+- WatchConnectivity: Pair iPhone 17 Pro + Apple Watch Series 11 simulator, verify bidirectional score sync (iPhone → Watch, Watch → iPhone)
 
 ## Architecture
 
