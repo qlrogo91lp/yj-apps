@@ -1,6 +1,6 @@
 import Foundation
 
-enum MatchFormat: String, CaseIterable {
+enum MatchFormat: String, CaseIterable, Codable {
     case oneSet = "one_set"
     case bestOfThree = "best_of_3"
 
