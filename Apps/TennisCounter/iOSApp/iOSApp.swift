@@ -33,7 +33,7 @@ struct TennisCounterApp: App {
 struct MainTabView: View {
     var body: some View {
         TabView {
-            Text("Summary")
+            SummaryView()
                 .tabItem {
                     Label(String(localized: "tab_summary"), systemImage: "chart.bar.fill")
                 }
@@ -124,6 +124,237 @@ private struct ModeCardView: View {
         .padding(20)
         .background(Color.white.opacity(0.08))
         .clipShape(RoundedRectangle(cornerRadius: 16))
+    }
+}
+
+// MARK: - Summary
+
+enum SummaryPeriod: String, CaseIterable {
+    case today
+    case week
+    case month
+    case all
+
+    var localizedTitle: String {
+        switch self {
+        case .today: return String(localized: "summary_period_today")
+        case .week: return String(localized: "summary_period_week")
+        case .month: return String(localized: "summary_period_month")
+        case .all: return String(localized: "summary_period_all")
+        }
+    }
+
+    func startDate(from now: Date = Date()) -> Date? {
+        let calendar = Calendar.current
+        switch self {
+        case .today:
+            return calendar.startOfDay(for: now)
+        case .week:
+            return calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now))
+        case .month:
+            let components = calendar.dateComponents([.year, .month], from: now)
+            return calendar.date(from: components)
+        case .all:
+            return nil
+        }
+    }
+}
+
+struct SummaryStats {
+    let totalMatches: Int
+    let wins: Int
+    let winRate: Double
+    let streak: Int
+}
+
+@MainActor
+final class SummaryViewModel: ObservableObject {
+    @Published var selectedPeriod: SummaryPeriod = .week
+    @Published var selectedMatch: Match?
+
+    func stats(from matches: [Match]) -> SummaryStats {
+        let filtered = filteredMatches(from: matches)
+        let wins = filtered.filter { $0.myTotalSets > $0.yourTotalSets }.count
+        let total = filtered.count
+        let winRate = total > 0 ? Double(wins) / Double(total) : 0.0
+
+        return SummaryStats(
+            totalMatches: total,
+            wins: wins,
+            winRate: winRate,
+            streak: calculateStreak(from: matches)
+        )
+    }
+
+    func recentMatches(from matches: [Match]) -> [Match] {
+        Array(matches.prefix(2))
+    }
+
+    func filteredMatches(from matches: [Match]) -> [Match] {
+        guard let start = selectedPeriod.startDate() else { return matches }
+        return matches.filter { $0.startedAt >= start }
+    }
+
+    private func calculateStreak(from matches: [Match]) -> Int {
+        let calendar = Calendar.current
+        var streak = 0
+        var checkDate = Date()
+
+        for match in matches {
+            let matchDay = calendar.startOfDay(for: match.startedAt)
+            let currentDay = calendar.startOfDay(for: checkDate)
+            let diff = calendar.dateComponents([.day], from: matchDay, to: currentDay).day ?? 0
+
+            if diff == 0 || diff == streak {
+                streak = max(streak, diff + 1)
+                checkDate = match.startedAt
+            } else {
+                break
+            }
+        }
+        return streak
+    }
+}
+
+struct SummaryView: View {
+    @StateObject private var viewModel = SummaryViewModel()
+    @Query(sort: \Match.startedAt, order: .reverse) private var matches: [Match]
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: 20) {
+                    periodPicker
+                    statsGrid
+                    recentMatchesSection
+                }
+                .padding()
+            }
+            .navigationTitle(String(localized: "tab_summary"))
+            .sheet(item: $viewModel.selectedMatch) { match in
+                MatchDetailSheet(match: match)
+            }
+        }
+    }
+
+    private var periodPicker: some View {
+        Picker("Period", selection: $viewModel.selectedPeriod) {
+            ForEach(SummaryPeriod.allCases, id: \.rawValue) { period in
+                Text(period.localizedTitle).tag(period)
+            }
+        }
+        .pickerStyle(.segmented)
+    }
+
+    private var statsGrid: some View {
+        let stats = viewModel.stats(from: matches)
+        return LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
+            SummaryStatCard(
+                title: String(localized: "summary_total_matches"),
+                value: "\(stats.totalMatches)",
+                systemImage: "sportscourt.fill",
+                color: .blue
+            )
+
+            SummaryStatCard(
+                title: String(localized: "summary_win_rate"),
+                value: String(format: "%.0f%%", stats.winRate * 100),
+                systemImage: "trophy.fill",
+                color: stats.winRate >= 0.5 ? .green : .orange
+            )
+
+            SummaryStatCard(
+                title: String(localized: "summary_streak"),
+                value: "\(stats.streak)",
+                systemImage: "flame.fill",
+                color: .red
+            )
+
+            SummaryStatCard(
+                title: "Wins",
+                value: "\(stats.wins)",
+                systemImage: "checkmark.circle.fill",
+                color: .green
+            )
+        }
+    }
+
+    private var recentMatchesSection: some View {
+        let recent = viewModel.recentMatches(from: matches)
+        return Group {
+            if !recent.isEmpty {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text(String(localized: "summary_recent_matches"))
+                        .font(.headline)
+
+                    ForEach(recent) { match in
+                        SummaryRecentMatchCard(match: match)
+                            .onTapGesture { viewModel.selectedMatch = match }
+                    }
+                }
+            }
+        }
+    }
+}
+
+private struct SummaryStatCard: View {
+    let title: String
+    let value: String
+    let systemImage: String
+    let color: Color
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: systemImage)
+                    .foregroundColor(color)
+                Text(title)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            Text(value)
+                .font(.system(size: 32, weight: .bold))
+                .foregroundColor(.primary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(16)
+        .background(Color(.secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+    }
+}
+
+private struct SummaryRecentMatchCard: View {
+    let match: Match
+
+    private var didWin: Bool { match.myTotalSets > match.yourTotalSets }
+
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 6) {
+                    Text(didWin ? String(localized: "match_over_win") : String(localized: "match_over_lose"))
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(didWin ? .green : .orange)
+
+                    Text(match.matchFormat == .oneSet
+                         ? String(localized: "match_format_one_set")
+                         : String(localized: "match_format_best_of_3"))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                Text(match.startedAt.formatted(date: .abbreviated, time: .shortened))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            Spacer()
+
+            Text("\(match.myTotalSets) – \(match.yourTotalSets)")
+                .font(.system(size: 22, weight: .bold))
+        }
+        .padding(14)
+        .background(Color(.secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 14))
     }
 }
 
