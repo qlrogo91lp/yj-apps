@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		06761FC4C1394C44BA380979 /* SetRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FBAE1C4E98435069306D5C2 /* SetRecord.swift */; };
 		06F96F329795FFD1F8DE2D1F /* Match.swift in Sources */ = {isa = PBXBuildFile; fileRef = 814B692B11B6F01FBDEA7B04 /* Match.swift */; };
+		16906567F40C8622BBAFE8F2 /* WatchConnectivityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA0D4A9F05FCC92AAD1B7F86 /* WatchConnectivityService.swift */; };
 		390E3BDF2F3B7A00003599BF /* MatchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 390E3BDE2F3B7A00003599BF /* MatchView.swift */; };
 		390E3BE22F3B7B02003599BF /* MatchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 390E3BE02F3B7B00003599BF /* MatchViewModel.swift */; };
 		390E3BE32F3B7B03003599BF /* MatchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 390E3BE12F3B7B01003599BF /* MatchViewModel.swift */; };
@@ -27,6 +28,7 @@
 		399700F72A1D9BC900D0D486 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 399700F62A1D9BC900D0D486 /* Preview Assets.xcassets */; };
 		399700FD2A1D9BC900D0D486 /* TennisCounter Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 399700FC2A1D9BC900D0D486 /* TennisCounter Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		399701182A1D9C7100D0D486 /* CounterButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 399701172A1D9C7100D0D486 /* CounterButtonView.swift */; };
+		844A98385CA7B3C7D937AB1E /* WatchConnectivityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA0D4A9F05FCC92AAD1B7F86 /* WatchConnectivityService.swift */; };
 		BB90A8473F72F3F0D1750710 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C3E921D699AC713143D3899E /* Localizable.strings */; };
 		BD37DBF73DEBB829069C6CA9 /* SetRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FBAE1C4E98435069306D5C2 /* SetRecord.swift */; };
 		CE1DAA42E37005BF3898A908 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 6204489ECC55AD2D17D78F8E /* Localizable.strings */; };
@@ -119,10 +121,11 @@
 		3FF7E46CD5EDF740DF6B8C83 /* ko */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/Localizable.strings; sourceTree = "<group>"; };
 		4FBAE1C4E98435069306D5C2 /* SetRecord.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SetRecord.swift; sourceTree = "<group>"; };
 		814B692B11B6F01FBDEA7B04 /* Match.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Match.swift; sourceTree = "<group>"; };
+		EA0D4A9F05FCC92AAD1B7F86 /* WatchConnectivityService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = WatchConnectivityService.swift; path = Shared/Services/WatchConnectivityService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		3974B9042EBCDFA6002D0EA7 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+		3974B9042EBCDFA6002D0EA7 /* Exceptions for "ComplicationApp" folder in "ComplicationAppExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -132,9 +135,40 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		3974B8F72EBCDFA5002D0EA7 /* ComplicationApp */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (3974B9042EBCDFA6002D0EA7 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = ComplicationApp; sourceTree = "<group>"; };
-		39D9AB7D2FA1D86B006DC9F5 /* iosTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = iosTests; sourceTree = "<group>"; };
-		39D9AB8A2FA1D882006DC9F5 /* watchosTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = watchosTests; sourceTree = "<group>"; };
+		3974B8F72EBCDFA5002D0EA7 /* ComplicationApp */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				3974B9042EBCDFA6002D0EA7 /* Exceptions for "ComplicationApp" folder in "ComplicationAppExtension" target */,
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = ComplicationApp;
+			sourceTree = "<group>";
+		};
+		39D9AB7D2FA1D86B006DC9F5 /* iosTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = iosTests;
+			sourceTree = "<group>";
+		};
+		39D9AB8A2FA1D882006DC9F5 /* watchosTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
+			explicitFileTypes = {
+			};
+			explicitFolders = (
+			);
+			path = watchosTests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -290,6 +324,7 @@
 				39BF174E2EBA37F60026184E /* Frameworks */,
 				399700ED2A1D9BC800D0D486 /* Products */,
 				399289F72EB8EC9E005F1856 /* WatchApp */,
+				EA0D4A9F05FCC92AAD1B7F86 /* WatchConnectivityService.swift */,
 			);
 			sourceTree = "<group>";
 		};
@@ -413,8 +448,6 @@
 				39D9AB7D2FA1D86B006DC9F5 /* iosTests */,
 			);
 			name = iosTests;
-			packageProductDependencies = (
-			);
 			productName = iosTests;
 			productReference = 39D9AB7C2FA1D86B006DC9F5 /* iosTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -436,8 +469,6 @@
 				39D9AB8A2FA1D882006DC9F5 /* watchosTests */,
 			);
 			name = watchosTests;
-			packageProductDependencies = (
-			);
 			productName = watchosTests;
 			productReference = 39D9AB892FA1D882006DC9F5 /* watchosTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -577,6 +608,7 @@
 				399700F02A1D9BC800D0D486 /* iOSApp.swift in Sources */,
 				F7FECED75D1C7B9F7A1DD051 /* Match.swift in Sources */,
 				BD37DBF73DEBB829069C6CA9 /* SetRecord.swift in Sources */,
+				16906567F40C8622BBAFE8F2 /* WatchConnectivityService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -591,6 +623,7 @@
 				390E3BDF2F3B7A00003599BF /* MatchView.swift in Sources */,
 				06F96F329795FFD1F8DE2D1F /* Match.swift in Sources */,
 				06761FC4C1394C44BA380979 /* SetRecord.swift in Sources */,
+				844A98385CA7B3C7D937AB1E /* WatchConnectivityService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
