@@ -20,9 +20,6 @@ make format    # SwiftFormat --lint check
 make fix       # Auto-fix: swiftformat + swiftlint --fix
 ```
 
-No unit test targets. Integration testing via simulator pairing:
-- WatchConnectivity: Pair iPhone 17 Pro + Apple Watch Series 11 simulator, verify bidirectional score sync (iPhone → Watch, Watch → iPhone)
-
 ## Architecture
 
 Tennis score tracking app (Ralli) with three targets sharing a single model. Feature-based folder structure with MVVM pattern. Each top-level folder is a domain feature; sub-folders are screens within that feature.
