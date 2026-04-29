@@ -31,6 +31,8 @@
 		844A98385CA7B3C7D937AB1E /* WatchConnectivityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA0D4A9F05FCC92AAD1B7F86 /* WatchConnectivityService.swift */; };
 		3BF931F7E91B4E9485520010 /* HealthKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FED375147BA742B5922F10BE /* HealthKitService.swift */; };
 		EC11386025ED47BFAFD41881 /* HealthKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FED375147BA742B5922F10BE /* HealthKitService.swift */; };
+		EF37C58D1A0646C1BE95C4FE /* ExercisePageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B742343E1084EFD82BB146C /* ExercisePageView.swift */; };
+		614C76917BEF4F0290E7C8B7 /* SetHistoryPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50B51DD1C5744495A1CBE412 /* SetHistoryPageView.swift */; };
 		BB90A8473F72F3F0D1750710 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C3E921D699AC713143D3899E /* Localizable.strings */; };
 		BD37DBF73DEBB829069C6CA9 /* SetRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FBAE1C4E98435069306D5C2 /* SetRecord.swift */; };
 		CE1DAA42E37005BF3898A908 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 6204489ECC55AD2D17D78F8E /* Localizable.strings */; };
@@ -98,6 +100,8 @@
 		08A9F453B9B2A19F49679C88 /* en */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		2C7F297ABAD9D6BD5F9A7D47 /* ko */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/Localizable.strings; sourceTree = "<group>"; };
 		390E3BDE2F3B7A00003599BF /* MatchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchView.swift; sourceTree = "<group>"; };
+		7B742343E1084EFD82BB146C /* ExercisePageView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ExercisePageView.swift; sourceTree = "<group>"; };
+		50B51DD1C5744495A1CBE412 /* SetHistoryPageView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SetHistoryPageView.swift; sourceTree = "<group>"; };
 		390E3BE02F3B7B00003599BF /* MatchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchViewModel.swift; sourceTree = "<group>"; };
 		390E3BE12F3B7B01003599BF /* MatchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchViewModel.swift; sourceTree = "<group>"; };
 		39670C362FA1BBA1009C0010 /* ComplicationAppExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ComplicationAppExtension.entitlements; sourceTree = "<group>"; };
@@ -262,6 +266,8 @@
 			isa = PBXGroup;
 			children = (
 				390E3BDE2F3B7A00003599BF /* MatchView.swift */,
+				7B742343E1084EFD82BB146C /* ExercisePageView.swift */,
+				50B51DD1C5744495A1CBE412 /* SetHistoryPageView.swift */,
 				390E3BE12F3B7B01003599BF /* MatchViewModel.swift */,
 			);
 			path = Match;
@@ -630,6 +636,8 @@
 				06761FC4C1394C44BA380979 /* SetRecord.swift in Sources */,
 				844A98385CA7B3C7D937AB1E /* WatchConnectivityService.swift in Sources */,
 				EC11386025ED47BFAFD41881 /* HealthKitService.swift in Sources */,
+				EF37C58D1A0646C1BE95C4FE /* ExercisePageView.swift in Sources */,
+				614C76917BEF4F0290E7C8B7 /* SetHistoryPageView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
