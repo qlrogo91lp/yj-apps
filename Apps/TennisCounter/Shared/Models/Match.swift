@@ -3,7 +3,14 @@ import SwiftData
 
 enum MatchFormat: String, Codable {
     case oneSet = "one_set"
-    case bestOf3 = "best_of_3"
+    case bestOfThree = "best_of_3"
+
+    var setsToWin: Int {
+        switch self {
+        case .oneSet: return 1
+        case .bestOfThree: return 2
+        }
+    }
 }
 
 @Model
