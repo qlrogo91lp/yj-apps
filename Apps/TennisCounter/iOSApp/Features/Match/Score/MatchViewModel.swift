@@ -18,6 +18,7 @@ final class MatchViewModel: ObservableObject {
 
     private var cancellable: AnyCancellable?
     private var modelContext: ModelContext?
+    private let connectivity = WatchConnectivityService.shared
 
     init(format: MatchFormat = .oneSet, modelContext: ModelContext? = nil) {
         self.format = format
@@ -37,10 +38,12 @@ final class MatchViewModel: ObservableObject {
         if score.myScore == 50 {
             myGameScore += 1
             score.resetData()
+            sendScoreUpdate()
             checkSetUpdate()
         } else if score.yourScore == 50 {
             yourGameScore += 1
             score.resetData()
+            sendScoreUpdate()
             checkSetUpdate()
         }
     }
@@ -90,6 +93,16 @@ final class MatchViewModel: ObservableObject {
         let maxGames = max(myGameScore, yourGameScore)
         let minGames = min(myGameScore, yourGameScore)
         return maxGames >= 6 && (maxGames - minGames) >= 2
+    }
+
+    private func sendScoreUpdate() {
+        let update = ScoreUpdate(
+            myScore: score.myScore,
+            yourScore: score.yourScore,
+            myGameScore: myGameScore,
+            yourGameScore: yourGameScore
+        )
+        connectivity.sendScoreUpdate(update)
     }
 
     private func saveMatch() {

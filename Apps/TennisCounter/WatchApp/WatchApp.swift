@@ -9,6 +9,8 @@ import SwiftUI
 
 @main
 struct TennisCounter_Watch_AppApp: App {
+    private let watchConnectivity = WatchConnectivityService.shared
+
     var body: some Scene {
         WindowGroup {
             HomeView()

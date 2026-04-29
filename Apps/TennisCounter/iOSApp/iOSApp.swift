@@ -11,6 +11,7 @@ import SwiftUI
 @main
 struct TennisCounterApp: App {
     let container: ModelContainer
+    private let watchConnectivity = WatchConnectivityService.shared
 
     init() {
         do {
