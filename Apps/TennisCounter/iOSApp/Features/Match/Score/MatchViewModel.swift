@@ -19,6 +19,7 @@ final class MatchViewModel: ObservableObject {
     private var cancellable: AnyCancellable?
     private var modelContext: ModelContext?
     private let connectivity = WatchConnectivityService.shared
+    private let healthKit = HealthKitService.shared
 
     init(format: MatchFormat = .oneSet, modelContext: ModelContext? = nil) {
         self.format = format
@@ -30,6 +31,10 @@ final class MatchViewModel: ObservableObject {
 
     func injectContext(_ context: ModelContext) {
         self.modelContext = context
+    }
+
+    func requestHealthKitAndStart() async {
+        await healthKit.requestAuthorization()
     }
 
     func confirmScore() {
@@ -113,12 +118,12 @@ final class MatchViewModel: ObservableObject {
         match.myTotalSets = mySetScore
         match.yourTotalSets = yourSetScore
         match.isCompleted = true
+        match.durationSeconds = healthKit.elapsedSeconds
 
         let setRecords = completedSets.enumerated().map { index, result in
             SetRecord(myGames: result.my, yourGames: result.your, setNumber: index + 1)
         }
         match.sets = setRecords
-
         context.insert(match)
         try? context.save()
     }

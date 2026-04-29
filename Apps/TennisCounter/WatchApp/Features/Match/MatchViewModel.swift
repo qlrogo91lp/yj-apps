@@ -1,10 +1,3 @@
-//
-//  MatchViewModel.swift
-//  TennisCounter Watch App
-//
-//  Created by 윤재 on 2023/05/24.
-//
-
 import Combine
 import SwiftUI
 
@@ -12,9 +5,13 @@ class MatchViewModel: ObservableObject {
     @Published var score = Score()
     @Published var myGameScore: Int = 0
     @Published var yourGameScore: Int = 0
+    @Published var mySetScore: Int = 0
+    @Published var yourSetScore: Int = 0
+    @Published var completedSets: [(my: Int, your: Int)] = []
     @Published var isMatchOver: Bool = false
     @Published var didWin: Bool = false
 
+    let healthKit = HealthKitService.shared
     private var cancellables = Set<AnyCancellable>()
     private let connectivity = WatchConnectivityService.shared
 
@@ -26,10 +23,12 @@ class MatchViewModel: ObservableObject {
         connectivity.$receivedScoreUpdate
             .compactMap { $0 }
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] update in
-                self?.applyScoreUpdate(update)
-            }
+            .sink { [weak self] update in self?.applyScoreUpdate(update) }
             .store(in: &cancellables)
+    }
+
+    func startMatch() {
+        healthKit.startWorkout()
     }
 
     func addMyPoint() {
@@ -52,9 +51,12 @@ class MatchViewModel: ObservableObject {
     func startNewMatch() {
         myGameScore = 0
         yourGameScore = 0
-        score.resetData()
+        mySetScore = 0
+        yourSetScore = 0
+        completedSets = []
         isMatchOver = false
         didWin = false
+        score.resetData()
     }
 
     private func sendScoreUpdate() {
@@ -80,11 +82,37 @@ class MatchViewModel: ObservableObject {
         if score.myScore == 50 {
             withAnimation(.bouncy) { myGameScore += 1 }
             score.resetData()
-            if myGameScore >= 6 { didWin = true; isMatchOver = true }
+            checkSetUpdate(myWon: true)
         } else if score.yourScore == 50 {
             withAnimation(.bouncy) { yourGameScore += 1 }
             score.resetData()
-            if yourGameScore >= 6 { didWin = false; isMatchOver = true }
+            checkSetUpdate(myWon: false)
         }
+    }
+
+    private func checkSetUpdate(myWon: Bool) {
+        let maxGames = max(myGameScore, yourGameScore)
+        let minGames = min(myGameScore, yourGameScore)
+        guard maxGames >= 6 && (maxGames - minGames) >= 2 else { return }
+
+        completedSets.append((my: myGameScore, your: yourGameScore))
+
+        if myWon { mySetScore += 1 } else { yourSetScore += 1 }
+        myGameScore = 0
+        yourGameScore = 0
+
+        if mySetScore >= 1 {
+            didWin = true
+            isMatchOver = true
+            Task { await finishMatch() }
+        } else if yourSetScore >= 1 {
+            didWin = false
+            isMatchOver = true
+            Task { await finishMatch() }
+        }
+    }
+
+    private func finishMatch() async {
+        _ = await healthKit.stopWorkout()
     }
 }

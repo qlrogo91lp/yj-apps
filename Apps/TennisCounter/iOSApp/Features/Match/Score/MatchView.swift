@@ -34,6 +34,10 @@ struct MatchView: View {
         .navigationBarHidden(true)
         .onAppear {
             viewModel.injectContext(modelContext)
+            UIApplication.shared.isIdleTimerDisabled = true
+        }
+        .onDisappear {
+            UIApplication.shared.isIdleTimerDisabled = false
         }
     }
 
