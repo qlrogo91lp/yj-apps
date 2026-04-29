@@ -1,7 +1,7 @@
 import Foundation
 import SwiftData
 
-enum MatchFormat: String, Codable {
+enum MatchFormat: String, Codable, CaseIterable {
     case oneSet = "one_set"
     case bestOfThree = "best_of_3"
 
