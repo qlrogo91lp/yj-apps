@@ -11,15 +11,8 @@ struct MatchView: View {
                 scorePageView
                     .tag(0)
 
-                ExercisePageView(healthKit: viewModel.healthKit)
+                ExerciseView(healthKit: viewModel.healthKit)
                     .tag(1)
-
-                SetHistoryPageView(
-                    completedSets: viewModel.completedSets,
-                    myGameScore: viewModel.myGameScore,
-                    yourGameScore: viewModel.yourGameScore
-                )
-                .tag(2)
             }
             .tabViewStyle(.page)
             .onAppear { viewModel.startMatch() }

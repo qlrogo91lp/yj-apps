@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct ExercisePageView: View {
+struct ExerciseView: View {
     @ObservedObject var healthKit: HealthKitService
 
     var body: some View {

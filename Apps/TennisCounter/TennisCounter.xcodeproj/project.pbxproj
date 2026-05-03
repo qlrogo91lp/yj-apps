@@ -28,14 +28,13 @@
 		399700F72A1D9BC900D0D486 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 399700F62A1D9BC900D0D486 /* Preview Assets.xcassets */; };
 		399700FD2A1D9BC900D0D486 /* TennisCounter Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 399700FC2A1D9BC900D0D486 /* TennisCounter Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		399701182A1D9C7100D0D486 /* CounterButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 399701172A1D9C7100D0D486 /* CounterButtonView.swift */; };
-		844A98385CA7B3C7D937AB1E /* WatchConnectivityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA0D4A9F05FCC92AAD1B7F86 /* WatchConnectivityService.swift */; };
 		3BF931F7E91B4E9485520010 /* HealthKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FED375147BA742B5922F10BE /* HealthKitService.swift */; };
-		EC11386025ED47BFAFD41881 /* HealthKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FED375147BA742B5922F10BE /* HealthKitService.swift */; };
-		EF37C58D1A0646C1BE95C4FE /* ExercisePageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B742343E1084EFD82BB146C /* ExercisePageView.swift */; };
-		614C76917BEF4F0290E7C8B7 /* SetHistoryPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50B51DD1C5744495A1CBE412 /* SetHistoryPageView.swift */; };
+		844A98385CA7B3C7D937AB1E /* WatchConnectivityService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA0D4A9F05FCC92AAD1B7F86 /* WatchConnectivityService.swift */; };
 		BB90A8473F72F3F0D1750710 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C3E921D699AC713143D3899E /* Localizable.strings */; };
 		BD37DBF73DEBB829069C6CA9 /* SetRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FBAE1C4E98435069306D5C2 /* SetRecord.swift */; };
 		CE1DAA42E37005BF3898A908 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 6204489ECC55AD2D17D78F8E /* Localizable.strings */; };
+		EC11386025ED47BFAFD41881 /* HealthKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FED375147BA742B5922F10BE /* HealthKitService.swift */; };
+		EF37C58D1A0646C1BE95C4FE /* ExerciseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B742343E1084EFD82BB146C /* ExerciseView.swift */; };
 		F7FECED75D1C7B9F7A1DD051 /* Match.swift in Sources */ = {isa = PBXBuildFile; fileRef = 814B692B11B6F01FBDEA7B04 /* Match.swift */; };
 /* End PBXBuildFile section */
 
@@ -100,8 +99,6 @@
 		08A9F453B9B2A19F49679C88 /* en */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		2C7F297ABAD9D6BD5F9A7D47 /* ko */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/Localizable.strings; sourceTree = "<group>"; };
 		390E3BDE2F3B7A00003599BF /* MatchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchView.swift; sourceTree = "<group>"; };
-		7B742343E1084EFD82BB146C /* ExercisePageView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ExercisePageView.swift; sourceTree = "<group>"; };
-		50B51DD1C5744495A1CBE412 /* SetHistoryPageView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SetHistoryPageView.swift; sourceTree = "<group>"; };
 		390E3BE02F3B7B00003599BF /* MatchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchViewModel.swift; sourceTree = "<group>"; };
 		390E3BE12F3B7B01003599BF /* MatchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchViewModel.swift; sourceTree = "<group>"; };
 		39670C362FA1BBA1009C0010 /* ComplicationAppExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ComplicationAppExtension.entitlements; sourceTree = "<group>"; };
@@ -126,13 +123,14 @@
 		39D9AB892FA1D882006DC9F5 /* watchosTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = watchosTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3FF7E46CD5EDF740DF6B8C83 /* ko */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/Localizable.strings; sourceTree = "<group>"; };
 		4FBAE1C4E98435069306D5C2 /* SetRecord.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SetRecord.swift; sourceTree = "<group>"; };
+		7B742343E1084EFD82BB146C /* ExerciseView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ExerciseView.swift; sourceTree = "<group>"; };
 		814B692B11B6F01FBDEA7B04 /* Match.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Match.swift; sourceTree = "<group>"; };
 		EA0D4A9F05FCC92AAD1B7F86 /* WatchConnectivityService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = WatchConnectivityService.swift; path = Shared/Services/WatchConnectivityService.swift; sourceTree = "<group>"; };
 		FED375147BA742B5922F10BE /* HealthKitService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = HealthKitService.swift; path = Shared/Services/HealthKitService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		3974B9042EBCDFA6002D0EA7 /* Exceptions for "ComplicationApp" folder in "ComplicationAppExtension" target */ = {
+		3974B9042EBCDFA6002D0EA7 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -142,40 +140,9 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		3974B8F72EBCDFA5002D0EA7 /* ComplicationApp */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				3974B9042EBCDFA6002D0EA7 /* Exceptions for "ComplicationApp" folder in "ComplicationAppExtension" target */,
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			path = ComplicationApp;
-			sourceTree = "<group>";
-		};
-		39D9AB7D2FA1D86B006DC9F5 /* iosTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			path = iosTests;
-			sourceTree = "<group>";
-		};
-		39D9AB8A2FA1D882006DC9F5 /* watchosTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
-			explicitFileTypes = {
-			};
-			explicitFolders = (
-			);
-			path = watchosTests;
-			sourceTree = "<group>";
-		};
+		3974B8F72EBCDFA5002D0EA7 /* ComplicationApp */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (3974B9042EBCDFA6002D0EA7 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = ComplicationApp; sourceTree = "<group>"; };
+		39D9AB7D2FA1D86B006DC9F5 /* iosTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = iosTests; sourceTree = "<group>"; };
+		39D9AB8A2FA1D882006DC9F5 /* watchosTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = watchosTests; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -266,8 +233,7 @@
 			isa = PBXGroup;
 			children = (
 				390E3BDE2F3B7A00003599BF /* MatchView.swift */,
-				7B742343E1084EFD82BB146C /* ExercisePageView.swift */,
-				50B51DD1C5744495A1CBE412 /* SetHistoryPageView.swift */,
+				7B742343E1084EFD82BB146C /* ExerciseView.swift */,
 				390E3BE12F3B7B01003599BF /* MatchViewModel.swift */,
 			);
 			path = Match;
@@ -636,8 +602,7 @@
 				06761FC4C1394C44BA380979 /* SetRecord.swift in Sources */,
 				844A98385CA7B3C7D937AB1E /* WatchConnectivityService.swift in Sources */,
 				EC11386025ED47BFAFD41881 /* HealthKitService.swift in Sources */,
-				EF37C58D1A0646C1BE95C4FE /* ExercisePageView.swift in Sources */,
-				614C76917BEF4F0290E7C8B7 /* SetHistoryPageView.swift in Sources */,
+				EF37C58D1A0646C1BE95C4FE /* ExerciseView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -973,10 +938,10 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = TennisCounter;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.sports";
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Ralli uses HealthKit to track calories and heart rate during matches.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Ralli saves your tennis workout to Apple Health.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
