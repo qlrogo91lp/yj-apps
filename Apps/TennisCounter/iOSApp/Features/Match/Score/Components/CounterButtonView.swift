@@ -22,7 +22,6 @@ struct CounterButtonView: View {
                     Button(action: {
                         if score.myIndex < 4 {
                             score.myIndex += 1
-                            score.myScore = scoreArr[score.myIndex]
                         }
                     }, label: {
                         Circle()
@@ -41,7 +40,6 @@ struct CounterButtonView: View {
                     Button(action: {
                         if score.myIndex > 0 {
                             score.myIndex -= 1
-                            score.myScore = scoreArr[score.myIndex]
                         }
                     }, label: {
                         Circle()
@@ -92,7 +90,6 @@ struct CounterButtonView: View {
                     Button(action: {
                         if score.yourIndex < 4 {
                             score.yourIndex += 1
-                            score.yourScore = scoreArr[score.yourIndex]
                         }
                     }, label: {
                         Circle()
@@ -111,7 +108,6 @@ struct CounterButtonView: View {
                     Button(action: {
                         if score.yourIndex > 0 {
                             score.yourIndex -= 1
-                            score.yourScore = scoreArr[score.yourIndex]
                         }
                     }, label: {
                         Circle()

@@ -1,144 +1,78 @@
 import SwiftUI
 
 struct MatchView: View {
-    @StateObject var viewModel = MatchViewModel()
+    let options: MatchOptions
+    @ObservedObject var flowViewModel: WorkoutFlowViewModel
+    @StateObject private var viewModel: MatchViewModel
+    @State private var showEarlyEndConfirm = false
 
-    var body: some View {
-        if viewModel.isMatchOver {
-            matchOverView
-        } else {
-            TabView {
-                scorePageView
-                    .tag(0)
-
-                ExerciseView(healthKit: viewModel.healthKit)
-                    .tag(1)
-            }
-            .tabViewStyle(.page)
-            .onAppear { viewModel.startMatch() }
-        }
+    init(options: MatchOptions, flowViewModel: WorkoutFlowViewModel) {
+        self.options = options
+        self.flowViewModel = flowViewModel
+        _viewModel = StateObject(wrappedValue: MatchViewModel(options: options))
     }
 
-    // MARK: - Score Page
-
-    private var scorePageView: some View {
+    var body: some View {
         ZStack {
-            HStack(spacing: 0) {
-                Button(action: { viewModel.addMyPoint() }) {
-                    ZStack {
-                        Color.green.opacity(0.15)
-                        VStack(spacing: 4) {
-                            Text("ME")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(.green)
-                            Text(viewModel.score.myScore == 50 ? "W" : "\(viewModel.score.myScore)")
-                                .font(.system(size: 48, weight: .bold))
-                                .foregroundColor(.green)
-                                .contentTransition(.numericText())
-                        }
-                    }
-                }
-                .buttonStyle(.plain)
-
-                Button(action: { viewModel.addYourPoint() }) {
-                    ZStack {
-                        Color.orange.opacity(0.15)
-                        VStack(spacing: 4) {
-                            Text("OPP")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(.orange)
-                            Text(viewModel.score.yourScore == 50 ? "W" : "\(viewModel.score.yourScore)")
-                                .font(.system(size: 48, weight: .bold))
-                                .foregroundColor(.orange)
-                                .contentTransition(.numericText())
-                        }
-                    }
-                }
-                .buttonStyle(.plain)
-            }
-            .ignoresSafeArea()
+            ScorePadView(viewModel: viewModel)
 
             VStack {
-                HStack(spacing: 10) {
-                    Text("\(viewModel.myGameScore)")
-                        .foregroundColor(.green)
-                        .contentTransition(.numericText())
-                    Text("SET")
-                        .foregroundColor(.white)
-                    Text("\(viewModel.yourGameScore)")
-                        .foregroundColor(.orange)
-                        .contentTransition(.numericText())
+                // Header row: SetIndicator + optional EarlyEndButton
+                HStack(alignment: .top) {
+                    Spacer()
+                    SetIndicatorView(
+                        myGameScore: viewModel.myGameScore,
+                        yourGameScore: viewModel.yourGameScore,
+                        isTieBreak: viewModel.score.gameMode == .tieBreak,
+                        mySetScore: viewModel.mySetScore,
+                        yourSetScore: viewModel.yourSetScore
+                    )
+                    Spacer()
+
+                    if viewModel.showEarlyEndButton {
+                        EarlyEndButton { showEarlyEndConfirm = true }
+                            .padding(.top, 4)
+                    }
                 }
-                .font(.system(size: 16, weight: .bold))
-                .padding(.horizontal, 12)
-                .padding(.vertical, 10)
-                .background(Color.black.opacity(0.8))
-                .clipShape(Capsule())
-                .overlay(Capsule().strokeBorder(Color.white.opacity(0.3), lineWidth: 1))
+                .padding(.top, 20)
+                .padding(.horizontal, 8)
 
                 Spacer()
 
-                if viewModel.score.lastAction != .none {
-                    Button(action: { viewModel.undo() }) {
-                        HStack(spacing: 6) {
-                            Image(systemName: "arrow.uturn.backward")
-                                .font(.system(size: 16, weight: .semibold))
-                            Text("Undo")
-                                .font(.system(size: 16, weight: .semibold))
-                        }
-                        .foregroundColor(.white.opacity(0.8))
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 6)
-                        .background(Color.gray.opacity(0.3))
+                // Deciding point / Deuce label
+                if viewModel.score.isDecidingPoint {
+                    Text(String(localized: "score_deciding_point"))
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(.white.opacity(0.7))
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(Color.white.opacity(0.1))
                         .clipShape(Capsule())
-                        .overlay(Capsule().strokeBorder(Color.white.opacity(0.2), lineWidth: 1))
-                    }
-                    .buttonStyle(.plain)
-                    .transition(.scale.combined(with: .opacity))
+                        .transition(.opacity)
+                }
+
+                // Undo button
+                if viewModel.score.lastAction != .none {
+                    UndoButton { viewModel.undo() }
+                        .padding(.bottom, 20)
                 }
             }
-            .padding(.vertical, 25)
-            .ignoresSafeArea()
             .animation(.easeInOut(duration: 0.2), value: viewModel.score.lastAction)
         }
-    }
-
-    // MARK: - Match Over
-
-    private var matchOverView: some View {
-        VStack(spacing: 12) {
-            Text(viewModel.didWin ? "Victory!" : "Defeat")
-                .font(.system(size: 28, weight: .bold))
-                .foregroundColor(viewModel.didWin ? .green : .orange)
-
-            HStack {
-                Text("\(viewModel.mySetScore)")
-                    .font(.system(size: 32, weight: .bold))
-                    .foregroundColor(.green)
-                Text(":")
-                    .font(.system(size: 26, weight: .bold))
-                Text("\(viewModel.yourSetScore)")
-                    .font(.system(size: 32, weight: .bold))
-                    .foregroundColor(.orange)
+        .confirmationDialog(
+            String(localized: "early_end_confirm_title"),
+            isPresented: $showEarlyEndConfirm
+        ) {
+            Button(String(localized: "early_end_confirm_yes"), role: .destructive) {
+                viewModel.triggerEarlyEnd()
             }
-
-            Button(action: { viewModel.startNewMatch() }) {
-                HStack(spacing: 4) {
-                    Image(systemName: "arrow.counterclockwise")
-                    Text("New Match")
-                        .font(.system(size: 15, weight: .bold))
-                }
-                .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.borderedProminent)
-            .tint(.blue)
+        } message: {
+            Text(String(localized: "early_end_confirm_message"))
         }
-        .padding()
-    }
-}
-
-struct MatchView_Previews: PreviewProvider {
-    static var previews: some View {
-        MatchView()
+        .onAppear {
+            viewModel.onMatchFinished = { result, sets in
+                flowViewModel.finishMatch(result: result, completedSets: sets)
+            }
+        }
     }
 }

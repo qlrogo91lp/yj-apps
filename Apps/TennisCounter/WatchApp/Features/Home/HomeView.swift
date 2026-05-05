@@ -15,11 +15,11 @@ struct HomeView: View {
                 Text("Tennis Counter")
                     .font(.system(size: 18, weight: .bold))
 
-                NavigationLink(destination: MatchView()) {
+                NavigationLink(destination: WorkoutFlowView()) {
                     HStack {
                         Image(systemName: "bolt.fill")
                             .foregroundColor(.yellow)
-                        Text("Quick Match")
+                        Text(String(localized: "watch_start_workout"))
                             .font(.system(size: 16, weight: .semibold))
                     }
                     .frame(maxWidth: .infinity)
