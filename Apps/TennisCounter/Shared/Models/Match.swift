@@ -1,18 +1,6 @@
 import Foundation
 import SwiftData
 
-enum MatchFormat: String, Codable, CaseIterable {
-    case oneSet = "one_set"
-    case bestOfThree = "best_of_3"
-
-    var setsToWin: Int {
-        switch self {
-        case .oneSet: return 1
-        case .bestOfThree: return 2
-        }
-    }
-}
-
 @Model
 class Match {
     var id: UUID = UUID()

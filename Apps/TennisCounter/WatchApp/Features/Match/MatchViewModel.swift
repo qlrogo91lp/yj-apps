@@ -7,112 +7,89 @@ class MatchViewModel: ObservableObject {
     @Published var yourGameScore: Int = 0
     @Published var mySetScore: Int = 0
     @Published var yourSetScore: Int = 0
-    @Published var completedSets: [(my: Int, your: Int)] = []
-    @Published var isMatchOver: Bool = false
-    @Published var didWin: Bool = false
+    @Published var completedSets: [SetScore] = []
+    @Published var showEarlyEndButton: Bool = false
 
-    let healthKit = HealthKitService.shared
+    let options: MatchOptions
+    var onMatchFinished: ((MatchResult, [SetScore]) -> Void)?
+
+    private var tieBreakInProgress: Bool = false
     private var cancellables = Set<AnyCancellable>()
-    private let connectivity = WatchConnectivityService.shared
 
-    init() {
+    init(options: MatchOptions) {
+        self.options = options
+        score.noAdRule = options.noAdRule
+
         score.objectWillChange
             .sink { [weak self] _ in self?.objectWillChange.send() }
             .store(in: &cancellables)
-
-        connectivity.$receivedScoreUpdate
-            .compactMap { $0 }
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] update in self?.applyScoreUpdate(update) }
-            .store(in: &cancellables)
     }
 
-    func startMatch() {
-        healthKit.startWorkout()
-    }
-
-    func addMyPoint() {
-        score.addMyPoint()
-        checkGameUpdate()
-        sendScoreUpdate()
-    }
-
-    func addYourPoint() {
-        score.addYourPoint()
-        checkGameUpdate()
-        sendScoreUpdate()
+    func addPoint(_ side: PlayerSide) {
+        guard score.addPoint(side) != nil else { return }
+        withAnimation(.bouncy) {
+            if side == .me { myGameScore += 1 } else { yourGameScore += 1 }
+        }
+        score.reset()
+        checkSetUpdate()
+        updateEarlyEndVisibility()
     }
 
     func undo() {
         score.undo()
-        sendScoreUpdate()
     }
 
-    func startNewMatch() {
-        myGameScore = 0
-        yourGameScore = 0
-        mySetScore = 0
-        yourSetScore = 0
-        completedSets = []
-        isMatchOver = false
-        didWin = false
-        score.resetData()
-    }
+    private func checkSetUpdate() {
+        let my = myGameScore, your = yourGameScore
 
-    private func sendScoreUpdate() {
-        let update = ScoreUpdate(
-            myScore: score.myScore,
-            yourScore: score.yourScore,
-            myGameScore: myGameScore,
-            yourGameScore: yourGameScore
-        )
-        connectivity.sendScoreUpdate(update)
-    }
-
-    private func applyScoreUpdate(_ update: ScoreUpdate) {
-        score.myScore = update.myScore
-        score.yourScore = update.yourScore
-        score.myIndex = score.scoreArr.firstIndex(of: update.myScore) ?? 0
-        score.yourIndex = score.scoreArr.firstIndex(of: update.yourScore) ?? 0
-        myGameScore = update.myGameScore
-        yourGameScore = update.yourGameScore
-    }
-
-    private func checkGameUpdate() {
-        if score.myScore == 50 {
-            withAnimation(.bouncy) { myGameScore += 1 }
-            score.resetData()
-            checkSetUpdate(myWon: true)
-        } else if score.yourScore == 50 {
-            withAnimation(.bouncy) { yourGameScore += 1 }
-            score.resetData()
-            checkSetUpdate(myWon: false)
+        if tieBreakInProgress {
+            if (my == 7 && your == 6) || (your == 7 && my == 6) {
+                tieBreakInProgress = false
+                let winner: PlayerSide = my == 7 ? .me : .opponent
+                finalizeSet(winner: winner)
+            }
+            return
         }
+
+        // Tiebreak trigger at 6-6
+        if !options.noTieRule && my == 6 && your == 6 {
+            score.setTieBreakMode()
+            tieBreakInProgress = true
+            return
+        }
+
+        let maxG = max(my, your), minG = min(my, your)
+        let setWinner: PlayerSide?
+
+        if options.noTieRule {
+            if my >= 6 && my > your { setWinner = .me }
+            else if your >= 6 && your > my { setWinner = .opponent }
+            else { setWinner = nil }
+        } else {
+            if maxG >= 6 && (maxG - minG) >= 2 { setWinner = my > your ? .me : .opponent }
+            else { setWinner = nil }
+        }
+
+        if let winner = setWinner { finalizeSet(winner: winner) }
     }
 
-    private func checkSetUpdate(myWon: Bool) {
-        let maxGames = max(myGameScore, yourGameScore)
-        let minGames = min(myGameScore, yourGameScore)
-        guard maxGames >= 6 && (maxGames - minGames) >= 2 else { return }
-
-        completedSets.append((my: myGameScore, your: yourGameScore))
-
-        if myWon { mySetScore += 1 } else { yourSetScore += 1 }
+    private func finalizeSet(winner: PlayerSide) {
+        completedSets.append(SetScore(my: myGameScore, your: yourGameScore))
+        if winner == .me { mySetScore += 1 } else { yourSetScore += 1 }
         myGameScore = 0
         yourGameScore = 0
 
-        if mySetScore >= 1 {
-            didWin = true
-            isMatchOver = true
-            Task { await finishMatch() }
-        } else if yourSetScore >= 1 {
-            didWin = false
-            isMatchOver = true
-            Task { await finishMatch() }
-        }
+        let setsToWin = options.mode.setsToWin
+        if mySetScore >= setsToWin { onMatchFinished?(.win, completedSets) }
+        else if yourSetScore >= setsToWin { onMatchFinished?(.loss, completedSets) }
     }
 
-    private func finishMatch() async {
-        _ = await healthKit.stopWorkout()
+    private func updateEarlyEndVisibility() {
+        guard options.mode == .oneSet else { showEarlyEndButton = false; return }
+        showEarlyEndButton = myGameScore >= 5 && yourGameScore >= 5
+    }
+
+    func triggerEarlyEnd() {
+        onMatchFinished?(.draw, completedSets)
     }
 }
