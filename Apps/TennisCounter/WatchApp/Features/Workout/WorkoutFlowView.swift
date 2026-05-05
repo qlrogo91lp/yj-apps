@@ -3,9 +3,10 @@ import SwiftUI
 struct WorkoutFlowView: View {
     @StateObject private var viewModel = WorkoutFlowViewModel()
     @Environment(\.dismiss) private var dismiss
+    @State private var selectedTab = 1
 
     var body: some View {
-        TabView {
+        TabView(selection: $selectedTab) {
             // Left: controls
             WorkoutControlsView(viewModel: viewModel, dismiss: dismiss)
                 .tag(0)

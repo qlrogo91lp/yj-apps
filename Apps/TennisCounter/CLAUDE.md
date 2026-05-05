@@ -63,16 +63,38 @@ iOSApp/
         └── HistoryViewModel.swift
 
 WatchApp/
-│  # Apple Watch 전용 타겟. 좌우 스와이프 페이지 구조 (Phase 1-B).
+│  # Apple Watch 전용 타겟. 홈에서 두 가지 flow 진입 가능: 기존 Quick Match / HealthKit 통합 Workout.
 ├── WatchApp.swift         # @main 진입점 → HomeView()
 └── Features/
     ├── Home/
-    │   │  # 워치 홈 화면 — Quick Match 진입 버튼
+    │   │  # 워치 홈 화면 — Quick Match / Workout 진입 버튼
     │   └── HomeView.swift
-    └── Match/
-        │  # 경기 중 워치 화면. 스와이프로 페이지 전환 (Phase 1-B: Score/Exercise/History 3페이지)
-        ├── MatchView.swift        # 터치 스코어링 (탭으로 득점 입력)
-        └── MatchViewModel.swift   # addPoint, undo, checkGameUpdate, 세트 집계
+    ├── Match/
+    │   │  # 기존 경기 flow (Phase 1-A). HealthKit 없이 순수 점수 입력만.
+    │   ├── ModeSelection/
+    │   │   │  # 포맷 선택 (One Set / Best of 3)
+    │   │   ├── ModeSelectionView.swift
+    │   │   └── ModeSelectionViewModel.swift
+    │   ├── Match/
+    │   │   │  # 점수 입력 화면
+    │   │   ├── MatchView.swift
+    │   │   ├── MatchViewModel.swift   # addPoint, undo, checkGameUpdate, 세트 집계
+    │   │   ├── ScorePadView.swift     # 스코어 입력 패드
+    │   │   └── SetIndicatorView.swift # 게임/세트 표시
+    │   ├── Result/
+    │   │   └── MatchResultView.swift  # 경기 결과 화면
+    │   └── Components/
+    │       ├── UndoButton.swift
+    │       └── EarlyEndButton.swift
+    └── Workout/
+        │  # HealthKit 통합 경기 flow (Phase 1-B). 3-탭 TabView: 조작 | 매치 | 메트릭.
+        ├── WorkoutFlowView.swift         # 좌우 스와이프로 3개 탭 전환 (기본: 매치 뷰)
+        ├── WorkoutFlowViewModel.swift    # MatchPhase 상태 + HealthKit 연동
+        ├── WorkoutControlsView.swift     # 좌측 탭: 일시정지/재개/종료 버튼
+        ├── WorkoutMetricsView.swift      # 우측 탭: 칼로리/BPM/시간 표시
+        └── Components/
+            ├── WorkoutPauseButton.swift
+            └── WorkoutEndButton.swift
 
 ComplicationApp/
 │  # watchOS WidgetKit complication + AppIntents. 잠금화면/항상켜기 화면에 현재 점수 표시.
