@@ -15,14 +15,14 @@
 "metrics_kcal" = "kcal";
 "metrics_bpm" = "BPM";
 "mode_select_title" = "모드 선택";
-"mode_one_set" = "1 세트";
-"mode_one_set_desc" = "1세트 경기";
+"mode_one_set" = "1 세트 경기";
+"mode_one_set_desc" = "단판 경기;
 "mode_best_of_3" = "3세트 경기";
 "mode_best_of_3_desc" = "2세트 선취";
 "mode_no_ad" = "No-Ad";
 "mode_no_tie" = "No Tiebreak";
 "set_tiebreak" = "TIE";
-"score_deciding_point" = "결정 포인트";
+"score_deciding_point" = "매치 포인트";
 "early_end_confirm_title" = "경기 종료";
 "early_end_confirm_message" = "매치를 무승부로 종료할까요?";
 "early_end_confirm_yes" = "무승부";

@@ -20,6 +20,7 @@ struct WorkoutFlowView: View {
                 .tag(2)
         }
         .tabViewStyle(.page)
+        .navigationBackButtonHidden(true)
         .onAppear { viewModel.startWorkout() }
     }
 
