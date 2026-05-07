@@ -194,6 +194,9 @@
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		3974B8F72EBCDFA5002D0EA7 /* ComplicationApp */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (3974B9042EBCDFA6002D0EA7 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = ComplicationApp; sourceTree = "<group>"; };
+		39928A012EB95F0D005F1856 /* Shared */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Shared; sourceTree = "<group>"; };
+		399289F72EB8EC9E005F1856 /* WatchApp */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = WatchApp; sourceTree = "<group>"; };
+		399700EE2A1D9BC800D0D486 /* iOSApp */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = iOSApp; sourceTree = "<group>"; };
 		39D9AB7D2FA1D86B006DC9F5 /* iosTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = iosTests; sourceTree = "<group>"; };
 		39D9AB8A2FA1D882006DC9F5 /* watchosTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = watchosTests; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
