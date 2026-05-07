@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct SetScoreView: View {
+struct SetScoreBadge: View {
     let mySetScore: Int
     let yourSetScore: Int
 
