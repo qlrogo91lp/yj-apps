@@ -43,7 +43,7 @@ struct MatchView: View {
                             isTieBreak: viewModel.score.gameMode == .tieBreak
                         )
 
-                        SetScore(
+                        SetScoreView(
                             mySetScore: viewModel.mySetScore,
                             yourSetScore: viewModel.yourSetScore
                         )

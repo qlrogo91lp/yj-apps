@@ -82,6 +82,8 @@ class MatchViewModel: ObservableObject {
         else if yourSetScore >= setsToWin { onMatchFinished?(.loss, completedSets) }
     }
 
+    var showEarlyEndButton: Bool { true }
+
     func triggerEarlyEnd() {
         onMatchFinished?(.draw, completedSets)
     }
