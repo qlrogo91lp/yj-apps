@@ -14,19 +14,40 @@ struct MatchView: View {
 
     var body: some View {
         ZStack {
-            ScorePadView(viewModel: viewModel)
+            // Score pad
+            HStack(spacing: 0) {
+                PlayerScoreButton(
+                    displayScore: viewModel.score.myDisplayScore,
+                    player: String(localized: "watch_score_me"),
+                    color: .green,
+                    action: { viewModel.addPoint(.me) }
+                )
+
+                PlayerScoreButton(
+                    displayScore: viewModel.score.yourDisplayScore,
+                    player: String(localized: "watch_score_opp"),
+                    color: .orange,
+                    action: { viewModel.addPoint(.opponent) }
+                )
+            }
+            .ignoresSafeArea()
 
             VStack {
-                // Header row: SetIndicator + optional EarlyEndButton
+                // Header row: GameScore + SetScore + optional EarlyEndButton
                 HStack(alignment: .top) {
                     Spacer()
-                    SetIndicatorView(
-                        myGameScore: viewModel.myGameScore,
-                        yourGameScore: viewModel.yourGameScore,
-                        isTieBreak: viewModel.score.gameMode == .tieBreak,
-                        mySetScore: viewModel.mySetScore,
-                        yourSetScore: viewModel.yourSetScore
-                    )
+                    VStack(spacing: 4) {
+                        GameScore(
+                            myGameScore: viewModel.myGameScore,
+                            yourGameScore: viewModel.yourGameScore,
+                            isTieBreak: viewModel.score.gameMode == .tieBreak
+                        )
+
+                        SetScore(
+                            mySetScore: viewModel.mySetScore,
+                            yourSetScore: viewModel.yourSetScore
+                        )
+                    }
                     Spacer()
 
                     if viewModel.showEarlyEndButton {

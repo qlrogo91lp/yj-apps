@@ -28,7 +28,7 @@ struct WorkoutMetricsView: View {
 
                 // Metrics row
                 HStack(spacing: 0) {
-                    metricView(
+                    WorkoutMetric(
                         value: String(format: "%.0f", healthKit.currentCalories),
                         label: String(localized: "metrics_kcal"),
                         icon: "flame.fill",
@@ -39,7 +39,7 @@ struct WorkoutMetricsView: View {
                         .frame(height: 50)
                         .background(Color.white.opacity(0.15))
 
-                    metricView(
+                    WorkoutMetric(
                         value: heartRateText,
                         label: String(localized: "metrics_bpm"),
                         icon: "heart.fill",
@@ -55,21 +55,5 @@ struct WorkoutMetricsView: View {
         healthKit.currentHeartRate > 0
             ? String(format: "%.0f", healthKit.currentHeartRate)
             : "--"
-    }
-
-    private func metricView(value: String, label: String, icon: String, color: Color) -> some View {
-        VStack(spacing: 3) {
-            Image(systemName: icon)
-                .font(.system(size: 14))
-                .foregroundColor(color)
-            Text(value)
-                .font(.system(size: 28, weight: .bold, design: .monospaced))
-                .foregroundColor(.white)
-                .contentTransition(.numericText())
-            Text(label)
-                .font(.system(size: 11))
-                .foregroundColor(.white.opacity(0.5))
-        }
-        .frame(maxWidth: .infinity)
     }
 }

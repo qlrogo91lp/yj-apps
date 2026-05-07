@@ -16,7 +16,7 @@
 "metrics_bpm" = "BPM";
 "mode_select_title" = "모드 선택";
 "mode_one_set" = "1 세트 경기";
-"mode_one_set_desc" = "단판 경기;
+"mode_one_set_desc" = "단판 경기";
 "mode_best_of_3" = "3세트 경기";
 "mode_best_of_3_desc" = "2세트 선취";
 "mode_no_ad" = "No-Ad";

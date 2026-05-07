@@ -8,24 +8,27 @@
 import SwiftUI
 
 struct HomeView: View {
-
+    
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
-                Text("Tennis Counter")
-                    .font(.system(size: 18, weight: .bold))
-
+                VStack(spacing:4) {
+                    Text("Ralli")
+                        .font(.system(size: 30, weight: .bold))
+                        .foregroundStyle(.green)
+                        .italic()
+                    Text("Tennis Counter")
+                        .font(.system(size: 14, weight: .semibold))
+                }
+                
                 NavigationLink(destination: WorkoutFlowView()) {
-                    HStack {
-                        Image(systemName: "bolt.fill")
-                            .foregroundColor(.yellow)
-                        Text(String(localized: "watch_start_workout"))
-                            .font(.system(size: 16, weight: .semibold))
-                    }
-                    .frame(maxWidth: .infinity)
+                    Text(String(localized: "watch_start_workout"))
+                        .font(.system(size: 16, weight: .bold))
+                        .frame(maxWidth: .infinity)
+                    
                 }
                 .buttonStyle(.borderedProminent)
-                .tint(.green.opacity(0.8))
+                .tint(.green)
             }
             .padding()
         }

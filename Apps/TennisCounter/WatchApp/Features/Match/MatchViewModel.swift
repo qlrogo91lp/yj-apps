@@ -8,7 +8,6 @@ class MatchViewModel: ObservableObject {
     @Published var mySetScore: Int = 0
     @Published var yourSetScore: Int = 0
     @Published var completedSets: [SetScore] = []
-    @Published var showEarlyEndButton: Bool = false
 
     let options: MatchOptions
     var onMatchFinished: ((MatchResult, [SetScore]) -> Void)?
@@ -32,7 +31,6 @@ class MatchViewModel: ObservableObject {
         }
         score.reset()
         checkSetUpdate()
-        updateEarlyEndVisibility()
     }
 
     func undo() {
@@ -82,11 +80,6 @@ class MatchViewModel: ObservableObject {
         let setsToWin = options.mode.setsToWin
         if mySetScore >= setsToWin { onMatchFinished?(.win, completedSets) }
         else if yourSetScore >= setsToWin { onMatchFinished?(.loss, completedSets) }
-    }
-
-    private func updateEarlyEndVisibility() {
-        guard options.mode == .oneSet else { showEarlyEndButton = false; return }
-        showEarlyEndButton = myGameScore >= 5 && yourGameScore >= 5
     }
 
     func triggerEarlyEnd() {
