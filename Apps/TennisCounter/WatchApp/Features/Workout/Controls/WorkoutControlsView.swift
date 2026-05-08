@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct WorkoutControlsView: View {
-    @ObservedObject var viewModel: WorkoutFlowViewModel
+    @ObservedObject var viewModel: WorkoutSessionViewModel
     let dismiss: DismissAction
 
     var body: some View {

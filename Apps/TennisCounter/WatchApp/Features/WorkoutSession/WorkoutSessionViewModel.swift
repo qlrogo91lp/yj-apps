@@ -2,7 +2,7 @@ import Foundation
 import Combine
 
 @MainActor
-class WorkoutFlowViewModel: ObservableObject {
+class WorkoutSessionViewModel: ObservableObject {
     @Published var phase: MatchPhase = .modeSelection
     @Published var isPaused: Bool = false
 

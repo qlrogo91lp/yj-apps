@@ -1,7 +1,7 @@
 import SwiftUI
 
-struct WorkoutFlowView: View {
-    @StateObject private var viewModel = WorkoutFlowViewModel()
+struct WorkoutSessionView: View {
+    @StateObject private var viewModel = WorkoutSessionViewModel()
     @Environment(\.dismiss) private var dismiss
     @State private var selectedTab = 1
 
@@ -28,7 +28,7 @@ struct WorkoutFlowView: View {
     private var centerView: some View {
         switch viewModel.phase {
         case .modeSelection:
-            ModeSelectionView(viewModel: viewModel)
+            ModeView(viewModel: viewModel)
         case .playing(let options):
             MatchView(options: options, flowViewModel: viewModel)
         case .finished(let session):

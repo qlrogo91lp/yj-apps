@@ -2,7 +2,7 @@ import SwiftUI
 
 struct MatchResultView: View {
     let session: MatchSession
-    @ObservedObject var flowViewModel: WorkoutFlowViewModel
+    @ObservedObject var flowViewModel: WorkoutSessionViewModel
     @State private var saved = false
     @State private var saveError: String?
 

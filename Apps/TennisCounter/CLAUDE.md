@@ -63,42 +63,47 @@ iOSApp/
         └── HistoryViewModel.swift
 
 WatchApp/
-│  # Apple Watch 전용 타겟. 홈에서 두 가지 flow 진입 가능: 기존 Quick Match / HealthKit 통합 Workout.
+│  # Apple Watch 전용 타겟. HealthKit 통합 Workout 경험 제공.
 ├── WatchApp.swift         # @main 진입점 → HomeView()
 └── Features/
     ├── Home/
-    │   │  # 워치 홈 화면 — Quick Match / Workout 진입 버튼
+    │   │  # 워치 홈 화면 — Workout 진입 버튼
     │   └── HomeView.swift
     ├── Match/
-    │   │  # 기존 경기 flow (Phase 1-A). HealthKit 없이 순수 점수 입력만.
-    │   ├── ModeSelection/
-    │   │   │  # 포맷 선택 (One Set / Best of 3)
-    │   │   ├── ModeSelectionView.swift
-    │   │   ├── ModeSelectionViewModel.swift
+    │   │  # 경기 도메인 (Workout과 독립적). 모드 선택 → 점수 입력 → 결과
+    │   ├── Mode/                        # 포맷 선택 화면
+    │   │   ├── ModeView.swift
+    │   │   ├── ModeViewModel.swift
     │   │   └── Components/
-    │   │       └── ModeOptionItem.swift  # 모드 선택 옵션 아이템
-    │   ├── MatchView.swift              # 점수 입력 화면 (PlayerScoreButton + GameScore + SetScore 조합)
-    │   ├── MatchViewModel.swift         # addPoint, undo, checkGameUpdate, 세트 집계
-    │   ├── ExerciseView.swift           # 운동 메트릭 표시
-    │   ├── Result/
-    │   │   └── MatchResultView.swift    # 경기 결과 화면
-    │   └── Components/
-    │       ├── GameScore.swift          # 게임 점수 캡슐
-    │       ├── SetScore.swift           # 세트 스코어
-    │       ├── PlayerScoreButton.swift   # 점수 입력 버튼 (Me/Opponent)
-    │       ├── ExerciseMetric.swift      # 운동 메트릭 항목
-    │       ├── UndoButton.swift
-    │       └── EarlyEndButton.swift
-    └── Workout/
-        │  # HealthKit 통합 경기 flow (Phase 1-B). 3-탭 TabView: 조작 | 매치 | 메트릭.
-        ├── WorkoutFlowView.swift         # 좌우 스와이프로 3개 탭 전환 (기본: 매치 뷰)
-        ├── WorkoutFlowViewModel.swift    # MatchPhase 상태 + HealthKit 연동
-        ├── WorkoutControlsView.swift     # 좌측 탭: 일시정지/재개/종료 버튼
-        ├── WorkoutMetricsView.swift      # 우측 탭: 칼로리/BPM/시간 표시 (WorkoutMetric 조합)
-        └── Components/
-            ├── WorkoutMetric.swift       # 메트릭 항목 (칼로리, BPM 등)
-            ├── WorkoutPauseButton.swift
-            └── WorkoutEndButton.swift
+    │   │       └── ModeOptionItem.swift
+    │   ├── Score/                       # 점수 입력 화면
+    │   │   ├── MatchView.swift
+    │   │   ├── MatchViewModel.swift
+    │   │   └── Components/
+    │   │       ├── GameScore.swift
+    │   │       ├── SetScoreBadge.swift
+    │   │       ├── PlayerScoreButton.swift
+    │   │       ├── SetIndicatorView.swift
+    │   │       ├── UndoButton.swift
+    │   │       └── EarlyEndButton.swift
+    │   └── Result/                      # 경기 결과 화면
+    │       └── MatchResultView.swift
+    ├── Workout/
+    │   │  # HealthKit 통합 전용 UI (제어, 메트릭 표시)
+    │   ├── Controls/                    # 일시정지/재개/종료 버튼
+    │   │   ├── WorkoutControlsView.swift
+    │   │   └── Components/
+    │   │       ├── WorkoutPauseButton.swift
+    │   │       └── WorkoutEndButton.swift
+    │   └── Metrics/                     # 칼로리/BPM/시간 표시
+    │       ├── WorkoutMetricsView.swift
+    │       └── Components/
+    │           └── WorkoutMetric.swift
+    └── WorkoutSession/
+        │  # 컨테이너 Feature: 3-탭 TabView [Workout.Controls | Match | Workout.Metrics]
+        │  # HealthKit 세션 생명주기 관리, Match 흐름 조정
+        ├── WorkoutSessionView.swift      # 좌우 스와이프로 3개 탭 전환
+        └── WorkoutSessionViewModel.swift # MatchPhase 상태 + HealthKit 연동
 
 ComplicationApp/
 │  # watchOS WidgetKit complication + AppIntents. 잠금화면/항상켜기 화면에 현재 점수 표시.
@@ -158,6 +163,6 @@ ScreenName/Components/  ← 특정 View 전용 (가장 낮은 계층)
 - **Service**: 시스템/외부 API 호출을 캡슐화. 호출부는 Service 인터페이스만 알게 함
 
 **File Naming**
-- View suffix: 독립적인 화면/페이지만 (e.g., `ModeSelectionView.swift`, `MatchView.swift`)
+- View suffix: 독립적인 화면/페이지만 (e.g., `ModeView.swift`, `MatchView.swift`, `WorkoutSessionView.swift`)
 - Components 폴더의 순수 컴포넌트: suffix 없음 (e.g., `UndoButton.swift`, `GameScore.swift`, `PlayerScoreButton.swift`)
 - 한 파일 = 한 타입: 같은 파일에 여러 View/ViewModel 정의 금지 (단, private helper component는 제외)

@@ -21,7 +21,7 @@ struct HomeView: View {
                         .font(.system(size: 14, weight: .semibold))
                 }
                 
-                NavigationLink(destination: WorkoutFlowView()) {
+                NavigationLink(destination: WorkoutSessionView()) {
                     Text(String(localized: "watch_start_workout"))
                         .font(.system(size: 16, weight: .bold))
                         .frame(maxWidth: .infinity)

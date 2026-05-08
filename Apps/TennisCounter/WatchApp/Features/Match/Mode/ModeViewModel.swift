@@ -1,6 +1,6 @@
 import Foundation
 
-class ModeSelectionViewModel: ObservableObject {
+class ModeViewModel: ObservableObject {
     @Published var selectedMode: MatchMode = .oneSet
     @Published var noAdRule: Bool = true
     @Published var noTieRule: Bool = false

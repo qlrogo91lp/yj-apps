@@ -1,8 +1,8 @@
 import SwiftUI
 
-struct ModeSelectionView: View {
-    @ObservedObject var viewModel: WorkoutFlowViewModel
-    @StateObject private var selectionVM = ModeSelectionViewModel()
+struct ModeView: View {
+    @ObservedObject var viewModel: WorkoutSessionViewModel
+    @StateObject private var selectionVM = ModeViewModel()
 
     var body: some View {
         ScrollView {

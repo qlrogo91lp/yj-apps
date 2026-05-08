@@ -2,11 +2,11 @@ import SwiftUI
 
 struct MatchView: View {
     let options: MatchOptions
-    @ObservedObject var flowViewModel: WorkoutFlowViewModel
+    @ObservedObject var flowViewModel: WorkoutSessionViewModel
     @StateObject private var viewModel: MatchViewModel
     @State private var showEarlyEndConfirm = false
 
-    init(options: MatchOptions, flowViewModel: WorkoutFlowViewModel) {
+    init(options: MatchOptions, flowViewModel: WorkoutSessionViewModel) {
         self.options = options
         self.flowViewModel = flowViewModel
         _viewModel = StateObject(wrappedValue: MatchViewModel(options: options))
