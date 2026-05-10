@@ -6,6 +6,7 @@
 //
 
 import Testing
+@testable import TennisCounter_Watch_App
 
 struct watchosTests {
 
@@ -15,4 +16,32 @@ struct watchosTests {
         // https://developer.apple.com/documentation/testing
     }
 
+    @Test @MainActor func testFinishMatchSetsPhaseImmediately() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.finishMatch(result: .draw, completedSets: [])
+
+        guard case .finished = vm.phase else {
+            Issue.record("Expected .finished phase immediately after finishMatch, got \(vm.phase)")
+            return
+        }
+    }
+
+    @Test @MainActor func testFinishMatchPopulatesSetScores() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false))
+
+        let sets = [
+            SetScore(my: 6, your: 3),
+            SetScore(my: 2, your: 6),
+        ]
+        vm.finishMatch(result: .draw, completedSets: sets)
+
+        guard case .finished(let session) = vm.phase else {
+            Issue.record("Expected .finished phase")
+            return
+        }
+        #expect(session.mySetScore == 1)
+        #expect(session.yourSetScore == 1)
+    }
 }

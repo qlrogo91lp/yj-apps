@@ -42,15 +42,16 @@ class WorkoutSessionViewModel: ObservableObject {
         session.result = result
         session.completedSets = completedSets
         session.kcalAtEnd = healthKit.currentCalories
+        session.mySetScore = completedSets.filter { $0.my > $0.your }.count
+        session.yourSetScore = completedSets.filter { $0.your > $0.my }.count
+
+        phase = .finished(session)
 
         Task {
             session.averageHeartRate = await healthKit.averageHeartRate(
                 from: session.startedAt,
                 to: session.endedAt ?? Date()
             )
-            await MainActor.run {
-                phase = .finished(session)
-            }
         }
     }
 

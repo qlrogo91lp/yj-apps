@@ -70,12 +70,14 @@ final class HealthKitService: NSObject, ObservableObject {
             workoutSession = session
             liveWorkoutBuilder = builder
 
-            session.startActivity(with: Date())
-            builder.beginCollection(withStart: Date()) { [weak self] _, _ in
+            let now = Date()
+            startDate = now
+            startTimer()
+
+            session.startActivity(with: now)
+            builder.beginCollection(withStart: now) { [weak self] _, _ in
                 DispatchQueue.main.async {
                     self?.isWorkoutActive = true
-                    self?.startDate = Date()
-                    self?.startTimer()
                 }
             }
         } catch {}
@@ -84,6 +86,7 @@ final class HealthKitService: NSObject, ObservableObject {
     func pauseWorkout() {
         guard let session = workoutSession else { return }
         session.pause()
+        DispatchQueue.main.async { self.isPaused = true }
         timerPausedAt = Date()
         timer?.invalidate()
         timer = nil
@@ -92,9 +95,11 @@ final class HealthKitService: NSObject, ObservableObject {
     func resumeWorkout() {
         guard let session = workoutSession else { return }
         session.resume()
-        // Restart timer from where it left off — elapsed seconds already preserved
+        DispatchQueue.main.async { self.isPaused = false }
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
-            self?.elapsedSeconds += 1
+            DispatchQueue.main.async {
+                self?.elapsedSeconds += 1
+            }
         }
         timerPausedAt = nil
     }
@@ -154,7 +159,9 @@ final class HealthKitService: NSObject, ObservableObject {
     private func startTimer() {
         elapsedSeconds = 0
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
-            self?.elapsedSeconds += 1
+            DispatchQueue.main.async {
+                self?.elapsedSeconds += 1
+            }
         }
     }
 
