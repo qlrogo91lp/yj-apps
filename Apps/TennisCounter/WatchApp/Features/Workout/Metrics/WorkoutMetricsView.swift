@@ -3,51 +3,47 @@ import SwiftUI
 struct WorkoutMetricsView: View {
     @ObservedObject var healthKit: HealthKitService
     let isPaused: Bool
+    @State private var heartScale: CGFloat = 1.0
 
     var body: some View {
-        ZStack {
-            Color.black.ignoresSafeArea()
+        VStack(alignment: .leading, spacing: 2) {
+            Text(healthKit.formattedElapsed())
+                .font(.system(size: 35, weight: .bold, design: .rounded))
+                .foregroundColor(isPaused ? Color.yellow.opacity(0.5) : .yellow)
+                .contentTransition(.numericText())
+            // .animation(.linear(duration: 0.3), value: healthKit.elapsedSeconds)
 
-            VStack(spacing: 0) {
-                // Elapsed time - large yellow
-                VStack(spacing: 2) {
-                    Text(healthKit.formattedElapsed())
-                        .font(.system(size: 38, weight: .semibold, design: .monospaced))
-                        .foregroundColor(isPaused ? Color.yellow.opacity(0.5) : .yellow)
-                        .contentTransition(.numericText())
-                        .animation(.linear(duration: 0.3), value: healthKit.elapsedSeconds)
-
-                    Text(isPaused ? String(localized: "metrics_paused") : String(localized: "metrics_elapsed"))
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundColor(.white.opacity(0.5))
-                }
-                .padding(.bottom, 10)
-
-                Divider().background(Color.white.opacity(0.15))
-                    .padding(.bottom, 8)
-
-                // Metrics row
-                HStack(spacing: 0) {
-                    WorkoutMetric(
-                        value: String(format: "%.0f", healthKit.currentCalories),
-                        label: String(localized: "metrics_kcal"),
-                        icon: "flame.fill",
-                        color: .orange
-                    )
-
-                    Divider()
-                        .frame(height: 50)
-                        .background(Color.white.opacity(0.15))
-
-                    WorkoutMetric(
-                        value: heartRateText,
-                        label: String(localized: "metrics_bpm"),
-                        icon: "heart.fill",
-                        color: .red
-                    )
-                }
+            HStack(alignment: .bottom, spacing: 6) {
+                Text(String(format: "%.0f", healthKit.currentCalories))
+                    .font(.system(size: 35, weight: .bold, design: .rounded))
+                Text("kcal")
+                    .font(.system(size: 20, weight: .semibold))
+                    .padding(.bottom, 5)
             }
-            .padding(.horizontal, 4)
+
+            HStack(alignment: .bottom, spacing: 6) {
+                Text(heartRateText)
+                    .font(.system(size: 35, weight: .bold, design: .rounded))
+                Image(systemName: healthKit.currentHeartRate > 0 ? "heart.fill" : "heart")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundColor(.red)
+                    .scaleEffect(heartScale)
+                    .onAppear {
+                        if healthKit.currentHeartRate > 0 {
+                            withAnimation(.easeInOut(duration: 0.6).repeatForever(autoreverses: true)) {
+                                heartScale = 1.2
+                            }
+                        }
+                    }
+                    .padding(.bottom, 6)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.black.ignoresSafeArea())
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Color.clear.frame(width: 36, height: 36)
+            }
         }
     }
 
@@ -56,4 +52,12 @@ struct WorkoutMetricsView: View {
             ? String(format: "%.0f", healthKit.currentHeartRate)
             : "--"
     }
+}
+
+#Preview("Active") {
+    let service = HealthKitService.shared
+    service.elapsedSeconds = 1523
+    service.currentCalories = 245
+    service.currentHeartRate = 102
+    return WorkoutMetricsView(healthKit: service, isPaused: false)
 }

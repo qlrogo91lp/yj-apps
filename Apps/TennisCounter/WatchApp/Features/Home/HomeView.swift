@@ -8,11 +8,10 @@
 import SwiftUI
 
 struct HomeView: View {
-    
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
-                VStack(spacing:4) {
+                VStack(spacing: 4) {
                     Text("Ralli")
                         .font(.system(size: 30, weight: .bold))
                         .foregroundStyle(.green)
@@ -20,12 +19,10 @@ struct HomeView: View {
                     Text("Tennis Counter")
                         .font(.system(size: 14, weight: .semibold))
                 }
-                
                 NavigationLink(destination: WorkoutSessionView()) {
                     Text(String(localized: "watch_start_workout"))
                         .font(.system(size: 16, weight: .bold))
                         .frame(maxWidth: .infinity)
-                    
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(.green)
@@ -35,8 +32,6 @@ struct HomeView: View {
     }
 }
 
-struct HomeView_Previews: PreviewProvider {
-    static var previews: some View {
-        HomeView()
-    }
+#Preview {
+    HomeView()
 }

@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct GameScore: View {
+struct GameScores: View {
     let myGameScore: Int
     let yourGameScore: Int
     let isTieBreak: Bool
@@ -10,7 +10,7 @@ struct GameScore: View {
             Text("\(myGameScore)")
                 .foregroundColor(.green)
                 .contentTransition(.numericText())
-            Text(isTieBreak ? String(localized: "set_tiebreak") : String(localized: "watch_set_label"))
+            Text(isTieBreak ? String(localized: "set_tiebreak") : ":")
                 .foregroundColor(.white)
             Text("\(yourGameScore)")
                 .foregroundColor(.orange)
@@ -23,4 +23,8 @@ struct GameScore: View {
         .clipShape(Capsule())
         .overlay(Capsule().strokeBorder(Color.white.opacity(0.3), lineWidth: 1))
     }
+}
+
+#Preview {
+    GameScores(myGameScore: 1, yourGameScore: 0, isTieBreak: true)
 }

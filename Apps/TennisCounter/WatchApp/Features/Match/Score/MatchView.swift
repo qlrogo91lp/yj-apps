@@ -33,28 +33,18 @@ struct MatchView: View {
             .ignoresSafeArea()
 
             VStack {
-                // Header row: GameScore + SetScore + optional EarlyEndButton
-                HStack(alignment: .top) {
-                    Spacer()
-                    VStack(spacing: 4) {
-                        GameScore(
-                            myGameScore: viewModel.myGameScore,
-                            yourGameScore: viewModel.yourGameScore,
-                            isTieBreak: viewModel.score.gameMode == .tieBreak
-                        )
-
-                        SetScoreBadge(
-                            mySetScore: viewModel.mySetScore,
-                            yourSetScore: viewModel.yourSetScore
-                        )
-                    }
-                    Spacer()
-
-                    if viewModel.showEarlyEndButton {
-                        EarlyEndButton { showEarlyEndConfirm = true }
-                            .padding(.top, 4)
-                    }
+                VStack(spacing: 4) {
+                    SetScores(
+                        mySetScore: viewModel.mySetScore,
+                        yourSetScore: viewModel.yourSetScore
+                    )
+                    GameScores(
+                        myGameScore: viewModel.myGameScore,
+                        yourGameScore: viewModel.yourGameScore,
+                        isTieBreak: viewModel.score.gameMode == .tieBreak
+                    )
                 }
+                .frame(maxWidth: .infinity, alignment: .center)
                 .padding(.top, 20)
                 .padding(.horizontal, 8)
 
@@ -79,6 +69,12 @@ struct MatchView: View {
                 }
             }
             .animation(.easeInOut(duration: 0.2), value: viewModel.score.lastAction)
+
+        }
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                EarlyEndButton { showEarlyEndConfirm = true }
+            }
         }
         .confirmationDialog(
             String(localized: "early_end_confirm_title"),
@@ -96,4 +92,11 @@ struct MatchView: View {
             }
         }
     }
+}
+
+#Preview {
+    MatchView(
+        options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false),
+        flowViewModel: WorkoutSessionViewModel()
+    )
 }

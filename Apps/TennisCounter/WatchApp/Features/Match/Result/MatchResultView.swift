@@ -69,6 +69,14 @@ struct MatchResultView: View {
             .padding(.horizontal, 8)
             .padding(.vertical, 10)
         }
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Group {
+                    Color.clear
+                }
+                .frame(width: 36, height: 36)
+            }
+        }
     }
 
     private var resultTitle: String {

@@ -5,9 +5,11 @@ struct EarlyEndButton: View {
 
     var body: some View {
         Button(action: action) {
-            Image(systemName: "arrow.clockwise.circle")
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundColor(.white.opacity(0.7))
+            Image(systemName: "chevron.left")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(.white)
+                .frame(width: 36, height: 36)
+                .background(.thickMaterial, in: Circle())
         }
         .buttonStyle(.plain)
         .transition(.opacity)

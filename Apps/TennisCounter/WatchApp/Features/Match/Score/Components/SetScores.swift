@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct SetScoreBadge: View {
+struct SetScores: View {
     let mySetScore: Int
     let yourSetScore: Int
 
@@ -20,5 +20,5 @@ struct SetScoreBadge: View {
 }
 
 #Preview {
-    SetScoreBadge(mySetScore: 3, yourSetScore: 0)
+    SetScores(mySetScore: 3, yourSetScore: 0)
 }

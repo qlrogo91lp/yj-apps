@@ -19,5 +19,10 @@ struct WorkoutControlsView: View {
             }
         }
         .padding()
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Color.clear.frame(width: 36, height: 36)
+            }
+        }
     }
 }
