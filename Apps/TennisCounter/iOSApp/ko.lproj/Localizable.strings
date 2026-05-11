@@ -2,6 +2,7 @@
 "tab_summary" = "요약";
 "tab_match" = "경기";
 "tab_history" = "기록";
+"tab_workout" = "운동";
 
 /* Match Format */
 "match_format_one_set" = "한 세트";

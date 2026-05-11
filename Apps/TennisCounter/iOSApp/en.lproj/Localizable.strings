@@ -2,6 +2,7 @@
 "tab_summary" = "Summary";
 "tab_match" = "Match";
 "tab_history" = "History";
+"tab_workout" = "Workout";
 
 /* Match Format */
 "match_format_one_set" = "One Set";
