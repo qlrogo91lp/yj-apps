@@ -50,22 +50,17 @@ class MatchViewModel: ObservableObject {
         }
 
         // Tiebreak trigger at 6-6
-        if !options.noTieRule && my == 6 && your == 6 {
+        if !options.noTieRule, my == 6, your == 6 {
             score.setTieBreakMode()
             tieBreakInProgress = true
             return
         }
 
         let maxG = max(my, your), minG = min(my, your)
-        let setWinner: PlayerSide?
-
-        if options.noTieRule {
-            if my >= 6 && my > your { setWinner = .me }
-            else if your >= 6 && your > my { setWinner = .opponent }
-            else { setWinner = nil }
+        let setWinner: PlayerSide? = if options.noTieRule {
+            if my >= 6, my > your { .me } else if your >= 6, your > my { .opponent } else { nil }
         } else {
-            if maxG >= 6 && (maxG - minG) >= 2 { setWinner = my > your ? .me : .opponent }
-            else { setWinner = nil }
+            if maxG >= 6, (maxG - minG) >= 2 { my > your ? .me : .opponent } else { nil }
         }
 
         if let winner = setWinner { finalizeSet(winner: winner) }
@@ -78,8 +73,11 @@ class MatchViewModel: ObservableObject {
         yourGameScore = 0
 
         let setsToWin = options.mode.setsToWin
-        if mySetScore >= setsToWin { onMatchFinished?(.win, completedSets) }
-        else if yourSetScore >= setsToWin { onMatchFinished?(.loss, completedSets) }
+        if mySetScore >= setsToWin {
+            onMatchFinished?(.win, completedSets)
+        } else if yourSetScore >= setsToWin {
+            onMatchFinished?(.loss, completedSets)
+        }
     }
 
     func triggerEarlyEnd() {

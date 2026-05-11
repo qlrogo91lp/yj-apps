@@ -4,9 +4,7 @@ import Foundation
 @MainActor
 final class MatchContainerViewModel: ObservableObject {
     @Published var watchConnected: Bool = false
-    @Published var metrics: WorkoutMetrics = WorkoutMetrics()
-
-    private var cancellables = Set<AnyCancellable>()
+    @Published var metrics: WorkoutMetrics = .init()
 
     init() {
         let service = WatchConnectivityService.shared
@@ -17,7 +15,7 @@ final class MatchContainerViewModel: ObservableObject {
 
         service.$receivedMetrics
             .receive(on: DispatchQueue.main)
-            .compactMap { $0 }
+            .compactMap(\.self)
             .assign(to: &$metrics)
     }
 }

@@ -13,13 +13,16 @@ struct ScoreOverlay: View {
         VStack {
             scoreInfo
                 .padding(.top, 12)
+                .allowsHitTesting(false)
             Spacer()
+        }
+        .allowsHitTesting(false)
+        .overlay(alignment: .bottom) {
             if showUndo {
                 undoButton
                     .padding(.bottom, 20)
             }
         }
-        .allowsHitTesting(false)
     }
 
     private var scoreInfo: some View {

@@ -79,6 +79,8 @@ struct ScoreTabView: View {
                 .font(.system(size: 14))
             }
         }
+        .onAppear { UIApplication.shared.isIdleTimerDisabled = true }
+        .onDisappear { UIApplication.shared.isIdleTimerDisabled = false }
     }
 
     // MARK: - Match over view
@@ -86,8 +88,8 @@ struct ScoreTabView: View {
     private var matchOverView: some View {
         VStack(spacing: 20) {
             Text(viewModel.didWin
-                 ? String(localized: "match_over_win")
-                 : String(localized: "match_over_lose"))
+                ? String(localized: "match_over_win")
+                : String(localized: "match_over_lose"))
                 .font(.system(size: 36, weight: .bold))
                 .foregroundColor(viewModel.didWin ? .green : .orange)
 
