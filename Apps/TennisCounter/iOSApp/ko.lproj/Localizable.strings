@@ -23,6 +23,9 @@
 "match_over_win" = "승리!";
 "match_over_lose" = "패배";
 "game_score_label" = "게임";
+"score_edit_title" = "점수 수정";
+"watch_score_me" = "나";
+"watch_score_opp" = "상대";
 
 /* Summary */
 "summary_period_today" = "오늘";

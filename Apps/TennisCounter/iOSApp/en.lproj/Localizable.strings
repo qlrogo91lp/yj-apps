@@ -23,6 +23,9 @@
 "match_over_win" = "Victory!";
 "match_over_lose" = "Defeat";
 "game_score_label" = "Games";
+"score_edit_title" = "Edit Score";
+"watch_score_me" = "ME";
+"watch_score_opp" = "OPP";
 
 /* Summary */
 "summary_period_today" = "Today";
