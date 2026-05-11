@@ -31,6 +31,10 @@
 "early_end_confirm_yes" = "End Match";
 "early_end_confirm_message" = "The match result will not be saved.";
 
+/* Workout */
+"workout_pause" = "Pause";
+"workout_end" = "End Workout";
+
 /* Summary */
 "summary_period_today" = "Today";
 "summary_period_week" = "This Week";

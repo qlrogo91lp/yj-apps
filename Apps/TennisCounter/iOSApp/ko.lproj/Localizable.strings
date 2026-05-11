@@ -31,6 +31,10 @@
 "early_end_confirm_yes" = "종료";
 "early_end_confirm_message" = "경기 결과가 저장되지 않습니다.";
 
+/* Workout */
+"workout_pause" = "일시정지";
+"workout_end" = "운동 종료";
+
 /* Summary */
 "summary_period_today" = "오늘";
 "summary_period_week" = "이번 주";
