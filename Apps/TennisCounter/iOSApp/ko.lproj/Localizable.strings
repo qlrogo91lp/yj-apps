@@ -26,6 +26,10 @@
 "score_edit_title" = "점수 수정";
 "watch_score_me" = "나";
 "watch_score_opp" = "상대";
+"early_end_button" = "조기 종료";
+"early_end_confirm_title" = "경기를 조기 종료할까요?";
+"early_end_confirm_yes" = "종료";
+"early_end_confirm_message" = "경기 결과가 저장되지 않습니다.";
 
 /* Summary */
 "summary_period_today" = "오늘";
