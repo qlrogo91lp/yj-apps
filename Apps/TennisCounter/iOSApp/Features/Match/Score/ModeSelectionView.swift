@@ -25,7 +25,7 @@ struct ModeSelectionView: View {
                 .padding(.top, 40)
             }
             .navigationDestination(for: MatchFormat.self) { format in
-                MatchView(format: format)
+                MatchContainerView(format: format)
             }
             .navigationBarHidden(true)
         }
