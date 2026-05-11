@@ -8,10 +8,9 @@ struct WorkoutMetricsView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(healthKit.formattedElapsed())
-                .font(.system(size: 35, weight: .bold, design: .rounded))
+                .font(.system(size: 45, weight: .bold, design: .rounded))
                 .foregroundColor(isPaused ? Color.yellow.opacity(0.5) : .yellow)
                 .contentTransition(.numericText())
-            // .animation(.linear(duration: 0.3), value: healthKit.elapsedSeconds)
 
             HStack(alignment: .bottom, spacing: 6) {
                 Text(String(format: "%.0f", healthKit.currentCalories))
@@ -39,6 +38,7 @@ struct WorkoutMetricsView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.leading, 10)
         .background(Color.black.ignoresSafeArea())
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
