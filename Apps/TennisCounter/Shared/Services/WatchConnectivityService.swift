@@ -6,6 +6,8 @@ final class WatchConnectivityService: NSObject, ObservableObject {
     static let shared = WatchConnectivityService()
 
     @Published var receivedScoreUpdate: ScoreUpdate?
+    @Published var isWatchReachable: Bool = false
+    @Published var receivedMetrics: WorkoutMetrics?
 
     private override init() {
         super.init()
@@ -31,11 +33,26 @@ final class WatchConnectivityService: NSObject, ObservableObject {
 }
 
 extension WatchConnectivityService: WCSessionDelegate {
-    func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {}
+    func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
+        DispatchQueue.main.async {
+            self.isWatchReachable = session.isReachable
+        }
+    }
+
+    func sessionReachabilityDidChange(_ session: WCSession) {
+        DispatchQueue.main.async {
+            self.isWatchReachable = session.isReachable
+        }
+    }
 
     func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
         DispatchQueue.main.async {
-            self.receivedScoreUpdate = ScoreUpdate(from: message)
+            if let metricsDict = message[WorkoutMetrics.messageKey] as? [String: Any],
+               let metrics = WorkoutMetrics(from: metricsDict) {
+                self.receivedMetrics = metrics
+            } else if let update = ScoreUpdate(from: message) {
+                self.receivedScoreUpdate = update
+            }
         }
     }
 
