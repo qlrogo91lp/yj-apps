@@ -54,6 +54,7 @@ final class MatchViewModel: ObservableObject {
     }
 
     func addPoint(_ side: PlayerSide) {
+        guard !isMatchOver else { return }
         guard score.addPoint(side) != nil else { return }
         if side == .me { myGameScore += 1 } else { yourGameScore += 1 }
         score.resetData()

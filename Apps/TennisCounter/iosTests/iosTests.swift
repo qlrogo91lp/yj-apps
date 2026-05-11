@@ -60,6 +60,7 @@ struct iosTests {
         vm.addPoint(.opponent)
         vm.addPoint(.opponent)
         #expect(vm.yourGameScore == 1)
+        #expect(vm.myGameScore == 0)
     }
 
     @Test @MainActor func addPointUndoResetsScore() {
@@ -78,5 +79,15 @@ struct iosTests {
         }
         #expect(vm.isMatchOver == true)
         #expect(vm.didWin == true)
+        #expect(vm.mySetScore == 1)
+        #expect(vm.myGameScore == 0)
+    }
+
+    @Test @MainActor func undoAfterGameWinIsNoOp() {
+        let vm = MatchViewModel(format: .oneSet)
+        vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me) // game won
+        let gameScoreBefore = vm.myGameScore
+        vm.undo() // undo cannot reverse a game-winning tap
+        #expect(vm.myGameScore == gameScoreBefore) // game score unchanged
     }
 }
