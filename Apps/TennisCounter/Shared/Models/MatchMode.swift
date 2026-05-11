@@ -6,8 +6,8 @@ enum MatchMode: String, Codable, CaseIterable {
 
     var setsToWin: Int {
         switch self {
-        case .oneSet: return 1
-        case .bestOfThree: return 2
+        case .oneSet: 1
+        case .bestOfThree: 2
         }
     }
 }

@@ -9,7 +9,7 @@ final class WatchConnectivityService: NSObject, ObservableObject {
     @Published var isWatchReachable: Bool = false
     @Published var receivedMetrics: WorkoutMetrics?
 
-    private override init() {
+    override private init() {
         super.init()
         guard WCSession.isSupported() else { return }
         WCSession.default.delegate = self
@@ -19,7 +19,7 @@ final class WatchConnectivityService: NSObject, ObservableObject {
     func sendScoreUpdate(_ update: ScoreUpdate) {
         guard WCSession.default.activationState == .activated else { return }
         #if os(iOS)
-        guard WCSession.default.isWatchAppInstalled else { return }
+            guard WCSession.default.isWatchAppInstalled else { return }
         #endif
 
         let message = update.toDictionary()
@@ -33,7 +33,7 @@ final class WatchConnectivityService: NSObject, ObservableObject {
 }
 
 extension WatchConnectivityService: WCSessionDelegate {
-    func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
+    func session(_ session: WCSession, activationDidCompleteWith _: WCSessionActivationState, error _: Error?) {
         DispatchQueue.main.async {
             self.isWatchReachable = session.isReachable
         }
@@ -45,10 +45,11 @@ extension WatchConnectivityService: WCSessionDelegate {
         }
     }
 
-    func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
+    func session(_: WCSession, didReceiveMessage message: [String: Any]) {
         DispatchQueue.main.async {
             if let metricsDict = message[WorkoutMetrics.messageKey] as? [String: Any],
-               let metrics = WorkoutMetrics(from: metricsDict) {
+               let metrics = WorkoutMetrics(from: metricsDict)
+            {
                 self.receivedMetrics = metrics
             } else if let update = ScoreUpdate(from: message) {
                 self.receivedScoreUpdate = update
@@ -56,17 +57,17 @@ extension WatchConnectivityService: WCSessionDelegate {
         }
     }
 
-    func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
+    func session(_: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
         DispatchQueue.main.async {
             self.receivedScoreUpdate = ScoreUpdate(from: applicationContext)
         }
     }
 
     #if os(iOS)
-    func sessionDidBecomeInactive(_ session: WCSession) {}
-    func sessionDidDeactivate(_ session: WCSession) {
-        WCSession.default.activate()
-    }
+        func sessionDidBecomeInactive(_: WCSession) {}
+        func sessionDidDeactivate(_: WCSession) {
+            WCSession.default.activate()
+        }
     #endif
 }
 

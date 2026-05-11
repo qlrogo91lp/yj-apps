@@ -39,22 +39,22 @@ class Score: ObservableObject {
 
     var noAdRule: Bool = true
 
-    // Display text for the score pad
+    /// Display text for the score pad
     var myDisplayScore: String {
         switch gameMode {
-        case .normal: return text(for: myNormal)
-        case .tieBreak: return "\(myTieBreak)"
+        case .normal: text(for: myNormal)
+        case .tieBreak: "\(myTieBreak)"
         }
     }
 
     var yourDisplayScore: String {
         switch gameMode {
-        case .normal: return text(for: yourNormal)
-        case .tieBreak: return "\(yourTieBreak)"
+        case .normal: text(for: yourNormal)
+        case .tieBreak: "\(yourTieBreak)"
         }
     }
 
-    // Returns the winning side if the game ends, nil otherwise
+    /// Returns the winning side if the game ends, nil otherwise
     @discardableResult
     func addPoint(_ side: PlayerSide) -> PlayerSide? {
         snapshot = SnapShot(myNormal: myNormal, yourNormal: yourNormal,
@@ -98,12 +98,12 @@ class Score: ObservableObject {
         objectWillChange.send()
     }
 
-    // True when both at 40 and noAdRule is OFF (standard deuce) — show DEUCE label
+    /// True when both at 40 and noAdRule is OFF (standard deuce) — show DEUCE label
     var isDeuce: Bool {
         gameMode == .normal && myNormal == .forty && yourNormal == .forty && !noAdRule
     }
 
-    // True when both at 40 and noAdRule is ON — show DECIDING POINT label
+    /// True when both at 40 and noAdRule is ON — show DECIDING POINT label
     var isDecidingPoint: Bool {
         gameMode == .normal && myNormal == .forty && yourNormal == .forty && noAdRule
     }
@@ -116,10 +116,9 @@ class Score: ObservableObject {
             case .thirty: myNormal = .forty
             case .forty:
                 if yourNormal == .advantage {
-                    yourNormal = .forty  // back to deuce
+                    yourNormal = .forty // back to deuce
                 } else if yourNormal == .forty {
-                    if noAdRule { return .me }
-                    else { myNormal = .advantage }
+                    if noAdRule { return .me } else { myNormal = .advantage }
                 } else {
                     return .me
                 }
@@ -133,10 +132,9 @@ class Score: ObservableObject {
             case .thirty: yourNormal = .forty
             case .forty:
                 if myNormal == .advantage {
-                    myNormal = .forty  // back to deuce
+                    myNormal = .forty // back to deuce
                 } else if myNormal == .forty {
-                    if noAdRule { return .opponent }
-                    else { yourNormal = .advantage }
+                    if noAdRule { return .opponent } else { yourNormal = .advantage }
                 } else {
                     return .opponent
                 }
@@ -151,34 +149,40 @@ class Score: ObservableObject {
     private func addTieBreakPoint(_ side: PlayerSide) -> PlayerSide? {
         if side == .me { myTieBreak += 1 } else { yourTieBreak += 1 }
         let diff = abs(myTieBreak - yourTieBreak)
-        if myTieBreak >= 7 && diff >= 2 { return .me }
-        if yourTieBreak >= 7 && diff >= 2 { return .opponent }
+        if myTieBreak >= 7, diff >= 2 { return .me }
+        if yourTieBreak >= 7, diff >= 2 { return .opponent }
         return nil
     }
 
     private func text(for state: NormalState) -> String {
         switch state {
-        case .zero: return "0"
-        case .fifteen: return "15"
-        case .thirty: return "30"
-        case .forty: return "40"
-        case .advantage: return "AD"
+        case .zero: "0"
+        case .fifteen: "15"
+        case .thirty: "30"
+        case .forty: "40"
+        case .advantage: "AD"
         }
     }
 
     // MARK: - iOS Backward Compatibility
+
     // scoreArr index 0-4 maps to zero/fifteen/thirty/forty/advantage; 50 signals game win.
 
     private static let normalStates: [NormalState] = [.zero, .fifteen, .thirty, .forty, .advantage]
     private static let scoreValues = [0, 15, 30, 40, 50]
 
-    var myScore: Int { Self.scoreValues[myIndex] }
-    var yourScore: Int { Self.scoreValues[yourIndex] }
+    var myScore: Int {
+        Self.scoreValues[myIndex]
+    }
+
+    var yourScore: Int {
+        Self.scoreValues[yourIndex]
+    }
 
     var myIndex: Int {
         get { Self.normalStates.firstIndex(of: myNormal) ?? 0 }
         set {
-            guard newValue >= 0 && newValue < Self.normalStates.count else { return }
+            guard newValue >= 0, newValue < Self.normalStates.count else { return }
             myNormal = Self.normalStates[newValue]
             objectWillChange.send()
         }
@@ -187,11 +191,13 @@ class Score: ObservableObject {
     var yourIndex: Int {
         get { Self.normalStates.firstIndex(of: yourNormal) ?? 0 }
         set {
-            guard newValue >= 0 && newValue < Self.normalStates.count else { return }
+            guard newValue >= 0, newValue < Self.normalStates.count else { return }
             yourNormal = Self.normalStates[newValue]
             objectWillChange.send()
         }
     }
 
-    func resetData() { reset() }
+    func resetData() {
+        reset()
+    }
 }

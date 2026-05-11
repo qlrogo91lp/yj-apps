@@ -6,22 +6,22 @@ enum MatchFormat: String, CaseIterable, Codable {
 
     var localizedTitle: String {
         switch self {
-        case .oneSet: return String(localized: "match_format_one_set")
-        case .bestOfThree: return String(localized: "match_format_best_of_3")
+        case .oneSet: String(localized: "match_format_one_set")
+        case .bestOfThree: String(localized: "match_format_best_of_3")
         }
     }
 
     var localizedDescription: String {
         switch self {
-        case .oneSet: return String(localized: "match_format_one_set_desc")
-        case .bestOfThree: return String(localized: "match_format_best_of_3_desc")
+        case .oneSet: String(localized: "match_format_one_set_desc")
+        case .bestOfThree: String(localized: "match_format_best_of_3_desc")
         }
     }
 
     var setsToWin: Int {
         switch self {
-        case .oneSet: return 1
-        case .bestOfThree: return 2
+        case .oneSet: 1
+        case .bestOfThree: 2
         }
     }
 }

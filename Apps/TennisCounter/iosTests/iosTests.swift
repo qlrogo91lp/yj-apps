@@ -5,11 +5,11 @@
 //  Created by yj on 4/29/26.
 //
 
-import Testing
 @testable import TennisCounter
+import Testing
 
 struct iosTests {
-    @Test func example() async throws {}
+    @Test func example() {}
 
     // MARK: - WorkoutMetrics
 
@@ -74,7 +74,7 @@ struct iosTests {
     @Test @MainActor func addPointMatchOver() {
         let vm = MatchViewModel(format: .oneSet)
         // oneSet: 6게임 이기면 매치 종료
-        for _ in 0..<6 {
+        for _ in 0 ..< 6 {
             vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
         }
         #expect(vm.isMatchOver == true)

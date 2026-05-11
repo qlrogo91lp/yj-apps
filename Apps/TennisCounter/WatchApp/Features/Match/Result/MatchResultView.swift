@@ -25,7 +25,7 @@ struct MatchResultView: View {
                     .foregroundColor(.orange)
             }
 
-            if session.options.mode == .bestOfThree && !session.completedSets.isEmpty {
+            if session.options.mode == .bestOfThree, !session.completedSets.isEmpty {
                 HStack {
                     ForEach(Array(session.completedSets.enumerated()), id: \.offset) { index, set in
                         HStack {
@@ -60,19 +60,19 @@ struct MatchResultView: View {
 
     private var resultTitle: String {
         switch session.result {
-        case .win: return String(localized: "watch_victory")
-        case .loss: return String(localized: "watch_defeat")
-        case .draw: return String(localized: "result_draw")
-        case nil: return ""
+        case .win: String(localized: "watch_victory")
+        case .loss: String(localized: "watch_defeat")
+        case .draw: String(localized: "result_draw")
+        case nil: ""
         }
     }
 
     private var resultColor: Color {
         switch session.result {
-        case .win: return .green
-        case .loss: return .orange
-        case .draw: return .yellow
-        case nil: return .white
+        case .win: .green
+        case .loss: .orange
+        case .draw: .yellow
+        case nil: .white
         }
     }
 

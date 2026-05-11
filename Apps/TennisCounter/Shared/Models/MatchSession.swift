@@ -17,7 +17,8 @@ class MatchSession {
     var averageHeartRate: Double?
 
     init(id: UUID = UUID(), workoutSessionId: UUID, options: MatchOptions,
-         startedAt: Date = Date(), kcalAtStart: Double) {
+         startedAt: Date = Date(), kcalAtStart: Double)
+    {
         self.id = id
         self.workoutSessionId = workoutSessionId
         self.options = options

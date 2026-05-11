@@ -30,7 +30,7 @@ final class MatchViewModel: ObservableObject {
     }
 
     func injectContext(_ context: ModelContext) {
-        self.modelContext = context
+        modelContext = context
     }
 
     func requestHealthKitAndStart() async {

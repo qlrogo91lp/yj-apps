@@ -29,9 +29,9 @@ struct WorkoutSessionView: View {
         switch viewModel.phase {
         case .modeSelection:
             ModeView(viewModel: viewModel)
-        case .playing(let options):
+        case let .playing(options):
             MatchView(options: options, flowViewModel: viewModel)
-        case .finished(let session):
+        case let .finished(session):
             MatchResultView(session: session, flowViewModel: viewModel)
         }
     }

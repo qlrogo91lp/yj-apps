@@ -24,15 +24,15 @@ struct ModeOptionItem: View {
 
     private func modeTitle(_ mode: MatchMode) -> String {
         switch mode {
-        case .oneSet: return String(localized: "mode_one_set")
-        case .bestOfThree: return String(localized: "mode_best_of_3")
+        case .oneSet: String(localized: "mode_one_set")
+        case .bestOfThree: String(localized: "mode_best_of_3")
         }
     }
 
     private func modeDescription(_ mode: MatchMode) -> String {
         switch mode {
-        case .oneSet: return String(localized: "mode_one_set_desc")
-        case .bestOfThree: return String(localized: "mode_best_of_3_desc")
+        case .oneSet: String(localized: "mode_one_set_desc")
+        case .bestOfThree: String(localized: "mode_best_of_3_desc")
         }
     }
 }
