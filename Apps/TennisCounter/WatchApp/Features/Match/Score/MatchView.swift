@@ -74,7 +74,7 @@ struct MatchView: View {
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 BackButton {
-                    if viewModel.myGameScore == 0 && viewModel.yourGameScore == 0 {
+                    if viewModel.myGameScore == 0, viewModel.yourGameScore == 0 {
                         flowViewModel.startNewMatch()
                     } else {
                         showEarlyEndConfirm = true

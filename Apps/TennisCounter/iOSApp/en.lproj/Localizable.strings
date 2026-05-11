@@ -2,6 +2,7 @@
 "tab_summary" = "Summary";
 "tab_match" = "Match";
 "tab_history" = "History";
+"tab_workout" = "Workout";
 
 /* Match Format */
 "match_format_one_set" = "One Set";
@@ -23,6 +24,17 @@
 "match_over_win" = "Victory!";
 "match_over_lose" = "Defeat";
 "game_score_label" = "Games";
+"score_edit_title" = "Edit Score";
+"watch_score_me" = "ME";
+"watch_score_opp" = "OPP";
+"early_end_button" = "Early End";
+"early_end_confirm_title" = "End Match Early?";
+"early_end_confirm_yes" = "End Match";
+"early_end_confirm_message" = "The match result will not be saved.";
+
+/* Workout */
+"workout_pause" = "Pause";
+"workout_end" = "End Workout";
 
 /* Summary */
 "summary_period_today" = "Today";

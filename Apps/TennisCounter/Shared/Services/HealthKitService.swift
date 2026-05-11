@@ -20,7 +20,7 @@ final class HealthKitService: NSObject, ObservableObject {
     private var workoutSession: HKWorkoutSession?
     private var workoutBuilder: HKWorkoutBuilder?
     #if os(watchOS)
-    private var liveWorkoutBuilder: HKLiveWorkoutBuilder?
+        private var liveWorkoutBuilder: HKLiveWorkoutBuilder?
     #endif
     private var startDate: Date?
     private var timer: Timer?
@@ -29,17 +29,19 @@ final class HealthKitService: NSObject, ObservableObject {
     private let typesToShare: Set<HKSampleType> = [
         HKQuantityType(.activeEnergyBurned),
         HKQuantityType(.heartRate),
-        HKObjectType.workoutType()
+        HKObjectType.workoutType(),
     ]
     private let typesToRead: Set<HKObjectType> = [
         HKQuantityType(.activeEnergyBurned),
         HKQuantityType(.heartRate),
-        HKObjectType.workoutType()
+        HKObjectType.workoutType(),
     ]
 
     override private init() {}
 
-    var isAvailable: Bool { HKHealthStore.isHealthDataAvailable() }
+    var isAvailable: Bool {
+        HKHealthStore.isHealthDataAvailable()
+    }
 
     func requestAuthorization() async -> Bool {
         guard isAvailable else { return false }
@@ -52,107 +54,107 @@ final class HealthKitService: NSObject, ObservableObject {
     }
 
     #if os(watchOS)
-    func startWorkout() {
-        guard isAvailable else { return }
+        func startWorkout() {
+            guard isAvailable else { return }
 
-        let config = HKWorkoutConfiguration()
-        config.activityType = .tennis
-        config.locationType = .outdoor
+            let config = HKWorkoutConfiguration()
+            config.activityType = .tennis
+            config.locationType = .outdoor
 
-        do {
-            let session = try HKWorkoutSession(healthStore: store, configuration: config)
-            let builder = session.associatedWorkoutBuilder()
-            builder.dataSource = HKLiveWorkoutDataSource(healthStore: store, workoutConfiguration: config)
+            do {
+                let session = try HKWorkoutSession(healthStore: store, configuration: config)
+                let builder = session.associatedWorkoutBuilder()
+                builder.dataSource = HKLiveWorkoutDataSource(healthStore: store, workoutConfiguration: config)
 
-            session.delegate = self
-            builder.delegate = self
+                session.delegate = self
+                builder.delegate = self
 
-            workoutSession = session
-            liveWorkoutBuilder = builder
+                workoutSession = session
+                liveWorkoutBuilder = builder
 
-            let now = Date()
-            startDate = now
-            startTimer()
+                let now = Date()
+                startDate = now
+                startTimer()
 
-            session.startActivity(with: now)
-            builder.beginCollection(withStart: now) { [weak self] _, _ in
+                session.startActivity(with: now)
+                builder.beginCollection(withStart: now) { [weak self] _, _ in
+                    DispatchQueue.main.async {
+                        self?.isWorkoutActive = true
+                    }
+                }
+            } catch {}
+        }
+
+        func pauseWorkout() {
+            guard let session = workoutSession else { return }
+            session.pause()
+            DispatchQueue.main.async { self.isPaused = true }
+            timerPausedAt = Date()
+            timer?.invalidate()
+            timer = nil
+        }
+
+        func resumeWorkout() {
+            guard let session = workoutSession else { return }
+            session.resume()
+            DispatchQueue.main.async { self.isPaused = false }
+            timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
                 DispatchQueue.main.async {
-                    self?.isWorkoutActive = true
+                    self?.elapsedSeconds += 1
                 }
             }
-        } catch {}
-    }
+            timerPausedAt = nil
+        }
 
-    func pauseWorkout() {
-        guard let session = workoutSession else { return }
-        session.pause()
-        DispatchQueue.main.async { self.isPaused = true }
-        timerPausedAt = Date()
-        timer?.invalidate()
-        timer = nil
-    }
+        func stopWorkout() async -> WorkoutResult? {
+            guard let session = workoutSession,
+                  let builder = liveWorkoutBuilder,
+                  let start = startDate else { return nil }
 
-    func resumeWorkout() {
-        guard let session = workoutSession else { return }
-        session.resume()
-        DispatchQueue.main.async { self.isPaused = false }
-        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
-            DispatchQueue.main.async {
-                self?.elapsedSeconds += 1
+            session.end()
+            stopTimer()
+
+            let elapsed = Int(Date().timeIntervalSince(start))
+            let calories = await collectCalories(builder: builder)
+            let heartRate = await collectAverageHeartRate(builder: builder)
+
+            await withCheckedContinuation { continuation in
+                builder.endCollection(withEnd: Date()) { _, _ in continuation.resume() }
             }
+            try? await builder.finishWorkout()
+
+            DispatchQueue.main.async { self.isWorkoutActive = false }
+            return WorkoutResult(durationSeconds: elapsed, caloriesBurned: calories, averageHeartRate: heartRate)
         }
-        timerPausedAt = nil
-    }
 
-    func stopWorkout() async -> WorkoutResult? {
-        guard let session = workoutSession,
-              let builder = liveWorkoutBuilder,
-              let start = startDate else { return nil }
-
-        session.end()
-        stopTimer()
-
-        let elapsed = Int(Date().timeIntervalSince(start))
-        let calories = await collectCalories(builder: builder)
-        let heartRate = await collectAverageHeartRate(builder: builder)
-
-        await withCheckedContinuation { continuation in
-            builder.endCollection(withEnd: Date()) { _, _ in continuation.resume() }
+        private func collectCalories(builder: HKLiveWorkoutBuilder) async -> Double {
+            builder.statistics(for: HKQuantityType(.activeEnergyBurned))?
+                .sumQuantity()?.doubleValue(for: .kilocalorie()) ?? 0
         }
-        try? await builder.finishWorkout()
 
-        DispatchQueue.main.async { self.isWorkoutActive = false }
-        return WorkoutResult(durationSeconds: elapsed, caloriesBurned: calories, averageHeartRate: heartRate)
-    }
-
-    private func collectCalories(builder: HKLiveWorkoutBuilder) async -> Double {
-        builder.statistics(for: HKQuantityType(.activeEnergyBurned))?
-            .sumQuantity()?.doubleValue(for: .kilocalorie()) ?? 0
-    }
-
-    private func collectAverageHeartRate(builder: HKLiveWorkoutBuilder) async -> Double? {
-        builder.statistics(for: HKQuantityType(.heartRate))?
-            .averageQuantity()?.doubleValue(for: HKUnit(from: "count/min"))
-    }
+        private func collectAverageHeartRate(builder: HKLiveWorkoutBuilder) async -> Double? {
+            builder.statistics(for: HKQuantityType(.heartRate))?
+                .averageQuantity()?.doubleValue(for: HKUnit(from: "count/min"))
+        }
     #endif
 
     func averageHeartRate(from startDate: Date, to endDate: Date) async -> Double? {
         #if os(watchOS)
-        let hrType = HKQuantityType(.heartRate)
-        let predicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate)
-        return await withCheckedContinuation { continuation in
-            let query = HKStatisticsQuery(
-                quantityType: hrType,
-                quantitySamplePredicate: predicate,
-                options: .discreteAverage
-            ) { _, stats, _ in
-                let value = stats?.averageQuantity()?.doubleValue(for: HKUnit(from: "count/min"))
-                continuation.resume(returning: value)
+            let hrType = HKQuantityType(.heartRate)
+            let predicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate)
+            return await withCheckedContinuation { continuation in
+                let query = HKStatisticsQuery(
+                    quantityType: hrType,
+                    quantitySamplePredicate: predicate,
+                    options: .discreteAverage
+                ) { _, stats, _ in
+                    let value = stats?.averageQuantity()?.doubleValue(for: HKUnit(from: "count/min"))
+                    continuation.resume(returning: value)
+                }
+                store.execute(query)
             }
-            store.execute(query)
-        }
         #else
-        return nil
+            return nil
         #endif
     }
 
@@ -178,30 +180,31 @@ final class HealthKitService: NSObject, ObservableObject {
 }
 
 #if os(watchOS)
-extension HealthKitService: HKWorkoutSessionDelegate, HKLiveWorkoutBuilderDelegate {
-    func workoutSession(_ workoutSession: HKWorkoutSession,
-                        didChangeTo toState: HKWorkoutSessionState,
-                        from fromState: HKWorkoutSessionState,
-                        date: Date) {
-        DispatchQueue.main.async {
-            self.isWorkoutActive = toState == .running
-            self.isPaused = toState == .paused
-        }
-    }
-
-    func workoutSession(_ workoutSession: HKWorkoutSession, didFailWithError error: Error) {}
-
-    func workoutBuilderDidCollectEvent(_ workoutBuilder: HKLiveWorkoutBuilder) {}
-
-    func workoutBuilder(_ workoutBuilder: HKLiveWorkoutBuilder, didCollectDataOf collectedTypes: Set<HKSampleType>) {
-        DispatchQueue.main.async {
-            if let stats = workoutBuilder.statistics(for: HKQuantityType(.heartRate)) {
-                self.currentHeartRate = stats.mostRecentQuantity()?.doubleValue(for: HKUnit(from: "count/min")) ?? self.currentHeartRate
-            }
-            if let stats = workoutBuilder.statistics(for: HKQuantityType(.activeEnergyBurned)) {
-                self.currentCalories = stats.sumQuantity()?.doubleValue(for: .kilocalorie()) ?? self.currentCalories
+    extension HealthKitService: HKWorkoutSessionDelegate, HKLiveWorkoutBuilderDelegate {
+        func workoutSession(_: HKWorkoutSession,
+                            didChangeTo toState: HKWorkoutSessionState,
+                            from _: HKWorkoutSessionState,
+                            date _: Date)
+        {
+            DispatchQueue.main.async {
+                self.isWorkoutActive = toState == .running
+                self.isPaused = toState == .paused
             }
         }
+
+        func workoutSession(_: HKWorkoutSession, didFailWithError _: Error) {}
+
+        func workoutBuilderDidCollectEvent(_: HKLiveWorkoutBuilder) {}
+
+        func workoutBuilder(_ workoutBuilder: HKLiveWorkoutBuilder, didCollectDataOf _: Set<HKSampleType>) {
+            DispatchQueue.main.async {
+                if let stats = workoutBuilder.statistics(for: HKQuantityType(.heartRate)) {
+                    self.currentHeartRate = stats.mostRecentQuantity()?.doubleValue(for: HKUnit(from: "count/min")) ?? self.currentHeartRate
+                }
+                if let stats = workoutBuilder.statistics(for: HKQuantityType(.activeEnergyBurned)) {
+                    self.currentCalories = stats.sumQuantity()?.doubleValue(for: .kilocalorie()) ?? self.currentCalories
+                }
+            }
+        }
     }
-}
 #endif

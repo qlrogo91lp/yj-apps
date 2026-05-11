@@ -1,5 +1,5 @@
-import Foundation
 import Combine
+import Foundation
 
 @MainActor
 class WorkoutSessionViewModel: ObservableObject {
@@ -7,7 +7,7 @@ class WorkoutSessionViewModel: ObservableObject {
     @Published var isPaused: Bool = false
 
     let healthKit = HealthKitService.shared
-    let workoutSessionId: UUID = UUID()
+    let workoutSessionId: UUID = .init()
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -34,7 +34,9 @@ class WorkoutSessionViewModel: ObservableObject {
 
     private var _currentSession: MatchSession?
 
-    func currentSession() -> MatchSession? { _currentSession }
+    func currentSession() -> MatchSession? {
+        _currentSession
+    }
 
     func finishMatch(result: MatchResult, completedSets: [SetScore]) {
         guard let session = _currentSession else { return }
@@ -42,8 +44,8 @@ class WorkoutSessionViewModel: ObservableObject {
         session.result = result
         session.completedSets = completedSets
         session.kcalAtEnd = healthKit.currentCalories
-        session.mySetScore = completedSets.filter { $0.my > $0.your }.count
-        session.yourSetScore = completedSets.filter { $0.your > $0.my }.count
+        session.mySetScore = completedSets.count(where: { $0.my > $0.your })
+        session.yourSetScore = completedSets.count(where: { $0.your > $0.my })
 
         phase = .finished(session)
 

@@ -5,18 +5,18 @@
 //  Created by yj on 4/29/26.
 //
 
-import Testing
 @testable import TennisCounter_Watch_App
+import Testing
 
 struct watchosTests {
 
-    @Test func example() async throws {
+    @Test func example() {
         // Write your test here and use APIs like `#expect(...)` to check expected conditions.
         // Swift Testing Documentation
         // https://developer.apple.com/documentation/testing
     }
 
-    @Test @MainActor func testFinishMatchSetsPhaseImmediately() {
+    @Test @MainActor func finishMatchSetsPhaseImmediately() {
         let vm = WorkoutSessionViewModel()
         vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
         vm.finishMatch(result: .draw, completedSets: [])
@@ -27,7 +27,7 @@ struct watchosTests {
         }
     }
 
-    @Test @MainActor func testFinishMatchPopulatesSetScores() {
+    @Test @MainActor func finishMatchPopulatesSetScores() {
         let vm = WorkoutSessionViewModel()
         vm.startMatch(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false))
 
@@ -37,7 +37,7 @@ struct watchosTests {
         ]
         vm.finishMatch(result: .draw, completedSets: sets)
 
-        guard case .finished(let session) = vm.phase else {
+        guard case let .finished(session) = vm.phase else {
             Issue.record("Expected .finished phase")
             return
         }
@@ -45,7 +45,7 @@ struct watchosTests {
         #expect(session.yourSetScore == 1)
     }
 
-    @Test @MainActor func testRestartMatchReusesOptions() {
+    @Test @MainActor func restartMatchReusesOptions() {
         let vm = WorkoutSessionViewModel()
         let options = MatchOptions(mode: .bestOfThree, noAdRule: false, noTieRule: true)
         vm.startMatch(options: options)
@@ -53,7 +53,7 @@ struct watchosTests {
 
         vm.restartMatch()
 
-        guard case .playing(let newOptions) = vm.phase else {
+        guard case let .playing(newOptions) = vm.phase else {
             Issue.record("Expected .playing phase after restartMatch, got \(vm.phase)")
             return
         }

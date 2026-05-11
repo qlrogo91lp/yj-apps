@@ -30,7 +30,7 @@ final class MatchViewModel: ObservableObject {
     }
 
     func injectContext(_ context: ModelContext) {
-        self.modelContext = context
+        modelContext = context
     }
 
     func requestHealthKitAndStart() async {
@@ -51,6 +51,19 @@ final class MatchViewModel: ObservableObject {
             sendScoreUpdate()
             checkSetUpdate()
         }
+    }
+
+    func addPoint(_ side: PlayerSide) {
+        guard !isMatchOver else { return }
+        guard score.addPoint(side) != nil else { return }
+        if side == .me { myGameScore += 1 } else { yourGameScore += 1 }
+        score.resetData()
+        sendScoreUpdate()
+        checkSetUpdate()
+    }
+
+    func undo() {
+        score.undo()
     }
 
     func resetAll() {

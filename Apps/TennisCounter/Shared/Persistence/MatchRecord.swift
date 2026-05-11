@@ -4,7 +4,7 @@ import SwiftData
 @Model
 final class MatchRecord {
     var id: UUID = UUID()
-    var mode: String = MatchMode.oneSet.rawValue     // store rawValue (MatchMode is not directly supported by SwiftData transformable easily)
+    var mode: String = MatchMode.oneSet.rawValue // store rawValue (MatchMode is not directly supported by SwiftData transformable easily)
     var noAdRule: Bool = true
     var startedAt: Date = Date()
     var endedAt: Date = Date()
@@ -18,7 +18,7 @@ final class MatchRecord {
     var averageHeartRate: Double?
     var workoutSessionId: UUID?
 
-    // Stored as JSON since SwiftData doesn't support [SetScore] directly
+    /// Stored as JSON since SwiftData doesn't support [SetScore] directly
     var completedSetsJSON: String = "[]"
 
     var matchMode: MatchMode {
@@ -43,18 +43,18 @@ final class MatchRecord {
     }
 
     init(from session: MatchSession) {
-        self.id = session.id
-        self.mode = session.options.mode.rawValue
-        self.noAdRule = session.options.noAdRule
-        self.startedAt = session.startedAt
-        self.endedAt = session.endedAt ?? Date()
-        self.resultRaw = session.result?.rawValue ?? MatchResult.win.rawValue
-        self.mySetScore = session.mySetScore
-        self.yourSetScore = session.yourSetScore
-        self.durationSeconds = Int((session.endedAt ?? Date()).timeIntervalSince(session.startedAt))
-        self.caloriesBurned = (session.kcalAtEnd ?? 0) - session.kcalAtStart
-        self.averageHeartRate = session.averageHeartRate
-        self.workoutSessionId = session.workoutSessionId
-        self.completedSets = session.completedSets
+        id = session.id
+        mode = session.options.mode.rawValue
+        noAdRule = session.options.noAdRule
+        startedAt = session.startedAt
+        endedAt = session.endedAt ?? Date()
+        resultRaw = session.result?.rawValue ?? MatchResult.win.rawValue
+        mySetScore = session.mySetScore
+        yourSetScore = session.yourSetScore
+        durationSeconds = Int((session.endedAt ?? Date()).timeIntervalSince(session.startedAt))
+        caloriesBurned = (session.kcalAtEnd ?? 0) - session.kcalAtStart
+        averageHeartRate = session.averageHeartRate
+        workoutSessionId = session.workoutSessionId
+        completedSets = session.completedSets
     }
 }

@@ -62,10 +62,10 @@ enum SummaryPeriod: String, CaseIterable {
 
     var localizedTitle: String {
         switch self {
-        case .today: return String(localized: "summary_period_today")
-        case .week: return String(localized: "summary_period_week")
-        case .month: return String(localized: "summary_period_month")
-        case .all: return String(localized: "summary_period_all")
+        case .today: String(localized: "summary_period_today")
+        case .week: String(localized: "summary_period_week")
+        case .month: String(localized: "summary_period_month")
+        case .all: String(localized: "summary_period_all")
         }
     }
 
@@ -99,7 +99,7 @@ final class SummaryViewModel: ObservableObject {
 
     func stats(from matches: [Match]) -> SummaryStats {
         let filtered = filteredMatches(from: matches)
-        let wins = filtered.filter { $0.myTotalSets > $0.yourTotalSets }.count
+        let wins = filtered.count(where: { $0.myTotalSets > $0.yourTotalSets })
         let total = filtered.count
         let winRate = total > 0 ? Double(wins) / Double(total) : 0.0
 
@@ -251,7 +251,9 @@ private struct SummaryStatCard: View {
 private struct SummaryRecentMatchCard: View {
     let match: Match
 
-    private var didWin: Bool { match.myTotalSets > match.yourTotalSets }
+    private var didWin: Bool {
+        match.myTotalSets > match.yourTotalSets
+    }
 
     var body: some View {
         HStack {
@@ -262,8 +264,8 @@ private struct SummaryRecentMatchCard: View {
                         .foregroundColor(didWin ? .green : .orange)
 
                     Text(match.matchFormat == .oneSet
-                         ? String(localized: "match_format_one_set")
-                         : String(localized: "match_format_best_of_3"))
+                        ? String(localized: "match_format_one_set")
+                        : String(localized: "match_format_best_of_3"))
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -442,8 +444,8 @@ struct MatchDetailSheet: View {
                         Spacer()
                         VStack(spacing: 8) {
                             Text(match.myTotalSets > match.yourTotalSets
-                                 ? String(localized: "match_over_win")
-                                 : String(localized: "match_over_lose"))
+                                ? String(localized: "match_over_win")
+                                : String(localized: "match_over_lose"))
                                 .font(.system(size: 28, weight: .bold))
                                 .foregroundColor(match.myTotalSets > match.yourTotalSets ? .green : .orange)
 
@@ -482,8 +484,8 @@ struct MatchDetailSheet: View {
                 Section(header: Text("Info")) {
                     LabeledContent("Format") {
                         Text(match.matchFormat == .oneSet
-                             ? String(localized: "match_format_one_set")
-                             : String(localized: "match_format_best_of_3"))
+                            ? String(localized: "match_format_one_set")
+                            : String(localized: "match_format_best_of_3"))
                     }
                     if let endedAt = match.endedAt {
                         LabeledContent("Duration") {
@@ -513,7 +515,9 @@ struct CalendarHistoryView: View {
 
     @State private var displayedMonth = Date()
 
-    private var calendar: Calendar { Calendar.current }
+    private var calendar: Calendar {
+        Calendar.current
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -556,7 +560,7 @@ struct CalendarHistoryView: View {
         let days = daysInMonth()
         return LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7), spacing: 8) {
             ForEach(days, id: \.self) { date in
-                if let date = date {
+                if let date {
                     let dayMatches = matchesForDate(date)
                     DayCellView(date: date, matches: dayMatches) {
                         selectedMatch = dayMatches.first
@@ -602,10 +606,21 @@ private struct DayCellView: View {
     let matches: [Match]
     let onTap: () -> Void
 
-    private var calendar: Calendar { Calendar.current }
-    private var isToday: Bool { calendar.isDateInToday(date) }
-    private var hasMatch: Bool { !matches.isEmpty }
-    private var hasWin: Bool { matches.contains { $0.myTotalSets > $0.yourTotalSets } }
+    private var calendar: Calendar {
+        Calendar.current
+    }
+
+    private var isToday: Bool {
+        calendar.isDateInToday(date)
+    }
+
+    private var hasMatch: Bool {
+        !matches.isEmpty
+    }
+
+    private var hasWin: Bool {
+        matches.contains { $0.myTotalSets > $0.yourTotalSets }
+    }
 
     var body: some View {
         VStack(spacing: 2) {
