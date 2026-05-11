@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct EarlyEndButton: View {
+struct BackButton: View {
     let action: () -> Void
 
     var body: some View {
@@ -12,6 +12,5 @@ struct EarlyEndButton: View {
                 .background(.thickMaterial, in: Circle())
         }
         .buttonStyle(.plain)
-        .transition(.opacity)
     }
 }

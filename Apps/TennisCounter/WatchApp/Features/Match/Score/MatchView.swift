@@ -73,7 +73,13 @@ struct MatchView: View {
         }
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
-                EarlyEndButton { showEarlyEndConfirm = true }
+                BackButton {
+                    if viewModel.myGameScore == 0 && viewModel.yourGameScore == 0 {
+                        flowViewModel.startNewMatch()
+                    } else {
+                        showEarlyEndConfirm = true
+                    }
+                }
             }
         }
         .confirmationDialog(

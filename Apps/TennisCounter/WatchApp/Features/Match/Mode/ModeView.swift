@@ -31,8 +31,12 @@ struct ModeView: View {
                     .font(.system(size: 13))
                     .toggleStyle(SwitchToggleStyle(tint: .orange))
             }
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Color.clear.frame(width: 36, height: 36)
+                }
+            }
             .padding(.horizontal, 8)
-            .padding(.vertical, 6)
         }
     }
 }

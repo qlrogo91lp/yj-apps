@@ -7,74 +7,53 @@ struct MatchResultView: View {
     @State private var saveError: String?
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 14) {
-                // Result header
-                Text(resultTitle)
-                    .font(.system(size: 26, weight: .bold))
-                    .foregroundColor(resultColor)
-                    .multilineTextAlignment(.center)
+        VStack(spacing: 2) {
+            Text(resultTitle)
+                .font(.system(size: 30, weight: .bold))
+                .foregroundColor(resultColor)
+                .multilineTextAlignment(.center)
 
-                // Set score
-                HStack(spacing: 8) {
-                    Text("\(session.mySetScore)")
-                        .font(.system(size: 30, weight: .bold))
-                        .foregroundColor(.green)
-                    Text("-")
-                        .font(.system(size: 24, weight: .bold))
-                        .foregroundColor(.white.opacity(0.6))
-                    Text("\(session.yourSetScore)")
-                        .font(.system(size: 30, weight: .bold))
-                        .foregroundColor(.orange)
-                }
+            HStack(spacing: 8) {
+                Text("\(session.mySetScore)")
+                    .font(.system(size: 25, weight: .bold))
+                    .foregroundColor(.green)
+                Text(":")
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundColor(.white.opacity(0.6))
+                Text("\(session.yourSetScore)")
+                    .font(.system(size: 25, weight: .bold))
+                    .foregroundColor(.orange)
+            }
 
-                // Completed sets detail
-                if !session.completedSets.isEmpty {
-                    HStack(spacing: 6) {
-                        ForEach(Array(session.completedSets.enumerated()), id: \.offset) { _, set in
-                            Text("\(set.my)-\(set.your)")
-                                .font(.system(size: 12))
+            if session.options.mode == .bestOfThree && !session.completedSets.isEmpty {
+                HStack {
+                    ForEach(Array(session.completedSets.enumerated()), id: \.offset) { index, set in
+                        HStack {
+                            Text("\(set.my) : \(set.your)")
+                                .font(.system(size: 14, weight: .bold))
                                 .foregroundColor(.white.opacity(0.7))
+                            if index < session.completedSets.count - 1 {
+                                Text("|")
+                                    .font(.system(size: 14, weight: .bold))
+                                    .foregroundColor(.white.opacity(0.7))
+                                    .padding(.horizontal, 4)
+                            }
                         }
                     }
                 }
-
-                Divider().background(Color.white.opacity(0.2))
-
-                // Save button
-                Button(action: saveMatch) {
-                    HStack(spacing: 6) {
-                        Image(systemName: saved ? "checkmark.circle.fill" : "square.and.arrow.down")
-                        Text(saved ? String(localized: "result_saved") : String(localized: "result_save"))
-                            .font(.system(size: 14, weight: .semibold))
-                    }
-                    .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(saved ? .gray : .blue)
-                .disabled(saved)
-
-                // New Match button
-                Button(action: { flowViewModel.startNewMatch() }) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "arrow.counterclockwise")
-                        Text(String(localized: "watch_new_match"))
-                            .font(.system(size: 14, weight: .semibold))
-                    }
-                    .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(.green.opacity(0.8))
             }
-            .padding(.horizontal, 8)
-            .padding(.vertical, 10)
+
+            Spacer()
+
+            HStack(spacing: 6) {
+                SaveButton(saved: saved) { saveMatch() }
+                RematchButton { flowViewModel.restartMatch() }
+            }
         }
+        .padding(.horizontal, 8)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
-                Group {
-                    Color.clear
-                }
-                .frame(width: 36, height: 36)
+                BackButton { flowViewModel.startNewMatch() }
             }
         }
     }
@@ -105,4 +84,24 @@ struct MatchResultView: View {
             saveError = error.localizedDescription
         }
     }
+}
+
+#Preview {
+    let session = MatchSession(
+        workoutSessionId: UUID(),
+        options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false),
+        kcalAtStart: 150
+    )
+    session.mySetScore = 1
+    session.yourSetScore = 0
+    session.completedSets = [SetScore(my: 6, your: 4), SetScore(my: 3, your: 6), SetScore(my: 3, your: 6)]
+    session.endedAt = Date()
+    session.result = .win
+    session.kcalAtEnd = 200
+    session.averageHeartRate = 145
+
+    return MatchResultView(
+        session: session,
+        flowViewModel: WorkoutSessionViewModel()
+    )
 }

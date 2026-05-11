@@ -44,4 +44,21 @@ struct watchosTests {
         #expect(session.mySetScore == 1)
         #expect(session.yourSetScore == 1)
     }
+
+    @Test @MainActor func testRestartMatchReusesOptions() {
+        let vm = WorkoutSessionViewModel()
+        let options = MatchOptions(mode: .bestOfThree, noAdRule: false, noTieRule: true)
+        vm.startMatch(options: options)
+        vm.finishMatch(result: .win, completedSets: [SetScore(my: 6, your: 3)])
+
+        vm.restartMatch()
+
+        guard case .playing(let newOptions) = vm.phase else {
+            Issue.record("Expected .playing phase after restartMatch, got \(vm.phase)")
+            return
+        }
+        #expect(newOptions.mode == .bestOfThree)
+        #expect(newOptions.noAdRule == false)
+        #expect(newOptions.noTieRule == true)
+    }
 }

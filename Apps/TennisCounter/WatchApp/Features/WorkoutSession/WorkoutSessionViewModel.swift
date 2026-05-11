@@ -66,6 +66,11 @@ class WorkoutSessionViewModel: ObservableObject {
         phase = .modeSelection
     }
 
+    func restartMatch() {
+        guard let options = _currentSession?.options else { return }
+        startMatch(options: options)
+    }
+
     func pauseWorkout() {
         healthKit.pauseWorkout()
     }
