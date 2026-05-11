@@ -39,4 +39,44 @@ struct iosTests {
         let metrics = WorkoutMetrics(elapsedSeconds: 3724)
         #expect(metrics.formattedElapsed == "62:04")
     }
+
+    // MARK: - MatchViewModel addPoint
+
+    @Test @MainActor func addPointWinsGame() {
+        let vm = MatchViewModel(format: .oneSet)
+        // 4번 탭하면 게임 승리 (noAdRule=true 기본값: 0→15→30→40→win)
+        vm.addPoint(.me)
+        vm.addPoint(.me)
+        vm.addPoint(.me)
+        vm.addPoint(.me)
+        #expect(vm.myGameScore == 1)
+        #expect(vm.score.myDisplayScore == "0")
+    }
+
+    @Test @MainActor func addPointOpponentWinsGame() {
+        let vm = MatchViewModel(format: .oneSet)
+        vm.addPoint(.opponent)
+        vm.addPoint(.opponent)
+        vm.addPoint(.opponent)
+        vm.addPoint(.opponent)
+        #expect(vm.yourGameScore == 1)
+    }
+
+    @Test @MainActor func addPointUndoResetsScore() {
+        let vm = MatchViewModel(format: .oneSet)
+        vm.addPoint(.me) // 15-0
+        vm.undo()
+        #expect(vm.score.myDisplayScore == "0")
+        #expect(vm.score.lastAction == .none)
+    }
+
+    @Test @MainActor func addPointMatchOver() {
+        let vm = MatchViewModel(format: .oneSet)
+        // oneSet: 6게임 이기면 매치 종료
+        for _ in 0..<6 {
+            vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
+        }
+        #expect(vm.isMatchOver == true)
+        #expect(vm.didWin == true)
+    }
 }
