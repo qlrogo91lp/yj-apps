@@ -150,6 +150,10 @@ ScreenName/Components/  ← 특정 View 전용 (가장 낮은 계층)
 - Feature → Shared만 import 가능
 - ViewModel → UI 프레임워크 import 금지 (순수 비즈니스 로직)
 
+## Docs Conventions
+
+- `docs/superpowers/specs/` 와 `docs/superpowers/plans/` 파일은 **최종 완료된 상태에서만 커밋**한다. 작성 중인 스펙/계획은 커밋하지 않는다.
+
 ## Code Conventions
 
 - Colors are inline (green=ME, orange=OPP) — no centralized theme system
