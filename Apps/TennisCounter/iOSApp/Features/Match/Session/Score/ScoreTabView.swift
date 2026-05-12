@@ -43,6 +43,8 @@ struct ScoreTabView: View {
 
     private var scoreView: some View {
         ZStack {
+            Color.black.ignoresSafeArea()
+
             HStack(spacing: 0) {
                 PlayerScoreZone(
                     displayScore: viewModel.score.myDisplayScore,
@@ -87,6 +89,7 @@ struct ScoreTabView: View {
 
     private var matchOverView: some View {
         VStack(spacing: 20) {
+            Spacer()
             Text(viewModel.didWin
                 ? String(localized: "match_over_win")
                 : String(localized: "match_over_lose"))
@@ -99,10 +102,10 @@ struct ScoreTabView: View {
                     VStack(spacing: 2) {
                         Text("Set \(idx + 1)")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(.white.opacity(0.5))
                         HStack(spacing: 4) {
                             Text("\(set.my)").foregroundColor(.green)
-                            Text("–").foregroundColor(.secondary)
+                            Text("–").foregroundColor(.white.opacity(0.5))
                             Text("\(set.your)").foregroundColor(.orange)
                         }
                         .font(.system(size: 18, weight: .bold))
@@ -124,7 +127,11 @@ struct ScoreTabView: View {
             }
             .padding(.horizontal, 32)
             .padding(.top, 8)
+
+            Spacer()
         }
         .padding()
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.black.ignoresSafeArea())
     }
 }

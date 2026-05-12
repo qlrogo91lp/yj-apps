@@ -26,6 +26,7 @@ struct ModeSelectionView: View {
             }
             .navigationDestination(for: MatchFormat.self) { format in
                 MatchContainerView(format: format)
+                    .toolbar(.hidden, for: .tabBar)
             }
             .navigationBarHidden(true)
         }
