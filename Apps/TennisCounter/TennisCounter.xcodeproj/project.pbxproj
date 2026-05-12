@@ -11,6 +11,9 @@
 		3974B8F62EBCDFA5002D0EA7 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 39BF17512EBA37F60026184E /* SwiftUI.framework */; };
 		3974B9032EBCDFA6002D0EA7 /* ComplicationAppExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3974B8F42EBCDFA5002D0EA7 /* ComplicationAppExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		399700FD2A1D9BC900D0D486 /* TennisCounter Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 399700FC2A1D9BC900D0D486 /* TennisCounter Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		39CDA6E12FB3173B009825BA /* Ralli.icon in Resources */ = {isa = PBXBuildFile; fileRef = 39CDA6E02FB3173B009825BA /* Ralli.icon */; };
+		39CDA6E22FB3173B009825BA /* Ralli.icon in Resources */ = {isa = PBXBuildFile; fileRef = 39CDA6E02FB3173B009825BA /* Ralli.icon */; };
+		39CDA6E32FB3173B009825BA /* Ralli.icon in Resources */ = {isa = PBXBuildFile; fileRef = 39CDA6E02FB3173B009825BA /* Ralli.icon */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -78,6 +81,7 @@
 		399700FC2A1D9BC900D0D486 /* TennisCounter Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "TennisCounter Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		39BF174F2EBA37F60026184E /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		39BF17512EBA37F60026184E /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		39CDA6E02FB3173B009825BA /* Ralli.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = Ralli.icon; sourceTree = "<group>"; };
 		39D9AB7C2FA1D86B006DC9F5 /* iosTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iosTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		39D9AB892FA1D882006DC9F5 /* watchosTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = watchosTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -156,6 +160,7 @@
 				39BF174E2EBA37F60026184E /* Frameworks */,
 				399700ED2A1D9BC800D0D486 /* Products */,
 				399289F72EB8EC9E005F1856 /* WatchApp */,
+				39CDA6E02FB3173B009825BA /* Ralli.icon */,
 			);
 			sourceTree = "<group>";
 		};
@@ -349,6 +354,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				39CDA6E22FB3173B009825BA /* Ralli.icon in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -356,6 +362,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				39CDA6E32FB3173B009825BA /* Ralli.icon in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -363,6 +370,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				39CDA6E12FB3173B009825BA /* Ralli.icon in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
