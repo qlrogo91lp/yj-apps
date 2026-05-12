@@ -37,30 +37,43 @@ Shared/
 
 iOSApp/
 │  # iPhone 전용 타겟
-├── iOSApp.swift           # @main 진입점, 3-탭 TabView로 구성 예정
+├── iOSApp.swift           # @main 진입점 + MainTabView
+├── Components/
+│   └── MatchDetailSheet.swift  # Summary·History 공유 컴포넌트
 └── Features/
-    │  # 도메인/기능 단위 폴더. 탭 하나 = Feature 하나가 기본 원칙.
     ├── Summary/
-    │   │  # 요약 탭 — 오늘/주간 통계, streak, 최근 경기 카드 (Phase 1-A)
     │   ├── SummaryView.swift
-    │   └── SummaryViewModel.swift
+    │   ├── SummaryViewModel.swift  # SummaryPeriod, SummaryStats 포함
+    │   └── Components/
+    │       ├── StatCard.swift
+    │       └── RecentMatchCard.swift
     ├── Match/
-    │   │  # 경기 탭 — 모드 선택부터 점수 입력까지의 흐름을 담는 Feature
-    │   ├── ModeSelection/
-    │   │   │  # 경기 시작 전 포맷 선택 화면 (One Set / Best of 3) (Phase 1-A)
-    │   │   ├── ModeSelectionView.swift
-    │   │   └── ModeSelectionViewModel.swift
-    │   └── Score/
-    │       │  # 실제 점수 입력 화면. 모드에 따라 세트 인디케이터 표시 여부 분기
-    │       ├── MatchView.swift
-    │       ├── MatchViewModel.swift   # confirmScore, resetAll, 게임/세트 집계
-    │       └── Components/
-    │           │  # Score 화면 전용 재사용 UI 컴포넌트
-    │           └── CounterButtonView.swift  # +/- 점수 버튼
+    │   │  # Watch 앱과 대칭 구조: Mode / Tab(iOS 전용) / Score / Result / Workout
+    │   ├── Mode/                        # 포맷 선택 화면 (Watch: Match/Mode/)
+    │   │   ├── ModeView.swift
+    │   │   └── Components/
+    │   │       └── ModeCard.swift
+    │   ├── Tab/                         # iOS 전용 탭 컨테이너 (Watch: WorkoutSession/)
+    │   │   ├── MatchTabView.swift
+    │   │   └── MatchTabViewModel.swift
+    │   ├── Score/                       # 점수 입력 화면 (Watch: Match/Score/)
+    │   │   ├── ScoreView.swift
+    │   │   ├── MatchViewModel.swift
+    │   │   └── Components/
+    │   │       ├── PlayerScoreZone.swift
+    │   │       ├── ScoreOverlay.swift
+    │   │       └── ScoreEditSheet.swift
+    │   ├── Result/                      # 경기 결과 화면 (Watch: Match/Result/)
+    │   │   └── MatchResultView.swift
+    │   └── Workout/                     # 워크아웃 메트릭 탭 (iOS 전용)
+    │       └── WorkoutTabView.swift
     └── History/
-        │  # 기록 탭 — 저장된 경기 히스토리, 달력/리스트 토글 (Phase 1-A)
         ├── HistoryView.swift
-        └── HistoryViewModel.swift
+        ├── HistoryViewModel.swift
+        └── Components/
+            ├── MatchRow.swift
+            ├── CalendarHistoryView.swift
+            └── DayCell.swift
 
 WatchApp/
 │  # Apple Watch 전용 타겟. HealthKit 통합 Workout 경험 제공.
@@ -111,8 +124,8 @@ ComplicationApp/
 ```
 
 - **Score** (`ObservableObject`): point state (`scoreArr = [0, 15, 30, 40, 50]`), undo via `LastAction` enum. iOS/Watch 타겟 공유.
-- **MatchViewModel**: `Score` 인스턴스를 `@Published`로 소유, 게임/세트 레벨 로직 담당.
-- **View**: `@StateObject var viewModel = MatchViewModel()`으로 ViewModel 바인딩. Game win at 50 points (index 4), set win at 6 games.
+- **MatchViewModel**: `Score` 인스턴스를 `@Published`로 소유, 게임/세트 레벨 로직 담당. `Match/Score/MatchViewModel.swift`에 위치.
+- **ScoreView**: `@StateObject var viewModel = MatchViewModel()`으로 ViewModel 바인딩. 경기 종료 시 `MatchResultView`로 전환.
 - **Roadmap**: Phase 1-A에서 3-탭(Summary/Match/History) + SwiftData + WatchConnectivity. Phase 1-B에서 HealthKit + Live Activity. Phase 2에서 Firebase 멀티 모드 + StoreKit 2.
 
 ## Folder Conventions
