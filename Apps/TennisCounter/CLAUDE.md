@@ -152,7 +152,10 @@ ScreenName/Components/  ← 특정 View 전용 (가장 낮은 계층)
 
 ## Docs Conventions
 
-- `docs/superpowers/specs/` 와 `docs/superpowers/plans/` 파일은 **최종 완료된 상태에서만 커밋**한다. 작성 중인 스펙/계획은 커밋하지 않는다.
+  - `docs/superpowers/specs/` 와 `docs/superpowers/plans/` 파일은 **최종 완료된
+  상태에서만 커밋**한다.
+  - 작성 중인 스펙/계획은 커밋하지 않는다.
+  - **스킬이 커밋을 지시하더라도 사용자 검토 전에는 커밋하지 않는다.**
 
 ## Code Conventions
 
