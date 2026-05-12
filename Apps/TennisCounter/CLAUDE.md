@@ -152,10 +152,31 @@ ScreenName/Components/  ← 특정 View 전용 (가장 낮은 계층)
 
 ## Docs Conventions
 
-  - `docs/superpowers/specs/` 와 `docs/superpowers/plans/` 파일은 **최종 완료된
-  상태에서만 커밋**한다.
-  - 작성 중인 스펙/계획은 커밋하지 않는다.
-  - **스킬이 커밋을 지시하더라도 사용자 검토 전에는 커밋하지 않는다.**
+- `docs/superpowers/specs/` 와 `docs/superpowers/plans/` 파일은 **최종 완료된 상태에서만 커밋**한다.
+- 작성 중인 스펙/계획은 커밋하지 않는다.
+- **스킬이 커밋을 지시하더라도 사용자 검토 전에는 커밋하지 않는다.**
+
+**폴더 구조**
+
+플랫폼별로 서브폴더를 나눈다. 파일명에 플랫폼을 명시하지 않아도 된다 (폴더로 구분).
+
+```
+docs/superpowers/
+├── specs/
+│   ├── ios/     # iOS 앱 관련 스펙
+│   └── watch/   # Watch 앱 관련 스펙
+└── plans/
+    ├── ios/     # iOS 앱 관련 구현 계획
+    └── watch/   # Watch 앱 관련 구현 계획
+```
+
+## Xcode 프로젝트 파일
+
+이 프로젝트는 **Xcode 16의 `PBXFileSystemSynchronizedRootGroup`** 방식을 사용한다.
+
+- Swift 파일을 생성하거나 삭제하면 Xcode가 폴더를 자동 스캔해서 빌드 대상에 포함/제외한다.
+- `.xcodeproj/project.pbxproj`를 직접 수정하거나 `xcodeproj` gem 등 프로젝트 파일 편집 도구를 사용할 필요가 없다.
+- 파일 이동/생성/삭제는 파일시스템 조작만으로 충분하다.
 
 ## Code Conventions
 
