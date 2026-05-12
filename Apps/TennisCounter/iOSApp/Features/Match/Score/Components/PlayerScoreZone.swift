@@ -15,7 +15,7 @@ struct PlayerScoreZone: View {
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(color)
                 Text(displayScore)
-                    .font(.system(size: 72, weight: .heavy))
+                    .font(.system(size: 72, weight: .heavy, design: .rounded))
                     .foregroundColor(color)
                     // caller must wrap score state change in withAnimation for this to fire
                     .contentTransition(.numericText())

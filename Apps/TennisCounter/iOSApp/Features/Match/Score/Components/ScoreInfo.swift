@@ -1,31 +1,13 @@
 import SwiftUI
 
-struct ScoreOverlay: View {
+struct ScoreInfo: View {
     let myGameScore: Int
     let yourGameScore: Int
     let mySetScore: Int
     let yourSetScore: Int
     let format: MatchFormat
-    let showUndo: Bool
-    let onUndo: () -> Void
 
     var body: some View {
-        VStack {
-            scoreInfo
-                .padding(.top, 12)
-                .allowsHitTesting(false)
-            Spacer()
-        }
-        .allowsHitTesting(false)
-        .overlay(alignment: .bottom) {
-            if showUndo {
-                undoButton
-                    .padding(.bottom, 20)
-            }
-        }
-    }
-
-    private var scoreInfo: some View {
         VStack(spacing: 4) {
             if format == .bestOfThree {
                 HStack(spacing: 8) {
@@ -49,17 +31,5 @@ struct ScoreOverlay: View {
             .font(.system(size: 13, weight: .semibold))
         }
         .frame(maxWidth: .infinity, alignment: .center)
-    }
-
-    private var undoButton: some View {
-        Button(action: onUndo) {
-            Label(String(localized: "btn_undo"), systemImage: "arrow.uturn.backward")
-                .font(.system(size: 13, weight: .medium))
-                .foregroundColor(.white.opacity(0.7))
-                .padding(.horizontal, 16)
-                .padding(.vertical, 6)
-                .background(.white.opacity(0.1), in: Capsule())
-        }
-        .allowsHitTesting(true)
     }
 }

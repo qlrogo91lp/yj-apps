@@ -35,6 +35,7 @@
 /* Workout */
 "workout_pause" = "Pause";
 "workout_end" = "End Workout";
+"ios_start_workout" = "Start Workout";
 
 /* Summary */
 "summary_period_today" = "Today";

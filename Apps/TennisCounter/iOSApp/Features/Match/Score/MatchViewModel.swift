@@ -78,8 +78,6 @@ final class MatchViewModel: ObservableObject {
         score.resetData()
     }
 
-    // MARK: - Private
-
     private func checkSetUpdate() {
         guard isSetComplete() else { return }
 

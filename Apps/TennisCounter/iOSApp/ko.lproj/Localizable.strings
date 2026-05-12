@@ -35,6 +35,7 @@
 /* Workout */
 "workout_pause" = "일시정지";
 "workout_end" = "운동 종료";
+"ios_start_workout" = "운동 시작";
 
 /* Summary */
 "summary_period_today" = "오늘";
