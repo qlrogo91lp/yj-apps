@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct HomeView: View {
+    let onMatchStart: () -> Void
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
@@ -18,9 +20,8 @@ struct HomeView: View {
 
                 Spacer()
 
-                NavigationLink {
-                    MatchSessionView()
-                        .toolbar(.hidden, for: .tabBar)
+                Button {
+                    onMatchStart()
                 } label: {
                     Text(String(localized: "ios_start_workout"))
                         .font(.system(size: 18, weight: .bold))
@@ -40,5 +41,5 @@ struct HomeView: View {
 }
 
 #Preview {
-    HomeView()
+    HomeView(onMatchStart: {})
 }
