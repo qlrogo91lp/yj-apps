@@ -18,7 +18,10 @@ class WorkoutSessionViewModel: ObservableObject {
     }
 
     func startWorkout() {
-        healthKit.startWorkout()
+        Task {
+            await healthKit.requestAuthorization()
+            healthKit.startWorkout()
+        }
     }
 
     func startMatch(options: MatchOptions) {
