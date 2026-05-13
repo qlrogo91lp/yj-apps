@@ -12,6 +12,7 @@ import SwiftUI
 struct TennisCounterApp: App {
     let container: ModelContainer
     private let watchConnectivity = WatchConnectivityService.shared
+    @State private var isLaunching = true
 
     init() {
         do {
@@ -25,7 +26,11 @@ struct TennisCounterApp: App {
 
     var body: some Scene {
         WindowGroup {
-            MainTabView()
+            if isLaunching {
+                LaunchScreenView(onFinished: { isLaunching = false })
+            } else {
+                MainTabView()
+            }
         }
         .modelContainer(container)
     }
