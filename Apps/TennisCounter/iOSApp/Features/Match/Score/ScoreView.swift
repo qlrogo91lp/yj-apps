@@ -41,15 +41,22 @@ struct ScoreView: View {
             }
             .ignoresSafeArea()
 
-            ScoreOverlay(
-                myGameScore: viewModel.myGameScore,
-                yourGameScore: viewModel.yourGameScore,
-                mySetScore: viewModel.mySetScore,
-                yourSetScore: viewModel.yourSetScore,
-                format: format,
-                showUndo: viewModel.score.lastAction != .none,
-                onUndo: { viewModel.undo() }
-            )
+            VStack {
+                ScoreInfo(
+                    myGameScore: viewModel.myGameScore,
+                    yourGameScore: viewModel.yourGameScore,
+                    mySetScore: viewModel.mySetScore,
+                    yourSetScore: viewModel.yourSetScore,
+                    format: format
+                )
+                .padding(.top, 12)
+                .allowsHitTesting(false)
+                Spacer()
+                if viewModel.score.lastAction != .none {
+                    UndoButton(action: { viewModel.undo() })
+                        .padding(.bottom, 20)
+                }
+            }
         }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
