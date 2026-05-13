@@ -1,10 +1,11 @@
 import SwiftUI
 
 struct MatchSessionView: View {
+    let onExit: () -> Void
+
     @StateObject private var viewModel = MatchSessionViewModel()
     @State private var selectedTab: Int = 1
     @State private var showEndConfirm = false
-    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -23,10 +24,12 @@ struct MatchSessionView: View {
                 .tag(1)
         }
         .preferredColorScheme(.dark)
-        .navigationBarBackButtonHidden(!isBackAllowed)
+        .navigationBarBackButtonHidden(true)
         .toolbar {
-            if case .playing = viewModel.phase {
-                ToolbarItem(placement: .topBarLeading) {
+            ToolbarItem(placement: .topBarLeading) {
+                if case .modeSelection = viewModel.phase {
+                    BackButton { onExit() }
+                } else if case .playing = viewModel.phase {
                     BackButton { selectedTab = 0 }
                 }
             }
@@ -37,17 +40,12 @@ struct MatchSessionView: View {
         ) {
             Button(String(localized: "early_end_confirm_yes"), role: .destructive) {
                 viewModel.endSession()
-                dismiss()
+                onExit()
             }
         } message: {
             Text(String(localized: "early_end_confirm_message"))
         }
         .onAppear { viewModel.startSession() }
-    }
-
-    private var isBackAllowed: Bool {
-        if case .modeSelection = viewModel.phase { return true }
-        return false
     }
 
     @ViewBuilder
@@ -73,7 +71,7 @@ struct MatchSessionView: View {
                 didWin: session.result == .win,
                 completedSets: session.completedSets.map { ($0.my, $0.your) },
                 onNewMatch: { viewModel.startNewMatch() },
-                onExit: { dismiss() }
+                onExit: { onExit() }
             )
             .navigationBarBackButtonHidden()
         }
@@ -82,7 +80,6 @@ struct MatchSessionView: View {
 
 #Preview {
     NavigationStack {
-        MatchSessionView()
-            .toolbar(.hidden, for: .tabBar)
+        MatchSessionView(onExit: {})
     }
 }

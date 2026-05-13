@@ -18,7 +18,6 @@ struct LaunchScreenView: View {
                 .frame(width: 60, height: 60)
                 .rotationEffect(.degrees(rotation), anchor: .center)
                 .clipped()
-                .padding(.bottom, 10)
                 .animation(.linear(duration: 1)
                 .repeatForever(autoreverses: false), value: rotation)
 

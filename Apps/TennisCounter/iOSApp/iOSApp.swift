@@ -37,22 +37,42 @@ struct TennisCounterApp: App {
 }
 
 struct MainTabView: View {
+    @State private var isMatchActive = false
+    @State private var selectedTab: Int = 0
+
     var body: some View {
-        TabView {
-            SummaryView()
-                .tabItem {
-                    Label(String(localized: "tab_summary"), systemImage: "chart.bar.fill")
-                }
+        ZStack {
+            Color.black.ignoresSafeArea()
 
-            HomeView()
-                .tabItem {
-                    Label(String(localized: "tab_match"), systemImage: "sportscourt.fill")
-                }
+            TabView(selection: $selectedTab) {
+                SummaryView()
+                    .tabItem {
+                        Label(String(localized: "tab_summary"), systemImage: "chart.bar.fill")
+                    }
+                    .tag(0)
 
-            HistoryView()
-                .tabItem {
-                    Label(String(localized: "tab_history"), systemImage: "clock.fill")
+                HomeView(onMatchStart: { withAnimation { isMatchActive = true } })
+                    .tabItem {
+                        Label(String(localized: "tab_match"), systemImage: "sportscourt.fill")
+                    }
+                    .tag(1)
+
+                HistoryView()
+                    .tabItem {
+                        Label(String(localized: "tab_history"), systemImage: "clock.fill")
+                    }
+                    .tag(2)
+            }
+
+            if isMatchActive {
+                NavigationStack {
+                    MatchSessionView(onExit: {
+                        selectedTab = 1
+                        withAnimation { isMatchActive = false }
+                    })
                 }
+                .transition(.opacity)
+            }
         }
     }
 }
