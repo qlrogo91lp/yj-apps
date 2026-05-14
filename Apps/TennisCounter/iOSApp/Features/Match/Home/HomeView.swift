@@ -7,16 +7,8 @@ struct HomeView: View {
         NavigationStack {
             VStack(spacing: 16) {
                 Spacer()
-
-                VStack(spacing: 4) {
-                    Text("Ralli")
-                        .font(.system(size: 40, weight: .bold))
-                        .foregroundStyle(.green)
-                        .italic()
-                    Text("Tennis Counter")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.secondary)
-                }
+                
+                BrandTitle()
 
                 Spacer()
 

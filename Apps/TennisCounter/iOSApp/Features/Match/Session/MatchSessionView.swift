@@ -11,10 +11,17 @@ struct MatchSessionView: View {
         TabView(selection: $selectedTab) {
             WorkoutTabView(
                 metrics: viewModel.metrics,
+                isPaused: viewModel.isPaused,
                 onPauseResume: {
                     viewModel.isPaused ? viewModel.resumeSession() : viewModel.pauseSession()
                 },
-                onEnd: { showEndConfirm = true }
+                onEnd: {
+                    if case .playing = viewModel.phase {
+                        showEndConfirm = true
+                    } else {
+                        onExit()
+                    }
+                }
             )
             .tabItem { Label(String(localized: "tab_workout"), systemImage: "figure.run") }
             .tag(0)

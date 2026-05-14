@@ -21,14 +21,7 @@ struct LaunchScreenView: View {
                 .animation(.linear(duration: 1)
                 .repeatForever(autoreverses: false), value: rotation)
 
-                Text("Ralli")
-                    .font(.system(size: 52, weight: .bold))
-                    .italic()
-                    .foregroundStyle(.green)
-
-                Text("Tennis Counter")
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundStyle(.white)
+                BrandTitle(fontWeight: .bold)
             }
         }
         .task {
