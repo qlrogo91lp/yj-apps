@@ -1,9 +1,8 @@
 import Combine
-import SwiftData
-import SwiftUI
+import Foundation
 
 @MainActor
-final class MatchViewModel: ObservableObject {
+final class ScoreViewModel: ObservableObject {
     let format: MatchFormat
 
     @Published var score = Score()
@@ -16,40 +15,22 @@ final class MatchViewModel: ObservableObject {
     @Published var isMatchOver: Bool = false
     @Published var didWin: Bool = false
 
-    private var cancellable: AnyCancellable?
-    private var modelContext: ModelContext?
-    private let connectivity = WatchConnectivityService.shared
-    private let healthKit = HealthKitService.shared
+    var isTieBreak: Bool { myGameScore == 6 && yourGameScore == 6 }
 
-    init(format: MatchFormat = .oneSet, modelContext: ModelContext? = nil) {
+    var hasProgress: Bool {
+        myGameScore > 0 || yourGameScore > 0 ||
+        mySetScore > 0 || yourSetScore > 0 ||
+        !completedSets.isEmpty ||
+        score.lastAction != .none
+    }
+
+    private var cancellable: AnyCancellable?
+    private let connectivity = WatchConnectivityService.shared
+
+    init(format: MatchFormat = .oneSet) {
         self.format = format
-        self.modelContext = modelContext
         cancellable = score.objectWillChange.sink { [weak self] _ in
             self?.objectWillChange.send()
-        }
-    }
-
-    func injectContext(_ context: ModelContext) {
-        modelContext = context
-    }
-
-    func requestHealthKitAndStart() async {
-        await healthKit.requestAuthorization()
-    }
-
-    func confirmScore() {
-        guard score.myScore != score.yourScore else { return }
-
-        if score.myScore == 50 {
-            myGameScore += 1
-            score.resetData()
-            sendScoreUpdate()
-            checkSetUpdate()
-        } else if score.yourScore == 50 {
-            yourGameScore += 1
-            score.resetData()
-            sendScoreUpdate()
-            checkSetUpdate()
         }
     }
 
@@ -84,11 +65,7 @@ final class MatchViewModel: ObservableObject {
         let myWonSet = myGameScore > yourGameScore
         completedSets.append((my: myGameScore, your: yourGameScore))
 
-        if myWonSet {
-            mySetScore += 1
-        } else {
-            yourSetScore += 1
-        }
+        if myWonSet { mySetScore += 1 } else { yourSetScore += 1 }
 
         myGameScore = 0
         yourGameScore = 0
@@ -97,11 +74,9 @@ final class MatchViewModel: ObservableObject {
         if mySetScore >= format.setsToWin {
             didWin = true
             isMatchOver = true
-            saveMatch()
         } else if yourSetScore >= format.setsToWin {
             didWin = false
             isMatchOver = true
-            saveMatch()
         }
     }
 
@@ -112,30 +87,11 @@ final class MatchViewModel: ObservableObject {
     }
 
     private func sendScoreUpdate() {
-        let update = ScoreUpdate(
+        connectivity.sendScoreUpdate(ScoreUpdate(
             myScore: score.myScore,
             yourScore: score.yourScore,
             myGameScore: myGameScore,
             yourGameScore: yourGameScore
-        )
-        connectivity.sendScoreUpdate(update)
-    }
-
-    private func saveMatch() {
-        guard let context = modelContext else { return }
-
-        let match = Match(matchFormat: format)
-        match.endedAt = Date()
-        match.myTotalSets = mySetScore
-        match.yourTotalSets = yourSetScore
-        match.isCompleted = true
-        match.durationSeconds = healthKit.elapsedSeconds
-
-        let setRecords = completedSets.enumerated().map { index, result in
-            SetRecord(myGames: result.my, yourGames: result.your, setNumber: index + 1)
-        }
-        match.sets = setRecords
-        context.insert(match)
-        try? context.save()
+        ))
     }
 }

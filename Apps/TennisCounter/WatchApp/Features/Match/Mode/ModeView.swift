@@ -24,12 +24,12 @@ struct ModeView: View {
                 Divider().background(Color.white.opacity(0.2))
 
                 Toggle(String(localized: "mode_no_ad"), isOn: $selectionVM.noAdRule)
-                    .font(.system(size: 13))
+                    .font(.system(size: 14))
                     .toggleStyle(SwitchToggleStyle(tint: .green))
 
                 Toggle(String(localized: "mode_no_tie"), isOn: $selectionVM.noTieRule)
-                    .font(.system(size: 13))
-                    .toggleStyle(SwitchToggleStyle(tint: .orange))
+                    .font(.system(size: 14))
+                    .toggleStyle(SwitchToggleStyle(tint: .green))
             }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {

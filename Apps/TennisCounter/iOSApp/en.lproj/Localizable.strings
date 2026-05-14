@@ -12,6 +12,8 @@
 
 /* Match Screen */
 "new_match" = "New Match";
+"mode_no_ad" = "No-AD";
+"mode_no_tie" = "No Tiebreak";
 "score_label_me" = "ME";
 "score_label_opp" = "OPP";
 "btn_confirm" = "Confirm";
@@ -27,8 +29,7 @@
 "score_edit_title" = "Edit Score";
 "watch_score_me" = "ME";
 "watch_score_opp" = "OPP";
-"early_end_button" = "Early End";
-"early_end_confirm_title" = "End Match Early?";
+"early_end_confirm_title" = "End Match?";
 "early_end_confirm_yes" = "End Match";
 "early_end_confirm_message" = "The match result will not be saved.";
 
@@ -53,6 +54,22 @@
 "history_empty" = "No matches recorded yet";
 "history_view_calendar" = "Calendar";
 "history_view_list" = "List";
+
+/* Match Score */
+"set_tiebreak" = "TIE";
+"watch_set_label" = "SET";
+
+/* Match Result */
+"result_save" = "Save";
+"result_saved" = "Saved";
+"watch_victory" = "Victory!";
+"watch_defeat" = "Defeat";
+"result_draw" = "Draw";
+
+/* End Workout Dialog */
+"end_workout_confirm_title" = "End Workout";
+"end_workout_confirm_message" = "End this workout session?";
+"end_workout_with_match_message" = "A match is in progress. Ending the workout will void the match result.";
 
 /* Common */
 "btn_cancel" = "Cancel";

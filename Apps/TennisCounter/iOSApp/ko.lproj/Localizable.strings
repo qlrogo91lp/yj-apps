@@ -12,6 +12,8 @@
 
 /* Match Screen */
 "new_match" = "새 경기";
+"mode_no_ad" = "No-AD";
+"mode_no_tie" = "No-Tiebreak";
 "score_label_me" = "나";
 "score_label_opp" = "상대";
 "btn_confirm" = "확인";
@@ -27,8 +29,7 @@
 "score_edit_title" = "점수 수정";
 "watch_score_me" = "나";
 "watch_score_opp" = "상대";
-"early_end_button" = "조기 종료";
-"early_end_confirm_title" = "경기를 조기 종료할까요?";
+"early_end_confirm_title" = "경기를 종료할까요?";
 "early_end_confirm_yes" = "종료";
 "early_end_confirm_message" = "경기 결과가 저장되지 않습니다.";
 
@@ -53,6 +54,22 @@
 "history_empty" = "저장된 경기가 없습니다";
 "history_view_calendar" = "달력";
 "history_view_list" = "목록";
+
+/* Match Score */
+"set_tiebreak" = "TIE";
+"watch_set_label" = "세트";
+
+/* Match Result */
+"result_save" = "저장";
+"result_saved" = "저장됨";
+"watch_victory" = "승리!";
+"watch_defeat" = "패배";
+"result_draw" = "무승부";
+
+/* End Workout Dialog */
+"end_workout_confirm_title" = "운동 종료";
+"end_workout_confirm_message" = "운동을 종료하시겠습니까?";
+"end_workout_with_match_message" = "경기가 진행 중입니다. 운동을 종료하면 경기 결과가 무효됩니다.";
 
 /* Common */
 "btn_cancel" = "취소";

@@ -20,7 +20,7 @@
 "mode_best_of_3" = "3세트 경기";
 "mode_best_of_3_desc" = "2세트 선취";
 "mode_no_ad" = "No-Ad";
-"mode_no_tie" = "No Tiebreak";
+"mode_no_tie" = "No-Tiebreak";
 "set_tiebreak" = "TIE";
 "score_deciding_point" = "매치 포인트";
 "early_end_confirm_title" = "경기 종료";

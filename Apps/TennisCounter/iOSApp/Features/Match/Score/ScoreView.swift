@@ -1,22 +1,20 @@
-import SwiftData
 import SwiftUI
 
 struct ScoreView: View {
     let format: MatchFormat
     let onMatchFinished: (Bool, [(my: Int, your: Int)]) -> Void
-    let onEnd: () -> Void
+    let onProgressChanged: (Bool) -> Void
 
-    @StateObject private var viewModel: MatchViewModel
-    @Environment(\.modelContext) private var modelContext
+    @StateObject private var viewModel: ScoreViewModel
     @State private var showEditSheet = false
 
     init(format: MatchFormat,
          onMatchFinished: @escaping (Bool, [(my: Int, your: Int)]) -> Void,
-         onEnd: @escaping () -> Void) {
+         onProgressChanged: @escaping (Bool) -> Void = { _ in }) {
         self.format = format
         self.onMatchFinished = onMatchFinished
-        self.onEnd = onEnd
-        _viewModel = StateObject(wrappedValue: MatchViewModel(format: format))
+        self.onProgressChanged = onProgressChanged
+        _viewModel = StateObject(wrappedValue: ScoreViewModel(format: format))
     }
 
     var body: some View {
@@ -42,13 +40,19 @@ struct ScoreView: View {
             .ignoresSafeArea()
 
             VStack {
-                ScoreInfo(
-                    myGameScore: viewModel.myGameScore,
-                    yourGameScore: viewModel.yourGameScore,
-                    mySetScore: viewModel.mySetScore,
-                    yourSetScore: viewModel.yourSetScore,
-                    format: format
-                )
+                VStack(spacing: 6) {
+                    if format == .bestOfThree {
+                        SetScores(
+                            mySetScore: viewModel.mySetScore,
+                            yourSetScore: viewModel.yourSetScore
+                        )
+                    }
+                    GameScores(
+                        myGameScore: viewModel.myGameScore,
+                        yourGameScore: viewModel.yourGameScore,
+                        isTieBreak: viewModel.isTieBreak
+                    )
+                }
                 .padding(.top, 12)
                 .allowsHitTesting(false)
                 Spacer()
@@ -58,21 +62,13 @@ struct ScoreView: View {
                 }
             }
         }
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button(String(localized: "early_end_button"), action: onEnd)
-                    .font(.system(size: 14))
-            }
-        }
-        .onAppear {
-            viewModel.injectContext(modelContext)
-            UIApplication.shared.isIdleTimerDisabled = true
-        }
+        .onAppear { UIApplication.shared.isIdleTimerDisabled = true }
         .onDisappear { UIApplication.shared.isIdleTimerDisabled = false }
         .onChange(of: viewModel.isMatchOver) { _, isOver in
-            if isOver {
-                onMatchFinished(viewModel.didWin, viewModel.completedSets)
-            }
+            if isOver { onMatchFinished(viewModel.didWin, viewModel.completedSets) }
+        }
+        .onChange(of: viewModel.hasProgress) { _, hasProgress in
+            onProgressChanged(hasProgress)
         }
         .sheet(isPresented: $showEditSheet) {
             ScoreEditSheet(score: viewModel.score)
@@ -82,10 +78,6 @@ struct ScoreView: View {
 
 #Preview {
     NavigationStack {
-        ScoreView(
-            format: .oneSet,
-            onMatchFinished: { _, _ in },
-            onEnd: {}
-        )
+        ScoreView(format: .oneSet, onMatchFinished: { _, _ in })
     }
 }

@@ -5,7 +5,9 @@ struct MatchSessionView: View {
 
     @StateObject private var viewModel = MatchSessionViewModel()
     @State private var selectedTab: Int = 1
-    @State private var showEndConfirm = false
+    @State private var showEndMatchConfirm = false
+    @State private var showEndWorkoutConfirm = false
+    @State private var hasMatchProgress = false
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -15,13 +17,7 @@ struct MatchSessionView: View {
                 onPauseResume: {
                     viewModel.isPaused ? viewModel.resumeSession() : viewModel.pauseSession()
                 },
-                onEnd: {
-                    if case .playing = viewModel.phase {
-                        showEndConfirm = true
-                    } else {
-                        onExit()
-                    }
-                }
+                onEnd: { showEndWorkoutConfirm = true }
             )
             .tabItem { Label(String(localized: "tab_workout"), systemImage: "figure.run") }
             .tag(0)
@@ -34,23 +30,56 @@ struct MatchSessionView: View {
         .navigationBarBackButtonHidden(true)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
-                if case .modeSelection = viewModel.phase {
-                    BackButton { onExit() }
-                } else if case .playing = viewModel.phase {
+                switch viewModel.phase {
+                case .modeSelection:
                     BackButton { selectedTab = 0 }
+                case .playing:
+                    BackButton {
+                        if hasMatchProgress {
+                            showEndMatchConfirm = true
+                        } else {
+                            viewModel.startNewMatch()
+                        }
+                    }
+                case .finished:
+                    BackButton { viewModel.startNewMatch() }
+                }
+            }
+            ToolbarItem(placement: .principal) {
+                if case .modeSelection = viewModel.phase {
+                    Text(String(localized: "new_match"))
+                        .font(.system(size: 28, weight: .bold))
+                        .foregroundColor(.white)
                 }
             }
         }
-        .confirmationDialog(
+        .alert(
             String(localized: "early_end_confirm_title"),
-            isPresented: $showEndConfirm
+            isPresented: $showEndMatchConfirm
         ) {
             Button(String(localized: "early_end_confirm_yes"), role: .destructive) {
+                hasMatchProgress = false
+                viewModel.startNewMatch()
+            }
+            Button(String(localized: "btn_cancel"), role: .cancel) {}
+        } message: {
+            Text(String(localized: "early_end_confirm_message"))
+        }
+        .alert(
+            String(localized: "end_workout_confirm_title"),
+            isPresented: $showEndWorkoutConfirm
+        ) {
+            Button(String(localized: "workout_end"), role: .destructive) {
                 viewModel.endSession()
                 onExit()
             }
+            Button(String(localized: "btn_cancel"), role: .cancel) {}
         } message: {
-            Text(String(localized: "early_end_confirm_message"))
+            if case .playing = viewModel.phase {
+                Text(String(localized: "end_workout_with_match_message"))
+            } else {
+                Text(String(localized: "end_workout_confirm_message"))
+            }
         }
         .onAppear { viewModel.startSession() }
     }
@@ -59,8 +88,8 @@ struct MatchSessionView: View {
     private var scoreTabContent: some View {
         switch viewModel.phase {
         case .modeSelection:
-            ModeView { format in
-                viewModel.startMatch(format: format)
+            ModeView { options in
+                viewModel.startMatch(options: options)
             }
 
         case .playing(let options):
@@ -70,17 +99,11 @@ struct MatchSessionView: View {
                 onMatchFinished: { didWin, sets in
                     viewModel.finishMatch(didWin: didWin, completedSets: sets)
                 },
-                onEnd: { showEndConfirm = true }
+                onProgressChanged: { hasMatchProgress = $0 }
             )
 
         case .finished(let session):
-            MatchResultView(
-                didWin: session.result == .win,
-                completedSets: session.completedSets.map { ($0.my, $0.your) },
-                onNewMatch: { viewModel.startNewMatch() },
-                onExit: { onExit() }
-            )
-            .navigationBarBackButtonHidden()
+            MatchResultView(session: session, viewModel: viewModel)
         }
     }
 }

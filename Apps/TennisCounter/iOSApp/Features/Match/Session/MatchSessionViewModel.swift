@@ -12,6 +12,7 @@ class MatchSessionViewModel: ObservableObject {
     private var startedAt: Date?
     private let sessionId: UUID = .init()
     private var currentOptions: MatchOptions?
+    private var _currentSession: MatchSession?
     private var timer: Timer?
     private var cancellables = Set<AnyCancellable>()
 
@@ -36,9 +37,7 @@ class MatchSessionViewModel: ObservableObject {
             .store(in: &cancellables)
     }
 
-    deinit {
-        timer?.invalidate()
-    }
+    deinit { timer?.invalidate() }
 
     func startSession() {
         startedAt = Date()
@@ -56,21 +55,19 @@ class MatchSessionViewModel: ObservableObject {
         startTimer()
     }
 
-    func startMatch(format: MatchFormat) {
-        let mode = MatchMode(rawValue: format.rawValue) ?? .oneSet
-        let options = MatchOptions(mode: mode, noAdRule: true, noTieRule: false)
+    func startMatch(options: MatchOptions) {
         currentOptions = options
-        phase = .playing(options)
-    }
-
-    func finishMatch(didWin: Bool, completedSets: [(my: Int, your: Int)]) {
-        guard let options = currentOptions else { return }
-        let session = MatchSession(
+        _currentSession = MatchSession(
             workoutSessionId: sessionId,
             options: options,
             startedAt: startedAt ?? Date(),
             kcalAtStart: 0
         )
+        phase = .playing(options)
+    }
+
+    func finishMatch(didWin: Bool, completedSets: [(my: Int, your: Int)]) {
+        guard let session = _currentSession else { return }
         session.endedAt = Date()
         session.result = didWin ? .win : .loss
         let setScores = completedSets.map { SetScore(my: $0.my, your: $0.your) }
@@ -81,7 +78,19 @@ class MatchSessionViewModel: ObservableObject {
         phase = .finished(session)
     }
 
+    func saveCurrentMatch() throws {
+        guard let session = _currentSession else { return }
+        let record = MatchRecord(from: session)
+        try MatchPersistenceService.shared.save(record)
+    }
+
+    func restartMatch() {
+        guard let options = _currentSession?.options else { return }
+        startMatch(options: options)
+    }
+
     func startNewMatch() {
+        _currentSession = nil
         currentOptions = nil
         phase = .modeSelection
     }
@@ -91,6 +100,8 @@ class MatchSessionViewModel: ObservableObject {
         timer = nil
         elapsedSeconds = 0
         metrics = .init()
+        _currentSession = nil
+        currentOptions = nil
         phase = .modeSelection
     }
 
