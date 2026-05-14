@@ -22,7 +22,7 @@ struct WorkoutTabView: View {
                         .padding(.bottom, 4)
                         .foregroundColor(.secondary)
                 }
-                
+  
                 HStack(alignment: .bottom, spacing: 6) {
                     Text(metrics.heartRate > 0 ? String(format: "%.0f", metrics.heartRate) : "--")
                         .font(.system(size: 38, weight: .bold, design: .rounded))
@@ -32,7 +32,7 @@ struct WorkoutTabView: View {
                         .padding(.bottom, 4)
                 }
             }
-            
+
             Spacer()
 
             WorkoutControls(

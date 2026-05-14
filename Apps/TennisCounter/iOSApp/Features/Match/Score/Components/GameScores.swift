@@ -6,7 +6,7 @@ struct GameScores: View {
     let isTieBreak: Bool
 
     var body: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: 20) {
             Text("\(myGameScore)")
                 .foregroundColor(.green)
                 .contentTransition(.numericText())
@@ -16,9 +16,9 @@ struct GameScores: View {
                 .foregroundColor(.orange)
                 .contentTransition(.numericText())
         }
-        .font(.system(size: 20, weight: .bold))
-        .padding(.horizontal, 16)
-        .padding(.vertical, 8)
+        .font(.system(size: 40, weight: .bold))
+        .padding(.horizontal, 25)
+        .padding(.vertical, 10)
         .background(Color.black.opacity(0.75))
         .clipShape(Capsule())
         .overlay(Capsule().strokeBorder(Color.white.opacity(0.25), lineWidth: 1))

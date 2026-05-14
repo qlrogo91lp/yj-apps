@@ -39,26 +39,26 @@ struct ScoreView: View {
             }
             .ignoresSafeArea()
 
-            VStack {
-                VStack(spacing: 6) {
-                    if format == .bestOfThree {
-                        SetScores(
-                            mySetScore: viewModel.mySetScore,
-                            yourSetScore: viewModel.yourSetScore
-                        )
-                    }
-                    GameScores(
-                        myGameScore: viewModel.myGameScore,
-                        yourGameScore: viewModel.yourGameScore,
-                        isTieBreak: viewModel.isTieBreak
+            VStack(spacing: 15) {
+                if format == .bestOfThree {
+                    SetScores(
+                        mySetScore: viewModel.mySetScore,
+                        yourSetScore: viewModel.yourSetScore
                     )
                 }
-                .padding(.top, 12)
-                .allowsHitTesting(false)
-                Spacer()
-                if viewModel.score.lastAction != .none {
+                GameScores(
+                    myGameScore: viewModel.myGameScore,
+                    yourGameScore: viewModel.yourGameScore,
+                    isTieBreak: viewModel.isTieBreak
+                )
+            }
+            .padding(.bottom, 300)
+
+            if viewModel.score.lastAction != .none {
+                VStack {
+                    Spacer()
                     UndoButton(action: { viewModel.undo() })
-                        .padding(.bottom, 20)
+                        .padding(.bottom, 150)
                 }
             }
         }
@@ -78,6 +78,6 @@ struct ScoreView: View {
 
 #Preview {
     NavigationStack {
-        ScoreView(format: .oneSet, onMatchFinished: { _, _ in })
+        ScoreView(format: .bestOfThree, onMatchFinished: { _, _ in })
     }
 }
