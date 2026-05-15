@@ -3,7 +3,7 @@ import Foundation
 
 @MainActor
 final class ScoreViewModel: ObservableObject {
-    let format: MatchFormat
+    let options: MatchOptions
 
     @Published var score = Score()
     @Published var myGameScore: Int = 0
@@ -15,7 +15,7 @@ final class ScoreViewModel: ObservableObject {
     @Published var isMatchOver: Bool = false
     @Published var didWin: Bool = false
 
-    var isTieBreak: Bool { myGameScore == 6 && yourGameScore == 6 }
+    var isTieBreak: Bool { score.gameMode == .tieBreak }
 
     var hasProgress: Bool {
         myGameScore > 0 || yourGameScore > 0 ||
@@ -27,8 +27,9 @@ final class ScoreViewModel: ObservableObject {
     private var cancellable: AnyCancellable?
     private let connectivity = WatchConnectivityService.shared
 
-    init(format: MatchFormat = .oneSet) {
-        self.format = format
+    init(options: MatchOptions = MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false)) {
+        self.options = options
+        self.score.noAdRule = options.noAdRule
         cancellable = score.objectWillChange.sink { [weak self] _ in
             self?.objectWillChange.send()
         }
@@ -41,6 +42,9 @@ final class ScoreViewModel: ObservableObject {
         score.resetData()
         sendScoreUpdate()
         checkSetUpdate()
+        if myGameScore == 6 && yourGameScore == 6 && !options.noTieRule {
+            score.setTieBreakMode()
+        }
     }
 
     func undo() {
@@ -56,6 +60,7 @@ final class ScoreViewModel: ObservableObject {
         completedSets = []
         isMatchOver = false
         didWin = false
+        score.noAdRule = options.noAdRule
         score.resetData()
     }
 
@@ -71,10 +76,10 @@ final class ScoreViewModel: ObservableObject {
         yourGameScore = 0
         currentSetNumber += 1
 
-        if mySetScore >= format.setsToWin {
+        if mySetScore >= options.mode.setsToWin {
             didWin = true
             isMatchOver = true
-        } else if yourSetScore >= format.setsToWin {
+        } else if yourSetScore >= options.mode.setsToWin {
             didWin = false
             isMatchOver = true
         }
@@ -83,6 +88,7 @@ final class ScoreViewModel: ObservableObject {
     private func isSetComplete() -> Bool {
         let maxGames = max(myGameScore, yourGameScore)
         let minGames = min(myGameScore, yourGameScore)
+        if maxGames == 7 && minGames == 6 { return true }
         return maxGames >= 6 && (maxGames - minGames) >= 2
     }
 

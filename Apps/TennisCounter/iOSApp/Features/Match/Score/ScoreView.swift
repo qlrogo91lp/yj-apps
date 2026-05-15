@@ -1,20 +1,20 @@
 import SwiftUI
 
 struct ScoreView: View {
-    let format: MatchFormat
+    let options: MatchOptions
     let onMatchFinished: (Bool, [(my: Int, your: Int)]) -> Void
     let onProgressChanged: (Bool) -> Void
 
     @StateObject private var viewModel: ScoreViewModel
     @State private var showEditSheet = false
 
-    init(format: MatchFormat,
+    init(options: MatchOptions,
          onMatchFinished: @escaping (Bool, [(my: Int, your: Int)]) -> Void,
          onProgressChanged: @escaping (Bool) -> Void = { _ in }) {
-        self.format = format
+        self.options = options
         self.onMatchFinished = onMatchFinished
         self.onProgressChanged = onProgressChanged
-        _viewModel = StateObject(wrappedValue: ScoreViewModel(format: format))
+        _viewModel = StateObject(wrappedValue: ScoreViewModel(options: options))
     }
 
     var body: some View {
@@ -40,7 +40,7 @@ struct ScoreView: View {
             .ignoresSafeArea()
 
             VStack(spacing: 15) {
-                if format == .bestOfThree {
+                if options.mode == .bestOfThree {
                     SetScores(
                         mySetScore: viewModel.mySetScore,
                         yourSetScore: viewModel.yourSetScore
@@ -78,6 +78,9 @@ struct ScoreView: View {
 
 #Preview {
     NavigationStack {
-        ScoreView(format: .bestOfThree, onMatchFinished: { _, _ in })
+        ScoreView(
+            options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false),
+            onMatchFinished: { _, _ in }
+        )
     }
 }

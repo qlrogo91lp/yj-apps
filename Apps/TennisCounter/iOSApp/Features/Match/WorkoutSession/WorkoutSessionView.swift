@@ -1,13 +1,16 @@
 import SwiftUI
 
-struct MatchSessionView: View {
+struct WorkoutSessionView: View {
     let onExit: () -> Void
 
-    @StateObject private var viewModel = MatchSessionViewModel()
+    @StateObject private var viewModel = WorkoutSessionViewModel()
     @State private var selectedTab: Int = 1
     @State private var showEndMatchConfirm = false
     @State private var showEndWorkoutConfirm = false
     @State private var hasMatchProgress = false
+
+    @State private var noAdRule: Bool = true
+    @State private var noTieRule: Bool = false
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -88,14 +91,11 @@ struct MatchSessionView: View {
     private var scoreTabContent: some View {
         switch viewModel.phase {
         case .modeSelection:
-            ModeView { options in
-                viewModel.startMatch(options: options)
-            }
+            modeSelectionContent
 
         case .playing(let options):
-            let format = MatchFormat(rawValue: options.mode.rawValue) ?? .oneSet
             ScoreView(
-                format: format,
+                options: options,
                 onMatchFinished: { didWin, sets in
                     viewModel.finishMatch(didWin: didWin, completedSets: sets)
                 },
@@ -106,10 +106,42 @@ struct MatchSessionView: View {
             MatchResultView(session: session, viewModel: viewModel)
         }
     }
+
+    @ViewBuilder
+    private var modeSelectionContent: some View {
+        ZStack {
+            Color.black.ignoresSafeArea()
+
+            VStack(spacing: 24) {
+                ForEach(MatchFormat.allCases, id: \.rawValue) { format in
+                    Button {
+                        let mode = MatchMode(rawValue: format.rawValue) ?? .oneSet
+                        viewModel.startMatch(options: MatchOptions(mode: mode, noAdRule: noAdRule, noTieRule: noTieRule))
+                    } label: {
+                        ModeListItem(format: format)
+                    }
+                    .buttonStyle(.plain)
+                }
+
+                Divider().background(Color.white.opacity(0.2))
+
+                Toggle(String(localized: "mode_no_ad"), isOn: $noAdRule)
+                    .font(.system(size: 15))
+                    .tint(.green)
+
+                Toggle(String(localized: "mode_no_tie"), isOn: $noTieRule)
+                    .font(.system(size: 15))
+                    .tint(.green)
+
+                Spacer()
+            }
+            .padding(.horizontal, 24)
+        }
+    }
 }
 
 #Preview {
     NavigationStack {
-        MatchSessionView(onExit: {})
+        WorkoutSessionView(onExit: {})
     }
 }

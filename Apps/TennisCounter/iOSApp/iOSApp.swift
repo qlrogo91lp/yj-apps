@@ -66,7 +66,7 @@ struct MainTabView: View {
 
             if isMatchActive {
                 NavigationStack {
-                    MatchSessionView(onExit: {
+                    WorkoutSessionView(onExit: {
                         selectedTab = 1
                         withAnimation { isMatchActive = false }
                     })

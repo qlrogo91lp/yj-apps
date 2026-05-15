@@ -2,7 +2,7 @@ import SwiftUI
 
 struct MatchResultView: View {
     let session: MatchSession
-    @ObservedObject var viewModel: MatchSessionViewModel
+    @ObservedObject var viewModel: WorkoutSessionViewModel
 
     @State private var saved = false
     @State private var saveError: String?
@@ -100,6 +100,6 @@ struct MatchResultView: View {
     session.result = .win
 
     return NavigationStack {
-        MatchResultView(session: session, viewModel: MatchSessionViewModel())
+        MatchResultView(session: session, viewModel: WorkoutSessionViewModel())
     }
 }

@@ -2,7 +2,7 @@ import Combine
 import Foundation
 
 @MainActor
-class MatchSessionViewModel: ObservableObject {
+class WorkoutSessionViewModel: ObservableObject {
     @Published var phase: MatchPhase = .modeSelection
     @Published var elapsedSeconds: Int = 0
     @Published var metrics: WorkoutMetrics = .init()
