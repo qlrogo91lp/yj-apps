@@ -35,8 +35,18 @@
 
 /* Workout */
 "workout_pause" = "일시정지";
+"workout_resume" = "계속하기";
 "workout_end" = "운동 종료";
 "ios_start_workout" = "운동 시작";
+"workout_in_progress" = "진행 중";
+"workout_paused" = "일시정지됨";
+"workout_elapsed_label" = "운동 시간";
+"workout_metric_heartrate" = "심박수";
+"workout_metric_calories" = "칼로리";
+"workout_metric_steps" = "걸음 수";
+"workout_metric_steps_unit" = "걸음";
+"workout_metric_matches" = "경기 수";
+"workout_metric_matches_unit" = "경기";
 
 /* Summary */
 "summary_period_today" = "오늘";

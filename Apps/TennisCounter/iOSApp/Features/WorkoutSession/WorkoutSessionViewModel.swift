@@ -8,6 +8,7 @@ class WorkoutSessionViewModel: ObservableObject {
     @Published var metrics: WorkoutMetrics = .init()
     @Published var watchConnected: Bool = false
     @Published var isPaused: Bool = false
+    @Published var completedMatchCount: Int = 0
 
     private var startedAt: Date?
     private let sessionId: UUID = .init()
@@ -31,7 +32,8 @@ class WorkoutSessionViewModel: ObservableObject {
                 self.metrics = WorkoutMetrics(
                     elapsedSeconds: TimeInterval(self.elapsedSeconds),
                     calories: received.calories,
-                    heartRate: received.heartRate
+                    heartRate: received.heartRate,
+                    steps: received.steps
                 )
             }
             .store(in: &cancellables)
@@ -75,6 +77,7 @@ class WorkoutSessionViewModel: ObservableObject {
         session.mySetScore = setScores.filter { $0.my > $0.your }.count
         session.yourSetScore = setScores.filter { $0.your > $0.my }.count
         session.kcalAtEnd = metrics.calories
+        completedMatchCount += 1
         phase = .finished(session)
     }
 
@@ -115,7 +118,8 @@ class WorkoutSessionViewModel: ObservableObject {
                 self.metrics = WorkoutMetrics(
                     elapsedSeconds: TimeInterval(self.elapsedSeconds),
                     calories: self.metrics.calories,
-                    heartRate: self.metrics.heartRate
+                    heartRate: self.metrics.heartRate,
+                    steps: self.metrics.steps
                 )
             }
         }

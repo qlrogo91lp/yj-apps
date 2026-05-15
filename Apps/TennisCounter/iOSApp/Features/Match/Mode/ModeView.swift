@@ -15,7 +15,7 @@ struct ModeView: View {
                         selectionVM.selectedMode = mode
                         viewModel.startMatch(options: selectionVM.options)
                     } label: {
-                        ModeListItem(format: format)
+                        ModeOptionItem(format: format)
                     }
                     .buttonStyle(.plain)
                 }
@@ -35,4 +35,8 @@ struct ModeView: View {
             .padding(.horizontal, 24)
         }
     }
+}
+
+#Preview {
+    ModeView(viewModel: WorkoutSessionViewModel())
 }

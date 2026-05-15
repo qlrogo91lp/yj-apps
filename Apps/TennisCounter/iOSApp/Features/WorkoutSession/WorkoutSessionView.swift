@@ -13,6 +13,7 @@ struct WorkoutSessionView: View {
         TabView(selection: $selectedTab) {
             WorkoutTabView(
                 metrics: viewModel.metrics,
+                completedMatchCount: viewModel.completedMatchCount,
                 isPaused: viewModel.isPaused,
                 onPauseResume: {
                     viewModel.isPaused ? viewModel.resumeSession() : viewModel.pauseSession()
@@ -108,5 +109,6 @@ struct WorkoutSessionView: View {
 #Preview {
     NavigationStack {
         WorkoutSessionView(onExit: {})
+            .preferredColorScheme(.dark)
     }
 }

@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct ModeListItem: View {
+struct ModeOptionItem: View {
     let format: MatchFormat
 
     var body: some View {
@@ -18,7 +18,7 @@ struct ModeListItem: View {
                 .foregroundColor(.white.opacity(0.6))
         }
         .padding(20)
-        .background(Color.white.opacity(0.08))
+        .background(Color(.secondarySystemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 }

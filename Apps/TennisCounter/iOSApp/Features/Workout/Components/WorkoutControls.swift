@@ -6,27 +6,30 @@ struct WorkoutControls: View {
     let onEnd: () -> Void
 
     var body: some View {
-        HStack(spacing: 24) {
+        HStack(spacing: 12) {
             Button(action: onPauseResume) {
-                Image(systemName: isPaused ? "play.fill" : "pause.fill")
-                    .font(.system(size: 36))
+                HStack(spacing: 8) {
+                    Image(systemName: isPaused ? "play.fill" : "pause.fill")
+                        .font(.system(size: 16, weight: .semibold))
+                    Text(isPaused ? String(localized: "workout_resume") : String(localized: "workout_pause"))
+                        .font(.system(size: 17, weight: .semibold))
+                }
+                .frame(maxWidth: .infinity)
+                .frame(height: 56)
+                .background(Color.yellow)
+                .foregroundColor(.black)
+                .clipShape(Capsule())
             }
-            .frame(maxWidth: .infinity)
-            .frame(height: 100)
-            .background(Color.yellow.opacity(0.9))
-            .foregroundColor(.black)
-            .clipShape(Circle())
             .accessibilityLabel(isPaused ? String(localized: "workout_resume") : String(localized: "workout_pause"))
 
             Button(role: .destructive, action: onEnd) {
                 Image(systemName: "stop.fill")
-                    .font(.system(size: 32))
+                    .font(.system(size: 20))
+                    .frame(width: 56, height: 56)
+                    .background(Color.red.opacity(0.85))
+                    .foregroundColor(.white)
+                    .clipShape(Circle())
             }
-            .frame(maxWidth: .infinity)
-            .frame(height: 100)
-            .background(Color.red.opacity(0.85))
-            .foregroundColor(.white)
-            .clipShape(Circle())
             .accessibilityLabel(String(localized: "workout_end"))
         }
         .padding(.bottom, 16)
@@ -35,4 +38,5 @@ struct WorkoutControls: View {
 
 #Preview {
     WorkoutControls(isPaused: false, onPauseResume: {}, onEnd: {})
+        .background(Color.black)
 }
