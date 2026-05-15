@@ -9,9 +9,6 @@ struct WorkoutSessionView: View {
     @State private var showEndWorkoutConfirm = false
     @State private var hasMatchProgress = false
 
-    @State private var noAdRule: Bool = true
-    @State private var noTieRule: Bool = false
-
     var body: some View {
         TabView(selection: $selectedTab) {
             WorkoutTabView(
@@ -91,7 +88,7 @@ struct WorkoutSessionView: View {
     private var scoreTabContent: some View {
         switch viewModel.phase {
         case .modeSelection:
-            modeSelectionContent
+            ModeView(viewModel: viewModel)
 
         case .playing(let options):
             ScoreView(
@@ -104,38 +101,6 @@ struct WorkoutSessionView: View {
 
         case .finished(let session):
             MatchResultView(session: session, viewModel: viewModel)
-        }
-    }
-
-    @ViewBuilder
-    private var modeSelectionContent: some View {
-        ZStack {
-            Color.black.ignoresSafeArea()
-
-            VStack(spacing: 24) {
-                ForEach(MatchFormat.allCases, id: \.rawValue) { format in
-                    Button {
-                        let mode = MatchMode(rawValue: format.rawValue) ?? .oneSet
-                        viewModel.startMatch(options: MatchOptions(mode: mode, noAdRule: noAdRule, noTieRule: noTieRule))
-                    } label: {
-                        ModeListItem(format: format)
-                    }
-                    .buttonStyle(.plain)
-                }
-
-                Divider().background(Color.white.opacity(0.2))
-
-                Toggle(String(localized: "mode_no_ad"), isOn: $noAdRule)
-                    .font(.system(size: 15))
-                    .tint(.green)
-
-                Toggle(String(localized: "mode_no_tie"), isOn: $noTieRule)
-                    .font(.system(size: 15))
-                    .tint(.green)
-
-                Spacer()
-            }
-            .padding(.horizontal, 24)
         }
     }
 }

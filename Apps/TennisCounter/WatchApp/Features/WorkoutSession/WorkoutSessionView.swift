@@ -30,7 +30,7 @@ struct WorkoutSessionView: View {
         case .modeSelection:
             ModeView(viewModel: viewModel)
         case let .playing(options):
-            MatchView(options: options, flowViewModel: viewModel)
+            ScoreView(options: options, flowViewModel: viewModel)
         case let .finished(session):
             MatchResultView(session: session, flowViewModel: viewModel)
         }

@@ -1,15 +1,15 @@
 import SwiftUI
 
-struct MatchView: View {
+struct ScoreView: View {
     let options: MatchOptions
     @ObservedObject var flowViewModel: WorkoutSessionViewModel
-    @StateObject private var viewModel: MatchViewModel
+    @StateObject private var viewModel: ScoreViewModel
     @State private var showEarlyEndConfirm = false
 
     init(options: MatchOptions, flowViewModel: WorkoutSessionViewModel) {
         self.options = options
         self.flowViewModel = flowViewModel
-        _viewModel = StateObject(wrappedValue: MatchViewModel(options: options))
+        _viewModel = StateObject(wrappedValue: ScoreViewModel(options: options))
     }
 
     var body: some View {
@@ -101,7 +101,7 @@ struct MatchView: View {
 }
 
 #Preview {
-    MatchView(
+    ScoreView(
         options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false),
         flowViewModel: WorkoutSessionViewModel()
     )

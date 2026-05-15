@@ -1,7 +1,7 @@
 import Combine
 import SwiftUI
 
-class MatchViewModel: ObservableObject {
+class ScoreViewModel: ObservableObject {
     @Published var score = Score()
     @Published var myGameScore: Int = 0
     @Published var yourGameScore: Int = 0
