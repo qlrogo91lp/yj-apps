@@ -10,14 +10,11 @@ struct ModeView: View {
 
             VStack(spacing: 24) {
                 ForEach(MatchFormat.allCases, id: \.rawValue) { format in
-                    Button {
+                    ModeOptionItem(format: format) {
                         let mode = MatchMode(rawValue: format.rawValue) ?? .oneSet
                         selectionVM.selectedMode = mode
                         viewModel.startMatch(options: selectionVM.options)
-                    } label: {
-                        ModeOptionItem(format: format)
                     }
-                    .buttonStyle(.plain)
                 }
 
                 Divider().background(Color.white.opacity(0.2))

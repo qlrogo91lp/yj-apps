@@ -16,7 +16,7 @@ struct ModeOptionItem: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 10)
-            .background(Color.green.opacity(0.25))
+            .background(Color.white.opacity(0.2))
             .clipShape(RoundedRectangle(cornerRadius: 10))
         }
         .buttonStyle(.plain)
@@ -35,4 +35,8 @@ struct ModeOptionItem: View {
         case .bestOfThree: String(localized: "mode_best_of_3_desc")
         }
     }
+}
+
+#Preview {
+    ModeOptionItem(mode: .oneSet, onTap: {})
 }

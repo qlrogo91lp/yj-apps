@@ -50,18 +50,6 @@ struct ScoreView: View {
 
                 Spacer()
 
-                // Deciding point / Deuce label
-                if viewModel.score.isDecidingPoint {
-                    Text(String(localized: "score_deciding_point"))
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundColor(.white.opacity(0.7))
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 3)
-                        .background(Color.white.opacity(0.1))
-                        .clipShape(Capsule())
-                        .transition(.opacity)
-                }
-
                 // Undo button
                 if viewModel.score.lastAction != .none {
                     UndoButton { viewModel.undo() }

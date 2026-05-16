@@ -103,11 +103,6 @@ class Score: ObservableObject {
         gameMode == .normal && myNormal == .forty && yourNormal == .forty && !noAdRule
     }
 
-    /// True when both at 40 and noAdRule is ON — show DECIDING POINT label
-    var isDecidingPoint: Bool {
-        gameMode == .normal && myNormal == .forty && yourNormal == .forty && noAdRule
-    }
-
     private func addNormalPoint(_ side: PlayerSide) -> PlayerSide? {
         if side == .me {
             switch myNormal {

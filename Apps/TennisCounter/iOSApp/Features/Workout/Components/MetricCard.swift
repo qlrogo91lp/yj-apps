@@ -10,7 +10,7 @@ struct MetricCard<Content: View>: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity, minHeight: 100, alignment: .leading)
-        .background(Color(.secondarySystemBackground))
+        .background(Color.white.opacity(0.2))
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 }

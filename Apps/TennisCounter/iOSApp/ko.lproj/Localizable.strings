@@ -18,7 +18,7 @@
 "score_label_opp" = "상대";
 "btn_confirm" = "확인";
 "btn_reset" = "초기화";
-"btn_undo" = "실행 취소";
+"btn_undo" = "취소";
 "btn_end_match" = "경기 종료";
 "btn_end_set" = "세트 종료";
 "btn_new_match" = "새 경기";
