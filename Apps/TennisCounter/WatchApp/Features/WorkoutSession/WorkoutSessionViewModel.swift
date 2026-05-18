@@ -1,5 +1,6 @@
 import Combine
 import Foundation
+import WidgetKit
 
 @MainActor
 class WorkoutSessionViewModel: ObservableObject {
@@ -8,6 +9,8 @@ class WorkoutSessionViewModel: ObservableObject {
 
     let healthKit = HealthKitService.shared
     let workoutSessionId: UUID = .init()
+
+    private let appGroupDefaults = UserDefaults(suiteName: "group.com.yj.TennisCounter")
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -21,6 +24,8 @@ class WorkoutSessionViewModel: ObservableObject {
         Task {
             await healthKit.requestAuthorization()
             healthKit.startWorkout()
+            appGroupDefaults?.set(true, forKey: "isWorkoutActive")
+            WidgetCenter.shared.reloadTimelines(ofKind: "ComplicationApp")
         }
     }
 
@@ -86,6 +91,8 @@ class WorkoutSessionViewModel: ObservableObject {
 
     func endWorkout() {
         _currentSession = nil
+        appGroupDefaults?.set(false, forKey: "isWorkoutActive")
+        WidgetCenter.shared.reloadTimelines(ofKind: "ComplicationApp")
         Task { _ = await healthKit.stopWorkout() }
     }
 }
