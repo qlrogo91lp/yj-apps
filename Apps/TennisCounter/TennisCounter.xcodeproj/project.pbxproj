@@ -486,7 +486,7 @@
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ComplicationApp/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = TennisCounter;
+				INFOPLIST_KEY_CFBundleDisplayName = Ralli;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -525,7 +525,7 @@
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ComplicationApp/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = TennisCounter;
+				INFOPLIST_KEY_CFBundleDisplayName = Ralli;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -672,7 +672,7 @@
 				DEVELOPMENT_TEAM = P2TU28W32L;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = TennisCounter;
+				INFOPLIST_KEY_CFBundleDisplayName = Ralli;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Ralli uses HealthKit to track calories and heart rate during matches.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Ralli saves your tennis workout to Apple Health.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
@@ -707,7 +707,7 @@
 				DEVELOPMENT_TEAM = P2TU28W32L;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = TennisCounter;
+				INFOPLIST_KEY_CFBundleDisplayName = Ralli;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Ralli uses HealthKit to track calories and heart rate during matches.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Ralli saves your tennis workout to Apple Health.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";

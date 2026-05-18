@@ -29,9 +29,9 @@
 "score_edit_title" = "점수 수정";
 "watch_score_me" = "나";
 "watch_score_opp" = "상대";
-"early_end_confirm_title" = "경기를 종료할까요?";
-"early_end_confirm_yes" = "종료";
-"early_end_confirm_message" = "경기 결과가 저장되지 않습니다.";
+"early_end_confirm_title" = "경기를 중단할까요?";
+"early_end_confirm_yes" = "확인";
+"early_end_confirm_message" = "점수는 저장되지 않습니다.";
 
 /* Workout */
 "workout_pause" = "일시정지";
@@ -67,7 +67,7 @@
 
 /* Match Score */
 "set_tiebreak" = "TIE";
-"watch_set_label" = "세트";
+"watch_set_label" = "SET";
 
 /* Match Result */
 "result_save" = "저장";

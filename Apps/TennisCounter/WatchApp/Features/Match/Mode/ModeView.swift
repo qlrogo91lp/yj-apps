@@ -7,10 +7,6 @@ struct ModeView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 10) {
-                Text(String(localized: "mode_select_title"))
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(.white.opacity(0.7))
-
                 ModeOptionItem(mode: .oneSet) {
                     selectionVM.selectedMode = .oneSet
                     viewModel.startMatch(options: selectionVM.options)

@@ -16,7 +16,7 @@ struct GameScores: View {
                 .foregroundColor(.orange)
                 .contentTransition(.numericText())
         }
-        .font(.system(size: 15, weight: .bold))
+        .font(.system(size: 18, weight: .bold))
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
         .background(Color.black.opacity(0.8))

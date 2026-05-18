@@ -12,8 +12,8 @@ struct UndoButton: View {
                     .font(.system(size: 14, weight: .semibold))
             }
             .foregroundColor(.white.opacity(0.8))
-            .padding(.horizontal, 10)
-            .padding(.vertical, 5)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
             .background(Color.gray.opacity(0.3))
             .clipShape(Capsule())
             .overlay(Capsule().strokeBorder(Color.white.opacity(0.2), lineWidth: 1))

@@ -80,7 +80,4 @@ class ScoreViewModel: ObservableObject {
         }
     }
 
-    func triggerEarlyEnd() {
-        onMatchFinished?(.draw, completedSets)
-    }
 }

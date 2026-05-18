@@ -6,7 +6,7 @@ struct SetScores: View {
 
     var body: some View {
         if mySetScore > 0 || yourSetScore > 0 {
-            HStack(spacing: 6) {
+            HStack(spacing: 4) {
                 Text("\(mySetScore)")
                     .foregroundColor(.green.opacity(0.8))
                 Text(String(localized: "watch_set_label"))
@@ -14,7 +14,7 @@ struct SetScores: View {
                 Text("\(yourSetScore)")
                     .foregroundColor(.orange.opacity(0.8))
             }
-            .font(.system(size: 16, weight: .medium))
+            .font(.system(size: 16, weight: .bold))
         }
     }
 }

@@ -9,7 +9,7 @@ struct MatchResultView: View {
     var body: some View {
         VStack(spacing: 2) {
             Text(resultTitle)
-                .font(.system(size: 30, weight: .bold))
+                .font(.system(size: 25, weight: .bold))
                 .foregroundColor(resultColor)
                 .multilineTextAlignment(.center)
 

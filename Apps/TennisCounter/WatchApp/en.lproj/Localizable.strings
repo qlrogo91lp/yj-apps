@@ -14,7 +14,6 @@
 "metrics_paused" = "paused";
 "metrics_kcal" = "kcal";
 "metrics_bpm" = "BPM";
-"mode_select_title" = "Select Mode";
 "mode_one_set" = "One Set";
 "mode_one_set_desc" = "1 set match";
 "mode_best_of_3" = "Best of 3";
@@ -23,9 +22,9 @@
 "mode_no_tie" = "No Tiebreak";
 "set_tiebreak" = "TIE";
 "score_deciding_point" = "DECIDING POINT";
-"early_end_confirm_title" = "End Match";
-"early_end_confirm_message" = "End as a draw?";
-"early_end_confirm_yes" = "Draw";
+"early_end_confirm_title" = "Quit Match";
+"early_end_confirm_message" = "Quit the match? Your score won't be saved.";
+"early_end_confirm_yes" = "Confirm";
 "result_save" = "Save";
 "result_saved" = "Saved";
 "result_draw" = "Draw";

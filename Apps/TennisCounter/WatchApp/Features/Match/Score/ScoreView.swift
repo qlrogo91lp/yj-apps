@@ -4,7 +4,7 @@ struct ScoreView: View {
     let options: MatchOptions
     @ObservedObject var flowViewModel: WorkoutSessionViewModel
     @StateObject private var viewModel: ScoreViewModel
-    @State private var showEarlyEndConfirm = false
+    @State private var showExitConfirm = false
 
     init(options: MatchOptions, flowViewModel: WorkoutSessionViewModel) {
         self.options = options
@@ -14,12 +14,12 @@ struct ScoreView: View {
 
     var body: some View {
         ZStack {
-            // Score pad
             HStack(spacing: 0) {
                 PlayerScoreButton(
                     displayScore: viewModel.score.myDisplayScore,
                     player: String(localized: "watch_score_me"),
                     color: .green,
+                    hasSetScore: viewModel.mySetScore > 0 || viewModel.yourSetScore > 0,
                     action: { viewModel.addPoint(.me) }
                 )
 
@@ -27,12 +27,14 @@ struct ScoreView: View {
                     displayScore: viewModel.score.yourDisplayScore,
                     player: String(localized: "watch_score_opp"),
                     color: .orange,
+                    hasSetScore: viewModel.mySetScore > 0 || viewModel.yourSetScore > 0,
                     action: { viewModel.addPoint(.opponent) }
                 )
             }
-            .ignoresSafeArea()
+            .ignoresSafeArea(.container)
 
-            VStack {
+            GeometryReader { geo in
+                let isSmall = geo.size.width <= 162
                 VStack(spacing: 4) {
                     SetScores(
                         mySetScore: viewModel.mySetScore,
@@ -44,38 +46,36 @@ struct ScoreView: View {
                         isTieBreak: viewModel.score.gameMode == .tieBreak
                     )
                 }
-                .frame(maxWidth: .infinity, alignment: .center)
-                .padding(.top, 20)
-                .padding(.horizontal, 8)
-
-                Spacer()
-
-                // Undo button
-                if viewModel.score.lastAction != .none {
-                    UndoButton { viewModel.undo() }
-                        .padding(.bottom, 20)
+                .padding(.top, isSmall ? 24 : 40)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                .overlay(alignment: .bottom) {
+                    if viewModel.score.lastAction != .none {
+                        UndoButton { viewModel.undo() }
+                            .padding(.bottom, isSmall ? 20 : 25)
+                    }
                 }
+                .ignoresSafeArea(.container)
+                .animation(.easeInOut(duration: 0.2), value: viewModel.score.lastAction)
             }
-            .animation(.easeInOut(duration: 0.2), value: viewModel.score.lastAction)
-
         }
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 BackButton {
-                    if viewModel.myGameScore == 0, viewModel.yourGameScore == 0 {
+                    if viewModel.mySetScore == 0, viewModel.yourSetScore == 0,
+                       viewModel.myGameScore == 0, viewModel.yourGameScore == 0 {
                         flowViewModel.startNewMatch()
                     } else {
-                        showEarlyEndConfirm = true
+                        showExitConfirm = true
                     }
                 }
             }
         }
         .confirmationDialog(
             String(localized: "early_end_confirm_title"),
-            isPresented: $showEarlyEndConfirm
+            isPresented: $showExitConfirm
         ) {
             Button(String(localized: "early_end_confirm_yes"), role: .destructive) {
-                viewModel.triggerEarlyEnd()
+                flowViewModel.startNewMatch()
             }
         } message: {
             Text(String(localized: "early_end_confirm_message"))
