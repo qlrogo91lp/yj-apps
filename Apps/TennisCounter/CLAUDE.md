@@ -28,45 +28,76 @@ Tennis score tracking app (Ralli) with three targets sharing a single model. Fea
 Shared/
 │  # iOS/Watch 두 타겟이 공유하는 코드. 플랫폼 독립적인 순수 로직만 둔다.
 ├── Models/
-│   └── Score.swift        # 점수 상태 ObservableObject. scoreArr = [0,15,30,40,50], undo via LastAction enum
+│   ├── Score.swift          # 점수 상태 ObservableObject. scoreArr = [0,15,30,40,50], undo via LastAction enum
+│   ├── MatchFormat.swift    # 경기 포맷 (세트 수, 타이브레이크 등)
+│   ├── MatchMode.swift      # 경기 모드 enum
+│   ├── MatchOptions.swift   # 경기 옵션 (포맷 + 모드 조합)
+│   ├── MatchPhase.swift     # 경기 진행 단계 enum (mode → playing → result)
+│   ├── MatchResult.swift    # 경기 결과 struct
+│   ├── MatchSession.swift   # 진행 중 경기 세션 상태
+│   ├── SetScore.swift       # 세트 점수 struct
+│   └── WorkoutMetrics.swift # HealthKit 메트릭 (칼로리, BPM, 시간)
+├── Persistence/
+│   │  # SwiftData @Model 클래스. DB 스키마 역할.
+│   ├── Match.swift          # SwiftData 경기 기록 모델
+│   ├── MatchRecord.swift    # 경기 기록 집계 struct
+│   └── SetRecord.swift      # 세트별 기록 struct
 └── Services/
-    │  # 외부 프레임워크/시스템 API를 래핑하는 서비스 레이어. Phase 1+에서 파일 추가 예정.
-    ├── HealthKitService.swift       # (Phase 1-B) 워크아웃 세션, 칼로리/BPM 측정
-    ├── WatchConnectivityService.swift  # (Phase 1-A) 폰↔워치 실시간 점수 동기화
-    └── CloudKitService.swift        # (Phase 1-A) SwiftData + iCloud 경기 기록 동기화
+    │  # 외부 프레임워크/시스템 API를 래핑하는 서비스 레이어.
+    ├── HealthKitService.swift          # 워크아웃 세션, 칼로리/BPM 측정
+    ├── MatchPersistenceService.swift   # SwiftData 경기 저장/조회
+    └── WatchConnectivityService.swift  # 폰↔워치 실시간 점수 동기화
 
 iOSApp/
 │  # iPhone 전용 타겟
 ├── iOSApp.swift           # @main 진입점 + MainTabView
 ├── Components/
-│   └── MatchDetailSheet.swift  # Summary·History 공유 컴포넌트
+│   ├── BackButton.swift        # 공통 뒤로가기 버튼
+│   ├── BrandTitle.swift        # 앱 브랜드 타이틀 컴포넌트
+│   └── MatchDetailSheet.swift  # Summary·History 공유 경기 상세 시트
 └── Features/
+    ├── Home/
+    │   └── HomeView.swift           # iOS 홈 화면 (탭 컨테이너)
+    ├── Launch/
+    │   └── LaunchScreenView.swift   # 런치 스크린
     ├── Summary/
     │   ├── SummaryView.swift
-    │   ├── SummaryViewModel.swift  # SummaryPeriod, SummaryStats 포함
+    │   ├── SummaryViewModel.swift
     │   └── Components/
     │       ├── StatCard.swift
     │       └── RecentMatchCard.swift
     ├── Match/
-    │   │  # Watch 앱과 대칭 구조: Mode / Tab(iOS 전용) / Score / Result / Workout
-    │   ├── Mode/                        # 포맷 선택 화면 (Watch: Match/Mode/)
+    │   │  # Watch 앱과 대칭 구조: Mode / Score / Result
+    │   ├── Mode/                        # 포맷 선택 화면
     │   │   ├── ModeView.swift
+    │   │   ├── ModeViewModel.swift
     │   │   └── Components/
-    │   │       └── ModeCard.swift
-    │   ├── Tab/                         # iOS 전용 탭 컨테이너 (Watch: WorkoutSession/)
-    │   │   ├── MatchTabView.swift
-    │   │   └── MatchTabViewModel.swift
-    │   ├── Score/                       # 점수 입력 화면 (Watch: Match/Score/)
+    │   │       └── ModeOptionItem.swift
+    │   ├── Score/                       # 점수 입력 화면
     │   │   ├── ScoreView.swift
-    │   │   ├── MatchViewModel.swift
+    │   │   ├── ScoreViewModel.swift
     │   │   └── Components/
     │   │       ├── PlayerScoreZone.swift
-    │   │       ├── ScoreOverlay.swift
+    │   │       ├── GameScores.swift
+    │   │       ├── SetScores.swift
+    │   │       ├── UndoButton.swift
     │   │       └── ScoreEditSheet.swift
-    │   ├── Result/                      # 경기 결과 화면 (Watch: Match/Result/)
-    │   │   └── MatchResultView.swift
-    │   └── Workout/                     # 워크아웃 메트릭 탭 (iOS 전용)
-    │       └── WorkoutTabView.swift
+    │   └── Result/                      # 경기 결과 화면
+    │       ├── MatchResultView.swift
+    │       └── Components/
+    │           ├── RematchButton.swift
+    │           └── SaveButton.swift
+    ├── Workout/                         # 워크아웃 메트릭 탭 (iOS 전용)
+    │   ├── WorkoutTabView.swift
+    │   └── Components/
+    │       ├── HeartRateIcon.swift
+    │       ├── MetricCard.swift
+    │       ├── WorkoutControls.swift
+    │       ├── WorkoutMetricsGrid.swift
+    │       └── WorkoutTimerRing.swift
+    ├── WorkoutSession/                  # iOS 워크아웃 세션 컨테이너
+    │   ├── WorkoutSessionView.swift
+    │   └── WorkoutSessionViewModel.swift
     └── History/
         ├── HistoryView.swift
         ├── HistoryViewModel.swift
@@ -78,10 +109,11 @@ iOSApp/
 WatchApp/
 │  # Apple Watch 전용 타겟. HealthKit 통합 Workout 경험 제공.
 ├── WatchApp.swift         # @main 진입점 → HomeView()
+├── Components/
+│   └── BackButton.swift   # 공통 뒤로가기 버튼
 └── Features/
     ├── Home/
-    │   │  # 워치 홈 화면 — Workout 진입 버튼
-    │   └── HomeView.swift
+    │   └── HomeView.swift           # 워치 홈 화면 — Workout 진입 버튼
     ├── Match/
     │   │  # 경기 도메인 (Workout과 독립적). 모드 선택 → 점수 입력 → 결과
     │   ├── Mode/                        # 포맷 선택 화면
@@ -90,17 +122,18 @@ WatchApp/
     │   │   └── Components/
     │   │       └── ModeOptionItem.swift
     │   ├── Score/                       # 점수 입력 화면
-    │   │   ├── MatchView.swift
-    │   │   ├── MatchViewModel.swift
+    │   │   ├── ScoreView.swift
+    │   │   ├── ScoreViewModel.swift
     │   │   └── Components/
-    │   │       ├── GameScore.swift
-    │   │       ├── SetScoreBadge.swift
+    │   │       ├── GameScores.swift
+    │   │       ├── SetScores.swift
     │   │       ├── PlayerScoreButton.swift
-    │   │       ├── SetIndicatorView.swift
-    │   │       ├── UndoButton.swift
-    │   │       └── EarlyEndButton.swift
+    │   │       └── UndoButton.swift
     │   └── Result/                      # 경기 결과 화면
-    │       └── MatchResultView.swift
+    │       ├── MatchResultView.swift
+    │       └── Components/
+    │           ├── RematchButton.swift
+    │           └── SaveButton.swift
     ├── Workout/
     │   │  # HealthKit 통합 전용 UI (제어, 메트릭 표시)
     │   ├── Controls/                    # 일시정지/재개/종료 버튼
@@ -124,9 +157,10 @@ ComplicationApp/
 ```
 
 - **Score** (`ObservableObject`): point state (`scoreArr = [0, 15, 30, 40, 50]`), undo via `LastAction` enum. iOS/Watch 타겟 공유.
-- **MatchViewModel**: `Score` 인스턴스를 `@Published`로 소유, 게임/세트 레벨 로직 담당. `Match/Score/MatchViewModel.swift`에 위치.
-- **ScoreView**: `@StateObject var viewModel = MatchViewModel()`으로 ViewModel 바인딩. 경기 종료 시 `MatchResultView`로 전환.
-- **Roadmap**: Phase 1-A에서 3-탭(Summary/Match/History) + SwiftData + WatchConnectivity. Phase 1-B에서 HealthKit + Live Activity. Phase 2에서 Firebase 멀티 모드 + StoreKit 2.
+- **ScoreViewModel**: `Score` 인스턴스를 소유, 게임/세트 레벨 로직 담당. iOS·Watch 모두 `Match/Score/ScoreViewModel.swift`에 위치.
+- **ScoreView**: `ScoreViewModel`을 바인딩. 경기 종료 시 `MatchResultView`로 전환.
+- **Shared/Persistence/**: SwiftData `@Model` 클래스. `MatchPersistenceService`를 통해서만 접근.
+- **Roadmap**: Phase 1-A (SwiftData + WatchConnectivity) 구현 완료. Phase 1-B에서 HealthKit + Live Activity. Phase 2에서 Firebase 멀티 모드 + StoreKit 2.
 
 ## Folder Conventions
 
