@@ -52,19 +52,13 @@ final class ScoreViewModel: ObservableObject {
 
     func addPoint(_ side: PlayerSide) {
         guard !isMatchOver else { return }
-        guard score.addPoint(side) != nil else { return }
+        let gameWon = score.addPoint(side)
+        LiveActivityService.shared.update(from: makeScoreState(), score: score)
+        guard gameWon != nil else { return }
         if side == .me { myGameScore += 1 } else { yourGameScore += 1 }
         score.resetData()
         sendScoreState()
-        let myS = score.gameMode == .tieBreak ? score.myTieBreak : score.myScore
-        let yourS = score.gameMode == .tieBreak ? score.yourTieBreak : score.yourScore
-        LiveActivityService.shared.update(from: ScoreState(
-            myScore: myS, yourScore: yourS,
-            myGameScore: myGameScore, yourGameScore: yourGameScore,
-            mySetScore: mySetScore, yourSetScore: yourSetScore,
-            completedSets: completedSets.map { [$0.my, $0.your] },
-            isTieBreak: score.gameMode == .tieBreak
-        ), score: score)
+        LiveActivityService.shared.update(from: makeScoreState(), score: score)
         checkSetUpdate()
         if myGameScore == 6 && yourGameScore == 6 && !options.noTieRule {
             score.setTieBreakMode()
@@ -100,20 +94,21 @@ final class ScoreViewModel: ObservableObject {
         isApplyingRemote = false
     }
 
-    private func sendScoreState() {
-        guard !isApplyingRemote else { return }
-        let myScore = score.gameMode == .tieBreak ? score.myTieBreak : score.myScore
-        let yourScore = score.gameMode == .tieBreak ? score.yourTieBreak : score.yourScore
-        connectivity.sendScoreState(ScoreState(
-            myScore: myScore,
-            yourScore: yourScore,
-            myGameScore: myGameScore,
-            yourGameScore: yourGameScore,
-            mySetScore: mySetScore,
-            yourSetScore: yourSetScore,
+    private func makeScoreState() -> ScoreState {
+        let myS = score.gameMode == .tieBreak ? score.myTieBreak : score.myScore
+        let yourS = score.gameMode == .tieBreak ? score.yourTieBreak : score.yourScore
+        return ScoreState(
+            myScore: myS, yourScore: yourS,
+            myGameScore: myGameScore, yourGameScore: yourGameScore,
+            mySetScore: mySetScore, yourSetScore: yourSetScore,
             completedSets: completedSets.map { [$0.my, $0.your] },
             isTieBreak: score.gameMode == .tieBreak
-        ))
+        )
+    }
+
+    private func sendScoreState() {
+        guard !isApplyingRemote else { return }
+        connectivity.sendScoreState(makeScoreState())
     }
 
     private func checkSetUpdate() {

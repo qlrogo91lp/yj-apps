@@ -7,7 +7,7 @@ struct HomeView: View {
         NavigationStack {
             VStack(spacing: 16) {
                 Spacer()
-                
+
                 BrandTitle()
 
                 Spacer()

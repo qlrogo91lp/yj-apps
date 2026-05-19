@@ -2194,6 +2194,72 @@ git commit -m "design: Summary StatCard 아이콘 제거"
 
 ---
 
+## Task 15: Live Activity 운동 시간 표시
+
+잠금화면 및 Dynamic Island 확장 뷰 좌측에 운동 시작 시각 기준 실시간 타이머를 추가한다.
+`Text(timerInterval:)` 방식으로 iOS가 직접 카운팅하므로 Live Activity 업데이트 불필요.
+
+**Files:**
+- Modify: `TennisLiveActivity/Models/TennisActivityAttributes.swift` — `workoutStartTime: Date?` 추가
+- Modify: `TennisLiveActivity/TennisLiveActivityView.swift` — 잠금화면 + 확장 뷰 레이아웃 변경
+- Modify: `iOSApp/Services/LiveActivityService.swift` — `start()` 시 `workoutStartTime: Date.now` 전달, `update()` 시 유지
+
+- [ ] **Step 1: TennisActivityAttributes.swift — workoutStartTime 추가**
+
+```swift
+struct ContentState: Codable, Hashable {
+    var myPoint: String
+    var yourPoint: String
+    var myGame: Int
+    var yourGame: Int
+    var mySet: Int
+    var yourSet: Int
+    var isTieBreak: Bool
+    var workoutStartTime: Date?
+    ...
+}
+```
+
+- [ ] **Step 2: TennisLiveActivityView.swift — 레이아웃 변경 (잠금화면 + 확장 뷰 동일)**
+
+타이머를 왼쪽에 노란색 rounded 배지로 표시. Spacer로 타이머와 점수 영역을 분리.
+
+```swift
+HStack {
+    if let start = state.workoutStartTime {
+        Text(timerInterval: start...Date.distantFuture, countsDown: false)
+            .font(.system(size: 13, weight: .semibold))
+            .monospacedDigit()
+            .foregroundColor(.yellow)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(Color.yellow.opacity(0.15), in: RoundedRectangle(cornerRadius: 8))
+    }
+    Spacer()
+    // 기존 점수 HStack
+}
+```
+
+- [ ] **Step 3: LiveActivityService.swift — workoutStartTime 전달**
+
+`start()` 에서 `ContentState.empty` 대신 `workoutStartTime: Date.now` 포함 state 생성.
+`update()` 에서 기존 `activity?.content.state.workoutStartTime` 을 유지해 전달.
+
+- [ ] **Step 4: 빌드 확인**
+
+```bash
+xcodebuild -project TennisCounter.xcodeproj -scheme "TennisCounter" -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build 2>&1 | grep -E "error:|BUILD"
+```
+
+- [ ] **Step 5: 커밋**
+
+```bash
+git add TennisLiveActivity/Models/TennisActivityAttributes.swift TennisLiveActivity/TennisLiveActivityView.swift iOSApp/Services/LiveActivityService.swift
+git commit -m "feat: Live Activity 잠금화면에 운동 시간 실시간 표시"
+```
+
+---
+
 ## 최종 빌드 검증
 
 - [ ] iOS + Watch 동시 빌드
@@ -2207,5 +2273,5 @@ xcodebuild -project TennisCounter.xcodeproj -scheme "TennisCounter Watch App" -d
 - [ ] Complication Extension 빌드
 
 ```bash
-xcodebuild -project TennisCounter.xcodeproj -scheme "ComplicationAppExtension" -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)' build 2>&1 | grep -E "error:|BUILD"
+xcodebuild -project TennisCounㄱter.xcodeproj -scheme "ComplicationAppExtension" -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)' build 2>&1 | grep -E "error:|BUILD"
 ```

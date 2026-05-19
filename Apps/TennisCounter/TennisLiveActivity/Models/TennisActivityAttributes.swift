@@ -10,12 +10,14 @@ struct TennisActivityAttributes: ActivityAttributes {
         var mySet: Int
         var yourSet: Int
         var isTieBreak: Bool
+        var workoutStartTime: Date?
 
         static let empty = ContentState(
             myPoint: "0", yourPoint: "0",
             myGame: 0, yourGame: 0,
             mySet: 0, yourSet: 0,
-            isTieBreak: false
+            isTieBreak: false,
+            workoutStartTime: nil
         )
     }
 

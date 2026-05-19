@@ -5,15 +5,20 @@ import Foundation
 final class LiveActivityService {
     static let shared = LiveActivityService()
     private var activity: Activity<TennisActivityAttributes>?
+    private var workoutStartTime: Date?
 
     private init() {}
 
     func start(mode: MatchFormat) {
         guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
+        let startTime = Date.now
+        workoutStartTime = startTime
         let attributes = TennisActivityAttributes(matchMode: mode.rawValue)
+        var initial = TennisActivityAttributes.ContentState.empty
+        initial.workoutStartTime = startTime
         activity = try? Activity.request(
             attributes: attributes,
-            contentState: .empty,
+            contentState: initial,
             pushType: nil
         )
     }
@@ -26,7 +31,8 @@ final class LiveActivityService {
             yourGame: state.yourGameScore,
             mySet: state.mySetScore,
             yourSet: state.yourSetScore,
-            isTieBreak: state.isTieBreak
+            isTieBreak: state.isTieBreak,
+            workoutStartTime: workoutStartTime
         )
         Task { await activity?.update(using: contentState) }
     }
@@ -34,5 +40,6 @@ final class LiveActivityService {
     func end() {
         Task { await activity?.end(dismissalPolicy: .immediate) }
         activity = nil
+        workoutStartTime = nil
     }
 }

@@ -8,15 +8,22 @@ struct TennisCounterApp: App {
     @State private var isLaunching = true
 
     init() {
+        let schema = Schema([Match.self, SetRecord.self])
         do {
-            let schema = Schema([Match.self, SetRecord.self])
+            // iCloud 로그인 상태일 때 CloudKit 동기화 활성화
             let config = ModelConfiguration(schema: schema, cloudKitDatabase: .automatic)
             container = try ModelContainer(for: schema, configurations: config)
-            let context = ModelContext(container)
-            MatchPersistenceService.shared.configure(with: context)
         } catch {
-            fatalError("Failed to create ModelContainer: \(error)")
+            // iCloud 미로그인(시뮬레이터, 개발 환경 등) 시 로컬 저장소로 폴백
+            let config = ModelConfiguration(schema: schema)
+            do {
+                container = try ModelContainer(for: schema, configurations: config)
+            } catch {
+                fatalError("Failed to create ModelContainer: \(error)")
+            }
         }
+        let context = ModelContext(container)
+        MatchPersistenceService.shared.configure(with: context)
     }
 
     var body: some Scene {
@@ -54,6 +61,7 @@ struct MainTabView: View {
                     .tabItem { Label(String(localized: "tab_history"), systemImage: "clock.fill") }
                     .tag(2)
             }
+            .colorScheme(.dark)
 
             if isMatchActive {
                 NavigationStack {
