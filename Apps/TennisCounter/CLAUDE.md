@@ -14,6 +14,12 @@ xcodebuild -project TennisCounter.xcodeproj -scheme "TennisCounter Watch App" -d
 # Build Complication widget
 xcodebuild -project TennisCounter.xcodeproj -scheme "ComplicationAppExtension" -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)' build
 
+# Run iOS tests
+xcodebuild test -project TennisCounter.xcodeproj -scheme "TennisCounter" -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
+
+# Run Watch tests
+xcodebuild test -project TennisCounter.xcodeproj -scheme "TennisCounter Watch App" -destination 'platform=watchOS Simulator,id=8502B1AE-7DCB-4442-9D80-FD34FD0370E1'
+
 # Lint & Format
 make lint      # Run swiftlint
 make format    # SwiftFormat --lint check
@@ -224,6 +230,35 @@ docs/superpowers/
 - Swift 파일을 생성하거나 삭제하면 Xcode가 폴더를 자동 스캔해서 빌드 대상에 포함/제외한다.
 - `.xcodeproj/project.pbxproj`를 직접 수정하거나 `xcodeproj` gem 등 프로젝트 파일 편집 도구를 사용할 필요가 없다.
 - 파일 이동/생성/삭제는 파일시스템 조작만으로 충분하다.
+
+## Testing
+
+기능 추가나 버그 수정 시 **반드시 테스트를 함께 작성**한다.
+
+**프레임워크**: Swift Testing (`@Test`, `#expect`, `Issue.record`)
+
+**파일 위치**
+
+| 대상 | 테스트 파일 |
+|------|-----------|
+| iOS 타겟 (`TennisCounter`) | `iosTests/iosTests.swift` |
+| Watch 타겟 (`TennisCounter Watch App`) | `watchosTests/watchosTests.swift` |
+
+**테스트 대상 우선순위**
+
+1. **ViewModel** — 비즈니스 로직의 핵심. 반드시 테스트.
+2. **Service** — 메시지 파싱, 데이터 변환 등 순수 로직 부분.
+3. **Model** — `toDictionary()` / `init?(from:)` 같은 직렬화 로직.
+4. **View** — 테스트하지 않는다. UI는 직접 확인.
+
+**작성 규칙**
+
+- ViewModel 테스트는 `@MainActor` 필수
+- 테스트명: `대상_행위_예상결과` 형태 (e.g., `addPointWinsGame`, `endSessionResetsState`)
+- 하나의 `@Test` 는 하나의 시나리오만 검증
+- 외부 의존성(HealthKit, WatchConnectivity)은 테스트에서 직접 호출하지 않음 — ViewModel의 순수 상태 변화만 검증
+
+**버그 수정 시**: 해당 버그를 재현하는 테스트를 먼저 작성한 뒤 수정한다.
 
 ## Code Conventions
 

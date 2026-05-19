@@ -6,6 +6,7 @@ import WidgetKit
 class WorkoutSessionViewModel: ObservableObject {
     @Published var phase: MatchPhase = .modeSelection
     @Published var isPaused: Bool = false
+    @Published var remoteWorkoutEnded: Bool = false
 
     let healthKit = HealthKitService.shared
     let workoutSessionId: UUID = .init()
@@ -27,6 +28,16 @@ class WorkoutSessionViewModel: ObservableObject {
                 guard let self, case .modeSelection = self.phase else { return }
                 if !self.healthKit.isWorkoutActive { self.startWorkout() }
                 self.startMatch(options: msg.options, sessionId: msg.sessionId, isRemote: true)
+            }
+            .store(in: &cancellables)
+
+        connectivity.$receivedWorkoutEnd
+            .compactMap { $0 }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                guard let self else { return }
+                self.endWorkout()
+                self.remoteWorkoutEnded = true
             }
             .store(in: &cancellables)
     }
@@ -114,6 +125,7 @@ class WorkoutSessionViewModel: ObservableObject {
         _currentSession = nil
         appGroupDefaults?.set(false, forKey: "isWorkoutActive")
         WidgetCenter.shared.reloadTimelines(ofKind: "ComplicationApp")
+        connectivity.sendWorkoutEnd()
         Task { _ = await healthKit.stopWorkout() }
     }
 

@@ -9,6 +9,7 @@ private enum WCMessageType: String {
     case scoreState
     case matchEnd
     case metrics
+    case workoutEnd
 }
 
 struct SessionStartMessage {
@@ -170,6 +171,7 @@ final class WatchConnectivityService: NSObject, ObservableObject {
     @Published var receivedScoreState: ScoreState?
     @Published var receivedMatchEnd: MatchEndMessage?
     @Published var receivedMetrics: WorkoutMetrics?
+    @Published var receivedWorkoutEnd: Date?
 
     override private init() {
         super.init()
@@ -200,6 +202,10 @@ final class WatchConnectivityService: NSObject, ObservableObject {
         send(metrics.toDictionary())
     }
 
+    func sendWorkoutEnd() {
+        send(["type": WCMessageType.workoutEnd.rawValue])
+    }
+
     private func send(_ dict: [String: Any]) {
         guard WCSession.default.activationState == .activated else { return }
         #if os(iOS)
@@ -223,6 +229,8 @@ final class WatchConnectivityService: NSObject, ObservableObject {
                 self.receivedMatchEnd = MatchEndMessage(from: message)
             case WCMessageType.metrics.rawValue:
                 self.receivedMetrics = WorkoutMetrics(from: message)
+            case WCMessageType.workoutEnd.rawValue:
+                self.receivedWorkoutEnd = Date()
             default:
                 break
             }

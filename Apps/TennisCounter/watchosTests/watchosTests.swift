@@ -1,20 +1,9 @@
-//
-//  watchosTests.swift
-//  watchosTests
-//
-//  Created by yj on 4/29/26.
-//
-
 @testable import TennisCounter_Watch_App
 import Testing
 
 struct watchosTests {
 
-    @Test func example() {
-        // Write your test here and use APIs like `#expect(...)` to check expected conditions.
-        // Swift Testing Documentation
-        // https://developer.apple.com/documentation/testing
-    }
+    @Test func example() {}
 
     @Test @MainActor func finishMatchSetsPhaseImmediately() {
         let vm = WorkoutSessionViewModel()
@@ -22,7 +11,7 @@ struct watchosTests {
         vm.finishMatch(result: .draw, completedSets: [])
 
         guard case .finished = vm.phase else {
-            Issue.record("Expected .finished phase immediately after finishMatch, got \(vm.phase)")
+            Issue.record("Expected .finished phase immediately after finishMatch")
             return
         }
     }
@@ -54,11 +43,33 @@ struct watchosTests {
         vm.restartMatch()
 
         guard case let .playing(newOptions) = vm.phase else {
-            Issue.record("Expected .playing phase after restartMatch, got \(vm.phase)")
+            Issue.record("Expected .playing phase after restartMatch")
             return
         }
         #expect(newOptions.mode == .bestOfThree)
         #expect(newOptions.noAdRule == false)
         #expect(newOptions.noTieRule == true)
+    }
+
+    // MARK: - 워크아웃 종료 동기화
+
+    @Test @MainActor func endWorkoutClearsCurrentSession() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        #expect(vm.currentSession() != nil)
+        vm.endWorkout()
+        #expect(vm.currentSession() == nil)
+    }
+
+    @Test @MainActor func endWorkoutDuringMatchInProgressClearsSession() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .bestOfThree, noAdRule: false, noTieRule: true))
+        vm.endWorkout()
+        #expect(vm.currentSession() == nil)
+    }
+
+    @Test @MainActor func remoteWorkoutEndedDefaultsFalse() {
+        let vm = WorkoutSessionViewModel()
+        #expect(vm.remoteWorkoutEnded == false)
     }
 }

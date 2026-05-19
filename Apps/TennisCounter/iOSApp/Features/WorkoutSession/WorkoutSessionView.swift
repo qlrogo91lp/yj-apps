@@ -94,6 +94,9 @@ struct WorkoutSessionView: View {
                 viewModel.startMatch(options: remote.options, isRemote: true)
             }
         }
+        .onChange(of: viewModel.remoteWorkoutEnded) { ended in
+            if ended { onExit() }
+        }
     }
 
     @ViewBuilder

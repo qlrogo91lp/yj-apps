@@ -9,6 +9,7 @@ class WorkoutSessionViewModel: ObservableObject {
     @Published var watchConnected: Bool = false
     @Published var isPaused: Bool = false
     @Published var completedMatchCount: Int = 0
+    @Published var remoteWorkoutEnded: Bool = false
 
     private var startedAt: Date?
     private var sessionId: UUID = .init()
@@ -58,6 +59,16 @@ class WorkoutSessionViewModel: ObservableObject {
                 let session = self.buildSession(from: msg)
                 self.completedMatchCount += 1
                 self.phase = .finished(session)
+            }
+            .store(in: &cancellables)
+
+        connectivity.$receivedWorkoutEnd
+            .compactMap { $0 }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                guard let self else { return }
+                self.endSession()
+                self.remoteWorkoutEnded = true
             }
             .store(in: &cancellables)
     }
@@ -134,6 +145,7 @@ class WorkoutSessionViewModel: ObservableObject {
         _currentSession = nil
         phase = .modeSelection
         LiveActivityService.shared.end()
+        connectivity.sendWorkoutEnd()
     }
 
     // MARK: - Private

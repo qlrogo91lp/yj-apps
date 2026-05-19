@@ -1,10 +1,3 @@
-//
-//  iosTests.swift
-//  iosTests
-//
-//  Created by yj on 4/29/26.
-//
-
 @testable import TennisCounter
 import Testing
 
@@ -35,15 +28,20 @@ struct iosTests {
         #expect(metrics == nil)
     }
 
-    @Test func workoutMetricsFormattedElapsed() {
-        let metrics = WorkoutMetrics(elapsedSeconds: 3724)
-        #expect(metrics.formattedElapsed == "62:04")
+    @Test func workoutMetricsFormattedElapsedUnderHour() {
+        let metrics = WorkoutMetrics(elapsedSeconds: 754) // 12분 34초
+        #expect(metrics.formattedElapsed == "12:34")
+    }
+
+    @Test func workoutMetricsFormattedElapsedOverHour() {
+        let metrics = WorkoutMetrics(elapsedSeconds: 3724) // 1시간 2분 4초
+        #expect(metrics.formattedElapsed == "1:02:04")
     }
 
     // MARK: - ScoreViewModel addPoint
 
     @Test @MainActor func addPointWinsGame() {
-        let vm = ScoreViewModel(format: .oneSet)
+        let vm = ScoreViewModel()
         // 4번 탭하면 게임 승리 (noAdRule=true 기본값: 0→15→30→40→win)
         vm.addPoint(.me)
         vm.addPoint(.me)
@@ -54,7 +52,7 @@ struct iosTests {
     }
 
     @Test @MainActor func addPointOpponentWinsGame() {
-        let vm = ScoreViewModel(format: .oneSet)
+        let vm = ScoreViewModel()
         vm.addPoint(.opponent)
         vm.addPoint(.opponent)
         vm.addPoint(.opponent)
@@ -64,7 +62,7 @@ struct iosTests {
     }
 
     @Test @MainActor func addPointUndoResetsScore() {
-        let vm = ScoreViewModel(format: .oneSet)
+        let vm = ScoreViewModel()
         vm.addPoint(.me) // 15-0
         vm.undo()
         #expect(vm.score.myDisplayScore == "0")
@@ -72,7 +70,7 @@ struct iosTests {
     }
 
     @Test @MainActor func addPointMatchOver() {
-        let vm = ScoreViewModel(format: .oneSet)
+        let vm = ScoreViewModel()
         // oneSet: 6게임 이기면 매치 종료
         for _ in 0 ..< 6 {
             vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
@@ -84,20 +82,20 @@ struct iosTests {
     }
 
     @Test @MainActor func undoAfterGameWinIsNoOp() {
-        let vm = ScoreViewModel(format: .oneSet)
+        let vm = ScoreViewModel()
         vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me) // game won
         let gameScoreBefore = vm.myGameScore
         vm.undo() // undo cannot reverse a game-winning tap
         #expect(vm.myGameScore == gameScoreBefore) // game score unchanged
     }
 
-    // MARK: - MatchSessionViewModel
+    // MARK: - WorkoutSessionViewModel
 
     @Test @MainActor func matchSessionStartMatchSetsPlayingPhase() {
-        let vm = MatchSessionViewModel()
-        vm.startMatch(format: .oneSet)
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
         guard case .playing(let options) = vm.phase else {
-            Issue.record("Expected .playing phase, got \(vm.phase)")
+            Issue.record("Expected .playing phase")
             return
         }
         #expect(options.mode == .oneSet)
@@ -105,12 +103,12 @@ struct iosTests {
     }
 
     @Test @MainActor func matchSessionFinishMatchSetsFinishedPhase() {
-        let vm = MatchSessionViewModel()
+        let vm = WorkoutSessionViewModel()
         vm.startSession()
-        vm.startMatch(format: .oneSet)
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
         vm.finishMatch(didWin: true, completedSets: [(my: 6, your: 4)])
         guard case .finished(let session) = vm.phase else {
-            Issue.record("Expected .finished phase, got \(vm.phase)")
+            Issue.record("Expected .finished phase")
             return
         }
         #expect(session.result == .win)
@@ -120,9 +118,9 @@ struct iosTests {
     }
 
     @Test @MainActor func matchSessionStartNewMatchResetsToModeSelection() {
-        let vm = MatchSessionViewModel()
+        let vm = WorkoutSessionViewModel()
         vm.startSession()
-        vm.startMatch(format: .bestOfThree)
+        vm.startMatch(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false))
         vm.startNewMatch()
         guard case .modeSelection = vm.phase else {
             Issue.record("Expected .modeSelection after startNewMatch")
@@ -131,9 +129,9 @@ struct iosTests {
     }
 
     @Test @MainActor func matchSessionEndSessionResetsState() {
-        let vm = MatchSessionViewModel()
+        let vm = WorkoutSessionViewModel()
         vm.startSession()
-        vm.startMatch(format: .oneSet)
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
         vm.endSession()
         guard case .modeSelection = vm.phase else {
             Issue.record("Expected .modeSelection after endSession")
@@ -143,7 +141,7 @@ struct iosTests {
     }
 
     @Test @MainActor func matchSessionPauseStopsTimer() {
-        let vm = MatchSessionViewModel()
+        let vm = WorkoutSessionViewModel()
         vm.startSession()
         vm.pauseSession()
         #expect(vm.isPaused == true)
@@ -151,23 +149,21 @@ struct iosTests {
         #expect(vm.isPaused == false)
     }
 
-    // MARK: - MatchSessionViewModel 확장 테스트
-
     @Test @MainActor func matchSessionRestartMatchUsesSameFormat() {
-        let vm = MatchSessionViewModel()
+        let vm = WorkoutSessionViewModel()
         vm.startSession()
-        vm.startMatch(format: .bestOfThree)
+        vm.startMatch(options: MatchOptions(mode: .bestOfThree, noAdRule: false, noTieRule: true))
         vm.finishMatch(didWin: false, completedSets: [(my: 3, your: 6)])
         vm.restartMatch()
-        guard case .playing(let options) = vm.phase else {
-            Issue.record("Expected .playing after restartMatch, got \(vm.phase)")
+        guard case let .playing(newOptions) = vm.phase else {
+            Issue.record("Expected .playing after restartMatch")
             return
         }
-        #expect(options.mode == .bestOfThree)
+        #expect(newOptions.mode == .bestOfThree)
     }
 
     @Test @MainActor func matchSessionRestartWithoutMatchIsNoOp() {
-        let vm = MatchSessionViewModel()
+        let vm = WorkoutSessionViewModel()
         vm.restartMatch()
         guard case .modeSelection = vm.phase else {
             Issue.record("Expected .modeSelection — restartMatch without prior match should be no-op")
@@ -175,15 +171,15 @@ struct iosTests {
         }
     }
 
-    @Test @MainActor func matchSessionSaveWithNoSessionDoesNotThrow() throws {
-        let vm = MatchSessionViewModel()
-        try vm.saveCurrentMatch()
+    @Test @MainActor func matchSessionSaveWithNoSessionIsNoOp() {
+        let vm = WorkoutSessionViewModel()
+        vm.saveCurrentMatch() // _currentSession nil이면 guard에서 리턴
     }
 
     @Test @MainActor func matchSessionFinishMatchStoresSession() {
-        let vm = MatchSessionViewModel()
+        let vm = WorkoutSessionViewModel()
         vm.startSession()
-        vm.startMatch(format: .oneSet)
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
         vm.finishMatch(didWin: true, completedSets: [(my: 6, your: 4)])
         guard case .finished(let session) = vm.phase else {
             Issue.record("Expected .finished")
@@ -196,14 +192,55 @@ struct iosTests {
     }
 
     @Test @MainActor func matchSessionStartNewMatchClearsToModeSelection() {
-        let vm = MatchSessionViewModel()
+        let vm = WorkoutSessionViewModel()
         vm.startSession()
-        vm.startMatch(format: .oneSet)
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
         vm.finishMatch(didWin: true, completedSets: [(my: 6, your: 4)])
         vm.startNewMatch()
         guard case .modeSelection = vm.phase else {
             Issue.record("Expected .modeSelection after startNewMatch")
             return
         }
+    }
+
+    // MARK: - WorkoutSessionViewModel (워크아웃 종료 동기화)
+
+    @Test @MainActor func workoutSessionRemoteWorkoutEndedDefaultsFalse() {
+        let vm = WorkoutSessionViewModel()
+        #expect(vm.remoteWorkoutEnded == false)
+    }
+
+    @Test @MainActor func workoutSessionEndSessionDuringPlayingResetsPhase() {
+        let vm = WorkoutSessionViewModel()
+        vm.startSession()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.endSession()
+        guard case .modeSelection = vm.phase else {
+            Issue.record("Expected .modeSelection after remote workout end triggers endSession")
+            return
+        }
+        #expect(vm.elapsedSeconds == 0)
+        #expect(vm.isPaused == false)
+    }
+
+    @Test @MainActor func workoutSessionEndSessionAfterFinishedResetsPhase() {
+        let vm = WorkoutSessionViewModel()
+        vm.startSession()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.finishMatch(didWin: true, completedSets: [(my: 6, your: 4)])
+        vm.endSession()
+        guard case .modeSelection = vm.phase else {
+            Issue.record("Expected .modeSelection after endSession from .finished state")
+            return
+        }
+    }
+
+    @Test @MainActor func workoutSessionEndSessionResetsMetrics() {
+        let vm = WorkoutSessionViewModel()
+        vm.startSession()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.endSession()
+        #expect(vm.metrics.calories == 0)
+        #expect(vm.metrics.heartRate == 0)
     }
 }
