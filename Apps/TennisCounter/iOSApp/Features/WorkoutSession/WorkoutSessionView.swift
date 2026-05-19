@@ -2,12 +2,18 @@ import SwiftUI
 
 struct WorkoutSessionView: View {
     let onExit: () -> Void
+    let remoteSession: SessionStartMessage?
 
     @StateObject private var viewModel = WorkoutSessionViewModel()
     @State private var selectedTab: Int = 1
     @State private var showEndMatchConfirm = false
     @State private var showEndWorkoutConfirm = false
     @State private var hasMatchProgress = false
+
+    init(remoteSession: SessionStartMessage? = nil, onExit: @escaping () -> Void) {
+        self.remoteSession = remoteSession
+        self.onExit = onExit
+    }
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -82,7 +88,12 @@ struct WorkoutSessionView: View {
                 Text(String(localized: "end_workout_confirm_message"))
             }
         }
-        .onAppear { viewModel.startSession() }
+        .onAppear {
+            viewModel.startSession()
+            if let remote = remoteSession {
+                viewModel.startMatch(options: remote.options, isRemote: true)
+            }
+        }
     }
 
     @ViewBuilder

@@ -10,14 +10,25 @@ class WorkoutSessionViewModel: ObservableObject {
     let healthKit = HealthKitService.shared
     let workoutSessionId: UUID = .init()
 
+    private let connectivity = WatchConnectivityService.shared
     private let appGroupDefaults = UserDefaults(suiteName: "group.com.yj.TennisCounter")
-
     private var cancellables = Set<AnyCancellable>()
+    private var _currentSession: MatchSession?
 
     init() {
         healthKit.$isPaused
             .receive(on: DispatchQueue.main)
             .assign(to: &$isPaused)
+
+        connectivity.$receivedSessionStart
+            .compactMap { $0 }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] msg in
+                guard let self, case .modeSelection = self.phase else { return }
+                if !self.healthKit.isWorkoutActive { self.startWorkout() }
+                self.startMatch(options: msg.options, sessionId: msg.sessionId, isRemote: true)
+            }
+            .store(in: &cancellables)
     }
 
     func startWorkout() {
@@ -29,22 +40,22 @@ class WorkoutSessionViewModel: ObservableObject {
         }
     }
 
-    func startMatch(options: MatchOptions) {
+    func startMatch(options: MatchOptions, sessionId: UUID? = nil, isRemote: Bool = false) {
+        let id = sessionId ?? workoutSessionId
         let session = MatchSession(
-            workoutSessionId: workoutSessionId,
+            workoutSessionId: id,
             options: options,
             kcalAtStart: healthKit.currentCalories
         )
-        phase = .playing(options)
-        // Store session reference for finishMatch
         _currentSession = session
+        phase = .playing(options)
+
+        if !isRemote {
+            connectivity.sendSessionStart(SessionStartMessage(sessionId: id, options: options))
+        }
     }
 
-    private var _currentSession: MatchSession?
-
-    func currentSession() -> MatchSession? {
-        _currentSession
-    }
+    func currentSession() -> MatchSession? { _currentSession }
 
     func finishMatch(result: MatchResult, completedSets: [SetScore]) {
         guard let session = _currentSession else { return }
@@ -62,13 +73,28 @@ class WorkoutSessionViewModel: ObservableObject {
                 from: session.startedAt,
                 to: session.endedAt ?? Date()
             )
+            sendMatchEndToiOS(session: session)
         }
     }
 
     func saveCurrentMatch() throws {
         guard let session = _currentSession else { return }
-        let record = MatchRecord(from: session)
-        try MatchPersistenceService.shared.save(record)
+        let match = Match()
+        match.workoutSessionId = session.workoutSessionId
+        match.startedAt = session.startedAt
+        match.endedAt = session.endedAt ?? Date()
+        match.durationSeconds = Int((session.endedAt ?? Date()).timeIntervalSince(session.startedAt))
+        match.mode = session.options.mode.rawValue
+        match.noAdRule = session.options.noAdRule
+        match.resultRaw = session.result?.rawValue ?? "win"
+        match.myTotalSets = session.mySetScore
+        match.yourTotalSets = session.yourSetScore
+        match.averageHeartRate = session.averageHeartRate
+        match.caloriesBurned = (session.kcalAtEnd ?? 0) - session.kcalAtStart
+        match.sets = session.completedSets.enumerated().map {
+            SetRecord(myGames: $0.element.my, yourGames: $0.element.your, setNumber: $0.offset + 1)
+        }
+        try MatchPersistenceService.shared.save(match)
     }
 
     func startNewMatch() {
@@ -81,18 +107,28 @@ class WorkoutSessionViewModel: ObservableObject {
         startMatch(options: options)
     }
 
-    func pauseWorkout() {
-        healthKit.pauseWorkout()
-    }
-
-    func resumeWorkout() {
-        healthKit.resumeWorkout()
-    }
+    func pauseWorkout() { healthKit.pauseWorkout() }
+    func resumeWorkout() { healthKit.resumeWorkout() }
 
     func endWorkout() {
         _currentSession = nil
         appGroupDefaults?.set(false, forKey: "isWorkoutActive")
         WidgetCenter.shared.reloadTimelines(ofKind: "ComplicationApp")
         Task { _ = await healthKit.stopWorkout() }
+    }
+
+    private func sendMatchEndToiOS(session: MatchSession) {
+        let msg = MatchEndMessage(
+            sessionId: session.workoutSessionId,
+            result: session.result?.rawValue ?? "win",
+            completedSets: session.completedSets.map { [$0.my, $0.your] },
+            startedAt: session.startedAt,
+            endedAt: session.endedAt ?? Date(),
+            calories: (session.kcalAtEnd ?? 0) - session.kcalAtStart,
+            averageHeartRate: session.averageHeartRate,
+            mode: session.options.mode.rawValue,
+            noAdRule: session.options.noAdRule
+        )
+        connectivity.sendMatchEnd(msg)
     }
 }

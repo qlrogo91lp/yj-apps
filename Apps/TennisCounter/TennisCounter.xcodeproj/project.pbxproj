@@ -14,6 +14,9 @@
 		39CDA6E12FB3173B009825BA /* Ralli.icon in Resources */ = {isa = PBXBuildFile; fileRef = 39CDA6E02FB3173B009825BA /* Ralli.icon */; };
 		39CDA6E22FB3173B009825BA /* Ralli.icon in Resources */ = {isa = PBXBuildFile; fileRef = 39CDA6E02FB3173B009825BA /* Ralli.icon */; };
 		39CDA6E32FB3173B009825BA /* Ralli.icon in Resources */ = {isa = PBXBuildFile; fileRef = 39CDA6E02FB3173B009825BA /* Ralli.icon */; };
+		39D471E92FBC32EF005FBA12 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 39BF174F2EBA37F60026184E /* WidgetKit.framework */; };
+		39D471EA2FBC32EF005FBA12 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 39BF17512EBA37F60026184E /* SwiftUI.framework */; };
+		39D471F72FBC32F1005FBA12 /* TennisLiveActivityExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 39D471E82FBC32EF005FBA12 /* TennisLiveActivityExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -30,6 +33,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 399700FB2A1D9BC900D0D486;
 			remoteInfo = "TennisCounter Watch App";
+		};
+		39D471F52FBC32F1005FBA12 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 399700E42A1D9BC800D0D486 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 39D471E72FBC32EF005FBA12;
+			remoteInfo = TennisLiveActivityExtension;
 		};
 		39D9AB802FA1D86B006DC9F5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -70,6 +80,17 @@
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		39D471FC2FBC32F1005FBA12 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				39D471F72FBC32F1005FBA12 /* TennisLiveActivityExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
@@ -82,6 +103,8 @@
 		39BF174F2EBA37F60026184E /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		39BF17512EBA37F60026184E /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		39CDA6E02FB3173B009825BA /* Ralli.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = Ralli.icon; sourceTree = "<group>"; };
+		39D471E82FBC32EF005FBA12 /* TennisLiveActivityExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TennisLiveActivityExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		39D472092FBC37D4005FBA12 /* TennisCounter-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "TennisCounter-Info.plist"; sourceTree = "<group>"; };
 		39D9AB7C2FA1D86B006DC9F5 /* iosTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iosTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		39D9AB892FA1D882006DC9F5 /* watchosTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = watchosTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -94,6 +117,20 @@
 			);
 			target = 3974B8F32EBCDFA5002D0EA7 /* ComplicationAppExtension */;
 		};
+		39D471F82FBC32F1005FBA12 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 39D471E72FBC32EF005FBA12 /* TennisLiveActivityExtension */;
+		};
+		39D472082FBC357E005FBA12 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Models/TennisActivityAttributes.swift,
+			);
+			target = 399700EB2A1D9BC800D0D486 /* TennisCounter */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -101,6 +138,7 @@
 		399289F72EB8EC9E005F1856 /* WatchApp */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = WatchApp; sourceTree = "<group>"; };
 		39928A012EB95F0D005F1856 /* Shared */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Shared; sourceTree = "<group>"; };
 		399700EE2A1D9BC800D0D486 /* iOSApp */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = iOSApp; sourceTree = "<group>"; };
+		39D471EB2FBC32EF005FBA12 /* TennisLiveActivity */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (39D472082FBC357E005FBA12 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, 39D471F82FBC32F1005FBA12 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = TennisLiveActivity; sourceTree = "<group>"; };
 		39D9AB7D2FA1D86B006DC9F5 /* iosTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = iosTests; sourceTree = "<group>"; };
 		39D9AB8A2FA1D882006DC9F5 /* watchosTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = watchosTests; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -129,6 +167,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		39D471E52FBC32EF005FBA12 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				39D471EA2FBC32EF005FBA12 /* SwiftUI.framework in Frameworks */,
+				39D471E92FBC32EF005FBA12 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		39D9AB792FA1D86B006DC9F5 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -149,6 +196,7 @@
 		399700E32A1D9BC800D0D486 = {
 			isa = PBXGroup;
 			children = (
+				39D472092FBC37D4005FBA12 /* TennisCounter-Info.plist */,
 				39670C382FA1BD20009C0010 /* TennisCounter Watch App.entitlements */,
 				39670C372FA1BD0E009C0010 /* TennisCounter.entitlements */,
 				39670C362FA1BBA1009C0010 /* ComplicationAppExtension.entitlements */,
@@ -157,6 +205,7 @@
 				3974B8F72EBCDFA5002D0EA7 /* ComplicationApp */,
 				39D9AB7D2FA1D86B006DC9F5 /* iosTests */,
 				39D9AB8A2FA1D882006DC9F5 /* watchosTests */,
+				39D471EB2FBC32EF005FBA12 /* TennisLiveActivity */,
 				39BF174E2EBA37F60026184E /* Frameworks */,
 				399700ED2A1D9BC800D0D486 /* Products */,
 				399289F72EB8EC9E005F1856 /* WatchApp */,
@@ -172,6 +221,7 @@
 				3974B8F42EBCDFA5002D0EA7 /* ComplicationAppExtension.appex */,
 				39D9AB7C2FA1D86B006DC9F5 /* iosTests.xctest */,
 				39D9AB892FA1D882006DC9F5 /* watchosTests.xctest */,
+				39D471E82FBC32EF005FBA12 /* TennisLiveActivityExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -217,11 +267,13 @@
 				399700EA2A1D9BC800D0D486 /* Resources */,
 				3997010F2A1D9BCA00D0D486 /* Embed Watch Content */,
 				390E3BDD2F3B62B9003599BF /* ShellScript */,
+				39D471FC2FBC32F1005FBA12 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				399700FF2A1D9BC900D0D486 /* PBXTargetDependency */,
+				39D471F62FBC32F1005FBA12 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				39928A012EB95F0D005F1856 /* Shared */,
@@ -254,6 +306,28 @@
 			productName = "TennisCounter Watch App";
 			productReference = 399700FC2A1D9BC900D0D486 /* TennisCounter Watch App.app */;
 			productType = "com.apple.product-type.application";
+		};
+		39D471E72FBC32EF005FBA12 /* TennisLiveActivityExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 39D471F92FBC32F1005FBA12 /* Build configuration list for PBXNativeTarget "TennisLiveActivityExtension" */;
+			buildPhases = (
+				39D471E42FBC32EF005FBA12 /* Sources */,
+				39D471E52FBC32EF005FBA12 /* Frameworks */,
+				39D471E62FBC32EF005FBA12 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				39D471EB2FBC32EF005FBA12 /* TennisLiveActivity */,
+			);
+			name = TennisLiveActivityExtension;
+			packageProductDependencies = (
+			);
+			productName = TennisLiveActivityExtension;
+			productReference = 39D471E82FBC32EF005FBA12 /* TennisLiveActivityExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 		39D9AB7B2FA1D86B006DC9F5 /* iosTests */ = {
 			isa = PBXNativeTarget;
@@ -304,7 +378,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 2640;
+				LastSwiftUpdateCheck = 2650;
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
 					3974B8F32EBCDFA5002D0EA7 = {
@@ -315,6 +389,9 @@
 					};
 					399700FB2A1D9BC900D0D486 = {
 						CreatedOnToolsVersion = 14.3;
+					};
+					39D471E72FBC32EF005FBA12 = {
+						CreatedOnToolsVersion = 26.5;
 					};
 					39D9AB7B2FA1D86B006DC9F5 = {
 						CreatedOnToolsVersion = 26.4.1;
@@ -343,6 +420,7 @@
 				399700EB2A1D9BC800D0D486 /* TennisCounter */,
 				399700FB2A1D9BC900D0D486 /* TennisCounter Watch App */,
 				3974B8F32EBCDFA5002D0EA7 /* ComplicationAppExtension */,
+				39D471E72FBC32EF005FBA12 /* TennisLiveActivityExtension */,
 				39D9AB7B2FA1D86B006DC9F5 /* iosTests */,
 				39D9AB882FA1D882006DC9F5 /* watchosTests */,
 			);
@@ -371,6 +449,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				39CDA6E12FB3173B009825BA /* Ralli.icon in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		39D471E62FBC32EF005FBA12 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -432,6 +517,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		39D471E42FBC32EF005FBA12 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		39D9AB782FA1D86B006DC9F5 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -458,6 +550,11 @@
 			isa = PBXTargetDependency;
 			target = 399700FB2A1D9BC900D0D486 /* TennisCounter Watch App */;
 			targetProxy = 399700FE2A1D9BC900D0D486 /* PBXContainerItemProxy */;
+		};
+		39D471F62FBC32F1005FBA12 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 39D471E72FBC32EF005FBA12 /* TennisLiveActivityExtension */;
+			targetProxy = 39D471F52FBC32F1005FBA12 /* PBXContainerItemProxy */;
 		};
 		39D9AB812FA1D86B006DC9F5 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -744,10 +841,13 @@
 				DEVELOPMENT_TEAM = P2TU28W32L;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "TennisCounter-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Ralli;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.sports";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Ralli uses HealthKit to track calories and heart rate during matches.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Ralli saves your tennis workout to Apple Health.";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -786,10 +886,13 @@
 				DEVELOPMENT_TEAM = P2TU28W32L;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "TennisCounter-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Ralli;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.sports";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Ralli uses HealthKit to track calories and heart rate during matches.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Ralli saves your tennis workout to Apple Health.";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -811,6 +914,82 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		39D471FA2FBC32F1005FBA12 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = P2TU28W32L;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TennisLiveActivity/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = TennisLiveActivity;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yj.TennisCounter.TennisLiveActivity;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		39D471FB2FBC32F1005FBA12 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = P2TU28W32L;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TennisLiveActivity/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = TennisLiveActivity;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yj.TennisCounter.TennisLiveActivity;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -962,6 +1141,15 @@
 			buildConfigurations = (
 				399701112A1D9BCA00D0D486 /* Debug */,
 				399701122A1D9BCA00D0D486 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		39D471F92FBC32F1005FBA12 /* Build configuration list for PBXNativeTarget "TennisLiveActivityExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				39D471FA2FBC32F1005FBA12 /* Debug */,
+				39D471FB2FBC32F1005FBA12 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

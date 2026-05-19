@@ -60,6 +60,16 @@ struct MatchDetailSheet: View {
                     LabeledContent("Date") {
                         Text(match.startedAt.formatted(date: .abbreviated, time: .shortened))
                     }
+                    if let calories = match.caloriesBurned, calories > 0 {
+                        LabeledContent("Calories") {
+                            Text(String(format: "%.0f kcal", calories))
+                        }
+                    }
+                    if let hr = match.averageHeartRate {
+                        LabeledContent("Avg. Heart Rate") {
+                            Text(String(format: "%.0f BPM", hr))
+                        }
+                    }
                 }
             }
             .navigationTitle("Match Detail")

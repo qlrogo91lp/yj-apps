@@ -11,8 +11,7 @@ struct ModeView: View {
             VStack(spacing: 24) {
                 ForEach(MatchFormat.allCases, id: \.rawValue) { format in
                     ModeOptionItem(format: format) {
-                        let mode = MatchMode(rawValue: format.rawValue) ?? .oneSet
-                        selectionVM.selectedMode = mode
+                        selectionVM.selectedMode = format
                         viewModel.startMatch(options: selectionVM.options)
                     }
                 }

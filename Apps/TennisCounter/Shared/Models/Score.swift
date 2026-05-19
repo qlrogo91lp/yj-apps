@@ -195,4 +195,21 @@ class Score: ObservableObject {
     func resetData() {
         reset()
     }
+
+    func applyRemote(myScore: Int, yourScore: Int, isTieBreak: Bool) {
+        snapshot = nil
+        lastAction = .none
+        if isTieBreak {
+            gameMode = .tieBreak
+            myTieBreak = myScore
+            yourTieBreak = yourScore
+        } else {
+            gameMode = .normal
+            let myIdx = Self.scoreValues.firstIndex(of: myScore) ?? 0
+            let yourIdx = Self.scoreValues.firstIndex(of: yourScore) ?? 0
+            myNormal = Self.normalStates[myIdx]
+            yourNormal = Self.normalStates[yourIdx]
+        }
+        objectWillChange.send()
+    }
 }

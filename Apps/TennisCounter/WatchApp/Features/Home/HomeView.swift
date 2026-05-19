@@ -1,13 +1,10 @@
-//
-//  HomeView.swift
-//  TennisCounter Watch App
-//
-//  Created by 윤재 on 2023/05/24.
-//
-
 import SwiftUI
 
 struct HomeView: View {
+    @State private var autoNavigate = false
+    @State private var remoteSession: SessionStartMessage?
+    private let connectivity = WatchConnectivityService.shared
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
@@ -26,8 +23,18 @@ struct HomeView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(.green)
+
+                NavigationLink(
+                    destination: WorkoutSessionView(remoteSession: remoteSession),
+                    isActive: $autoNavigate
+                ) { EmptyView() }
+                .hidden()
             }
             .padding()
+        }
+        .onReceive(connectivity.$receivedSessionStart.compactMap { $0 }) { msg in
+            remoteSession = msg
+            autoNavigate = true
         }
     }
 }

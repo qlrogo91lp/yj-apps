@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ModeOptionItem: View {
-    let mode: MatchMode
+    let mode: MatchFormat
     let onTap: () -> Void
 
     var body: some View {
@@ -22,14 +22,14 @@ struct ModeOptionItem: View {
         .buttonStyle(.plain)
     }
 
-    private func modeTitle(_ mode: MatchMode) -> String {
+    private func modeTitle(_ mode: MatchFormat) -> String {
         switch mode {
         case .oneSet: String(localized: "mode_one_set")
         case .bestOfThree: String(localized: "mode_best_of_3")
         }
     }
 
-    private func modeDescription(_ mode: MatchMode) -> String {
+    private func modeDescription(_ mode: MatchFormat) -> String {
         switch mode {
         case .oneSet: String(localized: "mode_one_set_desc")
         case .bestOfThree: String(localized: "mode_best_of_3_desc")

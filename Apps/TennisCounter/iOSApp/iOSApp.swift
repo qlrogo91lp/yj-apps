@@ -1,10 +1,3 @@
-//
-//  iOSApp.swift
-//  TennisCounter
-//
-//  Created by 윤재 on 2023/05/24.
-//
-
 import SwiftData
 import SwiftUI
 
@@ -19,6 +12,8 @@ struct TennisCounterApp: App {
             let schema = Schema([Match.self, SetRecord.self])
             let config = ModelConfiguration(schema: schema, cloudKitDatabase: .automatic)
             container = try ModelContainer(for: schema, configurations: config)
+            let context = ModelContext(container)
+            MatchPersistenceService.shared.configure(with: context)
         } catch {
             fatalError("Failed to create ModelContainer: \(error)")
         }
@@ -39,6 +34,8 @@ struct TennisCounterApp: App {
 struct MainTabView: View {
     @State private var isMatchActive = false
     @State private var selectedTab: Int = 0
+    @State private var remoteSession: SessionStartMessage?
+    private let connectivity = WatchConnectivityService.shared
 
     var body: some View {
         ZStack {
@@ -46,33 +43,36 @@ struct MainTabView: View {
 
             TabView(selection: $selectedTab) {
                 SummaryView()
-                    .tabItem {
-                        Label(String(localized: "tab_summary"), systemImage: "chart.bar.fill")
-                    }
+                    .tabItem { Label(String(localized: "tab_summary"), systemImage: "chart.bar.fill") }
                     .tag(0)
 
                 HomeView(onMatchStart: { withAnimation { isMatchActive = true } })
-                    .tabItem {
-                        Label(String(localized: "tab_match"), systemImage: "sportscourt.fill")
-                    }
+                    .tabItem { Label(String(localized: "tab_match"), systemImage: "sportscourt.fill") }
                     .tag(1)
 
                 HistoryView()
-                    .tabItem {
-                        Label(String(localized: "tab_history"), systemImage: "clock.fill")
-                    }
+                    .tabItem { Label(String(localized: "tab_history"), systemImage: "clock.fill") }
                     .tag(2)
             }
 
             if isMatchActive {
                 NavigationStack {
-                    WorkoutSessionView(onExit: {
-                        selectedTab = 1
-                        withAnimation { isMatchActive = false }
-                    })
+                    WorkoutSessionView(
+                        remoteSession: remoteSession,
+                        onExit: {
+                            selectedTab = 1
+                            remoteSession = nil
+                            withAnimation { isMatchActive = false }
+                        }
+                    )
                 }
                 .transition(.opacity)
             }
+        }
+        .onReceive(connectivity.$receivedSessionStart.compactMap { $0 }) { msg in
+            guard !isMatchActive else { return }
+            remoteSession = msg
+            withAnimation { isMatchActive = true }
         }
     }
 }

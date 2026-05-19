@@ -1,27 +1,34 @@
 import SwiftUI
 
 struct WorkoutSessionView: View {
-    @StateObject private var viewModel = WorkoutSessionViewModel()
+    let remoteSession: SessionStartMessage?
+
+    @StateObject private var viewModel: WorkoutSessionViewModel
     @Environment(\.dismiss) private var dismiss
     @State private var selectedTab = 1
 
+    init(remoteSession: SessionStartMessage? = nil) {
+        self.remoteSession = remoteSession
+        _viewModel = StateObject(wrappedValue: WorkoutSessionViewModel())
+    }
+
     var body: some View {
         TabView(selection: $selectedTab) {
-            // Left: controls
             WorkoutControlsView(viewModel: viewModel, dismiss: dismiss)
                 .tag(0)
-
-            // Center: match flow
             centerView
                 .tag(1)
-
-            // Right: metrics
             WorkoutMetricsView(healthKit: viewModel.healthKit, isPaused: viewModel.isPaused)
                 .tag(2)
         }
         .tabViewStyle(.page)
         .navigationBarBackButtonHidden()
-        .onAppear { viewModel.startWorkout() }
+        .onAppear {
+            viewModel.startWorkout()
+            if let remote = remoteSession {
+                viewModel.startMatch(options: remote.options, sessionId: remote.sessionId, isRemote: true)
+            }
+        }
     }
 
     @ViewBuilder

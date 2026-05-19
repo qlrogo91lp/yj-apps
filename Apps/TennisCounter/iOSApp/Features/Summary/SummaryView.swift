@@ -34,10 +34,10 @@ struct SummaryView: View {
     private var statsGrid: some View {
         let stats = viewModel.stats(from: matches)
         return LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
-            StatCard(title: String(localized: "summary_total_matches"), value: "\(stats.totalMatches)", systemImage: "sportscourt.fill", color: .blue)
-            StatCard(title: String(localized: "summary_win_rate"), value: String(format: "%.0f%%", stats.winRate * 100), systemImage: "trophy.fill", color: stats.winRate >= 0.5 ? .green : .orange)
-            StatCard(title: String(localized: "summary_streak"), value: "\(stats.streak)", systemImage: "flame.fill", color: .red)
-            StatCard(title: "Wins", value: "\(stats.wins)", systemImage: "checkmark.circle.fill", color: .green)
+            StatCard(title: String(localized: "summary_total_matches"), value: "\(stats.totalMatches)", color: .blue)
+            StatCard(title: String(localized: "summary_win_rate"), value: String(format: "%.0f%%", stats.winRate * 100), color: stats.winRate >= 0.5 ? .green : .orange)
+            StatCard(title: String(localized: "summary_streak"), value: "\(stats.streak)", color: .red)
+            StatCard(title: "Wins", value: "\(stats.wins)", color: .green)
         }
     }
 

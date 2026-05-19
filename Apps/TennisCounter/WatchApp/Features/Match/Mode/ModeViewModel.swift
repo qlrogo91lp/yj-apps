@@ -1,7 +1,7 @@
 import Foundation
 
 class ModeViewModel: ObservableObject {
-    @Published var selectedMode: MatchMode = .oneSet
+    @Published var selectedMode: MatchFormat = .oneSet
     @Published var noAdRule: Bool = true
     @Published var noTieRule: Bool = false
 

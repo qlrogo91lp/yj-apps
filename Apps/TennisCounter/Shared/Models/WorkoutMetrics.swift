@@ -13,7 +13,8 @@ struct WorkoutMetrics {
     private static let keysSteps = "steps"
 
     func toDictionary() -> [String: Any] {
-        [Self.keysElapsed: elapsedSeconds,
+        ["type": "metrics",
+         Self.keysElapsed: elapsedSeconds,
          Self.keysCalories: calories,
          Self.keysHeartRate: heartRate,
          Self.keysSteps: steps]

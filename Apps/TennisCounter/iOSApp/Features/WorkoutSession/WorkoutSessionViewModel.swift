@@ -11,22 +11,20 @@ class WorkoutSessionViewModel: ObservableObject {
     @Published var completedMatchCount: Int = 0
 
     private var startedAt: Date?
-    private let sessionId: UUID = .init()
-    private var currentOptions: MatchOptions?
+    private var sessionId: UUID = .init()
     private var _currentSession: MatchSession?
     private var timer: Timer?
     private var cancellables = Set<AnyCancellable>()
+    private let connectivity = WatchConnectivityService.shared
 
     init() {
-        let connectivity = WatchConnectivityService.shared
-
         connectivity.$isWatchReachable
             .receive(on: DispatchQueue.main)
             .assign(to: &$watchConnected)
 
         connectivity.$receivedMetrics
+            .compactMap { $0 }
             .receive(on: DispatchQueue.main)
-            .compactMap(\.self)
             .sink { [weak self] received in
                 guard let self else { return }
                 self.metrics = WorkoutMetrics(
@@ -35,6 +33,31 @@ class WorkoutSessionViewModel: ObservableObject {
                     heartRate: received.heartRate,
                     steps: received.steps
                 )
+            }
+            .store(in: &cancellables)
+
+        connectivity.$receivedSessionStart
+            .compactMap { $0 }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] msg in
+                guard let self else { return }
+                self.sessionId = msg.sessionId
+                self.startSession()
+                self.startMatch(options: msg.options, isRemote: true)
+                LiveActivityService.shared.start(mode: msg.options.mode)
+            }
+            .store(in: &cancellables)
+
+        connectivity.$receivedMatchEnd
+            .compactMap { $0 }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] msg in
+                guard let self else { return }
+                self.saveFromWatch(msg)
+                LiveActivityService.shared.end()
+                let session = self.buildSession(from: msg)
+                self.completedMatchCount += 1
+                self.phase = .finished(session)
             }
             .store(in: &cancellables)
     }
@@ -57,8 +80,7 @@ class WorkoutSessionViewModel: ObservableObject {
         startTimer()
     }
 
-    func startMatch(options: MatchOptions) {
-        currentOptions = options
+    func startMatch(options: MatchOptions, isRemote: Bool = false) {
         _currentSession = MatchSession(
             workoutSessionId: sessionId,
             options: options,
@@ -66,6 +88,11 @@ class WorkoutSessionViewModel: ObservableObject {
             kcalAtStart: 0
         )
         phase = .playing(options)
+        LiveActivityService.shared.start(mode: options.mode)
+
+        if !isRemote {
+            connectivity.sendSessionStart(SessionStartMessage(sessionId: sessionId, options: options))
+        }
     }
 
     func finishMatch(didWin: Bool, completedSets: [(my: Int, your: Int)]) {
@@ -79,12 +106,14 @@ class WorkoutSessionViewModel: ObservableObject {
         session.kcalAtEnd = metrics.calories
         completedMatchCount += 1
         phase = .finished(session)
+        LiveActivityService.shared.end()
+        saveCurrentMatch()
     }
 
-    func saveCurrentMatch() throws {
+    func saveCurrentMatch() {
         guard let session = _currentSession else { return }
-        let record = MatchRecord(from: session)
-        try MatchPersistenceService.shared.save(record)
+        let match = buildMatchFromSession(session)
+        try? MatchPersistenceService.shared.save(match)
     }
 
     func restartMatch() {
@@ -94,7 +123,6 @@ class WorkoutSessionViewModel: ObservableObject {
 
     func startNewMatch() {
         _currentSession = nil
-        currentOptions = nil
         phase = .modeSelection
     }
 
@@ -104,8 +132,74 @@ class WorkoutSessionViewModel: ObservableObject {
         elapsedSeconds = 0
         metrics = .init()
         _currentSession = nil
-        currentOptions = nil
         phase = .modeSelection
+        LiveActivityService.shared.end()
+    }
+
+    // MARK: - Private
+
+    private func saveFromWatch(_ msg: MatchEndMessage) {
+        let match = buildMatchFromMessage(msg)
+        try? MatchPersistenceService.shared.save(match)
+    }
+
+    private func buildMatchFromMessage(_ msg: MatchEndMessage) -> Match {
+        let match = Match()
+        match.workoutSessionId = msg.sessionId
+        match.startedAt = msg.startedAt
+        match.endedAt = msg.endedAt
+        match.durationSeconds = Int(msg.endedAt.timeIntervalSince(msg.startedAt))
+        match.caloriesBurned = msg.calories
+        match.averageHeartRate = msg.averageHeartRate
+        match.mode = msg.mode
+        match.noAdRule = msg.noAdRule
+        match.resultRaw = msg.result
+        match.myTotalSets = msg.completedSets.filter { $0[0] > $0[1] }.count
+        match.yourTotalSets = msg.completedSets.filter { $0[1] > $0[0] }.count
+        match.sets = msg.completedSets.enumerated().map {
+            SetRecord(myGames: $0.element[0], yourGames: $0.element[1], setNumber: $0.offset + 1)
+        }
+        return match
+    }
+
+    private func buildMatchFromSession(_ session: MatchSession) -> Match {
+        let match = Match()
+        match.workoutSessionId = session.workoutSessionId
+        match.startedAt = session.startedAt
+        match.endedAt = session.endedAt ?? Date()
+        match.durationSeconds = Int((session.endedAt ?? Date()).timeIntervalSince(session.startedAt))
+        match.caloriesBurned = (session.kcalAtEnd ?? 0) - session.kcalAtStart
+        match.mode = session.options.mode.rawValue
+        match.noAdRule = session.options.noAdRule
+        match.resultRaw = session.result?.rawValue ?? "win"
+        match.myTotalSets = session.mySetScore
+        match.yourTotalSets = session.yourSetScore
+        match.sets = session.completedSets.enumerated().map {
+            SetRecord(myGames: $0.element.my, yourGames: $0.element.your, setNumber: $0.offset + 1)
+        }
+        return match
+    }
+
+    private func buildSession(from msg: MatchEndMessage) -> MatchSession {
+        let options = MatchOptions(
+            mode: MatchFormat(rawValue: msg.mode) ?? .oneSet,
+            noAdRule: msg.noAdRule,
+            noTieRule: false
+        )
+        let session = MatchSession(
+            workoutSessionId: msg.sessionId,
+            options: options,
+            startedAt: msg.startedAt,
+            kcalAtStart: 0
+        )
+        session.endedAt = msg.endedAt
+        session.result = msg.result == "win" ? .win : .loss
+        session.completedSets = msg.completedSets.map { SetScore(my: $0[0], your: $0[1]) }
+        session.mySetScore = msg.completedSets.filter { $0[0] > $0[1] }.count
+        session.yourSetScore = msg.completedSets.filter { $0[1] > $0[0] }.count
+        session.kcalAtEnd = msg.calories
+        session.averageHeartRate = msg.averageHeartRate
+        return session
     }
 
     private func startTimer() {
