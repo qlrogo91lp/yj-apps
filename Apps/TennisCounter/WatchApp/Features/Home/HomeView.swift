@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct HomeView: View {
-    @State private var autoNavigate = false
+    @State private var navigateToWorkout = false
     @State private var remoteSession: SessionStartMessage?
     private let connectivity = WatchConnectivityService.shared
 
@@ -17,7 +17,11 @@ struct HomeView: View {
                     Text("Tennis Counter")
                         .font(.system(size: 14, weight: .semibold))
                 }
-                NavigationLink(destination: WorkoutSessionView()) {
+                Button {
+                    guard !navigateToWorkout else { return }
+                    connectivity.receivedSessionStart = nil
+                    navigateToWorkout = true
+                } label: {
                     Text(String(localized: "watch_start_workout"))
                         .font(.system(size: 16, weight: .bold))
                         .frame(maxWidth: .infinity)
@@ -28,13 +32,15 @@ struct HomeView: View {
                 Spacer()
             }
             .padding()
-            .navigationDestination(isPresented: $autoNavigate) {
+            .navigationDestination(isPresented: $navigateToWorkout) {
                 WorkoutSessionView(remoteSession: remoteSession)
             }
         }
         .onReceive(connectivity.$receivedSessionStart.compactMap { $0 }) { msg in
+            guard !navigateToWorkout else { return }
             remoteSession = msg
-            autoNavigate = true
+            connectivity.receivedSessionStart = nil
+            navigateToWorkout = true
         }
     }
 }
