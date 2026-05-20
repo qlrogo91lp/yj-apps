@@ -57,9 +57,9 @@ final class ScoreViewModel: ObservableObject {
         guard gameWon != nil else { return }
         if side == .me { myGameScore += 1 } else { yourGameScore += 1 }
         score.resetData()
+        checkSetUpdate()
         sendScoreState()
         LiveActivityService.shared.update(from: makeScoreState(), score: score)
-        checkSetUpdate()
         if myGameScore == 6 && yourGameScore == 6 && !options.noTieRule {
             score.setTieBreakMode()
         }
