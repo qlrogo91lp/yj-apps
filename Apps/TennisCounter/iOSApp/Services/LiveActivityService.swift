@@ -38,7 +38,8 @@ final class LiveActivityService {
     }
 
     func end() {
-        Task { await activity?.end(dismissalPolicy: .immediate) }
+        let current = activity
+        Task { await current?.end(dismissalPolicy: .immediate) }
         activity = nil
         workoutStartTime = nil
     }
