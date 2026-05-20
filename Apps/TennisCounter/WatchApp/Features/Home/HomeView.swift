@@ -8,6 +8,7 @@ struct HomeView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
+                Spacer()
                 VStack(spacing: 4) {
                     Text("Ralli")
                         .font(.system(size: 30, weight: .bold))
@@ -24,13 +25,12 @@ struct HomeView: View {
                 .buttonStyle(.borderedProminent)
                 .tint(.green)
 
-                NavigationLink(
-                    destination: WorkoutSessionView(remoteSession: remoteSession),
-                    isActive: $autoNavigate
-                ) { EmptyView() }
-                .hidden()
+                Spacer()
             }
             .padding()
+            .navigationDestination(isPresented: $autoNavigate) {
+                WorkoutSessionView(remoteSession: remoteSession)
+            }
         }
         .onReceive(connectivity.$receivedSessionStart.compactMap { $0 }) { msg in
             remoteSession = msg
