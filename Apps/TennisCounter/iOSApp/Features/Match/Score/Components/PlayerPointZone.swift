@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct PlayerScoreZone: View {
+struct PlayerPointZone: View {
     let displayScore: String
     let playerLabel: String
     let color: Color
@@ -31,8 +31,8 @@ struct PlayerScoreZone: View {
 
 #Preview {
     HStack(spacing: 0) {
-        PlayerScoreZone(displayScore: "40", playerLabel: "나", color: .green, onTap: {}, onLongPress: {})
-        PlayerScoreZone(displayScore: "15", playerLabel: "상대", color: .orange, onTap: {}, onLongPress: {})
+        PlayerPointZone(displayScore: "40", playerLabel: "나", color: .green, onTap: {}, onLongPress: {})
+        PlayerPointZone(displayScore: "15", playerLabel: "상대", color: .orange, onTap: {}, onLongPress: {})
     }
     .ignoresSafeArea()
     .background(.black)

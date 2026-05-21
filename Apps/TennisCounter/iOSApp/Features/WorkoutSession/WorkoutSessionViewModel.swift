@@ -106,10 +106,10 @@ class WorkoutSessionViewModel: ObservableObject {
         }
     }
 
-    func finishMatch(didWin: Bool, completedSets: [(my: Int, your: Int)]) {
+    func finishMatch(result: MatchResult, completedSets: [(my: Int, your: Int)]) {
         guard let session = _currentSession else { return }
         session.endedAt = Date()
-        session.result = didWin ? .win : .loss
+        session.result = result
         let setScores = completedSets.map { SetScore(my: $0.my, your: $0.your) }
         session.completedSets = setScores
         session.mySetScore = setScores.filter { $0.my > $0.your }.count
@@ -205,7 +205,7 @@ class WorkoutSessionViewModel: ObservableObject {
             kcalAtStart: 0
         )
         session.endedAt = msg.endedAt
-        session.result = msg.result == "win" ? .win : .loss
+        session.result = MatchResult(rawValue: msg.result) ?? .loss
         session.completedSets = msg.completedSets.map { SetScore(my: $0[0], your: $0[1]) }
         session.mySetScore = msg.completedSets.filter { $0[0] > $0[1] }.count
         session.yourSetScore = msg.completedSets.filter { $0[1] > $0[0] }.count

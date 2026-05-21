@@ -108,8 +108,8 @@ struct WorkoutSessionView: View {
         case .playing(let options):
             ScoreView(
                 options: options,
-                onMatchFinished: { didWin, sets in
-                    viewModel.finishMatch(didWin: didWin, completedSets: sets)
+                onMatchFinished: { result, sets in
+                    viewModel.finishMatch(result: result, completedSets: sets)
                 },
                 onProgressChanged: { hasMatchProgress = $0 }
             )

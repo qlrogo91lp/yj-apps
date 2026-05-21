@@ -12,6 +12,7 @@
 
 /* Match Screen */
 "new_match" = "New Match";
+"mode_game_threshold" = "Games";
 "mode_no_ad" = "No-AD";
 "mode_no_tie" = "No Tiebreak";
 "score_label_me" = "ME";

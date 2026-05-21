@@ -17,7 +17,7 @@ struct WorkoutSessionViewModelTests {
         let vm = WorkoutSessionViewModel()
         vm.startSession()
         vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
-        vm.finishMatch(didWin: true, completedSets: [(my: 6, your: 4)])
+        vm.finishMatch(result: .win, completedSets: [(my: 6, your: 4)])
         guard case .finished(let session) = vm.phase else {
             Issue.record("Expected .finished phase")
             return
@@ -64,7 +64,7 @@ struct WorkoutSessionViewModelTests {
         let vm = WorkoutSessionViewModel()
         vm.startSession()
         vm.startMatch(options: MatchOptions(mode: .bestOfThree, noAdRule: false, noTieRule: true))
-        vm.finishMatch(didWin: false, completedSets: [(my: 3, your: 6)])
+        vm.finishMatch(result: .loss, completedSets: [(my: 3, your: 6)])
         vm.restartMatch()
         guard case let .playing(newOptions) = vm.phase else {
             Issue.record("Expected .playing after restartMatch")
@@ -91,7 +91,7 @@ struct WorkoutSessionViewModelTests {
         let vm = WorkoutSessionViewModel()
         vm.startSession()
         vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
-        vm.finishMatch(didWin: true, completedSets: [(my: 6, your: 4)])
+        vm.finishMatch(result: .win, completedSets: [(my: 6, your: 4)])
         guard case .finished(let session) = vm.phase else {
             Issue.record("Expected .finished")
             return
@@ -106,7 +106,7 @@ struct WorkoutSessionViewModelTests {
         let vm = WorkoutSessionViewModel()
         vm.startSession()
         vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
-        vm.finishMatch(didWin: true, completedSets: [(my: 6, your: 4)])
+        vm.finishMatch(result: .win, completedSets: [(my: 6, your: 4)])
         vm.startNewMatch()
         guard case .modeSelection = vm.phase else {
             Issue.record("Expected .modeSelection after startNewMatch")
@@ -136,7 +136,7 @@ struct WorkoutSessionViewModelTests {
         let vm = WorkoutSessionViewModel()
         vm.startSession()
         vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
-        vm.finishMatch(didWin: true, completedSets: [(my: 6, your: 4)])
+        vm.finishMatch(result: .win, completedSets: [(my: 6, your: 4)])
         vm.endSession()
         guard case .modeSelection = vm.phase else {
             Issue.record("Expected .modeSelection after endSession from .finished state")

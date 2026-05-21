@@ -18,6 +18,19 @@ struct ModeView: View {
 
                 Divider().background(Color.white.opacity(0.2))
 
+                HStack {
+                    Text(String(localized: "mode_game_threshold"))
+                        .font(.system(size: 15))
+                        .foregroundColor(.white)
+                    Spacer()
+                    Picker("", selection: $selectionVM.gameThreshold) {
+                        Text("5").tag(5)
+                        Text("6").tag(6)
+                    }
+                    .pickerStyle(.segmented)
+                    .frame(width: 120)
+                }
+
                 Toggle(String(localized: "mode_no_ad"), isOn: $selectionVM.noAdRule)
                     .font(.system(size: 15))
                     .tint(.green)

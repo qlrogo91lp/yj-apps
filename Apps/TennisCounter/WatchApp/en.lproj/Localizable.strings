@@ -18,6 +18,7 @@
 "mode_one_set_desc" = "1 set match";
 "mode_best_of_3" = "Best of 3";
 "mode_best_of_3_desc" = "First to 2 sets";
+"mode_game_threshold" = "Games";
 "mode_no_ad" = "No-AD";
 "mode_no_tie" = "No Tiebreak";
 "set_tiebreak" = "TIE";

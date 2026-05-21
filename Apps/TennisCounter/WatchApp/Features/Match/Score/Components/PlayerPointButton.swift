@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct PlayerScoreButton: View {
+struct PlayerPointButton: View {
     let displayScore: String
     let player: String
     let color: Color

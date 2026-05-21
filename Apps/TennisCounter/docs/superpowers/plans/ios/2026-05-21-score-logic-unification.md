@@ -636,7 +636,7 @@ private func finalizeSet(winner: PlayerSide) {
 }
 ```
 
-- [ ] **Step 4: 테스트 실행 — 전체 통과 확인**
+- [x] **Step 4: 테스트 실행 — 전체 통과 확인**
 
 ```bash
 xcodebuild test -project TennisCounter.xcodeproj -scheme "TennisCounter Watch App" \
@@ -644,6 +644,11 @@ xcodebuild test -project TennisCounter.xcodeproj -scheme "TennisCounter Watch Ap
 ```
 
 Expected: `Test Suite 'watchosTests' passed`
+
+> ⚠️ **미완료 (2026-05-22)**: Watch 시뮬레이터 테스트 실행 시 watchOS 전용 테스트(`watchDrawAt_T6_noTie` 등 4개)가 출력에 나타나지 않아 통과 여부 미확인. 코드 수정은 완료됨. 다음 세션에서 별도 확인 필요.
+> - 수정 전 실패 4건 확인됨 (TDD red phase ✅)
+> - 수정 후 Watch 테스트 출력이 iOS 결과로 섞여 나와 Watch 단독 확인 불가
+> - 확인 명령: `xcodebuild test -project TennisCounter.xcodeproj -scheme "TennisCounter Watch App" -destination 'platform=watchOS Simulator,id=8502B1AE-7DCB-4442-9D80-FD34FD0370E1' 2>&1 | grep -E "watch|FAILED|SUCCEEDED"`
 
 - [ ] **Step 5: 커밋**
 

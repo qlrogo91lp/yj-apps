@@ -19,6 +19,11 @@ struct ModeView: View {
 
                 Divider().background(Color.white.opacity(0.2))
 
+                Picker(String(localized: "mode_game_threshold"), selection: $selectionVM.gameThreshold) {
+                    Text("5").tag(5)
+                    Text("6").tag(6)
+                }
+
                 Toggle(String(localized: "mode_no_ad"), isOn: $selectionVM.noAdRule)
                     .font(.system(size: 14))
                     .toggleStyle(SwitchToggleStyle(tint: .green))
