@@ -239,10 +239,28 @@ docs/superpowers/
 
 **파일 위치**
 
-| 대상 | 테스트 파일 |
+테스트 타겟은 앱 타겟과 빌드가 분리되므로, 소스 파일과 같은 폴더에 둘 수 없다. 대신 테스트 폴더 안에서 소스 폴더 구조를 그대로 미러링한다.
+
+| 대상 | 테스트 루트 |
 |------|-----------|
-| iOS 타겟 (`TennisCounter`) | `iosTests/iosTests.swift` |
-| Watch 타겟 (`TennisCounter Watch App`) | `watchosTests/watchosTests.swift` |
+| iOS 타겟 (`TennisCounter`) | `iosTests/` |
+| Watch 타겟 (`TennisCounter Watch App`) | `watchosTests/` |
+
+```
+iosTests/
+├── Match/
+│   ├── ScoreViewModelTests.swift        # iOSApp/Features/Match/Score/ 대응
+│   └── WorkoutSessionViewModelTests.swift
+└── Shared/
+    └── WorkoutMetricsTests.swift        # Shared/Models/ 대응
+
+watchosTests/
+└── Match/
+    └── ScoreViewModelTests.swift        # WatchApp/Features/Match/Score/ 대응
+```
+
+- 파일명: `{테스트대상}Tests.swift` (e.g., `ScoreViewModelTests.swift`)
+- 서브폴더는 `PBXFileSystemSynchronizedRootGroup` 덕분에 Xcode가 자동으로 테스트 타겟에 포함한다.
 
 **테스트 대상 우선순위**
 

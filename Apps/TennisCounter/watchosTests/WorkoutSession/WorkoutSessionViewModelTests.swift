@@ -1,10 +1,7 @@
 @testable import TennisCounter_Watch_App
 import Testing
 
-struct watchosTests {
-
-    @Test func example() {}
-
+struct WorkoutSessionViewModelTests {
     @Test @MainActor func finishMatchSetsPhaseImmediately() {
         let vm = WorkoutSessionViewModel()
         vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
@@ -50,8 +47,6 @@ struct watchosTests {
         #expect(newOptions.noAdRule == false)
         #expect(newOptions.noTieRule == true)
     }
-
-    // MARK: - 워크아웃 종료 동기화
 
     @Test @MainActor func endWorkoutClearsCurrentSession() {
         let vm = WorkoutSessionViewModel()
