@@ -5,7 +5,6 @@ struct MatchResultView: View {
     @ObservedObject var viewModel: WorkoutSessionViewModel
 
     @State private var saved = false
-    @State private var saveError: String?
 
     var body: some View {
         ZStack {
@@ -20,28 +19,26 @@ struct MatchResultView: View {
 
                 HStack(spacing: 12) {
                     Text("\(session.mySetScore)")
-                        .font(.system(size: 32, weight: .bold))
                         .foregroundColor(.green)
                     Text(":")
-                        .font(.system(size: 26, weight: .bold))
-                        .foregroundColor(.white.opacity(0.5))
+                        .foregroundColor(.white)
                     Text("\(session.yourSetScore)")
-                        .font(.system(size: 32, weight: .bold))
                         .foregroundColor(.orange)
                 }
+                .font(.system(size: 40, weight: .bold))
 
                 if session.options.mode == .bestOfThree, !session.completedSets.isEmpty {
-                    HStack(spacing: 4) {
+                    HStack(spacing: 10) {
                         ForEach(Array(session.completedSets.enumerated()), id: \.offset) { index, set in
-                            HStack(spacing: 2) {
-                                Text("\(set.my):\(set.your)")
-                                    .font(.system(size: 15, weight: .semibold))
-                                    .foregroundColor(.white.opacity(0.6))
-                                if index < session.completedSets.count - 1 {
-                                    Text("|")
-                                        .foregroundColor(.white.opacity(0.3))
-                                        .padding(.horizontal, 4)
-                                }
+                            Text("\(set.my):\(set.your)")
+                                .font(.system(size: 24, weight: .bold))
+                                .kerning(5)
+                                .foregroundColor(.white)
+                            if index < session.completedSets.count - 1 {
+                                Text("|")
+                                    .font(.system(size: 24, weight: .bold))
+                                    .foregroundColor(.white.opacity(0.3))
+                                    .padding(.horizontal, 4)
                             }
                         }
                     }
@@ -79,12 +76,8 @@ struct MatchResultView: View {
     }
 
     private func saveMatch() {
-        do {
-            try viewModel.saveCurrentMatch()
-            withAnimation { saved = true }
-        } catch {
-            saveError = error.localizedDescription
-        }
+        viewModel.saveCurrentMatch()
+        withAnimation { saved = true }
     }
 }
 
