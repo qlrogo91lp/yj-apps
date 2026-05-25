@@ -12,9 +12,10 @@ final class ScoreViewModel: ObservableObject {
     @Published var yourSetScore: Int = 0
     @Published var currentSetNumber: Int = 1
     @Published var completedSets: [(my: Int, your: Int)] = []
-    @Published var isMatchOver: Bool = false
-    @Published var didWin: Bool = false
+    @Published private(set) var matchResult: MatchResult?
 
+    var isMatchOver: Bool { matchResult != nil }
+    var didWin: Bool { matchResult == .win }
     var isTieBreak: Bool { score.gameMode == .tieBreak }
 
     var hasProgress: Bool {
@@ -24,6 +25,7 @@ final class ScoreViewModel: ObservableObject {
         score.lastAction != .none
     }
 
+    private var tieBreakInProgress = false
     private var isApplyingRemote = false
     private var cancellables = Set<AnyCancellable>()
     private let connectivity = WatchConnectivityService.shared
@@ -42,7 +44,6 @@ final class ScoreViewModel: ObservableObject {
             .sink { [weak self] state in self?.applyRemoteState(state) }
             .store(in: &cancellables)
 
-        // Watch 재연결 시 현재 상태 즉시 전송
         connectivity.$isWatchReachable
             .filter { $0 }
             .receive(on: DispatchQueue.main)
@@ -60,9 +61,6 @@ final class ScoreViewModel: ObservableObject {
         checkSetUpdate()
         sendScoreState()
         LiveActivityService.shared.update(from: makeScoreState(), score: score)
-        if myGameScore == 6 && yourGameScore == 6 && !options.noTieRule {
-            score.setTieBreakMode()
-        }
     }
 
     func undo() {
@@ -76,8 +74,8 @@ final class ScoreViewModel: ObservableObject {
         yourSetScore = 0
         currentSetNumber = 1
         completedSets = []
-        isMatchOver = false
-        didWin = false
+        matchResult = nil
+        tieBreakInProgress = false
         score.noAdRule = options.noAdRule
         score.resetData()
     }
@@ -90,8 +88,53 @@ final class ScoreViewModel: ObservableObject {
         yourSetScore = state.yourSetScore
         completedSets = state.completedSets.map { (my: $0[0], your: $0[1]) }
         score.applyRemote(myScore: state.myScore, yourScore: state.yourScore, isTieBreak: state.isTieBreak)
+        tieBreakInProgress = state.isTieBreak
         LiveActivityService.shared.update(from: state, score: score)
         isApplyingRemote = false
+    }
+
+    // MARK: - Private
+
+    private func checkSetUpdate() {
+        let T = options.gameThreshold
+        let my = myGameScore, your = yourGameScore
+
+        if tieBreakInProgress {
+            if (my == T + 1 && your == T) || (your == T + 1 && my == T) {
+                tieBreakInProgress = false
+                finalizeSet(winner: my > your ? .me : .opponent)
+            }
+            return
+        }
+
+        if my == T && your == T {
+            if options.noTieRule {
+                completedSets.append((my: my, your: your))
+                matchResult = .draw
+            } else {
+                score.setTieBreakMode()
+                tieBreakInProgress = true
+            }
+            return
+        }
+
+        let maxG = max(my, your), minG = min(my, your)
+        guard maxG >= T && (maxG - minG) >= 2 else { return }
+        finalizeSet(winner: my > your ? .me : .opponent)
+    }
+
+    private func finalizeSet(winner: PlayerSide) {
+        completedSets.append((my: myGameScore, your: yourGameScore))
+        if winner == .me { mySetScore += 1 } else { yourSetScore += 1 }
+        myGameScore = 0
+        yourGameScore = 0
+        currentSetNumber += 1
+
+        if mySetScore >= options.mode.setsToWin {
+            matchResult = .win
+        } else if yourSetScore >= options.mode.setsToWin {
+            matchResult = .loss
+        }
     }
 
     private func makeScoreState() -> ScoreState {
@@ -109,29 +152,5 @@ final class ScoreViewModel: ObservableObject {
     private func sendScoreState() {
         guard !isApplyingRemote else { return }
         connectivity.sendScoreState(makeScoreState())
-    }
-
-    private func checkSetUpdate() {
-        guard isSetComplete() else { return }
-        let myWonSet = myGameScore > yourGameScore
-        completedSets.append((my: myGameScore, your: yourGameScore))
-        if myWonSet { mySetScore += 1 } else { yourSetScore += 1 }
-        myGameScore = 0
-        yourGameScore = 0
-        currentSetNumber += 1
-        if mySetScore >= options.mode.setsToWin {
-            didWin = true
-            isMatchOver = true
-        } else if yourSetScore >= options.mode.setsToWin {
-            didWin = false
-            isMatchOver = true
-        }
-    }
-
-    private func isSetComplete() -> Bool {
-        let maxGames = max(myGameScore, yourGameScore)
-        let minGames = min(myGameScore, yourGameScore)
-        if maxGames == 7 && minGames == 6 { return true }
-        return maxGames >= 6 && (maxGames - minGames) >= 2
     }
 }

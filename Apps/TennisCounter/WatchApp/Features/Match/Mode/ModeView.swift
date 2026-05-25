@@ -19,6 +19,25 @@ struct ModeView: View {
 
                 Divider().background(Color.white.opacity(0.2))
 
+                HStack {
+                    Text(String(localized: "mode_game_threshold"))
+                        .font(.system(size: 14))
+                    Spacer()
+                    Button {
+                        let options = [4, 5, 6]
+                        let next = ((options.firstIndex(of: selectionVM.gameThreshold) ?? 0) + 1) % options.count
+                        selectionVM.gameThreshold = options[next]
+                    } label: {
+                        Text("\(selectionVM.gameThreshold)")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(.white)
+                            .frame(width: 60, height: 32)
+                            .background(Color.white.opacity(0.2))
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                    }
+                    .buttonStyle(.plain)
+                }
+
                 Toggle(String(localized: "mode_no_ad"), isOn: $selectionVM.noAdRule)
                     .font(.system(size: 14))
                     .toggleStyle(SwitchToggleStyle(tint: .green))

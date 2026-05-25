@@ -22,7 +22,8 @@ struct SessionStartMessage {
             "sessionId": sessionId.uuidString,
             "mode": options.mode.rawValue,
             "noAdRule": options.noAdRule,
-            "noTieRule": options.noTieRule
+            "noTieRule": options.noTieRule,
+            "gameThreshold": options.gameThreshold
         ]
     }
 
@@ -36,7 +37,8 @@ struct SessionStartMessage {
         options = MatchOptions(
             mode: mode,
             noAdRule: dict["noAdRule"] as? Bool ?? true,
-            noTieRule: dict["noTieRule"] as? Bool ?? false
+            noTieRule: dict["noTieRule"] as? Bool ?? false,
+            gameThreshold: dict["gameThreshold"] as? Int ?? 6
         )
     }
 

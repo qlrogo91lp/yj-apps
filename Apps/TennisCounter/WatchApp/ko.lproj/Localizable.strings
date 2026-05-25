@@ -18,6 +18,7 @@
 "mode_one_set_desc" = "단판 경기";
 "mode_best_of_3" = "3세트 경기";
 "mode_best_of_3_desc" = "2세트 선취";
+"mode_game_threshold" = "게임 수";
 "mode_no_ad" = "No-Ad";
 "mode_no_tie" = "No-Tiebreak";
 "set_tiebreak" = "TIE";

@@ -75,31 +75,32 @@ class ScoreViewModel: ObservableObject {
     }
 
     private func checkSetUpdate() {
+        let T = options.gameThreshold
         let my = myGameScore, your = yourGameScore
 
         if tieBreakInProgress {
-            if (my == 7 && your == 6) || (your == 7 && my == 6) {
+            if (my == T + 1 && your == T) || (your == T + 1 && my == T) {
                 tieBreakInProgress = false
-                let winner: PlayerSide = my == 7 ? .me : .opponent
+                let winner: PlayerSide = my == T + 1 ? .me : .opponent
                 finalizeSet(winner: winner)
             }
             return
         }
 
-        if !options.noTieRule, my == 6, your == 6 {
-            score.setTieBreakMode()
-            tieBreakInProgress = true
+        if my == T && your == T {
+            if options.noTieRule {
+                completedSets.append(SetScore(my: my, your: your))
+                onMatchFinished?(.draw, completedSets)
+            } else {
+                score.setTieBreakMode()
+                tieBreakInProgress = true
+            }
             return
         }
 
         let maxG = max(my, your), minG = min(my, your)
-        let setWinner: PlayerSide? = if options.noTieRule {
-            if my >= 6, my > your { .me } else if your >= 6, your > my { .opponent } else { nil }
-        } else {
-            if maxG >= 6, (maxG - minG) >= 2 { my > your ? .me : .opponent } else { nil }
-        }
-
-        if let winner = setWinner { finalizeSet(winner: winner) }
+        guard maxG >= T && (maxG - minG) >= 2 else { return }
+        finalizeSet(winner: my > your ? .me : .opponent)
     }
 
     private func finalizeSet(winner: PlayerSide) {

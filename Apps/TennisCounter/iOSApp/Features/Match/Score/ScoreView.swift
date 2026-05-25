@@ -2,14 +2,14 @@ import SwiftUI
 
 struct ScoreView: View {
     let options: MatchOptions
-    let onMatchFinished: (Bool, [(my: Int, your: Int)]) -> Void
+    let onMatchFinished: (MatchResult, [(my: Int, your: Int)]) -> Void
     let onProgressChanged: (Bool) -> Void
 
     @StateObject private var viewModel: ScoreViewModel
     @State private var showEditSheet = false
 
     init(options: MatchOptions,
-         onMatchFinished: @escaping (Bool, [(my: Int, your: Int)]) -> Void,
+         onMatchFinished: @escaping (MatchResult, [(my: Int, your: Int)]) -> Void,
          onProgressChanged: @escaping (Bool) -> Void = { _ in }) {
         self.options = options
         self.onMatchFinished = onMatchFinished
@@ -22,14 +22,14 @@ struct ScoreView: View {
             Color.black.ignoresSafeArea()
 
             HStack(spacing: 0) {
-                PlayerScoreZone(
+                PlayerPointZone(
                     displayScore: viewModel.score.myDisplayScore,
                     playerLabel: String(localized: "watch_score_me"),
                     color: .green,
                     onTap: { withAnimation { viewModel.addPoint(.me) } },
                     onLongPress: { showEditSheet = true }
                 )
-                PlayerScoreZone(
+                PlayerPointZone(
                     displayScore: viewModel.score.yourDisplayScore,
                     playerLabel: String(localized: "watch_score_opp"),
                     color: .orange,
@@ -64,8 +64,8 @@ struct ScoreView: View {
         }
         .onAppear { UIApplication.shared.isIdleTimerDisabled = true }
         .onDisappear { UIApplication.shared.isIdleTimerDisabled = false }
-        .onChange(of: viewModel.isMatchOver) { _, isOver in
-            if isOver { onMatchFinished(viewModel.didWin, viewModel.completedSets) }
+        .onChange(of: viewModel.matchResult) { _, result in
+            if let result { onMatchFinished(result, viewModel.completedSets) }
         }
         .onChange(of: viewModel.hasProgress) { _, hasProgress in
             onProgressChanged(hasProgress)

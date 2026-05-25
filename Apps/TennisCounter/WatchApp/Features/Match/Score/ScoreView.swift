@@ -15,7 +15,7 @@ struct ScoreView: View {
     var body: some View {
         ZStack {
             HStack(spacing: 0) {
-                PlayerScoreButton(
+                PlayerPointButton(
                     displayScore: viewModel.score.myDisplayScore,
                     player: String(localized: "watch_score_me"),
                     color: .green,
@@ -23,7 +23,7 @@ struct ScoreView: View {
                     action: { viewModel.addPoint(.me) }
                 )
 
-                PlayerScoreButton(
+                PlayerPointButton(
                     displayScore: viewModel.score.yourDisplayScore,
                     player: String(localized: "watch_score_opp"),
                     color: .orange,
