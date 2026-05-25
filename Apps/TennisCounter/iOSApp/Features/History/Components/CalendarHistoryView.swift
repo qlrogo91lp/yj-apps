@@ -48,7 +48,7 @@ struct CalendarHistoryView: View {
     private var daysGrid: some View {
         let days = daysInMonth()
         return LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7), spacing: 8) {
-            ForEach(days, id: \.self) { date in
+            ForEach(Array(days.enumerated()), id: \.offset) { _, date in
                 if let date {
                     let dayMatches = matchesForDate(date)
                     DayCell(date: date, matches: dayMatches) {
