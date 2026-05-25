@@ -10,13 +10,16 @@ class WorkoutSessionViewModel: ObservableObject {
 
     let healthKit = HealthKitService.shared
     let workoutSessionId: UUID = .init()
+    @Published private(set) var lastMetrics: WorkoutMetrics?
 
     private let connectivity = WatchConnectivityService.shared
     private let appGroupDefaults = UserDefaults(suiteName: "group.com.yj.TennisCounter")
+    private let metricsThrottle: TimeInterval
     private var cancellables = Set<AnyCancellable>()
     private var _currentSession: MatchSession?
 
-    init() {
+    init(metricsThrottle: TimeInterval = 5) {
+        self.metricsThrottle = metricsThrottle
         healthKit.$isPaused
             .receive(on: DispatchQueue.main)
             .assign(to: &$isPaused)
@@ -38,6 +41,15 @@ class WorkoutSessionViewModel: ObservableObject {
                 guard let self else { return }
                 self.endWorkout()
                 self.remoteWorkoutEnded = true
+            }
+            .store(in: &cancellables)
+
+        healthKit.$currentHeartRate
+            .dropFirst()
+            .throttle(for: .seconds(metricsThrottle), scheduler: DispatchQueue.main, latest: true)
+            .sink { [weak self] _ in
+                guard let self, case .playing = self.phase else { return }
+                self.broadcastMetrics()
             }
             .store(in: &cancellables)
     }
@@ -127,6 +139,19 @@ class WorkoutSessionViewModel: ObservableObject {
         WidgetCenter.shared.reloadTimelines(ofKind: "ComplicationApp")
         connectivity.sendWorkoutEnd()
         Task { _ = await healthKit.stopWorkout() }
+    }
+
+    func broadcastMetrics() {
+        guard case .playing = phase else { return }
+        let kcalStart = _currentSession?.kcalAtStart ?? 0
+        let metrics = WorkoutMetrics(
+            elapsedSeconds: TimeInterval(healthKit.elapsedSeconds),
+            calories: healthKit.currentCalories - kcalStart,
+            heartRate: healthKit.currentHeartRate,
+            steps: 0
+        )
+        lastMetrics = metrics
+        connectivity.sendMetrics(metrics)
     }
 
     private func sendMatchEndToiOS(session: MatchSession) {

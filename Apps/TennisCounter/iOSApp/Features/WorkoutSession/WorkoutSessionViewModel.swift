@@ -118,7 +118,6 @@ class WorkoutSessionViewModel: ObservableObject {
         completedMatchCount += 1
         phase = .finished(session)
         LiveActivityService.shared.end()
-        saveCurrentMatch()
     }
 
     func saveCurrentMatch() {

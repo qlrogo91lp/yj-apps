@@ -24,11 +24,12 @@ struct ModeView: View {
                         .foregroundColor(.white)
                     Spacer()
                     Picker("", selection: $selectionVM.gameThreshold) {
+                        Text("4").tag(4)
                         Text("5").tag(5)
                         Text("6").tag(6)
                     }
                     .pickerStyle(.segmented)
-                    .frame(width: 120)
+                    .frame(width: 160)
                 }
 
                 Toggle(String(localized: "mode_no_ad"), isOn: $selectionVM.noAdRule)

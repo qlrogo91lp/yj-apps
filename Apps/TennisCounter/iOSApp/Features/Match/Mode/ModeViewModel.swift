@@ -22,7 +22,7 @@ class ModeViewModel: ObservableObject {
         let ud = UserDefaults.standard
         selectedMode  = MatchFormat(rawValue: ud.string(forKey: "lastSelectedMode") ?? "") ?? .oneSet
         noAdRule      = ud.object(forKey: "lastNoAdRule") as? Bool ?? true
-        noTieRule     = ud.object(forKey: "lastNoTieRule") as? Bool ?? false
+        noTieRule     = ud.object(forKey: "lastNoTieRule") as? Bool ?? true
         gameThreshold = ud.object(forKey: "lastGameThreshold") as? Int ?? 6
     }
 }

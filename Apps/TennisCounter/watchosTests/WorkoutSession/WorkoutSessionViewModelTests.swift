@@ -67,4 +67,46 @@ struct WorkoutSessionViewModelTests {
         let vm = WorkoutSessionViewModel()
         #expect(vm.remoteWorkoutEnded == false)
     }
+
+    // MARK: - Metrics Broadcast
+
+    @Test @MainActor func metricsNotBroadcastWhenNotPlaying() {
+        let vm = WorkoutSessionViewModel()
+        vm.broadcastMetrics()
+        #expect(vm.lastMetrics == nil)
+    }
+
+    @Test @MainActor func metricsBroadcastWhenPlaying() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.broadcastMetrics()
+        #expect(vm.lastMetrics != nil)
+    }
+
+    @Test @MainActor func metricsHeartRateReflectsHealthKit() {
+        HealthKitService.shared.currentHeartRate = 140
+        defer { HealthKitService.shared.currentHeartRate = 0 }
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.broadcastMetrics()
+        #expect(vm.lastMetrics?.heartRate == 140)
+    }
+
+    @Test @MainActor func metricsCaloriesAreNetOfStart() {
+        HealthKitService.shared.currentCalories = 100
+        defer { HealthKitService.shared.currentCalories = 0 }
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        HealthKitService.shared.currentCalories = 150
+        vm.broadcastMetrics()
+        #expect(vm.lastMetrics?.calories == 50)
+    }
+
+    @Test @MainActor func metricsNotBroadcastAfterMatchFinished() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.finishMatch(result: .win, completedSets: [SetScore(my: 6, your: 3)])
+        vm.broadcastMetrics()
+        #expect(vm.lastMetrics == nil)
+    }
 }
