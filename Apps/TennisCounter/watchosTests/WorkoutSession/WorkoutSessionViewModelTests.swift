@@ -63,6 +63,27 @@ struct WorkoutSessionViewModelTests {
         #expect(vm.currentSession() == nil)
     }
 
+    @Test @MainActor func endWorkoutTwiceIsIdempotent() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.endWorkout()
+        vm.endWorkout()
+        #expect(vm.currentSession() == nil)
+        #expect(vm.isPaused == false)
+    }
+
+    @Test @MainActor func endWorkoutDoesNotResetPhase() {
+        // Watch의 endWorkout은 HealthKit 세션만 종료하고 phase는 변경하지 않음
+        // startNewMatch()가 phase를 .modeSelection으로 리셋하는 역할
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.endWorkout()
+        guard case .playing = vm.phase else {
+            Issue.record("endWorkout should not reset phase — phase should remain .playing")
+            return
+        }
+    }
+
     @Test @MainActor func remoteWorkoutEndedDefaultsFalse() {
         let vm = WorkoutSessionViewModel()
         #expect(vm.remoteWorkoutEnded == false)

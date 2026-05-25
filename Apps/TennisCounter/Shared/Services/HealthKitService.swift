@@ -55,7 +55,7 @@ final class HealthKitService: NSObject, ObservableObject {
 
     #if os(watchOS)
         func startWorkout() {
-            guard isAvailable else { return }
+            guard isAvailable, workoutSession == nil else { return }
 
             let config = HKWorkoutConfiguration()
             config.activityType = .tennis
@@ -111,16 +111,23 @@ final class HealthKitService: NSObject, ObservableObject {
                   let builder = liveWorkoutBuilder,
                   let start = startDate else { return nil }
 
+            workoutSession = nil
+            liveWorkoutBuilder = nil
+            startDate = nil
+
             session.end()
             stopTimer()
 
             let elapsed = Int(Date().timeIntervalSince(start))
+            let endDate = Date()
+
+            await withCheckedContinuation { continuation in
+                builder.endCollection(withEnd: endDate) { _, _ in continuation.resume() }
+            }
+
             let calories = await collectCalories(builder: builder)
             let heartRate = await collectAverageHeartRate(builder: builder)
 
-            await withCheckedContinuation { continuation in
-                builder.endCollection(withEnd: Date()) { _, _ in continuation.resume() }
-            }
             try? await builder.finishWorkout()
 
             DispatchQueue.main.async { self.isWorkoutActive = false }
