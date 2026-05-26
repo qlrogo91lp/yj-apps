@@ -5,13 +5,13 @@ import WidgetKit
 struct TennisLiveActivityWidget: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: TennisActivityAttributes.self) { context in
-            LockScreenView(state: context.state)
+            LiveActivityView(state: context.state, matchMode: context.attributes.matchMode)
                 .activityBackgroundTint(Color.black)
                 .activitySystemActionForegroundColor(Color.white)
         } dynamicIsland: { context in
             DynamicIsland {
                 DynamicIslandExpandedRegion(.center) {
-                    ExpandedView(state: context.state)
+                    LiveActivityView(state: context.state, matchMode: context.attributes.matchMode)
                 }
             } compactLeading: {
                 Text(context.state.myPoint)
@@ -38,6 +38,7 @@ struct TennisLiveActivityWidget: Widget {
 
 private extension TennisActivityAttributes {
     static let preview = TennisActivityAttributes(matchMode: "3세트")
+    static let previewOneSet = TennisActivityAttributes(matchMode: "one_set")
 }
 
 #Preview("Lock Screen", as: .content, using: TennisActivityAttributes.preview) {
@@ -47,7 +48,20 @@ private extension TennisActivityAttributes {
     TennisActivityAttributes.ContentState.tieBreak
 }
 
+#Preview("Lock Screen - One Set", as: .content, using: TennisActivityAttributes.previewOneSet) {
+    TennisLiveActivityWidget()
+} contentStates: {
+    TennisActivityAttributes.ContentState.oneSet
+}
+
 #Preview("Dynamic Island Expanded", as: .dynamicIsland(.expanded), using: TennisActivityAttributes.preview) {
+    TennisLiveActivityWidget()
+} contentStates: {
+    TennisActivityAttributes.ContentState.preview
+    TennisActivityAttributes.ContentState.tieBreak
+}
+
+#Preview("Dynamic Island Compact", as: .dynamicIsland(.compact), using: TennisActivityAttributes.preview) {
     TennisLiveActivityWidget()
 } contentStates: {
     TennisActivityAttributes.ContentState.preview
@@ -74,5 +88,12 @@ private extension TennisActivityAttributes.ContentState {
         mySet: 1, yourSet: 1,
         isTieBreak: true,
         workoutStartTime: Date.now - 3600
+    )
+    static let oneSet = TennisActivityAttributes.ContentState(
+        myPoint: "40", yourPoint: "30",
+        myGame: 3, yourGame: 2,
+        mySet: 0, yourSet: 0,
+        isTieBreak: false,
+        workoutStartTime: Date.now - 1234
     )
 }
