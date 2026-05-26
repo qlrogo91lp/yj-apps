@@ -2,27 +2,24 @@ import SwiftUI
 
 struct CalendarView: View {
     let matches: [Match]
+    let currentMonth: Date
+    let onPrevious: () -> Void
+    let onNext: () -> Void
     @Binding var selectedMatch: Match?
-
-    @State private var displayedMonth = Date()
 
     var body: some View {
         VStack(spacing: 0) {
             MonthHeader(
-                displayedMonth: displayedMonth,
-                onPrevious: { changeMonth(by: -1) },
-                onNext: { changeMonth(by: 1) }
+                displayedMonth: currentMonth,
+                onPrevious: onPrevious,
+                onNext: onNext
             )
-
             WeekdayLabels()
-
-            CalendarGrid(matches: matches, displayedMonth: displayedMonth, selectedMatch: $selectedMatch)
-        }
-    }
-
-    private func changeMonth(by value: Int) {
-        if let newMonth = Calendar.current.date(byAdding: .month, value: value, to: displayedMonth) {
-            displayedMonth = newMonth
+            CalendarGrid(
+                matches: matches,
+                displayedMonth: currentMonth,
+                selectedMatch: $selectedMatch
+            )
         }
     }
 }
