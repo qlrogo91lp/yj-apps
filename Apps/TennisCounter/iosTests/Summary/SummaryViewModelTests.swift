@@ -6,7 +6,7 @@ import Testing
 struct SummaryViewModelTests {
     @Test func statsWithNoWorkoutData_returnNilFitnessStats() {
         let vm = SummaryViewModel()
-        vm.selectedPeriod = .all
+        vm.selectedPeriod = .week
 
         let match = Match()
         match.myTotalSets = 2
@@ -22,7 +22,7 @@ struct SummaryViewModelTests {
 
     @Test func statsWithWorkoutData_aggregatesCorrectly() {
         let vm = SummaryViewModel()
-        vm.selectedPeriod = .all
+        vm.selectedPeriod = .week
 
         let match1 = Match()
         match1.myTotalSets = 2
@@ -49,7 +49,7 @@ struct SummaryViewModelTests {
 
     @Test func statsWithMixedWorkoutData_onlyAggregatesAvailableData() {
         let vm = SummaryViewModel()
-        vm.selectedPeriod = .all
+        vm.selectedPeriod = .week
 
         let matchWithData = Match()
         matchWithData.myTotalSets = 2

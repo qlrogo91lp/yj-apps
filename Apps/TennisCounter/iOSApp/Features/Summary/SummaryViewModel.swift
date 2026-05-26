@@ -1,14 +1,13 @@
 import Foundation
 
 enum SummaryPeriod: String, CaseIterable {
-    case today, week, month, all
+    case today, week, month
 
     var localizedTitle: String {
         switch self {
         case .today: String(localized: "summary_period_today")
         case .week: String(localized: "summary_period_week")
         case .month: String(localized: "summary_period_month")
-        case .all: String(localized: "summary_period_all")
         }
     }
 
@@ -20,7 +19,6 @@ enum SummaryPeriod: String, CaseIterable {
         case .month:
             let components = calendar.dateComponents([.year, .month], from: now)
             return calendar.date(from: components)
-        case .all: return nil
         }
     }
 }
