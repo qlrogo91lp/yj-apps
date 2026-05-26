@@ -2,21 +2,34 @@ import SwiftData
 import SwiftUI
 
 struct HistoryView: View {
+    @Environment(\.modelContext) private var modelContext
     @StateObject private var viewModel = HistoryViewModel()
-    @Query(sort: \Match.startedAt, order: .reverse) private var matches: [Match]
     @State private var selectedMatch: Match?
 
     var body: some View {
         NavigationStack {
             Group {
-                if matches.isEmpty {
-                    HistoryEmptyState()
-                } else if viewModel.viewMode == .list {
-                    MatchList(matches: matches, onSelect: { selectedMatch = $0 })
+                if viewModel.viewMode == .list {
+                    if viewModel.listMatches.isEmpty && !viewModel.isLoadingMore {
+                        HistoryEmptyState()
+                    } else {
+                        MatchList(
+                            matches: viewModel.listMatches,
+                            isLoadingMore: viewModel.isLoadingMore,
+                            onLoadMore: { viewModel.loadNextPage() },
+                            onSelect: { selectedMatch = $0 }
+                        )
+                    }
                 } else {
                     ScrollView {
-                        CalendarView(matches: matches, selectedMatch: $selectedMatch)
-                            .padding()
+                        CalendarView(
+                            matches: viewModel.calendarMatches,
+                            currentMonth: viewModel.currentMonth,
+                            onPrevious: { viewModel.changeMonth(by: -1) },
+                            onNext: { viewModel.changeMonth(by: 1) },
+                            selectedMatch: $selectedMatch
+                        )
+                        .padding()
                     }
                 }
             }
@@ -30,6 +43,10 @@ struct HistoryView: View {
             }
             .sheet(item: $selectedMatch) { match in
                 MatchDetailSheet(match: match)
+            }
+            .onAppear {
+                viewModel.configure(modelContext: modelContext)
+                viewModel.loadInitial()
             }
         }
     }
