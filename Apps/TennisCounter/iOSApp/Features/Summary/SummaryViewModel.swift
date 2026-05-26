@@ -29,20 +29,54 @@ struct SummaryStats {
     let totalMatches: Int
     let wins: Int
     let winRate: Double
-    let streak: Int
+    let totalCalories: Double?
+    let totalDuration: Int?
+    let avgHeartRate: Double?
+
+    var formattedCalories: String {
+        totalCalories.map { String(format: "%.0f", $0) } ?? "–"
+    }
+
+    var formattedDuration: String {
+        totalDuration.map { WorkoutMetrics.formatSeconds($0) } ?? "–"
+    }
+
+    var formattedHeartRate: String {
+        avgHeartRate.map { String(format: "%.0f", $0) } ?? "–"
+    }
 }
 
 @MainActor
 final class SummaryViewModel: ObservableObject {
     @Published var selectedPeriod: SummaryPeriod = .week
-    @Published var selectedMatch: Match?
 
     func stats(from matches: [Match]) -> SummaryStats {
         let filtered = filteredMatches(from: matches)
         let wins = filtered.count(where: { $0.myTotalSets > $0.yourTotalSets })
         let total = filtered.count
         let winRate = total > 0 ? Double(wins) / Double(total) : 0.0
-        return SummaryStats(totalMatches: total, wins: wins, winRate: winRate, streak: calculateStreak(from: matches))
+
+        let calories = filtered.compactMap(\.caloriesBurned)
+        let totalCalories: Double? = calories.isEmpty ? nil : calories.reduce(0, +)
+
+        let durations: [Int] = filtered.compactMap { match in
+            if let d = match.durationSeconds { return d }
+            if let end = match.endedAt { return Int(end.timeIntervalSince(match.startedAt)) }
+            return nil
+        }
+        let totalDuration: Int? = durations.isEmpty ? nil : durations.reduce(0, +)
+
+        let heartRates = filtered.compactMap(\.averageHeartRate)
+        let avgHeartRate: Double? = heartRates.isEmpty ? nil : heartRates.reduce(0, +) / Double(heartRates.count)
+
+        return SummaryStats(
+            totalMatches: total,
+            wins: wins,
+            winRate: winRate,
+            totalCalories: totalCalories,
+            totalDuration: totalDuration,
+            avgHeartRate: avgHeartRate
+        )
     }
 
     func recentMatches(from matches: [Match]) -> [Match] {
@@ -52,23 +86,5 @@ final class SummaryViewModel: ObservableObject {
     func filteredMatches(from matches: [Match]) -> [Match] {
         guard let start = selectedPeriod.startDate() else { return matches }
         return matches.filter { $0.startedAt >= start }
-    }
-
-    private func calculateStreak(from matches: [Match]) -> Int {
-        let calendar = Calendar.current
-        var streak = 0
-        var checkDate = Date()
-        for match in matches {
-            let matchDay = calendar.startOfDay(for: match.startedAt)
-            let currentDay = calendar.startOfDay(for: checkDate)
-            let diff = calendar.dateComponents([.day], from: matchDay, to: currentDay).day ?? 0
-            if diff == 0 || diff == streak {
-                streak = max(streak, diff + 1)
-                checkDate = match.startedAt
-            } else {
-                break
-            }
-        }
-        return streak
     }
 }

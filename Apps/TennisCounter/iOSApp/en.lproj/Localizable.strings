@@ -55,10 +55,20 @@
 "summary_period_month" = "This Month";
 "summary_period_all" = "All Time";
 "summary_total_matches" = "Matches";
+"summary_wins" = "Wins";
 "summary_win_rate" = "Win Rate";
 "summary_streak" = "Day Streak";
 "summary_recent_matches" = "Recent Matches";
 "summary_no_matches" = "No matches this period";
+"summary_section_workout" = "Workout";
+"summary_total_calories" = "Total kcal";
+"summary_duration" = "Duration";
+"summary_avg_heartrate" = "Avg BPM";
+
+/* Match Detail */
+"match_detail_title" = "Match Detail";
+"match_detail_section_sets" = "Sets";
+"match_detail_section_info" = "Info";
 
 /* History */
 "history_title" = "History";

@@ -13,9 +13,9 @@ struct DayCell: View {
     var body: some View {
         VStack(spacing: 2) {
             Text("\(calendar.component(.day, from: date))")
-                .font(.system(size: 14, weight: isToday ? .bold : .regular))
+                .font(.system(size: 18, weight: isToday ? .bold : .semibold))
                 .foregroundColor(isToday ? .blue : .primary)
-                .frame(width: 32, height: 32)
+                .frame(width: 40, height: 40)
                 .background(isToday ? Color.blue.opacity(0.1) : Color.clear)
                 .clipShape(Circle())
 

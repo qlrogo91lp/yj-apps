@@ -33,4 +33,12 @@ struct WorkoutMetricsTests {
         let metrics = WorkoutMetrics(elapsedSeconds: 3724) // 1시간 2분 4초
         #expect(metrics.formattedElapsed == "1:02:04")
     }
+
+    @Test func formatSecondsUnderOneHour() {
+        #expect(WorkoutMetrics.formatSeconds(150) == "02:30")
+    }
+
+    @Test func formatSecondsOverOneHour() {
+        #expect(WorkoutMetrics.formatSeconds(3661) == "1:01:01")
+    }
 }

@@ -5,6 +5,16 @@ struct MatchDetailSheet: View {
 
     @Environment(\.dismiss) private var dismiss
 
+    private var matchDurationString: String {
+        if let d = match.durationSeconds {
+            return WorkoutMetrics.formatSeconds(d)
+        }
+        if let end = match.endedAt {
+            return WorkoutMetrics.formatSeconds(Int(end.timeIntervalSince(match.startedAt)))
+        }
+        return "–"
+    }
+
     var body: some View {
         NavigationStack {
             List {
@@ -26,7 +36,33 @@ struct MatchDetailSheet: View {
                     .listRowBackground(Color.clear)
                 }
 
-                Section(header: Text("Sets")) {
+                Section(header: Text(String(localized: "summary_section_workout"))) {
+                    LazyVGrid(
+                        columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())],
+                        spacing: 12
+                    ) {
+                        StatCard(
+                            title: String(localized: "summary_total_calories"),
+                            value: match.caloriesBurned.map { String(format: "%.0f", $0) } ?? "–",
+                            color: .white
+                        )
+                        StatCard(
+                            title: String(localized: "summary_duration"),
+                            value: matchDurationString,
+                            color: .white
+                        )
+                        StatCard(
+                            title: String(localized: "summary_avg_heartrate"),
+                            value: match.averageHeartRate.map { String(format: "%.0f", $0) } ?? "–",
+                            color: .white
+                        )
+                    }
+                    .padding(.horizontal, 8)
+                    .listRowInsets(EdgeInsets())
+                    .listRowBackground(Color.clear)
+                }
+
+                Section(header: Text(String(localized: "match_detail_section_sets"))) {
                     let sets = (match.sets ?? []).sorted { $0.setNumber < $1.setNumber }
                     if sets.isEmpty {
                         Text("No set data").foregroundColor(.secondary)
@@ -37,42 +73,27 @@ struct MatchDetailSheet: View {
                                 Spacer()
                                 Text("\(set.myGames)")
                                     .font(.system(size: 18, weight: .bold)).foregroundColor(.green)
-                                Text(" – ").foregroundColor(.secondary)
+                                Text(":").foregroundColor(.secondary)
                                 Text("\(set.yourGames)")
                                     .font(.system(size: 18, weight: .bold)).foregroundColor(.orange)
                             }
+                            .padding(.horizontal, 6)
                         }
                     }
                 }
 
-                Section(header: Text("Info")) {
+                Section(header: Text(String(localized: "match_detail_section_info"))) {
                     LabeledContent("Format") {
                         Text(match.matchFormat == .oneSet
                             ? String(localized: "match_format_one_set")
                             : String(localized: "match_format_best_of_3"))
                     }
-                    if let endedAt = match.endedAt {
-                        LabeledContent("Duration") {
-                            let minutes = Int(endedAt.timeIntervalSince(match.startedAt) / 60)
-                            Text("\(minutes) min")
-                        }
-                    }
                     LabeledContent("Date") {
                         Text(match.startedAt.formatted(date: .abbreviated, time: .shortened))
                     }
-                    if let calories = match.caloriesBurned, calories > 0 {
-                        LabeledContent("Calories") {
-                            Text(String(format: "%.0f kcal", calories))
-                        }
-                    }
-                    if let hr = match.averageHeartRate {
-                        LabeledContent("Avg. Heart Rate") {
-                            Text(String(format: "%.0f BPM", hr))
-                        }
-                    }
                 }
             }
-            .navigationTitle("Match Detail")
+            .navigationTitle(String(localized: "match_detail_title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {

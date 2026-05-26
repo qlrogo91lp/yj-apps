@@ -10,11 +10,14 @@ struct HistoryView: View {
         NavigationStack {
             Group {
                 if matches.isEmpty {
-                    emptyState
+                    HistoryEmptyState()
                 } else if viewModel.viewMode == .list {
-                    listView
+                    MatchList(matches: matches, onSelect: { selectedMatch = $0 })
                 } else {
-                    calendarView
+                    ScrollView {
+                        CalendarView(matches: matches, selectedMatch: $selectedMatch)
+                            .padding()
+                    }
                 }
             }
             .navigationTitle(String(localized: "history_title"))
@@ -28,36 +31,6 @@ struct HistoryView: View {
             .sheet(item: $selectedMatch) { match in
                 MatchDetailSheet(match: match)
             }
-        }
-    }
-
-    private var emptyState: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "clock.badge.xmark")
-                .font(.system(size: 48))
-                .foregroundColor(.secondary)
-            Text(String(localized: "history_empty"))
-                .foregroundColor(.secondary)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-
-    private var listView: some View {
-        List {
-            ForEach(matches) { match in
-                MatchRow(match: match, didWin: viewModel.wonMatch(match))
-                    .contentShape(Rectangle())
-                    .onTapGesture { selectedMatch = match }
-                    .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
-            }
-        }
-        .listStyle(.plain)
-    }
-
-    private var calendarView: some View {
-        ScrollView {
-            CalendarHistoryView(matches: matches, selectedMatch: $selectedMatch)
-                .padding()
         }
     }
 }

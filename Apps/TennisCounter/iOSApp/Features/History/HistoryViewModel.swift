@@ -13,7 +13,4 @@ final class HistoryViewModel: ObservableObject {
         viewMode = viewMode == .list ? .calendar : .list
     }
 
-    func wonMatch(_ match: Match) -> Bool {
-        match.myTotalSets > match.yourTotalSets
-    }
 }

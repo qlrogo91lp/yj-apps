@@ -55,10 +55,20 @@
 "summary_period_month" = "이번 달";
 "summary_period_all" = "전체";
 "summary_total_matches" = "경기 수";
+"summary_wins" = "승";
 "summary_win_rate" = "승률";
 "summary_streak" = "연속 플레이";
 "summary_recent_matches" = "최근 경기";
 "summary_no_matches" = "이 기간에 경기가 없습니다";
+"summary_section_workout" = "운동";
+"summary_total_calories" = "총 kcal";
+"summary_duration" = "운동시간";
+"summary_avg_heartrate" = "평균 bpm";
+
+/* Match Detail */
+"match_detail_title" = "경기 상세";
+"match_detail_section_sets" = "세트";
+"match_detail_section_info" = "정보";
 
 /* History */
 "history_title" = "기록";
