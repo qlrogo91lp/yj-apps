@@ -30,16 +30,17 @@
 
 ## 2. iPhone App Store 스크린샷 (6장)
 
-iPhone 페이지는 1~3번에서 "워치가 메인 도구"임을 박고, 4~6번에서 iOS의 '다시 보기' 보조 가치로 자연스럽게 전환.
+iPhone 페이지는 1~3번에서 "워치가 메인 도구"임을 박고, 4번에서 iPhone↔Watch 연동을 보여준 뒤, 5~7번에서 iOS의 '다시 보기' 보조 가치로 자연스럽게 전환.
 
 | # | 캡처 화면 | 한국어 카피 | English Copy |
 |---|----------|-------------|--------------|
 | 1 | Watch 점수 입력 (디바이스 목업) | 복잡한 점수, 손목에서 한 번에. | Tennis scores, right on your wrist. |
-| 2 | Watch 컴플리케이션 + Live Activity (워치페이스/잠금화면) | 앱 안 열어도, 점수가 보여요. | Glance, don't tap. |
+| 2 | Watch 컴플리케이션 + Live Activity (워치페이스/잠금화면) | 탭 없이도, 점수는 보여요. | Glance, don't tap. |
 | 3 | Watch Workout 메트릭 (칼로리·심박수·시간) | 경기하는 동안, 운동도 자동으로. | Score the match. Log the workout. |
-| 4 | iOS 경기 결과 (세트별 상세) | 끝나면, 폰에서 차근차근. | Replay every match on iPhone. |
-| 5 | iOS 캘린더 히스토리 | 친 날들이, 달력에 차곡차곡. | Your tennis days, on one calendar. |
-| 6 | iOS Summary 통계 | 한 경기, 한 기억으로. | Every match, a memory. |
+| 4 | iPhone + Watch 연동 (두 디바이스 함께) | 어디서든, 함께. | Together, anywhere. |
+| 5 | iOS 경기 결과 (세트별 상세) | 끝나면, 폰에서 차근차근. | Replay every match on iPhone. |
+| 6 | iOS 캘린더 히스토리 | 친 날들이, 달력에 차곡차곡. | Your tennis days, on one calendar. |
+| 7 | iOS Summary 통계 | 한 경기, 한 기억으로. | Every match, a memory. |
 
 ---
 
@@ -200,11 +201,11 @@ your wrist that keeps the score for you.
 | Keywords | ✓ | ✓ |
 | Promotional Text | ✓ | ✓ |
 | Description | ✓ | ✓ |
-| iPhone 스크린샷 × 6장 | 한국어 카피 박힌 PNG | 영어 카피 박힌 PNG |
+| iPhone 스크린샷 × 7장 | 한국어 카피 박힌 PNG | 영어 카피 박힌 PNG |
 | Watch 스크린샷 × 5장 | 한국어 카피 박힌 PNG | 영어 카피 박힌 PNG |
 | What's New | ✓ | ✓ |
 
-**총 스크린샷:** (6 + 5) × 2 로케일 = **22장**.
+**총 스크린샷:** (7 + 5) × 2 로케일 = **24장**.
 베이스 디바이스 캡처는 공통, 카피 텍스트만 언어별로 교체.
 
 ---
