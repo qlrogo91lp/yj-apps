@@ -106,7 +106,7 @@ class WorkoutSessionViewModel: ObservableObject {
         match.workoutSessionId = session.workoutSessionId
         match.startedAt = session.startedAt
         match.endedAt = session.endedAt ?? Date()
-        match.durationSeconds = Int((session.endedAt ?? Date()).timeIntervalSince(session.startedAt))
+        match.durationSeconds = healthKit.elapsedSeconds
         match.mode = session.options.mode.rawValue
         match.noAdRule = session.options.noAdRule
         match.resultRaw = session.result?.rawValue ?? "win"
@@ -161,6 +161,7 @@ class WorkoutSessionViewModel: ObservableObject {
             completedSets: session.completedSets.map { [$0.my, $0.your] },
             startedAt: session.startedAt,
             endedAt: session.endedAt ?? Date(),
+            durationSeconds: healthKit.elapsedSeconds,
             calories: (session.kcalAtEnd ?? 0) - session.kcalAtStart,
             averageHeartRate: session.averageHeartRate,
             mode: session.options.mode.rawValue,

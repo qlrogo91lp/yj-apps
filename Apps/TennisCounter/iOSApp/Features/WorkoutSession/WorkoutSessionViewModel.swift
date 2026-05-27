@@ -12,6 +12,8 @@ class WorkoutSessionViewModel: ObservableObject {
     @Published var remoteWorkoutEnded: Bool = false
 
     private var startedAt: Date?
+    private var pausedAt: Date?
+    private var totalPausedSeconds: TimeInterval = 0
     private var sessionId: UUID = .init()
     private var _currentSession: MatchSession?
     private var timer: Timer?
@@ -77,16 +79,23 @@ class WorkoutSessionViewModel: ObservableObject {
 
     func startSession() {
         startedAt = Date()
+        totalPausedSeconds = 0
+        pausedAt = nil
         startTimer()
     }
 
     func pauseSession() {
         isPaused = true
+        pausedAt = Date()
         timer?.invalidate()
         timer = nil
     }
 
     func resumeSession() {
+        if let p = pausedAt {
+            totalPausedSeconds += Date().timeIntervalSince(p)
+            pausedAt = nil
+        }
         isPaused = false
         startTimer()
     }
@@ -140,6 +149,8 @@ class WorkoutSessionViewModel: ObservableObject {
         timer?.invalidate()
         timer = nil
         elapsedSeconds = 0
+        totalPausedSeconds = 0
+        pausedAt = nil
         metrics = .init()
         _currentSession = nil
         phase = .modeSelection
@@ -159,7 +170,7 @@ class WorkoutSessionViewModel: ObservableObject {
         match.workoutSessionId = msg.sessionId
         match.startedAt = msg.startedAt
         match.endedAt = msg.endedAt
-        match.durationSeconds = Int(msg.endedAt.timeIntervalSince(msg.startedAt))
+        match.durationSeconds = msg.durationSeconds
         match.caloriesBurned = msg.calories
         match.averageHeartRate = msg.averageHeartRate
         match.mode = msg.mode
@@ -178,7 +189,7 @@ class WorkoutSessionViewModel: ObservableObject {
         match.workoutSessionId = session.workoutSessionId
         match.startedAt = session.startedAt
         match.endedAt = session.endedAt ?? Date()
-        match.durationSeconds = Int((session.endedAt ?? Date()).timeIntervalSince(session.startedAt))
+        match.durationSeconds = elapsedSeconds
         match.caloriesBurned = (session.kcalAtEnd ?? 0) - session.kcalAtStart
         match.mode = session.options.mode.rawValue
         match.noAdRule = session.options.noAdRule
@@ -218,8 +229,8 @@ class WorkoutSessionViewModel: ObservableObject {
         guard let startedAt else { return }
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
             Task { @MainActor [weak self] in
-                guard let self, !self.isPaused else { return }
-                self.elapsedSeconds = Int(Date().timeIntervalSince(startedAt))
+                guard let self else { return }
+                self.elapsedSeconds = Int(Date().timeIntervalSince(startedAt) - self.totalPausedSeconds)
                 self.metrics = WorkoutMetrics(
                     elapsedSeconds: TimeInterval(self.elapsedSeconds),
                     calories: self.metrics.calories,

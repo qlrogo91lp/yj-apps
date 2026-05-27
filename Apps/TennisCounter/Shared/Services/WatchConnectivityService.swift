@@ -109,6 +109,7 @@ struct MatchEndMessage {
     let completedSets: [[Int]]
     let startedAt: Date
     let endedAt: Date
+    let durationSeconds: Int
     let calories: Double
     let averageHeartRate: Double?
     let mode: String
@@ -122,6 +123,7 @@ struct MatchEndMessage {
             "sets": completedSets,
             "startedAt": startedAt.timeIntervalSince1970,
             "endedAt": endedAt.timeIntervalSince1970,
+            "durationSeconds": durationSeconds,
             "calories": calories,
             "mode": mode,
             "noAdRule": noAdRule
@@ -143,6 +145,7 @@ struct MatchEndMessage {
         completedSets = dict["sets"] as? [[Int]] ?? []
         startedAt = Date(timeIntervalSince1970: startTs)
         endedAt = Date(timeIntervalSince1970: endTs)
+        durationSeconds = dict["durationSeconds"] as? Int ?? Int(endTs - startTs)
         calories = dict["calories"] as? Double ?? 0
         averageHeartRate = dict["heartRate"] as? Double
         self.mode = mode
@@ -150,12 +153,13 @@ struct MatchEndMessage {
     }
 
     init(sessionId: UUID, result: String, completedSets: [[Int]], startedAt: Date,
-         endedAt: Date, calories: Double, averageHeartRate: Double?, mode: String, noAdRule: Bool) {
+         endedAt: Date, durationSeconds: Int, calories: Double, averageHeartRate: Double?, mode: String, noAdRule: Bool) {
         self.sessionId = sessionId
         self.result = result
         self.completedSets = completedSets
         self.startedAt = startedAt
         self.endedAt = endedAt
+        self.durationSeconds = durationSeconds
         self.calories = calories
         self.averageHeartRate = averageHeartRate
         self.mode = mode
