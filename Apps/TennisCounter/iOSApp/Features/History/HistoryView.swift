@@ -36,9 +36,9 @@ struct HistoryView: View {
             .navigationTitle(String(localized: "history_title"))
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button(action: { viewModel.toggleViewMode() }) {
+                    Button(action: { viewModel.toggleViewMode() }, label: {
                         Image(systemName: viewModel.viewMode == .list ? "calendar" : "list.bullet")
-                    }
+                    })
                 }
             }
             .sheet(item: $selectedMatch) { match in

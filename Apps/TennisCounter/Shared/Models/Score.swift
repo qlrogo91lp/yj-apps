@@ -103,6 +103,7 @@ class Score: ObservableObject {
         gameMode == .normal && myNormal == .forty && yourNormal == .forty && !noAdRule
     }
 
+    // swiftlint:disable:next cyclomatic_complexity
     private func addNormalPoint(_ side: PlayerSide) -> PlayerSide? {
         if side == .me {
             switch myNormal {

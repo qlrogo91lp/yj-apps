@@ -75,19 +75,19 @@ class ScoreViewModel: ObservableObject {
     }
 
     private func checkSetUpdate() {
-        let T = options.gameThreshold
+        let threshold = options.gameThreshold
         let my = myGameScore, your = yourGameScore
 
         if tieBreakInProgress {
-            if (my == T + 1 && your == T) || (your == T + 1 && my == T) {
+            if (my == threshold + 1 && your == threshold) || (your == threshold + 1 && my == threshold) {
                 tieBreakInProgress = false
-                let winner: PlayerSide = my == T + 1 ? .me : .opponent
+                let winner: PlayerSide = my == threshold + 1 ? .me : .opponent
                 finalizeSet(winner: winner)
             }
             return
         }
 
-        if my == T && your == T {
+        if my == threshold && your == threshold {
             if options.noTieRule {
                 completedSets.append(SetScore(my: my, your: your))
                 onMatchFinished?(.draw, completedSets)
@@ -99,7 +99,7 @@ class ScoreViewModel: ObservableObject {
         }
 
         let maxG = max(my, your), minG = min(my, your)
-        guard maxG >= T && (maxG - minG) >= 2 else { return }
+        guard maxG >= threshold && (maxG - minG) >= 2 else { return }
         finalizeSet(winner: my > your ? .me : .opponent)
     }
 

@@ -66,7 +66,7 @@ final class HistoryViewModel: ObservableObject {
         let end = currentMonth.endOfMonth
 
         let predicate = #Predicate<Match> { $0.startedAt >= start && $0.startedAt < end }
-        var descriptor = FetchDescriptor<Match>(
+        let descriptor = FetchDescriptor<Match>(
             predicate: predicate,
             sortBy: [SortDescriptor(\Match.startedAt, order: .reverse)]
         )

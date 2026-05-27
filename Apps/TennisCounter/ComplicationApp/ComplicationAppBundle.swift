@@ -12,6 +12,5 @@ import WidgetKit
 struct ComplicationAppBundle: WidgetBundle {
     var body: some Widget {
         ComplicationApp()
-        ComplicationAppControl()
     }
 }

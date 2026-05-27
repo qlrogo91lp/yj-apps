@@ -29,8 +29,8 @@ struct WorkoutSessionView: View {
                 viewModel.startMatch(options: remote.options, sessionId: remote.sessionId, isRemote: true)
             }
         }
-        .onChange(of: viewModel.remoteWorkoutEnded) { ended in
-            if ended { dismiss() }
+        .onChange(of: viewModel.remoteWorkoutEnded) {
+            if viewModel.remoteWorkoutEnded { dismiss() }
         }
     }
 
