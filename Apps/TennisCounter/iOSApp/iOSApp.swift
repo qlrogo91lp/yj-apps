@@ -53,7 +53,11 @@ struct MainTabView: View {
                     .tabItem { Label(String(localized: "tab_summary"), systemImage: "chart.bar.fill") }
                     .tag(0)
 
-                HomeView(onMatchStart: { withAnimation { isMatchActive = true } })
+                HomeView(onMatchStart: {
+                    connectivity.receivedWorkoutEnd = nil
+                    connectivity.receivedMatchEnd = nil
+                    withAnimation { isMatchActive = true }
+                })
                     .tabItem { Label(String(localized: "tab_match"), systemImage: "sportscourt.fill") }
                     .tag(1)
 
@@ -80,6 +84,9 @@ struct MainTabView: View {
         .onReceive(connectivity.$receivedSessionStart.compactMap { $0 }) { msg in
             guard !isMatchActive else { return }
             remoteSession = msg
+            connectivity.receivedSessionStart = nil
+            connectivity.receivedWorkoutEnd = nil
+            connectivity.receivedMatchEnd = nil
             withAnimation { isMatchActive = true }
         }
     }

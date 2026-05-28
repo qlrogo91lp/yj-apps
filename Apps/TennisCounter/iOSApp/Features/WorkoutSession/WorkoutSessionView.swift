@@ -89,9 +89,11 @@ struct WorkoutSessionView: View {
             }
         }
         .onAppear {
-            viewModel.startSession()
             if let remote = remoteSession {
+                viewModel.startSession(startDate: remote.workoutStartDate)
                 viewModel.startMatch(options: remote.options, isRemote: true)
+            } else {
+                viewModel.startSession()
             }
         }
         .onChange(of: viewModel.remoteWorkoutEnded) {

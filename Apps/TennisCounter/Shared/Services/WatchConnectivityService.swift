@@ -15,6 +15,7 @@ private enum WCMessageType: String {
 struct SessionStartMessage {
     let sessionId: UUID
     let options: MatchOptions
+    let workoutStartDate: Date
 
     func toDictionary() -> [String: Any] {
         [
@@ -23,7 +24,8 @@ struct SessionStartMessage {
             "mode": options.mode.rawValue,
             "noAdRule": options.noAdRule,
             "noTieRule": options.noTieRule,
-            "gameThreshold": options.gameThreshold
+            "gameThreshold": options.gameThreshold,
+            "workoutStartDate": workoutStartDate.timeIntervalSince1970
         ]
     }
 
@@ -40,11 +42,14 @@ struct SessionStartMessage {
             noTieRule: dict["noTieRule"] as? Bool ?? false,
             gameThreshold: dict["gameThreshold"] as? Int ?? 6
         )
+        let ts = dict["workoutStartDate"] as? Double ?? Date().timeIntervalSince1970
+        workoutStartDate = Date(timeIntervalSince1970: ts)
     }
 
-    init(sessionId: UUID, options: MatchOptions) {
+    init(sessionId: UUID, options: MatchOptions, workoutStartDate: Date = Date()) {
         self.sessionId = sessionId
         self.options = options
+        self.workoutStartDate = workoutStartDate
     }
 }
 

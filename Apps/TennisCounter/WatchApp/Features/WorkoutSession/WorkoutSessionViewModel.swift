@@ -28,7 +28,8 @@ class WorkoutSessionViewModel: ObservableObject {
             .compactMap { $0 }
             .receive(on: DispatchQueue.main)
             .sink { [weak self] msg in
-                guard let self, case .modeSelection = self.phase else { return }
+                guard let self else { return }
+                if case .playing = self.phase { return }
                 if !self.healthKit.isWorkoutActive { self.startWorkout() }
                 self.startMatch(options: msg.options, sessionId: msg.sessionId, isRemote: true)
             }
@@ -39,7 +40,7 @@ class WorkoutSessionViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 guard let self else { return }
-                self.endWorkout()
+                self.endWorkout(notifyRemote: false)
                 self.remoteWorkoutEnded = true
             }
             .store(in: &cancellables)
@@ -74,7 +75,11 @@ class WorkoutSessionViewModel: ObservableObject {
         phase = .playing(options)
 
         if !isRemote {
-            connectivity.sendSessionStart(SessionStartMessage(sessionId: id, options: options))
+            connectivity.sendSessionStart(SessionStartMessage(
+                sessionId: id,
+                options: options,
+                workoutStartDate: healthKit.startDate ?? Date()
+            ))
         }
     }
 
@@ -133,11 +138,11 @@ class WorkoutSessionViewModel: ObservableObject {
     func pauseWorkout() { healthKit.pauseWorkout() }
     func resumeWorkout() { healthKit.resumeWorkout() }
 
-    func endWorkout() {
+    func endWorkout(notifyRemote: Bool = true) {
         _currentSession = nil
         appGroupDefaults?.set(false, forKey: "isWorkoutActive")
         WidgetCenter.shared.reloadTimelines(ofKind: "ComplicationApp")
-        connectivity.sendWorkoutEnd()
+        if notifyRemote { connectivity.sendWorkoutEnd() }
         Task { _ = await healthKit.stopWorkout() }
     }
 

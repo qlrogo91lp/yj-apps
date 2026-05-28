@@ -22,7 +22,7 @@ final class HealthKitService: NSObject, ObservableObject {
     #if os(watchOS)
         private var liveWorkoutBuilder: HKLiveWorkoutBuilder?
     #endif
-    private var startDate: Date?
+    private(set) var startDate: Date?
     private var timer: Timer?
     private var timerPausedAt: Date?
 

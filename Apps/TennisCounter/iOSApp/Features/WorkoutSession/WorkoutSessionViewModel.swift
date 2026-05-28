@@ -45,7 +45,7 @@ class WorkoutSessionViewModel: ObservableObject {
             .sink { [weak self] msg in
                 guard let self else { return }
                 self.sessionId = msg.sessionId
-                self.startSession()
+                self.startSession(startDate: msg.workoutStartDate)
                 self.startMatch(options: msg.options, isRemote: true)
                 LiveActivityService.shared.start(mode: msg.options.mode)
             }
@@ -69,7 +69,7 @@ class WorkoutSessionViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 guard let self else { return }
-                self.endSession()
+                self.endSession(notifyRemote: false)
                 self.remoteWorkoutEnded = true
             }
             .store(in: &cancellables)
@@ -77,8 +77,8 @@ class WorkoutSessionViewModel: ObservableObject {
 
     deinit { timer?.invalidate() }
 
-    func startSession() {
-        startedAt = Date()
+    func startSession(startDate: Date = Date()) {
+        startedAt = startDate
         totalPausedSeconds = 0
         pausedAt = nil
         startTimer()
@@ -111,7 +111,11 @@ class WorkoutSessionViewModel: ObservableObject {
         LiveActivityService.shared.start(mode: options.mode)
 
         if !isRemote {
-            connectivity.sendSessionStart(SessionStartMessage(sessionId: sessionId, options: options))
+            connectivity.sendSessionStart(SessionStartMessage(
+                sessionId: sessionId,
+                options: options,
+                workoutStartDate: startedAt ?? Date()
+            ))
         }
     }
 
@@ -145,7 +149,7 @@ class WorkoutSessionViewModel: ObservableObject {
         phase = .modeSelection
     }
 
-    func endSession() {
+    func endSession(notifyRemote: Bool = true) {
         timer?.invalidate()
         timer = nil
         elapsedSeconds = 0
@@ -155,7 +159,7 @@ class WorkoutSessionViewModel: ObservableObject {
         _currentSession = nil
         phase = .modeSelection
         LiveActivityService.shared.end()
-        connectivity.sendWorkoutEnd()
+        if notifyRemote { connectivity.sendWorkoutEnd() }
     }
 
     // MARK: - Private

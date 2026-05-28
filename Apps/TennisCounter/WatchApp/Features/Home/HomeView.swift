@@ -20,6 +20,8 @@ struct HomeView: View {
                 Button {
                     guard !navigateToWorkout else { return }
                     connectivity.receivedSessionStart = nil
+                    connectivity.receivedWorkoutEnd = nil
+                    connectivity.receivedMatchEnd = nil
                     navigateToWorkout = true
                 } label: {
                     Text(String(localized: "watch_start_workout"))
@@ -40,6 +42,8 @@ struct HomeView: View {
             guard !navigateToWorkout else { return }
             remoteSession = msg
             connectivity.receivedSessionStart = nil
+            connectivity.receivedWorkoutEnd = nil
+            connectivity.receivedMatchEnd = nil
             navigateToWorkout = true
         }
     }
