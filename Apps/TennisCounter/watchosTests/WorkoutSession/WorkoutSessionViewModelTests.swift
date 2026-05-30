@@ -84,6 +84,39 @@ struct WorkoutSessionViewModelTests {
         }
     }
 
+    @Test @MainActor func startOwnMatchClearsStaleRemoteScoreState() {
+        let service = WatchConnectivityService.shared
+        service.receivedScoreState = ScoreState(
+            myScore: 15, yourScore: 0,
+            myGameScore: 3, yourGameScore: 2,
+            mySetScore: 1, yourSetScore: 0,
+            completedSets: [], isTieBreak: false
+        )
+        defer { service.receivedScoreState = nil }
+
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false), isRemote: false)
+
+        #expect(service.receivedScoreState == nil)
+    }
+
+    @Test @MainActor func remoteMatchStartDoesNotClearScoreState() {
+        let service = WatchConnectivityService.shared
+        let existing = ScoreState(
+            myScore: 15, yourScore: 0,
+            myGameScore: 3, yourGameScore: 2,
+            mySetScore: 1, yourSetScore: 0,
+            completedSets: [], isTieBreak: false
+        )
+        service.receivedScoreState = existing
+        defer { service.receivedScoreState = nil }
+
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false), isRemote: true)
+
+        #expect(service.receivedScoreState != nil)
+    }
+
     @Test @MainActor func remoteWorkoutEndedDefaultsFalse() {
         let vm = WorkoutSessionViewModel()
         #expect(vm.remoteWorkoutEnded == false)

@@ -196,7 +196,7 @@ final class WatchConnectivityService: NSObject, ObservableObject {
     }
 
     func sendScoreState(_ state: ScoreState) {
-        send(state.toDictionary())
+        sendRealtimeOnly(state.toDictionary())
     }
 
     func sendMatchEnd(_ msg: MatchEndMessage) {
@@ -210,11 +210,20 @@ final class WatchConnectivityService: NSObject, ObservableObject {
     }
 
     func sendMetrics(_ metrics: WorkoutMetrics) {
-        send(metrics.toDictionary())
+        sendRealtimeOnly(metrics.toDictionary())
     }
 
     func sendWorkoutEnd() {
-        send(["type": WCMessageType.workoutEnd.rawValue])
+        sendRealtimeOnly(["type": WCMessageType.workoutEnd.rawValue])
+    }
+
+    private func sendRealtimeOnly(_ dict: [String: Any]) {
+        guard WCSession.default.activationState == .activated,
+              WCSession.default.isReachable else { return }
+        #if os(iOS)
+        guard WCSession.default.isWatchAppInstalled else { return }
+        #endif
+        WCSession.default.sendMessage(dict, replyHandler: nil, errorHandler: nil)
     }
 
     private func send(_ dict: [String: Any]) {

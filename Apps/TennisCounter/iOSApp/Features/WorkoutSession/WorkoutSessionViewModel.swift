@@ -25,6 +25,19 @@ class WorkoutSessionViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .assign(to: &$watchConnected)
 
+        connectivity.$isWatchReachable
+            .filter { $0 }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                guard let self, case .playing(let options) = self.phase else { return }
+                self.connectivity.sendSessionStart(SessionStartMessage(
+                    sessionId: self.sessionId,
+                    options: options,
+                    workoutStartDate: self.startedAt ?? Date()
+                ))
+            }
+            .store(in: &cancellables)
+
         connectivity.$receivedMetrics
             .compactMap { $0 }
             .receive(on: DispatchQueue.main)

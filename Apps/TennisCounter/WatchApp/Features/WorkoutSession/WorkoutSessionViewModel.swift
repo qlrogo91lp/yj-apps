@@ -72,6 +72,11 @@ class WorkoutSessionViewModel: ObservableObject {
             kcalAtStart: healthKit.currentCalories
         )
         _currentSession = session
+
+        if !isRemote {
+            connectivity.receivedScoreState = nil
+        }
+
         phase = .playing(options)
 
         if !isRemote {
