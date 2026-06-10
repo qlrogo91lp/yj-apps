@@ -47,7 +47,7 @@ struct ComplicationAppEntryView: View {
     @Environment(\.widgetFamily) var widgetFamily
     var entry: Provider.Entry
 
-    private let defaultBgColor = Color(red: 0.6784, green: 1.0, blue: 0.2549)
+    private let defaultBgColor = Color.brand
 
     private var bgColor: Color {
         entry.isWorkoutActive ? .yellow : defaultBgColor
@@ -91,10 +91,10 @@ struct ComplicationApp: Widget {
         StaticConfiguration(kind: kind, provider: Provider()) { entry in
             if #available(watchOS 10.0, *) {
                 ComplicationAppEntryView(entry: entry)
-                    .containerBackground(Color(red: 0.6784, green: 1.0, blue: 0.2549), for: .widget)
+                    .containerBackground(Color.brand, for: .widget)
             } else {
                 ComplicationAppEntryView(entry: entry)
-                    .background(Color(red: 0.6784, green: 1.0, blue: 0.2549))
+                    .background(Color.brand)
             }
         }
         .configurationDisplayName("Ralli")

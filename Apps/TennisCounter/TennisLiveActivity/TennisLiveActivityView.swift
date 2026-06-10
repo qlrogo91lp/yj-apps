@@ -30,7 +30,7 @@ struct TennisLiveActivityWidget: Widget {
                     .resizable()
                     .scaledToFit()
                     .padding(3)
-                    .background(Circle().fill(Color(red: 0.6784, green: 1.0, blue: 0.2549)))
+                    .background(Circle().fill(Color.brand))
             }
         }
     }

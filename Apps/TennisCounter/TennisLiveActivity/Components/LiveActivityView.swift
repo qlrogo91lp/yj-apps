@@ -12,7 +12,7 @@ struct LiveActivityView: View {
                     .scaledToFit()
                     .frame(width: 24, height: 24)
                     .padding(3)
-                    .background(Circle().fill(Color(red: 0.6784, green: 1.0, blue: 0.2549)))
+                    .background(Circle().fill(Color.brand))
 
                 Text("Ralli")
                     .font(.system(size: 20, weight: .bold))
@@ -45,7 +45,7 @@ struct LiveActivityView: View {
                         if state.isTieBreak {
                             Text("Tiebreak")
                                 .font(.caption2)
-                                .foregroundColor(Color(red: 0.6784, green: 1.0, blue: 0.2549))
+                                .foregroundColor(Color.brand)
                         }
                     }
                     Text(state.yourPoint)
