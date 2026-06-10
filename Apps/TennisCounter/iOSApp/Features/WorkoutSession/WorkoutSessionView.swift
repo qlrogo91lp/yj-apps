@@ -53,10 +53,15 @@ struct WorkoutSessionView: View {
                 }
             }
             ToolbarItem(placement: .principal) {
-                if case .modeSelection = viewModel.phase {
+                switch viewModel.phase {
+                case .modeSelection:
                     Text(String(localized: "new_match"))
                         .font(.system(size: 28, weight: .bold))
                         .foregroundColor(.white)
+                case .playing, .finished:
+                    if selectedTab == 1 {
+                        WorkoutIndicator(elapsedFormatted: viewModel.metrics.formattedElapsed)
+                    }
                 }
             }
         }
