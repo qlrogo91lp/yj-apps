@@ -36,7 +36,6 @@ Shared/
 ├── Models/
 │   ├── Score.swift          # 점수 상태 ObservableObject. scoreArr = [0,15,30,40,50], undo via LastAction enum
 │   ├── MatchFormat.swift    # 경기 포맷 (세트 수, 타이브레이크 등)
-│   ├── MatchMode.swift      # 경기 모드 enum
 │   ├── MatchOptions.swift   # 경기 옵션 (포맷 + 모드 조합)
 │   ├── MatchPhase.swift     # 경기 진행 단계 enum (mode → playing → result)
 │   ├── MatchResult.swift    # 경기 결과 struct
@@ -46,7 +45,6 @@ Shared/
 ├── Persistence/
 │   │  # SwiftData @Model 클래스. DB 스키마 역할.
 │   ├── Match.swift          # SwiftData 경기 기록 모델
-│   ├── MatchRecord.swift    # 경기 기록 집계 struct
 │   └── SetRecord.swift      # 세트별 기록 struct
 └── Services/
     │  # 외부 프레임워크/시스템 API를 래핑하는 서비스 레이어.
@@ -57,10 +55,16 @@ Shared/
 iOSApp/
 │  # iPhone 전용 타겟
 ├── iOSApp.swift           # @main 진입점 + MainTabView
+├── BrandColor.swift       # Color.brand 확장 (앱 브랜드 컬러)
+├── Extensions/
+│   └── Date+Month.swift   # Date 월 표기 헬퍼
+├── Services/
+│   └── LiveActivityService.swift  # Live Activity 시작/업데이트/종료
 ├── Components/
-│   ├── BackButton.swift        # 공통 뒤로가기 버튼
-│   ├── BrandTitle.swift        # 앱 브랜드 타이틀 컴포넌트
-│   └── MatchDetailSheet.swift  # Summary·History 공유 경기 상세 시트
+│   ├── BackButton.swift   # 공통 뒤로가기 버튼
+│   ├── BrandTitle.swift   # 앱 브랜드 타이틀 컴포넌트
+│   ├── MatchCard.swift    # Summary·History 공유 경기 카드
+│   └── StatCard.swift     # 통계 수치 카드 (Summary·Workout 공유)
 └── Features/
     ├── Home/
     │   └── HomeView.swift           # iOS 홈 화면 (탭 컨테이너)
@@ -70,8 +74,9 @@ iOSApp/
     │   ├── SummaryView.swift
     │   ├── SummaryViewModel.swift
     │   └── Components/
-    │       ├── StatCard.swift
-    │       └── RecentMatchCard.swift
+    │       ├── MatchStatsGrid.swift   # 경기 통계 그리드
+    │       ├── RecentMatchList.swift  # 최근 경기 목록
+    │       └── WorkoutStatsGrid.swift # 워크아웃 통계 그리드
     ├── Match/
     │   │  # Watch 앱과 대칭 구조: Mode / Score / Result
     │   ├── Mode/                        # 포맷 선택 화면
@@ -83,7 +88,7 @@ iOSApp/
     │   │   ├── ScoreView.swift
     │   │   ├── ScoreViewModel.swift
     │   │   └── Components/
-    │   │       ├── PlayerScoreZone.swift
+    │   │       ├── PlayerPointZone.swift
     │   │       ├── GameScores.swift
     │   │       ├── SetScores.swift
     │   │       ├── UndoButton.swift
@@ -103,14 +108,23 @@ iOSApp/
     │       └── WorkoutTimerRing.swift
     ├── WorkoutSession/                  # iOS 워크아웃 세션 컨테이너
     │   ├── WorkoutSessionView.swift
-    │   └── WorkoutSessionViewModel.swift
+    │   ├── WorkoutSessionViewModel.swift
+    │   └── Components/
+    │       └── WorkoutIndicator.swift   # 경기 중 툴바에 표시되는 운동 경과시간
     └── History/
         ├── HistoryView.swift
         ├── HistoryViewModel.swift
+        ├── Calendar/                    # 캘린더 뷰 서브 피처
+        │   ├── CalendarView.swift
+        │   └── Components/
+        │       ├── CalendarGrid.swift
+        │       ├── DayCell.swift
+        │       ├── MonthHeader.swift
+        │       └── WeekdayLabels.swift
         └── Components/
-            ├── MatchRow.swift
-            ├── CalendarHistoryView.swift
-            └── DayCell.swift
+            ├── HistoryEmptyState.swift  # 기록 없을 때 빈 상태 뷰
+            ├── MatchDetailSheet.swift   # 경기 상세 시트
+            └── MatchList.swift          # 경기 목록
 
 WatchApp/
 │  # Apple Watch 전용 타겟. HealthKit 통합 Workout 경험 제공.
@@ -133,7 +147,7 @@ WatchApp/
     │   │   └── Components/
     │   │       ├── GameScores.swift
     │   │       ├── SetScores.swift
-    │   │       ├── PlayerScoreButton.swift
+    │   │       ├── PlayerPointButton.swift
     │   │       └── UndoButton.swift
     │   └── Result/                      # 경기 결과 화면
     │       ├── MatchResultView.swift
@@ -160,6 +174,16 @@ WatchApp/
 ComplicationApp/
 │  # watchOS WidgetKit complication + AppIntents. 잠금화면/항상켜기 화면에 현재 점수 표시.
 └── ...
+
+TennisLiveActivity/
+│  # iOS Live Activity 위젯 익스텐션. 잠금화면/Dynamic Island에 실시간 점수 표시.
+├── TennisLiveActivityBundle.swift  # WidgetBundle 진입점
+├── TennisLiveActivityView.swift    # Live Activity 메인 뷰
+├── BrandColor.swift                # Color.brand 확장 (익스텐션 타겟용)
+├── Models/
+│   └── TennisActivityAttributes.swift  # ActivityAttributes 정의
+└── Components/
+    └── LiveActivityView.swift      # 잠금화면/Dynamic Island 레이아웃
 ```
 
 - **Score** (`ObservableObject`): point state (`scoreArr = [0, 15, 30, 40, 50]`), undo via `LastAction` enum. iOS/Watch 타겟 공유.
@@ -218,10 +242,19 @@ docs/superpowers/
 ├── specs/
 │   ├── ios/     # iOS 앱 관련 스펙
 │   └── watch/   # Watch 앱 관련 스펙
-└── plans/
-    ├── ios/     # iOS 앱 관련 구현 계획
-    └── watch/   # Watch 앱 관련 구현 계획
+├── plans/
+│   ├── ios/     # iOS 앱 관련 구현 계획
+│   └── watch/   # Watch 앱 관련 구현 계획
+└── logs/        # 버그 수정·리팩터링 작업 기록
 ```
+
+**logs 폴더**
+
+버그 수정, 리팩터링, 주요 변경 사항의 원인·분석·수정 내용을 기록한다. 커밋 메시지로 담기 어려운 맥락(재현 경로, 근본 원인 분석, before/after 코드 비교)을 보존하는 것이 목적이다.
+
+- 파일명: `YYYY-MM-DD-{설명}.md` (e.g., `2026-05-29-workout-connectivity-bug-fix.md`)
+- 플랫폼 구분 없이 `logs/` 아래 flat하게 둔다 (한 작업이 여러 타겟에 걸치는 경우가 많으므로)
+- logs 파일은 완료된 작업만 커밋한다
 
 ## Xcode 프로젝트 파일
 
@@ -280,7 +313,7 @@ watchosTests/
 
 ## Code Conventions
 
-- Colors are inline (green=ME, orange=OPP) — no centralized theme system
+- Brand color: `Color.brand` (`BrandColor.swift`). Player colors are inline (green=ME, orange=OPP)
 - SwiftLint: line length 150/200, disabled `trailing_comma`, `todo`, `opening_brace`
 - SwiftFormat: 4-space indent, max width 150, alphabetical imports
 
@@ -292,5 +325,5 @@ watchosTests/
 
 **File Naming**
 - View suffix: 독립적인 화면/페이지만 (e.g., `ModeView.swift`, `MatchView.swift`, `WorkoutSessionView.swift`)
-- Components 폴더의 순수 컴포넌트: suffix 없음 (e.g., `UndoButton.swift`, `GameScore.swift`, `PlayerScoreButton.swift`)
+- Components 폴더의 순수 컴포넌트: suffix 없음 (e.g., `UndoButton.swift`, `GameScores.swift`, `PlayerPointButton.swift`)
 - 한 파일 = 한 타입: 같은 파일에 여러 View/ViewModel 정의 금지 (단, private helper component는 제외)
