@@ -120,6 +120,11 @@ class WorkoutSessionViewModel: ObservableObject {
             startedAt: startedAt ?? Date(),
             kcalAtStart: 0
         )
+
+        if !isRemote {
+            connectivity.receivedScoreState = nil
+        }
+
         phase = .playing(options)
         LiveActivityService.shared.start(mode: options.mode)
 
