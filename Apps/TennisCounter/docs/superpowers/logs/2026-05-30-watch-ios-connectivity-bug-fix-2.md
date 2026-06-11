@@ -310,3 +310,63 @@ func startMatch(options: MatchOptions, sessionId: UUID? = nil, isRemote: Bool = 
 | `iOSApp/Features/WorkoutSession/WorkoutSessionViewModel.swift` | `$isWatchReachable.filter { $0 }` 구독 추가 → Watch 재연결 시 sessionStart 재전송 |
 | `WatchApp/Features/WorkoutSession/WorkoutSessionViewModel.swift` | `startMatch(isRemote: false)` 시 `receivedScoreState = nil` 초기화 |
 | `watchosTests/WorkoutSession/WorkoutSessionViewModelTests.swift` | 테스트 2개 추가 (자체 경기 초기화, 원격 경기 비초기화) |
+
+---
+
+## 후속 (2026-06-11): iOS 동일 버그 수정
+
+### 증상
+
+Watch 실사용 중 "경기 중단(뒤로가기)이나 결과뷰 리매치 후에도 점수가 초기화되지 않음"을 재발견. 조사 결과 **Bug 3는 Watch에만 수정이 적용**되었고, **iOS `startMatch`에는 동일 클리어가 누락**되어 있었음.
+
+### 진단 과정 (시뮬레이터 vs 실제 기기 분리)
+
+1. `ScoreViewModel`에 `init`/`deinit`/`applyRemoteState` 계측 로그를 심고 watchOS 시뮬레이터에서 재현.
+2. 시뮬레이터 결과: 새 경기마다 `🟢 init`은 찍히고(= StateObject는 정상 재생성), `🟡 applyRemoteState`는 **한 번도 안 찍힘** → 시뮬레이터에서는 점수가 **정상 초기화됨**.
+3. 결론: 현재 코드(HEAD)는 Watch 측에서 정상. 실제 손목 워치의 버그는 **e2b15ef(Bug 3 수정) 이전 빌드(버전 14, `c013479`)가 설치돼 있던 탓** → 재설치로 해결되는 사안이었음.
+4. 다만 같은 분석에서 **iOS `startMatch`에는 `receivedScoreState = nil` 클리어가 없음**을 확인 → iOS는 코드 레벨에서 아직 취약. (계측 로그는 진단 후 제거.)
+
+### 원인
+
+Bug 3와 동일. iOS `ScoreViewModel`도 `connectivity.$receivedScoreState`를 구독하므로, 새 경기에서 `ScoreViewModel.init()` 시 싱글턴에 남은 직전 점수가 즉시 emit되어 게임/세트 점수가 복원됨. iOS `startMatch`는 이 값을 비우지 않았다.
+
+### 수정
+
+**`iOSApp/Features/WorkoutSession/WorkoutSessionViewModel.swift`**
+
+```swift
+func startMatch(options: MatchOptions, isRemote: Bool = false) {
+    _currentSession = MatchSession(...)
+
+    // 추가: 자체 경기 시작 시 ScoreView 생성 전에 stale 상태 초기화 (Watch와 동일)
+    if !isRemote {
+        connectivity.receivedScoreState = nil
+    }
+
+    phase = .playing(options)   // ← 이 이후에 ScoreView/ScoreViewModel 생성됨
+    LiveActivityService.shared.start(mode: options.mode)
+    ...
+}
+```
+
+### 추가된 테스트
+
+Watch 테스트를 iOS로 미러링. TDD로 먼저 RED 확인(`startOwnMatchClearsStaleRemoteScoreState`가 `== nil` 기대에서 실패) 후 수정 → 스위트 16/16 GREEN.
+
+**`iosTests/WorkoutSession/WorkoutSessionViewModelTests.swift`**
+
+```swift
+@Test @MainActor func startOwnMatchClearsStaleRemoteScoreState() { ... #expect(service.receivedScoreState == nil) }
+@Test @MainActor func remoteMatchStartDoesNotClearScoreState()  { ... #expect(service.receivedScoreState != nil) }
+```
+
+### 변경 파일
+
+| 파일 | 변경 내용 |
+|------|----------|
+| `iOSApp/Features/WorkoutSession/WorkoutSessionViewModel.swift` | `startMatch(isRemote: false)` 시 `receivedScoreState = nil` 초기화 (Bug 3의 iOS 미러링) |
+| `iosTests/WorkoutSession/WorkoutSessionViewModelTests.swift` | 테스트 2개 추가 (자체 경기 초기화, 원격 경기 비초기화) |
+
+### 미해결 (별도 추적)
+
+진단 중 `ScoreViewModel`의 `deinit`이 한 번도 호출되지 않음을 관찰 → 경기 반복 시 옛 인스턴스가 해제되지 않고 누적되는 **메모리 누수 의심**. 점수 초기화 버그와는 독립적인 사안으로 분리.
