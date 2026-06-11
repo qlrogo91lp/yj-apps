@@ -1,4 +1,5 @@
 @testable import TennisCounter
+import Foundation
 import Testing
 
 struct ScoreViewModelTests {
@@ -132,5 +133,18 @@ struct ScoreViewModelTests {
         }
         #expect(vm.matchResult == .draw)
         #expect(vm.isMatchOver == true)
+    }
+
+    // 누수 진단: 강한 참조를 놓으면 ScoreViewModel이 해제되는지 검증.
+    // 통과 → VM 자체엔 retain cycle 없음(앱에서 deinit 안 보이는 건 SwiftUI StateObject 보유 때문).
+    // 실패 → VM 내부에 실제 retain cycle 존재.
+    @Test @MainActor func scoreViewModelDeallocatesWhenReleased() {
+        weak var weakVM: ScoreViewModel?
+        autoreleasepool {
+            let vm = ScoreViewModel(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+            weakVM = vm
+            #expect(weakVM != nil)
+        }
+        #expect(weakVM == nil)
     }
 }
