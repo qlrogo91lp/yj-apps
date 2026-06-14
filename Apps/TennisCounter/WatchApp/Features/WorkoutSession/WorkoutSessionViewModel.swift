@@ -110,24 +110,10 @@ class WorkoutSessionViewModel: ObservableObject {
         }
     }
 
-    func saveCurrentMatch() throws {
+    /// Watch엔 로컬 저장소가 없다. 저장 버튼 → iOS에 저장 요청을 보내고 iOS가 히스토리에 persist 한다.
+    func saveCurrentMatch() {
         guard let session = _currentSession else { return }
-        let match = Match()
-        match.workoutSessionId = session.workoutSessionId
-        match.startedAt = session.startedAt
-        match.endedAt = session.endedAt ?? Date()
-        match.durationSeconds = healthKit.elapsedSeconds
-        match.mode = session.options.mode.rawValue
-        match.noAdRule = session.options.noAdRule
-        match.resultRaw = session.result?.rawValue ?? "win"
-        match.myTotalSets = session.mySetScore
-        match.yourTotalSets = session.yourSetScore
-        match.averageHeartRate = session.averageHeartRate
-        match.caloriesBurned = (session.kcalAtEnd ?? 0) - session.kcalAtStart
-        match.sets = session.completedSets.enumerated().map {
-            SetRecord(myGames: $0.element.my, yourGames: $0.element.your, setNumber: $0.offset + 1)
-        }
-        try MatchPersistenceService.shared.save(match)
+        connectivity.sendMatchSave(makeMatchEndMessage(session: session))
     }
 
     func startNewMatch() {
@@ -165,7 +151,11 @@ class WorkoutSessionViewModel: ObservableObject {
     }
 
     private func sendMatchEndToiOS(session: MatchSession) {
-        let msg = MatchEndMessage(
+        connectivity.sendMatchEnd(makeMatchEndMessage(session: session))
+    }
+
+    private func makeMatchEndMessage(session: MatchSession) -> MatchEndMessage {
+        MatchEndMessage(
             sessionId: session.workoutSessionId,
             result: session.result?.rawValue ?? "win",
             completedSets: session.completedSets.map { [$0.my, $0.your] },
@@ -177,6 +167,5 @@ class WorkoutSessionViewModel: ObservableObject {
             mode: session.options.mode.rawValue,
             noAdRule: session.options.noAdRule
         )
-        connectivity.sendMatchEnd(msg)
     }
 }

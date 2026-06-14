@@ -8,6 +8,7 @@ private enum WCMessageType: String {
     case sessionStart
     case scoreState
     case matchEnd
+    case matchSave
     case metrics
     case workoutEnd
 }
@@ -121,8 +122,17 @@ struct MatchEndMessage {
     let noAdRule: Bool
 
     func toDictionary() -> [String: Any] {
+        dictionary(type: .matchEnd)
+    }
+
+    /// 사용자가 저장 버튼을 눌렀을 때 전송하는 페이로드 (iOS가 이때만 persist)
+    func toSaveDictionary() -> [String: Any] {
+        dictionary(type: .matchSave)
+    }
+
+    private func dictionary(type: WCMessageType) -> [String: Any] {
         var dict: [String: Any] = [
-            "type": WCMessageType.matchEnd.rawValue,
+            "type": type.rawValue,
             "sessionId": sessionId.uuidString,
             "result": result,
             "sets": completedSets,
@@ -138,7 +148,8 @@ struct MatchEndMessage {
     }
 
     init?(from dict: [String: Any]) {
-        guard dict["type"] as? String == WCMessageType.matchEnd.rawValue,
+        let type = dict["type"] as? String
+        guard type == WCMessageType.matchEnd.rawValue || type == WCMessageType.matchSave.rawValue,
               let idStr = dict["sessionId"] as? String,
               let id = UUID(uuidString: idStr),
               let result = dict["result"] as? String,
@@ -181,6 +192,7 @@ final class WatchConnectivityService: NSObject, ObservableObject {
     @Published var receivedSessionStart: SessionStartMessage?
     @Published var receivedScoreState: ScoreState?
     @Published var receivedMatchEnd: MatchEndMessage?
+    @Published var receivedMatchSave: MatchEndMessage?
     @Published var receivedMetrics: WorkoutMetrics?
     @Published var receivedWorkoutEnd: Date?
 
@@ -200,7 +212,15 @@ final class WatchConnectivityService: NSObject, ObservableObject {
     }
 
     func sendMatchEnd(_ msg: MatchEndMessage) {
-        let dict = msg.toDictionary()
+        sendReliably(msg.toDictionary())
+    }
+
+    /// 저장 버튼 전용. iOS가 이 메시지를 받을 때만 히스토리에 persist 한다.
+    func sendMatchSave(_ msg: MatchEndMessage) {
+        sendReliably(msg.toSaveDictionary())
+    }
+
+    private func sendReliably(_ dict: [String: Any]) {
         guard WCSession.default.activationState == .activated else { return }
         if WCSession.default.isReachable {
             WCSession.default.sendMessage(dict, replyHandler: nil, errorHandler: nil)
@@ -247,6 +267,8 @@ final class WatchConnectivityService: NSObject, ObservableObject {
                 self.receivedScoreState = ScoreState(from: message)
             case WCMessageType.matchEnd.rawValue:
                 self.receivedMatchEnd = MatchEndMessage(from: message)
+            case WCMessageType.matchSave.rawValue:
+                self.receivedMatchSave = MatchEndMessage(from: message)
             case WCMessageType.metrics.rawValue:
                 self.receivedMetrics = WorkoutMetrics(from: message)
             case WCMessageType.workoutEnd.rawValue:

@@ -56,6 +56,7 @@ struct MainTabView: View {
                 HomeView(onMatchStart: {
                     connectivity.receivedWorkoutEnd = nil
                     connectivity.receivedMatchEnd = nil
+                    connectivity.receivedMatchSave = nil
                     withAnimation { isMatchActive = true }
                 })
                     .tabItem { Label(String(localized: "tab_match"), systemImage: "sportscourt.fill") }
@@ -87,6 +88,7 @@ struct MainTabView: View {
             connectivity.receivedSessionStart = nil
             connectivity.receivedWorkoutEnd = nil
             connectivity.receivedMatchEnd = nil
+            connectivity.receivedMatchSave = nil
             withAnimation { isMatchActive = true }
         }
     }

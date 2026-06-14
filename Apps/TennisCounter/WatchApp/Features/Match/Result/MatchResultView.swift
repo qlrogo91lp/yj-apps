@@ -4,7 +4,6 @@ struct MatchResultView: View {
     let session: MatchSession
     @ObservedObject var flowViewModel: WorkoutSessionViewModel
     @State private var saved = false
-    @State private var saveError: String?
 
     var body: some View {
         VStack(spacing: 2) {
@@ -77,12 +76,8 @@ struct MatchResultView: View {
     }
 
     private func saveMatch() {
-        do {
-            try flowViewModel.saveCurrentMatch()
-            withAnimation { saved = true }
-        } catch {
-            saveError = error.localizedDescription
-        }
+        flowViewModel.saveCurrentMatch()
+        withAnimation { saved = true }
     }
 }
 

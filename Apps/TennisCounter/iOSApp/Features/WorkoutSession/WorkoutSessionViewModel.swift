@@ -69,11 +69,19 @@ class WorkoutSessionViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] msg in
                 guard let self else { return }
-                self.saveFromWatch(msg)
+                // 경기 종료 = 결과 화면 표시만. 저장은 사용자가 저장 버튼을 누를 때(receivedMatchSave)만 한다.
                 LiveActivityService.shared.end()
                 let session = self.buildSession(from: msg)
                 self.completedMatchCount += 1
                 self.phase = .finished(session)
+            }
+            .store(in: &cancellables)
+
+        connectivity.$receivedMatchSave
+            .compactMap { $0 }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] msg in
+                self?.saveFromWatch(msg)
             }
             .store(in: &cancellables)
 
