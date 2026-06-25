@@ -18,6 +18,7 @@ class WorkoutSessionViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     private var _currentSession: MatchSession?
     let scoreVM = ScoreViewModel(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+    private(set) var isDriver = false
 
     init(metricsThrottle: TimeInterval = 5) {
         self.metricsThrottle = metricsThrottle
@@ -58,6 +59,26 @@ class WorkoutSessionViewModel: ObservableObject {
         scoreVM.onMatchFinished = { [weak self] result, sets in
             self?.finishMatch(result: result, completedSets: sets)
         }
+
+        scoreVM.onStateChanged = { [weak self] in
+            guard let self, self.isDriver else { return }
+            self.connectivity.sendScoreState(self.scoreVM.makeScoreState())
+        }
+
+        connectivity.$receivedScoreState
+            .compactMap { $0 }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] state in self?.handleIncomingScoreState(state) }
+            .store(in: &cancellables)
+
+        connectivity.$isWatchReachable
+            .filter(\.self)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                guard let self, isDriver, case .playing = phase else { return }
+                connectivity.sendScoreState(scoreVM.makeScoreState())
+            }
+            .store(in: &cancellables)
     }
 
     func startWorkout() {
@@ -70,6 +91,7 @@ class WorkoutSessionViewModel: ObservableObject {
     }
 
     func startMatch(options: MatchOptions, sessionId: UUID? = nil, isRemote: Bool = false) {
+        isDriver = !isRemote
         let id = sessionId ?? workoutSessionId
         let session = MatchSession(
             workoutSessionId: id,
@@ -162,6 +184,15 @@ class WorkoutSessionViewModel: ObservableObject {
         lastMetrics = metrics
         connectivity.sendMetrics(metrics)
     }
+
+    private func handleIncomingScoreState(_ state: ScoreState) {
+        guard !isDriver else { return }
+        scoreVM.applyRemoteState(state)
+    }
+
+    #if DEBUG
+    func applyIncomingScoreStateForTest(_ state: ScoreState) { handleIncomingScoreState(state) }
+    #endif
 
     private func sendMatchEndToiOS(session: MatchSession) {
         connectivity.sendMatchEnd(makeMatchEndMessage(session: session))
