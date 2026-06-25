@@ -20,6 +20,7 @@ class WorkoutSessionViewModel: ObservableObject {
     private var timer: Timer?
     private var cancellables = Set<AnyCancellable>()
     private let connectivity = WatchConnectivityService.shared
+    private(set) var isDriver = false
 
     init() {
         connectivity.$isWatchReachable
@@ -30,13 +31,27 @@ class WorkoutSessionViewModel: ObservableObject {
             .filter(\.self)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
-                guard let self, case let .playing(options) = phase else { return }
+                guard let self, isDriver, case let .playing(options) = phase else { return }
                 connectivity.sendSessionStart(SessionStartMessage(
                     sessionId: sessionId,
                     options: options,
                     workoutStartDate: startedAt ?? Date()
                 ))
+                connectivity.sendScoreState(scoreVM.makeScoreState())
             }
+            .store(in: &cancellables)
+
+        scoreVM.onStateChanged = { [weak self] in
+            guard let self else { return }
+            LiveActivityService.shared.update(from: self.scoreVM.makeScoreState(), score: self.scoreVM.score)
+            guard self.isDriver else { return }
+            self.connectivity.sendScoreState(self.scoreVM.makeScoreState())
+        }
+
+        connectivity.$receivedScoreState
+            .compactMap { $0 }
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] state in self?.handleIncomingScoreState(state) }
             .store(in: &cancellables)
 
         connectivity.$receivedMetrics
@@ -123,6 +138,7 @@ class WorkoutSessionViewModel: ObservableObject {
     }
 
     func startMatch(options: MatchOptions, isRemote: Bool = false) {
+        isDriver = !isRemote
         _currentSession = MatchSession(
             workoutSessionId: sessionId,
             options: options,
@@ -191,6 +207,16 @@ class WorkoutSessionViewModel: ObservableObject {
     }
 
     // MARK: - Private
+
+    private func handleIncomingScoreState(_ state: ScoreState) {
+        guard !isDriver else { return }
+        scoreVM.applyRemoteState(state)
+        LiveActivityService.shared.update(from: state, score: scoreVM.score)
+    }
+
+    #if DEBUG
+    func applyIncomingScoreStateForTest(_ state: ScoreState) { handleIncomingScoreState(state) }
+    #endif
 
     private func saveFromWatch(_ msg: MatchEndMessage) {
         let match = buildMatchFromMessage(msg)
