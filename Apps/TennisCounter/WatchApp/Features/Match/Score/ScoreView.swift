@@ -18,7 +18,7 @@ struct ScoreView: View {
                     player: String(localized: "watch_score_me"),
                     color: .green,
                     hasSetScore: viewModel.mySetScore > 0 || viewModel.yourSetScore > 0,
-                    action: { viewModel.addPoint(.me) }
+                    action: { guard flowViewModel.isDriver else { return }; viewModel.addPoint(.me) }
                 )
 
                 PlayerPointButton(
@@ -26,10 +26,17 @@ struct ScoreView: View {
                     player: String(localized: "watch_score_opp"),
                     color: .orange,
                     hasSetScore: viewModel.mySetScore > 0 || viewModel.yourSetScore > 0,
-                    action: { viewModel.addPoint(.opponent) }
+                    action: { guard flowViewModel.isDriver else { return }; viewModel.addPoint(.opponent) }
                 )
             }
             .ignoresSafeArea(.container)
+
+            if !flowViewModel.isDriver {
+                VStack {
+                    MirrorBadge().padding(.top, 4)
+                    Spacer()
+                }
+            }
 
             GeometryReader { geo in
                 let isSmall = geo.size.width <= 162
