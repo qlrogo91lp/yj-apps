@@ -9,7 +9,7 @@ class ScoreViewModel: ObservableObject {
     @Published var yourSetScore: Int = 0
     @Published var completedSets: [SetScore] = []
 
-    private(set) var options: MatchOptions
+    @Published private(set) var options: MatchOptions
     var onMatchFinished: ((MatchResult, [SetScore]) -> Void)?
 
     private var isApplyingRemote = false

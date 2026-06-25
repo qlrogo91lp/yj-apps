@@ -3,7 +3,7 @@ import Foundation
 
 @MainActor
 final class ScoreViewModel: ObservableObject {
-    private(set) var options: MatchOptions
+    @Published private(set) var options: MatchOptions
 
     @Published var score = Score()
     @Published var myGameScore: Int = 0
