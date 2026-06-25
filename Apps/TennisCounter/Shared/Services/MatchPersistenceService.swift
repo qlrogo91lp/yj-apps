@@ -13,12 +13,6 @@ final class MatchPersistenceService {
         modelContext = context
     }
 
-    func save(_ match: Match) throws {
-        guard let context = modelContext else { return }
-        context.insert(match)
-        try context.save()
-    }
-
     func fetchAll() throws -> [Match] {
         guard let context = modelContext else { return [] }
         let descriptor = FetchDescriptor<Match>(
