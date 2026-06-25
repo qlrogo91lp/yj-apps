@@ -185,4 +185,25 @@ struct WorkoutSessionViewModelTests {
 
         #expect(service.receivedScoreState != nil)
     }
+
+    @Test @MainActor func restartMatchResetsScoreVM() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.scoreVM.myGameScore = 3
+        vm.scoreVM.mySetScore = 1
+        vm.scoreVM.completedSets = [(my: 6, your: 4)]
+
+        vm.restartMatch()
+
+        #expect(vm.scoreVM.myGameScore == 0)
+        #expect(vm.scoreVM.mySetScore == 0)
+        #expect(vm.scoreVM.completedSets.isEmpty)
+    }
+
+    @Test @MainActor func startMatchAppliesOptionsToScoreVM() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .bestOfThree, noAdRule: false, noTieRule: false))
+        #expect(vm.scoreVM.options.mode == .bestOfThree)
+        #expect(vm.scoreVM.score.noAdRule == false)
+    }
 }

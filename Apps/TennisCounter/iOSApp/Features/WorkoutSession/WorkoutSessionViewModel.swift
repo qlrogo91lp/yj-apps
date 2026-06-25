@@ -16,6 +16,7 @@ class WorkoutSessionViewModel: ObservableObject {
     private var totalPausedSeconds: TimeInterval = 0
     private var sessionId: UUID = .init()
     private var _currentSession: MatchSession?
+    let scoreVM = ScoreViewModel()
     private var timer: Timer?
     private var cancellables = Set<AnyCancellable>()
     private let connectivity = WatchConnectivityService.shared
@@ -133,6 +134,7 @@ class WorkoutSessionViewModel: ObservableObject {
             connectivity.receivedScoreState = nil
         }
 
+        scoreVM.resetAll(options: options)
         phase = .playing(options)
         LiveActivityService.shared.start(mode: options.mode)
 
