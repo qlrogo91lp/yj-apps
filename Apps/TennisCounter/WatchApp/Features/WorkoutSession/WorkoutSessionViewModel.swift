@@ -62,7 +62,9 @@ class WorkoutSessionViewModel: ObservableObject {
     }
 
     #if DEBUG
-        func handleIncomingWorkoutEndForTest(_ id: UUID) { handleIncomingWorkoutEnd(id) }
+        func handleIncomingWorkoutEndForTest(_ id: UUID) {
+            handleIncomingWorkoutEnd(id)
+        }
     #endif
 
     private func setupScoreSync() {

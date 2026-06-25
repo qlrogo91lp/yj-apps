@@ -122,8 +122,13 @@ class WorkoutSessionViewModel: ObservableObject {
     }
 
     #if DEBUG
-        func handleIncomingWorkoutEndForTest(_ id: UUID) { handleIncomingWorkoutEnd(id) }
-        var currentSessionIdForTest: UUID { sessionId }
+        func handleIncomingWorkoutEndForTest(_ id: UUID) {
+            handleIncomingWorkoutEnd(id)
+        }
+
+        var currentSessionIdForTest: UUID {
+            sessionId
+        }
     #endif
 
     deinit { timer?.invalidate() }
