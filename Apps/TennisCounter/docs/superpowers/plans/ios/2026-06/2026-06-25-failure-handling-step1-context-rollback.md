@@ -39,7 +39,7 @@ make fix && make lint
 ---
 
 ### Task 0: 브랜치 생성
-- [ ] **Step 1:** `git switch -c failure-handling-step1-context-rollback`
+- [x] **Step 1:** `git switch -c failure-handling-step1-context-rollback`
 
 ---
 
@@ -47,7 +47,7 @@ make fix && make lint
 
 **Files:** Modify `Shared/Services/MatchPersistenceService.swift`, Test `iosTests/Shared/MatchPersistenceServiceTests.swift` (기존 파일, 회귀 확인용)
 
-- [ ] **Step 1: 현재 코드 확인**
+- [x] **Step 1: 현재 코드 확인**
 
 `Shared/Services/MatchPersistenceService.swift`의 현재 `upsert(_:)`는 다음과 같다:
 ```swift
@@ -64,7 +64,7 @@ make fix && make lint
     }
 ```
 
-- [ ] **Step 2: 구현**
+- [x] **Step 2: 구현**
 
 파일 맨 위 `import SwiftData` 다음 줄에 추가:
 ```swift
@@ -97,17 +97,17 @@ enum PersistenceError: Error {
 > (`docs/superpowers/specs/ios/2026-06-25-upsert-failure-handling-design.md`의 "자동 테스트로
 > 다루기 어려운 부분" 참조). 이 Task는 성공 경로 회귀만 확인한다.
 
-- [ ] **Step 3: 회귀 테스트 실행 — 성공 경로가 그대로 통과하는지 확인**
+- [x] **Step 3: 회귀 테스트 실행 — 성공 경로가 그대로 통과하는지 확인**
 
 Run: `xcodebuild test -project TennisCounter.xcodeproj -scheme "TennisCounter" -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -only-testing:iosTests/MatchPersistenceServiceTests`
 Expected: PASS (`upsertSameSessionKeepsSingleRecord`)
 
-- [ ] **Step 4: Watch 빌드 확인** (Shared 파일 변경이라 Watch 타겟도 컴파일돼야 함)
+- [x] **Step 4: Watch 빌드 확인** (Shared 파일 변경이라 Watch 타겟도 컴파일돼야 함)
 
 Run: `xcodebuild -project TennisCounter.xcodeproj -scheme "TennisCounter Watch App" -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)' build`
 Expected: BUILD SUCCEEDED
 
-- [ ] **Step 5: 커밋**
+- [x] **Step 5: 커밋**
 
 ```bash
 git add Shared/Services/MatchPersistenceService.swift
@@ -118,11 +118,11 @@ git commit -m "🐛 upsert 저장 실패 시 컨텍스트 rollback (stuck 방지
 
 ### Task 2: 전체 검증 + code-review
 
-- [ ] **Step 1:** iOS 빌드/테스트 전체 GREEN
+- [x] **Step 1:** iOS 빌드/테스트 전체 GREEN
 
 Run: `xcodebuild test -project TennisCounter.xcodeproj -scheme "TennisCounter" -destination 'platform=iOS Simulator,name=iPhone 17 Pro'`
 
-- [ ] **Step 2:** `make fix && make lint` — 모두 클린
+- [x] **Step 2:** `make fix && make lint` — 모두 클린
 
 - [ ] **Step 3:** `/code-review` 실행 → 지적 사항은 `superpowers:receiving-code-review`로 검증 후 반영
 
