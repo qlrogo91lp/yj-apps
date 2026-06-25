@@ -17,6 +17,7 @@ class WorkoutSessionViewModel: ObservableObject {
     private let metricsThrottle: TimeInterval
     private var cancellables = Set<AnyCancellable>()
     private var _currentSession: MatchSession?
+    let scoreVM = ScoreViewModel(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
 
     init(metricsThrottle: TimeInterval = 5) {
         self.metricsThrottle = metricsThrottle
@@ -53,6 +54,10 @@ class WorkoutSessionViewModel: ObservableObject {
                 self.broadcastMetrics()
             }
             .store(in: &cancellables)
+
+        scoreVM.onMatchFinished = { [weak self] result, sets in
+            self?.finishMatch(result: result, completedSets: sets)
+        }
     }
 
     func startWorkout() {
@@ -77,6 +82,7 @@ class WorkoutSessionViewModel: ObservableObject {
             connectivity.receivedScoreState = nil
         }
 
+        scoreVM.resetAll(options: options)
         phase = .playing(options)
 
         if !isRemote {

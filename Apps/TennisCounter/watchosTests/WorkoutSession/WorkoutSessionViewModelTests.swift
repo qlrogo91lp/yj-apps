@@ -156,6 +156,20 @@ struct WorkoutSessionViewModelTests {
         #expect(vm.lastMetrics?.calories == 50)
     }
 
+    @Test @MainActor func restartMatchResetsScoreVM() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.scoreVM.myGameScore = 3
+        vm.scoreVM.mySetScore = 1
+        vm.scoreVM.completedSets = [SetScore(my: 6, your: 4)]
+
+        vm.restartMatch()
+
+        #expect(vm.scoreVM.myGameScore == 0)
+        #expect(vm.scoreVM.mySetScore == 0)
+        #expect(vm.scoreVM.completedSets.isEmpty)
+    }
+
     @Test @MainActor func metricsNotBroadcastAfterMatchFinished() {
         let vm = WorkoutSessionViewModel()
         vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
