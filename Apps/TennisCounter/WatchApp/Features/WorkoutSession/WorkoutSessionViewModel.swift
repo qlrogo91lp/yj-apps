@@ -43,12 +43,7 @@ class WorkoutSessionViewModel: ObservableObject {
         connectivity.$receivedSessionStart
             .compactMap(\.self)
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] msg in
-                guard let self else { return }
-                if case .playing = phase { return }
-                if !healthKit.isWorkoutActive { startWorkout() }
-                startMatch(options: msg.options, sessionId: msg.sessionId, isRemote: true)
-            }
+            .sink { [weak self] msg in self?.handleIncomingSessionStart(msg) }
             .store(in: &cancellables)
 
         connectivity.$receivedWorkoutEnd
@@ -160,7 +155,7 @@ class WorkoutSessionViewModel: ObservableObject {
 
     func restartMatch() {
         guard let options = _currentSession?.options else { return }
-        startMatch(options: options)
+        startMatch(options: options, isRemote: !isDriver)
     }
 
     func pauseWorkout() {
@@ -192,14 +187,27 @@ class WorkoutSessionViewModel: ObservableObject {
         connectivity.sendMetrics(metrics)
     }
 
+    private func handleIncomingSessionStart(_ msg: SessionStartMessage) {
+        if case .playing = phase {
+            // 동시 시작 race: 이미 driver로 진행 중이면 더 작은 sessionId 쪽이 우선권을 가진다.
+            guard isDriver, msg.sessionId.uuidString < workoutSessionId.uuidString else { return }
+        }
+        if !healthKit.isWorkoutActive { startWorkout() }
+        startMatch(options: msg.options, sessionId: msg.sessionId, isRemote: true)
+    }
+
     private func handleIncomingScoreState(_ state: ScoreState) {
-        guard !isDriver else { return }
+        guard !isDriver, case .playing = phase else { return }
         scoreVM.applyRemoteState(state)
     }
 
     #if DEBUG
         func applyIncomingScoreStateForTest(_ state: ScoreState) {
             handleIncomingScoreState(state)
+        }
+
+        func applyIncomingSessionStartForTest(_ msg: SessionStartMessage) {
+            handleIncomingSessionStart(msg)
         }
     #endif
 

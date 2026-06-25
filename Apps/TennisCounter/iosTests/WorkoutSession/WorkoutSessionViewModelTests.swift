@@ -1,3 +1,4 @@
+import Foundation
 @testable import TennisCounter
 import Testing
 
@@ -227,5 +228,52 @@ struct WorkoutSessionViewModelTests {
         ))
         #expect(vm.scoreVM.myGameScore == 3)
         #expect(vm.scoreVM.score.myScore == 30)
+    }
+
+    @Test @MainActor func restartMatchPreservesMirrorRole() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false), isRemote: true) // mirror
+        vm.finishMatch(result: .win, completedSets: [(my: 6, your: 4)])
+        vm.restartMatch()
+        vm.applyIncomingScoreStateForTest(ScoreState(
+            myScore: 30, yourScore: 15, myGameScore: 3, yourGameScore: 2,
+            mySetScore: 0, yourSetScore: 0, completedSets: [], isTieBreak: false
+        ))
+        #expect(vm.scoreVM.myGameScore == 3) // restartMatch 후에도 mirror 역할이 유지되어 원격 상태를 적용
+    }
+
+    @Test @MainActor func mirrorIgnoresScoreStateAfterMatchFinished() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false), isRemote: true) // mirror
+        vm.finishMatch(result: .win, completedSets: [(my: 6, your: 4)])
+        vm.applyIncomingScoreStateForTest(ScoreState(
+            myScore: 30, yourScore: 15, myGameScore: 3, yourGameScore: 2,
+            mySetScore: 0, yourSetScore: 0, completedSets: [], isTieBreak: false
+        ))
+        #expect(vm.scoreVM.myGameScore == 0) // 경기 종료 후 늦게 도착한 상태는 무시
+    }
+
+    @Test @MainActor func driverYieldsToSmallerSessionIdOnSimultaneousStart() throws {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false)) // driver, random sessionId
+        let smallerId = try #require(UUID(uuidString: "00000000-0000-0000-0000-000000000000"))
+        vm.applyIncomingSessionStartForTest(SessionStartMessage(
+            sessionId: smallerId,
+            options: MatchOptions(mode: .bestOfThree, noAdRule: false, noTieRule: false),
+            workoutStartDate: Date()
+        ))
+        #expect(vm.scoreVM.options.mode == .bestOfThree) // 더 작은 sessionId가 우선해 mirror로 전환
+    }
+
+    @Test @MainActor func driverKeepsDrivingAgainstLargerSessionIdOnSimultaneousStart() throws {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false)) // driver, random sessionId
+        let largerId = try #require(UUID(uuidString: "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF"))
+        vm.applyIncomingSessionStartForTest(SessionStartMessage(
+            sessionId: largerId,
+            options: MatchOptions(mode: .bestOfThree, noAdRule: false, noTieRule: false),
+            workoutStartDate: Date()
+        ))
+        #expect(vm.scoreVM.options.mode == .oneSet) // 더 큰 sessionId는 우선권이 없어 무시되고 driver 유지
     }
 }
