@@ -57,6 +57,24 @@ struct ScoreViewModelTests {
     #expect(finishedResult == .draw)
 }
 
+@Test @MainActor func resetAllClearsStateAndAppliesNewOptions() {
+    let vm = ScoreViewModel(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+    vm.myGameScore = 3
+    vm.mySetScore = 1
+    vm.completedSets = [SetScore(my: 6, your: 4)]
+
+    let newOptions = MatchOptions(mode: .bestOfThree, noAdRule: false, noTieRule: false)
+    vm.resetAll(options: newOptions)
+
+    #expect(vm.myGameScore == 0)
+    #expect(vm.yourGameScore == 0)
+    #expect(vm.mySetScore == 0)
+    #expect(vm.yourSetScore == 0)
+    #expect(vm.completedSets.isEmpty)
+    #expect(vm.options.mode == .bestOfThree)
+    #expect(vm.score.noAdRule == false)
+}
+
 // 누수 진단: 강한 참조를 놓으면 ScoreViewModel이 해제되는지 검증.
 // 통과 → VM 자체엔 retain cycle 없음(앱에서 deinit 안 보이는 건 SwiftUI StateObject 보유 때문).
 @Test @MainActor func scoreViewModelDeallocatesWhenReleased() {

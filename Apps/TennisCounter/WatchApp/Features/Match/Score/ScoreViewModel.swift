@@ -9,7 +9,7 @@ class ScoreViewModel: ObservableObject {
     @Published var yourSetScore: Int = 0
     @Published var completedSets: [SetScore] = []
 
-    let options: MatchOptions
+    private(set) var options: MatchOptions
     var onMatchFinished: ((MatchResult, [SetScore]) -> Void)?
 
     private var isApplyingRemote = false
@@ -44,6 +44,18 @@ class ScoreViewModel: ObservableObject {
 
     func undo() {
         score.undo()
+    }
+
+    func resetAll(options: MatchOptions) {
+        self.options = options
+        myGameScore = 0
+        yourGameScore = 0
+        mySetScore = 0
+        yourSetScore = 0
+        completedSets = []
+        tieBreakInProgress = false
+        score.noAdRule = options.noAdRule
+        score.reset()
     }
 
     func applyRemoteState(_ state: ScoreState) {
