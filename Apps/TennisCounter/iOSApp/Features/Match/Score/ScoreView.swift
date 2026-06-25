@@ -70,7 +70,7 @@ struct ScoreView: View {
             onProgressChanged(hasProgress)
         }
         .sheet(isPresented: $showEditSheet) {
-            ScoreEditSheet(score: viewModel.score)
+            ScoreEditSheet(score: viewModel.score, onChange: { viewModel.onStateChanged?() })
         }
     }
 }

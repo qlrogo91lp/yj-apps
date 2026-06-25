@@ -210,7 +210,7 @@ final class WatchConnectivityService: NSObject, ObservableObject {
     }
 
     func sendScoreState(_ state: ScoreState) {
-        sendRealtimeOnly(state.toDictionary())
+        sendReliably(state.toDictionary())
     }
 
     func sendMatchEnd(_ msg: MatchEndMessage) {

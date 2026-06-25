@@ -18,6 +18,7 @@ class WorkoutSessionViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     private var _currentSession: MatchSession?
     let scoreVM = ScoreViewModel(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+    private(set) var isDriver = false
 
     init(metricsThrottle: TimeInterval = 5) {
         self.metricsThrottle = metricsThrottle
@@ -25,15 +26,24 @@ class WorkoutSessionViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .assign(to: &$isPaused)
 
+        setupConnectivityBindings()
+        setupScoreSync()
+
+        healthKit.$currentHeartRate
+            .dropFirst()
+            .throttle(for: .seconds(metricsThrottle), scheduler: DispatchQueue.main, latest: true)
+            .sink { [weak self] _ in
+                guard let self, case .playing = self.phase else { return }
+                broadcastMetrics()
+            }
+            .store(in: &cancellables)
+    }
+
+    private func setupConnectivityBindings() {
         connectivity.$receivedSessionStart
             .compactMap(\.self)
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] msg in
-                guard let self else { return }
-                if case .playing = phase { return }
-                if !healthKit.isWorkoutActive { startWorkout() }
-                startMatch(options: msg.options, sessionId: msg.sessionId, isRemote: true)
-            }
+            .sink { [weak self] msg in self?.handleIncomingSessionStart(msg) }
             .store(in: &cancellables)
 
         connectivity.$receivedWorkoutEnd
@@ -45,19 +55,32 @@ class WorkoutSessionViewModel: ObservableObject {
                 remoteWorkoutEnded = true
             }
             .store(in: &cancellables)
+    }
 
-        healthKit.$currentHeartRate
-            .dropFirst()
-            .throttle(for: .seconds(metricsThrottle), scheduler: DispatchQueue.main, latest: true)
-            .sink { [weak self] _ in
-                guard let self, case .playing = self.phase else { return }
-                broadcastMetrics()
-            }
-            .store(in: &cancellables)
-
+    private func setupScoreSync() {
         scoreVM.onMatchFinished = { [weak self] result, sets in
             self?.finishMatch(result: result, completedSets: sets)
         }
+
+        scoreVM.onStateChanged = { [weak self] in
+            guard let self, isDriver else { return }
+            connectivity.sendScoreState(scoreVM.makeScoreState())
+        }
+
+        connectivity.$receivedScoreState
+            .compactMap(\.self)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] state in self?.handleIncomingScoreState(state) }
+            .store(in: &cancellables)
+
+        connectivity.$isWatchReachable
+            .filter(\.self)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                guard let self, isDriver, case .playing = phase else { return }
+                connectivity.sendScoreState(scoreVM.makeScoreState())
+            }
+            .store(in: &cancellables)
     }
 
     func startWorkout() {
@@ -70,6 +93,7 @@ class WorkoutSessionViewModel: ObservableObject {
     }
 
     func startMatch(options: MatchOptions, sessionId: UUID? = nil, isRemote: Bool = false) {
+        isDriver = !isRemote
         let id = sessionId ?? workoutSessionId
         let session = MatchSession(
             workoutSessionId: id,
@@ -131,7 +155,7 @@ class WorkoutSessionViewModel: ObservableObject {
 
     func restartMatch() {
         guard let options = _currentSession?.options else { return }
-        startMatch(options: options)
+        startMatch(options: options, isRemote: !isDriver)
     }
 
     func pauseWorkout() {
@@ -162,6 +186,30 @@ class WorkoutSessionViewModel: ObservableObject {
         lastMetrics = metrics
         connectivity.sendMetrics(metrics)
     }
+
+    private func handleIncomingSessionStart(_ msg: SessionStartMessage) {
+        if case .playing = phase {
+            // 동시 시작 race: 이미 driver로 진행 중이면 더 작은 sessionId 쪽이 우선권을 가진다.
+            guard isDriver, msg.sessionId.uuidString < workoutSessionId.uuidString else { return }
+        }
+        if !healthKit.isWorkoutActive { startWorkout() }
+        startMatch(options: msg.options, sessionId: msg.sessionId, isRemote: true)
+    }
+
+    private func handleIncomingScoreState(_ state: ScoreState) {
+        guard !isDriver, case .playing = phase else { return }
+        scoreVM.applyRemoteState(state)
+    }
+
+    #if DEBUG
+        func applyIncomingScoreStateForTest(_ state: ScoreState) {
+            handleIncomingScoreState(state)
+        }
+
+        func applyIncomingSessionStartForTest(_ msg: SessionStartMessage) {
+            handleIncomingSessionStart(msg)
+        }
+    #endif
 
     private func sendMatchEndToiOS(session: MatchSession) {
         connectivity.sendMatchEnd(makeMatchEndMessage(session: session))

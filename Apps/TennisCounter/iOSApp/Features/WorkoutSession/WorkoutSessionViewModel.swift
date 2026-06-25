@@ -20,24 +20,47 @@ class WorkoutSessionViewModel: ObservableObject {
     private var timer: Timer?
     private var cancellables = Set<AnyCancellable>()
     private let connectivity = WatchConnectivityService.shared
+    private(set) var isDriver = false
 
     init() {
-        connectivity.$isWatchReachable
-            .receive(on: DispatchQueue.main)
-            .assign(to: &$watchConnected)
+        setupScoreSync()
+        setupConnectivityBindings()
+    }
 
+    private func setupScoreSync() {
         connectivity.$isWatchReachable
             .filter(\.self)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
-                guard let self, case let .playing(options) = phase else { return }
+                guard let self, isDriver, case let .playing(options) = phase else { return }
                 connectivity.sendSessionStart(SessionStartMessage(
                     sessionId: sessionId,
                     options: options,
                     workoutStartDate: startedAt ?? Date()
                 ))
+                connectivity.sendScoreState(scoreVM.makeScoreState())
             }
             .store(in: &cancellables)
+
+        scoreVM.onStateChanged = { [weak self] in
+            guard let self else { return }
+            let state = scoreVM.makeScoreState()
+            LiveActivityService.shared.update(from: state, score: scoreVM.score)
+            guard isDriver else { return }
+            connectivity.sendScoreState(state)
+        }
+
+        connectivity.$receivedScoreState
+            .compactMap(\.self)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] state in self?.handleIncomingScoreState(state) }
+            .store(in: &cancellables)
+    }
+
+    private func setupConnectivityBindings() {
+        connectivity.$isWatchReachable
+            .receive(on: DispatchQueue.main)
+            .assign(to: &$watchConnected)
 
         connectivity.$receivedMetrics
             .compactMap(\.self)
@@ -53,16 +76,14 @@ class WorkoutSessionViewModel: ObservableObject {
             }
             .store(in: &cancellables)
 
+        setupMatchLifecycleBindings()
+    }
+
+    private func setupMatchLifecycleBindings() {
         connectivity.$receivedSessionStart
             .compactMap(\.self)
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] msg in
-                guard let self else { return }
-                sessionId = msg.sessionId
-                startSession(startDate: msg.workoutStartDate)
-                startMatch(options: msg.options, isRemote: true)
-                LiveActivityService.shared.start(mode: msg.options.mode)
-            }
+            .sink { [weak self] msg in self?.handleIncomingSessionStart(msg) }
             .store(in: &cancellables)
 
         connectivity.$receivedMatchEnd
@@ -123,6 +144,7 @@ class WorkoutSessionViewModel: ObservableObject {
     }
 
     func startMatch(options: MatchOptions, isRemote: Bool = false) {
+        isDriver = !isRemote
         _currentSession = MatchSession(
             workoutSessionId: sessionId,
             options: options,
@@ -169,7 +191,7 @@ class WorkoutSessionViewModel: ObservableObject {
 
     func restartMatch() {
         guard let options = _currentSession?.options else { return }
-        startMatch(options: options)
+        startMatch(options: options, isRemote: !isDriver)
     }
 
     func startNewMatch() {
@@ -191,6 +213,33 @@ class WorkoutSessionViewModel: ObservableObject {
     }
 
     // MARK: - Private
+
+    private func handleIncomingSessionStart(_ msg: SessionStartMessage) {
+        if case .playing = phase {
+            // 동시 시작 race: 이미 driver로 진행 중이면 더 작은 sessionId 쪽이 우선권을 가진다.
+            guard isDriver, msg.sessionId.uuidString < sessionId.uuidString else { return }
+        }
+        sessionId = msg.sessionId
+        startSession(startDate: msg.workoutStartDate)
+        startMatch(options: msg.options, isRemote: true)
+        LiveActivityService.shared.start(mode: msg.options.mode)
+    }
+
+    private func handleIncomingScoreState(_ state: ScoreState) {
+        guard !isDriver, case .playing = phase else { return }
+        scoreVM.applyRemoteState(state)
+        LiveActivityService.shared.update(from: state, score: scoreVM.score)
+    }
+
+    #if DEBUG
+        func applyIncomingScoreStateForTest(_ state: ScoreState) {
+            handleIncomingScoreState(state)
+        }
+
+        func applyIncomingSessionStartForTest(_ msg: SessionStartMessage) {
+            handleIncomingSessionStart(msg)
+        }
+    #endif
 
     private func saveFromWatch(_ msg: MatchEndMessage) {
         let match = buildMatchFromMessage(msg)
