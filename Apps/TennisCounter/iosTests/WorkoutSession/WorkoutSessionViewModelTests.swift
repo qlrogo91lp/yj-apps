@@ -213,7 +213,8 @@ struct WorkoutSessionViewModelTests {
         vm.scoreVM.myGameScore = 2
         vm.applyIncomingScoreStateForTest(ScoreState(
             myScore: 0, yourScore: 0, myGameScore: 5, yourGameScore: 5,
-            mySetScore: 0, yourSetScore: 0, completedSets: [], isTieBreak: false))
+            mySetScore: 0, yourSetScore: 0, completedSets: [], isTieBreak: false
+        ))
         #expect(vm.scoreVM.myGameScore == 2) // driver는 덮어쓰지 않음
     }
 
@@ -222,7 +223,8 @@ struct WorkoutSessionViewModelTests {
         vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false), isRemote: true) // mirror
         vm.applyIncomingScoreStateForTest(ScoreState(
             myScore: 30, yourScore: 15, myGameScore: 3, yourGameScore: 2,
-            mySetScore: 0, yourSetScore: 0, completedSets: [], isTieBreak: false))
+            mySetScore: 0, yourSetScore: 0, completedSets: [], isTieBreak: false
+        ))
         #expect(vm.scoreVM.myGameScore == 3)
         #expect(vm.scoreVM.score.myScore == 30)
     }

@@ -26,6 +26,20 @@ class WorkoutSessionViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .assign(to: &$isPaused)
 
+        setupConnectivityBindings()
+        setupScoreSync()
+
+        healthKit.$currentHeartRate
+            .dropFirst()
+            .throttle(for: .seconds(metricsThrottle), scheduler: DispatchQueue.main, latest: true)
+            .sink { [weak self] _ in
+                guard let self, case .playing = self.phase else { return }
+                broadcastMetrics()
+            }
+            .store(in: &cancellables)
+    }
+
+    private func setupConnectivityBindings() {
         connectivity.$receivedSessionStart
             .compactMap(\.self)
             .receive(on: DispatchQueue.main)
@@ -46,27 +60,20 @@ class WorkoutSessionViewModel: ObservableObject {
                 remoteWorkoutEnded = true
             }
             .store(in: &cancellables)
+    }
 
-        healthKit.$currentHeartRate
-            .dropFirst()
-            .throttle(for: .seconds(metricsThrottle), scheduler: DispatchQueue.main, latest: true)
-            .sink { [weak self] _ in
-                guard let self, case .playing = self.phase else { return }
-                broadcastMetrics()
-            }
-            .store(in: &cancellables)
-
+    private func setupScoreSync() {
         scoreVM.onMatchFinished = { [weak self] result, sets in
             self?.finishMatch(result: result, completedSets: sets)
         }
 
         scoreVM.onStateChanged = { [weak self] in
-            guard let self, self.isDriver else { return }
-            self.connectivity.sendScoreState(self.scoreVM.makeScoreState())
+            guard let self, isDriver else { return }
+            connectivity.sendScoreState(scoreVM.makeScoreState())
         }
 
         connectivity.$receivedScoreState
-            .compactMap { $0 }
+            .compactMap(\.self)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in self?.handleIncomingScoreState(state) }
             .store(in: &cancellables)
@@ -191,7 +198,9 @@ class WorkoutSessionViewModel: ObservableObject {
     }
 
     #if DEBUG
-    func applyIncomingScoreStateForTest(_ state: ScoreState) { handleIncomingScoreState(state) }
+        func applyIncomingScoreStateForTest(_ state: ScoreState) {
+            handleIncomingScoreState(state)
+        }
     #endif
 
     private func sendMatchEndToiOS(session: MatchSession) {

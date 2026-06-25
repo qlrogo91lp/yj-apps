@@ -23,10 +23,11 @@ class WorkoutSessionViewModel: ObservableObject {
     private(set) var isDriver = false
 
     init() {
-        connectivity.$isWatchReachable
-            .receive(on: DispatchQueue.main)
-            .assign(to: &$watchConnected)
+        setupScoreSync()
+        setupConnectivityBindings()
+    }
 
+    private func setupScoreSync() {
         connectivity.$isWatchReachable
             .filter(\.self)
             .receive(on: DispatchQueue.main)
@@ -43,16 +44,22 @@ class WorkoutSessionViewModel: ObservableObject {
 
         scoreVM.onStateChanged = { [weak self] in
             guard let self else { return }
-            LiveActivityService.shared.update(from: self.scoreVM.makeScoreState(), score: self.scoreVM.score)
-            guard self.isDriver else { return }
-            self.connectivity.sendScoreState(self.scoreVM.makeScoreState())
+            LiveActivityService.shared.update(from: scoreVM.makeScoreState(), score: scoreVM.score)
+            guard isDriver else { return }
+            connectivity.sendScoreState(scoreVM.makeScoreState())
         }
 
         connectivity.$receivedScoreState
-            .compactMap { $0 }
+            .compactMap(\.self)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in self?.handleIncomingScoreState(state) }
             .store(in: &cancellables)
+    }
+
+    private func setupConnectivityBindings() {
+        connectivity.$isWatchReachable
+            .receive(on: DispatchQueue.main)
+            .assign(to: &$watchConnected)
 
         connectivity.$receivedMetrics
             .compactMap(\.self)
@@ -68,6 +75,10 @@ class WorkoutSessionViewModel: ObservableObject {
             }
             .store(in: &cancellables)
 
+        setupMatchLifecycleBindings()
+    }
+
+    private func setupMatchLifecycleBindings() {
         connectivity.$receivedSessionStart
             .compactMap(\.self)
             .receive(on: DispatchQueue.main)
@@ -215,7 +226,9 @@ class WorkoutSessionViewModel: ObservableObject {
     }
 
     #if DEBUG
-    func applyIncomingScoreStateForTest(_ state: ScoreState) { handleIncomingScoreState(state) }
+        func applyIncomingScoreStateForTest(_ state: ScoreState) {
+            handleIncomingScoreState(state)
+        }
     #endif
 
     private func saveFromWatch(_ msg: MatchEndMessage) {
