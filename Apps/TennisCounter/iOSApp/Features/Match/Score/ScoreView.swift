@@ -29,14 +29,14 @@ struct ScoreView: View {
                     playerLabel: String(localized: "watch_score_me"),
                     color: .green,
                     onTap: { guard isDriver else { return }; withAnimation { viewModel.addPoint(.me) } },
-                    onLongPress: { showEditSheet = true }
+                    onLongPress: { guard isDriver else { return }; showEditSheet = true }
                 )
                 PlayerPointZone(
                     displayScore: viewModel.score.yourDisplayScore,
                     playerLabel: String(localized: "watch_score_opp"),
                     color: .orange,
                     onTap: { guard isDriver else { return }; withAnimation { viewModel.addPoint(.opponent) } },
-                    onLongPress: { showEditSheet = true }
+                    onLongPress: { guard isDriver else { return }; showEditSheet = true }
                 )
             }
             .ignoresSafeArea()

@@ -294,4 +294,11 @@ struct WorkoutSessionViewModelTests {
         vm.handleIncomingWorkoutEndForTest(vm.currentSessionIdForTest)
         #expect(vm.remoteWorkoutEnded == true)
     }
+
+    @Test @MainActor func workoutEndAppliedBeforeAnyMatchStarted() {
+        // 매치를 한 번도 시작하지 않으면 sessionId가 상대와 동기화되지 않으므로, 어떤 id가 와도 종료를 수용해야 한다.
+        let vm = WorkoutSessionViewModel()
+        vm.handleIncomingWorkoutEndForTest(UUID())
+        #expect(vm.remoteWorkoutEnded == true)
+    }
 }

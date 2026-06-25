@@ -20,6 +20,7 @@ class WorkoutSessionViewModel: ObservableObject {
     let scoreVM = ScoreViewModel(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
     private(set) var isDriver = false
     private(set) var activeSessionId: UUID = .init()
+    private var hasSyncedSession = false
 
     init(metricsThrottle: TimeInterval = 5) {
         self.metricsThrottle = metricsThrottle
@@ -55,7 +56,8 @@ class WorkoutSessionViewModel: ObservableObject {
     }
 
     private func handleIncomingWorkoutEnd(_ id: UUID) {
-        guard id == activeSessionId else { return }
+        // 매치가 한 번도 시작되지 않았으면 sessionId가 아직 상대와 동기화되지 않았으므로 무조건 수용한다.
+        if hasSyncedSession, id != activeSessionId { return }
         connectivity.receivedWorkoutEnd = nil
         endWorkout(notifyRemote: false)
         remoteWorkoutEnded = true
@@ -64,6 +66,10 @@ class WorkoutSessionViewModel: ObservableObject {
     #if DEBUG
         func handleIncomingWorkoutEndForTest(_ id: UUID) {
             handleIncomingWorkoutEnd(id)
+        }
+
+        var activeSessionIdForTest: UUID {
+            activeSessionId
         }
     #endif
 
@@ -104,6 +110,7 @@ class WorkoutSessionViewModel: ObservableObject {
 
     func startMatch(options: MatchOptions, sessionId: UUID? = nil, isRemote: Bool = false) {
         isDriver = !isRemote
+        hasSyncedSession = true
         let id = sessionId ?? workoutSessionId
         activeSessionId = id
         let session = MatchSession(
@@ -166,7 +173,7 @@ class WorkoutSessionViewModel: ObservableObject {
 
     func restartMatch() {
         guard let options = _currentSession?.options else { return }
-        startMatch(options: options, isRemote: !isDriver)
+        startMatch(options: options, sessionId: activeSessionId, isRemote: !isDriver)
     }
 
     func pauseWorkout() {
