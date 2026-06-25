@@ -144,3 +144,94 @@ mirror는 전송 안 함). 따라서 증상 3의 echo 출처를 실기기 계측
 4. 저장 upsert (중복 방지)
 
 > 이후 각 단계 구현이 끝나면 "## 구현: N단계" 섹션으로 before/after·이슈를 여기 추가한다.
+
+---
+
+## 구현: 1단계 — 상태 소유권 이동 (PR #4, 2026-06-25 머지)
+
+**계획:** `docs/superpowers/plans/ios/2026-06-24-sync-step1-state-ownership.md`
+
+**Before:** `ScoreViewModel`이 `ScoreView`의 `@StateObject`라, 리매치/탭전환/재진입 시 점수 초기화가 "SwiftUI가 view를 재생성하느냐"에 암묵적으로 의존했다(원인 B). 명시적 리셋이 없어 증상 1(리매치 미초기화)이 발생.
+
+**After:**
+- iOS/Watch `ScoreViewModel.resetAll(options:)` 도입 — `options`를 `private(set) var`로 바꿔 동일 인스턴스를 재사용 가능하게 함.
+- `WorkoutSessionViewModel`이 `scoreVM`을 단일 인스턴스로 소유하고, `startMatch`/`restartMatch`에서 `resetAll(options:)`를 명시적으로 호출.
+- `ScoreView`는 `@StateObject` → `@ObservedObject` 주입식으로 전환 (iOS/Watch 동일).
+- Watch는 `onMatchFinished` 콜백을 `ScoreView.onAppear`가 아니라 `WorkoutSessionViewModel.init()`에서 연결하도록 이동(중복 설정 방지).
+
+**커밋:** `e468220`(iOS resetAll), `1053b97`(Watch resetAll), `7d9671f`/`aa10000`(scoreVM 소유), `01ce963`/`776a880`(ScoreView 주입식), `60938b9`(`options` `@Published` 전환), `ebb5e8a`(swiftformat/swiftlint).
+
+**이슈:** 없음 (code-review 통과, 추가 수정 없이 머지).
+
+---
+
+## 구현: 2단계 — 단방향 authority (PR #5, 2026-06-25 머지)
+
+**계획:** `docs/superpowers/plans/ios/2026-06-24-sync-step2-unidirectional-authority.md`
+
+**Before:** iOS·Watch 둘 다 scoreState를 보내고 받은 건 무조건 덮어썼다(원인 A, echo). Watch는 `sendScoreState()`가 `checkSetUpdate()` **앞**, `score.reset()` **뒤**에 있어 인게임 점수가 항상 0으로 전송됨(증상 3).
+
+**After:**
+- iOS/Watch `ScoreViewModel`을 connectivity 의존 없는 순수 로직으로 전환. `onStateChanged` 콜백 + `makeScoreState()` 공개.
+- `WorkoutSessionViewModel`이 `isDriver`(경기를 시작한 기기)를 들고, driver만 전송(`onStateChanged`에서 송신), mirror만 수신 적용(`handleIncomingScoreState`에서 driver면 무시). echo 경로를 양쪽에서 구조적으로 차단.
+- Watch `addPoint` 전송 타이밍 버그 수정 — `score.reset()` → `checkSetUpdate()` → `onStateChanged?()` 순서로 정정.
+- LiveActivity 갱신 책임을 `ScoreViewModel`에서 `WorkoutSessionViewModel`로 이동.
+
+**커밋:** `ddf67b5`(iOS 순수화), `a6f0b62`(Watch 순수화+타이밍버그), `8e4b9e8`/`5eb3f65`(driver/mirror 동기화), `17283f1`(init 분리, function_body_length lint).
+
+**이슈 (code-review 반영, 커밋 `01409f1`):**
+- `restartMatch()`가 `isDriver` 역할을 보존하지 못하던 버그 수정.
+- `handleIncomingScoreState`에 `phase == .playing` 가드 추가 — 경기 종료 후 도착하는 stale 원격 점수 무시.
+- 동시 시작 race 해소: 두 기기가 동시에 시작할 때 `sessionId` UUID 문자열 비교로 deterministic하게 한쪽만 driver 유지.
+- `ScoreEditSheet`(수동 점수 수정)이 `onStateChanged` 동기화 파이프라인을 안 거치던 문제 수정.
+- `sendScoreState`를 `sendRealtimeOnly` → `sendReliably`로 변경 — reachability 손실 시 `transferUserInfo`로 큐잉되게.
+
+---
+
+## 구현: 3단계 — workoutEnd 가드 + 미러 UI (PR #6, 2026-06-25 머지)
+
+**계획:** `docs/superpowers/plans/ios/2026-06-24-sync-step3-workoutend-guard-mirror-ui.md`
+
+**Before:** `workoutEnd` 메시지에 `sessionId`가 없어, 무관하거나 stale한 종료 신호에도 활성 기기가 강제로 홈으로 dismiss됐다(증상 2). 미러 기기도 점수 입력이 가능해 두 기기가 동시에 입력하면 충돌 가능.
+
+**After:**
+- `WatchConnectivityService.receivedWorkoutEnd`를 `Date?` → `UUID?`로 변경. 전송 시 `sessionId`를 함께 보내고, 수신 측은 자기 현재 세션 id와 일치할 때만 처리 + 소비 즉시 `nil`로 비움.
+- iOS/Watch `MirrorBadge` 컴포넌트 신설 — 미러 기기에 "보기 전용" 배지 표시.
+- 미러 기기는 점수 영역 탭(`onTap`/`action`)이 `isDriver` 가드로 막힘.
+
+**커밋:** `aff70aa`(iOS sessionId 가드), `9edb2d5`(Watch sessionId 가드), `c7e2703`/`17cfc48`(미러 입력 비활성+배지), `44b100c`(swiftformat).
+
+**이슈 (code-review 반영, 커밋 `a12c271`):**
+- 매치가 한 번도 시작되지 않아 `sessionId`가 아직 동기화 전인 상태에서 `workoutEnd` 가드가 모든 신호를 막아버리던 회귀 — `hasSyncedSession` 플래그로 "가드 도입 전 동작"(무조건 수용) 복원.
+- Watch `restartMatch()`가 mirror 상태에서 `activeSessionId` 대신 동기화 안 된 `workoutSessionId`로 폴백하던 버그 수정.
+- iOS `ScoreView`의 `onLongPress`(수동 점수 수정)에 `isDriver` 가드가 빠져있어 미러 기기가 long-press로 입력을 우회할 수 있던 구멍 수정.
+
+---
+
+## 구현: 4단계 — 저장 upsert (PR #7, 2026-06-25 머지)
+
+**계획:** `docs/superpowers/plans/ios/2026-06-24-sync-step4-save-upsert.md`
+
+**Before:** `MatchPersistenceService.save(_:)`는 항상 insert만 했다. driver가 로컬에서 저장(`saveCurrentMatch`)하고 mirror 쪽 사용자도 별도로 저장(`saveFromWatch`)하면, 같은 경기(`workoutSessionId`)가 History에 2건으로 중복 저장될 수 있었다.
+
+**After:**
+- `MatchPersistenceService.upsert(_:)` 추가 — `workoutSessionId`로 기존 Match를 조회해 있으면 삭제 후 insert, 없으면 insert.
+- `saveCurrentMatch`/`saveFromWatch` 모두 `upsert`를 경유하도록 통일.
+- 더 이상 호출되지 않는 `save(_:)` 제거.
+
+**커밋:** `b2b977f`(upsert 구현+테스트), `008ed07`(저장 경로 전환), `b722f2d`(`save` 제거), `3770090`(swiftformat).
+
+**이슈 (`/code-review`, 수정 보류):**
+- `upsert`는 `context.delete(old)` → `context.insert(match)` → `context.save()` 순서다. `save()`가 실패하면(드묾: CloudKit 충돌·디스크 오류 등) SwiftData/CoreData가 pending 상태인 delete/insert를 자동 롤백하지 않고, 코드베이스 전체에 `rollback()` 호출이 없다. 두 호출부 모두 `try?`로 실패를 삼키므로, 이 stuck 상태가 앱 전체가 공유하는 메인 `ModelContext`에 남아 이후 무관한 화면(History 등)의 저장까지 연쇄 실패시킬 수 있다.
+- 기존 `save()`(insert만)도 동일한 구조적 위험(롤백 부재 + `try?`)을 갖고 있어 **이 diff가 새로 만든 버그는 아니나, delete가 추가되며 위험이 커졌다.**
+- 발생 확률이 낮아 이번 단계 범위에서는 수정하지 않고 보류. 후속 조치는 별도 brainstorming/plan으로 진행 예정.
+
+**검증 한계:** 워치 저장→iOS History 1건 확인은 시뮬레이터로 신뢰성 있게 재현되지 않는다([[watch-sync-simulator-trap]]). 빌드/단위테스트는 GREEN이나, 실기기 2대 수동 확인은 PR 머지 시점에 아직 수행하지 않았다.
+
+---
+
+## 종합 — 4단계 전체 완료 (2026-06-25)
+
+증상 1·2·3을 일으킨 구조적 원인(authority 부재, view 상태 의존, sessionId 가드 누락, 저장 중복)을 4개의 독립 PR(#4~#7)로 모두 해소했다. 각 단계는 TDD + `/code-review` 게이트를 통과했고, 2·3단계는 code-review에서 실제 회귀(역할 보존, race, 가드 회귀, 입력 우회)를 잡아 반영했다. 남은 항목:
+1. 4단계 code-review에서 나온 `upsert` 실패 시 컨텍스트 stuck 위험 — 후속 plan 대상.
+2. 1~4단계 전체에 대한 실기기 2대 수동 확인 — 시뮬레이터로 대체 불가.
