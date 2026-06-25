@@ -27,6 +27,16 @@ final class MatchPersistenceService {
         return try context.fetch(descriptor)
     }
 
+    func upsert(_ match: Match) throws {
+        guard let context = modelContext else { return }
+        if let sid = match.workoutSessionId {
+            let existing = try fetchByWorkoutSession(sid)
+            for old in existing { context.delete(old) }
+        }
+        context.insert(match)
+        try context.save()
+    }
+
     func fetchByWorkoutSession(_ sessionId: UUID) throws -> [Match] {
         guard let context = modelContext else { return [] }
         let id = sessionId
