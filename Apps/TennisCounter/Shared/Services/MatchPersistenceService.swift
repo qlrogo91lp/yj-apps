@@ -1,6 +1,10 @@
 import Foundation
 import SwiftData
 
+enum PersistenceError: Error {
+    case saveFailed(Error)
+}
+
 @MainActor
 final class MatchPersistenceService {
     static let shared = MatchPersistenceService()
@@ -30,7 +34,12 @@ final class MatchPersistenceService {
             }
         }
         context.insert(match)
-        try context.save()
+        do {
+            try context.save()
+        } catch {
+            context.rollback()
+            throw PersistenceError.saveFailed(error)
+        }
     }
 
     func fetchByWorkoutSession(_ sessionId: UUID) throws -> [Match] {
