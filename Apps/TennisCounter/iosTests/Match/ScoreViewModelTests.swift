@@ -154,6 +154,14 @@ struct ScoreViewModelTests {
         #expect(vm.score.noAdRule == false)
     }
 
+    @Test @MainActor func makeScoreStateIncludesInGamePoints() {
+        let vm = ScoreViewModel(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.addPoint(.me) // 0 → 15 (게임 미승리)
+        let state = vm.makeScoreState()
+        #expect(state.myScore == 15) // 현재 인게임 점수가 0이 아니라 15
+        #expect(state.myGameScore == 0)
+    }
+
     /// 누수 진단: 강한 참조를 놓으면 ScoreViewModel이 해제되는지 검증.
     /// 통과 → VM 자체엔 retain cycle 없음(앱에서 deinit 안 보이는 건 SwiftUI StateObject 보유 때문).
     /// 실패 → VM 내부에 실제 retain cycle 존재.
