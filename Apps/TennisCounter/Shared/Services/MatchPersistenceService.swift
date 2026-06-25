@@ -25,7 +25,9 @@ final class MatchPersistenceService {
         guard let context = modelContext else { return }
         if let sid = match.workoutSessionId {
             let existing = try fetchByWorkoutSession(sid)
-            for old in existing { context.delete(old) }
+            for old in existing {
+                context.delete(old)
+            }
         }
         context.insert(match)
         try context.save()

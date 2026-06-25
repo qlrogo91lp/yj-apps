@@ -1,9 +1,9 @@
 import Foundation
 import SwiftData
-import Testing
 @testable import TennisCounter
+import Testing
 
-@Suite @MainActor
+@MainActor
 struct MatchPersistenceServiceTests {
     private func makeService() throws -> MatchPersistenceService {
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
