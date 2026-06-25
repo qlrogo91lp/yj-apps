@@ -276,4 +276,22 @@ struct WorkoutSessionViewModelTests {
         ))
         #expect(vm.scoreVM.options.mode == .oneSet) // 더 큰 sessionId는 우선권이 없어 무시되고 driver 유지
     }
+
+    @Test @MainActor func workoutEndIgnoredWhenSessionIdMismatch() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.handleIncomingWorkoutEndForTest(UUID()) // 다른 세션
+        #expect(vm.remoteWorkoutEnded == false)
+        guard case .playing = vm.phase else {
+            Issue.record("playing 유지 기대")
+            return
+        }
+    }
+
+    @Test @MainActor func workoutEndAppliedWhenSessionIdMatches() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.handleIncomingWorkoutEndForTest(vm.currentSessionIdForTest)
+        #expect(vm.remoteWorkoutEnded == true)
+    }
 }

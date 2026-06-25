@@ -110,13 +110,21 @@ class WorkoutSessionViewModel: ObservableObject {
         connectivity.$receivedWorkoutEnd
             .compactMap(\.self)
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                guard let self else { return }
-                endSession(notifyRemote: false)
-                remoteWorkoutEnded = true
-            }
+            .sink { [weak self] id in self?.handleIncomingWorkoutEnd(id) }
             .store(in: &cancellables)
     }
+
+    private func handleIncomingWorkoutEnd(_ id: UUID) {
+        guard id == sessionId else { return }
+        connectivity.receivedWorkoutEnd = nil
+        endSession(notifyRemote: false)
+        remoteWorkoutEnded = true
+    }
+
+    #if DEBUG
+        func handleIncomingWorkoutEndForTest(_ id: UUID) { handleIncomingWorkoutEnd(id) }
+        var currentSessionIdForTest: UUID { sessionId }
+    #endif
 
     deinit { timer?.invalidate() }
 
@@ -209,7 +217,7 @@ class WorkoutSessionViewModel: ObservableObject {
         _currentSession = nil
         phase = .modeSelection
         LiveActivityService.shared.end()
-        if notifyRemote { connectivity.sendWorkoutEnd() }
+        if notifyRemote { connectivity.sendWorkoutEnd(sessionId: sessionId) }
     }
 
     // MARK: - Private
