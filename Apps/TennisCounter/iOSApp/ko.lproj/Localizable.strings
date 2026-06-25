@@ -92,6 +92,9 @@
 "end_workout_confirm_message" = "운동을 종료하시겠습니까?";
 "end_workout_with_match_message" = "경기가 진행 중입니다. 운동을 종료하면 경기 결과가 무효됩니다.";
 
+/* Mirror View */
+"mirror_view_only" = "워치에서 입력 중 · 보기 전용";
+
 /* Common */
 "btn_cancel" = "취소";
 "btn_save" = "저장";

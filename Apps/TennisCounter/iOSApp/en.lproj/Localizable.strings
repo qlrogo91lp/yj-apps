@@ -92,6 +92,9 @@
 "end_workout_confirm_message" = "End this workout session?";
 "end_workout_with_match_message" = "A match is in progress. Ending the workout will void the match result.";
 
+/* Mirror View */
+"mirror_view_only" = "Entering on Watch · View only";
+
 /* Common */
 "btn_cancel" = "Cancel";
 "btn_save" = "Save";

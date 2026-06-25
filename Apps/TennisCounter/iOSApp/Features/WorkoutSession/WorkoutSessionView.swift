@@ -115,6 +115,7 @@ struct WorkoutSessionView: View {
         case .playing:
             ScoreView(
                 viewModel: viewModel.scoreVM,
+                isDriver: viewModel.isDriver,
                 onMatchFinished: { result, sets in
                     viewModel.finishMatch(result: result, completedSets: sets)
                 },
