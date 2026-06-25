@@ -3,7 +3,7 @@ import Foundation
 
 @MainActor
 final class ScoreViewModel: ObservableObject {
-    let options: MatchOptions
+    private(set) var options: MatchOptions
 
     @Published var score = Score()
     @Published var myGameScore: Int = 0
@@ -67,7 +67,8 @@ final class ScoreViewModel: ObservableObject {
         score.undo()
     }
 
-    func resetAll() {
+    func resetAll(options: MatchOptions) {
+        self.options = options
         myGameScore = 0
         yourGameScore = 0
         mySetScore = 0
