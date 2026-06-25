@@ -10,7 +10,7 @@ struct HistoryView: View {
         NavigationStack {
             Group {
                 if viewModel.viewMode == .list {
-                    if viewModel.listMatches.isEmpty && !viewModel.isLoadingMore {
+                    if viewModel.listMatches.isEmpty, !viewModel.isLoadingMore {
                         HistoryEmptyState()
                     } else {
                         MatchList(

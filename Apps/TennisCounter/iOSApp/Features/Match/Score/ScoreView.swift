@@ -9,7 +9,8 @@ struct ScoreView: View {
 
     init(viewModel: ScoreViewModel,
          onMatchFinished: @escaping (MatchResult, [(my: Int, your: Int)]) -> Void,
-         onProgressChanged: @escaping (Bool) -> Void = { _ in }) {
+         onProgressChanged: @escaping (Bool) -> Void = { _ in })
+    {
         self.viewModel = viewModel
         self.onMatchFinished = onMatchFinished
         self.onProgressChanged = onProgressChanged

@@ -60,7 +60,8 @@ struct ScoreView: View {
             ToolbarItem(placement: .topBarLeading) {
                 BackButton {
                     if viewModel.mySetScore == 0, viewModel.yourSetScore == 0,
-                       viewModel.myGameScore == 0, viewModel.yourGameScore == 0 {
+                       viewModel.myGameScore == 0, viewModel.yourGameScore == 0
+                    {
                         flowViewModel.startNewMatch()
                     } else {
                         showExitConfirm = true

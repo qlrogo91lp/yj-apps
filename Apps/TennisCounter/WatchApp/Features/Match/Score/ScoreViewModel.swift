@@ -26,7 +26,7 @@ class ScoreViewModel: ObservableObject {
             .store(in: &cancellables)
 
         connectivity.$receivedScoreState
-            .compactMap { $0 }
+            .compactMap(\.self)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in self?.applyRemoteState(state) }
             .store(in: &cancellables)
@@ -99,7 +99,7 @@ class ScoreViewModel: ObservableObject {
             return
         }
 
-        if my == threshold && your == threshold {
+        if my == threshold, your == threshold {
             if options.noTieRule {
                 completedSets.append(SetScore(my: my, your: your))
                 onMatchFinished?(.draw, completedSets)
@@ -111,7 +111,7 @@ class ScoreViewModel: ObservableObject {
         }
 
         let maxG = max(my, your), minG = min(my, your)
-        guard maxG >= threshold && (maxG - minG) >= 2 else { return }
+        guard maxG >= threshold, (maxG - minG) >= 2 else { return }
         finalizeSet(winner: my > your ? .me : .opponent)
     }
 

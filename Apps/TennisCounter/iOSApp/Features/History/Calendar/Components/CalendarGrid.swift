@@ -5,7 +5,9 @@ struct CalendarGrid: View {
     let displayedMonth: Date
     @Binding var selectedMatch: Match?
 
-    private var calendar: Calendar { Calendar.current }
+    private var calendar: Calendar {
+        Calendar.current
+    }
 
     var body: some View {
         let days = daysInMonth()

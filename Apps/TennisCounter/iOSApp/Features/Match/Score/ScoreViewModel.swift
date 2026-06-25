@@ -14,15 +14,23 @@ final class ScoreViewModel: ObservableObject {
     @Published var completedSets: [(my: Int, your: Int)] = []
     @Published private(set) var matchResult: MatchResult?
 
-    var isMatchOver: Bool { matchResult != nil }
-    var didWin: Bool { matchResult == .win }
-    var isTieBreak: Bool { score.gameMode == .tieBreak }
+    var isMatchOver: Bool {
+        matchResult != nil
+    }
+
+    var didWin: Bool {
+        matchResult == .win
+    }
+
+    var isTieBreak: Bool {
+        score.gameMode == .tieBreak
+    }
 
     var hasProgress: Bool {
         myGameScore > 0 || yourGameScore > 0 ||
-        mySetScore > 0 || yourSetScore > 0 ||
-        !completedSets.isEmpty ||
-        score.lastAction != .none
+            mySetScore > 0 || yourSetScore > 0 ||
+            !completedSets.isEmpty ||
+            score.lastAction != .none
     }
 
     private var tieBreakInProgress = false
@@ -32,20 +40,20 @@ final class ScoreViewModel: ObservableObject {
 
     init(options: MatchOptions = MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false)) {
         self.options = options
-        self.score.noAdRule = options.noAdRule
+        score.noAdRule = options.noAdRule
 
         score.objectWillChange
             .sink { [weak self] _ in self?.objectWillChange.send() }
             .store(in: &cancellables)
 
         connectivity.$receivedScoreState
-            .compactMap { $0 }
+            .compactMap(\.self)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in self?.applyRemoteState(state) }
             .store(in: &cancellables)
 
         connectivity.$isWatchReachable
-            .filter { $0 }
+            .filter(\.self)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in self?.sendScoreState() }
             .store(in: &cancellables)
@@ -108,7 +116,7 @@ final class ScoreViewModel: ObservableObject {
             return
         }
 
-        if my == threshold && your == threshold {
+        if my == threshold, your == threshold {
             if options.noTieRule {
                 completedSets.append((my: my, your: your))
                 matchResult = .draw
@@ -120,7 +128,7 @@ final class ScoreViewModel: ObservableObject {
         }
 
         let maxG = max(my, your), minG = min(my, your)
-        guard maxG >= threshold && (maxG - minG) >= 2 else { return }
+        guard maxG >= threshold, (maxG - minG) >= 2 else { return }
         finalizeSet(winner: my > your ? .me : .opponent)
     }
 

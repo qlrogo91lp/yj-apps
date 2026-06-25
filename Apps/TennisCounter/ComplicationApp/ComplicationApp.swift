@@ -3,9 +3,9 @@ import WidgetKit
 
 private let appGroupID = "group.com.yj.TennisCounter"
 private let workoutActiveKey = "isWorkoutActive"
-private let rotationFrameCount = 8      // 45° 간격
+private let rotationFrameCount = 8 // 45° 간격
 private let rotationFrameInterval = 4.0 // 초 단위, 한 프레임 지속 시간
-private let rotationBatchSize = 80      // 한 번에 생성할 entries 수 (~160초)
+private let rotationBatchSize = 80 // 한 번에 생성할 entries 수 (~160초)
 
 struct Provider: TimelineProvider {
     func placeholder(in _: Context) -> SimpleEntry {
@@ -23,7 +23,7 @@ struct Provider: TimelineProvider {
         if isActive {
             let startDate = Date()
             let degreesPerFrame = 360.0 / Double(rotationFrameCount)
-            let entries: [SimpleEntry] = (0..<rotationBatchSize).map { i in
+            let entries: [SimpleEntry] = (0 ..< rotationBatchSize).map { i in
                 let degrees = Double(i % rotationFrameCount) * degreesPerFrame
                 let entryDate = startDate.addingTimeInterval(Double(i) * rotationFrameInterval)
                 return SimpleEntry(date: entryDate, isWorkoutActive: true, rotationDegrees: degrees)

@@ -121,7 +121,7 @@ struct WorkoutSessionView: View {
                 onProgressChanged: { hasMatchProgress = $0 }
             )
 
-        case .finished(let session):
+        case let .finished(session):
             MatchResultView(session: session, viewModel: viewModel)
         }
     }

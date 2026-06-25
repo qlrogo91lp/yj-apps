@@ -1,7 +1,7 @@
-@testable import TennisCounter
 import Foundation
-import Testing
 import SwiftData
+@testable import TennisCounter
+import Testing
 
 @MainActor
 struct HistoryViewModelTests {
@@ -13,7 +13,7 @@ struct HistoryViewModelTests {
     }
 
     private func insertMatches(count: Int, in context: ModelContext) throws {
-        for i in 0..<count {
+        for i in 0 ..< count {
             let match = Match()
             match.startedAt = Date().addingTimeInterval(TimeInterval(-i * 3600))
             context.insert(match)
@@ -75,7 +75,7 @@ struct HistoryViewModelTests {
     @Test func changeMonth_updatesCalendarMatches() throws {
         let context = try makeContext()
         let now = Date()
-        let nextMonth = Calendar.current.date(byAdding: .month, value: 1, to: now)!
+        let nextMonth = try #require(Calendar.current.date(byAdding: .month, value: 1, to: now))
 
         let currentMonthMatch = Match()
         currentMonthMatch.startedAt = now

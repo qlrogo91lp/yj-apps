@@ -5,7 +5,7 @@ struct WorkoutSessionViewModelTests {
     @Test @MainActor func matchSessionStartMatchSetsPlayingPhase() {
         let vm = WorkoutSessionViewModel()
         vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
-        guard case .playing(let options) = vm.phase else {
+        guard case let .playing(options) = vm.phase else {
             Issue.record("Expected .playing phase")
             return
         }
@@ -18,7 +18,7 @@ struct WorkoutSessionViewModelTests {
         vm.startSession()
         vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
         vm.finishMatch(result: .win, completedSets: [(my: 6, your: 4)])
-        guard case .finished(let session) = vm.phase else {
+        guard case let .finished(session) = vm.phase else {
             Issue.record("Expected .finished phase")
             return
         }
@@ -92,7 +92,7 @@ struct WorkoutSessionViewModelTests {
         vm.startSession()
         vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
         vm.finishMatch(result: .win, completedSets: [(my: 6, your: 4)])
-        guard case .finished(let session) = vm.phase else {
+        guard case let .finished(session) = vm.phase else {
             Issue.record("Expected .finished")
             return
         }

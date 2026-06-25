@@ -9,8 +9,8 @@ struct SaveButton: View {
             HStack(spacing: 8) {
                 Image(systemName: saved ? "checkmark.circle.fill" : "square.and.arrow.down")
                 Text(saved
-                     ? String(localized: "result_saved")
-                     : String(localized: "result_save"))
+                    ? String(localized: "result_saved")
+                    : String(localized: "result_save"))
                     .font(.system(size: 16, weight: .semibold))
             }
             .frame(maxWidth: .infinity)

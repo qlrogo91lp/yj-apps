@@ -1,7 +1,9 @@
 import SwiftUI
 
 struct WeekdayLabels: View {
-    private var labels: [String] { Calendar.current.shortWeekdaySymbols }
+    private var labels: [String] {
+        Calendar.current.shortWeekdaySymbols
+    }
 
     var body: some View {
         HStack {

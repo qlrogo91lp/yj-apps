@@ -5,10 +5,21 @@ struct DayCell: View {
     let matches: [Match]
     let onTap: () -> Void
 
-    private var calendar: Calendar { Calendar.current }
-    private var isToday: Bool { calendar.isDateInToday(date) }
-    private var hasMatch: Bool { !matches.isEmpty }
-    private var hasWin: Bool { matches.contains { $0.myTotalSets > $0.yourTotalSets } }
+    private var calendar: Calendar {
+        Calendar.current
+    }
+
+    private var isToday: Bool {
+        calendar.isDateInToday(date)
+    }
+
+    private var hasMatch: Bool {
+        !matches.isEmpty
+    }
+
+    private var hasWin: Bool {
+        matches.contains { $0.myTotalSets > $0.yourTotalSets }
+    }
 
     var body: some View {
         VStack(spacing: 2) {

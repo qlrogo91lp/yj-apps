@@ -24,7 +24,7 @@ struct LiveActivityView: View {
 
             HStack {
                 if let start = state.workoutStartTime {
-                    Text(timerInterval: start...Date.distantFuture, countsDown: false)
+                    Text(timerInterval: start ... Date.distantFuture, countsDown: false)
                         .font(.system(size: 30, weight: .semibold))
                         .monospacedDigit()
                         .foregroundColor(.yellow)
