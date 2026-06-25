@@ -247,4 +247,41 @@ struct WorkoutSessionViewModelTests {
         ))
         #expect(vm.scoreVM.options.mode == .oneSet) // 더 큰 sessionId는 우선권이 없어 무시되고 driver 유지
     }
+
+    @Test @MainActor func workoutEndIgnoredWhenSessionIdMismatch() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.handleIncomingWorkoutEndForTest(UUID())
+        #expect(vm.remoteWorkoutEnded == false)
+    }
+
+    @Test @MainActor func workoutEndAppliedWhenSessionIdMatches() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.handleIncomingWorkoutEndForTest(vm.activeSessionIdForTest)
+        #expect(vm.remoteWorkoutEnded == true)
+    }
+
+    @Test @MainActor func workoutEndAppliedBeforeAnyMatchStarted() {
+        // 매치를 한 번도 시작하지 않으면 sessionId가 상대와 동기화되지 않으므로, 어떤 id가 와도 종료를 수용해야 한다.
+        let vm = WorkoutSessionViewModel()
+        vm.handleIncomingWorkoutEndForTest(UUID())
+        #expect(vm.remoteWorkoutEnded == true)
+    }
+
+    @Test @MainActor func restartMatchAsMirrorPreservesActiveSessionIdForWorkoutEnd() {
+        // mirror가 Rematch를 직접 눌러도 driver의 sessionId를 잃지 않아야 한다 (회귀 방지).
+        let vm = WorkoutSessionViewModel()
+        let driverSessionId = UUID()
+        vm.startMatch(
+            options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false),
+            sessionId: driverSessionId,
+            isRemote: true
+        ) // mirror
+        vm.finishMatch(result: .win, completedSets: [SetScore(my: 6, your: 4)])
+        vm.restartMatch()
+        #expect(vm.activeSessionIdForTest == driverSessionId)
+        vm.handleIncomingWorkoutEndForTest(driverSessionId)
+        #expect(vm.remoteWorkoutEnded == true)
+    }
 }

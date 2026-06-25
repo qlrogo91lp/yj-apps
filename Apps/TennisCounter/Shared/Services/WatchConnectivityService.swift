@@ -196,7 +196,7 @@ final class WatchConnectivityService: NSObject, ObservableObject {
     @Published var receivedMatchEnd: MatchEndMessage?
     @Published var receivedMatchSave: MatchEndMessage?
     @Published var receivedMetrics: WorkoutMetrics?
-    @Published var receivedWorkoutEnd: Date?
+    @Published var receivedWorkoutEnd: UUID?
 
     override private init() {
         super.init()
@@ -235,8 +235,11 @@ final class WatchConnectivityService: NSObject, ObservableObject {
         sendRealtimeOnly(metrics.toDictionary())
     }
 
-    func sendWorkoutEnd() {
-        sendRealtimeOnly(["type": WCMessageType.workoutEnd.rawValue])
+    func sendWorkoutEnd(sessionId: UUID) {
+        sendRealtimeOnly([
+            "type": WCMessageType.workoutEnd.rawValue,
+            "sessionId": sessionId.uuidString,
+        ])
     }
 
     private func sendRealtimeOnly(_ dict: [String: Any]) {
@@ -274,7 +277,9 @@ final class WatchConnectivityService: NSObject, ObservableObject {
             case WCMessageType.metrics.rawValue:
                 self.receivedMetrics = WorkoutMetrics(from: message)
             case WCMessageType.workoutEnd.rawValue:
-                self.receivedWorkoutEnd = Date()
+                if let idStr = message["sessionId"] as? String, let id = UUID(uuidString: idStr) {
+                    self.receivedWorkoutEnd = id
+                }
             default:
                 break
             }

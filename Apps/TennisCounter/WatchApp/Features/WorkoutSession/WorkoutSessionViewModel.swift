@@ -19,6 +19,8 @@ class WorkoutSessionViewModel: ObservableObject {
     private var _currentSession: MatchSession?
     let scoreVM = ScoreViewModel(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
     private(set) var isDriver = false
+    private(set) var activeSessionId: UUID = .init()
+    private var hasSyncedSession = false
 
     init(metricsThrottle: TimeInterval = 5) {
         self.metricsThrottle = metricsThrottle
@@ -49,13 +51,27 @@ class WorkoutSessionViewModel: ObservableObject {
         connectivity.$receivedWorkoutEnd
             .compactMap(\.self)
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                guard let self else { return }
-                endWorkout(notifyRemote: false)
-                remoteWorkoutEnded = true
-            }
+            .sink { [weak self] id in self?.handleIncomingWorkoutEnd(id) }
             .store(in: &cancellables)
     }
+
+    private func handleIncomingWorkoutEnd(_ id: UUID) {
+        // 매치가 한 번도 시작되지 않았으면 sessionId가 아직 상대와 동기화되지 않았으므로 무조건 수용한다.
+        if hasSyncedSession, id != activeSessionId { return }
+        connectivity.receivedWorkoutEnd = nil
+        endWorkout(notifyRemote: false)
+        remoteWorkoutEnded = true
+    }
+
+    #if DEBUG
+        func handleIncomingWorkoutEndForTest(_ id: UUID) {
+            handleIncomingWorkoutEnd(id)
+        }
+
+        var activeSessionIdForTest: UUID {
+            activeSessionId
+        }
+    #endif
 
     private func setupScoreSync() {
         scoreVM.onMatchFinished = { [weak self] result, sets in
@@ -94,7 +110,9 @@ class WorkoutSessionViewModel: ObservableObject {
 
     func startMatch(options: MatchOptions, sessionId: UUID? = nil, isRemote: Bool = false) {
         isDriver = !isRemote
+        hasSyncedSession = true
         let id = sessionId ?? workoutSessionId
+        activeSessionId = id
         let session = MatchSession(
             workoutSessionId: id,
             options: options,
@@ -155,7 +173,7 @@ class WorkoutSessionViewModel: ObservableObject {
 
     func restartMatch() {
         guard let options = _currentSession?.options else { return }
-        startMatch(options: options, isRemote: !isDriver)
+        startMatch(options: options, sessionId: activeSessionId, isRemote: !isDriver)
     }
 
     func pauseWorkout() {
@@ -170,7 +188,7 @@ class WorkoutSessionViewModel: ObservableObject {
         _currentSession = nil
         appGroupDefaults?.set(false, forKey: "isWorkoutActive")
         WidgetCenter.shared.reloadTimelines(ofKind: "ComplicationApp")
-        if notifyRemote { connectivity.sendWorkoutEnd() }
+        if notifyRemote { connectivity.sendWorkoutEnd(sessionId: activeSessionId) }
         Task { _ = await healthKit.stopWorkout() }
     }
 

@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct ScoreView: View {
+    let isDriver: Bool
     let onMatchFinished: (MatchResult, [(my: Int, your: Int)]) -> Void
     let onProgressChanged: (Bool) -> Void
 
@@ -8,10 +9,12 @@ struct ScoreView: View {
     @State private var showEditSheet = false
 
     init(viewModel: ScoreViewModel,
+         isDriver: Bool,
          onMatchFinished: @escaping (MatchResult, [(my: Int, your: Int)]) -> Void,
          onProgressChanged: @escaping (Bool) -> Void = { _ in })
     {
         self.viewModel = viewModel
+        self.isDriver = isDriver
         self.onMatchFinished = onMatchFinished
         self.onProgressChanged = onProgressChanged
     }
@@ -25,15 +28,15 @@ struct ScoreView: View {
                     displayScore: viewModel.score.myDisplayScore,
                     playerLabel: String(localized: "watch_score_me"),
                     color: .green,
-                    onTap: { withAnimation { viewModel.addPoint(.me) } },
-                    onLongPress: { showEditSheet = true }
+                    onTap: { guard isDriver else { return }; withAnimation { viewModel.addPoint(.me) } },
+                    onLongPress: { guard isDriver else { return }; showEditSheet = true }
                 )
                 PlayerPointZone(
                     displayScore: viewModel.score.yourDisplayScore,
                     playerLabel: String(localized: "watch_score_opp"),
                     color: .orange,
-                    onTap: { withAnimation { viewModel.addPoint(.opponent) } },
-                    onLongPress: { showEditSheet = true }
+                    onTap: { guard isDriver else { return }; withAnimation { viewModel.addPoint(.opponent) } },
+                    onLongPress: { guard isDriver else { return }; showEditSheet = true }
                 )
             }
             .ignoresSafeArea()
@@ -60,6 +63,13 @@ struct ScoreView: View {
                         .padding(.bottom, 150)
                 }
             }
+
+            if !isDriver {
+                VStack {
+                    MirrorBadge().padding(.top, 8)
+                    Spacer()
+                }
+            }
         }
         .onAppear { UIApplication.shared.isIdleTimerDisabled = true }
         .onDisappear { UIApplication.shared.isIdleTimerDisabled = false }
@@ -79,6 +89,7 @@ struct ScoreView: View {
     NavigationStack {
         ScoreView(
             viewModel: ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false)),
+            isDriver: true,
             onMatchFinished: { _, _ in }
         )
     }
