@@ -12,7 +12,7 @@ class Match {
     var myTotalSets: Int = 0
     var yourTotalSets: Int = 0
     var isCompleted: Bool = false
-    // CloudKit 요구사항: optional + inverse 지정
+    /// CloudKit 요구사항: optional + inverse 지정
     @Relationship(deleteRule: .cascade, inverse: \SetRecord.match) var sets: [SetRecord]?
 
     var workoutSessionId: UUID?

@@ -9,7 +9,7 @@ class ScoreViewModel: ObservableObject {
     @Published var yourSetScore: Int = 0
     @Published var completedSets: [SetScore] = []
 
-    let options: MatchOptions
+    @Published private(set) var options: MatchOptions
     var onMatchFinished: ((MatchResult, [SetScore]) -> Void)?
 
     private var isApplyingRemote = false
@@ -26,7 +26,7 @@ class ScoreViewModel: ObservableObject {
             .store(in: &cancellables)
 
         connectivity.$receivedScoreState
-            .compactMap { $0 }
+            .compactMap(\.self)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in self?.applyRemoteState(state) }
             .store(in: &cancellables)
@@ -44,6 +44,18 @@ class ScoreViewModel: ObservableObject {
 
     func undo() {
         score.undo()
+    }
+
+    func resetAll(options: MatchOptions) {
+        self.options = options
+        myGameScore = 0
+        yourGameScore = 0
+        mySetScore = 0
+        yourSetScore = 0
+        completedSets = []
+        tieBreakInProgress = false
+        score.noAdRule = options.noAdRule
+        score.reset()
     }
 
     func applyRemoteState(_ state: ScoreState) {
@@ -87,7 +99,7 @@ class ScoreViewModel: ObservableObject {
             return
         }
 
-        if my == threshold && your == threshold {
+        if my == threshold, your == threshold {
             if options.noTieRule {
                 completedSets.append(SetScore(my: my, your: your))
                 onMatchFinished?(.draw, completedSets)
@@ -99,7 +111,7 @@ class ScoreViewModel: ObservableObject {
         }
 
         let maxG = max(my, your), minG = min(my, your)
-        guard maxG >= threshold && (maxG - minG) >= 2 else { return }
+        guard maxG >= threshold, (maxG - minG) >= 2 else { return }
         finalizeSet(winner: my > your ? .me : .opponent)
     }
 

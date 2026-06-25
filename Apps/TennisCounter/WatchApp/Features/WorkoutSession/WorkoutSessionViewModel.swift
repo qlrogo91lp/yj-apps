@@ -17,6 +17,7 @@ class WorkoutSessionViewModel: ObservableObject {
     private let metricsThrottle: TimeInterval
     private var cancellables = Set<AnyCancellable>()
     private var _currentSession: MatchSession?
+    let scoreVM = ScoreViewModel(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
 
     init(metricsThrottle: TimeInterval = 5) {
         self.metricsThrottle = metricsThrottle
@@ -25,23 +26,23 @@ class WorkoutSessionViewModel: ObservableObject {
             .assign(to: &$isPaused)
 
         connectivity.$receivedSessionStart
-            .compactMap { $0 }
+            .compactMap(\.self)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] msg in
                 guard let self else { return }
-                if case .playing = self.phase { return }
-                if !self.healthKit.isWorkoutActive { self.startWorkout() }
-                self.startMatch(options: msg.options, sessionId: msg.sessionId, isRemote: true)
+                if case .playing = phase { return }
+                if !healthKit.isWorkoutActive { startWorkout() }
+                startMatch(options: msg.options, sessionId: msg.sessionId, isRemote: true)
             }
             .store(in: &cancellables)
 
         connectivity.$receivedWorkoutEnd
-            .compactMap { $0 }
+            .compactMap(\.self)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 guard let self else { return }
-                self.endWorkout(notifyRemote: false)
-                self.remoteWorkoutEnded = true
+                endWorkout(notifyRemote: false)
+                remoteWorkoutEnded = true
             }
             .store(in: &cancellables)
 
@@ -50,9 +51,13 @@ class WorkoutSessionViewModel: ObservableObject {
             .throttle(for: .seconds(metricsThrottle), scheduler: DispatchQueue.main, latest: true)
             .sink { [weak self] _ in
                 guard let self, case .playing = self.phase else { return }
-                self.broadcastMetrics()
+                broadcastMetrics()
             }
             .store(in: &cancellables)
+
+        scoreVM.onMatchFinished = { [weak self] result, sets in
+            self?.finishMatch(result: result, completedSets: sets)
+        }
     }
 
     func startWorkout() {
@@ -77,6 +82,7 @@ class WorkoutSessionViewModel: ObservableObject {
             connectivity.receivedScoreState = nil
         }
 
+        scoreVM.resetAll(options: options)
         phase = .playing(options)
 
         if !isRemote {
@@ -88,7 +94,9 @@ class WorkoutSessionViewModel: ObservableObject {
         }
     }
 
-    func currentSession() -> MatchSession? { _currentSession }
+    func currentSession() -> MatchSession? {
+        _currentSession
+    }
 
     func finishMatch(result: MatchResult, completedSets: [SetScore]) {
         guard let session = _currentSession else { return }
@@ -126,8 +134,13 @@ class WorkoutSessionViewModel: ObservableObject {
         startMatch(options: options)
     }
 
-    func pauseWorkout() { healthKit.pauseWorkout() }
-    func resumeWorkout() { healthKit.resumeWorkout() }
+    func pauseWorkout() {
+        healthKit.pauseWorkout()
+    }
+
+    func resumeWorkout() {
+        healthKit.resumeWorkout()
+    }
 
     func endWorkout(notifyRemote: Bool = true) {
         _currentSession = nil

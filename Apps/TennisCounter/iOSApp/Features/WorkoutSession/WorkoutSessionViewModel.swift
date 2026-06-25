@@ -16,6 +16,7 @@ class WorkoutSessionViewModel: ObservableObject {
     private var totalPausedSeconds: TimeInterval = 0
     private var sessionId: UUID = .init()
     private var _currentSession: MatchSession?
+    let scoreVM = ScoreViewModel()
     private var timer: Timer?
     private var cancellables = Set<AnyCancellable>()
     private let connectivity = WatchConnectivityService.shared
@@ -26,25 +27,25 @@ class WorkoutSessionViewModel: ObservableObject {
             .assign(to: &$watchConnected)
 
         connectivity.$isWatchReachable
-            .filter { $0 }
+            .filter(\.self)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
-                guard let self, case .playing(let options) = self.phase else { return }
-                self.connectivity.sendSessionStart(SessionStartMessage(
-                    sessionId: self.sessionId,
+                guard let self, case let .playing(options) = phase else { return }
+                connectivity.sendSessionStart(SessionStartMessage(
+                    sessionId: sessionId,
                     options: options,
-                    workoutStartDate: self.startedAt ?? Date()
+                    workoutStartDate: startedAt ?? Date()
                 ))
             }
             .store(in: &cancellables)
 
         connectivity.$receivedMetrics
-            .compactMap { $0 }
+            .compactMap(\.self)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] received in
                 guard let self else { return }
-                self.metrics = WorkoutMetrics(
-                    elapsedSeconds: TimeInterval(self.elapsedSeconds),
+                metrics = WorkoutMetrics(
+                    elapsedSeconds: TimeInterval(elapsedSeconds),
                     calories: received.calories,
                     heartRate: received.heartRate,
                     steps: received.steps
@@ -53,32 +54,32 @@ class WorkoutSessionViewModel: ObservableObject {
             .store(in: &cancellables)
 
         connectivity.$receivedSessionStart
-            .compactMap { $0 }
+            .compactMap(\.self)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] msg in
                 guard let self else { return }
-                self.sessionId = msg.sessionId
-                self.startSession(startDate: msg.workoutStartDate)
-                self.startMatch(options: msg.options, isRemote: true)
+                sessionId = msg.sessionId
+                startSession(startDate: msg.workoutStartDate)
+                startMatch(options: msg.options, isRemote: true)
                 LiveActivityService.shared.start(mode: msg.options.mode)
             }
             .store(in: &cancellables)
 
         connectivity.$receivedMatchEnd
-            .compactMap { $0 }
+            .compactMap(\.self)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] msg in
                 guard let self else { return }
                 // 경기 종료 = 결과 화면 표시만. 저장은 사용자가 저장 버튼을 누를 때(receivedMatchSave)만 한다.
                 LiveActivityService.shared.end()
-                let session = self.buildSession(from: msg)
-                self.completedMatchCount += 1
-                self.phase = .finished(session)
+                let session = buildSession(from: msg)
+                completedMatchCount += 1
+                phase = .finished(session)
             }
             .store(in: &cancellables)
 
         connectivity.$receivedMatchSave
-            .compactMap { $0 }
+            .compactMap(\.self)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] msg in
                 self?.saveFromWatch(msg)
@@ -86,12 +87,12 @@ class WorkoutSessionViewModel: ObservableObject {
             .store(in: &cancellables)
 
         connectivity.$receivedWorkoutEnd
-            .compactMap { $0 }
+            .compactMap(\.self)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 guard let self else { return }
-                self.endSession(notifyRemote: false)
-                self.remoteWorkoutEnded = true
+                endSession(notifyRemote: false)
+                remoteWorkoutEnded = true
             }
             .store(in: &cancellables)
     }
@@ -133,6 +134,7 @@ class WorkoutSessionViewModel: ObservableObject {
             connectivity.receivedScoreState = nil
         }
 
+        scoreVM.resetAll(options: options)
         phase = .playing(options)
         LiveActivityService.shared.start(mode: options.mode)
 
@@ -151,8 +153,8 @@ class WorkoutSessionViewModel: ObservableObject {
         session.result = result
         let setScores = completedSets.map { SetScore(my: $0.my, your: $0.your) }
         session.completedSets = setScores
-        session.mySetScore = setScores.filter { $0.my > $0.your }.count
-        session.yourSetScore = setScores.filter { $0.your > $0.my }.count
+        session.mySetScore = setScores.count(where: { $0.my > $0.your })
+        session.yourSetScore = setScores.count(where: { $0.your > $0.my })
         session.kcalAtEnd = metrics.calories
         completedMatchCount += 1
         phase = .finished(session)
@@ -206,8 +208,8 @@ class WorkoutSessionViewModel: ObservableObject {
         match.mode = msg.mode
         match.noAdRule = msg.noAdRule
         match.resultRaw = msg.result
-        match.myTotalSets = msg.completedSets.filter { $0[0] > $0[1] }.count
-        match.yourTotalSets = msg.completedSets.filter { $0[1] > $0[0] }.count
+        match.myTotalSets = msg.completedSets.count(where: { $0[0] > $0[1] })
+        match.yourTotalSets = msg.completedSets.count(where: { $0[1] > $0[0] })
         match.sets = msg.completedSets.enumerated().map {
             SetRecord(myGames: $0.element[0], yourGames: $0.element[1], setNumber: $0.offset + 1)
         }
@@ -247,8 +249,8 @@ class WorkoutSessionViewModel: ObservableObject {
         session.endedAt = msg.endedAt
         session.result = MatchResult(rawValue: msg.result) ?? .loss
         session.completedSets = msg.completedSets.map { SetScore(my: $0[0], your: $0[1]) }
-        session.mySetScore = msg.completedSets.filter { $0[0] > $0[1] }.count
-        session.yourSetScore = msg.completedSets.filter { $0[1] > $0[0] }.count
+        session.mySetScore = msg.completedSets.count(where: { $0[0] > $0[1] })
+        session.yourSetScore = msg.completedSets.count(where: { $0[1] > $0[0] })
         session.kcalAtEnd = msg.calories
         session.averageHeartRate = msg.averageHeartRate
         return session
@@ -260,12 +262,12 @@ class WorkoutSessionViewModel: ObservableObject {
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
             Task { @MainActor [weak self] in
                 guard let self else { return }
-                self.elapsedSeconds = Int(Date().timeIntervalSince(startedAt) - self.totalPausedSeconds)
-                self.metrics = WorkoutMetrics(
-                    elapsedSeconds: TimeInterval(self.elapsedSeconds),
-                    calories: self.metrics.calories,
-                    heartRate: self.metrics.heartRate,
-                    steps: self.metrics.steps
+                elapsedSeconds = Int(Date().timeIntervalSince(startedAt) - totalPausedSeconds)
+                metrics = WorkoutMetrics(
+                    elapsedSeconds: TimeInterval(elapsedSeconds),
+                    calories: metrics.calories,
+                    heartRate: metrics.heartRate,
+                    steps: metrics.steps
                 )
             }
         }

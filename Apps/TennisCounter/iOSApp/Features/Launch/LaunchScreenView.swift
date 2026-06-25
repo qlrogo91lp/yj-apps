@@ -19,7 +19,7 @@ struct LaunchScreenView: View {
                 .rotationEffect(.degrees(rotation), anchor: .center)
                 .clipped()
                 .animation(.linear(duration: 1)
-                .repeatForever(autoreverses: false), value: rotation)
+                    .repeatForever(autoreverses: false), value: rotation)
 
                 BrandTitle(fontWeight: .bold)
             }

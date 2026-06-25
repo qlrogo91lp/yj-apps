@@ -13,7 +13,7 @@ final class HistoryViewModel: ObservableObject {
     @Published var calendarMatches: [Match] = []
     @Published var isLoadingMore: Bool = false
     @Published var hasMore: Bool = true
-    @Published var currentMonth: Date = Date()
+    @Published var currentMonth: Date = .init()
 
     private var modelContext: ModelContext?
     private var currentPage: Int = 0

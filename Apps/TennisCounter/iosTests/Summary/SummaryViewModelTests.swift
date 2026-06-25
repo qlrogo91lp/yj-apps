@@ -1,5 +1,5 @@
-@testable import TennisCounter
 import Foundation
+@testable import TennisCounter
 import Testing
 
 @MainActor

@@ -4,7 +4,9 @@ struct WorkoutTimerRing: View {
     let formattedElapsed: String
     let isPaused: Bool
 
-    private var ringColor: Color { isPaused ? .yellow : .green }
+    private var ringColor: Color {
+        isPaused ? .yellow : .green
+    }
 
     var body: some View {
         ZStack {

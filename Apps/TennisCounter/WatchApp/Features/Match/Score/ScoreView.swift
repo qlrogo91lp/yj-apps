@@ -1,15 +1,13 @@
 import SwiftUI
 
 struct ScoreView: View {
-    let options: MatchOptions
     @ObservedObject var flowViewModel: WorkoutSessionViewModel
-    @StateObject private var viewModel: ScoreViewModel
+    @ObservedObject var viewModel: ScoreViewModel
     @State private var showExitConfirm = false
 
-    init(options: MatchOptions, flowViewModel: WorkoutSessionViewModel) {
-        self.options = options
+    init(viewModel: ScoreViewModel, flowViewModel: WorkoutSessionViewModel) {
+        self.viewModel = viewModel
         self.flowViewModel = flowViewModel
-        _viewModel = StateObject(wrappedValue: ScoreViewModel(options: options))
     }
 
     var body: some View {
@@ -62,7 +60,8 @@ struct ScoreView: View {
             ToolbarItem(placement: .topBarLeading) {
                 BackButton {
                     if viewModel.mySetScore == 0, viewModel.yourSetScore == 0,
-                       viewModel.myGameScore == 0, viewModel.yourGameScore == 0 {
+                       viewModel.myGameScore == 0, viewModel.yourGameScore == 0
+                    {
                         flowViewModel.startNewMatch()
                     } else {
                         showExitConfirm = true
@@ -80,17 +79,12 @@ struct ScoreView: View {
         } message: {
             Text(String(localized: "early_end_confirm_message"))
         }
-        .onAppear {
-            viewModel.onMatchFinished = { result, sets in
-                flowViewModel.finishMatch(result: result, completedSets: sets)
-            }
-        }
     }
 }
 
 #Preview {
     ScoreView(
-        options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false),
+        viewModel: ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false)),
         flowViewModel: WorkoutSessionViewModel()
     )
 }

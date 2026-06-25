@@ -5,7 +5,9 @@ struct SummaryView: View {
     @StateObject private var viewModel = SummaryViewModel()
     @Query(sort: \Match.startedAt, order: .reverse) private var matches: [Match]
 
-    private var stats: SummaryStats { viewModel.stats(from: matches) }
+    private var stats: SummaryStats {
+        viewModel.stats(from: matches)
+    }
 
     var body: some View {
         NavigationStack {

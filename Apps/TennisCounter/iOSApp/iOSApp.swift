@@ -59,8 +59,8 @@ struct MainTabView: View {
                     connectivity.receivedMatchSave = nil
                     withAnimation { isMatchActive = true }
                 })
-                    .tabItem { Label(String(localized: "tab_match"), systemImage: "sportscourt.fill") }
-                    .tag(1)
+                .tabItem { Label(String(localized: "tab_match"), systemImage: "sportscourt.fill") }
+                .tag(1)
 
                 HistoryView()
                     .tabItem { Label(String(localized: "tab_history"), systemImage: "clock.fill") }
@@ -82,7 +82,7 @@ struct MainTabView: View {
                 .transition(.opacity)
             }
         }
-        .onReceive(connectivity.$receivedSessionStart.compactMap { $0 }) { msg in
+        .onReceive(connectivity.$receivedSessionStart.compactMap(\.self)) { msg in
             guard !isMatchActive else { return }
             remoteSession = msg
             connectivity.receivedSessionStart = nil

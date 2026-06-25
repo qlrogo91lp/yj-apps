@@ -26,7 +26,7 @@ struct SessionStartMessage {
             "noAdRule": options.noAdRule,
             "noTieRule": options.noTieRule,
             "gameThreshold": options.gameThreshold,
-            "workoutStartDate": workoutStartDate.timeIntervalSince1970
+            "workoutStartDate": workoutStartDate.timeIntervalSince1970,
         ]
     }
 
@@ -74,7 +74,7 @@ struct ScoreState {
             "mySet": mySetScore,
             "yourSet": yourSetScore,
             "sets": completedSets,
-            "tieBreak": isTieBreak
+            "tieBreak": isTieBreak,
         ]
     }
 
@@ -97,7 +97,8 @@ struct ScoreState {
     }
 
     init(myScore: Int, yourScore: Int, myGameScore: Int, yourGameScore: Int,
-         mySetScore: Int, yourSetScore: Int, completedSets: [[Int]], isTieBreak: Bool) {
+         mySetScore: Int, yourSetScore: Int, completedSets: [[Int]], isTieBreak: Bool)
+    {
         self.myScore = myScore
         self.yourScore = yourScore
         self.myGameScore = myGameScore
@@ -141,7 +142,7 @@ struct MatchEndMessage {
             "durationSeconds": durationSeconds,
             "calories": calories,
             "mode": mode,
-            "noAdRule": noAdRule
+            "noAdRule": noAdRule,
         ]
         if let hr = averageHeartRate { dict["heartRate"] = hr }
         return dict
@@ -169,7 +170,8 @@ struct MatchEndMessage {
     }
 
     init(sessionId: UUID, result: String, completedSets: [[Int]], startedAt: Date,
-         endedAt: Date, durationSeconds: Int, calories: Double, averageHeartRate: Double?, mode: String, noAdRule: Bool) {
+         endedAt: Date, durationSeconds: Int, calories: Double, averageHeartRate: Double?, mode: String, noAdRule: Bool)
+    {
         self.sessionId = sessionId
         self.result = result
         self.completedSets = completedSets
@@ -241,7 +243,7 @@ final class WatchConnectivityService: NSObject, ObservableObject {
         guard WCSession.default.activationState == .activated,
               WCSession.default.isReachable else { return }
         #if os(iOS)
-        guard WCSession.default.isWatchAppInstalled else { return }
+            guard WCSession.default.isWatchAppInstalled else { return }
         #endif
         WCSession.default.sendMessage(dict, replyHandler: nil, errorHandler: nil)
     }
@@ -249,7 +251,7 @@ final class WatchConnectivityService: NSObject, ObservableObject {
     private func send(_ dict: [String: Any]) {
         guard WCSession.default.activationState == .activated else { return }
         #if os(iOS)
-        guard WCSession.default.isWatchAppInstalled else { return }
+            guard WCSession.default.isWatchAppInstalled else { return }
         #endif
         if WCSession.default.isReachable {
             WCSession.default.sendMessage(dict, replyHandler: nil, errorHandler: nil)
@@ -304,9 +306,9 @@ extension WatchConnectivityService: WCSessionDelegate {
     }
 
     #if os(iOS)
-    func sessionDidBecomeInactive(_: WCSession) {}
-    func sessionDidDeactivate(_: WCSession) {
-        WCSession.default.activate()
-    }
+        func sessionDidBecomeInactive(_: WCSession) {}
+        func sessionDidDeactivate(_: WCSession) {
+            WCSession.default.activate()
+        }
     #endif
 }

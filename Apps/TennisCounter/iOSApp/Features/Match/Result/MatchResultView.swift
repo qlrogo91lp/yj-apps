@@ -59,19 +59,19 @@ struct MatchResultView: View {
 
     private var resultTitle: String {
         switch session.result {
-        case .win:  String(localized: "watch_victory")
+        case .win: String(localized: "watch_victory")
         case .loss: String(localized: "watch_defeat")
         case .draw: String(localized: "result_draw")
-        case nil:   ""
+        case nil: ""
         }
     }
 
     private var resultColor: Color {
         switch session.result {
-        case .win:  .green
+        case .win: .green
         case .loss: .orange
         case .draw: .yellow
-        case nil:   .white
+        case nil: .white
         }
     }
 

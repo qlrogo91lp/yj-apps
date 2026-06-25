@@ -3,7 +3,9 @@ import SwiftUI
 struct MatchCard: View {
     let match: Match
 
-    private var didWin: Bool { match.myTotalSets > match.yourTotalSets }
+    private var didWin: Bool {
+        match.myTotalSets > match.yourTotalSets
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {

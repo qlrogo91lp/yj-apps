@@ -13,7 +13,7 @@ struct PlayerPointButton: View {
                 ZStack {
                     color.opacity(0.15)
                     VStack(spacing: 4) {
-                        if geo.size.width > 81 && !hasSetScore {
+                        if geo.size.width > 81, !hasSetScore {
                             Text(player)
                                 .font(.system(size: 13, weight: .semibold, design: .rounded))
                                 .foregroundColor(color)

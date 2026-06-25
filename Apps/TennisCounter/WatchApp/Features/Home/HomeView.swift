@@ -38,7 +38,7 @@ struct HomeView: View {
                 WorkoutSessionView(remoteSession: remoteSession)
             }
         }
-        .onReceive(connectivity.$receivedSessionStart.compactMap { $0 }) { msg in
+        .onReceive(connectivity.$receivedSessionStart.compactMap(\.self)) { msg in
             guard !navigateToWorkout else { return }
             remoteSession = msg
             connectivity.receivedSessionStart = nil
