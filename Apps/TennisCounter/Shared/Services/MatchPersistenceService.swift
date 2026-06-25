@@ -13,18 +13,24 @@ final class MatchPersistenceService {
         modelContext = context
     }
 
-    func save(_ match: Match) throws {
-        guard let context = modelContext else { return }
-        context.insert(match)
-        try context.save()
-    }
-
     func fetchAll() throws -> [Match] {
         guard let context = modelContext else { return [] }
         let descriptor = FetchDescriptor<Match>(
             sortBy: [SortDescriptor(\.startedAt, order: .reverse)]
         )
         return try context.fetch(descriptor)
+    }
+
+    func upsert(_ match: Match) throws {
+        guard let context = modelContext else { return }
+        if let sid = match.workoutSessionId {
+            let existing = try fetchByWorkoutSession(sid)
+            for old in existing {
+                context.delete(old)
+            }
+        }
+        context.insert(match)
+        try context.save()
     }
 
     func fetchByWorkoutSession(_ sessionId: UUID) throws -> [Match] {

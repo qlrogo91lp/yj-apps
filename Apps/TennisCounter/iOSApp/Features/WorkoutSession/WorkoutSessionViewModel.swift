@@ -202,7 +202,7 @@ class WorkoutSessionViewModel: ObservableObject {
     func saveCurrentMatch() {
         guard let session = _currentSession else { return }
         let match = buildMatchFromSession(session)
-        try? MatchPersistenceService.shared.save(match)
+        try? MatchPersistenceService.shared.upsert(match)
     }
 
     func restartMatch() {
@@ -259,7 +259,7 @@ class WorkoutSessionViewModel: ObservableObject {
 
     private func saveFromWatch(_ msg: MatchEndMessage) {
         let match = buildMatchFromMessage(msg)
-        try? MatchPersistenceService.shared.save(match)
+        try? MatchPersistenceService.shared.upsert(match)
     }
 
     private func buildMatchFromMessage(_ msg: MatchEndMessage) -> Match {
