@@ -112,9 +112,9 @@ struct WorkoutSessionView: View {
         case .modeSelection:
             ModeView(viewModel: viewModel)
 
-        case .playing(let options):
+        case .playing:
             ScoreView(
-                options: options,
+                viewModel: viewModel.scoreVM,
                 onMatchFinished: { result, sets in
                     viewModel.finishMatch(result: result, completedSets: sets)
                 },
