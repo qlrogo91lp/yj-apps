@@ -19,6 +19,7 @@ class WorkoutSessionViewModel: ObservableObject {
     private var _currentSession: MatchSession?
     let scoreVM = ScoreViewModel(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
     private(set) var isDriver = false
+    private(set) var activeSessionId: UUID = .init()
 
     init(metricsThrottle: TimeInterval = 5) {
         self.metricsThrottle = metricsThrottle
@@ -49,13 +50,20 @@ class WorkoutSessionViewModel: ObservableObject {
         connectivity.$receivedWorkoutEnd
             .compactMap(\.self)
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                guard let self else { return }
-                endWorkout(notifyRemote: false)
-                remoteWorkoutEnded = true
-            }
+            .sink { [weak self] id in self?.handleIncomingWorkoutEnd(id) }
             .store(in: &cancellables)
     }
+
+    private func handleIncomingWorkoutEnd(_ id: UUID) {
+        guard id == activeSessionId else { return }
+        connectivity.receivedWorkoutEnd = nil
+        endWorkout(notifyRemote: false)
+        remoteWorkoutEnded = true
+    }
+
+    #if DEBUG
+        func handleIncomingWorkoutEndForTest(_ id: UUID) { handleIncomingWorkoutEnd(id) }
+    #endif
 
     private func setupScoreSync() {
         scoreVM.onMatchFinished = { [weak self] result, sets in
@@ -95,6 +103,7 @@ class WorkoutSessionViewModel: ObservableObject {
     func startMatch(options: MatchOptions, sessionId: UUID? = nil, isRemote: Bool = false) {
         isDriver = !isRemote
         let id = sessionId ?? workoutSessionId
+        activeSessionId = id
         let session = MatchSession(
             workoutSessionId: id,
             options: options,
@@ -170,7 +179,7 @@ class WorkoutSessionViewModel: ObservableObject {
         _currentSession = nil
         appGroupDefaults?.set(false, forKey: "isWorkoutActive")
         WidgetCenter.shared.reloadTimelines(ofKind: "ComplicationApp")
-        if notifyRemote { connectivity.sendWorkoutEnd() }
+        if notifyRemote { connectivity.sendWorkoutEnd(sessionId: activeSessionId) }
         Task { _ = await healthKit.stopWorkout() }
     }
 
