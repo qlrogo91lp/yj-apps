@@ -54,7 +54,7 @@ make fix && make lint
 ---
 
 ### Task 0: 브랜치 생성
-- [ ] **Step 1:** `git switch -c failure-handling-step4-watch-ack-ui`
+- [x] **Step 1:** `git switch -c failure-handling-step4-watch-ack-ui`
 
 ---
 
@@ -64,7 +64,7 @@ make fix && make lint
 - Modify: `WatchApp/Features/WorkoutSession/WorkoutSessionViewModel.swift`
 - Test: `watchosTests/WorkoutSession/WorkoutSessionViewModelTests.swift`
 
-- [ ] **Step 1: 실패 테스트 작성**
+- [x] **Step 1: 실패 테스트 작성**
 
 `watchosTests/WorkoutSession/WorkoutSessionViewModelTests.swift`에 다음 4개 테스트를 추가:
 
@@ -121,7 +121,7 @@ make fix && make lint
     }
 ```
 
-- [ ] **Step 2: 실패 확인**
+- [x] **Step 2: 실패 확인**
 
 Run: `xcrun simctl list devices available | grep -i "Apple Watch Series 11 (46mm)"` 로 시뮬레이터
 id를 확인한 뒤,
@@ -129,7 +129,7 @@ id를 확인한 뒤,
 Expected: BUILD FAILED — `saveAckState`/`handleMatchSaveResultForTest`/`activeSessionId`(이미
 `private(set)`로 읽기 가능하나 `ackTimeoutSeconds` init 파라미터)가 없어 컴파일 에러
 
-- [ ] **Step 3: 구현**
+- [x] **Step 3: 구현**
 
 `WatchApp/Features/WorkoutSession/WorkoutSessionViewModel.swift`의 프로퍼티 선언부:
 ```swift
@@ -257,12 +257,12 @@ Expected: BUILD FAILED — `saveAckState`/`handleMatchSaveResultForTest`/`active
     #endif
 ```
 
-- [ ] **Step 4: 통과 확인**
+- [x] **Step 4: 통과 확인**
 
 Run: `xcodebuild test -project TennisCounter.xcodeproj -scheme "TennisCounter Watch App" -destination 'platform=watchOS Simulator,id=<id>' -only-testing:watchosTests/WorkoutSessionViewModelTests`
 Expected: PASS (전체 5개 신규 테스트 포함)
 
-- [ ] **Step 5: 커밋**
+- [x] **Step 5: 커밋**
 
 ```bash
 git add WatchApp/Features/WorkoutSession/WorkoutSessionViewModel.swift watchosTests/WorkoutSession/WorkoutSessionViewModelTests.swift
@@ -280,7 +280,7 @@ git commit -m "✨ Watch 저장 ack 수신 + 타임아웃 처리"
 
 (View는 자동 테스트 대상이 아니다 — 시뮬레이터/실기기로 수동 확인한다.)
 
-- [ ] **Step 1: 로컬라이즈 키 추가**
+- [x] **Step 1: 로컬라이즈 키 추가**
 
 `WatchApp/ko.lproj/Localizable.strings`에서 다음 줄(현재 29-30번째 줄 부근)을 찾는다:
 ```
@@ -304,7 +304,7 @@ git commit -m "✨ Watch 저장 ack 수신 + 타임아웃 처리"
 "result_save_failed" = "Failed, Retry";
 ```
 
-- [ ] **Step 2: SaveButton.swift 교체**
+- [x] **Step 2: SaveButton.swift 교체**
 
 `WatchApp/Features/Match/Result/Components/SaveButton.swift` 전체를 다음으로 교체:
 ```swift
@@ -361,7 +361,7 @@ struct SaveButton: View {
 }
 ```
 
-- [ ] **Step 3: MatchResultView.swift 수정**
+- [x] **Step 3: MatchResultView.swift 수정**
 
 `@State private var saved = false` 줄을 삭제한다 (더 이상 로컬 상태가 필요 없음 — ViewModel의
 `@Published var saveAckState`를 직접 매핑한다).
@@ -392,7 +392,7 @@ struct SaveButton: View {
     }
 ```
 
-- [ ] **Step 4: 빌드 확인**
+- [x] **Step 4: 빌드 확인**
 
 Run: `xcodebuild -project TennisCounter.xcodeproj -scheme "TennisCounter Watch App" -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)' build`
 Expected: BUILD SUCCEEDED
@@ -403,7 +403,7 @@ watch-sync-simulator-trap 메모리대로 연동 동작은 시뮬레이터에서
 — 가능한 범위까지만 확인: 경기 종료 → 저장 버튼 탭 → "저장 중…" 표시 확인. ack 수신 후
 "저장됨"으로 바뀌는지는 페어링 상태에 따라 제한적으로만 확인 가능.
 
-- [ ] **Step 6: 커밋**
+- [x] **Step 6: 커밋**
 
 ```bash
 git add WatchApp/Features/Match/Result/Components/SaveButton.swift WatchApp/Features/Match/Result/MatchResultView.swift WatchApp/en.lproj/Localizable.strings WatchApp/ko.lproj/Localizable.strings
@@ -414,17 +414,17 @@ git commit -m "✨ Watch 저장 버튼에 ack 기반 진짜 상태 표시"
 
 ### Task 3: 전체 검증 + code-review
 
-- [ ] **Step 1:** Watch 빌드/테스트 전체 GREEN
+- [x] **Step 1:** Watch 빌드/테스트 전체 GREEN
 
 Run: `xcodebuild test -project TennisCounter.xcodeproj -scheme "TennisCounter Watch App" -destination 'platform=watchOS Simulator,id=<id>'`
 
-- [ ] **Step 2:** iOS 빌드 회귀 확인 (이 단계는 iOS 파일을 건드리지 않지만, Shared 의존성 확인 차원)
+- [x] **Step 2:** iOS 빌드 회귀 확인 (이 단계는 iOS 파일을 건드리지 않지만, Shared 의존성 확인 차원)
 
 Run: `xcodebuild -project TennisCounter.xcodeproj -scheme "TennisCounter" -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build`
 
-- [ ] **Step 3:** `make fix && make lint` — 모두 클린
+- [x] **Step 3:** `make fix && make lint` — 모두 클린
 
-- [ ] **Step 4:** `/code-review` 실행 → 지적 사항은 `superpowers:receiving-code-review`로 검증 후 반영
+- [x] **Step 4:** `/code-review` 실행 → 지적 사항은 `superpowers:receiving-code-review`로 검증 후 반영
 
 - [ ] **Step 5:** **실기기 2대로 수동 검증** (이 단계의 핵심 — `watch-sync-simulator-trap` 메모리에
   따라 연동 버그는 시뮬레이터에서 재현되지 않는다):
