@@ -2,6 +2,7 @@ import Foundation
 import SwiftData
 
 enum PersistenceError: Error {
+    case notConfigured
     case saveFailed(Error)
 }
 
@@ -26,7 +27,7 @@ final class MatchPersistenceService {
     }
 
     func upsert(_ match: Match) throws {
-        guard let context = modelContext else { return }
+        guard let context = modelContext else { throw PersistenceError.notConfigured }
         if let sid = match.workoutSessionId {
             let existing = try fetchByWorkoutSession(sid)
             for old in existing {

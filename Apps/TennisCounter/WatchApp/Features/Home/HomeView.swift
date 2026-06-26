@@ -22,6 +22,7 @@ struct HomeView: View {
                     connectivity.receivedSessionStart = nil
                     connectivity.receivedWorkoutEnd = nil
                     connectivity.receivedMatchEnd = nil
+                    connectivity.receivedMatchSaveResult = nil
                     navigateToWorkout = true
                 } label: {
                     Text(String(localized: "watch_start_workout"))
@@ -44,6 +45,7 @@ struct HomeView: View {
             connectivity.receivedSessionStart = nil
             connectivity.receivedWorkoutEnd = nil
             connectivity.receivedMatchEnd = nil
+            connectivity.receivedMatchSaveResult = nil
             navigateToWorkout = true
         }
     }
