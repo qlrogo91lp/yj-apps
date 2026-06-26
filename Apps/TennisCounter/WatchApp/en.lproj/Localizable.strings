@@ -28,5 +28,7 @@
 "early_end_confirm_yes" = "Confirm";
 "result_save" = "Save";
 "result_saved" = "Saved";
+"result_saving" = "Saving…";
+"result_save_failed" = "Failed, Retry";
 "result_draw" = "Draw";
 "mirror_view_only_short" = "View only";

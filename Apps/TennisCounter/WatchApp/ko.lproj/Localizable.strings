@@ -28,5 +28,7 @@
 "early_end_confirm_yes" = "확인";
 "result_save" = "저장";
 "result_saved" = "저장됨";
+"result_saving" = "저장 중…";
+"result_save_failed" = "실패, 재시도";
 "result_draw" = "무승부";
 "mirror_view_only_short" = "보기 전용";

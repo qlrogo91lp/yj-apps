@@ -22,8 +22,17 @@ class WorkoutSessionViewModel: ObservableObject {
     private(set) var activeSessionId: UUID = .init()
     private var hasSyncedSession = false
 
-    init(metricsThrottle: TimeInterval = 5) {
+    enum SaveAckState: Equatable {
+        case idle, pending, succeeded, failed
+    }
+
+    @Published var saveAckState: SaveAckState = .idle
+    private var saveAttemptToken = 0
+    private let ackTimeoutSeconds: TimeInterval
+
+    init(metricsThrottle: TimeInterval = 5, ackTimeoutSeconds: TimeInterval = 8) {
         self.metricsThrottle = metricsThrottle
+        self.ackTimeoutSeconds = ackTimeoutSeconds
         healthKit.$isPaused
             .receive(on: DispatchQueue.main)
             .assign(to: &$isPaused)
@@ -53,6 +62,19 @@ class WorkoutSessionViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] id in self?.handleIncomingWorkoutEnd(id) }
             .store(in: &cancellables)
+
+        connectivity.$receivedMatchSaveResult
+            .compactMap(\.self)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] result in self?.handleMatchSaveResult(result) }
+            .store(in: &cancellables)
+    }
+
+    private func handleMatchSaveResult(_ result: MatchSaveResultMessage) {
+        guard result.sessionId == activeSessionId else { return }
+        guard saveAckState == .pending || saveAckState == .failed else { return }
+        connectivity.receivedMatchSaveResult = nil
+        saveAckState = result.success ? .succeeded : .failed
     }
 
     private func handleIncomingWorkoutEnd(_ id: UUID) {
@@ -111,6 +133,8 @@ class WorkoutSessionViewModel: ObservableObject {
     func startMatch(options: MatchOptions, sessionId: UUID? = nil, isRemote: Bool = false) {
         isDriver = !isRemote
         hasSyncedSession = true
+        saveAckState = .idle
+        saveAttemptToken += 1
         let id = sessionId ?? workoutSessionId
         activeSessionId = id
         let session = MatchSession(
@@ -161,14 +185,26 @@ class WorkoutSessionViewModel: ObservableObject {
     }
 
     /// Watch엔 로컬 저장소가 없다. 저장 버튼 → iOS에 저장 요청을 보내고 iOS가 히스토리에 persist 한다.
+    /// iOS의 ack(`matchSaveResult`)를 받아 실제 결과를 반영하며, ackTimeoutSeconds 안에 ack가
+    /// 없으면 failed로 전환한다. saveAttemptToken은 재시도로 새 시도가 시작된 뒤 이전 시도의
+    /// 지연된 타임아웃이 새 상태를 덮어쓰지 않게 막는 표식이다.
     func saveCurrentMatch() {
         guard let session = _currentSession else { return }
+        saveAttemptToken += 1
+        let token = saveAttemptToken
+        saveAckState = .pending
         connectivity.sendMatchSave(makeMatchEndMessage(session: session))
+        DispatchQueue.main.asyncAfter(deadline: .now() + ackTimeoutSeconds) { [weak self] in
+            guard let self, saveAttemptToken == token, saveAckState == .pending else { return }
+            saveAckState = .failed
+        }
     }
 
     func startNewMatch() {
         _currentSession = nil
         phase = .modeSelection
+        saveAckState = .idle
+        saveAttemptToken += 1
     }
 
     func restartMatch() {
@@ -226,6 +262,10 @@ class WorkoutSessionViewModel: ObservableObject {
 
         func applyIncomingSessionStartForTest(_ msg: SessionStartMessage) {
             handleIncomingSessionStart(msg)
+        }
+
+        func handleMatchSaveResultForTest(_ result: MatchSaveResultMessage) {
+            handleMatchSaveResult(result)
         }
     #endif
 

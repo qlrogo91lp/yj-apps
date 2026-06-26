@@ -284,4 +284,106 @@ struct WorkoutSessionViewModelTests {
         vm.handleIncomingWorkoutEndForTest(driverSessionId)
         #expect(vm.remoteWorkoutEnded == true)
     }
+
+    // MARK: - Save Ack State Reset
+
+    @Test @MainActor func startNewMatchResetsSaveAckState() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.saveCurrentMatch()
+        vm.handleMatchSaveResultForTest(MatchSaveResultMessage(sessionId: vm.activeSessionId, success: true))
+        #expect(vm.saveAckState == .succeeded)
+
+        vm.startNewMatch()
+        #expect(vm.saveAckState == .idle)
+    }
+
+    @Test @MainActor func restartMatchResetsSaveAckState() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.finishMatch(result: .win, completedSets: [SetScore(my: 6, your: 3)])
+        vm.saveCurrentMatch()
+        vm.handleMatchSaveResultForTest(MatchSaveResultMessage(sessionId: vm.activeSessionId, success: false))
+        #expect(vm.saveAckState == .failed)
+
+        vm.restartMatch()
+        #expect(vm.saveAckState == .idle)
+    }
+
+    @Test @MainActor func staleAckIgnoredWhenSaveAckStateIsIdle() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.saveCurrentMatch()
+        vm.handleMatchSaveResultForTest(MatchSaveResultMessage(sessionId: vm.activeSessionId, success: true))
+        vm.restartMatch() // saveAckState → .idle
+
+        // 이전 경기의 delayed ack가 동일 sessionId로 도착 — 무시해야 한다
+        vm.handleMatchSaveResultForTest(MatchSaveResultMessage(sessionId: vm.activeSessionId, success: true))
+        #expect(vm.saveAckState == .idle)
+    }
+
+    @Test @MainActor func staleTimeoutDoesNotFireAfterStartNewMatch() async throws {
+        let vm = WorkoutSessionViewModel(ackTimeoutSeconds: 0.05)
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.saveCurrentMatch() // token=1, .pending
+
+        vm.startNewMatch() // saveAckState → .idle, token invalidated
+        #expect(vm.saveAckState == .idle)
+
+        try await Task.sleep(nanoseconds: 150_000_000) // 0.15s > 0.05s 타임아웃
+        #expect(vm.saveAckState == .idle) // 고아 타임아웃이 .idle을 .failed로 덮으면 안 된다
+    }
+
+    // MARK: - Save Ack
+
+    @Test @MainActor func saveCurrentMatchStartsPending() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.saveCurrentMatch()
+        #expect(vm.saveAckState == .pending)
+    }
+
+    @Test @MainActor func handleMatchSaveResultSucceeds() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.saveCurrentMatch()
+        vm.handleMatchSaveResultForTest(MatchSaveResultMessage(sessionId: vm.activeSessionId, success: true))
+        #expect(vm.saveAckState == .succeeded)
+    }
+
+    @Test @MainActor func handleMatchSaveResultIgnoredForMismatchedSession() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.saveCurrentMatch()
+        vm.handleMatchSaveResultForTest(MatchSaveResultMessage(sessionId: UUID(), success: true))
+        #expect(vm.saveAckState == .pending) // 다른 세션의 ack는 무시
+    }
+
+    @Test @MainActor func saveCurrentMatchTimesOutToFailedWhenNoAck() async throws {
+        let vm = WorkoutSessionViewModel(ackTimeoutSeconds: 0.05)
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.saveCurrentMatch()
+        #expect(vm.saveAckState == .pending)
+
+        try await Task.sleep(nanoseconds: 150_000_000) // 0.15s > 0.05s 타임아웃
+        #expect(vm.saveAckState == .failed)
+    }
+
+    @Test @MainActor func retryAfterTimeoutIgnoresStaleTimeout() async throws {
+        let vm = WorkoutSessionViewModel(ackTimeoutSeconds: 0.05)
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+
+        vm.saveCurrentMatch() // 시도 1
+        try await Task.sleep(nanoseconds: 70_000_000) // 시도 1의 타임아웃 발동 (0.05s 경과)
+        #expect(vm.saveAckState == .failed)
+
+        vm.saveCurrentMatch() // 시도 2 (재시도) — pending으로 전환
+        #expect(vm.saveAckState == .pending)
+        vm.handleMatchSaveResultForTest(MatchSaveResultMessage(sessionId: vm.activeSessionId, success: true))
+        #expect(vm.saveAckState == .succeeded)
+
+        // 시도 1의 지연된 타임아웃 클로저가 혹시 아직 안 끝났더라도, 토큰이 달라 succeeded를 덮어쓰지 않아야 한다.
+        try await Task.sleep(nanoseconds: 70_000_000)
+        #expect(vm.saveAckState == .succeeded)
+    }
 }
