@@ -123,16 +123,6 @@ class WorkoutSessionViewModel: ObservableObject {
         remoteWorkoutEnded = true
     }
 
-    #if DEBUG
-        func handleIncomingWorkoutEndForTest(_ id: UUID) {
-            handleIncomingWorkoutEnd(id)
-        }
-
-        var currentSessionIdForTest: UUID {
-            sessionId
-        }
-    #endif
-
     deinit { timer?.invalidate() }
 
     func startSession(startDate: Date = Date()) {
@@ -253,29 +243,10 @@ class WorkoutSessionViewModel: ObservableObject {
         LiveActivityService.shared.update(from: state, score: scoreVM.score)
     }
 
-    #if DEBUG
-        func applyIncomingScoreStateForTest(_ state: ScoreState) {
-            handleIncomingScoreState(state)
-        }
-
-        func applyIncomingSessionStartForTest(_ msg: SessionStartMessage) {
-            handleIncomingSessionStart(msg)
-        }
-
-        func saveFromWatchForTest(_ msg: MatchEndMessage) {
-            saveFromWatch(msg)
-        }
-    #endif
-
     private func saveFromWatch(_ msg: MatchEndMessage) {
         let match = buildMatchFromMessage(msg)
-        let success: Bool
-        do {
-            try MatchPersistenceService.shared.upsert(match)
-            success = true
-        } catch {
-            success = false
-        }
+        var success = true
+        do { try MatchPersistenceService.shared.upsert(match) } catch { success = false }
         connectivity.sendMatchSaveResult(MatchSaveResultMessage(sessionId: msg.sessionId, success: success))
     }
 
@@ -355,3 +326,27 @@ class WorkoutSessionViewModel: ObservableObject {
         }
     }
 }
+
+#if DEBUG
+    extension WorkoutSessionViewModel {
+        func handleIncomingWorkoutEndForTest(_ id: UUID) {
+            handleIncomingWorkoutEnd(id)
+        }
+
+        var currentSessionIdForTest: UUID {
+            sessionId
+        }
+
+        func applyIncomingScoreStateForTest(_ state: ScoreState) {
+            handleIncomingScoreState(state)
+        }
+
+        func applyIncomingSessionStartForTest(_ msg: SessionStartMessage) {
+            handleIncomingSessionStart(msg)
+        }
+
+        func saveFromWatchForTest(_ msg: MatchEndMessage) {
+            saveFromWatch(msg)
+        }
+    }
+#endif
