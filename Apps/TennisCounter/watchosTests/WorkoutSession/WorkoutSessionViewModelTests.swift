@@ -284,4 +284,57 @@ struct WorkoutSessionViewModelTests {
         vm.handleIncomingWorkoutEndForTest(driverSessionId)
         #expect(vm.remoteWorkoutEnded == true)
     }
+
+    // MARK: - Save Ack
+
+    @Test @MainActor func saveCurrentMatchStartsPending() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.saveCurrentMatch()
+        #expect(vm.saveAckState == .pending)
+    }
+
+    @Test @MainActor func handleMatchSaveResultSucceeds() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.saveCurrentMatch()
+        vm.handleMatchSaveResultForTest(MatchSaveResultMessage(sessionId: vm.activeSessionId, success: true))
+        #expect(vm.saveAckState == .succeeded)
+    }
+
+    @Test @MainActor func handleMatchSaveResultIgnoredForMismatchedSession() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.saveCurrentMatch()
+        vm.handleMatchSaveResultForTest(MatchSaveResultMessage(sessionId: UUID(), success: true))
+        #expect(vm.saveAckState == .pending) // 다른 세션의 ack는 무시
+    }
+
+    @Test @MainActor func saveCurrentMatchTimesOutToFailedWhenNoAck() async throws {
+        let vm = WorkoutSessionViewModel(ackTimeoutSeconds: 0.05)
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.saveCurrentMatch()
+        #expect(vm.saveAckState == .pending)
+
+        try await Task.sleep(nanoseconds: 150_000_000) // 0.15s > 0.05s 타임아웃
+        #expect(vm.saveAckState == .failed)
+    }
+
+    @Test @MainActor func retryAfterTimeoutIgnoresStaleTimeout() async throws {
+        let vm = WorkoutSessionViewModel(ackTimeoutSeconds: 0.05)
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+
+        vm.saveCurrentMatch() // 시도 1
+        try await Task.sleep(nanoseconds: 70_000_000) // 시도 1의 타임아웃 발동 (0.05s 경과)
+        #expect(vm.saveAckState == .failed)
+
+        vm.saveCurrentMatch() // 시도 2 (재시도) — pending으로 전환
+        #expect(vm.saveAckState == .pending)
+        vm.handleMatchSaveResultForTest(MatchSaveResultMessage(sessionId: vm.activeSessionId, success: true))
+        #expect(vm.saveAckState == .succeeded)
+
+        // 시도 1의 지연된 타임아웃 클로저가 혹시 아직 안 끝났더라도, 토큰이 달라 succeeded를 덮어쓰지 않아야 한다.
+        try await Task.sleep(nanoseconds: 70_000_000)
+        #expect(vm.saveAckState == .succeeded)
+    }
 }
