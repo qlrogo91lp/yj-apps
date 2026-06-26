@@ -46,7 +46,7 @@ make fix && make lint
 ---
 
 ### Task 0: 브랜치 생성
-- [ ] **Step 1:** `git switch -c failure-handling-step3-watch-ack-protocol`
+- [x] **Step 1:** `git switch -c failure-handling-step3-watch-ack-protocol`
 
 ---
 
@@ -56,7 +56,7 @@ make fix && make lint
 - Modify: `Shared/Services/WatchConnectivityService.swift`
 - Create: `iosTests/Shared/MatchSaveResultMessageTests.swift`
 
-- [ ] **Step 1: 실패 테스트 작성**
+- [x] **Step 1: 실패 테스트 작성**
 
 `iosTests/Shared/MatchSaveResultMessageTests.swift` 생성:
 ```swift
@@ -92,12 +92,12 @@ struct MatchSaveResultMessageTests {
 }
 ```
 
-- [ ] **Step 2: 실패 확인**
+- [x] **Step 2: 실패 확인**
 
 Run: `xcodebuild test -project TennisCounter.xcodeproj -scheme "TennisCounter" -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -only-testing:iosTests/MatchSaveResultMessageTests`
 Expected: BUILD FAILED — `MatchSaveResultMessage` 타입이 없음
 
-- [ ] **Step 3: 구현**
+- [x] **Step 3: 구현**
 
 `Shared/Services/WatchConnectivityService.swift`의 `WCMessageType` enum:
 ```swift
@@ -198,17 +198,17 @@ struct MatchSaveResultMessage {
             case WCMessageType.metrics.rawValue:
 ```
 
-- [ ] **Step 4: 통과 확인**
+- [x] **Step 4: 통과 확인**
 
 Run: `xcodebuild test -project TennisCounter.xcodeproj -scheme "TennisCounter" -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -only-testing:iosTests/MatchSaveResultMessageTests`
 Expected: PASS
 
-- [ ] **Step 5: Watch 빌드 확인**
+- [x] **Step 5: Watch 빌드 확인**
 
 Run: `xcodebuild -project TennisCounter.xcodeproj -scheme "TennisCounter Watch App" -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)' build`
 Expected: BUILD SUCCEEDED
 
-- [ ] **Step 6: 커밋**
+- [x] **Step 6: 커밋**
 
 ```bash
 git add Shared/Services/WatchConnectivityService.swift iosTests/Shared/MatchSaveResultMessageTests.swift
@@ -223,7 +223,7 @@ git commit -m "✨ matchSaveResult 메시지 추가 (Watch ack 프로토콜)"
 - Modify: `iOSApp/Features/WorkoutSession/WorkoutSessionViewModel.swift`
 - Test: `iosTests/WorkoutSession/WorkoutSessionViewModelTests.swift`
 
-- [ ] **Step 1: 실패 테스트 작성**
+- [x] **Step 1: 실패 테스트 작성**
 
 `iosTests/WorkoutSession/WorkoutSessionViewModelTests.swift`에서 `private func saveFromWatch`를
 테스트에서 호출할 수 있도록, `WorkoutSessionViewModel.swift`의 `#if DEBUG` 블록
@@ -259,12 +259,12 @@ git commit -m "✨ matchSaveResult 메시지 추가 (Watch ack 프로토콜)"
     }
 ```
 
-- [ ] **Step 2: 실패 확인**
+- [x] **Step 2: 실패 확인**
 
 Run: `xcodebuild test -project TennisCounter.xcodeproj -scheme "TennisCounter" -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -only-testing:iosTests/WorkoutSessionViewModelTests`
 Expected: BUILD FAILED — `saveFromWatchForTest`가 없음
 
-- [ ] **Step 3: 구현**
+- [x] **Step 3: 구현**
 
 `iOSApp/Features/WorkoutSession/WorkoutSessionViewModel.swift`의 `#if DEBUG` 블록:
 ```swift
@@ -317,7 +317,7 @@ Expected: BUILD FAILED — `saveFromWatchForTest`가 없음
     }
 ```
 
-- [ ] **Step 4: 통과 확인**
+- [x] **Step 4: 통과 확인**
 
 Run: `xcodebuild test -project TennisCounter.xcodeproj -scheme "TennisCounter" -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -only-testing:iosTests/WorkoutSessionViewModelTests`
 Expected: PASS
@@ -328,7 +328,7 @@ Expected: PASS
 > 상태 변화만 검증")대로 `upsert`의 부수효과(영속화 성공)만 검증한다. ack 전송 자체는 4단계의
 > Watch 수신 테스트와 실기기 검증으로 보완한다.
 
-- [ ] **Step 5: 커밋**
+- [x] **Step 5: 커밋**
 
 ```bash
 git add iOSApp/Features/WorkoutSession/WorkoutSessionViewModel.swift iosTests/WorkoutSession/WorkoutSessionViewModelTests.swift
@@ -339,15 +339,15 @@ git commit -m "✨ Watch 저장 요청 처리 후 결과를 ack로 회신"
 
 ### Task 3: 전체 검증 + code-review
 
-- [ ] **Step 1:** iOS 빌드/테스트 전체 GREEN
+- [x] **Step 1:** iOS 빌드/테스트 전체 GREEN
 
 Run: `xcodebuild test -project TennisCounter.xcodeproj -scheme "TennisCounter" -destination 'platform=iOS Simulator,name=iPhone 17 Pro'`
 
-- [ ] **Step 2:** Watch 빌드 GREEN (Shared 파일 변경 영향 확인)
+- [x] **Step 2:** Watch 빌드 GREEN (Shared 파일 변경 영향 확인)
 
 Run: `xcodebuild -project TennisCounter.xcodeproj -scheme "TennisCounter Watch App" -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)' build`
 
-- [ ] **Step 3:** `make fix && make lint` — 모두 클린
+- [x] **Step 3:** `make fix && make lint` — 모두 클린
 
 - [ ] **Step 4:** `/code-review` 실행 → 지적 사항은 `superpowers:receiving-code-review`로 검증 후 반영
 

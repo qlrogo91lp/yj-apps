@@ -315,4 +315,30 @@ struct WorkoutSessionViewModelTests {
         vm.handleIncomingWorkoutEndForTest(UUID())
         #expect(vm.remoteWorkoutEnded == true)
     }
+
+    @Test @MainActor func saveFromWatchPersistsMatch() throws {
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        let container = try ModelContainer(for: Match.self, SetRecord.self, configurations: config)
+        MatchPersistenceService.shared.configure(with: ModelContext(container))
+
+        let sid = UUID()
+        let msg = MatchEndMessage(
+            sessionId: sid,
+            result: "win",
+            completedSets: [[6, 4]],
+            startedAt: Date(timeIntervalSince1970: 1_000_000),
+            endedAt: Date(timeIntervalSince1970: 1_001_800),
+            durationSeconds: 1800,
+            calories: 200,
+            averageHeartRate: 130,
+            mode: "oneSet",
+            noAdRule: true
+        )
+
+        let vm = WorkoutSessionViewModel()
+        vm.saveFromWatchForTest(msg)
+
+        let saved = try MatchPersistenceService.shared.fetchByWorkoutSession(sid)
+        #expect(saved.count == 1)
+    }
 }

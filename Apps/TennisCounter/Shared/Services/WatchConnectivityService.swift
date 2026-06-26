@@ -9,6 +9,7 @@ private enum WCMessageType: String {
     case scoreState
     case matchEnd
     case matchSave
+    case matchSaveResult
     case metrics
     case workoutEnd
 }
@@ -185,6 +186,33 @@ struct MatchEndMessage {
     }
 }
 
+struct MatchSaveResultMessage {
+    let sessionId: UUID
+    let success: Bool
+
+    func toDictionary() -> [String: Any] {
+        [
+            "type": WCMessageType.matchSaveResult.rawValue,
+            "sessionId": sessionId.uuidString,
+            "success": success,
+        ]
+    }
+
+    init?(from dict: [String: Any]) {
+        guard dict["type"] as? String == WCMessageType.matchSaveResult.rawValue,
+              let idStr = dict["sessionId"] as? String,
+              let id = UUID(uuidString: idStr),
+              let success = dict["success"] as? Bool else { return nil }
+        sessionId = id
+        self.success = success
+    }
+
+    init(sessionId: UUID, success: Bool) {
+        self.sessionId = sessionId
+        self.success = success
+    }
+}
+
 // MARK: - Service
 
 final class WatchConnectivityService: NSObject, ObservableObject {
@@ -195,6 +223,7 @@ final class WatchConnectivityService: NSObject, ObservableObject {
     @Published var receivedScoreState: ScoreState?
     @Published var receivedMatchEnd: MatchEndMessage?
     @Published var receivedMatchSave: MatchEndMessage?
+    @Published var receivedMatchSaveResult: MatchSaveResultMessage?
     @Published var receivedMetrics: WorkoutMetrics?
     @Published var receivedWorkoutEnd: UUID?
 
@@ -220,6 +249,11 @@ final class WatchConnectivityService: NSObject, ObservableObject {
     /// 저장 버튼 전용. iOS가 이 메시지를 받을 때만 히스토리에 persist 한다.
     func sendMatchSave(_ msg: MatchEndMessage) {
         sendReliably(msg.toSaveDictionary())
+    }
+
+    /// iOS가 저장 요청을 처리한 뒤 실제 persist 성공/실패를 Watch에 회신한다.
+    func sendMatchSaveResult(_ msg: MatchSaveResultMessage) {
+        sendReliably(msg.toDictionary())
     }
 
     private func sendReliably(_ dict: [String: Any]) {
@@ -274,6 +308,8 @@ final class WatchConnectivityService: NSObject, ObservableObject {
                 self.receivedMatchEnd = MatchEndMessage(from: message)
             case WCMessageType.matchSave.rawValue:
                 self.receivedMatchSave = MatchEndMessage(from: message)
+            case WCMessageType.matchSaveResult.rawValue:
+                self.receivedMatchSaveResult = MatchSaveResultMessage(from: message)
             case WCMessageType.metrics.rawValue:
                 self.receivedMetrics = WorkoutMetrics(from: message)
             case WCMessageType.workoutEnd.rawValue:
