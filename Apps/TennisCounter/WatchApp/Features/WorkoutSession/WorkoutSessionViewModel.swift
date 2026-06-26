@@ -72,6 +72,7 @@ class WorkoutSessionViewModel: ObservableObject {
 
     private func handleMatchSaveResult(_ result: MatchSaveResultMessage) {
         guard result.sessionId == activeSessionId else { return }
+        guard saveAckState == .pending || saveAckState == .failed else { return }
         connectivity.receivedMatchSaveResult = nil
         saveAckState = result.success ? .succeeded : .failed
     }
@@ -132,6 +133,8 @@ class WorkoutSessionViewModel: ObservableObject {
     func startMatch(options: MatchOptions, sessionId: UUID? = nil, isRemote: Bool = false) {
         isDriver = !isRemote
         hasSyncedSession = true
+        saveAckState = .idle
+        saveAttemptToken += 1
         let id = sessionId ?? workoutSessionId
         activeSessionId = id
         let session = MatchSession(
@@ -200,6 +203,8 @@ class WorkoutSessionViewModel: ObservableObject {
     func startNewMatch() {
         _currentSession = nil
         phase = .modeSelection
+        saveAckState = .idle
+        saveAttemptToken += 1
     }
 
     func restartMatch() {
