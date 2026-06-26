@@ -124,6 +124,7 @@ struct WorkoutSessionView: View {
 
         case let .finished(session):
             MatchResultView(session: session, viewModel: viewModel)
+                .id(session.workoutSessionId)
         }
     }
 }

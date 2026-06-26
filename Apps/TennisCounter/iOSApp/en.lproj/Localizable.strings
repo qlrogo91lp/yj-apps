@@ -83,6 +83,7 @@
 /* Match Result */
 "result_save" = "Save";
 "result_saved" = "Saved";
+"result_save_failed" = "Save Failed, Retry";
 "watch_victory" = "Victory!";
 "watch_defeat" = "Defeat";
 "result_draw" = "Draw";

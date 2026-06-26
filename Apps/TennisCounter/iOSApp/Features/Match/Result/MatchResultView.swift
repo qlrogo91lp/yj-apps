@@ -4,7 +4,7 @@ struct MatchResultView: View {
     let session: MatchSession
     @ObservedObject var viewModel: WorkoutSessionViewModel
 
-    @State private var saved = false
+    @State private var saveState: SaveButtonState = .idle
 
     var body: some View {
         ZStack {
@@ -47,7 +47,7 @@ struct MatchResultView: View {
                 Spacer()
 
                 HStack(spacing: 16) {
-                    SaveButton(saved: saved) { saveMatch() }
+                    SaveButton(state: saveState) { saveMatch() }
                     RematchButton { viewModel.restartMatch() }
                 }
                 .padding(.horizontal, 32)
@@ -76,8 +76,9 @@ struct MatchResultView: View {
     }
 
     private func saveMatch() {
-        viewModel.saveCurrentMatch()
-        withAnimation { saved = true }
+        withAnimation {
+            saveState = viewModel.saveCurrentMatch() ? .saved : .failed
+        }
     }
 }
 

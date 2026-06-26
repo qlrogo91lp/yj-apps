@@ -199,10 +199,16 @@ class WorkoutSessionViewModel: ObservableObject {
         LiveActivityService.shared.end()
     }
 
-    func saveCurrentMatch() {
-        guard let session = _currentSession else { return }
+    @discardableResult
+    func saveCurrentMatch() -> Bool {
+        guard let session = _currentSession else { return false }
         let match = buildMatchFromSession(session)
-        try? MatchPersistenceService.shared.upsert(match)
+        do {
+            try MatchPersistenceService.shared.upsert(match)
+            return true
+        } catch {
+            return false
+        }
     }
 
     func restartMatch() {

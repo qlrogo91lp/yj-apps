@@ -47,7 +47,7 @@ make fix && make lint
 ---
 
 ### Task 0: 브랜치 생성
-- [ ] **Step 1:** `git switch -c failure-handling-step2-ios-save-ui`
+- [x] **Step 1:** `git switch -c failure-handling-step2-ios-save-ui`
 
 ---
 
@@ -57,7 +57,7 @@ make fix && make lint
 - Modify: `iOSApp/Features/WorkoutSession/WorkoutSessionViewModel.swift`
 - Test: `iosTests/WorkoutSession/WorkoutSessionViewModelTests.swift`
 
-- [ ] **Step 1: 실패 테스트 작성**
+- [x] **Step 1: 실패 테스트 작성**
 
 `iosTests/WorkoutSession/WorkoutSessionViewModelTests.swift` 맨 위 import 블록을 다음으로 교체
 (SwiftData 추가, 알파벳 순서 유지):
@@ -103,13 +103,13 @@ import Testing
 > 먼저 `configure`를 호출했어도 이 테스트가 다시 in-memory 컨테이너로 덮어쓰므로 순서 의존성은
 > 없다 (기존 `MatchPersistenceServiceTests`도 동일한 패턴 사용).
 
-- [ ] **Step 2: 실패 확인**
+- [x] **Step 2: 실패 확인**
 
 Run: `xcodebuild test -project TennisCounter.xcodeproj -scheme "TennisCounter" -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -only-testing:iosTests/WorkoutSessionViewModelTests`
 Expected: BUILD FAILED — `saveCurrentMatch()`가 `Void`를 반환해 `== false`/`== true` 비교가
 컴파일되지 않음 ("cannot convert value of type '()' to expected type 'Bool'" 류 에러)
 
-- [ ] **Step 3: 구현**
+- [x] **Step 3: 구현**
 
 `iOSApp/Features/WorkoutSession/WorkoutSessionViewModel.swift`의 현재
 ```swift
@@ -134,12 +134,12 @@ Expected: BUILD FAILED — `saveCurrentMatch()`가 `Void`를 반환해 `== false
     }
 ```
 
-- [ ] **Step 4: 통과 확인**
+- [x] **Step 4: 통과 확인**
 
 Run: `xcodebuild test -project TennisCounter.xcodeproj -scheme "TennisCounter" -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -only-testing:iosTests/WorkoutSessionViewModelTests`
 Expected: PASS
 
-- [ ] **Step 5: 커밋**
+- [x] **Step 5: 커밋**
 
 ```bash
 git add iOSApp/Features/WorkoutSession/WorkoutSessionViewModel.swift iosTests/WorkoutSession/WorkoutSessionViewModelTests.swift
@@ -157,7 +157,7 @@ git commit -m "✨ saveCurrentMatch가 저장 성공/실패를 Bool로 반환"
 
 (View는 CLAUDE.md 테스트 컨벤션상 자동 테스트 대상이 아니다 — 시뮬레이터에서 수동 확인한다.)
 
-- [ ] **Step 1: 로컬라이즈 키 추가**
+- [x] **Step 1: 로컬라이즈 키 추가**
 
 `iOSApp/ko.lproj/Localizable.strings`에서 다음 줄(현재 84-85번째 줄 부근)을 찾는다:
 ```
@@ -179,7 +179,7 @@ git commit -m "✨ saveCurrentMatch가 저장 성공/실패를 Bool로 반환"
 "result_save_failed" = "Save Failed, Retry";
 ```
 
-- [ ] **Step 2: SaveButton.swift 교체**
+- [x] **Step 2: SaveButton.swift 교체**
 
 `iOSApp/Features/Match/Result/Components/SaveButton.swift` 전체를 다음으로 교체:
 ```swift
@@ -247,7 +247,7 @@ struct SaveButton: View {
 > 정확한 폰트/패딩 값과 다르면(리팩터 중 변경됐을 수 있음) 기존 값을 우선하고 `state`/`enum`
 > 구조만 이 코드대로 적용한다.
 
-- [ ] **Step 3: MatchResultView.swift 수정**
+- [x] **Step 3: MatchResultView.swift 수정**
 
 현재:
 ```swift
@@ -288,18 +288,18 @@ struct MatchResultView: View {
     }
 ```
 
-- [ ] **Step 4: 빌드 확인**
+- [x] **Step 4: 빌드 확인**
 
 Run: `xcodebuild -project TennisCounter.xcodeproj -scheme "TennisCounter" -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build`
 Expected: BUILD SUCCEEDED
 
-- [ ] **Step 5: 시뮬레이터 수동 확인 (성공 경로)**
+- [x] **Step 5: 시뮬레이터 수동 확인 (성공 경로)**
 
 시뮬레이터에서 앱 실행 → 경기 시작 → 종료 → 결과 화면에서 저장 버튼 탭 → "저장됨"으로
 바뀌고 비활성화되는지 확인. (실패 경로는 디스크 강제 실패가 어려워 시뮬레이터에서 재현하지
 않는다 — 코드 리뷰로 로직만 검증한다.)
 
-- [ ] **Step 6: 커밋**
+- [x] **Step 6: 커밋**
 
 ```bash
 git add iOSApp/Features/Match/Result/Components/SaveButton.swift iOSApp/Features/Match/Result/MatchResultView.swift iOSApp/en.lproj/Localizable.strings iOSApp/ko.lproj/Localizable.strings
@@ -310,15 +310,17 @@ git commit -m "✨ 저장 실패 시 버튼에 실패 상태 표시 + 재시도"
 
 ### Task 3: 전체 검증 + code-review
 
-- [ ] **Step 1:** iOS 빌드/테스트 전체 GREEN
+- [x] **Step 1:** iOS 빌드/테스트 전체 GREEN
 
 Run: `xcodebuild test -project TennisCounter.xcodeproj -scheme "TennisCounter" -destination 'platform=iOS Simulator,name=iPhone 17 Pro'`
 
-- [ ] **Step 2:** `make fix && make lint` — 모두 클린
+- [x] **Step 2:** `make fix && make lint` — 모두 클린
 
-- [ ] **Step 3:** `/code-review` 실행 → 지적 사항은 `superpowers:receiving-code-review`로 검증 후 반영
+- [x] **Step 3:** `/code-review` 실행 → 지적 사항은 `superpowers:receiving-code-review`로 검증 후 반영
+  - Finding 1 반영: `MatchResultView`에 `.id(session.workoutSessionId)` 추가 — 리매치 후 `saveState` 초기화 보장
+  - Finding 2 반영 안 함: `catch` 에러 로깅은 코드베이스 전체 로깅 인프라 부재 문제로 이 PR 범위 밖
 
-- [ ] **Step 4:** 위 검증·반영이 끝나면 `superpowers:finishing-a-development-branch`로 브랜치 정리
+- [x] **Step 4:** 위 검증·반영이 끝나면 `superpowers:finishing-a-development-branch`로 브랜치 정리
 
 ---
 

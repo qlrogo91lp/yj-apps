@@ -1,4 +1,5 @@
 import Foundation
+import SwiftData
 @testable import TennisCounter
 import Testing
 
@@ -85,7 +86,20 @@ struct WorkoutSessionViewModelTests {
 
     @Test @MainActor func matchSessionSaveWithNoSessionIsNoOp() {
         let vm = WorkoutSessionViewModel()
-        vm.saveCurrentMatch() // _currentSession nil이면 guard에서 리턴
+        #expect(vm.saveCurrentMatch() == false) // _currentSession nil이면 guard에서 false 리턴
+    }
+
+    @Test @MainActor func saveCurrentMatchReturnsTrueOnSuccess() throws {
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        let container = try ModelContainer(for: Match.self, SetRecord.self, configurations: config)
+        MatchPersistenceService.shared.configure(with: ModelContext(container))
+
+        let vm = WorkoutSessionViewModel()
+        vm.startSession()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.finishMatch(result: .win, completedSets: [(my: 6, your: 4)])
+
+        #expect(vm.saveCurrentMatch() == true)
     }
 
     @Test @MainActor func matchSessionFinishMatchStoresSession() {

@@ -83,6 +83,7 @@
 /* Match Result */
 "result_save" = "저장";
 "result_saved" = "저장됨";
+"result_save_failed" = "저장 실패, 다시 시도";
 "watch_victory" = "승리!";
 "watch_defeat" = "패배";
 "result_draw" = "무승부";
