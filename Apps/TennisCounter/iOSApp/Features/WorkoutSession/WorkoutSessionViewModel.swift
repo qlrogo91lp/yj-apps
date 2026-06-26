@@ -261,11 +261,22 @@ class WorkoutSessionViewModel: ObservableObject {
         func applyIncomingSessionStartForTest(_ msg: SessionStartMessage) {
             handleIncomingSessionStart(msg)
         }
+
+        func saveFromWatchForTest(_ msg: MatchEndMessage) {
+            saveFromWatch(msg)
+        }
     #endif
 
     private func saveFromWatch(_ msg: MatchEndMessage) {
         let match = buildMatchFromMessage(msg)
-        try? MatchPersistenceService.shared.upsert(match)
+        let success: Bool
+        do {
+            try MatchPersistenceService.shared.upsert(match)
+            success = true
+        } catch {
+            success = false
+        }
+        connectivity.sendMatchSaveResult(MatchSaveResultMessage(sessionId: msg.sessionId, success: success))
     }
 
     private func buildMatchFromMessage(_ msg: MatchEndMessage) -> Match {
