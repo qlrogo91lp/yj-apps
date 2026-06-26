@@ -327,3 +327,11 @@ watchosTests/
 - View suffix: 독립적인 화면/페이지만 (e.g., `ModeView.swift`, `MatchView.swift`, `WorkoutSessionView.swift`)
 - Components 폴더의 순수 컴포넌트: suffix 없음 (e.g., `UndoButton.swift`, `GameScores.swift`, `PlayerPointButton.swift`)
 - 한 파일 = 한 타입: 같은 파일에 여러 View/ViewModel 정의 금지 (단, private helper component는 제외)
+
+## Git Workflow
+
+PR 머지 시 squash 금지. 항상 일반 merge commit을 사용한다.
+
+```bash
+gh pr merge <number> --merge --delete-branch
+```
