@@ -3,7 +3,6 @@ import SwiftUI
 struct MatchResultView: View {
     let session: MatchSession
     @ObservedObject var flowViewModel: WorkoutSessionViewModel
-    @State private var saved = false
 
     var body: some View {
         VStack(spacing: 2) {
@@ -45,7 +44,7 @@ struct MatchResultView: View {
             Spacer()
 
             HStack(spacing: 6) {
-                SaveButton(saved: saved) { saveMatch() }
+                SaveButton(state: buttonState) { flowViewModel.saveCurrentMatch() }
                 RematchButton { flowViewModel.restartMatch() }
             }
         }
@@ -75,9 +74,13 @@ struct MatchResultView: View {
         }
     }
 
-    private func saveMatch() {
-        flowViewModel.saveCurrentMatch()
-        withAnimation { saved = true }
+    private var buttonState: SaveButtonState {
+        switch flowViewModel.saveAckState {
+        case .idle: .idle
+        case .pending: .pending
+        case .succeeded: .saved
+        case .failed: .failed
+        }
     }
 }
 
