@@ -3,6 +3,7 @@ import SwiftData
 @testable import TennisCounter
 import Testing
 
+@Suite(.serialized)
 struct WorkoutSessionViewModelTests {
     @Test @MainActor func matchSessionStartMatchSetsPlayingPhase() {
         let vm = WorkoutSessionViewModel()
