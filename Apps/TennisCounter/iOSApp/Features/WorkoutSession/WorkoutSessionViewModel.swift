@@ -259,10 +259,6 @@ class WorkoutSessionViewModel: ObservableObject {
     }
 
     private func handleIncomingScoreState(_ state: ScoreState) {
-        SyncLog
-            .recv(
-                "my=\(state.myScore) your=\(state.yourScore) sets=\(state.completedSets.count) isDriver=\(isDriver) phase=\(String(describing: phase))"
-            )
         guard !isDriver, case .playing = phase else { return }
         scoreVM.applyRemoteState(state)
         liveActivity.update(from: state, score: scoreVM.score)

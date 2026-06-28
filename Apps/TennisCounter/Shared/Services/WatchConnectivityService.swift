@@ -242,10 +242,6 @@ final class WatchConnectivityService: NSObject, ObservableObject {
     }
 
     func sendScoreState(_ state: ScoreState) {
-        SyncLog
-            .sent(
-                "my=\(state.myScore) your=\(state.yourScore) sets=\(state.completedSets.count) tie=\(state.isTieBreak) reachable=\(WCSession.default.isReachable)"
-            )
         sendReliably(state.toDictionary())
     }
 
@@ -289,7 +285,6 @@ final class WatchConnectivityService: NSObject, ObservableObject {
         #if os(iOS)
             guard WCSession.default.isWatchAppInstalled else { return }
         #endif
-        SyncLog.session("CLEAR sessionContext")
         try? WCSession.default.updateApplicationContext(["type": WCMessageType.sessionCleared.rawValue])
     }
 
@@ -316,7 +311,6 @@ final class WatchConnectivityService: NSObject, ObservableObject {
 
     /// 드라이버가 진행 중 매치를 중간에 버릴 때(뒤로가기) 미러도 모드선택으로 돌아가도록 알린다.
     func sendMatchReset(sessionId: UUID) {
-        SyncLog.session("SENT matchReset")
         sendReliably([
             "type": WCMessageType.matchReset.rawValue,
             "sessionId": sessionId.uuidString,
@@ -338,10 +332,8 @@ final class WatchConnectivityService: NSObject, ObservableObject {
             guard WCSession.default.isWatchAppInstalled else { return }
         #endif
         if WCSession.default.isReachable {
-            SyncLog.session("SENT sessionStart via=message reachable=true")
             WCSession.default.sendMessage(dict, replyHandler: nil, errorHandler: nil)
         } else {
-            SyncLog.session("SENT sessionStart via=appContext reachable=false")
             try? WCSession.default.updateApplicationContext(dict)
         }
     }
@@ -350,7 +342,6 @@ final class WatchConnectivityService: NSObject, ObservableObject {
         DispatchQueue.main.async {
             switch message["type"] as? String {
             case WCMessageType.sessionStart.rawValue:
-                SyncLog.session("RECV sessionStart")
                 self.receivedSessionStart = SessionStartMessage(from: message)
             case WCMessageType.scoreState.rawValue:
                 self.receivedScoreState = ScoreState(from: message)
@@ -368,7 +359,6 @@ final class WatchConnectivityService: NSObject, ObservableObject {
                     self.receivedWorkoutEnd = id
                 }
             case WCMessageType.matchReset.rawValue:
-                SyncLog.session("RECV matchReset")
                 if let idStr = message["sessionId"] as? String, let id = UUID(uuidString: idStr) {
                     self.receivedMatchReset = id
                 }
@@ -382,19 +372,17 @@ final class WatchConnectivityService: NSObject, ObservableObject {
 // MARK: - WCSessionDelegate
 
 extension WatchConnectivityService: WCSessionDelegate {
-    func session(_ session: WCSession, activationDidCompleteWith state: WCSessionActivationState, error _: Error?) {
+    func session(_ session: WCSession, activationDidCompleteWith _: WCSessionActivationState, error _: Error?) {
         DispatchQueue.main.async { self.isWatchReachable = session.isReachable }
 
         // 콜드 런치 함정: 앱이 꺼져 있는 동안 updateApplicationContext로 도착한 값은
         // didReceiveApplicationContext 델리게이트가 불리지 않고 receivedApplicationContext에만 남는다.
         // 활성화 직후 직접 읽어 대기 중이던 sessionStart를 채택한다.
         let context = session.receivedApplicationContext
-        SyncLog.session("ACTIVATED state=\(state.rawValue) pendingCtx=\(context["type"] as? String ?? "none")")
         guard !context.isEmpty else { return }
         if context["type"] as? String == WCMessageType.sessionStart.rawValue,
            Self.isSessionStartStale(workoutStartDate: context["workoutStartDate"] as? Double)
         {
-            SyncLog.session("LAUNCH ctx sessionStart STALE → ignored")
             return
         }
         handle(context)
