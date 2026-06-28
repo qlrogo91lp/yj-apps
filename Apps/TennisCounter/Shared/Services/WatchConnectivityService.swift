@@ -239,6 +239,10 @@ final class WatchConnectivityService: NSObject, ObservableObject {
     }
 
     func sendScoreState(_ state: ScoreState) {
+        SyncLog
+            .sent(
+                "my=\(state.myScore) your=\(state.yourScore) sets=\(state.completedSets.count) tie=\(state.isTieBreak) reachable=\(WCSession.default.isReachable)"
+            )
         sendReliably(state.toDictionary())
     }
 
