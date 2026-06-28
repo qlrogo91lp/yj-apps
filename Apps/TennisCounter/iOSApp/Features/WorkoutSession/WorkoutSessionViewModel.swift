@@ -223,6 +223,7 @@ class WorkoutSessionViewModel: ObservableObject {
         _currentSession = nil
         phase = .modeSelection
         liveActivity.end()
+        connectivity.clearSessionContext()
         if notifyRemote { connectivity.sendWorkoutEnd(sessionId: sessionId) }
     }
 

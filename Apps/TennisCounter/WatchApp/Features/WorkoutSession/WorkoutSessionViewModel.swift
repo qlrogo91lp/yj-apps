@@ -224,6 +224,7 @@ class WorkoutSessionViewModel: ObservableObject {
         _currentSession = nil
         appGroupDefaults?.set(false, forKey: "isWorkoutActive")
         WidgetCenter.shared.reloadTimelines(ofKind: "ComplicationApp")
+        connectivity.clearSessionContext()
         if notifyRemote { connectivity.sendWorkoutEnd(sessionId: activeSessionId) }
         Task { _ = await healthKit.stopWorkout() }
     }

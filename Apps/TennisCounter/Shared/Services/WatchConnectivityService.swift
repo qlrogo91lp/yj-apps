@@ -12,6 +12,7 @@ private enum WCMessageType: String {
     case matchSaveResult
     case metrics
     case workoutEnd
+    case sessionCleared
 }
 
 struct SessionStartMessage {
@@ -269,6 +270,27 @@ final class WatchConnectivityService: NSObject, ObservableObject {
         return now - sentAt > workoutEndStalenessThreshold
     }
 
+    /// applicationContext는 마지막 값을 계속 보관하므로, 운동 종료 시 비우지 못한 채(워치 크래시 등)
+    /// 한참 뒤 콜드 런치하면 죽은 세션을 채택할 수 있다. workoutStartDate가 비현실적으로
+    /// 오래된 sessionStart는 콜드 런치 채택에서 제외한다. (정상 종료는 clearSessionContext가 비운다)
+    static let sessionStartStalenessThreshold: TimeInterval = 6 * 3600
+
+    static func isSessionStartStale(workoutStartDate: Double?, now: Double = Date().timeIntervalSince1970) -> Bool {
+        guard let workoutStartDate else { return false }
+        return now - workoutStartDate > sessionStartStalenessThreshold
+    }
+
+    /// 드라이버가 운동/매치를 끝낼 때 자기 outgoing applicationContext를 비운다.
+    /// 그래야 상대가 콜드 런치할 때 끝난 세션의 sessionStart를 읽어 잘못 진입하지 않는다.
+    func clearSessionContext() {
+        guard WCSession.default.activationState == .activated else { return }
+        #if os(iOS)
+            guard WCSession.default.isWatchAppInstalled else { return }
+        #endif
+        SyncLog.session("CLEAR sessionContext")
+        try? WCSession.default.updateApplicationContext(["type": WCMessageType.sessionCleared.rawValue])
+    }
+
     private func sendReliably(_ dict: [String: Any]) {
         guard WCSession.default.activationState == .activated else { return }
         if WCSession.default.isReachable {
@@ -305,8 +327,10 @@ final class WatchConnectivityService: NSObject, ObservableObject {
             guard WCSession.default.isWatchAppInstalled else { return }
         #endif
         if WCSession.default.isReachable {
+            SyncLog.session("SENT sessionStart via=message reachable=true")
             WCSession.default.sendMessage(dict, replyHandler: nil, errorHandler: nil)
         } else {
+            SyncLog.session("SENT sessionStart via=appContext reachable=false")
             try? WCSession.default.updateApplicationContext(dict)
         }
     }
@@ -315,6 +339,7 @@ final class WatchConnectivityService: NSObject, ObservableObject {
         DispatchQueue.main.async {
             switch message["type"] as? String {
             case WCMessageType.sessionStart.rawValue:
+                SyncLog.session("RECV sessionStart")
                 self.receivedSessionStart = SessionStartMessage(from: message)
             case WCMessageType.scoreState.rawValue:
                 self.receivedScoreState = ScoreState(from: message)
@@ -341,8 +366,22 @@ final class WatchConnectivityService: NSObject, ObservableObject {
 // MARK: - WCSessionDelegate
 
 extension WatchConnectivityService: WCSessionDelegate {
-    func session(_ session: WCSession, activationDidCompleteWith _: WCSessionActivationState, error _: Error?) {
+    func session(_ session: WCSession, activationDidCompleteWith state: WCSessionActivationState, error _: Error?) {
         DispatchQueue.main.async { self.isWatchReachable = session.isReachable }
+
+        // 콜드 런치 함정: 앱이 꺼져 있는 동안 updateApplicationContext로 도착한 값은
+        // didReceiveApplicationContext 델리게이트가 불리지 않고 receivedApplicationContext에만 남는다.
+        // 활성화 직후 직접 읽어 대기 중이던 sessionStart를 채택한다.
+        let context = session.receivedApplicationContext
+        SyncLog.session("ACTIVATED state=\(state.rawValue) pendingCtx=\(context["type"] as? String ?? "none")")
+        guard !context.isEmpty else { return }
+        if context["type"] as? String == WCMessageType.sessionStart.rawValue,
+           Self.isSessionStartStale(workoutStartDate: context["workoutStartDate"] as? Double)
+        {
+            SyncLog.session("LAUNCH ctx sessionStart STALE → ignored")
+            return
+        }
+        handle(context)
     }
 
     func sessionReachabilityDidChange(_ session: WCSession) {
