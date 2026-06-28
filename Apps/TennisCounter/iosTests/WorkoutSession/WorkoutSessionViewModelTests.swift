@@ -3,8 +3,33 @@ import SwiftData
 @testable import TennisCounter
 import Testing
 
+@MainActor
+final class LiveActivitySpy: LiveActivityControlling {
+    var startCount = 0
+    var endCount = 0
+    func start(mode _: MatchFormat) {
+        startCount += 1
+    }
+
+    func update(from _: ScoreState, score _: Score) {}
+    func end() {
+        endCount += 1
+    }
+}
+
 @Suite(.serialized)
 struct WorkoutSessionViewModelTests {
+    @Test @MainActor func remoteSessionStartStartsLiveActivityOnce() {
+        let spy = LiveActivitySpy()
+        let vm = WorkoutSessionViewModel(liveActivity: spy)
+        vm.applyIncomingSessionStartForTest(SessionStartMessage(
+            sessionId: UUID(),
+            options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false),
+            workoutStartDate: Date()
+        ))
+        #expect(spy.startCount == 1)
+    }
+
     @Test @MainActor func matchSessionStartMatchSetsPlayingPhase() {
         let vm = WorkoutSessionViewModel()
         vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
@@ -315,6 +340,19 @@ struct WorkoutSessionViewModelTests {
         let vm = WorkoutSessionViewModel()
         vm.handleIncomingWorkoutEndForTest(UUID())
         #expect(vm.remoteWorkoutEnded == true)
+    }
+
+    @Test @MainActor func staleWorkoutEndDoesNotEndCurrentMatch() {
+        let vm = WorkoutSessionViewModel()
+        vm.startSession()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        let unrelated = UUID()
+        vm.handleIncomingWorkoutEndForTest(unrelated)
+        #expect(vm.remoteWorkoutEnded == false)
+        guard case .playing = vm.phase else {
+            Issue.record("stale 종료는 무시되고 playing 유지되어야 함")
+            return
+        }
     }
 
     @Test @MainActor func saveFromWatchPersistsMatch() throws {

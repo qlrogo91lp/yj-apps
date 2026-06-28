@@ -2,7 +2,14 @@ import ActivityKit
 import Foundation
 
 @MainActor
-final class LiveActivityService {
+protocol LiveActivityControlling {
+    func start(mode: MatchFormat)
+    func update(from state: ScoreState, score: Score)
+    func end()
+}
+
+@MainActor
+final class LiveActivityService: LiveActivityControlling {
     static let shared = LiveActivityService()
     private var activity: Activity<TennisActivityAttributes>?
     private var workoutStartTime: Date?
@@ -13,14 +20,34 @@ final class LiveActivityService {
         guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
         let startTime = Date.now
         workoutStartTime = startTime
+        let stale = activity
         let attributes = TennisActivityAttributes(matchMode: mode.rawValue)
         var initial = TennisActivityAttributes.ContentState.empty
         initial.workoutStartTime = startTime
-        activity = try? Activity.request(
+        let requested = try? Activity.request(
             attributes: attributes,
             contentState: initial,
             pushType: nil
         )
+        activity = requested
+        Task {
+            await stale?.end(dismissalPolicy: .immediate)
+            for other in Activity<TennisActivityAttributes>.activities where other.id != requested?.id {
+                await other.end(dismissalPolicy: .immediate)
+            }
+        }
+    }
+
+    func endAll() {
+        let current = activity
+        activity = nil
+        workoutStartTime = nil
+        Task {
+            await current?.end(dismissalPolicy: .immediate)
+            for other in Activity<TennisActivityAttributes>.activities {
+                await other.end(dismissalPolicy: .immediate)
+            }
+        }
     }
 
     func update(from state: ScoreState, score: Score) {

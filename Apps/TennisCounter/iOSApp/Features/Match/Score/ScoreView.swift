@@ -56,18 +56,19 @@ struct ScoreView: View {
             }
             .padding(.bottom, 300)
 
-            if viewModel.score.lastAction != .none {
-                VStack {
-                    Spacer()
-                    UndoButton(action: { viewModel.undo() })
-                        .padding(.bottom, 150)
+            if isDriver {
+                if viewModel.score.lastAction != .none {
+                    VStack {
+                        Spacer()
+                        UndoButton(action: { viewModel.undo() })
+                            .padding(.bottom, 150)
+                    }
                 }
-            }
-
-            if !isDriver {
+            } else {
                 VStack {
-                    MirrorBadge().padding(.top, 8)
                     Spacer()
+                    MirrorBadge()
+                        .padding(.bottom, 150)
                 }
             }
         }

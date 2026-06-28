@@ -239,6 +239,10 @@ final class WatchConnectivityService: NSObject, ObservableObject {
     }
 
     func sendScoreState(_ state: ScoreState) {
+        SyncLog
+            .sent(
+                "my=\(state.myScore) your=\(state.yourScore) sets=\(state.completedSets.count) tie=\(state.isTieBreak) reachable=\(WCSession.default.isReachable)"
+            )
         sendReliably(state.toDictionary())
     }
 
@@ -256,6 +260,15 @@ final class WatchConnectivityService: NSObject, ObservableObject {
         sendReliably(msg.toDictionary())
     }
 
+    static let workoutEndStalenessThreshold: TimeInterval = 60
+
+    /// transferUserInfo로 큐잉돼 앱 재실행 후 뒤늦게 배달된 stale 종료 신호를 거른다.
+    /// sentAt이 없으면(구버전 메시지) 기존 동작 보존을 위해 stale로 보지 않는다.
+    static func isWorkoutEndStale(sentAt: Double?, now: Double = Date().timeIntervalSince1970) -> Bool {
+        guard let sentAt else { return false }
+        return now - sentAt > workoutEndStalenessThreshold
+    }
+
     private func sendReliably(_ dict: [String: Any]) {
         guard WCSession.default.activationState == .activated else { return }
         if WCSession.default.isReachable {
@@ -270,9 +283,10 @@ final class WatchConnectivityService: NSObject, ObservableObject {
     }
 
     func sendWorkoutEnd(sessionId: UUID) {
-        sendRealtimeOnly([
+        sendReliably([
             "type": WCMessageType.workoutEnd.rawValue,
             "sessionId": sessionId.uuidString,
+            "sentAt": Date().timeIntervalSince1970,
         ])
     }
 
@@ -313,6 +327,7 @@ final class WatchConnectivityService: NSObject, ObservableObject {
             case WCMessageType.metrics.rawValue:
                 self.receivedMetrics = WorkoutMetrics(from: message)
             case WCMessageType.workoutEnd.rawValue:
+                if Self.isWorkoutEndStale(sentAt: message["sentAt"] as? Double) { break }
                 if let idStr = message["sessionId"] as? String, let id = UUID(uuidString: idStr) {
                     self.receivedWorkoutEnd = id
                 }

@@ -24,6 +24,7 @@ struct TennisCounterApp: App {
         }
         let context = ModelContext(container)
         MatchPersistenceService.shared.configure(with: context)
+        Task { @MainActor in LiveActivityService.shared.endAll() }
     }
 
     var body: some Scene {

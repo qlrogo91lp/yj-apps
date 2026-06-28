@@ -21,9 +21,11 @@ class WorkoutSessionViewModel: ObservableObject {
     private var timer: Timer?
     private var cancellables = Set<AnyCancellable>()
     private let connectivity = WatchConnectivityService.shared
+    private let liveActivity: LiveActivityControlling
     private(set) var isDriver = false
 
-    init() {
+    init(liveActivity: LiveActivityControlling = LiveActivityService.shared) {
+        self.liveActivity = liveActivity
         setupScoreSync()
         setupConnectivityBindings()
     }
@@ -46,7 +48,7 @@ class WorkoutSessionViewModel: ObservableObject {
         scoreVM.onStateChanged = { [weak self] in
             guard let self else { return }
             let state = scoreVM.makeScoreState()
-            LiveActivityService.shared.update(from: state, score: scoreVM.score)
+            liveActivity.update(from: state, score: scoreVM.score)
             guard isDriver else { return }
             connectivity.sendScoreState(state)
         }
@@ -93,7 +95,7 @@ class WorkoutSessionViewModel: ObservableObject {
             .sink { [weak self] msg in
                 guard let self else { return }
                 // 경기 종료 = 결과 화면 표시만. 저장은 사용자가 저장 버튼을 누를 때(receivedMatchSave)만 한다.
-                LiveActivityService.shared.end()
+                liveActivity.end()
                 let session = buildSession(from: msg)
                 completedMatchCount += 1
                 phase = .finished(session)
@@ -164,7 +166,7 @@ class WorkoutSessionViewModel: ObservableObject {
 
         scoreVM.resetAll(options: options)
         phase = .playing(options)
-        LiveActivityService.shared.start(mode: options.mode)
+        liveActivity.start(mode: options.mode)
 
         if !isRemote {
             connectivity.sendSessionStart(SessionStartMessage(
@@ -186,7 +188,7 @@ class WorkoutSessionViewModel: ObservableObject {
         session.kcalAtEnd = metrics.calories
         completedMatchCount += 1
         phase = .finished(session)
-        LiveActivityService.shared.end()
+        liveActivity.end()
     }
 
     @discardableResult
@@ -220,7 +222,7 @@ class WorkoutSessionViewModel: ObservableObject {
         metrics = .init()
         _currentSession = nil
         phase = .modeSelection
-        LiveActivityService.shared.end()
+        liveActivity.end()
         if notifyRemote { connectivity.sendWorkoutEnd(sessionId: sessionId) }
     }
 
@@ -234,13 +236,16 @@ class WorkoutSessionViewModel: ObservableObject {
         sessionId = msg.sessionId
         startSession(startDate: msg.workoutStartDate)
         startMatch(options: msg.options, isRemote: true)
-        LiveActivityService.shared.start(mode: msg.options.mode)
     }
 
     private func handleIncomingScoreState(_ state: ScoreState) {
+        SyncLog
+            .recv(
+                "my=\(state.myScore) your=\(state.yourScore) sets=\(state.completedSets.count) isDriver=\(isDriver) phase=\(String(describing: phase))"
+            )
         guard !isDriver, case .playing = phase else { return }
         scoreVM.applyRemoteState(state)
-        LiveActivityService.shared.update(from: state, score: scoreVM.score)
+        liveActivity.update(from: state, score: scoreVM.score)
     }
 
     private func saveFromWatch(_ msg: MatchEndMessage) {
