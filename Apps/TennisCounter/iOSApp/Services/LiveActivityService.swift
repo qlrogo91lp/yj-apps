@@ -2,7 +2,14 @@ import ActivityKit
 import Foundation
 
 @MainActor
-final class LiveActivityService {
+protocol LiveActivityControlling {
+    func start(mode: MatchFormat)
+    func update(from state: ScoreState, score: Score)
+    func end()
+}
+
+@MainActor
+final class LiveActivityService: LiveActivityControlling {
     static let shared = LiveActivityService()
     private var activity: Activity<TennisActivityAttributes>?
     private var workoutStartTime: Date?

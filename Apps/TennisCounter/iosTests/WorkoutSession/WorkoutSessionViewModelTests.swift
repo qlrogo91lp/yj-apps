@@ -3,8 +3,33 @@ import SwiftData
 @testable import TennisCounter
 import Testing
 
+@MainActor
+final class LiveActivitySpy: LiveActivityControlling {
+    var startCount = 0
+    var endCount = 0
+    func start(mode _: MatchFormat) {
+        startCount += 1
+    }
+
+    func update(from _: ScoreState, score _: Score) {}
+    func end() {
+        endCount += 1
+    }
+}
+
 @Suite(.serialized)
 struct WorkoutSessionViewModelTests {
+    @Test @MainActor func remoteSessionStartStartsLiveActivityOnce() {
+        let spy = LiveActivitySpy()
+        let vm = WorkoutSessionViewModel(liveActivity: spy)
+        vm.applyIncomingSessionStartForTest(SessionStartMessage(
+            sessionId: UUID(),
+            options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false),
+            workoutStartDate: Date()
+        ))
+        #expect(spy.startCount == 1)
+    }
+
     @Test @MainActor func matchSessionStartMatchSetsPlayingPhase() {
         let vm = WorkoutSessionViewModel()
         vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
