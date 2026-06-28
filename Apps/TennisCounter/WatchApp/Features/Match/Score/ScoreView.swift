@@ -31,13 +31,6 @@ struct ScoreView: View {
             }
             .ignoresSafeArea(.container)
 
-            if !flowViewModel.isDriver {
-                VStack {
-                    MirrorBadge().padding(.top, 4)
-                    Spacer()
-                }
-            }
-
             GeometryReader { geo in
                 let isSmall = geo.size.width <= 162
                 VStack(spacing: 4) {
@@ -54,7 +47,10 @@ struct ScoreView: View {
                 .padding(.top, isSmall ? 24 : 40)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                 .overlay(alignment: .bottom) {
-                    if viewModel.score.lastAction != .none {
+                    if !flowViewModel.isDriver {
+                        MirrorBadge()
+                            .padding(.bottom, isSmall ? 20 : 25)
+                    } else if viewModel.score.lastAction != .none {
                         UndoButton { viewModel.undo() }
                             .padding(.bottom, isSmall ? 20 : 25)
                     }
