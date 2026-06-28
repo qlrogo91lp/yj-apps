@@ -63,6 +63,12 @@ class WorkoutSessionViewModel: ObservableObject {
             .sink { [weak self] id in self?.handleIncomingWorkoutEnd(id) }
             .store(in: &cancellables)
 
+        connectivity.$receivedMatchReset
+            .compactMap(\.self)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] id in self?.handleIncomingMatchReset(id) }
+            .store(in: &cancellables)
+
         connectivity.$receivedMatchSaveResult
             .compactMap(\.self)
             .receive(on: DispatchQueue.main)
@@ -83,6 +89,13 @@ class WorkoutSessionViewModel: ObservableObject {
         connectivity.receivedWorkoutEnd = nil
         endWorkout(notifyRemote: false)
         remoteWorkoutEnded = true
+    }
+
+    private func handleIncomingMatchReset(_ id: UUID) {
+        guard !isDriver else { return }
+        if hasSyncedSession, id != activeSessionId { return }
+        connectivity.receivedMatchReset = nil
+        startNewMatch(notifyRemote: false)
     }
 
     #if DEBUG
@@ -200,7 +213,10 @@ class WorkoutSessionViewModel: ObservableObject {
         }
     }
 
-    func startNewMatch() {
+    func startNewMatch(notifyRemote: Bool = true) {
+        if notifyRemote, isDriver, case .playing = phase {
+            connectivity.sendMatchReset(sessionId: activeSessionId)
+        }
         _currentSession = nil
         phase = .modeSelection
         saveAckState = .idle
@@ -224,6 +240,7 @@ class WorkoutSessionViewModel: ObservableObject {
         _currentSession = nil
         appGroupDefaults?.set(false, forKey: "isWorkoutActive")
         WidgetCenter.shared.reloadTimelines(ofKind: "ComplicationApp")
+        connectivity.clearSessionContext()
         if notifyRemote { connectivity.sendWorkoutEnd(sessionId: activeSessionId) }
         Task { _ = await healthKit.stopWorkout() }
     }

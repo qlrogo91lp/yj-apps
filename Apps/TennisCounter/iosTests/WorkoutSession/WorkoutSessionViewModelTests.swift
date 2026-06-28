@@ -355,6 +355,61 @@ struct WorkoutSessionViewModelTests {
         }
     }
 
+    @Test @MainActor func remoteStartMatchSyncsSessionIdForWorkoutEnd() {
+        let vm = WorkoutSessionViewModel()
+        let sid = UUID()
+        vm.startSession()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false), sessionId: sid, isRemote: true)
+        #expect(vm.currentSessionIdForTest == sid) // 원격 채택 시 sessionId가 상대 것으로 동기화됨
+        vm.handleIncomingWorkoutEndForTest(sid)
+        #expect(vm.remoteWorkoutEnded == true) // 동기화된 sessionId 덕분에 workoutEnd가 적용됨
+    }
+
+    @Test @MainActor func remoteStartMatchSyncsSessionIdForMatchReset() {
+        let vm = WorkoutSessionViewModel()
+        let sid = UUID()
+        vm.startSession()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false), sessionId: sid, isRemote: true)
+        vm.handleIncomingMatchResetForTest(sid)
+        guard case .modeSelection = vm.phase else {
+            Issue.record("sessionId 동기화 후 matchReset이 적용되어 모드선택으로 복귀해야 함")
+            return
+        }
+    }
+
+    @Test @MainActor func mirrorMatchResetReturnsToModeSelection() {
+        let vm = WorkoutSessionViewModel()
+        vm.startSession()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false), isRemote: true) // mirror
+        vm.handleIncomingMatchResetForTest(vm.currentSessionIdForTest)
+        guard case .modeSelection = vm.phase else {
+            Issue.record("미러는 드라이버의 matchReset을 받으면 모드선택으로 돌아가야 함")
+            return
+        }
+    }
+
+    @Test @MainActor func driverIgnoresMatchReset() {
+        let vm = WorkoutSessionViewModel()
+        vm.startSession()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false)) // driver
+        vm.handleIncomingMatchResetForTest(vm.currentSessionIdForTest)
+        guard case .playing = vm.phase else {
+            Issue.record("드라이버는 matchReset을 무시하고 playing 유지해야 함")
+            return
+        }
+    }
+
+    @Test @MainActor func mirrorIgnoresMatchResetForDifferentSession() {
+        let vm = WorkoutSessionViewModel()
+        vm.startSession()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false), isRemote: true) // mirror
+        vm.handleIncomingMatchResetForTest(UUID()) // 다른 세션
+        guard case .playing = vm.phase else {
+            Issue.record("다른 세션의 matchReset은 무시되어야 함")
+            return
+        }
+    }
+
     @Test @MainActor func saveFromWatchPersistsMatch() throws {
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
         let container = try ModelContainer(for: Match.self, SetRecord.self, configurations: config)

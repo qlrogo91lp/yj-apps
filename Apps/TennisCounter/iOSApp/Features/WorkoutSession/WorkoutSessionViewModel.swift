@@ -115,6 +115,19 @@ class WorkoutSessionViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] id in self?.handleIncomingWorkoutEnd(id) }
             .store(in: &cancellables)
+
+        connectivity.$receivedMatchReset
+            .compactMap(\.self)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] id in self?.handleIncomingMatchReset(id) }
+            .store(in: &cancellables)
+    }
+
+    private func handleIncomingMatchReset(_ id: UUID) {
+        guard !isDriver else { return }
+        if hasSyncedSession, id != sessionId { return }
+        connectivity.receivedMatchReset = nil
+        startNewMatch(notifyRemote: false)
     }
 
     private func handleIncomingWorkoutEnd(_ id: UUID) {
@@ -150,11 +163,14 @@ class WorkoutSessionViewModel: ObservableObject {
         startTimer()
     }
 
-    func startMatch(options: MatchOptions, isRemote: Bool = false) {
+    func startMatch(options: MatchOptions, sessionId: UUID? = nil, isRemote: Bool = false) {
         isDriver = !isRemote
         hasSyncedSession = true
+        // 원격 채택 시 자기 sessionId를 상대 것으로 맞춘다. 안 그러면 workoutEnd·matchReset
+        // 같은 sessionId 가드가 걸린 신호를 init UUID와 불일치로 모두 무시해버린다.
+        if let sessionId { self.sessionId = sessionId }
         _currentSession = MatchSession(
-            workoutSessionId: sessionId,
+            workoutSessionId: self.sessionId,
             options: options,
             startedAt: startedAt ?? Date(),
             kcalAtStart: 0
@@ -170,7 +186,7 @@ class WorkoutSessionViewModel: ObservableObject {
 
         if !isRemote {
             connectivity.sendSessionStart(SessionStartMessage(
-                sessionId: sessionId,
+                sessionId: self.sessionId,
                 options: options,
                 workoutStartDate: startedAt ?? Date()
             ))
@@ -208,7 +224,10 @@ class WorkoutSessionViewModel: ObservableObject {
         startMatch(options: options, isRemote: !isDriver)
     }
 
-    func startNewMatch() {
+    func startNewMatch(notifyRemote: Bool = true) {
+        if notifyRemote, isDriver, case .playing = phase {
+            connectivity.sendMatchReset(sessionId: sessionId)
+        }
         _currentSession = nil
         phase = .modeSelection
     }
@@ -223,6 +242,7 @@ class WorkoutSessionViewModel: ObservableObject {
         _currentSession = nil
         phase = .modeSelection
         liveActivity.end()
+        connectivity.clearSessionContext()
         if notifyRemote { connectivity.sendWorkoutEnd(sessionId: sessionId) }
     }
 
@@ -336,6 +356,10 @@ class WorkoutSessionViewModel: ObservableObject {
     extension WorkoutSessionViewModel {
         func handleIncomingWorkoutEndForTest(_ id: UUID) {
             handleIncomingWorkoutEnd(id)
+        }
+
+        func handleIncomingMatchResetForTest(_ id: UUID) {
+            handleIncomingMatchReset(id)
         }
 
         var currentSessionIdForTest: UUID {
