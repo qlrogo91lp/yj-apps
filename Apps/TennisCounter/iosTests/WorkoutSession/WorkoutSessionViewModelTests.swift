@@ -342,6 +342,19 @@ struct WorkoutSessionViewModelTests {
         #expect(vm.remoteWorkoutEnded == true)
     }
 
+    @Test @MainActor func staleWorkoutEndDoesNotEndCurrentMatch() {
+        let vm = WorkoutSessionViewModel()
+        vm.startSession()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        let unrelated = UUID()
+        vm.handleIncomingWorkoutEndForTest(unrelated)
+        #expect(vm.remoteWorkoutEnded == false)
+        guard case .playing = vm.phase else {
+            Issue.record("stale 종료는 무시되고 playing 유지되어야 함")
+            return
+        }
+    }
+
     @Test @MainActor func saveFromWatchPersistsMatch() throws {
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
         let container = try ModelContainer(for: Match.self, SetRecord.self, configurations: config)

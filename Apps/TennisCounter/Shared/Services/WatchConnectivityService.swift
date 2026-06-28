@@ -270,7 +270,7 @@ final class WatchConnectivityService: NSObject, ObservableObject {
     }
 
     func sendWorkoutEnd(sessionId: UUID) {
-        sendRealtimeOnly([
+        sendReliably([
             "type": WCMessageType.workoutEnd.rawValue,
             "sessionId": sessionId.uuidString,
         ])
