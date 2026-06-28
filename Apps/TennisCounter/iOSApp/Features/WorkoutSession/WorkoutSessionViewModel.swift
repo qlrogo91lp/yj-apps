@@ -163,11 +163,14 @@ class WorkoutSessionViewModel: ObservableObject {
         startTimer()
     }
 
-    func startMatch(options: MatchOptions, isRemote: Bool = false) {
+    func startMatch(options: MatchOptions, sessionId: UUID? = nil, isRemote: Bool = false) {
         isDriver = !isRemote
         hasSyncedSession = true
+        // 원격 채택 시 자기 sessionId를 상대 것으로 맞춘다. 안 그러면 workoutEnd·matchReset
+        // 같은 sessionId 가드가 걸린 신호를 init UUID와 불일치로 모두 무시해버린다.
+        if let sessionId { self.sessionId = sessionId }
         _currentSession = MatchSession(
-            workoutSessionId: sessionId,
+            workoutSessionId: self.sessionId,
             options: options,
             startedAt: startedAt ?? Date(),
             kcalAtStart: 0
@@ -183,7 +186,7 @@ class WorkoutSessionViewModel: ObservableObject {
 
         if !isRemote {
             connectivity.sendSessionStart(SessionStartMessage(
-                sessionId: sessionId,
+                sessionId: self.sessionId,
                 options: options,
                 workoutStartDate: startedAt ?? Date()
             ))

@@ -355,6 +355,28 @@ struct WorkoutSessionViewModelTests {
         }
     }
 
+    @Test @MainActor func remoteStartMatchSyncsSessionIdForWorkoutEnd() {
+        let vm = WorkoutSessionViewModel()
+        let sid = UUID()
+        vm.startSession()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false), sessionId: sid, isRemote: true)
+        #expect(vm.currentSessionIdForTest == sid) // 원격 채택 시 sessionId가 상대 것으로 동기화됨
+        vm.handleIncomingWorkoutEndForTest(sid)
+        #expect(vm.remoteWorkoutEnded == true) // 동기화된 sessionId 덕분에 workoutEnd가 적용됨
+    }
+
+    @Test @MainActor func remoteStartMatchSyncsSessionIdForMatchReset() {
+        let vm = WorkoutSessionViewModel()
+        let sid = UUID()
+        vm.startSession()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false), sessionId: sid, isRemote: true)
+        vm.handleIncomingMatchResetForTest(sid)
+        guard case .modeSelection = vm.phase else {
+            Issue.record("sessionId 동기화 후 matchReset이 적용되어 모드선택으로 복귀해야 함")
+            return
+        }
+    }
+
     @Test @MainActor func mirrorMatchResetReturnsToModeSelection() {
         let vm = WorkoutSessionViewModel()
         vm.startSession()
