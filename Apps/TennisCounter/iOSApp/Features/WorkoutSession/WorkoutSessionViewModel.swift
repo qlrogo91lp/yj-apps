@@ -115,6 +115,19 @@ class WorkoutSessionViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] id in self?.handleIncomingWorkoutEnd(id) }
             .store(in: &cancellables)
+
+        connectivity.$receivedMatchReset
+            .compactMap(\.self)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] id in self?.handleIncomingMatchReset(id) }
+            .store(in: &cancellables)
+    }
+
+    private func handleIncomingMatchReset(_ id: UUID) {
+        guard !isDriver else { return }
+        if hasSyncedSession, id != sessionId { return }
+        connectivity.receivedMatchReset = nil
+        startNewMatch(notifyRemote: false)
     }
 
     private func handleIncomingWorkoutEnd(_ id: UUID) {
@@ -208,7 +221,10 @@ class WorkoutSessionViewModel: ObservableObject {
         startMatch(options: options, isRemote: !isDriver)
     }
 
-    func startNewMatch() {
+    func startNewMatch(notifyRemote: Bool = true) {
+        if notifyRemote, isDriver, case .playing = phase {
+            connectivity.sendMatchReset(sessionId: sessionId)
+        }
         _currentSession = nil
         phase = .modeSelection
     }
@@ -337,6 +353,10 @@ class WorkoutSessionViewModel: ObservableObject {
     extension WorkoutSessionViewModel {
         func handleIncomingWorkoutEndForTest(_ id: UUID) {
             handleIncomingWorkoutEnd(id)
+        }
+
+        func handleIncomingMatchResetForTest(_ id: UUID) {
+            handleIncomingMatchReset(id)
         }
 
         var currentSessionIdForTest: UUID {

@@ -13,6 +13,7 @@ private enum WCMessageType: String {
     case metrics
     case workoutEnd
     case sessionCleared
+    case matchReset
 }
 
 struct SessionStartMessage {
@@ -227,6 +228,7 @@ final class WatchConnectivityService: NSObject, ObservableObject {
     @Published var receivedMatchSaveResult: MatchSaveResultMessage?
     @Published var receivedMetrics: WorkoutMetrics?
     @Published var receivedWorkoutEnd: UUID?
+    @Published var receivedMatchReset: UUID?
 
     override private init() {
         super.init()
@@ -312,6 +314,15 @@ final class WatchConnectivityService: NSObject, ObservableObject {
         ])
     }
 
+    /// 드라이버가 진행 중 매치를 중간에 버릴 때(뒤로가기) 미러도 모드선택으로 돌아가도록 알린다.
+    func sendMatchReset(sessionId: UUID) {
+        SyncLog.session("SENT matchReset")
+        sendReliably([
+            "type": WCMessageType.matchReset.rawValue,
+            "sessionId": sessionId.uuidString,
+        ])
+    }
+
     private func sendRealtimeOnly(_ dict: [String: Any]) {
         guard WCSession.default.activationState == .activated,
               WCSession.default.isReachable else { return }
@@ -355,6 +366,11 @@ final class WatchConnectivityService: NSObject, ObservableObject {
                 if Self.isWorkoutEndStale(sentAt: message["sentAt"] as? Double) { break }
                 if let idStr = message["sessionId"] as? String, let id = UUID(uuidString: idStr) {
                     self.receivedWorkoutEnd = id
+                }
+            case WCMessageType.matchReset.rawValue:
+                SyncLog.session("RECV matchReset")
+                if let idStr = message["sessionId"] as? String, let id = UUID(uuidString: idStr) {
+                    self.receivedMatchReset = id
                 }
             default:
                 break
