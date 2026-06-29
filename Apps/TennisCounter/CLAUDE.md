@@ -239,6 +239,7 @@ ScreenName/Components/  ← 특정 View 전용 (가장 낮은 계층)
 
 ```
 docs/superpowers/
+├── ideas/       # 사전 아이디어·타당성 검토 (구현 결정 전)
 ├── specs/
 │   ├── ios/     # iOS 앱 관련 스펙
 │   └── watch/   # Watch 앱 관련 스펙
@@ -247,6 +248,14 @@ docs/superpowers/
 │   └── watch/   # Watch 앱 관련 구현 계획
 └── logs/        # 버그 수정·리팩터링 작업 기록
 ```
+
+**ideas 폴더**
+
+아직 할지 말지 결정하지 않은 아이디어·타당성/스코핑 검토를 둔다. specs(확정 설계)·plans(구현 계획)에 들어가기 전 단계의 탐색 문서다. 공수 산정, 재사용성 분석, 기술 가능성 판단 등을 보존하는 것이 목적.
+
+- 파일명: `{설명}.md` (e.g., `workout-kit-spm-feasibility.md`) — 날짜 prefix 없음
+- 플랫폼 구분 없이 `ideas/` 아래 flat하게 둔다 (여러 타겟에 걸치거나 플랫폼 무관한 경우가 많으므로)
+- 검토 중 문서이므로 커밋 여부는 사용자 판단에 따른다 (기본은 미커밋)
 
 **logs 폴더**
 
