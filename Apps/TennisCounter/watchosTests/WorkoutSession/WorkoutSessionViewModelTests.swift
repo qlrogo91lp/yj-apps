@@ -1,6 +1,7 @@
 import Foundation
 @testable import TennisCounter_Watch_App
 import Testing
+import WorkoutCore
 
 struct WorkoutSessionViewModelTests {
     @Test @MainActor func finishMatchSetsPhaseImmediately() {
@@ -139,20 +140,20 @@ struct WorkoutSessionViewModelTests {
     }
 
     @Test @MainActor func metricsHeartRateReflectsHealthKit() {
-        HealthKitService.shared.currentHeartRate = 140
-        defer { HealthKitService.shared.currentHeartRate = 0 }
-        let vm = WorkoutSessionViewModel()
+        let healthKit = WorkoutSessionService(configuration: .tennis)
+        healthKit.setLiveMetricsForTesting(heartRate: 140)
+        let vm = WorkoutSessionViewModel(healthKit: healthKit)
         vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
         vm.broadcastMetrics()
         #expect(vm.lastMetrics?.heartRate == 140)
     }
 
     @Test @MainActor func metricsCaloriesAreNetOfStart() {
-        HealthKitService.shared.currentCalories = 100
-        defer { HealthKitService.shared.currentCalories = 0 }
-        let vm = WorkoutSessionViewModel()
+        let healthKit = WorkoutSessionService(configuration: .tennis)
+        healthKit.setLiveMetricsForTesting(calories: 100)
+        let vm = WorkoutSessionViewModel(healthKit: healthKit)
         vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
-        HealthKitService.shared.currentCalories = 150
+        healthKit.setLiveMetricsForTesting(calories: 150)
         vm.broadcastMetrics()
         #expect(vm.lastMetrics?.calories == 50)
     }
