@@ -1,4 +1,4 @@
-# WorkoutKit SPM 추출 타당성 검토
+# RalliKit SPM 추출 타당성 검토
 
 - 작성일: 2026-06-29 / **갱신: 2026-07-13** (소비자 앱 2개 확정, 패키지·레포 전략 및 API 설계 구체화)
 - 상태: **설계 확정 (구현 착수 전)** — 미커밋
@@ -14,7 +14,7 @@
 
 | 재사용 대상 | 테니스 (Ralli) | 헬스 기록 (신규) | 골프 카운터 (업데이트) |
 |---|---|---|---|
-| HealthKit 워크아웃 측정 | ✅ `.tennis` | ✅ 종목 가변 | ✅ `.golf` |
+| HealthKit 워크아웃 측정 | ✅ `.tennis` | ✅ `.traditionalStrengthTraining` (근력운동) | ✅ `.golf` |
 | WC 전송 코어 | ✅ 실시간 + 큐잉 | ✅ 큐잉 위주 | ✅ 큐잉 위주 (실시간 불필요) |
 | SwiftData + CloudKit 컨테이너/서비스 | ✅ | ✅ | ✅ |
 
@@ -34,14 +34,17 @@
 - **B. 테니스 레포 루트에 Package.swift**: SPM 원격 참조는 레포 루트에 Package.swift가 필요 → 테니스 레포가 곧 패키지 레포가 되어, 골프·헬스가 테니스 앱 소스 전체를 의존성으로 끌어오고 앱 릴리즈 태그와 패키지 버전 태그가 섞임.
 - **C. 파일 복사**: 공수 최소(반나절)지만 콜드런치/staleness 버그 픽스가 복사본 3개로 갈라짐. 새 앱에서 같은 버그가 또 터진다.
 
-### 네이밍 주의
+### 네이밍 (2026-07-13 확정)
 
-⚠️ 가칭 "WorkoutKit"은 **Apple 공식 프레임워크(iOS 17 WorkoutKit)와 모듈명이 충돌**한다. 레포명은 `workout-kit`이어도 되지만 패키지/모듈명은 다른 것으로 (예: `SweatKit`, `ActiveCore`, `FitFoundation`). 구현 착수 시 확정.
+**패키지명: `RalliKit`** — 이 인프라가 Ralli(테니스 앱)에서 파생됐음을 이름에 남긴다. 개인 사용 전제라 타 앱(골프·헬스)에서 `import` 시의 브랜드 어색함은 감수. 레포명은 `ralli-kit`.
+
+- ⚠️ 가칭이던 "WorkoutKit"은 **Apple 공식 프레임워크(iOS 17 WorkoutKit)와 모듈명이 충돌**해서 기각. `RalliKit`은 충돌 없음.
+- product/모듈명(`WorkoutCore`·`ConnectivityCore`·`PersistenceCore`)은 그대로 유지 — Apple 프레임워크와 겹치지 않는다.
 
 ## 패키지 구조
 
 ```
-workout-kit/                      # 새 GitHub 레포 (1개)
+ralli-kit/                        # 새 GitHub 레포 (1개)
 ├── Package.swift
 ├── Sources/
 │   ├── WorkoutCore/              # HealthKit 워크아웃 측정
@@ -57,7 +60,7 @@ workout-kit/                      # 새 GitHub 레포 (1개)
 ```swift
 // Package.swift
 let package = Package(
-    name: "WorkoutKit",  // 모듈명 충돌 — 확정 시 변경
+    name: "RalliKit",
     platforms: [.iOS(.v17), .watchOS(.v10)],
     products: [
         .library(name: "WorkoutCore", targets: ["WorkoutCore"]),
@@ -117,7 +120,7 @@ public final class WorkoutSessionService: NSObject, ObservableObject {
     configuration: .init(activityType: .golf)
 )
 // 테니스: .init(activityType: .tennis)
-// 헬스: 시작 화면에서 사용자가 고른 종목으로 생성
+// 헬스: .init(activityType: .traditionalStrengthTraining, locationType: .indoor)
 ```
 
 기존 `HealthKitService.shared` 호출부(앱 4파일 + 테스트 3파일)는 `@EnvironmentObject`/생성자 주입으로 전환. 로직은 불변.
@@ -242,7 +245,7 @@ let history = try store.fetchAll(sortBy: [SortDescriptor(\.endedAt, order: .reve
 
 | 단계 | 작업 | 공수 |
 |---|---|---|
-| 0 | `workout-kit` 레포 생성 + 스캐폴딩, 테니스 양 타겟 로컬 링크 | 0.5일 |
+| 0 | `ralli-kit` 레포 생성 + 스캐폴딩, 테니스 양 타겟 로컬 링크 | 0.5일 |
 | 1 | WorkoutCore 추출 + 테니스 마이그레이션 (싱글톤→DI 포함) | 1~1.5일 |
 | 2 | ConnectivityCore 추출 + 테니스 마이그레이션 — **실기기 2대 회귀 필수** (시뮬레이터로 연동 버그 재현 불가) | 2~3일 |
 | 3 | PersistenceCore 추출 (골프·헬스 확정으로 스킵하지 않음) | 1~1.5일 |
