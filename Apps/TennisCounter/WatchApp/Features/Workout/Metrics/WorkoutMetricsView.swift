@@ -1,7 +1,8 @@
 import SwiftUI
+import WorkoutCore
 
 struct WorkoutMetricsView: View {
-    @ObservedObject var healthKit: HealthKitService
+    @ObservedObject var healthKit: WorkoutSessionService
     let isPaused: Bool
     @State private var heartScale: CGFloat = 1.0
 
@@ -54,10 +55,10 @@ struct WorkoutMetricsView: View {
     }
 }
 
-#Preview("Active") {
-    let service = HealthKitService.shared
-    service.elapsedSeconds = 1523
-    service.currentCalories = 245
-    service.currentHeartRate = 102
-    return WorkoutMetricsView(healthKit: service, isPaused: false)
-}
+#if DEBUG
+    #Preview("Active") {
+        let service = WorkoutSessionService(configuration: .tennis)
+        service.setLiveMetricsForTesting(heartRate: 102, calories: 245, elapsedSeconds: 1523)
+        return WorkoutMetricsView(healthKit: service, isPaused: false)
+    }
+#endif

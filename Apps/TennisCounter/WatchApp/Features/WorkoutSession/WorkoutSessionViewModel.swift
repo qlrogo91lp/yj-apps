@@ -1,6 +1,7 @@
 import Combine
 import Foundation
 import WidgetKit
+import WorkoutCore
 
 @MainActor
 class WorkoutSessionViewModel: ObservableObject {
@@ -8,7 +9,7 @@ class WorkoutSessionViewModel: ObservableObject {
     @Published var isPaused: Bool = false
     @Published var remoteWorkoutEnded: Bool = false
 
-    let healthKit = HealthKitService.shared
+    let healthKit: WorkoutSessionService
     let workoutSessionId: UUID = .init()
     @Published private(set) var lastMetrics: WorkoutMetrics?
 
@@ -30,7 +31,10 @@ class WorkoutSessionViewModel: ObservableObject {
     private var saveAttemptToken = 0
     private let ackTimeoutSeconds: TimeInterval
 
-    init(metricsThrottle: TimeInterval = 5, ackTimeoutSeconds: TimeInterval = 8) {
+    init(healthKit: WorkoutSessionService = WorkoutSessionService(configuration: .tennis),
+         metricsThrottle: TimeInterval = 5, ackTimeoutSeconds: TimeInterval = 8)
+    {
+        self.healthKit = healthKit
         self.metricsThrottle = metricsThrottle
         self.ackTimeoutSeconds = ackTimeoutSeconds
         healthKit.$isPaused
