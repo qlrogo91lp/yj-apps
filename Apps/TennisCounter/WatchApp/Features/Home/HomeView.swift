@@ -3,7 +3,7 @@ import SwiftUI
 struct HomeView: View {
     @State private var navigateToWorkout = false
     @State private var remoteSession: SessionStartMessage?
-    private let connectivity = WatchConnectivityService.shared
+    private let connectivity = MatchConnectivity.shared
 
     var body: some View {
         NavigationStack {
