@@ -6,15 +6,25 @@ let package = Package(
     platforms: [.iOS(.v17), .watchOS(.v10), .macOS(.v14)],
     products: [
         .library(name: "WorkoutCore", targets: ["WorkoutCore"]),
+        .library(name: "ConnectivityCore", targets: ["ConnectivityCore"]),
     ],
     targets: [
         .target(
             name: "WorkoutCore",
             swiftSettings: [.swiftLanguageMode(.v5)]
         ),
+        .target(
+            name: "ConnectivityCore",
+            swiftSettings: [.swiftLanguageMode(.v5)]
+        ),
         .testTarget(
             name: "WorkoutCoreTests",
             dependencies: ["WorkoutCore"],
+            swiftSettings: [.swiftLanguageMode(.v5)]
+        ),
+        .testTarget(
+            name: "ConnectivityCoreTests",
+            dependencies: ["ConnectivityCore"],
             swiftSettings: [.swiftLanguageMode(.v5)]
         ),
     ]
