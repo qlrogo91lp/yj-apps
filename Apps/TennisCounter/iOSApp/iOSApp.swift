@@ -4,7 +4,7 @@ import SwiftUI
 @main
 struct TennisCounterApp: App {
     let container: ModelContainer
-    private let watchConnectivity = WatchConnectivityService.shared
+    private let watchConnectivity = MatchConnectivity.shared
     @State private var isLaunching = true
 
     init() {
@@ -43,7 +43,7 @@ struct MainTabView: View {
     @State private var isMatchActive = false
     @State private var selectedTab: Int = 0
     @State private var remoteSession: SessionStartMessage?
-    private let connectivity = WatchConnectivityService.shared
+    private let connectivity = MatchConnectivity.shared
 
     var body: some View {
         ZStack {
