@@ -1,4 +1,4 @@
-/// 전송 경로. 기존 WatchConnectivityService의 3가지 발신 함수를 일반화한 것.
+/// 전송 경로. 원본 앱의 3가지 발신 함수(sendRealtimeOnly/sendReliably/send)를 일반화한 것.
 public enum Delivery {
     /// sendMessage만, 미도달 시 드롭 — 실시간 메트릭용 (기존 sendMetrics 경로)
     case realtimeOnly
