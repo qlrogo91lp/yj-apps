@@ -84,7 +84,7 @@ final class MatchConnectivity: ObservableObject {
         service.clearSessionContext()
     }
 
-    // MARK: - Staleness (구 WatchConnectivityService에서 이동)
+    // MARK: - Staleness (구 폰↔워치 통신 서비스에서 이동)
 
     static let workoutEndStalenessThreshold: TimeInterval = 60
 
