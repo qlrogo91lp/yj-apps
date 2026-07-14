@@ -55,8 +55,10 @@ struct WorkoutMetricsView: View {
     }
 }
 
-#Preview("Active") {
-    let service = WorkoutSessionService(configuration: .tennis)
-    service.setLiveMetricsForTesting(heartRate: 102, calories: 245, elapsedSeconds: 1523)
-    return WorkoutMetricsView(healthKit: service, isPaused: false)
-}
+#if DEBUG
+    #Preview("Active") {
+        let service = WorkoutSessionService(configuration: .tennis)
+        service.setLiveMetricsForTesting(heartRate: 102, calories: 245, elapsedSeconds: 1523)
+        return WorkoutMetricsView(healthKit: service, isPaused: false)
+    }
+#endif
