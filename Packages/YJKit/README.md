@@ -39,6 +39,7 @@ struct RoundRecordMessage: ConnectivityMessage {
 }
 
 let connectivity = ConnectivityService()
+// ⚠️ 서비스는 프로세스당 정확히 하나만 생성할 것 — 두 번째 인스턴스가 WCSession delegate를 빼앗아 첫 인스턴스의 수신이 조용히 죽는다.
 // ⚠️ onReceive 등록은 서비스를 생성한 그 main-queue turn 안에서 마칠 것 —
 //    콜드런치 applicationContext 배달이 등록 전에 도착하면 유실된다.
 connectivity.onReceive(RoundRecordMessage.self, maxAge: 60) { record in ... }

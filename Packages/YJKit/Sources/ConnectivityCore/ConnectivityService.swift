@@ -14,6 +14,7 @@
         private let router = MessageRouter()
 
         override public init() {
+            dispatchPrecondition(condition: .onQueue(.main))
             super.init()
             guard WCSession.isSupported() else { return }
             WCSession.default.delegate = self
@@ -28,6 +29,7 @@
             maxAge: TimeInterval? = nil,
             handler: @escaping @MainActor (M) -> Void
         ) {
+            dispatchPrecondition(condition: .onQueue(.main))
             router.register(type: M.messageType, maxAge: maxAge) { dict in
                 guard let message = M(from: dict) else { return }
                 MainActor.assumeIsolated { handler(message) }
