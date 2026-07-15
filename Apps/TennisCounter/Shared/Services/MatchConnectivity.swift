@@ -20,7 +20,7 @@ final class MatchConnectivity: ObservableObject {
 
     private let service: ConnectivityService
 
-    init(service: ConnectivityService) {
+    private init(service: ConnectivityService) {
         self.service = service
 
         service.$isCounterpartReachable
