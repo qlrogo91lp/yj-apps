@@ -87,7 +87,7 @@ struct WorkoutSessionViewModelTests {
     }
 
     @Test @MainActor func startOwnMatchClearsStaleRemoteScoreState() {
-        let service = WatchConnectivityService.shared
+        let service = MatchConnectivity.shared
         service.receivedScoreState = ScoreState(
             myScore: 15, yourScore: 0,
             myGameScore: 3, yourGameScore: 2,
@@ -103,7 +103,7 @@ struct WorkoutSessionViewModelTests {
     }
 
     @Test @MainActor func remoteMatchStartDoesNotClearScoreState() {
-        let service = WatchConnectivityService.shared
+        let service = MatchConnectivity.shared
         let existing = ScoreState(
             myScore: 15, yourScore: 0,
             myGameScore: 3, yourGameScore: 2,

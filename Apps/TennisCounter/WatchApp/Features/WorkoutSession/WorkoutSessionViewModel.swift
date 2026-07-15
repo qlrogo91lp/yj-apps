@@ -13,7 +13,7 @@ class WorkoutSessionViewModel: ObservableObject {
     let workoutSessionId: UUID = .init()
     @Published private(set) var lastMetrics: WorkoutMetrics?
 
-    private let connectivity = WatchConnectivityService.shared
+    private let connectivity = MatchConnectivity.shared
     private let appGroupDefaults = UserDefaults(suiteName: "group.com.yj.TennisCounter")
     private let metricsThrottle: TimeInterval
     private var cancellables = Set<AnyCancellable>()

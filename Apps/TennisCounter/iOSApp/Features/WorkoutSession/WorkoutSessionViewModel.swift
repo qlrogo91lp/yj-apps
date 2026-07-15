@@ -20,7 +20,7 @@ class WorkoutSessionViewModel: ObservableObject {
     let scoreVM = ScoreViewModel()
     private var timer: Timer?
     private var cancellables = Set<AnyCancellable>()
-    private let connectivity = WatchConnectivityService.shared
+    private let connectivity = MatchConnectivity.shared
     private let liveActivity: LiveActivityControlling
     private(set) var isDriver = false
 

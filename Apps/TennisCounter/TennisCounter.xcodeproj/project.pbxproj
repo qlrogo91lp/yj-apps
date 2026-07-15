@@ -10,6 +10,8 @@
 		3974B8F52EBCDFA5002D0EA7 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 39BF174F2EBA37F60026184E /* WidgetKit.framework */; };
 		3974B8F62EBCDFA5002D0EA7 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 39BF17512EBA37F60026184E /* SwiftUI.framework */; };
 		3974B9032EBCDFA6002D0EA7 /* ComplicationAppExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3974B8F42EBCDFA5002D0EA7 /* ComplicationAppExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		3982E20A3006E3470006AFEE /* ConnectivityCore in Frameworks */ = {isa = PBXBuildFile; productRef = 3982E2093006E3470006AFEE /* ConnectivityCore */; };
+		3982E20C3006E3530006AFEE /* ConnectivityCore in Frameworks */ = {isa = PBXBuildFile; productRef = 3982E20B3006E3530006AFEE /* ConnectivityCore */; };
 		3988023C3005995300596EDB /* WorkoutCore in Frameworks */ = {isa = PBXBuildFile; productRef = 3988023B3005995300596EDB /* WorkoutCore */; };
 		399700FD2A1D9BC900D0D486 /* TennisCounter Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 399700FC2A1D9BC900D0D486 /* TennisCounter Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		39CDA6E12FB3173B009825BA /* Ralli.icon in Resources */ = {isa = PBXBuildFile; fileRef = 39CDA6E02FB3173B009825BA /* Ralli.icon */; };
@@ -158,6 +160,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3982E20A3006E3470006AFEE /* ConnectivityCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -165,6 +168,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3982E20C3006E3530006AFEE /* ConnectivityCore in Frameworks */,
 				3988023C3005995300596EDB /* WorkoutCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1187,6 +1191,16 @@
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		3982E2093006E3470006AFEE /* ConnectivityCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3988023A3005982500596EDB /* XCLocalSwiftPackageReference "../ralli-kit" */;
+			productName = ConnectivityCore;
+		};
+		3982E20B3006E3530006AFEE /* ConnectivityCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3988023A3005982500596EDB /* XCLocalSwiftPackageReference "../ralli-kit" */;
+			productName = ConnectivityCore;
+		};
 		3988023B3005995300596EDB /* WorkoutCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 3988023A3005982500596EDB /* XCLocalSwiftPackageReference "../ralli-kit" */;

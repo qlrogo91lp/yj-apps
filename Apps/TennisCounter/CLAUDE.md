@@ -48,9 +48,9 @@ Shared/
 │   └── SetRecord.swift      # 세트별 기록 struct
 └── Services/
     │  # 외부 프레임워크/시스템 API를 래핑하는 서비스 레이어.
-    ├── HealthKitService.swift          # 워크아웃 세션, 칼로리/BPM 측정
-    ├── MatchPersistenceService.swift   # SwiftData 경기 저장/조회
-    └── WatchConnectivityService.swift  # 폰↔워치 실시간 점수 동기화
+    ├── ConnectivityMessages.swift      # 워치↔폰 메시지 정의 (ConnectivityMessage 채택)
+    ├── MatchConnectivity.swift         # 폰↔워치 실시간 점수 동기화 (RalliKit ConnectivityCore 기반)
+    └── MatchPersistenceService.swift   # SwiftData 경기 저장/조회
 
 iOSApp/
 │  # iPhone 전용 타겟
