@@ -1,6 +1,6 @@
 import Foundation
 
-public struct WorkoutResult {
+public struct WorkoutResult: Equatable, Sendable {
     public let durationSeconds: Int
     public let caloriesBurned: Double
     public let averageHeartRate: Double?

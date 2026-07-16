@@ -17,7 +17,6 @@ public final class WorkoutSessionService: NSObject, ObservableObject {
     #endif
     public private(set) var startDate: Date?
     private var timer: Timer?
-    private var timerPausedAt: Date?
 
     private let typesToShare: Set<HKSampleType> = [
         HKQuantityType(.activeEnergyBurned),
@@ -33,6 +32,12 @@ public final class WorkoutSessionService: NSObject, ObservableObject {
     public init(configuration: WorkoutConfiguration) {
         self.configuration = configuration
         super.init()
+    }
+
+    /// 타이머 클로저가 [weak self]라 순환 참조는 없지만, 서비스가 해제되면
+    /// 런루프에 남은 타이머가 빈 틱을 계속 돌린다 — 해제 시점에 정리한다.
+    deinit {
+        timer?.invalidate()
     }
 
     public var isAvailable: Bool {
@@ -85,7 +90,6 @@ public final class WorkoutSessionService: NSObject, ObservableObject {
             guard let session = workoutSession else { return }
             session.pause()
             DispatchQueue.main.async { self.isPaused = true }
-            timerPausedAt = Date()
             timer?.invalidate()
             timer = nil
         }
@@ -99,7 +103,6 @@ public final class WorkoutSessionService: NSObject, ObservableObject {
                     self?.elapsedSeconds += 1
                 }
             }
-            timerPausedAt = nil
         }
 
         public func stopWorkout() async -> WorkoutResult? {

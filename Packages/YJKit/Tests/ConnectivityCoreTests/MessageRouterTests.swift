@@ -32,6 +32,17 @@ struct MessageRouterTests {
         #expect(delivered == true)
     }
 
+    /// 경계 의미론 고정: 필터는 `now - sentAt > maxAge`(초과)일 때만 드롭한다.
+    /// 정확히 maxAge와 같은 나이는 배달된다 — `>=`로 바뀌면 이 테스트가 깨진다.
+    @Test func messageExactlyAtMaxAgeBoundaryIsDelivered() {
+        let router = MessageRouter()
+        var delivered = false
+        router.register(type: "end", maxAge: 60) { _ in delivered = true }
+        let now = 1_000_000.0
+        router.route(["type": "end", "sentAt": now - 60], now: now)
+        #expect(delivered == true)
+    }
+
     @Test func staleMessageIsDroppedByMaxAgeFilter() {
         let router = MessageRouter()
         var delivered = false

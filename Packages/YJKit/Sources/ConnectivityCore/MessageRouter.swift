@@ -25,6 +25,11 @@ final class MessageRouter {
     }
 
     /// sentAt이 없는 메시지는 stale로 보지 않는다 (구버전 발신자 호환 — 기존 규칙 유지).
+    ///
+    /// ⚠️ `sentAt as? Double`: WCSession 수신 dict는 NSNumber 브리징이라 Double 캐스트가 항상
+    /// 성공하지만, 순수 Swift dict에 Int로 스탬프하는 발신자가 생기면 캐스트가 실패해 sentAt 없음으로
+    /// 취급된다(= staleness 필터 무력화). 현재 발신은 MessageEnvelope.stamp가 TimeInterval(Double)로
+    /// 통일하므로 도달 불가 경로 — 새 발신 경로를 추가할 때 이 전제를 깨지 않도록 주의.
     func route(_ dict: [String: Any], now: TimeInterval = Date().timeIntervalSince1970) {
         guard let type = dict["type"] as? String,
               let matched = registrations[type] else { return }
