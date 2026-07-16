@@ -7,6 +7,7 @@ let package = Package(
     products: [
         .library(name: "WorkoutCore", targets: ["WorkoutCore"]),
         .library(name: "ConnectivityCore", targets: ["ConnectivityCore"]),
+        .library(name: "PersistenceCore", targets: ["PersistenceCore"]),
     ],
     targets: [
         .target(
@@ -17,6 +18,10 @@ let package = Package(
             name: "ConnectivityCore",
             swiftSettings: [.swiftLanguageMode(.v5)]
         ),
+        .target(
+            name: "PersistenceCore",
+            swiftSettings: [.swiftLanguageMode(.v5)]
+        ),
         .testTarget(
             name: "WorkoutCoreTests",
             dependencies: ["WorkoutCore"],
@@ -25,6 +30,11 @@ let package = Package(
         .testTarget(
             name: "ConnectivityCoreTests",
             dependencies: ["ConnectivityCore"],
+            swiftSettings: [.swiftLanguageMode(.v5)]
+        ),
+        .testTarget(
+            name: "PersistenceCoreTests",
+            dependencies: ["PersistenceCore"],
             swiftSettings: [.swiftLanguageMode(.v5)]
         ),
     ]
