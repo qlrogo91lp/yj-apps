@@ -9,17 +9,17 @@ import SwiftUI
 
 struct ScoreView: View {
     @StateObject var scoreDetail: ScoreDetail
-    
+
     var body: some View {
-        
+
         HStack {
             Circle()
                 .fill(Color.white)
                 .frame(width: 30, height: 30)
-                .overlay() {
+                .overlay {
                     Circle().stroke(.gray, lineWidth: 4)
                 }
-                .overlay() {
+                .overlay {
                     Text("\(scoreDetail.id)")
                         .foregroundColor(.black)
                 }
@@ -31,9 +31,9 @@ struct ScoreView: View {
                         .foregroundColor(.blue)
 
                     Spacer()
-                    
+
                     let result = scoreDetail.score - Int(scoreDetail.maxHole)!
-                    
+
                     if scoreDetail.score == 0 {
                         Text("-")
                             .bold()
@@ -49,9 +49,9 @@ struct ScoreView: View {
                                 .foregroundColor(.green)
                         }
                     }
-                    
+
                     Spacer()
-                    
+
                     if scoreDetail.score == 0 {
                         Text("-")
                             .bold()
