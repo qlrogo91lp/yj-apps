@@ -9,11 +9,10 @@ import SwiftUI
 
 struct ScoreSetupView: View {
     @StateObject var scoreDetail: ScoreDetail
-    
-    
+
     var body: some View {
-        var select: Int = 3
-        
+        var select = 3
+
         VStack {
             HStack {
                 Text("Par \(scoreDetail.maxHole)")
@@ -21,30 +20,29 @@ struct ScoreSetupView: View {
                     .bold()
                     .foregroundColor(.blue)
                     .padding(.trailing)
-                
+
                 Text("+ \(scoreDetail.score)")
                     .font(.system(size: 30))
                     .bold()
                     .foregroundColor(.white)
                     .padding(.leading)
-                
+
             }
             .padding(.bottom)
-            
-            
+
             HStack {
                 Button(action: {
-                    if(scoreDetail.score < (Int(scoreDetail.maxHole)!)*2) {
+                    if scoreDetail.score < Int(scoreDetail.maxHole)! * 2 {
                         scoreDetail.score += 1
                     }
                 }, label: {
                     Circle()
                         .fill(Color.white)
                         .frame(width: 60, height: 60)
-                        .overlay() {
+                        .overlay {
                             Circle().stroke(.gray, lineWidth: 4)
                         }
-                        .overlay() {
+                        .overlay {
                             Image(systemName: "plus")
                                 .imageScale(.large)
                                 .bold()
@@ -52,20 +50,19 @@ struct ScoreSetupView: View {
                         }
                 }).buttonStyle(PlainButtonStyle())
                     .padding(.trailing)
-                
-                
+
                 Button(action: {
-                    if(scoreDetail.score > 0) {
+                    if scoreDetail.score > 0 {
                         scoreDetail.score -= 1
                     }
                 }, label: {
                     Circle()
                         .fill(Color.white)
                         .frame(width: 60, height: 60)
-                        .overlay() {
+                        .overlay {
                             Circle().stroke(.gray, lineWidth: 4)
                         }
-                        .overlay() {
+                        .overlay {
                             Image(systemName: "minus")
                                 .imageScale(.large)
                                 .bold()
@@ -73,16 +70,16 @@ struct ScoreSetupView: View {
                         }
                 }).buttonStyle(PlainButtonStyle())
                     .padding(.leading)
-                
+
             }
             .padding(.bottom)
             .padding(.horizontal)
-            
+
             HStack {
                 Button(action: {
                     select = Int(scoreDetail.maxHole)!
-                    
-                    if (select == 5) {
+
+                    if select == 5 {
                         select = 3
                         scoreDetail.maxHole = "3"
                     } else {
@@ -95,8 +92,7 @@ struct ScoreSetupView: View {
                         .foregroundColor(.blue)
                         .bold()
                 })
-                
-                
+
                 Button(action: {
                     scoreDetail.score = 0
                 }, label: {

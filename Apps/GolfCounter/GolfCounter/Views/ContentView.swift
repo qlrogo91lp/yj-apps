@@ -8,12 +8,12 @@
 import SwiftUI
 
 struct ContentView: View {
-    
+
     var body: some View {
         NavigationStack {
             ZStack {
                 Color.black.edgesIgnoringSafeArea(.all)
-                
+
                 VStack {
                     NavigationLink(destination: SingleGameView()) {
                         Text("Single Game")
@@ -34,4 +34,3 @@ struct ContentView: View {
 #Preview {
     ContentView()
 }
-

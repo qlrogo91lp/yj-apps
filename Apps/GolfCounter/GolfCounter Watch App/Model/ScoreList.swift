@@ -7,10 +7,9 @@
 
 import Foundation
 
-
 class ScoreList: ObservableObject {
-//    @Published var list: [ScoreDetail] 
-//    
+//    @Published var list: [ScoreDetail]
+//
 //    init() {
 //        self.list = [
 //            ScoreDetail(id: 1),

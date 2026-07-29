@@ -5,8 +5,8 @@
 //  Created by 윤재 on 2023/04/20.
 //
 
-import XCTest
 @testable import GolfCounter_Watch_App
+import XCTest
 
 final class GolfCounter_Watch_AppTests: XCTestCase {
 
@@ -18,7 +18,7 @@ final class GolfCounter_Watch_AppTests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
-    func testExample() throws {
+    func testExample() {
         // This is an example of a functional test case.
         // Use XCTAssert and related functions to verify your tests produce the correct results.
         // Any test you write for XCTest can be annotated as throws and async.
@@ -26,9 +26,9 @@ final class GolfCounter_Watch_AppTests: XCTestCase {
         // Tests marked async will run the test method on an arbitrary thread managed by the Swift runtime.
     }
 
-    func testPerformanceExample() throws {
+    func testPerformanceExample() {
         // This is an example of a performance test case.
-        self.measure {
+        measure {
             // Put the code you want to measure the time of here.
         }
     }

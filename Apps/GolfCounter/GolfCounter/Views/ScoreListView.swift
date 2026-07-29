@@ -27,21 +27,21 @@ struct ScoreListView: View {
     @StateObject var hole16 = ScoreDetail(id: 16)
     @StateObject var hole17 = ScoreDetail(id: 17)
     @StateObject var hole18 = ScoreDetail(id: 18)
-    
+
     var body: some View {
         let total: Int = hole1.score + hole2.score + hole3.score + hole4.score + hole5.score + hole6.score + hole7.score + hole8.score + hole9.score
-                    + hole10.score + hole11.score + hole12.score + hole13.score + hole14.score + hole15.score + hole16.score + hole17.score + hole18.score
-        
+            + hole10.score + hole11.score + hole12.score + hole13.score + hole14.score + hole15.score + hole16.score + hole17.score + hole18.score
+
         NavigationStack {
-            
+
             ZStack {
                 Color.black.edgesIgnoringSafeArea(.all)
-                
+
                 VStack {
                     Text("Total : \(total)")
                         .font(.title2)
                         .foregroundColor(.white)
-                    
+
                     List {
                         NavigationLink(destination: ScoreSetupView(scoreDetail: hole1)) {
                             ScoreView(scoreDetail: hole1)
@@ -101,11 +101,11 @@ struct ScoreListView: View {
                         .background(.black)
                 }
             }
-            
+
         }
     }
 }
 
-//#Preview {
+// #Preview {
 //    ScoreListView()
-//}
+// }
