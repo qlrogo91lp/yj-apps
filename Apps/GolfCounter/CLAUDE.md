@@ -126,6 +126,29 @@ This project uses **legacy `PBXGroup`** file references (`objectVersion = 56`), 
 - New `.swift` files must be added to the target in Xcode, or `project.pbxproj` must be edited to add both a `PBXBuildFile`/`PBXFileReference` pair and a `PBXGroup` entry.
 - A file needed by both apps must be added to **both** targets (or duplicated, per the current structure).
 
+## Git Workflow
+
+- `main`은 직접 push 금지 — 항상 브랜치를 만들고 PR을 통해 병합한다.
+- PR 머지 시 **squash 금지, 항상 일반 merge commit**을 사용한다 (저장소 설정에서 squash/rebase merge 버튼 자체를 비활성화해뒀다).
+
+  ```bash
+  gh pr merge <number> --merge --delete-branch
+  ```
+
+- 커밋 메시지는 **gitmoji**를 맨 앞에 붙인다 (`이모지 타입: 설명` 형태, Conventional Commits 타입과 병행):
+
+  | 이모지 | 타입 | 용도 |
+  |---|---|---|
+  | ✨ | feat | 새 기능 |
+  | 🐛 | fix | 버그 수정 |
+  | ♻️ | refactor | 동작 변경 없는 구조 개선 |
+  | 🎨 | style | 포맷팅/린트 자동 수정 등 동작 무관 변경 |
+  | 📝 | docs | 문서 |
+  | ✅ | test | 테스트 추가/수정 |
+  | 🔧 | chore | 설정, 빌드, 잡무 |
+  | 🔥 | remove | 코드/파일 삭제 |
+  | ⏪ | revert | 되돌리기 |
+
 ## Repo state
 
 - `.gitignore` covers macOS, Xcode user state (`xcuserdata/`), build products, and SPM/CocoaPods/Carthage/fastlane. `xcuserdata/` has been removed from the index, so local Xcode UI activity no longer shows up as diffs.
