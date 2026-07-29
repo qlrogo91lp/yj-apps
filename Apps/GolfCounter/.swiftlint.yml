@@ -1,0 +1,41 @@
+included:
+  - GolfCounter
+  - GolfCounter Watch App
+
+line_length:
+  warning: 150
+  error: 200
+
+type_body_length:
+  warning: 300
+  error: 500
+
+file_length:
+  warning: 500
+  error: 1000
+
+disabled_rules:
+  - trailing_comma
+  - todo
+  - opening_brace
+
+opt_in_rules:
+  - empty_count
+  - closure_spacing
+  - first_where
+  - modifier_order
+  # maxHole(String)을 Int로 강제 언래핑하는 기존 패턴을 드러내기 위해 켜둔다.
+  # warning 레벨이라 make lint는 통과하며, 모델을 Int/HoleType으로 바꿀 때 함께 사라진다.
+  - force_unwrapping
+
+type_name:
+  excluded:
+    - GolfCounter_Watch_AppApp
+
+identifier_name:
+  min_length:
+    warning: 1
+    error: 1
+  max_length:
+    warning: 50
+    error: 60

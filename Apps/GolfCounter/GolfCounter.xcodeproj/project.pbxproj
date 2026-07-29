@@ -340,6 +340,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 39EB515329F0C05C00885CEF /* Build configuration list for PBXNativeTarget "GolfCounter" */;
 			buildPhases = (
+				39EB520029F0C05B00885CEF /* SwiftLint */,
 				39EB50FF29F0C05B00885CEF /* Sources */,
 				39EB510029F0C05B00885CEF /* Frameworks */,
 				39EB510129F0C05B00885CEF /* Resources */,
@@ -549,6 +550,28 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		39EB520029F0C05B00885CEF /* SwiftLint */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = SwiftLint;
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "export PATH=\"$PATH:/opt/homebrew/bin\"\nif which swiftlint > /dev/null; then\n  swiftlint\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		39EB50FF29F0C05B00885CEF /* Sources */ = {
