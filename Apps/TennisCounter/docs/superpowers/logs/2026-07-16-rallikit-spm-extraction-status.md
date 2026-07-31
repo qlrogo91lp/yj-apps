@@ -61,14 +61,22 @@
 - **iOS 전용**: Watch·Complication은 저장소를 쓰지 않아 `PersistenceCore`를 iOS 타겟에만 링크하고,
   `MatchPersistenceService.swift`를 `Shared/Services/` → `iOSApp/Services/`로 이동했다
   (`Shared/`에 남기면 Watch 빌드가 없는 모듈을 import하게 된다).
-- 의도된 동작 변경: CloudKit 폴백이 실제로 로컬로 떨어진다 — 기존 `iOSApp.swift`의 폴백은 두 설정 모두
-  `cloudKitDatabase` 기본값 `.automatic`이라 같은 시도를 반복하는 셈이었고, 진짜 실패 시 `fatalError`였다.
+- 의도된 동작 변경 3가지:
+  1. CloudKit 폴백이 실제로 로컬로 떨어진다 — 기존 `iOSApp.swift`의 폴백은 두 설정 모두 `cloudKitDatabase`
+     기본값 `.automatic`이라 같은 시도를 반복하는 셈이었다. 팩토리는 폴백에서 `.none`을 명시하므로 진짜
+     로컬 스토어로 떨어진다 (단, 로컬 폴백조차 실패하면 팩토리도 기존과 동일하게 `fatalError` — 이 계약은
+     의도적으로 유지).
+  2. `upsert` 내부 fetch 실패도 `PersistenceError.saveFailed`로 감싸진다 (원본은 save 실패만 감쌌음 — 호출부가
+     에러 종류를 구분 안 해서 실질 영향 없음).
+  3. rollback 주체가 코어로 이동 (동작 동일, 위치만 이동).
 - 스코프 밖: `HistoryViewModel`(페이지네이션 — 코어가 offset/limit 미지원), `SummaryView`의 `@Query`.
 
 ## 실행 방법 메모 (재사용 가능한 교훈)
 
 - 실행 방식: `superpowers:subagent-driven-development` (태스크별 서브에이전트 + 리뷰 + 최종 전체 브랜치 리뷰).
-- watchOS 시뮬레이터: `name=Apple Watch Series 11 (46mm)` **매칭 실패** — 항상 `id=8502B1AE-7DCB-4442-9D80-FD34FD0370E1` 사용.
+- watchOS 시뮬레이터: `name=Apple Watch Series 11 (46mm)` **매칭 실패** — 항상 UDID로 지정. UDID는 머신마다 다르므로
+  매 세션 `xcrun simctl list devices available`로 다시 확인할 것 (2026-07-16 머신에서는 `8502B1AE-7DCB-4442-9D80-FD34FD0370E1`,
+  2026-07-30 머신에서는 `D7B72A34-B290-40CE-ADF1-6076F5DB23D0` — 이름 중복 기기까지 있어 UDID 고정이 필수였다).
 - 각 Plan에서 신규/변경 타겟은 **Debug + Release 둘 다** 빌드 검증 (Plan 1 교훈).
 - Xcode GUI 필요 지점(로컬 패키지 product를 타겟 Frameworks에 추가)은 항상 사용자가 직접 수행 — `project.pbxproj` 자동 편집 도구 사용 금지 (`PBXFileSystemSynchronizedRootGroup` 프로젝트라 파일 추가/삭제만 자동, 패키지 의존성 추가는 수동).
 
@@ -107,9 +115,10 @@ Plan 1·2·3 모두 머지 자체는 안전하지만(와이어 포맷 하위 호
 
 1. 위 실기기 회귀 전부 통과
 2. **테니스 프로젝트의 RalliKit 참조를 로컬 → 원격으로 전환** (`branch: "main"` 또는 semver 태그) — 지금은 로컬 참조라 "어느 시점 ralli-kit 코드가 들어갔는지" 기록이 없음. 전환 후 로컬 오버라이드는 반드시 제거 (남기면 태그를 올려도 Xcode가 조용히 무시함).
-3. Defer된 하이지니 항목 처리 여부 판단 (아래 참조 — 필수는 아님)
 
-## Defer된 하이지니 항목 (후속 커밋 후보, Plan 3 착수 전 일괄 처리 권장)
+## Defer된 하이지니 항목 — ✅ 완료 (ralli-kit `00d6f52`)
+
+Plan 3 착수 전 일괄 처리 권장이었던 아래 5개 항목은 ralli-kit `00d6f52`("🧹 Defer된 하이지니 항목 일괄 처리")에서 모두 처리됨 — 남은 작업 없음.
 
 - `WorkoutSessionService.timerPausedAt` — write-only 데드코드 (원본 유래)
 - `WorkoutConfiguration`/`WorkoutResult`에 `Sendable`/`Equatable` 부여
