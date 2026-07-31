@@ -49,8 +49,7 @@ Shared/
 └── Services/
     │  # 외부 프레임워크/시스템 API를 래핑하는 서비스 레이어.
     ├── ConnectivityMessages.swift      # 워치↔폰 메시지 정의 (ConnectivityMessage 채택)
-    ├── MatchConnectivity.swift         # 폰↔워치 실시간 점수 동기화 (RalliKit ConnectivityCore 기반)
-    └── MatchPersistenceService.swift   # SwiftData 경기 저장/조회
+    └── MatchConnectivity.swift         # 폰↔워치 실시간 점수 동기화 (RalliKit ConnectivityCore 기반)
 
 iOSApp/
 │  # iPhone 전용 타겟
@@ -59,7 +58,8 @@ iOSApp/
 ├── Extensions/
 │   └── Date+Month.swift   # Date 월 표기 헬퍼
 ├── Services/
-│   └── LiveActivityService.swift  # Live Activity 시작/업데이트/종료
+│   ├── LiveActivityService.swift  # Live Activity 시작/업데이트/종료
+│   └── MatchPersistenceService.swift  # SwiftData 경기 저장/조회 (RalliKit PersistenceCore 위임)
 ├── Components/
 │   ├── BackButton.swift   # 공통 뒤로가기 버튼
 │   ├── BrandTitle.swift   # 앱 브랜드 타이틀 컴포넌트
@@ -344,3 +344,6 @@ PR 머지 시 squash 금지. 항상 일반 merge commit을 사용한다.
 ```bash
 gh pr merge <number> --merge --delete-branch
 ```
+
+
+## 
