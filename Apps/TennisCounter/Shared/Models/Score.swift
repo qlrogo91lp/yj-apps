@@ -16,7 +16,7 @@ class Score: ObservableObject {
         case tieBreak
     }
 
-    private enum NormalState: Equatable {
+    fileprivate enum NormalState: Equatable {
         case zero, fifteen, thirty, forty, advantage
     }
 
@@ -26,6 +26,17 @@ class Score: ObservableObject {
         let myTieBreak: Int
         let yourTieBreak: Int
         let gameMode: GameMode
+    }
+
+    /// Score의 복원 가능한 전체 상태. undo 스택은 ScoreViewModel이 소유하고,
+    /// Score는 자기 상태를 봉인해 넘기고 되돌리는 방법만 제공한다.
+    /// 멤버가 fileprivate라 다른 파일에서는 내부를 볼 수 없는 불투명 값이다.
+    struct Snapshot {
+        fileprivate let myNormal: NormalState
+        fileprivate let yourNormal: NormalState
+        fileprivate let myTieBreak: Int
+        fileprivate let yourTieBreak: Int
+        fileprivate let gameMode: GameMode
     }
 
     @Published private(set) var gameMode: GameMode = .normal
@@ -95,6 +106,21 @@ class Score: ObservableObject {
         gameMode = .tieBreak
         myTieBreak = 0
         yourTieBreak = 0
+        objectWillChange.send()
+    }
+
+    func makeSnapshot() -> Snapshot {
+        Snapshot(myNormal: myNormal, yourNormal: yourNormal,
+                 myTieBreak: myTieBreak, yourTieBreak: yourTieBreak,
+                 gameMode: gameMode)
+    }
+
+    func restore(_ snapshot: Snapshot) {
+        myNormal = snapshot.myNormal
+        yourNormal = snapshot.yourNormal
+        myTieBreak = snapshot.myTieBreak
+        yourTieBreak = snapshot.yourTieBreak
+        gameMode = snapshot.gameMode
         objectWillChange.send()
     }
 
