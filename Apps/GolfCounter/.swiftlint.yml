@@ -1,6 +1,8 @@
 included:
-  - GolfCounter
-  - GolfCounter Watch App
+  - iOSApp
+  - WatchApp
+  - ComplicationApp
+  - Shared
 
 line_length:
   warning: 150
