@@ -31,7 +31,8 @@ final class GolfRound {
         holePars.reduce(0, +)
     }
 
+    /// holePars/puttCounts는 holeScores와 같은 개수만 유효 — 아직 파가 없는 홀의 배열 길이 불일치를 자동으로 무시한다
     var relativeToPar: Int {
-        totalStrokes - totalPar
+        zip(holeScores, holePars).reduce(0) { $0 + $1.0 - $1.1 }
     }
 }

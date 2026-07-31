@@ -20,6 +20,16 @@ struct RoundSnapshotTests {
         #expect(snapshot.relativeToPar == 0)
     }
 
+    @Test func holePars가_holeScores보다_짧으면_초과홀은_무시된다() {
+        // 8번째 홀을 플레이했지만 파는 아직 세팅되지 않은 상태(배열 길이 불일치)를 시뮬레이션한다.
+        var snapshot = makeSnapshot()
+        snapshot.holeScores.append(5)
+
+        // 옛 공식(totalStrokes - holePars.reduce(0,+))이라면 32 - 27 = 5 가 되어 완전히 틀린 값을 낸다.
+        // 새 공식은 짝지어지는 앞 7홀만 더해 기존과 동일하게 0 이어야 한다.
+        #expect(snapshot.relativeToPar == 0)
+    }
+
     @Test func 코더블_왕복시_동일하다() throws {
         let snapshot = makeSnapshot()
 
@@ -34,9 +44,16 @@ struct RoundSnapshotTests {
         defaults.removePersistentDomain(forName: #function)
         let snapshot = makeSnapshot()
 
-        RoundSnapshotStore.save(snapshot, to: defaults)
+        let saved = RoundSnapshotStore.save(snapshot, to: defaults)
 
+        #expect(saved)
         #expect(RoundSnapshotStore.load(from: defaults) == snapshot)
+    }
+
+    @Test func 스토어_defaults가_nil이면_저장은_false를_반환한다() {
+        let saved = RoundSnapshotStore.save(makeSnapshot(), to: nil)
+
+        #expect(!saved)
     }
 
     @Test func 스토어_클리어후_로드는_nil이다() throws {

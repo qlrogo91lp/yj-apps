@@ -212,6 +212,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				3974B8F72EBCDFA5002D0EA7 /* ComplicationApp */,
+				39928A012EB95F0D005F1856 /* Shared */,
 			);
 			name = ComplicationAppExtension;
 			productName = ComplicationAppExtension;
@@ -695,7 +696,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 2.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.yj.GolfCounter.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -730,7 +731,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 2.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.yj.GolfCounter.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;

@@ -10,9 +10,12 @@ enum RoundSnapshotStore {
         UserDefaults(suiteName: appGroupID)
     }
 
-    static func save(_ snapshot: RoundSnapshot, to defaults: UserDefaults? = RoundSnapshotStore.appGroupDefaults) {
-        guard let data = try? JSONEncoder().encode(snapshot) else { return }
-        defaults?.set(data, forKey: key)
+    @discardableResult
+    static func save(_ snapshot: RoundSnapshot, to defaults: UserDefaults? = RoundSnapshotStore.appGroupDefaults) -> Bool {
+        guard let data = try? JSONEncoder().encode(snapshot) else { return false }
+        guard let defaults else { return false }
+        defaults.set(data, forKey: key)
+        return true
     }
 
     static func load(from defaults: UserDefaults? = RoundSnapshotStore.appGroupDefaults) -> RoundSnapshot? {
