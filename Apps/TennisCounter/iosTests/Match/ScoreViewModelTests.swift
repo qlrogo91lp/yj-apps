@@ -187,7 +187,9 @@ struct ScoreViewModelTests {
         for _ in 0 ..< 5 {
             vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
         }
-        while vm.canUndo { vm.undo() }
+        while vm.canUndo {
+            vm.undo()
+        }
 
         #expect(vm.myGameScore == 0)
         #expect(vm.mySetScore == 0)

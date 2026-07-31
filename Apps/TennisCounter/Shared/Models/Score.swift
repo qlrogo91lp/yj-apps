@@ -4,49 +4,22 @@ enum PlayerSide {
     case me, opponent
 }
 
-enum LastAction {
-    case myPoint
-    case opponentPoint
-    case none
-}
-
 class Score: ObservableObject {
     enum GameMode: Equatable {
         case normal
         case tieBreak
     }
 
-    fileprivate enum NormalState: Equatable {
+    private enum NormalState: Equatable {
         case zero, fifteen, thirty, forty, advantage
     }
 
-    private struct SnapShot {
-        let myNormal: NormalState
-        let yourNormal: NormalState
-        let myTieBreak: Int
-        let yourTieBreak: Int
-        let gameMode: GameMode
-    }
-
-    /// Score의 복원 가능한 전체 상태. undo 스택은 ScoreViewModel이 소유하고,
-    /// Score는 자기 상태를 봉인해 넘기고 되돌리는 방법만 제공한다.
-    /// 멤버가 fileprivate라 다른 파일에서는 내부를 볼 수 없는 불투명 값이다.
-    struct Snapshot {
-        fileprivate let myNormal: NormalState
-        fileprivate let yourNormal: NormalState
-        fileprivate let myTieBreak: Int
-        fileprivate let yourTieBreak: Int
-        fileprivate let gameMode: GameMode
-    }
-
     @Published private(set) var gameMode: GameMode = .normal
-    @Published private(set) var lastAction: LastAction = .none
     @Published private(set) var myTieBreak: Int = 0
     @Published private(set) var yourTieBreak: Int = 0
 
     private var myNormal: NormalState = .zero
     private var yourNormal: NormalState = .zero
-    private var snapshot: SnapShot?
 
     var noAdRule: Bool = true
 
@@ -68,27 +41,10 @@ class Score: ObservableObject {
     /// Returns the winning side if the game ends, nil otherwise
     @discardableResult
     func addPoint(_ side: PlayerSide) -> PlayerSide? {
-        snapshot = SnapShot(myNormal: myNormal, yourNormal: yourNormal,
-                            myTieBreak: myTieBreak, yourTieBreak: yourTieBreak,
-                            gameMode: gameMode)
-        lastAction = side == .me ? .myPoint : .opponentPoint
-
         switch gameMode {
         case .normal: return addNormalPoint(side)
         case .tieBreak: return addTieBreakPoint(side)
         }
-    }
-
-    func undo() {
-        guard let s = snapshot else { return }
-        myNormal = s.myNormal
-        yourNormal = s.yourNormal
-        myTieBreak = s.myTieBreak
-        yourTieBreak = s.yourTieBreak
-        gameMode = s.gameMode
-        lastAction = .none
-        snapshot = nil
-        objectWillChange.send()
     }
 
     func reset() {
@@ -97,8 +53,6 @@ class Score: ObservableObject {
         myTieBreak = 0
         yourTieBreak = 0
         gameMode = .normal
-        lastAction = .none
-        snapshot = nil
         objectWillChange.send()
     }
 
@@ -106,21 +60,6 @@ class Score: ObservableObject {
         gameMode = .tieBreak
         myTieBreak = 0
         yourTieBreak = 0
-        objectWillChange.send()
-    }
-
-    func makeSnapshot() -> Snapshot {
-        Snapshot(myNormal: myNormal, yourNormal: yourNormal,
-                 myTieBreak: myTieBreak, yourTieBreak: yourTieBreak,
-                 gameMode: gameMode)
-    }
-
-    func restore(_ snapshot: Snapshot) {
-        myNormal = snapshot.myNormal
-        yourNormal = snapshot.yourNormal
-        myTieBreak = snapshot.myTieBreak
-        yourTieBreak = snapshot.yourTieBreak
-        gameMode = snapshot.gameMode
         objectWillChange.send()
     }
 
@@ -186,6 +125,36 @@ class Score: ObservableObject {
         }
     }
 
+    // MARK: - Snapshot API
+
+    /// Score의 복원 가능한 전체 상태. undo 스택은 ScoreViewModel이 소유하고,
+    /// Score는 자기 상태를 봉인해 넘기고 되돌리는 방법만 제공한다.
+    /// 멤버가 fileprivate라 다른 파일에서는 내부를 볼 수 없는 불투명 값이다.
+    struct Snapshot {
+        fileprivate let myNormal: NormalState
+        fileprivate let yourNormal: NormalState
+        fileprivate let myTieBreak: Int
+        fileprivate let yourTieBreak: Int
+        fileprivate let gameMode: GameMode
+    }
+
+    /// 현재 Score 상태를 불투명한 Snapshot으로 변환해 넘긴다.
+    func makeSnapshot() -> Snapshot {
+        Snapshot(myNormal: myNormal, yourNormal: yourNormal,
+                 myTieBreak: myTieBreak, yourTieBreak: yourTieBreak,
+                 gameMode: gameMode)
+    }
+
+    /// Snapshot 으로부터 이전 Score 상태를 복원한다.
+    func restore(_ snapshot: Snapshot) {
+        myNormal = snapshot.myNormal
+        yourNormal = snapshot.yourNormal
+        myTieBreak = snapshot.myTieBreak
+        yourTieBreak = snapshot.yourTieBreak
+        gameMode = snapshot.gameMode
+        objectWillChange.send()
+    }
+
     // MARK: - iOS Backward Compatibility
 
     // scoreArr index 0-4 maps to zero/fifteen/thirty/forty/advantage; 50 signals game win.
@@ -224,8 +193,6 @@ class Score: ObservableObject {
     }
 
     func applyRemote(myScore: Int, yourScore: Int, isTieBreak: Bool) {
-        snapshot = nil
-        lastAction = .none
         if isTieBreak {
             gameMode = .tieBreak
             myTieBreak = myScore
