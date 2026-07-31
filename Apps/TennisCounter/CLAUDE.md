@@ -34,7 +34,7 @@ Tennis score tracking app (Ralli) with three targets sharing a single model. Fea
 Shared/
 │  # iOS/Watch 두 타겟이 공유하는 코드. 플랫폼 독립적인 순수 로직만 둔다.
 ├── Models/
-│   ├── Score.swift          # 점수 상태 ObservableObject. scoreArr = [0,15,30,40,50], undo via LastAction enum
+│   ├── Score.swift          # 점수 상태 ObservableObject. scoreArr = [0,15,30,40,50], Snapshot 왕복 API 제공
 │   ├── MatchFormat.swift    # 경기 포맷 (세트 수, 타이브레이크 등)
 │   ├── MatchOptions.swift   # 경기 옵션 (포맷 + 모드 조합)
 │   ├── MatchPhase.swift     # 경기 진행 단계 enum (mode → playing → result)
@@ -186,7 +186,7 @@ TennisLiveActivity/
     └── LiveActivityView.swift      # 잠금화면/Dynamic Island 레이아웃
 ```
 
-- **Score** (`ObservableObject`): point state (`scoreArr = [0, 15, 30, 40, 50]`), undo via `LastAction` enum. iOS/Watch 타겟 공유.
+- **Score** (`ObservableObject`): point state (`scoreArr = [0, 15, 30, 40, 50]`), 복원용 `Score.Snapshot` 왕복 API 제공. undo 스택은 `ScoreViewModel`이 소유한다 (경기 전체 되돌리기). iOS/Watch 타겟 공유.
 - **ScoreViewModel**: `Score` 인스턴스를 소유, 게임/세트 레벨 로직 담당. iOS·Watch 모두 `Match/Score/ScoreViewModel.swift`에 위치.
 - **ScoreView**: `ScoreViewModel`을 바인딩. 경기 종료 시 `MatchResultView`로 전환.
 - **Shared/Persistence/**: SwiftData `@Model` 클래스. `MatchPersistenceService`를 통해서만 접근.

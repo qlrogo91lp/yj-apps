@@ -57,7 +57,7 @@ struct ScoreView: View {
             .padding(.bottom, 300)
 
             if isDriver {
-                if viewModel.score.lastAction != .none {
+                if viewModel.canUndo {
                     VStack {
                         Spacer()
                         UndoButton(action: { viewModel.undo() })
@@ -81,7 +81,7 @@ struct ScoreView: View {
             onProgressChanged(hasProgress)
         }
         .sheet(isPresented: $showEditSheet) {
-            ScoreEditSheet(score: viewModel.score, onChange: { viewModel.onStateChanged?() })
+            ScoreEditSheet(score: viewModel.score, onChange: { viewModel.applyManualEdit() })
         }
     }
 }

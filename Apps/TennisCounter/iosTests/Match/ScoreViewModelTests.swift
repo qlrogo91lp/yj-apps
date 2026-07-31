@@ -29,7 +29,7 @@ struct ScoreViewModelTests {
         vm.addPoint(.me) // 15-0
         vm.undo()
         #expect(vm.score.myDisplayScore == "0")
-        #expect(vm.score.lastAction == .none)
+        #expect(vm.canUndo == false)
     }
 
     @Test @MainActor func addPointMatchOver() {
@@ -44,12 +44,18 @@ struct ScoreViewModelTests {
         #expect(vm.myGameScore == 0)
     }
 
-    @Test @MainActor func undoAfterGameWinIsNoOp() {
+    @Test @MainActor func undoReversesGameWin() {
         let vm = ScoreViewModel()
-        vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me) // game won
-        let gameScoreBefore = vm.myGameScore
-        vm.undo() // undo cannot reverse a game-winning tap
-        #expect(vm.myGameScore == gameScoreBefore) // game score unchanged
+        vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me) // 40-0
+        vm.addPoint(.opponent) // 40-15
+        vm.addPoint(.me) // 게임 획득 → 1-0
+        #expect(vm.myGameScore == 1)
+
+        vm.undo() // 게임 경계를 넘어 되돌린다
+
+        #expect(vm.myGameScore == 0)
+        #expect(vm.score.myDisplayScore == "40")
+        #expect(vm.score.yourDisplayScore == "15")
     }
 
     // MARK: - ScoreViewModel 버그 재현 + 통일 로직
@@ -133,6 +139,135 @@ struct ScoreViewModelTests {
         }
         #expect(vm.matchResult == .draw)
         #expect(vm.isMatchOver == true)
+    }
+
+    // MARK: - 경기 전체 멀티 undo
+
+    @Test @MainActor func undoRewindsGamePointsToZero() {
+        let vm = ScoreViewModel()
+        vm.addPoint(.me) // 15-0
+        vm.addPoint(.opponent) // 15-15
+        vm.addPoint(.me) // 30-15
+
+        vm.undo(); vm.undo(); vm.undo()
+
+        #expect(vm.score.myDisplayScore == "0")
+        #expect(vm.score.yourDisplayScore == "0")
+        #expect(vm.canUndo == false)
+    }
+
+    @Test @MainActor func undoBeyondMatchStartIsNoOp() {
+        let vm = ScoreViewModel()
+        vm.undo() // 스택이 비어 있다
+        #expect(vm.score.myDisplayScore == "0")
+        #expect(vm.canUndo == false)
+    }
+
+    @Test @MainActor func undoReversesSetCompletion() {
+        // bestOfThree(setsToWin=2)라 세트 1개를 따도 경기는 안 끝난다
+        let vm = ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false, gameThreshold: 5))
+        for _ in 0 ..< 5 {
+            vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
+        }
+        #expect(vm.mySetScore == 1)
+        #expect(vm.completedSets.count == 1)
+        #expect(vm.currentSetNumber == 2)
+
+        vm.undo() // 세트 경계를 넘어 되돌린다
+
+        #expect(vm.mySetScore == 0)
+        #expect(vm.completedSets.isEmpty)
+        #expect(vm.currentSetNumber == 1)
+        #expect(vm.myGameScore == 4)
+        #expect(vm.score.myDisplayScore == "40")
+    }
+
+    @Test @MainActor func undoAllTheWayBackToMatchStart() {
+        let vm = ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false, gameThreshold: 5))
+        for _ in 0 ..< 5 {
+            vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
+        }
+        while vm.canUndo {
+            vm.undo()
+        }
+
+        #expect(vm.myGameScore == 0)
+        #expect(vm.mySetScore == 0)
+        #expect(vm.completedSets.isEmpty)
+        #expect(vm.currentSetNumber == 1)
+        #expect(vm.score.myDisplayScore == "0")
+        #expect(vm.canUndo == false)
+    }
+
+    @Test @MainActor func undoReversesTieBreakEntry() {
+        let vm = ScoreViewModel(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false, gameThreshold: 5))
+        for _ in 0 ..< 5 {
+            vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
+            vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent)
+        }
+        #expect(vm.isTieBreak == true)
+
+        vm.undo() // 타이브레이크 진입 직전으로
+
+        #expect(vm.isTieBreak == false)
+        #expect(vm.myGameScore == 5)
+        #expect(vm.yourGameScore == 4)
+        #expect(vm.score.yourDisplayScore == "40")
+    }
+
+    @Test @MainActor func undoReversesTieBreakWin() {
+        let vm = ScoreViewModel(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false, gameThreshold: 5))
+        for _ in 0 ..< 5 {
+            vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
+            vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent)
+        }
+        #expect(vm.isTieBreak == true)
+        vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
+        vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me) // wins tie-break 7-0, closes the set
+        #expect(vm.mySetScore == 1)
+        #expect(vm.completedSets.count == 1)
+
+        vm.undo() // undo the tie-break-winning point
+
+        #expect(vm.mySetScore == 0)
+        #expect(vm.completedSets.isEmpty)
+        #expect(vm.isTieBreak == true)
+        #expect(vm.score.myDisplayScore == "6")
+        #expect(vm.score.yourDisplayScore == "0")
+    }
+
+    @Test @MainActor func applyRemoteStateClearsUndoStack() {
+        let vm = ScoreViewModel()
+        vm.addPoint(.me)
+        #expect(vm.canUndo == true)
+
+        vm.applyRemoteState(ScoreState(
+            myScore: 30, yourScore: 15,
+            myGameScore: 2, yourGameScore: 1,
+            mySetScore: 0, yourSetScore: 0,
+            completedSets: [], isTieBreak: false
+        ))
+
+        #expect(vm.canUndo == false)
+    }
+
+    @Test @MainActor func applyManualEditClearsUndoStack() {
+        let vm = ScoreViewModel()
+        vm.addPoint(.me)
+        #expect(vm.canUndo == true)
+
+        vm.score.myIndex = 3 // ScoreEditSheet가 하는 조작
+        vm.applyManualEdit()
+
+        #expect(vm.canUndo == false)
+        #expect(vm.score.myDisplayScore == "40")
+    }
+
+    @Test @MainActor func resetAllClearsUndoStack() {
+        let vm = ScoreViewModel()
+        vm.addPoint(.me)
+        vm.resetAll(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        #expect(vm.canUndo == false)
     }
 
     @Test @MainActor func resetAllClearsStateAndAppliesNewOptions() {

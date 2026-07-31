@@ -14,6 +14,22 @@ final class ScoreViewModel: ObservableObject {
     @Published var completedSets: [(my: Int, your: Int)] = []
     @Published private(set) var matchResult: MatchResult?
 
+    /// 포인트 하나마다 쌓이는 경기 전체 상태. 게임·세트 경계를 넘어 되돌리기 위해
+    /// Score뿐 아니라 게임·세트 스코어와 완료 세트까지 함께 봉인한다.
+    private struct Snapshot {
+        let score: Score.Snapshot
+        let myGameScore: Int
+        let yourGameScore: Int
+        let mySetScore: Int
+        let yourSetScore: Int
+        let currentSetNumber: Int
+        let completedSets: [(my: Int, your: Int)]
+        let tieBreakInProgress: Bool
+        let matchResult: MatchResult?
+    }
+
+    private var snapshots: [Snapshot] = []
+
     var isMatchOver: Bool {
         matchResult != nil
     }
@@ -26,11 +42,15 @@ final class ScoreViewModel: ObservableObject {
         score.gameMode == .tieBreak
     }
 
+    var canUndo: Bool {
+        !snapshots.isEmpty
+    }
+
     var hasProgress: Bool {
         myGameScore > 0 || yourGameScore > 0 ||
             mySetScore > 0 || yourSetScore > 0 ||
             !completedSets.isEmpty ||
-            score.lastAction != .none
+            canUndo
     }
 
     private var tieBreakInProgress = false
@@ -49,6 +69,7 @@ final class ScoreViewModel: ObservableObject {
 
     func addPoint(_ side: PlayerSide) {
         guard !isMatchOver else { return }
+        snapshots.append(captureSnapshot())
         let gameWon = score.addPoint(side)
         if gameWon != nil {
             if side == .me { myGameScore += 1 } else { yourGameScore += 1 }
@@ -58,8 +79,17 @@ final class ScoreViewModel: ObservableObject {
         onStateChanged?()
     }
 
+    /// 경기 시작까지 되돌린다 — 게임·세트 경계를 넘는다.
     func undo() {
-        score.undo()
+        guard let snapshot = snapshots.popLast() else { return }
+        apply(snapshot)
+        onStateChanged?()
+    }
+
+    /// ScoreEditSheet 수동 수정 경로. 수정은 새 기준점이므로 이전 스택을 버린다
+    /// (버리지 않으면 undo가 수정 이전 과거로 튄다).
+    func applyManualEdit() {
+        snapshots.removeAll()
         onStateChanged?()
     }
 
@@ -73,6 +103,7 @@ final class ScoreViewModel: ObservableObject {
         completedSets = []
         matchResult = nil
         tieBreakInProgress = false
+        snapshots.removeAll()
         score.noAdRule = options.noAdRule
         score.resetData()
     }
@@ -85,6 +116,8 @@ final class ScoreViewModel: ObservableObject {
         completedSets = state.completedSets.map { (my: $0[0], your: $0[1]) }
         score.applyRemote(myScore: state.myScore, yourScore: state.yourScore, isTieBreak: state.isTieBreak)
         tieBreakInProgress = state.isTieBreak
+        // mirror 측은 스스로 되돌릴 수 없다 — 권한은 driver에 있다.
+        snapshots.removeAll()
     }
 
     func makeScoreState() -> ScoreState {
@@ -100,6 +133,32 @@ final class ScoreViewModel: ObservableObject {
     }
 
     // MARK: - Private
+
+    private func captureSnapshot() -> Snapshot {
+        Snapshot(
+            score: score.makeSnapshot(),
+            myGameScore: myGameScore,
+            yourGameScore: yourGameScore,
+            mySetScore: mySetScore,
+            yourSetScore: yourSetScore,
+            currentSetNumber: currentSetNumber,
+            completedSets: completedSets,
+            tieBreakInProgress: tieBreakInProgress,
+            matchResult: matchResult
+        )
+    }
+
+    private func apply(_ snapshot: Snapshot) {
+        score.restore(snapshot.score)
+        myGameScore = snapshot.myGameScore
+        yourGameScore = snapshot.yourGameScore
+        mySetScore = snapshot.mySetScore
+        yourSetScore = snapshot.yourSetScore
+        currentSetNumber = snapshot.currentSetNumber
+        completedSets = snapshot.completedSets
+        tieBreakInProgress = snapshot.tieBreakInProgress
+        matchResult = snapshot.matchResult
+    }
 
     private func checkSetUpdate() {
         let threshold = options.gameThreshold
@@ -142,5 +201,4 @@ final class ScoreViewModel: ObservableObject {
             matchResult = .loss
         }
     }
-
 }
