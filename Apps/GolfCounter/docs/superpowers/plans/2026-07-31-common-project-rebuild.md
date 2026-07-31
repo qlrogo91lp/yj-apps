@@ -14,7 +14,7 @@
 
 - Deployment target: **iOS 17.0 / watchOS 10.0** (ralli-kit 최소 요구)
 - 번들 ID 유지: iOS `com.yj.GolfCounter`, watch `com.yj.GolfCounter.watchkitapp`, 컴플리케이션 `com.yj.GolfCounter.watchkitapp.ComplicationApp`
-- `DEVELOPMENT_TEAM = P2TU28W32L`, `MARKETING_VERSION`: iOS 2.0 / watch·컴플리케이션 1.0
+- `DEVELOPMENT_TEAM = P2TU28W32L`, `MARKETING_VERSION`: iOS 2.0 / watch 2.0.1 (리빌드 전 실제 watch 타깃이 이미 2.0으로 App Store에 존재했으므로, 하향을 피하기 위해 1.0이 아닌 2.0.1로 상향) / 컴플리케이션 1.0 (신설 타깃, 이전 제출 이력 없음)
 - App Group: `group.com.yj.GolfCounter` (watch 앱 + ComplicationApp만. iOS는 불필요)
 - iCloud 컨테이너: `iCloud.com.yj.GolfCounter` (iOS만, CloudKit)
 - 아이콘: Icon Composer 포맷, 원본 `/Users/yj/Downloads/golf-counter.icon/` → 저장소 루트 `GolfCounter.icon`으로 복사, `ASSETCATALOG_COMPILER_APPICON_NAME = GolfCounter`
@@ -301,7 +301,7 @@ sed -i '' \
 치환 결과 자동으로 맞는 것: 번들 ID(`com.yj.GolfCounter*`), 엔타이틀먼트 파일명, App Group·iCloud 문자열, 타깃/스킴/모듈명. 이어서 수동 확인·수정:
 
 1. `PRODUCT_BUNDLE_IDENTIFIER` 전수 확인 — iOS `com.yj.GolfCounter`, watch `com.yj.GolfCounter.watchkitapp`, ComplicationApp `com.yj.GolfCounter.watchkitapp.ComplicationApp`. tennis의 watch 번들 ID 체계가 다르면(`.watchkitapp`이 아니면) 기존 golf 값으로 맞춘다 (App Store 연속성).
-2. `MARKETING_VERSION` — iOS 타깃 2.0, watch·ComplicationApp 1.0.
+2. `MARKETING_VERSION` — iOS 타깃 2.0, watch 2.0.1 (리빌드 전 실제 watch 타깃이 App Store에 이미 2.0으로 존재 — 1.0으로 내리면 업로드 거부 위험), ComplicationApp 1.0 (신설 타깃, 이전 제출 이력 없음).
 3. `DEVELOPMENT_TEAM = P2TU28W32L` 전수 확인.
 4. `IPHONEOS_DEPLOYMENT_TARGET = 17.0`, `WATCHOS_DEPLOYMENT_TARGET = 10.0` (앱 타깃 기준. 테스트 타깃이 26.x면 그대로 둬도 무방).
 5. 표시명(`INFOPLIST_KEY_CFBundleDisplayName`)이 "Ralli"로 남아 있으면 "GolfCounter"로.
