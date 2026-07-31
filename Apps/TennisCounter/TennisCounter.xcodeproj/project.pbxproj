@@ -20,6 +20,7 @@
 		39D471E92FBC32EF005FBA12 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 39BF174F2EBA37F60026184E /* WidgetKit.framework */; };
 		39D471EA2FBC32EF005FBA12 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 39BF17512EBA37F60026184E /* SwiftUI.framework */; };
 		39D471F72FBC32F1005FBA12 /* TennisLiveActivityExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 39D471E82FBC32EF005FBA12 /* TennisLiveActivityExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		39E38417301C3CB3004BCEB9 /* PersistenceCore in Frameworks */ = {isa = PBXBuildFile; productRef = 39E38416301C3CB3004BCEB9 /* PersistenceCore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -161,6 +162,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3982E20A3006E3470006AFEE /* ConnectivityCore in Frameworks */,
+				39E38417301C3CB3004BCEB9 /* PersistenceCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1205,6 +1207,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 3988023A3005982500596EDB /* XCLocalSwiftPackageReference "../ralli-kit" */;
 			productName = WorkoutCore;
+		};
+		39E38416301C3CB3004BCEB9 /* PersistenceCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3988023A3005982500596EDB /* XCLocalSwiftPackageReference "../ralli-kit" */;
+			productName = PersistenceCore;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
