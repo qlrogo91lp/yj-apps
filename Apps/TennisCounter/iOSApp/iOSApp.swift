@@ -1,3 +1,4 @@
+import PersistenceCore
 import SwiftData
 import SwiftUI
 
@@ -8,22 +9,9 @@ struct TennisCounterApp: App {
     @State private var isLaunching = true
 
     init() {
-        let schema = Schema([Match.self, SetRecord.self])
-        do {
-            // iCloud 로그인 상태일 때 CloudKit 동기화 활성화
-            let config = ModelConfiguration(schema: schema, cloudKitDatabase: .automatic)
-            container = try ModelContainer(for: schema, configurations: config)
-        } catch {
-            // iCloud 미로그인(시뮬레이터, 개발 환경 등) 시 로컬 저장소로 폴백
-            let config = ModelConfiguration(schema: schema)
-            do {
-                container = try ModelContainer(for: schema, configurations: config)
-            } catch {
-                fatalError("Failed to create ModelContainer: \(error)")
-            }
-        }
-        let context = ModelContext(container)
-        MatchPersistenceService.shared.configure(with: context)
+        // CloudKit 동기화 시도 → iCloud 미로그인·시뮬레이터 등 실패 시 로컬 폴백 (팩토리가 처리)
+        container = PersistenceContainerFactory.make(for: [Match.self, SetRecord.self])
+        MatchPersistenceService.shared.configure(with: ModelContext(container))
         Task { @MainActor in LiveActivityService.shared.endAll() }
     }
 

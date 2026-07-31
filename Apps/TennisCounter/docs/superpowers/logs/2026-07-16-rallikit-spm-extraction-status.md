@@ -1,6 +1,6 @@
-# RalliKit SPM 추출 — Plan 1·2 완료 현황 및 실기기 회귀 체크리스트
+# RalliKit SPM 추출 — Plan 1·2·3 완료 현황 및 실기기 회귀 체크리스트
 
-## 작업일: 2026-07-13 ~ 2026-07-16
+## 작업일: 2026-07-13 ~ 2026-07-30
 
 > Ralli(테니스 카운터)의 인프라(HealthKit·WatchConnectivity·SwiftData+CloudKit)를 별도 SPM 패키지
 > **RalliKit**으로 추출하는 작업의 진행 현황 정리. 세션을 이어받는 사람/에이전트가 다른 표면(데스크탑 앱 등)에서
@@ -14,11 +14,12 @@
 
 ## 레포 구조
 
-- **ralli-kit** (신규): `~/Workspace/Projects/ralli-kit`, 원격 `git@github.com:qlrogo91lp/ralli-kit.git` (private).
-  현재 `main` 브랜치, 로컬 커밋 즉시 푸시하는 관례로 진행 중.
-- **tennis-counter**: 기존 레포. RalliKit은 **로컬 패키지 참조**로 연결돼 있음 (Xcode Add Local Package,
-  `project.pbxproj`에 `XCLocalSwiftPackageReference "../ralli-kit"`). **원격 참조로 아직 전환 안 함** —
-  릴리즈 전 필수 전환 작업 (아래 "릴리즈 전 체크리스트" 참조).
+- **ralli-kit** (신규): 원격 `git@github.com:qlrogo91lp/ralli-kit.git` (private), `main` 브랜치.
+  로컬 클론은 **테니스 레포의 형제 폴더**여야 한다 — pbxproj가 `XCLocalSwiftPackageReference "../ralli-kit"`로
+  참조하기 때문. (2026-07-16 머신에서는 `~/Workspace/Projects/ralli-kit`, 2026-07-30 머신에서는
+  `~/Workspace/ralli-kit`. 새 머신에서 작업할 때는 테니스 레포 옆에 클론할 것.)
+- **tennis-counter**: 기존 레포. RalliKit은 **로컬 패키지 참조**로 연결돼 있음.
+  **원격 참조로 아직 전환 안 함** — 릴리즈 전 필수 전환 작업 (아래 "릴리즈 전 체크리스트" 참조).
 
 ## RalliKit 패키지 현재 구성
 
@@ -26,7 +27,7 @@
 |---|---|---|
 | `WorkoutCore` | HealthKit 워크아웃 세션(`WorkoutSessionService`), 종목 설정 주입(`WorkoutConfiguration`), 결과(`WorkoutResult`) | ✅ 완료 (Plan 1) |
 | `ConnectivityCore` | 워치↔폰 전송(`ConnectivityService`), 메시지 프로토콜(`ConnectivityMessage`), 전송경로(`Delivery`), 라우팅(`MessageRouter`) | ✅ 완료 (Plan 2) |
-| `PersistenceCore` | SwiftData + CloudKit 컨테이너/서비스 | ⬜ 미착수 (Plan 3 — 아직 계획서도 없음) |
+| `PersistenceCore` | SwiftData+CloudKit 컨테이너 팩토리(`PersistenceContainerFactory`), 제너릭 CRUD(`PersistenceService<Model>`) | ✅ 완료 (Plan 3) |
 
 ## Plan 1 — WorkoutCore (완료, PR #16 머지됨)
 
@@ -49,10 +50,33 @@
 - 최종 리뷰에서 하드닝 3건 추가: `dispatchPrecondition(.onQueue(.main))`(등록 시점 오용 방지), README 단일 인스턴스 경고, `MatchConnectivity.init` private화(WCSession delegate 탈취 방지).
 - 머지 커밋: tennis-counter `5a860db` (PR #17, 일반 머지).
 
+## Plan 3 — PersistenceCore (완료)
+
+- 계획: `docs/superpowers/plans/2026-07-30-ralli-kit-persistence-core.md`
+- **패키지 쪽은 Plan 2 직후 선행 구현되어 있었다** (ralli-kit `7cf5064`·`64d720b`) — Plan 3은 추출이 아니라
+  테니스 앱의 **소비 전환** 작업이었다. 2026-07-30 세션에서 이 사실을 확인하고 계획 범위를 축소했다.
+- `MatchPersistenceService`는 Plan 2의 `MatchConnectivity`와 같은 구조 — 앱 레이어가 도메인 규칙
+  (`workoutSessionId` 중복 제거, `startedAt` 정렬)을 소유하고 CRUD는 제너릭 코어에 위임. 표면이 불변이라
+  호출부(ViewModel 2곳)는 무변경.
+- **iOS 전용**: Watch·Complication은 저장소를 쓰지 않아 `PersistenceCore`를 iOS 타겟에만 링크하고,
+  `MatchPersistenceService.swift`를 `Shared/Services/` → `iOSApp/Services/`로 이동했다
+  (`Shared/`에 남기면 Watch 빌드가 없는 모듈을 import하게 된다).
+- 의도된 동작 변경 3가지:
+  1. CloudKit 폴백이 실제로 로컬로 떨어진다 — 기존 `iOSApp.swift`의 폴백은 두 설정 모두 `cloudKitDatabase`
+     기본값 `.automatic`이라 같은 시도를 반복하는 셈이었다. 팩토리는 폴백에서 `.none`을 명시하므로 진짜
+     로컬 스토어로 떨어진다 (단, 로컬 폴백조차 실패하면 팩토리도 기존과 동일하게 `fatalError` — 이 계약은
+     의도적으로 유지).
+  2. `upsert` 내부 fetch 실패도 `PersistenceError.saveFailed`로 감싸진다 (원본은 save 실패만 감쌌음 — 호출부가
+     에러 종류를 구분 안 해서 실질 영향 없음).
+  3. rollback 주체가 코어로 이동 (동작 동일, 위치만 이동).
+- 스코프 밖: `HistoryViewModel`(페이지네이션 — 코어가 offset/limit 미지원), `SummaryView`의 `@Query`.
+
 ## 실행 방법 메모 (재사용 가능한 교훈)
 
 - 실행 방식: `superpowers:subagent-driven-development` (태스크별 서브에이전트 + 리뷰 + 최종 전체 브랜치 리뷰).
-- watchOS 시뮬레이터: `name=Apple Watch Series 11 (46mm)` **매칭 실패** — 항상 `id=8502B1AE-7DCB-4442-9D80-FD34FD0370E1` 사용.
+- watchOS 시뮬레이터: `name=Apple Watch Series 11 (46mm)` **매칭 실패** — 항상 UDID로 지정. UDID는 머신마다 다르므로
+  매 세션 `xcrun simctl list devices available`로 다시 확인할 것 (2026-07-16 머신에서는 `8502B1AE-7DCB-4442-9D80-FD34FD0370E1`,
+  2026-07-30 머신에서는 `D7B72A34-B290-40CE-ADF1-6076F5DB23D0` — 이름 중복 기기까지 있어 UDID 고정이 필수였다).
 - 각 Plan에서 신규/변경 타겟은 **Debug + Release 둘 다** 빌드 검증 (Plan 1 교훈).
 - Xcode GUI 필요 지점(로컬 패키지 product를 타겟 Frameworks에 추가)은 항상 사용자가 직접 수행 — `project.pbxproj` 자동 편집 도구 사용 금지 (`PBXFileSystemSynchronizedRootGroup` 프로젝트라 파일 추가/삭제만 자동, 패키지 의존성 추가는 수동).
 
@@ -60,7 +84,10 @@
 
 ## ⚠️ 남은 작업 — 실기기 2대 회귀 (릴리즈 전 필수, 브랜치 머지 게이트는 아님)
 
-Plan 1·2 최종 리뷰 판단: 두 Plan 모두 **머지 자체는 안전**(와이어 포맷 하위 호환, 롤백 단위 명확)하지만, **시뮬레이터로는 재현 불가능한 버그**(콜드런치, WCSession 큐잉, HealthKit 워크아웃 세션)가 있어 **TestFlight/App Store 릴리즈 전에 실기기 2대(iPhone + Apple Watch)로 반드시 확인**해야 한다. Plan 3(PersistenceCore) 작업까지 마친 뒤 한 번에 모아서 진행해도 무방 — 아래 체크리스트를 그때 함께 수행한다.
+Plan 1·2·3 모두 머지 자체는 안전하지만(와이어 포맷 하위 호환, 롤백 단위 명확), **시뮬레이터로는 재현
+불가능한 버그**(콜드런치, WCSession 큐잉, HealthKit 워크아웃 세션, CloudKit 동기화)가 있어
+**TestFlight/App Store 릴리즈 전에 실기기 2대(iPhone + Apple Watch)로 반드시 확인**해야 한다.
+세 Plan의 코드 변경이 모두 들어간 지금이 회귀를 한 번에 수행할 시점이다.
 
 ### Plan 1 확인 (HealthKit/WorkoutCore)
 - [ ] 워치에서 운동 시작 → 심박수·칼로리 실시간 표기
@@ -76,15 +103,22 @@ Plan 1·2 최종 리뷰 판단: 두 Plan 모두 **머지 자체는 안전**(와�
 - [ ] **matchReset**: 드라이버 쪽 뒤로가기 → 미러가 모드 선택으로 복귀
 - [ ] **주변부**: Complication 점수 표시, iOS Live Activity 갱신 정상
 
+### Plan 3 확인 (PersistenceCore)
+- [ ] **저장·조회 왕복**: 폰에서 경기 종료 → 저장 → History 목록·캘린더·Summary 통계에 모두 반영
+- [ ] **중복 제거**: 같은 워크아웃 세션을 워치에서도 저장 → 히스토리에 레코드가 1개만 (중복 아님)
+- [ ] **CloudKit 동기화**: iCloud 로그인 상태에서 저장 → 잠시 후 같은 계정의 다른 기기/재설치 후 기록 복원
+- [ ] **로컬 폴백**: iCloud 로그아웃 상태로 앱 실행 → 크래시 없이 저장·조회 동작
+
 문제 발견 시: 증상 기록 후 `superpowers:systematic-debugging`으로 진입. 롤백 단위는 각 Plan의 스왑 커밋(Plan 1: `3b4f027`/`a4cb39c`, Plan 2: `dedc862`/`1cfd30a`).
 
 ## 릴리즈 전 체크리스트 (TestFlight/App Store 제출 전)
 
 1. 위 실기기 회귀 전부 통과
 2. **테니스 프로젝트의 RalliKit 참조를 로컬 → 원격으로 전환** (`branch: "main"` 또는 semver 태그) — 지금은 로컬 참조라 "어느 시점 ralli-kit 코드가 들어갔는지" 기록이 없음. 전환 후 로컬 오버라이드는 반드시 제거 (남기면 태그를 올려도 Xcode가 조용히 무시함).
-3. Defer된 하이지니 항목 처리 여부 판단 (아래 참조 — 필수는 아님)
 
-## Defer된 하이지니 항목 (후속 커밋 후보, Plan 3 착수 전 일괄 처리 권장)
+## Defer된 하이지니 항목 — ✅ 완료 (ralli-kit `00d6f52`)
+
+Plan 3 착수 전 일괄 처리 권장이었던 아래 5개 항목은 ralli-kit `00d6f52`("🧹 Defer된 하이지니 항목 일괄 처리")에서 모두 처리됨 — 남은 작업 없음.
 
 - `WorkoutSessionService.timerPausedAt` — write-only 데드코드 (원본 유래)
 - `WorkoutConfiguration`/`WorkoutResult`에 `Sendable`/`Equatable` 부여
@@ -94,4 +128,9 @@ Plan 1·2 최종 리뷰 판단: 두 Plan 모두 **머지 자체는 안전**(와�
 
 ## 다음 단계
 
-**Plan 3: PersistenceCore** (SwiftData + CloudKit 컨테이너/서비스 추출) — 아직 계획서 작성 전. 착수 시 `docs/superpowers/plans/`에 신규 파일로 작성 예정. iOS 타겟에만 신규 링크 필요(워치는 로컬 저장소 없음).
+세 코어 추출이 모두 끝났다. 남은 것은 릴리즈 준비뿐이다.
+
+1. 위 실기기 회귀 체크리스트 수행 (Plan 1·2·3 한 번에)
+2. 테니스의 RalliKit 참조를 로컬 → 원격으로 전환 + semver 태그
+3. 2차 소비자 검증: 골프 카운터 업데이트에서 세 코어 재사용
+   (타당성 문서의 진행 논리 — 테니스가 1차 검증, 골프가 2차, 헬스 앱은 처음부터 패키지 기반)
