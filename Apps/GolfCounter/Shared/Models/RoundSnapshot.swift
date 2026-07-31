@@ -10,7 +10,15 @@ struct RoundSnapshot: Codable, Equatable {
     var holePars: [Int]
     var puttCounts: [Int]
 
-    var currentHoleNumber: Int { currentHoleIndex + 1 }
-    var totalStrokes: Int { holeScores.reduce(0, +) }
-    var relativeToPar: Int { totalStrokes - holePars.reduce(0, +) }
+    var currentHoleNumber: Int {
+        currentHoleIndex + 1
+    }
+
+    var totalStrokes: Int {
+        holeScores.reduce(0, +)
+    }
+
+    var relativeToPar: Int {
+        totalStrokes - holePars.reduce(0, +)
+    }
 }

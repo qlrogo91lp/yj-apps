@@ -1,6 +1,6 @@
 import Foundation
-import Testing
 @testable import GolfCounter
+import Testing
 
 struct GolfRoundTests {
     @Test func 파생합계_홀배열로부터_계산된다() {

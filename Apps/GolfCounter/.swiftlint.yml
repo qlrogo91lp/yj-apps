@@ -30,10 +30,6 @@ opt_in_rules:
   # warning 레벨이라 make lint는 통과하며, 모델을 Int/HoleType으로 바꿀 때 함께 사라진다.
   - force_unwrapping
 
-type_name:
-  excluded:
-    - GolfCounter_Watch_AppApp
-
 identifier_name:
   min_length:
     warning: 1

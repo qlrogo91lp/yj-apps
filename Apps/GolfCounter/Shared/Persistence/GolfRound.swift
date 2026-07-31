@@ -19,8 +19,19 @@ final class GolfRound {
 
     init() {}
 
-    var totalStrokes: Int { holeScores.reduce(0, +) }
-    var totalPutts: Int { puttCounts.reduce(0, +) }
-    var totalPar: Int { holePars.reduce(0, +) }
-    var relativeToPar: Int { totalStrokes - totalPar }
+    var totalStrokes: Int {
+        holeScores.reduce(0, +)
+    }
+
+    var totalPutts: Int {
+        puttCounts.reduce(0, +)
+    }
+
+    var totalPar: Int {
+        holePars.reduce(0, +)
+    }
+
+    var relativeToPar: Int {
+        totalStrokes - totalPar
+    }
 }
