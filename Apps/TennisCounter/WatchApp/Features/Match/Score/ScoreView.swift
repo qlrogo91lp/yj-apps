@@ -50,13 +50,13 @@ struct ScoreView: View {
                     if !flowViewModel.isDriver {
                         MirrorBadge()
                             .padding(.bottom, isSmall ? 20 : 25)
-                    } else if viewModel.score.lastAction != .none {
+                    } else if viewModel.canUndo {
                         UndoButton { viewModel.undo() }
                             .padding(.bottom, isSmall ? 20 : 25)
                     }
                 }
                 .ignoresSafeArea(.container)
-                .animation(.easeInOut(duration: 0.2), value: viewModel.score.lastAction)
+                .animation(.easeInOut(duration: 0.2), value: viewModel.canUndo)
             }
         }
         .toolbar {

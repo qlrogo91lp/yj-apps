@@ -57,6 +57,90 @@ struct ScoreViewModelTests {
         #expect(finishedResult == .draw)
     }
 
+    // MARK: - 경기 전체 멀티 undo
+
+    @Test @MainActor func watchUndoRewindsGamePointsToZero() {
+        let vm = ScoreViewModel(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.addPoint(.me) // 15-0
+        vm.addPoint(.opponent) // 15-15
+        vm.addPoint(.me) // 30-15
+
+        vm.undo(); vm.undo(); vm.undo()
+
+        #expect(vm.score.myDisplayScore == "0")
+        #expect(vm.score.yourDisplayScore == "0")
+        #expect(vm.canUndo == false)
+    }
+
+    @Test @MainActor func watchUndoBeyondMatchStartIsNoOp() {
+        let vm = ScoreViewModel(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.undo() // 스택이 비어 있다
+        #expect(vm.score.myDisplayScore == "0")
+        #expect(vm.canUndo == false)
+    }
+
+    @Test @MainActor func watchUndoReversesGameWin() {
+        let vm = ScoreViewModel(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me) // 40-0
+        vm.addPoint(.opponent) // 40-15
+        vm.addPoint(.me) // 게임 획득 → 1-0
+        #expect(vm.myGameScore == 1)
+
+        vm.undo()
+
+        #expect(vm.myGameScore == 0)
+        #expect(vm.score.myDisplayScore == "40")
+        #expect(vm.score.yourDisplayScore == "15")
+    }
+
+    @Test @MainActor func watchUndoReversesSetCompletion() {
+        // bestOfThree(setsToWin=2)라 세트 1개를 따도 경기는 안 끝난다
+        let vm = ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false, gameThreshold: 5))
+        for _ in 0 ..< 5 {
+            vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
+        }
+        #expect(vm.mySetScore == 1)
+        #expect(vm.completedSets.count == 1)
+
+        vm.undo() // 세트 경계를 넘어 되돌린다
+
+        #expect(vm.mySetScore == 0)
+        #expect(vm.completedSets.isEmpty)
+        #expect(vm.myGameScore == 4)
+        #expect(vm.score.myDisplayScore == "40")
+    }
+
+    @Test @MainActor func watchUndoReversesTieBreakEntry() {
+        let vm = ScoreViewModel(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false, gameThreshold: 5))
+        for _ in 0 ..< 5 {
+            vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
+            vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent)
+        }
+        #expect(vm.score.gameMode == .tieBreak)
+
+        vm.undo()
+
+        #expect(vm.score.gameMode == .normal)
+        #expect(vm.myGameScore == 5)
+        #expect(vm.yourGameScore == 4)
+        #expect(vm.score.yourDisplayScore == "40")
+    }
+
+    @Test @MainActor func watchApplyRemoteStateClearsUndoStack() {
+        let vm = ScoreViewModel(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.addPoint(.me)
+        #expect(vm.canUndo == true)
+
+        vm.applyRemoteState(ScoreState(
+            myScore: 30, yourScore: 15,
+            myGameScore: 2, yourGameScore: 1,
+            mySetScore: 0, yourSetScore: 0,
+            completedSets: [], isTieBreak: false
+        ))
+
+        #expect(vm.canUndo == false)
+    }
+
     @Test @MainActor func resetAllClearsStateAndAppliesNewOptions() {
         let vm = ScoreViewModel(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
         vm.myGameScore = 3
@@ -73,6 +157,7 @@ struct ScoreViewModelTests {
         #expect(vm.completedSets.isEmpty)
         #expect(vm.options.mode == .bestOfThree)
         #expect(vm.score.noAdRule == false)
+        #expect(vm.canUndo == false)
     }
 
     @Test @MainActor func makeScoreStateIncludesInGamePoints() {

@@ -12,10 +12,27 @@ class ScoreViewModel: ObservableObject {
     @Published private(set) var options: MatchOptions
     var onMatchFinished: ((MatchResult, [SetScore]) -> Void)?
 
+    /// 포인트 하나마다 쌓이는 경기 전체 상태. 게임·세트 경계를 넘어 되돌리기 위해
+    /// Score뿐 아니라 게임·세트 스코어와 완료 세트까지 함께 봉인한다.
+    private struct Snapshot {
+        let score: Score.Snapshot
+        let myGameScore: Int
+        let yourGameScore: Int
+        let mySetScore: Int
+        let yourSetScore: Int
+        let completedSets: [SetScore]
+        let tieBreakInProgress: Bool
+    }
+
+    private var snapshots: [Snapshot] = []
     private var tieBreakInProgress: Bool = false
     private var cancellables = Set<AnyCancellable>()
 
     var onStateChanged: (() -> Void)?
+
+    var canUndo: Bool {
+        !snapshots.isEmpty
+    }
 
     init(options: MatchOptions) {
         self.options = options
@@ -27,6 +44,7 @@ class ScoreViewModel: ObservableObject {
     }
 
     func addPoint(_ side: PlayerSide) {
+        snapshots.append(captureSnapshot())
         let gameWon = score.addPoint(side)
         if gameWon != nil {
             withAnimation(.bouncy) {
@@ -38,8 +56,10 @@ class ScoreViewModel: ObservableObject {
         onStateChanged?()
     }
 
+    /// 경기 시작까지 되돌린다 — 게임·세트 경계를 넘는다.
     func undo() {
-        score.undo()
+        guard let snapshot = snapshots.popLast() else { return }
+        apply(snapshot)
         onStateChanged?()
     }
 
@@ -63,6 +83,7 @@ class ScoreViewModel: ObservableObject {
         yourSetScore = 0
         completedSets = []
         tieBreakInProgress = false
+        snapshots.removeAll()
         score.noAdRule = options.noAdRule
         score.reset()
     }
@@ -75,6 +96,30 @@ class ScoreViewModel: ObservableObject {
         completedSets = state.completedSets.map { SetScore(my: $0[0], your: $0[1]) }
         score.applyRemote(myScore: state.myScore, yourScore: state.yourScore, isTieBreak: state.isTieBreak)
         tieBreakInProgress = state.isTieBreak
+        // mirror 측은 스스로 되돌릴 수 없다 — 권한은 driver에 있다.
+        snapshots.removeAll()
+    }
+
+    private func captureSnapshot() -> Snapshot {
+        Snapshot(
+            score: score.makeSnapshot(),
+            myGameScore: myGameScore,
+            yourGameScore: yourGameScore,
+            mySetScore: mySetScore,
+            yourSetScore: yourSetScore,
+            completedSets: completedSets,
+            tieBreakInProgress: tieBreakInProgress
+        )
+    }
+
+    private func apply(_ snapshot: Snapshot) {
+        score.restore(snapshot.score)
+        myGameScore = snapshot.myGameScore
+        yourGameScore = snapshot.yourGameScore
+        mySetScore = snapshot.mySetScore
+        yourSetScore = snapshot.yourSetScore
+        completedSets = snapshot.completedSets
+        tieBreakInProgress = snapshot.tieBreakInProgress
     }
 
     private func checkSetUpdate() {
