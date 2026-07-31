@@ -344,6 +344,3 @@ PR 머지 시 squash 금지. 항상 일반 merge commit을 사용한다.
 ```bash
 gh pr merge <number> --merge --delete-branch
 ```
-
-
-## 
