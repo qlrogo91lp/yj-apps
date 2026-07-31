@@ -126,6 +126,27 @@ struct ScoreViewModelTests {
         #expect(vm.score.yourDisplayScore == "40")
     }
 
+    @Test @MainActor func watchUndoReversesTieBreakWin() {
+        let vm = ScoreViewModel(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false, gameThreshold: 5))
+        for _ in 0 ..< 5 {
+            vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
+            vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent)
+        }
+        #expect(vm.score.gameMode == .tieBreak)
+        vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
+        vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me) // wins tie-break 7-0, closes the set
+        #expect(vm.mySetScore == 1)
+        #expect(vm.completedSets.count == 1)
+
+        vm.undo() // undo the tie-break-winning point
+
+        #expect(vm.mySetScore == 0)
+        #expect(vm.completedSets.isEmpty)
+        #expect(vm.score.gameMode == .tieBreak)
+        #expect(vm.score.myDisplayScore == "6")
+        #expect(vm.score.yourDisplayScore == "0")
+    }
+
     @Test @MainActor func watchApplyRemoteStateClearsUndoStack() {
         let vm = ScoreViewModel(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
         vm.addPoint(.me)

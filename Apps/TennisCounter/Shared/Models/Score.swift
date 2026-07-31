@@ -10,7 +10,7 @@ class Score: ObservableObject {
         case tieBreak
     }
 
-    private enum NormalState: Equatable {
+    fileprivate enum NormalState: Equatable {
         case zero, fifteen, thirty, forty, advantage
     }
 
@@ -42,8 +42,8 @@ class Score: ObservableObject {
     @discardableResult
     func addPoint(_ side: PlayerSide) -> PlayerSide? {
         switch gameMode {
-        case .normal: return addNormalPoint(side)
-        case .tieBreak: return addTieBreakPoint(side)
+        case .normal: addNormalPoint(side)
+        case .tieBreak: addTieBreakPoint(side)
         }
     }
 
