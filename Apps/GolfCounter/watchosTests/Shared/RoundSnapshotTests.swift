@@ -1,10 +1,10 @@
 import Foundation
-import Testing
 @testable import GolfCounter_Watch_App
+import Testing
 
 struct RoundSnapshotTests {
     private func makeSnapshot() -> RoundSnapshot {
-        RoundSnapshot(startedAt: Date(timeIntervalSince1970: 1_000),
+        RoundSnapshot(startedAt: Date(timeIntervalSince1970: 1000),
                       courseName: "테스트CC",
                       currentHoleIndex: 6,
                       holeScores: [4, 3, 6, 5, 4, 3, 2],
@@ -29,8 +29,8 @@ struct RoundSnapshotTests {
         #expect(decoded == snapshot)
     }
 
-    @Test func 스토어_저장후_로드하면_동일하다() {
-        let defaults = UserDefaults(suiteName: #function)!
+    @Test func 스토어_저장후_로드하면_동일하다() throws {
+        let defaults = try #require(UserDefaults(suiteName: #function))
         defaults.removePersistentDomain(forName: #function)
         let snapshot = makeSnapshot()
 
@@ -39,8 +39,8 @@ struct RoundSnapshotTests {
         #expect(RoundSnapshotStore.load(from: defaults) == snapshot)
     }
 
-    @Test func 스토어_클리어후_로드는_nil이다() {
-        let defaults = UserDefaults(suiteName: #function)!
+    @Test func 스토어_클리어후_로드는_nil이다() throws {
+        let defaults = try #require(UserDefaults(suiteName: #function))
         defaults.removePersistentDomain(forName: #function)
         RoundSnapshotStore.save(makeSnapshot(), to: defaults)
 
