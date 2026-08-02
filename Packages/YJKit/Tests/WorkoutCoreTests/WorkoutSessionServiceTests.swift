@@ -33,4 +33,16 @@ struct WorkoutSessionServiceTests {
         #expect(result.caloriesBurned == 12.5)
         #expect(result.averageHeartRate == nil)
     }
+
+    @Test @MainActor func basalCaloriesStartAtZero() {
+        let service = WorkoutSessionService(configuration: WorkoutConfiguration(activityType: .tennis))
+        #expect(service.currentBasalCalories == 0)
+    }
+
+    @Test @MainActor func basalCaloriesReflectInjectedValue() {
+        let service = WorkoutSessionService(configuration: WorkoutConfiguration(activityType: .tennis))
+        service.setLiveMetricsForTesting(calories: 120, basalCalories: 45)
+        #expect(service.currentCalories == 120)
+        #expect(service.currentBasalCalories == 45)
+    }
 }

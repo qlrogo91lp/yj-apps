@@ -6,6 +6,7 @@ public final class WorkoutSessionService: NSObject, ObservableObject {
     @Published public private(set) var isPaused: Bool = false
     @Published public private(set) var currentHeartRate: Double = 0
     @Published public private(set) var currentCalories: Double = 0
+    @Published public private(set) var currentBasalCalories: Double = 0
     @Published public private(set) var elapsedSeconds: Int = 0
 
     public let configuration: WorkoutConfiguration
@@ -20,11 +21,13 @@ public final class WorkoutSessionService: NSObject, ObservableObject {
 
     private let typesToShare: Set<HKSampleType> = [
         HKQuantityType(.activeEnergyBurned),
+        HKQuantityType(.basalEnergyBurned),
         HKQuantityType(.heartRate),
         HKObjectType.workoutType(),
     ]
     private let typesToRead: Set<HKObjectType> = [
         HKQuantityType(.activeEnergyBurned),
+        HKQuantityType(.basalEnergyBurned),
         HKQuantityType(.heartRate),
         HKObjectType.workoutType(),
     ]
@@ -125,16 +128,25 @@ public final class WorkoutSessionService: NSObject, ObservableObject {
             }
 
             let calories = await collectCalories(builder: builder)
+            let basal = await collectBasalCalories(builder: builder)
             let heartRate = await collectAverageHeartRate(builder: builder)
 
             try? await builder.finishWorkout()
 
             DispatchQueue.main.async { self.isWorkoutActive = false }
-            return WorkoutResult(durationSeconds: elapsed, caloriesBurned: calories, averageHeartRate: heartRate)
+            return WorkoutResult(durationSeconds: elapsed,
+                                 caloriesBurned: calories,
+                                 averageHeartRate: heartRate,
+                                 totalCaloriesBurned: calories + basal)
         }
 
         private func collectCalories(builder: HKLiveWorkoutBuilder) async -> Double {
             builder.statistics(for: HKQuantityType(.activeEnergyBurned))?
+                .sumQuantity()?.doubleValue(for: .kilocalorie()) ?? 0
+        }
+
+        private func collectBasalCalories(builder: HKLiveWorkoutBuilder) async -> Double {
+            builder.statistics(for: HKQuantityType(.basalEnergyBurned))?
                 .sumQuantity()?.doubleValue(for: .kilocalorie()) ?? 0
         }
 
@@ -214,6 +226,9 @@ public final class WorkoutSessionService: NSObject, ObservableObject {
                 if let stats = workoutBuilder.statistics(for: HKQuantityType(.activeEnergyBurned)) {
                     self.currentCalories = stats.sumQuantity()?.doubleValue(for: .kilocalorie()) ?? self.currentCalories
                 }
+                if let stats = workoutBuilder.statistics(for: HKQuantityType(.basalEnergyBurned)) {
+                    self.currentBasalCalories = stats.sumQuantity()?.doubleValue(for: .kilocalorie()) ?? self.currentBasalCalories
+                }
             }
         }
     }
@@ -222,9 +237,14 @@ public final class WorkoutSessionService: NSObject, ObservableObject {
 #if DEBUG
     public extension WorkoutSessionService {
         /// 테스트·프리뷰 전용: HealthKit 세션 없이 표시 값을 주입한다. 릴리즈 빌드에는 포함되지 않는다.
-        func setLiveMetricsForTesting(heartRate: Double? = nil, calories: Double? = nil, elapsedSeconds: Int? = nil) {
+        func setLiveMetricsForTesting(heartRate: Double? = nil,
+                                      calories: Double? = nil,
+                                      basalCalories: Double? = nil,
+                                      elapsedSeconds: Int? = nil)
+        {
             if let heartRate { currentHeartRate = heartRate }
             if let calories { currentCalories = calories }
+            if let basalCalories { currentBasalCalories = basalCalories }
             if let elapsedSeconds { self.elapsedSeconds = elapsedSeconds }
         }
     }
