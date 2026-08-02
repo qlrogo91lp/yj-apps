@@ -44,8 +44,7 @@
 "workout_elapsed_label" = "Elapsed";
 "workout_metric_heartrate" = "Heart Rate";
 "workout_metric_calories" = "Calories";
-"workout_metric_steps" = "Steps";
-"workout_metric_steps_unit" = "steps";
+"workout_metric_total_calories" = "Total Calories";
 "workout_metric_matches" = "Matches";
 "workout_metric_matches_unit" = "matches";
 
@@ -61,7 +60,8 @@
 "summary_recent_matches" = "Recent Matches";
 "summary_no_matches" = "No matches this period";
 "summary_section_workout" = "Workout";
-"summary_total_calories" = "Total kcal";
+"summary_total_calories" = "Active kcal";
+"summary_total_energy" = "Total kcal";
 "summary_duration" = "Duration";
 "summary_avg_heartrate" = "Avg BPM";
 

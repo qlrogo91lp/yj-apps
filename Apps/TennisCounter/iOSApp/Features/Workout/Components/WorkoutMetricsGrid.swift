@@ -26,10 +26,10 @@ struct WorkoutMetricsGrid: View {
                 metricValue(text: String(format: "%.0f", metrics.calories), unit: "kcal")
             }
             MetricCard {
-                Text(String(localized: "workout_metric_steps"))
+                Text(String(localized: "workout_metric_total_calories"))
                     .font(.system(size: 13))
                     .foregroundColor(.secondary)
-                metricValue(text: "\(metrics.steps)", unit: String(localized: "workout_metric_steps_unit"))
+                metricValue(text: String(format: "%.0f", metrics.totalCalories), unit: "kcal")
             }
             MetricCard {
                 Text(String(localized: "workout_metric_matches"))

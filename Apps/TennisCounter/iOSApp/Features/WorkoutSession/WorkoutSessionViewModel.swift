@@ -74,8 +74,7 @@ class WorkoutSessionViewModel: ObservableObject {
                     elapsedSeconds: TimeInterval(elapsedSeconds),
                     calories: received.calories,
                     totalCalories: received.totalCalories,
-                    heartRate: received.heartRate,
-                    steps: received.steps
+                    heartRate: received.heartRate
                 )
             }
             .store(in: &cancellables)
@@ -342,8 +341,7 @@ class WorkoutSessionViewModel: ObservableObject {
                     elapsedSeconds: TimeInterval(elapsedSeconds),
                     calories: metrics.calories,
                     totalCalories: metrics.totalCalories,
-                    heartRate: metrics.heartRate,
-                    steps: metrics.steps
+                    heartRate: metrics.heartRate
                 )
             }
         }

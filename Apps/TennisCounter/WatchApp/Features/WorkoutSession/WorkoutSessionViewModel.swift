@@ -259,8 +259,7 @@ class WorkoutSessionViewModel: ObservableObject {
             elapsedSeconds: TimeInterval(healthKit.elapsedSeconds),
             calories: healthKit.currentCalories - kcalStart,
             totalCalories: (healthKit.currentCalories + healthKit.currentBasalCalories) - totalStart,
-            heartRate: healthKit.currentHeartRate,
-            steps: 0
+            heartRate: healthKit.currentHeartRate
         )
         lastMetrics = metrics
         connectivity.sendMetrics(metrics)

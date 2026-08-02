@@ -43,7 +43,7 @@ struct ConnectivityMessagesTests {
 
     @Test func workoutMetricsConformsWithMetricsType() {
         #expect(WorkoutMetrics.messageType == "metrics")
-        let decoded = WorkoutMetrics(from: WorkoutMetrics(elapsedSeconds: 10, calories: 5, heartRate: 120, steps: 0).toDictionary())
+        let decoded = WorkoutMetrics(from: WorkoutMetrics(elapsedSeconds: 10, calories: 5, heartRate: 120).toDictionary())
         #expect(decoded?.heartRate == 120)
     }
 }
