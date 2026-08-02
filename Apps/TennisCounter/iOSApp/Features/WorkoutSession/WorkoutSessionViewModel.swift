@@ -73,6 +73,7 @@ class WorkoutSessionViewModel: ObservableObject {
                 metrics = WorkoutMetrics(
                     elapsedSeconds: TimeInterval(elapsedSeconds),
                     calories: received.calories,
+                    totalCalories: received.totalCalories,
                     heartRate: received.heartRate,
                     steps: received.steps
                 )
@@ -340,6 +341,7 @@ class WorkoutSessionViewModel: ObservableObject {
                 metrics = WorkoutMetrics(
                     elapsedSeconds: TimeInterval(elapsedSeconds),
                     calories: metrics.calories,
+                    totalCalories: metrics.totalCalories,
                     heartRate: metrics.heartRate,
                     steps: metrics.steps
                 )
