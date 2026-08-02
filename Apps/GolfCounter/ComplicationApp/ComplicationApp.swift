@@ -102,6 +102,13 @@ private func previewSnapshot() -> RoundSnapshot {
     ComplicationEntry(date: .now, state: ComplicationState(snapshot: previewSnapshot()))
 }
 
+#Preview(as: .accessoryCorner) {
+    ComplicationApp()
+} timeline: {
+    ComplicationEntry(date: .now, state: ComplicationState(snapshot: nil))
+    ComplicationEntry(date: .now, state: ComplicationState(snapshot: previewSnapshot()))
+}
+
 #Preview(as: .accessoryRectangular) {
     ComplicationApp()
 } timeline: {
