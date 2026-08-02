@@ -7,6 +7,8 @@ class Match {
     var startedAt: Date = Date()
     var endedAt: Date?
     var caloriesBurned: Double?
+    /// 활동 + 휴식. CloudKit 요구사항상 optional이며, 총 칼로리 도입 전 기록은 nil이다.
+    var totalCaloriesBurned: Double?
     var durationSeconds: Int?
     var opponentName: String?
     var myTotalSets: Int = 0

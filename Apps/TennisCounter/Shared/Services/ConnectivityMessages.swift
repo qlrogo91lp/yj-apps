@@ -118,6 +118,8 @@ struct MatchEndMessage: ConnectivityMessage {
     let endedAt: Date
     let durationSeconds: Int
     let calories: Double
+    /// 활동 + 휴식. 구버전 워치 페이로드에는 없으므로 optional.
+    let totalCalories: Double?
     let averageHeartRate: Double?
     let mode: String
     let noAdRule: Bool
@@ -144,6 +146,7 @@ struct MatchEndMessage: ConnectivityMessage {
             "mode": mode,
             "noAdRule": noAdRule,
         ]
+        if let total = totalCalories { dict["totalCalories"] = total }
         if let hr = averageHeartRate { dict["heartRate"] = hr }
         return dict
     }
@@ -164,13 +167,15 @@ struct MatchEndMessage: ConnectivityMessage {
         endedAt = Date(timeIntervalSince1970: endTs)
         durationSeconds = dict["durationSeconds"] as? Int ?? Int(endTs - startTs)
         calories = dict["calories"] as? Double ?? 0
+        totalCalories = dict["totalCalories"] as? Double
         averageHeartRate = dict["heartRate"] as? Double
         self.mode = mode
         noAdRule = dict["noAdRule"] as? Bool ?? true
     }
 
     init(sessionId: UUID, result: String, completedSets: [[Int]], startedAt: Date,
-         endedAt: Date, durationSeconds: Int, calories: Double, averageHeartRate: Double?, mode: String, noAdRule: Bool)
+         endedAt: Date, durationSeconds: Int, calories: Double, averageHeartRate: Double?,
+         mode: String, noAdRule: Bool, totalCalories: Double? = nil)
     {
         self.sessionId = sessionId
         self.result = result
@@ -182,6 +187,7 @@ struct MatchEndMessage: ConnectivityMessage {
         self.averageHeartRate = averageHeartRate
         self.mode = mode
         self.noAdRule = noAdRule
+        self.totalCalories = totalCalories
     }
 }
 

@@ -47,6 +47,11 @@ struct MatchDetailSheet: View {
                             color: .white
                         )
                         StatCard(
+                            title: String(localized: "summary_total_energy"),
+                            value: match.totalCaloriesBurned.map { String(format: "%.0f", $0) } ?? "–",
+                            color: .white
+                        )
+                        StatCard(
                             title: String(localized: "summary_duration"),
                             value: matchDurationString,
                             color: .white

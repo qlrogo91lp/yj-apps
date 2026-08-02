@@ -308,7 +308,8 @@ class WorkoutSessionViewModel: ObservableObject {
             calories: (session.kcalAtEnd ?? 0) - session.kcalAtStart,
             averageHeartRate: session.averageHeartRate,
             mode: session.options.mode.rawValue,
-            noAdRule: session.options.noAdRule
+            noAdRule: session.options.noAdRule,
+            totalCalories: session.totalKcalAtEnd.map { $0 - session.totalKcalAtStart }
         )
     }
 }

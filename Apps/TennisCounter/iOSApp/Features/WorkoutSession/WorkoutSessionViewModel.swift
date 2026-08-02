@@ -202,6 +202,7 @@ class WorkoutSessionViewModel: ObservableObject {
         session.mySetScore = setScores.count(where: { $0.my > $0.your })
         session.yourSetScore = setScores.count(where: { $0.your > $0.my })
         session.kcalAtEnd = metrics.calories
+        session.totalKcalAtEnd = metrics.totalCalories
         completedMatchCount += 1
         phase = .finished(session)
         liveActivity.end()
@@ -278,6 +279,7 @@ class WorkoutSessionViewModel: ObservableObject {
         match.endedAt = msg.endedAt
         match.durationSeconds = msg.durationSeconds
         match.caloriesBurned = msg.calories
+        match.totalCaloriesBurned = msg.totalCalories
         match.averageHeartRate = msg.averageHeartRate
         match.mode = msg.mode
         match.noAdRule = msg.noAdRule
@@ -297,6 +299,7 @@ class WorkoutSessionViewModel: ObservableObject {
         match.endedAt = session.endedAt ?? Date()
         match.durationSeconds = elapsedSeconds
         match.caloriesBurned = (session.kcalAtEnd ?? 0) - session.kcalAtStart
+        match.totalCaloriesBurned = session.totalKcalAtEnd.map { $0 - session.totalKcalAtStart }
         match.mode = session.options.mode.rawValue
         match.noAdRule = session.options.noAdRule
         match.resultRaw = session.result?.rawValue ?? "win"
@@ -326,6 +329,7 @@ class WorkoutSessionViewModel: ObservableObject {
         session.mySetScore = msg.completedSets.count(where: { $0[0] > $0[1] })
         session.yourSetScore = msg.completedSets.count(where: { $0[1] > $0[0] })
         session.kcalAtEnd = msg.calories
+        session.totalKcalAtEnd = msg.totalCalories
         session.averageHeartRate = msg.averageHeartRate
         return session
     }
