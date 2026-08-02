@@ -38,7 +38,7 @@ struct MatchDetailSheet: View {
 
                 Section(header: Text(String(localized: "summary_section_workout"))) {
                     LazyVGrid(
-                        columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())],
+                        columns: [GridItem(.flexible()), GridItem(.flexible())],
                         spacing: 12
                     ) {
                         StatCard(

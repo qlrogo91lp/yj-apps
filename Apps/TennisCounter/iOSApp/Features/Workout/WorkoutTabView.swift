@@ -34,7 +34,7 @@ struct WorkoutTabView: View {
 
 #Preview {
     WorkoutTabView(
-        metrics: WorkoutMetrics(elapsedSeconds: 1980, calories: 245, heartRate: 142),
+        metrics: WorkoutMetrics(elapsedSeconds: 1980, calories: 245, totalCalories: 310, heartRate: 142),
         completedMatchCount: 2,
         isPaused: false,
         onPauseResume: {},

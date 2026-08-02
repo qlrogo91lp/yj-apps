@@ -13,7 +13,7 @@
 "metrics_elapsed" = "경과 시간";
 "metrics_paused" = "일시정지";
 "metrics_kcal" = "kcal";
-"watch_metric_total_kcal" = "총 kcal";
+"metrics_total_kcal" = "총 kcal";
 "metrics_bpm" = "BPM";
 "mode_one_set" = "1 세트 경기";
 "mode_one_set_desc" = "단판 경기";

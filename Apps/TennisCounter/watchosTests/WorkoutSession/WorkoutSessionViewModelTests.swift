@@ -158,6 +158,18 @@ struct WorkoutSessionViewModelTests {
         #expect(vm.lastMetrics?.calories == 50)
     }
 
+    @Test @MainActor func metricsTotalCaloriesIncludeBasalNetOfStart() {
+        let healthKit = WorkoutSessionService(configuration: .tennis)
+        healthKit.setLiveMetricsForTesting(calories: 100, basalCalories: 20)
+        let vm = WorkoutSessionViewModel(healthKit: healthKit)
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        // 시작 시점 총합(kcal+basal) = 120. 이후 활동 150, 휴식 40 → 총합 190. 순증분 = 190 - 120 = 70.
+        // basal이 합산에서 빠지면 150 - 100 = 50이 되어 이 값과 어긋난다.
+        healthKit.setLiveMetricsForTesting(calories: 150, basalCalories: 40)
+        vm.broadcastMetrics()
+        #expect(vm.lastMetrics?.totalCalories == 70)
+    }
+
     @Test @MainActor func restartMatchResetsScoreVM() {
         let vm = WorkoutSessionViewModel()
         vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))

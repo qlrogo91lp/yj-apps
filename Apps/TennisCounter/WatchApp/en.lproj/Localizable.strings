@@ -13,7 +13,7 @@
 "metrics_elapsed" = "elapsed";
 "metrics_paused" = "paused";
 "metrics_kcal" = "kcal";
-"watch_metric_total_kcal" = "total kcal";
+"metrics_total_kcal" = "total kcal";
 "metrics_bpm" = "BPM";
 "mode_one_set" = "One Set";
 "mode_one_set_desc" = "1 set match";

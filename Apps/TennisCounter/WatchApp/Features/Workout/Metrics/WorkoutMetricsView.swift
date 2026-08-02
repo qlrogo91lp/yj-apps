@@ -25,7 +25,7 @@ struct WorkoutMetricsView: View {
                 Text(String(format: "%.0f", healthKit.currentCalories + healthKit.currentBasalCalories))
                     .font(.system(size: 22, weight: .semibold, design: .rounded))
                     .foregroundColor(.white.opacity(0.7))
-                Text(String(localized: "watch_metric_total_kcal"))
+                Text(String(localized: "metrics_total_kcal"))
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(.white.opacity(0.5))
                     .padding(.bottom, 2)
