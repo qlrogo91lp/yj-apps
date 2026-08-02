@@ -85,6 +85,7 @@ ScreenName/Components/  ← 특정 View 전용 (가장 낮은 계층)
 ## Git Workflow
 
 - `main` 직접 push 금지 — 브랜치 + PR, 머지는 항상 일반 merge commit (`gh pr merge <n> --merge --delete-branch`)
+- 예외: `docs/superpowers/specs/`·`plans/`의 스펙/플랜 문서는 코드 변경이 없으므로 브랜치+PR 없이 `main`에 직접 커밋·push 가능
 - 커밋 메시지는 gitmoji prefix: ✨ feat / 🐛 fix / ♻️ refactor / 🎨 style / 📝 docs / ✅ test / 🔧 chore / 🔥 remove / ⏪ revert
 
 ## Docs
