@@ -27,12 +27,19 @@ struct SummaryStats {
     let totalMatches: Int
     let wins: Int
     let winRate: Double
+    /// 활동 에너지 합계.
     let totalCalories: Double?
+    /// 활동 + 휴식 합계. 총 칼로리 도입 이전 기록만 있으면 nil.
+    let totalEnergy: Double?
     let totalDuration: Int?
     let avgHeartRate: Double?
 
     var formattedCalories: String {
         totalCalories.map { String(format: "%.0f", $0) } ?? "–"
+    }
+
+    var formattedTotalEnergy: String {
+        totalEnergy.map { String(format: "%.0f", $0) } ?? "–"
     }
 
     var formattedDuration: String {
@@ -57,6 +64,9 @@ final class SummaryViewModel: ObservableObject {
         let calories = filtered.compactMap(\.caloriesBurned)
         let totalCalories: Double? = calories.isEmpty ? nil : calories.reduce(0, +)
 
+        let energies = filtered.compactMap(\.totalCaloriesBurned)
+        let totalEnergy: Double? = energies.isEmpty ? nil : energies.reduce(0, +)
+
         let durations: [Int] = filtered.compactMap { match in
             if let d = match.durationSeconds { return d }
             if let end = match.endedAt { return Int(end.timeIntervalSince(match.startedAt)) }
@@ -72,6 +82,7 @@ final class SummaryViewModel: ObservableObject {
             wins: wins,
             winRate: winRate,
             totalCalories: totalCalories,
+            totalEnergy: totalEnergy,
             totalDuration: totalDuration,
             avgHeartRate: avgHeartRate
         )

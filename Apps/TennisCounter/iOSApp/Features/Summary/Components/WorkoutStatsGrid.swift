@@ -6,6 +6,7 @@ import SwiftUI
         wins: 8,
         winRate: 0.67,
         totalCalories: 1240,
+        totalEnergy: 1585,
         totalDuration: 4980,
         avgHeartRate: 138
     ))
@@ -22,12 +23,17 @@ struct WorkoutStatsGrid: View {
                 .font(.headline)
 
             LazyVGrid(
-                columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())],
+                columns: [GridItem(.flexible()), GridItem(.flexible())],
                 spacing: 16
             ) {
                 StatCard(
                     title: String(localized: "summary_total_calories"),
                     value: stats.formattedCalories,
+                    color: .green
+                )
+                StatCard(
+                    title: String(localized: "summary_total_energy"),
+                    value: stats.formattedTotalEnergy,
                     color: .green
                 )
                 StatCard(

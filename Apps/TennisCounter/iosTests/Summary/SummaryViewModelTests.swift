@@ -71,4 +71,42 @@ struct SummaryViewModelTests {
         #expect(stats.avgHeartRate == 150)
         #expect(stats.totalMatches == 2)
     }
+
+    @Test func statsAggregatesTotalEnergy() {
+        let vm = SummaryViewModel()
+        vm.selectedPeriod = .week
+
+        let match1 = Match()
+        match1.startedAt = Date()
+        match1.caloriesBurned = 300
+        match1.totalCaloriesBurned = 385
+
+        let match2 = Match()
+        match2.startedAt = Date()
+        match2.caloriesBurned = 200
+        match2.totalCaloriesBurned = 265
+
+        let stats = vm.stats(from: [match1, match2])
+
+        #expect(stats.totalCalories == 500)
+        #expect(stats.totalEnergy == 650)
+        #expect(stats.formattedTotalEnergy == "650")
+    }
+
+    /// 총 칼로리 도입 이전 기록은 totalCaloriesBurned가 nil이다 — 그런 기록만 있으면
+    /// 0이 아니라 "값 없음"이어야 사용자가 오해하지 않는다.
+    @Test func statsTotalEnergyIsNilForLegacyRecords() {
+        let vm = SummaryViewModel()
+        vm.selectedPeriod = .week
+
+        let legacy = Match()
+        legacy.startedAt = Date()
+        legacy.caloriesBurned = 300
+
+        let stats = vm.stats(from: [legacy])
+
+        #expect(stats.totalCalories == 300)
+        #expect(stats.totalEnergy == nil)
+        #expect(stats.formattedTotalEnergy == "–")
+    }
 }
