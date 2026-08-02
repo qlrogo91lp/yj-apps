@@ -157,7 +157,8 @@ class WorkoutSessionViewModel: ObservableObject {
         let session = MatchSession(
             workoutSessionId: id,
             options: options,
-            kcalAtStart: healthKit.currentCalories
+            kcalAtStart: healthKit.currentCalories,
+            totalKcalAtStart: healthKit.currentCalories + healthKit.currentBasalCalories
         )
         _currentSession = session
 
@@ -187,6 +188,7 @@ class WorkoutSessionViewModel: ObservableObject {
         session.result = result
         session.completedSets = completedSets
         session.kcalAtEnd = healthKit.currentCalories
+        session.totalKcalAtEnd = healthKit.currentCalories + healthKit.currentBasalCalories
         session.mySetScore = completedSets.count(where: { $0.my > $0.your })
         session.yourSetScore = completedSets.count(where: { $0.your > $0.my })
 
@@ -252,11 +254,12 @@ class WorkoutSessionViewModel: ObservableObject {
     func broadcastMetrics() {
         guard case .playing = phase else { return }
         let kcalStart = _currentSession?.kcalAtStart ?? 0
+        let totalStart = _currentSession?.totalKcalAtStart ?? 0
         let metrics = WorkoutMetrics(
             elapsedSeconds: TimeInterval(healthKit.elapsedSeconds),
             calories: healthKit.currentCalories - kcalStart,
-            heartRate: healthKit.currentHeartRate,
-            steps: 0
+            totalCalories: (healthKit.currentCalories + healthKit.currentBasalCalories) - totalStart,
+            heartRate: healthKit.currentHeartRate
         )
         lastMetrics = metrics
         connectivity.sendMetrics(metrics)
@@ -305,7 +308,8 @@ class WorkoutSessionViewModel: ObservableObject {
             calories: (session.kcalAtEnd ?? 0) - session.kcalAtStart,
             averageHeartRate: session.averageHeartRate,
             mode: session.options.mode.rawValue,
-            noAdRule: session.options.noAdRule
+            noAdRule: session.options.noAdRule,
+            totalCalories: session.totalKcalAtEnd.map { $0 - session.totalKcalAtStart }
         )
     }
 }

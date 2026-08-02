@@ -6,6 +6,7 @@ import SwiftUI
         wins: 8,
         winRate: 0.67,
         totalCalories: nil,
+        totalEnergy: nil,
         totalDuration: nil,
         avgHeartRate: nil
     ))

@@ -41,4 +41,32 @@ struct WorkoutMetricsTests {
     @Test func formatSecondsOverOneHour() {
         #expect(WorkoutMetrics.formatSeconds(3661) == "1:01:01")
     }
+
+    @Test func workoutMetricsParsesTotalCalories() {
+        let dict: [String: Any] = ["elapsed": 100.0, "calories": 200.0, "totalCalories": 260.0]
+        let metrics = WorkoutMetrics(from: dict)
+        #expect(metrics?.calories == 200.0)
+        #expect(metrics?.totalCalories == 260.0)
+    }
+
+    /// 구버전 워치가 보낸 딕셔너리에는 totalCalories 키가 없다 — 활동 칼로리로 폴백해야
+    /// 화면에 0이 뜨지 않는다.
+    @Test func workoutMetricsFallsBackToActiveWhenTotalMissing() {
+        let dict: [String: Any] = ["elapsed": 100.0, "calories": 200.0]
+        let metrics = WorkoutMetrics(from: dict)
+        #expect(metrics?.totalCalories == 200.0)
+    }
+
+    @Test func workoutMetricsRoundTripsTotalCalories() {
+        let original = WorkoutMetrics(elapsedSeconds: 90, calories: 210, totalCalories: 275, heartRate: 130)
+        let restored = WorkoutMetrics(from: original.toDictionary())
+        #expect(restored?.totalCalories == 275)
+        #expect(restored?.calories == 210)
+        #expect(restored?.heartRate == 130)
+    }
+
+    @Test func workoutMetricsTotalDefaultsToZero() {
+        let metrics = WorkoutMetrics(elapsedSeconds: 10)
+        #expect(metrics.totalCalories == 0)
+    }
 }

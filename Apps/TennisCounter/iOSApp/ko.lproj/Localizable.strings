@@ -44,8 +44,7 @@
 "workout_elapsed_label" = "운동 시간";
 "workout_metric_heartrate" = "심박수";
 "workout_metric_calories" = "칼로리";
-"workout_metric_steps" = "걸음 수";
-"workout_metric_steps_unit" = "걸음";
+"workout_metric_total_calories" = "총 칼로리";
 "workout_metric_matches" = "경기 수";
 "workout_metric_matches_unit" = "경기";
 
@@ -61,7 +60,8 @@
 "summary_recent_matches" = "최근 경기";
 "summary_no_matches" = "이 기간에 경기가 없습니다";
 "summary_section_workout" = "운동";
-"summary_total_calories" = "총 kcal";
+"summary_total_calories" = "활동 kcal";
+"summary_total_energy" = "총 kcal";
 "summary_duration" = "운동시간";
 "summary_avg_heartrate" = "평균 bpm";
 

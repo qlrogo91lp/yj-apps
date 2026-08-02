@@ -73,8 +73,8 @@ class WorkoutSessionViewModel: ObservableObject {
                 metrics = WorkoutMetrics(
                     elapsedSeconds: TimeInterval(elapsedSeconds),
                     calories: received.calories,
-                    heartRate: received.heartRate,
-                    steps: received.steps
+                    totalCalories: received.totalCalories,
+                    heartRate: received.heartRate
                 )
             }
             .store(in: &cancellables)
@@ -202,6 +202,13 @@ class WorkoutSessionViewModel: ObservableObject {
         session.mySetScore = setScores.count(where: { $0.my > $0.your })
         session.yourSetScore = setScores.count(where: { $0.your > $0.my })
         session.kcalAtEnd = metrics.calories
+        // metrics.totalCalories는 WorkoutMetrics.totalCalories를 그대로 읽는데, 이 값은 워치로부터
+        // totalCalories 키를 포함한 메트릭을 한 번도 못 받았을 때(구버전 워치 또는 폰 드라이버 경로에서
+        // 워치 미연결) calories로 폴백한다. 이 경우 저장되는 Match.totalCaloriesBurned가 nil이 아니라
+        // caloriesBurned와 같은 값이 되어, 워치발 MatchEndMessage.totalCalories 경로(정상적으로 nil 유지)와
+        // 다르게 동작한다. 기존의 "메트릭 없을 때 caloriesBurned가 0으로 폴백"하는 동작과 대칭적인 accepted
+        // limitation으로 현재 동작을 유지한다.
+        session.totalKcalAtEnd = metrics.totalCalories
         completedMatchCount += 1
         phase = .finished(session)
         liveActivity.end()
@@ -278,6 +285,7 @@ class WorkoutSessionViewModel: ObservableObject {
         match.endedAt = msg.endedAt
         match.durationSeconds = msg.durationSeconds
         match.caloriesBurned = msg.calories
+        match.totalCaloriesBurned = msg.totalCalories
         match.averageHeartRate = msg.averageHeartRate
         match.mode = msg.mode
         match.noAdRule = msg.noAdRule
@@ -297,6 +305,7 @@ class WorkoutSessionViewModel: ObservableObject {
         match.endedAt = session.endedAt ?? Date()
         match.durationSeconds = elapsedSeconds
         match.caloriesBurned = (session.kcalAtEnd ?? 0) - session.kcalAtStart
+        match.totalCaloriesBurned = session.totalKcalAtEnd.map { $0 - session.totalKcalAtStart }
         match.mode = session.options.mode.rawValue
         match.noAdRule = session.options.noAdRule
         match.resultRaw = session.result?.rawValue ?? "win"
@@ -326,6 +335,7 @@ class WorkoutSessionViewModel: ObservableObject {
         session.mySetScore = msg.completedSets.count(where: { $0[0] > $0[1] })
         session.yourSetScore = msg.completedSets.count(where: { $0[1] > $0[0] })
         session.kcalAtEnd = msg.calories
+        session.totalKcalAtEnd = msg.totalCalories
         session.averageHeartRate = msg.averageHeartRate
         return session
     }
@@ -340,8 +350,8 @@ class WorkoutSessionViewModel: ObservableObject {
                 metrics = WorkoutMetrics(
                     elapsedSeconds: TimeInterval(elapsedSeconds),
                     calories: metrics.calories,
-                    heartRate: metrics.heartRate,
-                    steps: metrics.steps
+                    totalCalories: metrics.totalCalories,
+                    heartRate: metrics.heartRate
                 )
             }
         }

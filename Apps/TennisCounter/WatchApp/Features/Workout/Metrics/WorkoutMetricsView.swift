@@ -21,6 +21,16 @@ struct WorkoutMetricsView: View {
                     .padding(.bottom, 5)
             }
 
+            HStack(alignment: .bottom, spacing: 4) {
+                Text(String(format: "%.0f", healthKit.currentCalories + healthKit.currentBasalCalories))
+                    .font(.system(size: 22, weight: .semibold, design: .rounded))
+                    .foregroundColor(.white.opacity(0.7))
+                Text(String(localized: "metrics_total_kcal"))
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(.white.opacity(0.5))
+                    .padding(.bottom, 2)
+            }
+
             HStack(alignment: .bottom, spacing: 6) {
                 Text(heartRateText)
                     .font(.system(size: 35, weight: .bold, design: .rounded))
@@ -58,7 +68,7 @@ struct WorkoutMetricsView: View {
 #if DEBUG
     #Preview("Active") {
         let service = WorkoutSessionService(configuration: .tennis)
-        service.setLiveMetricsForTesting(heartRate: 102, calories: 245, elapsedSeconds: 1523)
+        service.setLiveMetricsForTesting(heartRate: 102, calories: 245, basalCalories: 58, elapsedSeconds: 1523)
         return WorkoutMetricsView(healthKit: service, isPaused: false)
     }
 #endif

@@ -38,12 +38,17 @@ struct MatchDetailSheet: View {
 
                 Section(header: Text(String(localized: "summary_section_workout"))) {
                     LazyVGrid(
-                        columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())],
+                        columns: [GridItem(.flexible()), GridItem(.flexible())],
                         spacing: 12
                     ) {
                         StatCard(
                             title: String(localized: "summary_total_calories"),
                             value: match.caloriesBurned.map { String(format: "%.0f", $0) } ?? "–",
+                            color: .white
+                        )
+                        StatCard(
+                            title: String(localized: "summary_total_energy"),
+                            value: match.totalCaloriesBurned.map { String(format: "%.0f", $0) } ?? "–",
                             color: .white
                         )
                         StatCard(

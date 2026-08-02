@@ -41,7 +41,7 @@ Shared/
 │   ├── MatchResult.swift    # 경기 결과 struct
 │   ├── MatchSession.swift   # 진행 중 경기 세션 상태
 │   ├── SetScore.swift       # 세트 점수 struct
-│   └── WorkoutMetrics.swift # HealthKit 메트릭 (칼로리, BPM, 시간)
+│   └── WorkoutMetrics.swift # HealthKit 메트릭 (활동/총 칼로리, BPM, 시간)
 ├── Persistence/
 │   │  # SwiftData @Model 클래스. DB 스키마 역할.
 │   ├── Match.swift          # SwiftData 경기 기록 모델
