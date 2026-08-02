@@ -22,8 +22,12 @@ let workout = WorkoutSessionService(
 ```
 
 - `startWorkout()/pauseWorkout()/resumeWorkout()/stopWorkout()`은 watchOS 전용.
-- `stopWorkout()`은 `WorkoutResult`(시간·칼로리·평균심박) 반환.
-- 테스트·프리뷰에서는 `#if DEBUG` 전용 `setLiveMetricsForTesting(heartRate:calories:elapsedSeconds:)`로 표시 값 주입.
+- `stopWorkout()`은 `WorkoutResult`(시간·칼로리·평균심박·총칼로리) 반환.
+- 라이브 데이터 (watchOS 전용):
+  - `currentCalories` — 활동 에너지(activeEnergyBurned) 누적 kcal.
+  - `currentBasalCalories` — 휴식 에너지(basalEnergyBurned) 누적 kcal. 총 칼로리는 `currentCalories + currentBasalCalories`.
+    `HKLiveWorkoutDataSource`가 종목에 따라 basal을 자동 수집하며, 수집되지 않는 종목에서는 0으로 남는다.
+- 테스트·프리뷰에서는 `#if DEBUG` 전용 `setLiveMetricsForTesting(heartRate:calories:basalCalories:elapsedSeconds:)`로 표시 값 주입.
 
 ## ConnectivityCore 사용법
 

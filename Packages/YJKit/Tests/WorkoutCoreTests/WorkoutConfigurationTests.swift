@@ -37,6 +37,17 @@ struct WorkoutConfigurationTests {
         #expect(a != c)
     }
 
+    @Test func resultTotalCaloriesDefaultsToZero() {
+        let result = WorkoutResult(durationSeconds: 60, caloriesBurned: 100, averageHeartRate: 120)
+        #expect(result.totalCaloriesBurned == 0)
+    }
+
+    @Test func resultCarriesTotalCalories() {
+        let result = WorkoutResult(durationSeconds: 60, caloriesBurned: 100, averageHeartRate: 120, totalCaloriesBurned: 145)
+        #expect(result.totalCaloriesBurned == 145)
+        #expect(result.caloriesBurned == 100)
+    }
+
     /// Sendable 컴파일 타임 검증 — conformance가 빠지면 이 함수 호출이 컴파일되지 않는다.
     @Test func typesAreSendable() {
         func requiresSendable(_: some Sendable) {}
