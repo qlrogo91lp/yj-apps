@@ -1,6 +1,8 @@
 included:
-  - GolfCounter
-  - GolfCounter Watch App
+  - iOSApp
+  - WatchApp
+  - ComplicationApp
+  - Shared
 
 line_length:
   warning: 150
@@ -27,10 +29,6 @@ opt_in_rules:
   # maxHole(String)을 Int로 강제 언래핑하는 기존 패턴을 드러내기 위해 켜둔다.
   # warning 레벨이라 make lint는 통과하며, 모델을 Int/HoleType으로 바꿀 때 함께 사라진다.
   - force_unwrapping
-
-type_name:
-  excluded:
-    - GolfCounter_Watch_AppApp
 
 identifier_name:
   min_length:
