@@ -29,7 +29,6 @@ struct ComplicationAppEntryView: View {
     @Environment(\.widgetFamily) private var widgetFamily
     var entry: ComplicationEntry
 
-    @ViewBuilder
     var body: some View {
         switch widgetFamily {
         case .accessoryRectangular:
