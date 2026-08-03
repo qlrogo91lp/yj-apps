@@ -27,22 +27,38 @@ struct Provider: TimelineProvider {
 
 struct ComplicationAppEntryView: View {
     @Environment(\.widgetFamily) private var widgetFamily
+    @Environment(\.widgetRenderingMode) private var renderingMode
     var entry: ComplicationEntry
+
+    private var backgroundColor: Color {
+        entry.state.isRoundActive ? .brandActive : .brand
+    }
 
     var body: some View {
         switch widgetFamily {
         case .accessoryRectangular:
             rectangularBody
                 .containerBackground(.clear, for: .widget)
+        case .accessoryCorner:
+            iconBody
+                .containerBackground(backgroundColor, for: .widget)
         default:
             iconBody
-                .containerBackground(entry.state.isRoundActive ? Color.brandActive : Color.brand, for: .widget)
+                .clipShape(Circle())
+                .containerBackground(backgroundColor, for: .widget)
         }
     }
 
     private var iconBody: some View {
-        golfIcon
-            .padding(4)
+        ZStack {
+            if renderingMode == .fullColor {
+                backgroundColor
+            } else {
+                AccessoryWidgetBackground()
+            }
+            golfIcon
+                .padding(4)
+        }
     }
 
     private var rectangularBody: some View {
