@@ -53,6 +53,24 @@ struct WorkoutSessionServiceTests {
         #expect(!service.typesToRead.contains(HKQuantityType(.distanceWalkingRunning)))
     }
 
+    @Test @MainActor func typesToShareOmitsAdditionalTypesByDefault() {
+        let service = WorkoutSessionService(configuration: WorkoutConfiguration(activityType: .tennis))
+        #expect(service.typesToShare.count == 4)
+        #expect(!service.typesToShare.contains(HKQuantityType(.stepCount)))
+        #expect(!service.typesToShare.contains(HKQuantityType(.distanceWalkingRunning)))
+    }
+
+    @Test @MainActor func typesToShareIncludesAdditionalTypes() {
+        let service = WorkoutSessionService(configuration: WorkoutConfiguration(
+            activityType: .golf,
+            locationType: .indoor,
+            additionalReadTypes: [.distanceWalkingRunning, .stepCount]
+        ))
+        #expect(service.typesToShare.count == 6)
+        #expect(service.typesToShare.contains(HKQuantityType(.stepCount)))
+        #expect(service.typesToShare.contains(HKQuantityType(.distanceWalkingRunning)))
+    }
+
     @Test @MainActor func typesToReadIncludesAdditionalTypes() {
         let service = WorkoutSessionService(configuration: WorkoutConfiguration(
             activityType: .golf,
