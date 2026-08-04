@@ -47,6 +47,62 @@
 
 ---
 
+## 구현 결과 (2026-08-04 완료)
+
+Task 0~11 전체 완료. superpowers:subagent-driven-development로 태스크별 구현 → 리뷰 → (필요시) 수정 루프를 거치고, 마지막에 브랜치 전체 리뷰를 별도로 진행했다. 이 절에는 진행 중 실제로 있었던 결정·변경 사항만 남긴다 — 각 태스크의 세부 스텝이 계획대로 됐는지는 위 체크리스트와 git 커밋 이력이 원본이다.
+
+- ralli-kit PR: [ralli-kit#2](https://github.com/qlrogo91lp/ralli-kit/pull/2) — `main` 머지 완료
+- golf-counter PR: [golf_counter#7](https://github.com/qlrogo91lp/golf_counter/pull/7) — 리뷰 대기
+
+### 플랜 문서 자체의 오류
+
+- Task 7 `RoundViewModelSnapshotTests`: 코드 블록에 실제로 작성된 `@Test`는 10개인데, 요약 문구는 "11"로 잘못 표기되어 있었다 (→ Task 11 Step 5, 완료 기준의 "watchosTests 45건"도 같은 이유로 실제와 다름). 코드가 맞고 요약 숫자가 틀렸던 것 — 구현은 코드 블록 그대로 따랐다.
+- Task 11 Step 3 기대치(iosTests 2건, watchosTests 45건)도 위와 같은 이유, 그리고 이 브랜치가 건드리지 않은 기존 baseline 파일(`RoundSnapshotTests`가 4건이 아니라 6건, `GolfRoundTests`가 2건이 아니라 3건)까지 겹쳐 실제로는 iosTests 3건·watchosTests 46건(태스크별 리뷰 시점 기준, 최종 리뷰의 fix wave로 3건 더 늘어 49건)이 정상이다. 회귀는 아니고 플랜의 최초 집계 실수다.
+
+### 태스크별 리뷰에서 나온 plan-mandated 발견 — 사용자가 판단
+
+각 태스크 리뷰에서 "플랜 브리프 코드 자체가 문제"라고 표시된 발견은 규칙상 임의로 처리하지 않고 사람에게 판단을 맡겼다. 결과:
+
+| 태스크 | 발견 | 판단 |
+|---|---|---|
+| Task 2 | `stopWorkout()`에서 거리·걸음수가 calories/heartRate와 달리 종료 시점 fresh query가 아니라 마지막 라이브 콜백 시점의 캐시값을 씀 — undercounting 가능 | **지금 고침** → `collectDistance(builder:)`/`collectSteps(builder:)` 헬퍼 추가, `stopWorkout()`에서 사용 |
+| Task 4 | `RoundSnapshotPublisher.swift` 한 파일에 `protocol RoundSnapshotPublishing`과 `struct RoundSnapshotPublisher` 두 타입 — "한 파일 = 한 타입" 규칙과 문자 그대로는 어긋남 | **플랜대로 유지** — protocol+유일한 구현체를 한 파일에 두는 건 Swift에서 흔한 저위험 패턴이라는 판단 |
+| Task 8 | `ParOptionButton`/`CounterView`/`Scorecard`의 "Par"/"H" 영문 하드코딩 — "한국어 하드코딩" 규칙과 어긋남 | **플랜대로 유지** — 골프 용어로 관용적으로 쓰이는 표기라는 판단 |
+
+### 태스크별 리뷰에서 나온 실질적 버그 — 그 자리에서 수정
+
+- **Task 2 (ralli-kit):** 위 표의 fresh-query 수정.
+- **Task 9 (golf-counter):** `RoundSessionView.startRound()`가 `Task { await requestAuthorization(); startWorkout() }`를 발사하는데, 그 인증 대기 중에 사용자가 "라운드 종료"를 누르면 `endRound()`의 `stopWorkout()`은 아직 세션이 없어 no-op이 되고 뷰는 dismiss된다. 뒤늦게 깨어난 start Task가 `startWorkout()`을 호출해 아무도 멈추지 못하는 워크아웃 세션이 남는 레이스였다. `startTask`를 보관해 `endRound()`에서 취소하고, 인증 완료 후 `Task.isCancelled`를 확인한 뒤에만 `startWorkout()`을 호출하도록 수정.
+
+### 최종 브랜치 전체 리뷰에서 새로 나온 발견 (태스크 단위 리뷰로는 못 잡음) — 전부 수정
+
+Task 11 자동 검증(린트·3스킴 빌드·전체 테스트) 통과 후, 두 브랜치 각각에 대해 opus 모델로 별도의 브랜치 전체 리뷰를 추가로 돌렸다. plan-mandated 충돌이 아니라 순수 리뷰 발견이라 바로 수정 라운드를 거쳤다.
+
+- **ralli-kit:** `additionalReadTypes`가 `typesToRead`만 넓히고 `typesToShare`는 그대로였다. `HKLiveWorkoutDataSource.enableCollection`으로 수집한 샘플을 워크아웃에 실제로 저장하려면 share 권한이 필요한데, 이게 빠져 있어 골프 워크아웃의 거리·걸음수가 Health에 조용히 저장 안 될 수 있는 위험이었다. `typesToShare`도 `typesToRead`와 같은 패턴으로 `additionalReadTypes`를 반영하도록 수정, 대응 테스트 추가.
+- **golf-counter — 파 선택 화면 유령 홀 버그:** `ParSelectionView`에 이전 홀로 돌아가는 버튼이 없었다. 카운터 화면에서 실수로 "다음"을 눌러 새 홀(par 미설정)에 진입하면 되돌아갈 방법이 없고, 빠져나가려고 아무 파나 고르면 `score 0 · 그 파 · putts 0`인 유령 홀이 영구히 남아 전체 오버파 표시가 그 파만큼 틀어지는(스코어카드·헤더·컴플리케이션 전부) 문제였다. `ParSelectionView`에 `ParBackButton` 추가, `RoundViewModel.cancelToPreviousHole()`/`isPristinePhantomHole`을 추가해 "손대지 않은 말단 홀"에서 되돌아갈 때만 그 홀을 배열에서 완전히 제거하고, `beginParEditing()`으로 재편집 중인 진짜 홀은 절대 건드리지 않도록 구분.
+- **golf-counter — 비정상 종료 시 워크아웃 고아 문제:** `endRound()`를 거치지 않고 뷰가 사라지면(예: 엣지 스와이프가 완전히 막히지 않는 경우) 스냅샷이 남아 홈 진입 시 자동 복구가 새 `WorkoutSessionService`로 워크아웃을 다시 시작해, 먼저 시작된 세션이 고아로 남을 수 있었다. `RoundSessionView`에 `didFinish` 플래그와 `.onDisappear` 가드를 추가해 `endRound()`를 거치지 않은 종료 시 워크아웃을 정리하도록 함 (스냅샷/App Group 상태는 건드리지 않아 크래시 복구는 그대로 동작).
+- **golf-counter — 사소한 정정:** `endRound()`의 `Task { await healthKit.stopWorkout() }`가 `dismiss()` 이후 `@StateObject`를 읽을 수 있는 위험 → `Task` 생성 전에 로컬 `let service = healthKit`로 캡처하도록 수정.
+
+### 최종 리뷰에서 나왔지만 병합을 막지 않는다고 판단해 보류한 것 (deferred minor)
+
+- `WorkoutConfiguration+Golf.swift`가 `Features/Round/`에 있음 — 비-UI HealthKit 설정이라 `Shared/Services/`가 더 맞다는 지적
+- `RoundSnapshotPublisherTests`의 임시 `UserDefaults` suite가 `removePersistentDomain`을 호출하지 않음 (UUID라 실질적 위험 없음)
+- `Scorecard`가 퍼트를 영문 약어 "p"로 표기, 요약 줄은 "퍼트"로 표기 — 표기 불일치
+- `MetricsView`의 단위 문자열 "bpm"/"kcal"/"km"이 영문 — Par/H와 같은 범주의 관용 표기로 판단해 보류
+- `startRound()`가 `requestAuthorization()`의 `Bool` 결과를 버림 — HealthKit 권한 거부 시 UI 피드백 없음
+- (fix wave가 새로 만든 것) `cancelToPreviousHole()` 테스트가 배열 길이 축소를 직접 단언하지 않아 회귀 방지력이 약함
+- (fix wave가 새로 만든 것) `ParSelectionView`에 `ScrollView`가 없어 40/41mm 워치 화면에서 새 버튼이 잘릴 가능성 — 이 프로젝트의 대상 기기는 46mm라 우선순위 낮음
+- ralli-kit `additionalReadTypes`라는 이름이 read 권한뿐 아니라 실제로는 live-collection 활성화까지 겸한다는 걸 이름만으로 알기 어려움
+- ralli-kit: 소비자가 `additionalReadTypes`에 `.distanceWalkingRunning`/`.stepCount` 외의 타입을 넣으면 수집·권한은 되지만 published 프로퍼티나 `WorkoutResult` 필드로 노출되지 않고 버려짐 (골프·테니스 조합에서는 문제 없음)
+- ralli-kit: watchOS 전용 경로(`enableCollection`, `didCollectDataOf` 콜백 등)는 `swift test`가 macOS에서 도는 한 유닛테스트로 검증되지 않음 — golf-counter 워치 타깃 빌드 성공과 실기기/시뮬레이터 확인이 사실상의 커버리지
+
+### 남은 일
+
+- Task 11 Step 4 (워치 시뮬레이터 육안 확인 12항목, `ParSelectionView`에 새로 추가된 "이전" 버튼 포함) — 사용자가 Xcode에서 직접 확인 예정
+- golf-counter [PR #7](https://github.com/qlrogo91lp/golf_counter/pull/7) 리뷰·머지
+
+---
+
 ### Task 0: 작업 브랜치 준비 (두 저장소)
 
 golf-counter와 ralli-kit 양쪽에 브랜치를 만든다. golf-counter는 로컬 경로로 ralli-kit을 참조하므로, ralli-kit 브랜치의 변경이 곧바로 워치 빌드에 반영된다.
@@ -2200,10 +2256,10 @@ EOF
 
 ## 완료 기준
 
-- [ ] ralli-kit `swift test` 전체 PASS (WorkoutCore 24건), tennis_counter 워치 타깃 BUILD SUCCEEDED
-- [ ] `watchosTests` 45건 PASS, `iosTests` 2건 PASS
-- [ ] 세 스킴(`GolfCounter`, `GolfCounter Watch App`, `ComplicationAppExtension`) BUILD SUCCEEDED
-- [ ] `make lint`·`make format` 위반 0
-- [ ] 시뮬레이터에서 Task 11 Step 4의 12개 항목 전부 확인
-- [ ] pbxproj 변경 없음 (synchronized group 덕분에 파일 추가만으로 반영)
-- [ ] ralli-kit PR 머지 후 golf-counter PR 생성
+- [x] ralli-kit `swift test` 전체 PASS (WorkoutCore 26건 — `typesToShare` 수정으로 24건에서 증가), tennis_counter 워치 타깃 BUILD SUCCEEDED
+- [x] `watchosTests` 49건 PASS (플랜의 "45건"은 집계 오류, 위 "플랜 문서 자체의 오류" 참조), `iosTests` 3건 PASS (플랜의 "2건"도 같은 이유)
+- [x] 세 스킴(`GolfCounter`, `GolfCounter Watch App`, `ComplicationAppExtension`) BUILD SUCCEEDED
+- [x] `make lint`·`make format` 위반 0
+- [ ] 시뮬레이터에서 Task 11 Step 4의 12개 항목 전부 확인 — 사용자가 Xcode에서 직접 진행 예정
+- [x] pbxproj 변경 없음 (synchronized group 덕분에 파일 추가만으로 반영)
+- [x] ralli-kit PR 머지 후 golf-counter PR 생성 — [ralli-kit#2](https://github.com/qlrogo91lp/ralli-kit/pull/2) 머지 완료, [golf_counter#7](https://github.com/qlrogo91lp/golf_counter/pull/7) 생성·리뷰 대기

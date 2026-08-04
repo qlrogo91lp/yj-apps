@@ -19,15 +19,8 @@ struct ComplicationState: Equatable {
         "H\(holeNumber)"
     }
 
-    /// 골프 표기 관례: 이븐파는 0이 아니라 E, 오버파는 명시적으로 + 부호를 붙인다.
     var relativeToParText: String {
-        if relativeToPar == 0 {
-            return "E"
-        }
-        if relativeToPar > 0 {
-            return "+\(relativeToPar)"
-        }
-        return "\(relativeToPar)"
+        ScoreFormat.relativeToPar(relativeToPar)
     }
 
     var strokesText: String {
