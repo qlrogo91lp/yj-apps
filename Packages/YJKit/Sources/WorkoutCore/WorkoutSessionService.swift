@@ -145,6 +145,8 @@ public final class WorkoutSessionService: NSObject, ObservableObject {
             let calories = await collectCalories(builder: builder)
             let basal = await collectBasalCalories(builder: builder)
             let heartRate = await collectAverageHeartRate(builder: builder)
+            let distance = await collectDistance(builder: builder)
+            let steps = await collectSteps(builder: builder)
 
             try? await builder.finishWorkout()
 
@@ -153,13 +155,24 @@ public final class WorkoutSessionService: NSObject, ObservableObject {
                                  caloriesBurned: calories,
                                  averageHeartRate: heartRate,
                                  totalCaloriesBurned: calories + basal,
-                                 distanceMeters: currentDistanceMeters,
-                                 steps: currentSteps)
+                                 distanceMeters: distance,
+                                 steps: steps)
         }
 
         private func collectCalories(builder: HKLiveWorkoutBuilder) async -> Double {
             builder.statistics(for: HKQuantityType(.activeEnergyBurned))?
                 .sumQuantity()?.doubleValue(for: .kilocalorie()) ?? 0
+        }
+
+        private func collectDistance(builder: HKLiveWorkoutBuilder) async -> Double {
+            builder.statistics(for: HKQuantityType(.distanceWalkingRunning))?
+                .sumQuantity()?.doubleValue(for: .meter()) ?? 0
+        }
+
+        private func collectSteps(builder: HKLiveWorkoutBuilder) async -> Int {
+            let value = builder.statistics(for: HKQuantityType(.stepCount))?
+                .sumQuantity()?.doubleValue(for: .count())
+            return value.map { Int($0) } ?? 0
         }
 
         private func collectBasalCalories(builder: HKLiveWorkoutBuilder) async -> Double {
