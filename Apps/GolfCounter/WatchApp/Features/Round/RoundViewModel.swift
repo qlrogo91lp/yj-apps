@@ -15,6 +15,8 @@ final class RoundViewModel: ObservableObject {
     @Published private(set) var puttCounts: [Int]
     @Published private(set) var currentHoleIndex: Int
     @Published var inputMode: StrokeInputMode = .swing
+    /// 파가 이미 설정된 홀에서 [Par] 버튼으로 파 선택 화면을 다시 띄운 상태.
+    @Published private(set) var isEditingPar = false
 
     let startedAt: Date
     var courseName: String?
@@ -41,6 +43,13 @@ final class RoundViewModel: ObservableObject {
     var currentPutts: Int { puttCounts[currentHoleIndex] }
     /// 0은 "아직 파가 설정되지 않음"을 뜻한다.
     var currentPar: Int { holePars[currentHoleIndex] }
+    /// 화면 분기 조건은 "홀 이동 방향"이 아니라 "이 홀에 파가 있는가" 하나다 (spec §4).
+    var phase: Phase {
+        if isEditingPar { return .parSelection }
+        return currentPar == 0 ? .parSelection : .counting
+    }
+
+    var canGoToPreviousHole: Bool { currentHoleIndex > 0 }
     var totalStrokes: Int { snapshot.totalStrokes }
     var relativeToPar: Int { snapshot.relativeToPar }
 
@@ -76,5 +85,44 @@ final class RoundViewModel: ObservableObject {
             holeScores[currentHoleIndex] -= 1
             puttCounts[currentHoleIndex] -= 1
         }
+    }
+
+    // MARK: - 파 선택
+
+    func selectPar(_ par: Int) {
+        holePars[currentHoleIndex] = par
+        isEditingPar = false
+    }
+
+    func beginParEditing() {
+        isEditingPar = true
+    }
+
+    // MARK: - 홀 이동
+
+    func goToNextHole() {
+        currentHoleIndex += 1
+        ensureCapacityForCurrentHole()
+        resetHoleLocalState()
+    }
+
+    func goToPreviousHole() {
+        guard canGoToPreviousHole else { return }
+        currentHoleIndex -= 1
+        resetHoleLocalState()
+    }
+
+    /// 홀 배열 세 개의 길이를 현재 홀까지 맞춘다. 세 배열은 항상 같은 길이를 유지한다.
+    private func ensureCapacityForCurrentHole() {
+        let needed = currentHoleIndex + 1
+        while holeScores.count < needed { holeScores.append(0) }
+        while holePars.count < needed { holePars.append(0) }
+        while puttCounts.count < needed { puttCounts.append(0) }
+    }
+
+    /// 홀을 옮기면 입력 모드는 스윙으로 리셋되고(spec §3), 진행 중이던 파 편집은 취소된다.
+    private func resetHoleLocalState() {
+        inputMode = .swing
+        isEditingPar = false
     }
 }
