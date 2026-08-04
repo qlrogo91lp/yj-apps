@@ -53,11 +53,10 @@ struct ComplicationAppEntryView: View {
         ZStack {
             if renderingMode == .fullColor {
                 backgroundColor
-            } else {
-                AccessoryWidgetBackground()
             }
             golfIcon
                 .padding(4)
+                .widgetAccentable()
         }
     }
 
