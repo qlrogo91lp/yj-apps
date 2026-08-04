@@ -53,20 +53,40 @@ final class RoundViewModel: ObservableObject {
 
     // MARK: - 표시값
 
-    var currentHoleNumber: Int { currentHoleIndex + 1 }
-    var currentScore: Int { holeScores[currentHoleIndex] }
-    var currentPutts: Int { puttCounts[currentHoleIndex] }
+    var currentHoleNumber: Int {
+        currentHoleIndex + 1
+    }
+
+    var currentScore: Int {
+        holeScores[currentHoleIndex]
+    }
+
+    var currentPutts: Int {
+        puttCounts[currentHoleIndex]
+    }
+
     /// 0은 "아직 파가 설정되지 않음"을 뜻한다.
-    var currentPar: Int { holePars[currentHoleIndex] }
+    var currentPar: Int {
+        holePars[currentHoleIndex]
+    }
+
     /// 화면 분기 조건은 "홀 이동 방향"이 아니라 "이 홀에 파가 있는가" 하나다 (spec §4).
     var phase: Phase {
         if isEditingPar { return .parSelection }
         return currentPar == 0 ? .parSelection : .counting
     }
 
-    var canGoToPreviousHole: Bool { currentHoleIndex > 0 }
-    var totalStrokes: Int { snapshot.totalStrokes }
-    var relativeToPar: Int { snapshot.relativeToPar }
+    var canGoToPreviousHole: Bool {
+        currentHoleIndex > 0
+    }
+
+    var totalStrokes: Int {
+        snapshot.totalStrokes
+    }
+
+    var relativeToPar: Int {
+        snapshot.relativeToPar
+    }
 
     var snapshot: RoundSnapshot {
         RoundSnapshot(startedAt: startedAt,
@@ -152,9 +172,15 @@ final class RoundViewModel: ObservableObject {
     /// 홀 배열 세 개의 길이를 현재 홀까지 맞춘다. 세 배열은 항상 같은 길이를 유지한다.
     private func ensureCapacityForCurrentHole() {
         let needed = currentHoleIndex + 1
-        while holeScores.count < needed { holeScores.append(0) }
-        while holePars.count < needed { holePars.append(0) }
-        while puttCounts.count < needed { puttCounts.append(0) }
+        while holeScores.count < needed {
+            holeScores.append(0)
+        }
+        while holePars.count < needed {
+            holePars.append(0)
+        }
+        while puttCounts.count < needed {
+            puttCounts.append(0)
+        }
     }
 
     /// 홀을 옮기면 입력 모드는 스윙으로 리셋되고(spec §3), 진행 중이던 파 편집은 취소된다.

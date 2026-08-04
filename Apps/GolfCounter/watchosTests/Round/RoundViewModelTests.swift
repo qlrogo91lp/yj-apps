@@ -98,7 +98,9 @@ struct RoundViewModelTests {
     @Test func 타수에_상한이_없다() {
         let viewModel = makeViewModel()
 
-        for _ in 0 ..< 15 { viewModel.incrementStroke() }
+        for _ in 0 ..< 15 {
+            viewModel.incrementStroke()
+        }
 
         #expect(viewModel.currentScore == 15)
     }
@@ -208,10 +210,14 @@ struct RoundViewModelHoleFlowTests {
     @Test func 누적_타수와_오버파를_홀에_걸쳐_합산한다() {
         let viewModel = makeViewModel()
         viewModel.selectPar(4)
-        for _ in 0 ..< 5 { viewModel.incrementStroke() }
+        for _ in 0 ..< 5 {
+            viewModel.incrementStroke()
+        }
         viewModel.goToNextHole()
         viewModel.selectPar(3)
-        for _ in 0 ..< 3 { viewModel.incrementStroke() }
+        for _ in 0 ..< 3 {
+            viewModel.incrementStroke()
+        }
 
         #expect(viewModel.totalStrokes == 8)
         #expect(viewModel.relativeToPar == 1)
