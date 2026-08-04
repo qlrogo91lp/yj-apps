@@ -36,6 +36,21 @@ final class RoundViewModel: ObservableObject {
         currentHoleIndex = 0
     }
 
+    /// App Group 스냅샷으로 라운드를 되살린다 (spec §12).
+    /// 워크아웃 세션은 복구하지 않고 새로 시작하므로, 여기서는 스코어 상태만 복원한다.
+    init(resuming snapshot: RoundSnapshot,
+         publisher: RoundSnapshotPublishing = RoundSnapshotPublisher())
+    {
+        startedAt = snapshot.startedAt
+        courseName = snapshot.courseName
+        self.publisher = publisher
+        holeScores = snapshot.holeScores
+        holePars = snapshot.holePars
+        puttCounts = snapshot.puttCounts
+        currentHoleIndex = max(snapshot.currentHoleIndex, 0)
+        ensureCapacityForCurrentHole()
+    }
+
     // MARK: - 표시값
 
     var currentHoleNumber: Int { currentHoleIndex + 1 }
@@ -62,6 +77,23 @@ final class RoundViewModel: ObservableObject {
                       puttCounts: puttCounts)
     }
 
+    // MARK: - 라이프사이클
+
+    /// 라운드 화면 진입 시 1회. 컴플리케이션이 곧바로 "라운드 중"으로 바뀌게 한다.
+    func start() {
+        publishSnapshot()
+    }
+
+    /// 라운드 종료. 스냅샷을 지워 컴플리케이션을 평상시로 되돌린다.
+    /// 완료 라운드의 저장·전송은 plan ④ 범위다.
+    func finish() {
+        publisher.clear()
+    }
+
+    private func publishSnapshot() {
+        publisher.publish(snapshot)
+    }
+
     // MARK: - 카운터
 
     func incrementStroke() {
@@ -72,6 +104,7 @@ final class RoundViewModel: ObservableObject {
             holeScores[currentHoleIndex] += 1
             puttCounts[currentHoleIndex] += 1
         }
+        publishSnapshot()
     }
 
     func decrementStroke() {
@@ -85,6 +118,7 @@ final class RoundViewModel: ObservableObject {
             holeScores[currentHoleIndex] -= 1
             puttCounts[currentHoleIndex] -= 1
         }
+        publishSnapshot()
     }
 
     // MARK: - 파 선택
@@ -92,6 +126,7 @@ final class RoundViewModel: ObservableObject {
     func selectPar(_ par: Int) {
         holePars[currentHoleIndex] = par
         isEditingPar = false
+        publishSnapshot()
     }
 
     func beginParEditing() {
@@ -104,12 +139,14 @@ final class RoundViewModel: ObservableObject {
         currentHoleIndex += 1
         ensureCapacityForCurrentHole()
         resetHoleLocalState()
+        publishSnapshot()
     }
 
     func goToPreviousHole() {
         guard canGoToPreviousHole else { return }
         currentHoleIndex -= 1
         resetHoleLocalState()
+        publishSnapshot()
     }
 
     /// 홀 배열 세 개의 길이를 현재 홀까지 맞춘다. 세 배열은 항상 같은 길이를 유지한다.
