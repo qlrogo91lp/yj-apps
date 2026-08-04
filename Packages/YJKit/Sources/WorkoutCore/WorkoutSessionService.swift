@@ -8,6 +8,8 @@ public final class WorkoutSessionService: NSObject, ObservableObject {
     @Published public private(set) var currentCalories: Double = 0
     @Published public private(set) var currentBasalCalories: Double = 0
     @Published public private(set) var elapsedSeconds: Int = 0
+    @Published public private(set) var currentDistanceMeters: Double = 0
+    @Published public private(set) var currentSteps: Int = 0
 
     public let configuration: WorkoutConfiguration
 
@@ -25,12 +27,19 @@ public final class WorkoutSessionService: NSObject, ObservableObject {
         HKQuantityType(.heartRate),
         HKObjectType.workoutType(),
     ]
-    private let typesToRead: Set<HKObjectType> = [
-        HKQuantityType(.activeEnergyBurned),
-        HKQuantityType(.basalEnergyBurned),
-        HKQuantityType(.heartRate),
-        HKObjectType.workoutType(),
-    ]
+    /// 기본 4종 + configuration이 지정한 추가 타입. 지정이 없으면 기존 소비자와 완전히 동일하다.
+    var typesToRead: Set<HKObjectType> {
+        var types: Set<HKObjectType> = [
+            HKQuantityType(.activeEnergyBurned),
+            HKQuantityType(.basalEnergyBurned),
+            HKQuantityType(.heartRate),
+            HKObjectType.workoutType(),
+        ]
+        for identifier in configuration.additionalReadTypes {
+            types.insert(HKQuantityType(identifier))
+        }
+        return types
+    }
 
     public init(configuration: WorkoutConfiguration) {
         self.configuration = configuration
@@ -68,7 +77,11 @@ public final class WorkoutSessionService: NSObject, ObservableObject {
             do {
                 let session = try HKWorkoutSession(healthStore: store, configuration: config)
                 let builder = session.associatedWorkoutBuilder()
-                builder.dataSource = HKLiveWorkoutDataSource(healthStore: store, workoutConfiguration: config)
+                let dataSource = HKLiveWorkoutDataSource(healthStore: store, workoutConfiguration: config)
+                for identifier in configuration.additionalReadTypes {
+                    dataSource.enableCollection(for: HKQuantityType(identifier), predicate: nil)
+                }
+                builder.dataSource = dataSource
 
                 session.delegate = self
                 builder.delegate = self
@@ -78,6 +91,8 @@ public final class WorkoutSessionService: NSObject, ObservableObject {
 
                 let now = Date()
                 startDate = now
+                currentDistanceMeters = 0
+                currentSteps = 0
                 startTimer()
 
                 session.startActivity(with: now)
@@ -137,7 +152,9 @@ public final class WorkoutSessionService: NSObject, ObservableObject {
             return WorkoutResult(durationSeconds: elapsed,
                                  caloriesBurned: calories,
                                  averageHeartRate: heartRate,
-                                 totalCaloriesBurned: calories + basal)
+                                 totalCaloriesBurned: calories + basal,
+                                 distanceMeters: currentDistanceMeters,
+                                 steps: currentSteps)
         }
 
         private func collectCalories(builder: HKLiveWorkoutBuilder) async -> Double {
@@ -229,6 +246,13 @@ public final class WorkoutSessionService: NSObject, ObservableObject {
                 if let stats = workoutBuilder.statistics(for: HKQuantityType(.basalEnergyBurned)) {
                     self.currentBasalCalories = stats.sumQuantity()?.doubleValue(for: .kilocalorie()) ?? self.currentBasalCalories
                 }
+                if let stats = workoutBuilder.statistics(for: HKQuantityType(.distanceWalkingRunning)) {
+                    self.currentDistanceMeters = stats.sumQuantity()?.doubleValue(for: .meter()) ?? self.currentDistanceMeters
+                }
+                if let stats = workoutBuilder.statistics(for: HKQuantityType(.stepCount)) {
+                    let value = stats.sumQuantity()?.doubleValue(for: .count())
+                    self.currentSteps = value.map { Int($0) } ?? self.currentSteps
+                }
             }
         }
     }
@@ -240,12 +264,16 @@ public final class WorkoutSessionService: NSObject, ObservableObject {
         func setLiveMetricsForTesting(heartRate: Double? = nil,
                                       calories: Double? = nil,
                                       basalCalories: Double? = nil,
-                                      elapsedSeconds: Int? = nil)
+                                      elapsedSeconds: Int? = nil,
+                                      distanceMeters: Double? = nil,
+                                      steps: Int? = nil)
         {
             if let heartRate { currentHeartRate = heartRate }
             if let calories { currentCalories = calories }
             if let basalCalories { currentBasalCalories = basalCalories }
             if let elapsedSeconds { self.elapsedSeconds = elapsedSeconds }
+            if let distanceMeters { currentDistanceMeters = distanceMeters }
+            if let steps { currentSteps = steps }
         }
     }
 #endif
