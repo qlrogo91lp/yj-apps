@@ -6,6 +6,7 @@ struct RoundSessionView: View {
     @StateObject private var healthKit = WorkoutSessionService(configuration: .golf)
     @Environment(\.dismiss) private var dismiss
     @State private var selectedTab = 1
+    @State private var startTask: Task<Void, Never>?
 
     /// 진행 중 스냅샷이 있으면 그 라운드를 이어서, 없으면 새 라운드를 시작한다.
     init(resuming snapshot: RoundSnapshot? = nil) {
@@ -42,15 +43,19 @@ struct RoundSessionView: View {
 
     private func startRound() {
         viewModel.start()
-        Task {
+        startTask = Task {
             await healthKit.requestAuthorization()
+            guard !Task.isCancelled else { return }
             healthKit.startWorkout()
         }
     }
 
     /// 워크아웃을 끝내고 스냅샷을 지운 뒤 홈으로 돌아간다.
     /// 종료 요약 화면과 iOS 전송은 plan ④에서 이 자리에 들어온다.
+    /// 인증 대기 중이던 시작 Task를 먼저 취소해, 라운드 종료 후 뒤늦게 startWorkout()이
+    /// 불려 고아 HKWorkoutSession이 남는 경쟁 상태를 막는다.
     private func endRound() {
+        startTask?.cancel()
         viewModel.finish()
         Task { _ = await healthKit.stopWorkout() }
         dismiss()
