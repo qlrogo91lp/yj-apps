@@ -169,6 +169,39 @@ final class RoundViewModel: ObservableObject {
         publishSnapshot()
     }
 
+    /// 파 선택 화면의 "이전" 버튼에서 호출한다.
+    /// 방금 실수로 다음 홀에 진입해 아직 아무 값도 입력하지 않은 홀(phantom hole)이면
+    /// 그 홀을 배열에서 완전히 제거하고 이전 홀로 돌아가, mis-tap 이전 상태를 그대로 복원한다.
+    /// 반대로 이미 점수가 있던 홀을 [Par] 버튼으로 재편집(`beginParEditing()`)하는 중이라면
+    /// 지울 phantom hole이 없으므로 일반 `goToPreviousHole()`과 동일하게 동작한다.
+    func cancelToPreviousHole() {
+        guard canGoToPreviousHole else { return }
+
+        guard isPristinePhantomHole else {
+            goToPreviousHole()
+            return
+        }
+
+        holeScores.removeLast()
+        holePars.removeLast()
+        puttCounts.removeLast()
+        currentHoleIndex -= 1
+        resetHoleLocalState()
+        publishSnapshot()
+    }
+
+    /// 현재 홀이 "방금 만들어졌고 아직 아무것도 입력되지 않은" phantom hole 상태인지 판단한다.
+    /// 세 배열의 마지막 원소가 현재 홀과 정확히 일치할 때만 안전하게 pop할 수 있다.
+    private var isPristinePhantomHole: Bool {
+        !isEditingPar
+            && currentScore == 0
+            && currentPar == 0
+            && currentPutts == 0
+            && currentHoleIndex == holeScores.count - 1
+            && currentHoleIndex == holePars.count - 1
+            && currentHoleIndex == puttCounts.count - 1
+    }
+
     /// 홀 배열 세 개의 길이를 현재 홀까지 맞춘다. 세 배열은 항상 같은 길이를 유지한다.
     private func ensureCapacityForCurrentHole() {
         let needed = currentHoleIndex + 1

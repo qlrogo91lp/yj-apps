@@ -15,6 +15,9 @@ struct ParSelectionView: View {
                     viewModel.selectPar(par)
                 }
             }
+
+            ParBackButton(canGoToPrevious: viewModel.canGoToPreviousHole,
+                          action: viewModel.cancelToPreviousHole)
         }
         .padding(.horizontal, 4)
     }
