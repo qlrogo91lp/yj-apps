@@ -29,6 +29,26 @@ struct WorkoutConfigurationTests {
         #expect(a != c)
     }
 
+    @Test func additionalReadTypesDefaultToEmpty() {
+        let config = WorkoutConfiguration(activityType: .tennis)
+        #expect(config.additionalReadTypes.isEmpty)
+    }
+
+    @Test func additionalReadTypesAreStored() {
+        let config = WorkoutConfiguration(
+            activityType: .golf,
+            locationType: .indoor,
+            additionalReadTypes: [.distanceWalkingRunning, .stepCount]
+        )
+        #expect(config.additionalReadTypes == [.distanceWalkingRunning, .stepCount])
+    }
+
+    @Test func equalityAccountsForAdditionalReadTypes() {
+        let a = WorkoutConfiguration(activityType: .golf, locationType: .indoor, additionalReadTypes: [.stepCount])
+        let b = WorkoutConfiguration(activityType: .golf, locationType: .indoor)
+        #expect(a != b)
+    }
+
     @Test func resultEqualWhenAllFieldsMatch() {
         let a = WorkoutResult(durationSeconds: 60, caloriesBurned: 100, averageHeartRate: 120)
         let b = WorkoutResult(durationSeconds: 60, caloriesBurned: 100, averageHeartRate: 120)
