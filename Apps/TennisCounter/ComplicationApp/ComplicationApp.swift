@@ -45,6 +45,7 @@ struct SimpleEntry: TimelineEntry {
 
 struct ComplicationAppEntryView: View {
     @Environment(\.widgetFamily) var widgetFamily
+    @Environment(\.widgetRenderingMode) private var renderingMode
     var entry: Provider.Entry
 
     private let defaultBgColor = Color.brand
@@ -57,23 +58,29 @@ struct ComplicationAppEntryView: View {
         switch widgetFamily {
         case .accessoryCorner:
             ZStack {
-                bgColor
+                if renderingMode == .fullColor {
+                    bgColor
+                }
                 iconImage
                     .renderingMode(.original)
                     .resizable()
                     .scaledToFit()
                     .padding(4)
+                    .widgetAccentable()
             }
             .rotationEffect(.degrees(entry.rotationDegrees))
         default:
             ZStack {
-                bgColor
+                if renderingMode == .fullColor {
+                    bgColor
+                }
                 iconImage
                     .renderingMode(.original)
                     .resizable()
                     .scaledToFit()
                     .padding(4)
                     .rotationEffect(.degrees(entry.rotationDegrees))
+                    .widgetAccentable()
             }
             .clipShape(Circle())
         }
