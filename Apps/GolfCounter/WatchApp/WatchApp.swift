@@ -4,7 +4,7 @@ import SwiftUI
 struct GolfCounterWatchApp: App {
     var body: some Scene {
         WindowGroup {
-            Text("GolfCounter")
+            HomeView()
         }
     }
 }
