@@ -12,8 +12,7 @@ class WorkoutSessionViewModel: ObservableObject {
     @Published var remoteWorkoutEnded: Bool = false
 
     private var startedAt: Date?
-    private var pausedAt: Date?
-    private var totalPausedSeconds: TimeInterval = 0
+    private var anchor: WorkoutMetricsMessage?
     private var sessionId: UUID = .init()
     private var hasSyncedSession = false
     private var _currentSession: MatchSession?
@@ -70,12 +69,10 @@ class WorkoutSessionViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] received in
                 guard let self else { return }
-                metrics = WorkoutMetrics(
-                    elapsedSeconds: TimeInterval(elapsedSeconds),
-                    activeCalories: received.activeCalories,
-                    totalCalories: received.totalCalories,
-                    heartRate: received.heartRate
-                )
+                anchor = received
+                metrics = received.metrics
+                isPaused = received.isPaused
+                recomputeElapsed()
             }
             .store(in: &cancellables)
 
@@ -141,23 +138,17 @@ class WorkoutSessionViewModel: ObservableObject {
 
     func startSession(startDate: Date = Date()) {
         startedAt = startDate
-        totalPausedSeconds = 0
-        pausedAt = nil
+        anchor = nil
         startTimer()
     }
 
     func pauseSession() {
         isPaused = true
-        pausedAt = Date()
         timer?.invalidate()
         timer = nil
     }
 
     func resumeSession() {
-        if let p = pausedAt {
-            totalPausedSeconds += Date().timeIntervalSince(p)
-            pausedAt = nil
-        }
         isPaused = false
         startTimer()
     }
@@ -242,8 +233,7 @@ class WorkoutSessionViewModel: ObservableObject {
         timer?.invalidate()
         timer = nil
         elapsedSeconds = 0
-        totalPausedSeconds = 0
-        pausedAt = nil
+        anchor = nil
         metrics = .init()
         _currentSession = nil
         phase = .modeSelection
@@ -341,19 +331,31 @@ class WorkoutSessionViewModel: ObservableObject {
 
     private func startTimer() {
         timer?.invalidate()
-        guard let startedAt else { return }
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
-            Task { @MainActor [weak self] in
-                guard let self else { return }
-                elapsedSeconds = Int(Date().timeIntervalSince(startedAt) - totalPausedSeconds)
-                metrics = WorkoutMetrics(
-                    elapsedSeconds: TimeInterval(elapsedSeconds),
-                    activeCalories: metrics.activeCalories,
-                    totalCalories: metrics.totalCalories,
-                    heartRate: metrics.heartRate
-                )
-            }
+            Task { @MainActor [weak self] in self?.recomputeElapsed() }
         }
+    }
+
+    /// 워치 앵커가 있으면 그 기준으로 보간하고, 없으면(폰 단독) 로컬 시작 시각으로 센다.
+    private func recomputeElapsed(now: TimeInterval = Date().timeIntervalSince1970) {
+        let seconds: TimeInterval
+        if let anchor {
+            seconds = WorkoutAnchor.interpolatedElapsed(
+                anchorElapsed: anchor.metrics.elapsedSeconds,
+                isPaused: anchor.isPaused,
+                sentAt: anchor.sentAt,
+                now: now
+            )
+        } else if let startedAt {
+            seconds = now - startedAt.timeIntervalSince1970
+        } else {
+            seconds = 0
+        }
+        elapsedSeconds = Int(seconds)
+        metrics = WorkoutMetrics(elapsedSeconds: seconds,
+                                 activeCalories: metrics.activeCalories,
+                                 totalCalories: metrics.totalCalories,
+                                 heartRate: metrics.heartRate)
     }
 }
 
@@ -389,6 +391,17 @@ class WorkoutSessionViewModel: ObservableObject {
 
         func buildMatchForTest(_ session: MatchSession) -> Match {
             buildMatchFromSession(session)
+        }
+
+        func applyIncomingMetricsForTest(_ msg: WorkoutMetricsMessage) {
+            anchor = msg
+            metrics = msg.metrics
+            isPaused = msg.isPaused
+            recomputeElapsed()
+        }
+
+        func recomputeElapsedForTest(now: TimeInterval) {
+            recomputeElapsed(now: now)
         }
     }
 #endif

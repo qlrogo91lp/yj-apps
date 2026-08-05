@@ -467,4 +467,51 @@ struct WorkoutSessionViewModelTests {
         #expect(session.kcalAtStart == 200)
         #expect(session.totalKcalAtStart == 260)
     }
+
+    // MARK: - 경과시간 앵커
+
+    /// 앵커 수신 후에는 워치가 보낸 경과초 + 그 뒤 흐른 시간으로 계산한다.
+    @Test @MainActor func elapsedInterpolatesFromWatchAnchor() {
+        let vm = WorkoutSessionViewModel()
+        let dict: [String: Any] = [
+            "elapsed": 100.0, "calories": 10.0, "totalCalories": 12.0,
+            "heartRate": 130.0, "isPaused": false, "sentAt": 1000.0,
+        ]
+        vm.applyIncomingMetricsForTest(WorkoutMetricsMessage(from: dict)!)
+
+        vm.recomputeElapsedForTest(now: 1007)
+
+        #expect(vm.elapsedSeconds == 107)
+    }
+
+    /// 일시정지 앵커를 받으면 시간이 멈춘다.
+    @Test @MainActor func elapsedFreezesOnPausedAnchor() {
+        let vm = WorkoutSessionViewModel()
+        let dict: [String: Any] = [
+            "elapsed": 100.0, "isPaused": true, "sentAt": 1000.0,
+        ]
+        vm.applyIncomingMetricsForTest(WorkoutMetricsMessage(from: dict)!)
+
+        vm.recomputeElapsedForTest(now: 1007)
+
+        #expect(vm.elapsedSeconds == 100)
+    }
+
+    /// 앵커의 isPaused가 폰 isPaused에 반영된다 (ack 경로).
+    @Test @MainActor func anchorIsPausedUpdatesViewModel() {
+        let vm = WorkoutSessionViewModel()
+        let dict: [String: Any] = ["elapsed": 10.0, "isPaused": true, "sentAt": 1000.0]
+        vm.applyIncomingMetricsForTest(WorkoutMetricsMessage(from: dict)!)
+        #expect(vm.isPaused == true)
+    }
+
+    /// 앵커를 한 번도 못 받은 폰 단독 상태면 로컬 시작 시각 기준으로 센다.
+    @Test @MainActor func elapsedFallsBackToLocalClockWithoutAnchor() {
+        let vm = WorkoutSessionViewModel()
+        vm.startSession(startDate: Date(timeIntervalSince1970: 1000))
+
+        vm.recomputeElapsedForTest(now: 1042)
+
+        #expect(vm.elapsedSeconds == 42)
+    }
 }
