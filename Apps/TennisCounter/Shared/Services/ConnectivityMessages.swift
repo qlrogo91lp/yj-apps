@@ -284,9 +284,3 @@ struct MatchResetMessage: ConnectivityMessage {
         ["sessionId": sessionId.uuidString]
     }
 }
-
-// MARK: - 기존 모델 conformance
-
-extension WorkoutMetrics: ConnectivityMessage {
-    static let messageType = "metrics"
-}

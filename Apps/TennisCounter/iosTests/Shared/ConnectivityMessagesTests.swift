@@ -40,10 +40,4 @@ struct ConnectivityMessagesTests {
         // toDictionary()는 type=matchEnd — matchSave 라우팅용 디코드는 거부해야 한다
         #expect(MatchSaveMessage(from: base.toDictionary()) == nil)
     }
-
-    @Test func workoutMetricsConformsWithMetricsType() {
-        #expect(WorkoutMetrics.messageType == "metrics")
-        let decoded = WorkoutMetrics(from: WorkoutMetrics(elapsedSeconds: 10, calories: 5, heartRate: 120).toDictionary())
-        #expect(decoded?.heartRate == 120)
-    }
 }

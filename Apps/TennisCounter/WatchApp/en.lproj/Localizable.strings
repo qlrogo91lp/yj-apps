@@ -7,14 +7,6 @@
 "watch_defeat" = "Defeat";
 "watch_set_label" = "SET";
 "watch_start_workout" = "Start Workout";
-"workout_pause" = "Pause";
-"workout_resume" = "Resume";
-"workout_end" = "End Workout";
-"metrics_elapsed" = "elapsed";
-"metrics_paused" = "paused";
-"metrics_kcal" = "kcal";
-"metrics_total_kcal" = "total kcal";
-"metrics_bpm" = "BPM";
 "mode_one_set" = "One Set";
 "mode_one_set_desc" = "1 set match";
 "mode_best_of_3" = "Best of 3";

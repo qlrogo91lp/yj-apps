@@ -1,4 +1,5 @@
 import SwiftUI
+import WorkoutCore
 
 struct MatchDetailSheet: View {
     let match: Match

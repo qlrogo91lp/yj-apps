@@ -1,4 +1,6 @@
 import SwiftUI
+import WorkoutCore
+import WorkoutUI
 
 struct WorkoutSessionView: View {
     let remoteSession: SessionStartMessage?
@@ -14,11 +16,11 @@ struct WorkoutSessionView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            WorkoutControlsView(viewModel: viewModel, dismiss: dismiss)
+            controlsTab
                 .tag(0)
             centerView
                 .tag(1)
-            WorkoutMetricsView(healthKit: viewModel.healthKit, isPaused: viewModel.isPaused)
+            metricsTab
                 .tag(2)
         }
         .tabViewStyle(.page)
@@ -32,6 +34,37 @@ struct WorkoutSessionView: View {
         .onChange(of: viewModel.remoteWorkoutEnded) {
             if viewModel.remoteWorkoutEnded { dismiss() }
         }
+    }
+
+    private var controlsTab: some View {
+        WorkoutControlsView(
+            isPaused: viewModel.isPaused,
+            onPauseResume: {
+                if viewModel.isPaused {
+                    viewModel.resumeWorkout()
+                } else {
+                    viewModel.pauseWorkout()
+                }
+            },
+            onEnd: {
+                viewModel.endWorkout()
+                dismiss()
+            }
+        )
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Color.clear.frame(width: 36, height: 36)
+            }
+        }
+    }
+
+    private var metricsTab: some View {
+        WorkoutMetricsView(metrics: viewModel.currentMetrics, isPaused: viewModel.isPaused)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Color.clear.frame(width: 36, height: 36)
+                }
+            }
     }
 
     @ViewBuilder

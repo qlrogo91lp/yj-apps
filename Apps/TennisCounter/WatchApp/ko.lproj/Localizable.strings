@@ -7,14 +7,6 @@
 "watch_defeat" = "패배";
 "watch_set_label" = "SET";
 "watch_start_workout" = "운동 시작";
-"workout_pause" = "일시정지";
-"workout_resume" = "재개";
-"workout_end" = "운동 종료";
-"metrics_elapsed" = "경과 시간";
-"metrics_paused" = "일시정지";
-"metrics_kcal" = "kcal";
-"metrics_total_kcal" = "총 kcal";
-"metrics_bpm" = "BPM";
 "mode_one_set" = "1 세트 경기";
 "mode_one_set_desc" = "단판 경기";
 "mode_best_of_3" = "3세트 경기";

@@ -1,5 +1,6 @@
 import Combine
 import Foundation
+import WorkoutCore
 
 @MainActor
 class WorkoutSessionViewModel: ObservableObject {
@@ -8,7 +9,6 @@ class WorkoutSessionViewModel: ObservableObject {
     @Published var metrics: WorkoutMetrics = .init()
     @Published var watchConnected: Bool = false
     @Published var isPaused: Bool = false
-    @Published var completedMatchCount: Int = 0
     @Published var remoteWorkoutEnded: Bool = false
 
     private var startedAt: Date?
@@ -72,7 +72,7 @@ class WorkoutSessionViewModel: ObservableObject {
                 guard let self else { return }
                 metrics = WorkoutMetrics(
                     elapsedSeconds: TimeInterval(elapsedSeconds),
-                    calories: received.calories,
+                    activeCalories: received.activeCalories,
                     totalCalories: received.totalCalories,
                     heartRate: received.heartRate
                 )
@@ -97,7 +97,6 @@ class WorkoutSessionViewModel: ObservableObject {
                 // 경기 종료 = 결과 화면 표시만. 저장은 사용자가 저장 버튼을 누를 때(receivedMatchSave)만 한다.
                 liveActivity.end()
                 let session = buildSession(from: msg)
-                completedMatchCount += 1
                 phase = .finished(session)
             }
             .store(in: &cancellables)
@@ -201,7 +200,7 @@ class WorkoutSessionViewModel: ObservableObject {
         session.completedSets = setScores
         session.mySetScore = setScores.count(where: { $0.my > $0.your })
         session.yourSetScore = setScores.count(where: { $0.your > $0.my })
-        session.kcalAtEnd = metrics.calories
+        session.kcalAtEnd = metrics.activeCalories
         // metrics.totalCalories는 WorkoutMetrics.totalCalories를 그대로 읽는데, 이 값은 워치로부터
         // totalCalories 키를 포함한 메트릭을 한 번도 못 받았을 때(구버전 워치 또는 폰 드라이버 경로에서
         // 워치 미연결) calories로 폴백한다. 이 경우 저장되는 Match.totalCaloriesBurned가 nil이 아니라
@@ -209,7 +208,6 @@ class WorkoutSessionViewModel: ObservableObject {
         // 다르게 동작한다. 기존의 "메트릭 없을 때 caloriesBurned가 0으로 폴백"하는 동작과 대칭적인 accepted
         // limitation으로 현재 동작을 유지한다.
         session.totalKcalAtEnd = metrics.totalCalories
-        completedMatchCount += 1
         phase = .finished(session)
         liveActivity.end()
     }
@@ -349,7 +347,7 @@ class WorkoutSessionViewModel: ObservableObject {
                 elapsedSeconds = Int(Date().timeIntervalSince(startedAt) - totalPausedSeconds)
                 metrics = WorkoutMetrics(
                     elapsedSeconds: TimeInterval(elapsedSeconds),
-                    calories: metrics.calories,
+                    activeCalories: metrics.activeCalories,
                     totalCalories: metrics.totalCalories,
                     heartRate: metrics.heartRate
                 )

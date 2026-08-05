@@ -1,6 +1,7 @@
 import Combine
 import ConnectivityCore
 import Foundation
+import WorkoutCore
 
 /// ConnectivityCore 위의 앱 레이어. 코어의 1회성 핸들러 배달을 기존 sticky @Published 시맨틱으로
 /// 복원하고(소비자가 nil 대입으로 소비), 테니스 메시지별 send/receive 표면을 제공한다.
@@ -37,7 +38,7 @@ final class MatchConnectivity: ObservableObject {
         service.onReceive(MatchEndMessage.self) { [weak self] in self?.receivedMatchEnd = $0 }
         service.onReceive(MatchSaveMessage.self) { [weak self] in self?.receivedMatchSave = $0.base }
         service.onReceive(MatchSaveResultMessage.self) { [weak self] in self?.receivedMatchSaveResult = $0 }
-        service.onReceive(WorkoutMetrics.self) { [weak self] in self?.receivedMetrics = $0 }
+        service.onReceive(WorkoutMetricsMessage.self) { [weak self] in self?.receivedMetrics = $0.metrics }
         service.onReceive(WorkoutEndMessage.self, maxAge: Self.workoutEndStalenessThreshold) { [weak self] in
             self?.receivedWorkoutEnd = $0.sessionId
         }
@@ -69,7 +70,7 @@ final class MatchConnectivity: ObservableObject {
     }
 
     func sendMetrics(_ metrics: WorkoutMetrics) {
-        service.send(metrics, via: .realtimeOnly)
+        service.send(WorkoutMetricsMessage(metrics: metrics), via: .realtimeOnly)
     }
 
     func sendWorkoutEnd(sessionId: UUID) {

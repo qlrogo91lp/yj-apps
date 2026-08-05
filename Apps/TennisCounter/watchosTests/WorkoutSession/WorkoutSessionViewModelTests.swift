@@ -155,7 +155,21 @@ struct WorkoutSessionViewModelTests {
         vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
         healthKit.setLiveMetricsForTesting(calories: 150)
         vm.broadcastMetrics()
-        #expect(vm.lastMetrics?.calories == 50)
+        #expect(vm.lastMetrics?.activeCalories == 50)
+    }
+
+    @MainActor
+    @Test func currentMetricsReflectsHealthKitValues() async throws {
+        let healthKit = WorkoutSessionService(configuration: .tennis)
+        let viewModel = WorkoutSessionViewModel(healthKit: healthKit)
+
+        healthKit.setLiveMetricsForTesting(heartRate: 142, calories: 245, basalCalories: 58, elapsedSeconds: 1523)
+        try await Task.sleep(for: .milliseconds(50))
+
+        #expect(viewModel.currentMetrics.elapsedSeconds == 1523)
+        #expect(viewModel.currentMetrics.activeCalories == 245)
+        #expect(viewModel.currentMetrics.totalCalories == 303)
+        #expect(viewModel.currentMetrics.heartRate == 142)
     }
 
     @Test @MainActor func metricsTotalCaloriesIncludeBasalNetOfStart() {
