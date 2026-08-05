@@ -64,6 +64,14 @@ class WorkoutSessionViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .assign(to: &$watchConnected)
 
+        // 알려진 좁은 레이스: WorkoutMetricsMessage에는 세션 식별자가 없다. 리매치처럼 endSession()과
+        // startSession()이 같은 런루프 턴에서 anchor = nil을 두 번 리셋하는 사이, 이전(방금 끝난) 세션에서
+        // 이미 인플라이트였던 메시지가 .receive(on: .main) 홉을 거쳐 두 리셋 이후에 도착하면 새 세션의
+        // anchor가 잠깐 과거 값으로 덮어써질 수 있다 — elapsedSeconds가 최대 ~1초 뒤로 튈 수 있다.
+        // 새 워치 브로드캐스트(주기 ~1s)가 도착하면 즉시 올바른 anchor로 덮어써지므로 자가 치유되며,
+        // 지금까지 관측된 영향은 없다. 메시지에 세션 식별자를 실어 이 메시지가 어느 세션 소속인지
+        // 판별하는 근본 수정은 WorkoutMetricsMessage 와이어 포맷 변경(ralli-kit, 별도 태스크)이 필요해
+        // 이 태스크 범위 밖이다. (2026-08-06 코드리뷰 finding, 문서화로 수용)
         connectivity.$receivedMetrics
             .compactMap(\.self)
             .receive(on: DispatchQueue.main)
@@ -338,18 +346,17 @@ class WorkoutSessionViewModel: ObservableObject {
 
     /// 워치 앵커가 있으면 그 기준으로 보간하고, 없으면(폰 단독) 로컬 시작 시각으로 센다.
     private func recomputeElapsed(now: TimeInterval = Date().timeIntervalSince1970) {
-        let seconds: TimeInterval
-        if let anchor {
-            seconds = WorkoutAnchor.interpolatedElapsed(
+        let seconds: TimeInterval = if let anchor {
+            WorkoutAnchor.interpolatedElapsed(
                 anchorElapsed: anchor.metrics.elapsedSeconds,
                 isPaused: anchor.isPaused,
                 sentAt: anchor.sentAt,
                 now: now
             )
         } else if let startedAt {
-            seconds = now - startedAt.timeIntervalSince1970
+            now - startedAt.timeIntervalSince1970
         } else {
-            seconds = 0
+            0
         }
         elapsedSeconds = Int(seconds)
         metrics = WorkoutMetrics(elapsedSeconds: seconds,

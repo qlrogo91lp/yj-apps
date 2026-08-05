@@ -471,13 +471,14 @@ struct WorkoutSessionViewModelTests {
     // MARK: - 경과시간 앵커
 
     /// 앵커 수신 후에는 워치가 보낸 경과초 + 그 뒤 흐른 시간으로 계산한다.
-    @Test @MainActor func elapsedInterpolatesFromWatchAnchor() {
+    @Test @MainActor func elapsedInterpolatesFromWatchAnchor() throws {
         let vm = WorkoutSessionViewModel()
         let dict: [String: Any] = [
             "elapsed": 100.0, "calories": 10.0, "totalCalories": 12.0,
             "heartRate": 130.0, "isPaused": false, "sentAt": 1000.0,
         ]
-        vm.applyIncomingMetricsForTest(WorkoutMetricsMessage(from: dict)!)
+        let msg = try #require(WorkoutMetricsMessage(from: dict))
+        vm.applyIncomingMetricsForTest(msg)
 
         vm.recomputeElapsedForTest(now: 1007)
 
@@ -485,12 +486,13 @@ struct WorkoutSessionViewModelTests {
     }
 
     /// 일시정지 앵커를 받으면 시간이 멈춘다.
-    @Test @MainActor func elapsedFreezesOnPausedAnchor() {
+    @Test @MainActor func elapsedFreezesOnPausedAnchor() throws {
         let vm = WorkoutSessionViewModel()
         let dict: [String: Any] = [
             "elapsed": 100.0, "isPaused": true, "sentAt": 1000.0,
         ]
-        vm.applyIncomingMetricsForTest(WorkoutMetricsMessage(from: dict)!)
+        let msg = try #require(WorkoutMetricsMessage(from: dict))
+        vm.applyIncomingMetricsForTest(msg)
 
         vm.recomputeElapsedForTest(now: 1007)
 
@@ -498,10 +500,11 @@ struct WorkoutSessionViewModelTests {
     }
 
     /// 앵커의 isPaused가 폰 isPaused에 반영된다 (ack 경로).
-    @Test @MainActor func anchorIsPausedUpdatesViewModel() {
+    @Test @MainActor func anchorIsPausedUpdatesViewModel() throws {
         let vm = WorkoutSessionViewModel()
         let dict: [String: Any] = ["elapsed": 10.0, "isPaused": true, "sentAt": 1000.0]
-        vm.applyIncomingMetricsForTest(WorkoutMetricsMessage(from: dict)!)
+        let msg = try #require(WorkoutMetricsMessage(from: dict))
+        vm.applyIncomingMetricsForTest(msg)
         #expect(vm.isPaused == true)
     }
 
