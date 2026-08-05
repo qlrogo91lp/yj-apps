@@ -80,15 +80,6 @@ struct WorkoutSessionViewModelTests {
         #expect(vm.elapsedSeconds == 0)
     }
 
-    @Test @MainActor func matchSessionPauseStopsTimer() {
-        let vm = WorkoutSessionViewModel()
-        vm.startSession()
-        vm.pauseSession()
-        #expect(vm.isPaused == true)
-        vm.resumeSession()
-        #expect(vm.isPaused == false)
-    }
-
     @Test @MainActor func matchSessionRestartMatchUsesSameFormat() {
         let vm = WorkoutSessionViewModel()
         vm.startSession()
@@ -516,5 +507,44 @@ struct WorkoutSessionViewModelTests {
         vm.recomputeElapsedForTest(now: 1042)
 
         #expect(vm.elapsedSeconds == 42)
+    }
+
+    // MARK: - Pause 왕복
+
+    /// 폰은 pause를 낙관적으로 토글하지 않는다 — 워치 ack(앵커)가 와야 바뀐다.
+    @Test @MainActor func requestPauseDoesNotToggleLocallyBeforeAck() {
+        let vm = WorkoutSessionViewModel()
+        vm.startSession()
+
+        vm.requestPause()
+
+        #expect(vm.isPaused == false)
+    }
+
+    /// 워치 ack가 도착하면 그때 isPaused가 바뀐다.
+    @Test @MainActor func pauseAppliesWhenWatchAckArrives() throws {
+        let vm = WorkoutSessionViewModel()
+        vm.startSession()
+        vm.requestPause()
+
+        let dict: [String: Any] = ["elapsed": 50.0, "isPaused": true, "sentAt": 1000.0]
+        try vm.applyIncomingMetricsForTest(#require(WorkoutMetricsMessage(from: dict)))
+
+        #expect(vm.isPaused == true)
+    }
+
+    /// 재개도 같은 경로 — 명령만 보내고 ack로 풀린다.
+    @Test @MainActor func resumeAppliesWhenWatchAckArrives() throws {
+        let vm = WorkoutSessionViewModel()
+        vm.startSession()
+        let paused: [String: Any] = ["elapsed": 50.0, "isPaused": true, "sentAt": 1000.0]
+        try vm.applyIncomingMetricsForTest(#require(WorkoutMetricsMessage(from: paused)))
+
+        vm.requestResume()
+        #expect(vm.isPaused == true) // 아직 ack 전
+
+        let running: [String: Any] = ["elapsed": 50.0, "isPaused": false, "sentAt": 1010.0]
+        try vm.applyIncomingMetricsForTest(#require(WorkoutMetricsMessage(from: running)))
+        #expect(vm.isPaused == false)
     }
 }

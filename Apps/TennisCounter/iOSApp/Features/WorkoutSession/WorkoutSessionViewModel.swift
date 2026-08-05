@@ -150,15 +150,14 @@ class WorkoutSessionViewModel: ObservableObject {
         startTimer()
     }
 
-    func pauseSession() {
-        isPaused = true
-        timer?.invalidate()
-        timer = nil
+    /// 폰에는 워크아웃 세션이 없다 — 워치에 명령만 보낸다.
+    /// isPaused는 워치가 보낸 앵커(ack)로만 바뀐다. 명령을 모르는 구버전 워치면 아무 일도 안 일어난다.
+    func requestPause() {
+        connectivity.sendPauseCommand(sessionId: sessionId, shouldPause: true)
     }
 
-    func resumeSession() {
-        isPaused = false
-        startTimer()
+    func requestResume() {
+        connectivity.sendPauseCommand(sessionId: sessionId, shouldPause: false)
     }
 
     func startMatch(options: MatchOptions, sessionId: UUID? = nil, isRemote: Bool = false) {
