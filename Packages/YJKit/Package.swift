@@ -3,15 +3,24 @@ import PackageDescription
 
 let package = Package(
     name: "RalliKit",
+    defaultLocalization: "en",
     platforms: [.iOS(.v17), .watchOS(.v10), .macOS(.v14)],
     products: [
         .library(name: "WorkoutCore", targets: ["WorkoutCore"]),
+        .library(name: "WorkoutUI", targets: ["WorkoutUI"]),
         .library(name: "ConnectivityCore", targets: ["ConnectivityCore"]),
         .library(name: "PersistenceCore", targets: ["PersistenceCore"]),
     ],
     targets: [
         .target(
             name: "WorkoutCore",
+            dependencies: ["ConnectivityCore"],
+            swiftSettings: [.swiftLanguageMode(.v5)]
+        ),
+        .target(
+            name: "WorkoutUI",
+            dependencies: ["WorkoutCore"],
+            resources: [.process("Resources")],
             swiftSettings: [.swiftLanguageMode(.v5)]
         ),
         .target(
