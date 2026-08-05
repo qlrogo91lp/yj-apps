@@ -29,6 +29,45 @@ let workout = WorkoutSessionService(
     `HKLiveWorkoutDataSource`가 종목에 따라 basal을 자동 수집하며, 수집되지 않는 종목에서는 0으로 남는다.
 - 테스트·프리뷰에서는 `#if DEBUG` 전용 `setLiveMetricsForTesting(heartRate:calories:basalCalories:elapsedSeconds:)`로 표시 값 주입.
 
+## WorkoutUI 사용법
+
+세 앱(테니스·골프·헬스)이 공유하는 워크아웃 화면. 표시 항목은 **경과시간·활동 kcal·총 kcal·BPM 4개 고정**이다.
+
+```swift
+import WorkoutUI
+
+// Watch — 메트릭 탭
+WorkoutMetricsView(metrics: viewModel.currentMetrics, isPaused: viewModel.isPaused)
+
+// Watch — 컨트롤 탭
+WorkoutControlsView(isPaused: viewModel.isPaused,
+                    onPauseResume: { ... },
+                    onEnd: { ... })
+
+// iOS — 대시보드 (링 + 지표 3칸 + 컨트롤)
+WorkoutDashboardView(metrics: viewModel.metrics,
+                     isPaused: viewModel.isPaused,
+                     isPauseAvailable: viewModel.watchConnected,
+                     onPauseResume: { ... },
+                     onEnd: { ... })
+```
+
+화면은 값과 콜백만 받는다 — 서비스나 ViewModel을 모른다. 라벨·색은 패키지가 소유하므로 앱이 문자열을 관리하지 않는다.
+
+### 소비자 책임 (패키지가 대신 못 해주는 것)
+
+- [ ] **칼로리는 워크아웃 누적값으로 넘긴다.** 경기/라운드 구간 값이 필요하면 저장 시점에 `종료값 - 시작값`으로 계산한다. 화면에 구간 델타를 넘기면 세 앱의 숫자 의미가 갈린다.
+- [ ] **경과시간은 워치가 단일 소스.** 폰은 `WorkoutAnchor.interpolatedElapsed(anchorElapsed:isPaused:sentAt:now:)`로 매초 보간한다. 폰이 자체 타이머로 시간을 세면 pause 한 번에 두 기기가 어긋난다.
+- [ ] **pause는 폰→워치 명령이다.** 폰은 `WorkoutPauseMessage(sessionId:shouldPause:)`를 `.reliable`로 보내고, `isPaused`는 워치가 보낸 앵커로만 갱신한다 — **낙관적 토글 금지**. 명령을 모르는 구버전 워치에서 오동작 대신 무동작이 되도록 하는 장치다.
+- [ ] **워치 미연결 시 `isPauseAvailable: false`.** 폰에는 HKWorkoutSession이 없어 누를 대상이 없다.
+- [ ] `WorkoutMetricsMessage`의 `sentAt`은 `ConnectivityService`가 스탬프한다 — 발신 시 채우지 말 것.
+
+### 와이어 포맷 (구버전 호환)
+
+`WorkoutMetricsMessage`의 키는 `elapsed`/`calories`/`totalCalories`/`heartRate`/`isPaused`.
+앞 넷은 초기 버전부터의 계약이라 이름을 바꾸지 않는다. 구버전이 `totalCalories`를 안 보내면
+`calories`로, `isPaused`를 안 보내면 `false`로 폴백한다.
+
 ## ConnectivityCore 사용법
 
 ```swift
