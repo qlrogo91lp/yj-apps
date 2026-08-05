@@ -21,7 +21,7 @@ struct WorkoutSessionView: View {
             WorkoutDashboardView(
                 metrics: viewModel.metrics,
                 isPaused: viewModel.isPaused,
-                isPauseAvailable: viewModel.watchConnected,
+                isPauseAvailable: viewModel.isPauseAvailable,
                 onPauseResume: {
                     viewModel.isPaused ? viewModel.requestResume() : viewModel.requestPause()
                 },

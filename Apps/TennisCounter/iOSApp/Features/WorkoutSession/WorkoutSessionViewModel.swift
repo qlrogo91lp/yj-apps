@@ -23,6 +23,12 @@ class WorkoutSessionViewModel: ObservableObject {
     private let liveActivity: LiveActivityControlling
     private(set) var isDriver = false
 
+    /// 워치가 reachable하다는 것만으로는 pause 명령을 받아줄 워크아웃이 있다는 보장이 없다 —
+    /// 워치로부터 앵커를 한 번이라도 받았어야(즉 실제로 브로드캐스트 중인 워크아웃이 있어야) 가용하다고 본다.
+    var isPauseAvailable: Bool {
+        watchConnected && anchor != nil
+    }
+
     init(liveActivity: LiveActivityControlling = LiveActivityService.shared) {
         self.liveActivity = liveActivity
         setupScoreSync()
@@ -64,24 +70,22 @@ class WorkoutSessionViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .assign(to: &$watchConnected)
 
-        // 알려진 좁은 레이스: WorkoutMetricsMessage에는 세션 식별자가 없다. 리매치처럼 endSession()과
-        // startSession()이 같은 런루프 턴에서 anchor = nil을 두 번 리셋하는 사이, 이전(방금 끝난) 세션에서
-        // 이미 인플라이트였던 메시지가 .receive(on: .main) 홉을 거쳐 두 리셋 이후에 도착하면 새 세션의
-        // anchor가 잠깐 과거 값으로 덮어써질 수 있다 — elapsedSeconds가 최대 ~1초 뒤로 튈 수 있다.
-        // 새 워치 브로드캐스트(주기 ~1s)가 도착하면 즉시 올바른 anchor로 덮어써지므로 자가 치유되며,
-        // 지금까지 관측된 영향은 없다. 메시지에 세션 식별자를 실어 이 메시지가 어느 세션 소속인지
-        // 판별하는 근본 수정은 WorkoutMetricsMessage 와이어 포맷 변경(ralli-kit, 별도 태스크)이 필요해
-        // 이 태스크 범위 밖이다. (2026-08-06 코드리뷰 finding, 문서화로 수용)
+        // 알려진 좁은 레이스: WorkoutMetricsMessage에는 세션 식별자가 없다. 워크아웃 경계 전환
+        // (endSession()으로 이전 워크아웃이 완전히 끝난 뒤, 이어서 startSession()으로 새 워크아웃이
+        // 시작되는 사이) — 이전(방금 끝난) 워크아웃에서 이미 인플라이트였던 메시지가
+        // .receive(on: .main) 홉을 거쳐 두 리셋 이후에 도착하면 새 워크아웃의 anchor가 잠깐 이전
+        // 워크아웃 값으로 덮어써질 수 있다 — elapsedSeconds가 그 이전 워크아웃의 경과시간(분 단위일 수도
+        // 있음, 상한 없음)으로 튈 수 있다. 새 워치 브로드캐스트(주기 ~5s, metricsThrottle)가 도착하면
+        // 즉시 올바른 anchor로 덮어써지므로 자가 치유되며, 지금까지 관측된 영향은 없다. 메시지에 세션
+        // 식별자를 실어 이 메시지가 어느 세션 소속인지 판별하는 근본 수정은 WorkoutMetricsMessage
+        // 와이어 포맷 변경(ralli-kit, 별도 태스크)이 필요해 이 태스크 범위 밖이다.
+        // 같은 근본 원인(세션 식별자 부재)이 isPauseAvailable에도 좁게 걸쳐 있다: 워치 워크아웃이
+        // 실행 중이지만 세션 동기화 전이면 pause 명령이 워치의 세션 가드에 막힌다 — 이 역시 별도 범위.
+        // (2026-08-06 코드리뷰 finding, 문서화로 수용)
         connectivity.$receivedMetrics
             .compactMap(\.self)
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] received in
-                guard let self else { return }
-                anchor = received
-                metrics = received.metrics
-                isPaused = received.isPaused
-                recomputeElapsed()
-            }
+            .sink { [weak self] received in self?.applyIncomingMetrics(received) }
             .store(in: &cancellables)
 
         setupMatchLifecycleBindings()
@@ -251,6 +255,13 @@ class WorkoutSessionViewModel: ObservableObject {
 
     // MARK: - Private
 
+    private func applyIncomingMetrics(_ msg: WorkoutMetricsMessage) {
+        anchor = msg
+        metrics = msg.metrics
+        isPaused = msg.isPaused
+        recomputeElapsed()
+    }
+
     private func handleIncomingSessionStart(_ msg: SessionStartMessage) {
         if case .playing = phase {
             // 동시 시작 race: 이미 driver로 진행 중이면 더 작은 sessionId 쪽이 우선권을 가진다.
@@ -272,68 +283,6 @@ class WorkoutSessionViewModel: ObservableObject {
         var success = true
         do { try MatchPersistenceService.shared.upsert(match) } catch { success = false }
         connectivity.sendMatchSaveResult(MatchSaveResultMessage(sessionId: msg.sessionId, success: success))
-    }
-
-    private func buildMatchFromMessage(_ msg: MatchEndMessage) -> Match {
-        let match = Match()
-        match.workoutSessionId = msg.sessionId
-        match.startedAt = msg.startedAt
-        match.endedAt = msg.endedAt
-        match.durationSeconds = msg.durationSeconds
-        match.caloriesBurned = msg.calories
-        match.totalCaloriesBurned = msg.totalCalories
-        match.averageHeartRate = msg.averageHeartRate
-        match.mode = msg.mode
-        match.noAdRule = msg.noAdRule
-        match.resultRaw = msg.result
-        match.myTotalSets = msg.completedSets.count(where: { $0[0] > $0[1] })
-        match.yourTotalSets = msg.completedSets.count(where: { $0[1] > $0[0] })
-        match.sets = msg.completedSets.enumerated().map {
-            SetRecord(myGames: $0.element[0], yourGames: $0.element[1], setNumber: $0.offset + 1)
-        }
-        return match
-    }
-
-    private func buildMatchFromSession(_ session: MatchSession) -> Match {
-        let match = Match()
-        match.workoutSessionId = session.workoutSessionId
-        match.startedAt = session.startedAt
-        match.endedAt = session.endedAt ?? Date()
-        match.durationSeconds = elapsedSeconds
-        match.caloriesBurned = (session.kcalAtEnd ?? 0) - session.kcalAtStart
-        match.totalCaloriesBurned = session.totalKcalAtEnd.map { $0 - session.totalKcalAtStart }
-        match.mode = session.options.mode.rawValue
-        match.noAdRule = session.options.noAdRule
-        match.resultRaw = session.result?.rawValue ?? "win"
-        match.myTotalSets = session.mySetScore
-        match.yourTotalSets = session.yourSetScore
-        match.sets = session.completedSets.enumerated().map {
-            SetRecord(myGames: $0.element.my, yourGames: $0.element.your, setNumber: $0.offset + 1)
-        }
-        return match
-    }
-
-    private func buildSession(from msg: MatchEndMessage) -> MatchSession {
-        let options = MatchOptions(
-            mode: MatchFormat(rawValue: msg.mode) ?? .oneSet,
-            noAdRule: msg.noAdRule,
-            noTieRule: false
-        )
-        let session = MatchSession(
-            workoutSessionId: msg.sessionId,
-            options: options,
-            startedAt: msg.startedAt,
-            kcalAtStart: 0
-        )
-        session.endedAt = msg.endedAt
-        session.result = MatchResult(rawValue: msg.result) ?? .loss
-        session.completedSets = msg.completedSets.map { SetScore(my: $0[0], your: $0[1]) }
-        session.mySetScore = msg.completedSets.count(where: { $0[0] > $0[1] })
-        session.yourSetScore = msg.completedSets.count(where: { $0[1] > $0[0] })
-        session.kcalAtEnd = msg.calories
-        session.totalKcalAtEnd = msg.totalCalories
-        session.averageHeartRate = msg.averageHeartRate
-        return session
     }
 
     private func startTimer() {
@@ -362,6 +311,72 @@ class WorkoutSessionViewModel: ObservableObject {
                                  activeCalories: metrics.activeCalories,
                                  totalCalories: metrics.totalCalories,
                                  heartRate: metrics.heartRate)
+    }
+}
+
+// MARK: - Match building
+
+private extension WorkoutSessionViewModel {
+    func buildMatchFromMessage(_ msg: MatchEndMessage) -> Match {
+        let match = Match()
+        match.workoutSessionId = msg.sessionId
+        match.startedAt = msg.startedAt
+        match.endedAt = msg.endedAt
+        match.durationSeconds = msg.durationSeconds
+        match.caloriesBurned = msg.calories
+        match.totalCaloriesBurned = msg.totalCalories
+        match.averageHeartRate = msg.averageHeartRate
+        match.mode = msg.mode
+        match.noAdRule = msg.noAdRule
+        match.resultRaw = msg.result
+        match.myTotalSets = msg.completedSets.count(where: { $0[0] > $0[1] })
+        match.yourTotalSets = msg.completedSets.count(where: { $0[1] > $0[0] })
+        match.sets = msg.completedSets.enumerated().map {
+            SetRecord(myGames: $0.element[0], yourGames: $0.element[1], setNumber: $0.offset + 1)
+        }
+        return match
+    }
+
+    func buildMatchFromSession(_ session: MatchSession) -> Match {
+        let match = Match()
+        match.workoutSessionId = session.workoutSessionId
+        match.startedAt = session.startedAt
+        match.endedAt = session.endedAt ?? Date()
+        match.durationSeconds = elapsedSeconds
+        match.caloriesBurned = (session.kcalAtEnd ?? 0) - session.kcalAtStart
+        match.totalCaloriesBurned = session.totalKcalAtEnd.map { $0 - session.totalKcalAtStart }
+        match.mode = session.options.mode.rawValue
+        match.noAdRule = session.options.noAdRule
+        match.resultRaw = session.result?.rawValue ?? "win"
+        match.myTotalSets = session.mySetScore
+        match.yourTotalSets = session.yourSetScore
+        match.sets = session.completedSets.enumerated().map {
+            SetRecord(myGames: $0.element.my, yourGames: $0.element.your, setNumber: $0.offset + 1)
+        }
+        return match
+    }
+
+    func buildSession(from msg: MatchEndMessage) -> MatchSession {
+        let options = MatchOptions(
+            mode: MatchFormat(rawValue: msg.mode) ?? .oneSet,
+            noAdRule: msg.noAdRule,
+            noTieRule: false
+        )
+        let session = MatchSession(
+            workoutSessionId: msg.sessionId,
+            options: options,
+            startedAt: msg.startedAt,
+            kcalAtStart: 0
+        )
+        session.endedAt = msg.endedAt
+        session.result = MatchResult(rawValue: msg.result) ?? .loss
+        session.completedSets = msg.completedSets.map { SetScore(my: $0[0], your: $0[1]) }
+        session.mySetScore = msg.completedSets.count(where: { $0[0] > $0[1] })
+        session.yourSetScore = msg.completedSets.count(where: { $0[1] > $0[0] })
+        session.kcalAtEnd = msg.calories
+        session.totalKcalAtEnd = msg.totalCalories
+        session.averageHeartRate = msg.averageHeartRate
+        return session
     }
 }
 
@@ -400,10 +415,7 @@ class WorkoutSessionViewModel: ObservableObject {
         }
 
         func applyIncomingMetricsForTest(_ msg: WorkoutMetricsMessage) {
-            anchor = msg
-            metrics = msg.metrics
-            isPaused = msg.isPaused
-            recomputeElapsed()
+            applyIncomingMetrics(msg)
         }
 
         func recomputeElapsedForTest(now: TimeInterval) {
