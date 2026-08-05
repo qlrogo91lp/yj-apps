@@ -11,10 +11,9 @@ struct HomeView: View {
             VStack(spacing: 14) {
                 Spacer()
 
-                Text("GolfCounter")
+                Text("Golf Counter")
                     .font(.system(size: 20, weight: .bold))
                     .foregroundStyle(.green)
-
                 Button {
                     resumingSnapshot = nil
                     isRoundActive = true
@@ -23,13 +22,11 @@ struct HomeView: View {
                         .font(.system(size: 16, weight: .bold))
                         .frame(maxWidth: .infinity, minHeight: 40)
                 }
-                .buttonStyle(.plain)
-                .background(Color.green.opacity(0.85), in: Capsule())
-                .foregroundStyle(.white)
+                .buttonStyle(.borderedProminent)
+                .tint(.green)
 
                 Spacer()
             }
-            .padding(.horizontal, 8)
             .navigationDestination(isPresented: $isRoundActive) {
                 RoundSessionView(resuming: resumingSnapshot)
             }
