@@ -126,10 +126,11 @@ struct WorkoutSessionViewModelTests {
 
     // MARK: - Metrics Broadcast
 
-    @Test @MainActor func metricsNotBroadcastWhenNotPlaying() {
+    /// 경기 중이 아니어도 브로드캐스트한다 — 폰이 모드 선택·결과 화면에서도 수치를 유지하도록.
+    @Test @MainActor func metricsBroadcastEvenWhenNotPlaying() {
         let vm = WorkoutSessionViewModel()
         vm.broadcastMetrics()
-        #expect(vm.lastMetrics == nil)
+        #expect(vm.lastMetrics != nil)
     }
 
     @Test @MainActor func metricsBroadcastWhenPlaying() {
@@ -148,14 +149,16 @@ struct WorkoutSessionViewModelTests {
         #expect(vm.lastMetrics?.heartRate == 140)
     }
 
-    @Test @MainActor func metricsCaloriesAreNetOfStart() {
+    /// 칼로리는 경기 구간 델타가 아니라 워크아웃 누적값을 그대로 싣는다.
+    /// 경기 구간 값은 저장 시점에 종료값 - 시작값으로 만든다.
+    @Test @MainActor func metricsCaloriesAreWorkoutCumulative() {
         let healthKit = WorkoutSessionService(configuration: .tennis)
         healthKit.setLiveMetricsForTesting(calories: 100)
         let vm = WorkoutSessionViewModel(healthKit: healthKit)
         vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
         healthKit.setLiveMetricsForTesting(calories: 150)
         vm.broadcastMetrics()
-        #expect(vm.lastMetrics?.activeCalories == 50)
+        #expect(vm.lastMetrics?.activeCalories == 150)
     }
 
     @MainActor
@@ -172,16 +175,15 @@ struct WorkoutSessionViewModelTests {
         #expect(viewModel.currentMetrics.heartRate == 142)
     }
 
-    @Test @MainActor func metricsTotalCaloriesIncludeBasalNetOfStart() {
+    /// 총 칼로리 = 활동 + 휴식, 역시 누적값.
+    @Test @MainActor func metricsTotalCaloriesIncludeBasalCumulative() {
         let healthKit = WorkoutSessionService(configuration: .tennis)
         healthKit.setLiveMetricsForTesting(calories: 100, basalCalories: 20)
         let vm = WorkoutSessionViewModel(healthKit: healthKit)
         vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
-        // 시작 시점 총합(kcal+basal) = 120. 이후 활동 150, 휴식 40 → 총합 190. 순증분 = 190 - 120 = 70.
-        // basal이 합산에서 빠지면 150 - 100 = 50이 되어 이 값과 어긋난다.
         healthKit.setLiveMetricsForTesting(calories: 150, basalCalories: 40)
         vm.broadcastMetrics()
-        #expect(vm.lastMetrics?.totalCalories == 70)
+        #expect(vm.lastMetrics?.totalCalories == 190)
     }
 
     @Test @MainActor func restartMatchResetsScoreVM() {
@@ -198,12 +200,13 @@ struct WorkoutSessionViewModelTests {
         #expect(vm.scoreVM.completedSets.isEmpty)
     }
 
-    @Test @MainActor func metricsNotBroadcastAfterMatchFinished() {
+    /// 경기가 끝난 뒤에도 워크아웃이 살아있으면 계속 브로드캐스트한다.
+    @Test @MainActor func metricsBroadcastAfterMatchFinished() {
         let vm = WorkoutSessionViewModel()
         vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
         vm.finishMatch(result: .win, completedSets: [SetScore(my: 6, your: 3)])
         vm.broadcastMetrics()
-        #expect(vm.lastMetrics == nil)
+        #expect(vm.lastMetrics != nil)
     }
 
     @Test @MainActor func driverIgnoresRemoteScoreState() {

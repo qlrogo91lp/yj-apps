@@ -436,4 +436,35 @@ struct WorkoutSessionViewModelTests {
         let saved = try MatchPersistenceService.shared.fetchByWorkoutSession(sid)
         #expect(saved.count == 1)
     }
+
+    /// 워치가 누적 칼로리를 보내는 체제에서, 폰 드라이버로 진행한 경기의 저장 칼로리는
+    /// 워크아웃 전체가 아니라 경기 구간이어야 한다. (kcalAtStart=0 고정이면 전체가 저장된다)
+    @Test @MainActor func phoneDriverSavesMatchSegmentCaloriesNotWorkoutTotal() throws {
+        let vm = WorkoutSessionViewModel()
+        // 경기 시작 전 이미 워크아웃에서 200/260 kcal 태운 상태
+        vm.metrics = WorkoutMetrics(elapsedSeconds: 600, activeCalories: 200, totalCalories: 260, heartRate: 120)
+
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+
+        // 경기 중 50/60 kcal 추가 소모 → 누적 250/320
+        vm.metrics = WorkoutMetrics(elapsedSeconds: 1200, activeCalories: 250, totalCalories: 320, heartRate: 140)
+        vm.finishMatch(result: .win, completedSets: [(my: 6, your: 3)])
+
+        let session = try #require(vm.currentSessionForTest)
+        let match = vm.buildMatchForTest(session)
+        #expect(match.caloriesBurned == 50)
+        #expect(match.totalCaloriesBurned == 60)
+    }
+
+    /// 경기 시작 시점의 누적값이 기준선으로 잡혀야 한다.
+    @Test @MainActor func startMatchCapturesCalorieBaseline() throws {
+        let vm = WorkoutSessionViewModel()
+        vm.metrics = WorkoutMetrics(activeCalories: 200, totalCalories: 260)
+
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+
+        let session = try #require(vm.currentSessionForTest)
+        #expect(session.kcalAtStart == 200)
+        #expect(session.totalKcalAtStart == 260)
+    }
 }

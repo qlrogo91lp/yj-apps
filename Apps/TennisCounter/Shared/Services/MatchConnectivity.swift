@@ -69,8 +69,8 @@ final class MatchConnectivity: ObservableObject {
         service.send(msg, via: .reliable)
     }
 
-    func sendMetrics(_ metrics: WorkoutMetrics) {
-        service.send(WorkoutMetricsMessage(metrics: metrics), via: .realtimeOnly)
+    func sendMetrics(_ metrics: WorkoutMetrics, isPaused: Bool) {
+        service.send(WorkoutMetricsMessage(metrics: metrics, isPaused: isPaused), via: .realtimeOnly)
     }
 
     func sendWorkoutEnd(sessionId: UUID) {

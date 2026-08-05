@@ -172,7 +172,8 @@ class WorkoutSessionViewModel: ObservableObject {
             workoutSessionId: self.sessionId,
             options: options,
             startedAt: startedAt ?? Date(),
-            kcalAtStart: 0
+            kcalAtStart: metrics.activeCalories,
+            totalKcalAtStart: metrics.totalCalories
         )
 
         if !isRemote {
@@ -380,6 +381,14 @@ class WorkoutSessionViewModel: ObservableObject {
 
         func saveFromWatchForTest(_ msg: MatchEndMessage) {
             saveFromWatch(msg)
+        }
+
+        var currentSessionForTest: MatchSession? {
+            _currentSession
+        }
+
+        func buildMatchForTest(_ session: MatchSession) -> Match {
+            buildMatchFromSession(session)
         }
     }
 #endif
