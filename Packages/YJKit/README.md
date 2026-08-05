@@ -5,6 +5,7 @@ Ralli(테니스 카운터)에서 추출한 iOS+watchOS 워크아웃 앱 인프�
 | Product | 역할 | 상태 |
 |---|---|---|
 | `WorkoutCore` | HealthKit 워크아웃 세션·칼로리·심박 측정 | ✅ |
+| `WorkoutUI` | 폰·워치 공유 워크아웃 화면 (경과시간·kcal·BPM) | ✅ |
 | `ConnectivityCore` | 폰↔워치 전송 (실시간/큐잉/컨텍스트) | ✅ |
 | `PersistenceCore` | SwiftData + CloudKit 컨테이너/서비스 | ✅ |
 
@@ -58,7 +59,9 @@ WorkoutDashboardView(metrics: viewModel.metrics,
 
 - [ ] **칼로리는 워크아웃 누적값으로 넘긴다.** 경기/라운드 구간 값이 필요하면 저장 시점에 `종료값 - 시작값`으로 계산한다. 화면에 구간 델타를 넘기면 세 앱의 숫자 의미가 갈린다.
 - [ ] **경과시간은 워치가 단일 소스.** 폰은 `WorkoutAnchor.interpolatedElapsed(anchorElapsed:isPaused:sentAt:now:)`로 매초 보간한다. 폰이 자체 타이머로 시간을 세면 pause 한 번에 두 기기가 어긋난다.
+- [ ] **`WorkoutMetricsMessage`는 반드시 `.realtimeOnly`로 보낸다.** 앵커 보간은 `sentAt`이 "방금"이라는 전제 위에 있다 — `.reliable`(미도달 시 `transferUserInfo` 큐잉)이나 `.context`(콜드런치 시 재생)로 보내면 분·시간 단위로 묵은 앵커가 그대로 interpolation에 들어가 경과시간이 크게 틀어진다. 유실은 괜찮지만(다음 tick이 곧 온다) 지연은 안 된다.
 - [ ] **pause는 폰→워치 명령이다.** 폰은 `WorkoutPauseMessage(sessionId:shouldPause:)`를 `.reliable`로 보내고, `isPaused`는 워치가 보낸 앵커로만 갱신한다 — **낙관적 토글 금지**. 명령을 모르는 구버전 워치에서 오동작 대신 무동작이 되도록 하는 장치다.
+  `.reliable`은 미도달 시 큐잉되므로, 같은 세션 안에서 늦게 배달되면 `sessionId` 검사를 통과한 채 이미 재개된 워크아웃을 뒤늦게 일시정지시킬 수 있다. 수신 측은 방어적으로 `onReceive(WorkoutPauseMessage.self, maxAge: 30) { ... }`처럼 `maxAge`를 등록해 묵은 명령을 걸러내는 것을 권장한다 (ConnectivityCore 사용법 절 참고).
 - [ ] **워치 미연결 시 `isPauseAvailable: false`.** 폰에는 HKWorkoutSession이 없어 누를 대상이 없다.
 - [ ] `WorkoutMetricsMessage`의 `sentAt`은 `ConnectivityService`가 스탬프한다 — 발신 시 채우지 말 것.
 
