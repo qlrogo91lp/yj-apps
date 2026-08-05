@@ -18,6 +18,7 @@ final class MatchConnectivity: ObservableObject {
     @Published var receivedMetrics: WorkoutMetrics?
     @Published var receivedWorkoutEnd: UUID?
     @Published var receivedMatchReset: UUID?
+    @Published var receivedPauseCommand: WorkoutPauseMessage?
 
     private let service: ConnectivityService
 
@@ -43,6 +44,7 @@ final class MatchConnectivity: ObservableObject {
             self?.receivedWorkoutEnd = $0.sessionId
         }
         service.onReceive(MatchResetMessage.self) { [weak self] in self?.receivedMatchReset = $0.sessionId }
+        service.onReceive(WorkoutPauseMessage.self) { [weak self] in self?.receivedPauseCommand = $0 }
     }
 
     // MARK: - Send
@@ -79,6 +81,11 @@ final class MatchConnectivity: ObservableObject {
 
     func sendMatchReset(sessionId: UUID) {
         service.send(MatchResetMessage(sessionId: sessionId), via: .reliable)
+    }
+
+    /// 폰에는 워크아웃 세션이 없다 — 워치에 pause/resume을 명령하고 결과는 앵커로 되돌아온다.
+    func sendPauseCommand(sessionId: UUID, shouldPause: Bool) {
+        service.send(WorkoutPauseMessage(sessionId: sessionId, shouldPause: shouldPause), via: .reliable)
     }
 
     func clearSessionContext() {

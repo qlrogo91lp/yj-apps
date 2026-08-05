@@ -42,6 +42,12 @@ class WorkoutSessionViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .assign(to: &$isPaused)
 
+        healthKit.$isPaused
+            .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.broadcastMetrics() }
+            .store(in: &cancellables)
+
         Publishers.CombineLatest4(
             healthKit.$elapsedSeconds,
             healthKit.$currentCalories,
@@ -86,6 +92,12 @@ class WorkoutSessionViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] result in self?.handleMatchSaveResult(result) }
             .store(in: &cancellables)
+
+        connectivity.$receivedPauseCommand
+            .compactMap(\.self)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] msg in self?.handleIncomingPauseCommand(msg) }
+            .store(in: &cancellables)
     }
 
     private func handleMatchSaveResult(_ result: MatchSaveResultMessage) {
@@ -110,6 +122,19 @@ class WorkoutSessionViewModel: ObservableObject {
         startNewMatch(notifyRemote: false)
     }
 
+    /// - Returns: 명령을 적용했으면 true, 다른 세션 것이라 무시했으면 false.
+    @discardableResult
+    private func handleIncomingPauseCommand(_ msg: WorkoutPauseMessage) -> Bool {
+        guard msg.sessionId == activeSessionId else { return false }
+        connectivity.receivedPauseCommand = nil
+        if msg.shouldPause {
+            healthKit.pauseWorkout()
+        } else {
+            healthKit.resumeWorkout()
+        }
+        return true
+    }
+
     #if DEBUG
         func handleIncomingWorkoutEndForTest(_ id: UUID) {
             handleIncomingWorkoutEnd(id)
@@ -117,6 +142,10 @@ class WorkoutSessionViewModel: ObservableObject {
 
         var activeSessionIdForTest: UUID {
             activeSessionId
+        }
+
+        func handleIncomingPauseCommandForTest(_ msg: WorkoutPauseMessage) -> Bool {
+            handleIncomingPauseCommand(msg)
         }
     #endif
 

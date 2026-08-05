@@ -416,4 +416,42 @@ struct WorkoutSessionViewModelTests {
         try await Task.sleep(nanoseconds: 70_000_000)
         #expect(vm.saveAckState == .succeeded)
     }
+
+    // MARK: - Pause 명령 수신
+
+    /// 자기 세션의 명령이면 적용한다.
+    @Test @MainActor func pauseCommandAppliedWhenSessionMatches() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+
+        let applied = vm.handleIncomingPauseCommandForTest(
+            WorkoutPauseMessage(sessionId: vm.activeSessionIdForTest, shouldPause: true)
+        )
+
+        #expect(applied == true)
+    }
+
+    /// 재개 명령도 같은 경로로 적용된다.
+    @Test @MainActor func resumeCommandAppliedWhenSessionMatches() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+
+        let applied = vm.handleIncomingPauseCommandForTest(
+            WorkoutPauseMessage(sessionId: vm.activeSessionIdForTest, shouldPause: false)
+        )
+
+        #expect(applied == true)
+    }
+
+    /// 다른 세션의 pause 명령은 무시한다 (죽은 세션·경합 방지).
+    @Test @MainActor func pauseCommandIgnoredWhenSessionIdMismatch() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+
+        let applied = vm.handleIncomingPauseCommandForTest(
+            WorkoutPauseMessage(sessionId: UUID(), shouldPause: true)
+        )
+
+        #expect(applied == false)
+    }
 }
