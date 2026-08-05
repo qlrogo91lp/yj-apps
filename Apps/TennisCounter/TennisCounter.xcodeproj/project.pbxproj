@@ -21,6 +21,8 @@
 		39D471EA2FBC32EF005FBA12 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 39BF17512EBA37F60026184E /* SwiftUI.framework */; };
 		39D471F72FBC32F1005FBA12 /* TennisLiveActivityExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 39D471E82FBC32EF005FBA12 /* TennisLiveActivityExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		39E38417301C3CB3004BCEB9 /* PersistenceCore in Frameworks */ = {isa = PBXBuildFile; productRef = 39E38416301C3CB3004BCEB9 /* PersistenceCore */; };
+		39F2680F302375D300D573CD /* WorkoutUI in Frameworks */ = {isa = PBXBuildFile; productRef = 39F2680E302375D300D573CD /* WorkoutUI */; };
+		39F26811302375FE00D573CD /* WorkoutUI in Frameworks */ = {isa = PBXBuildFile; productRef = 39F26810302375FE00D573CD /* WorkoutUI */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -163,6 +165,7 @@
 			files = (
 				3982E20A3006E3470006AFEE /* ConnectivityCore in Frameworks */,
 				39E38417301C3CB3004BCEB9 /* PersistenceCore in Frameworks */,
+				39F26811302375FE00D573CD /* WorkoutUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -172,6 +175,7 @@
 			files = (
 				3982E20C3006E3530006AFEE /* ConnectivityCore in Frameworks */,
 				3988023C3005995300596EDB /* WorkoutCore in Frameworks */,
+				39F2680F302375D300D573CD /* WorkoutUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1212,6 +1216,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 3988023A3005982500596EDB /* XCLocalSwiftPackageReference "../ralli-kit" */;
 			productName = PersistenceCore;
+		};
+		39F2680E302375D300D573CD /* WorkoutUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3988023A3005982500596EDB /* XCLocalSwiftPackageReference "../ralli-kit" */;
+			productName = WorkoutUI;
+		};
+		39F26810302375FE00D573CD /* WorkoutUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3988023A3005982500596EDB /* XCLocalSwiftPackageReference "../ralli-kit" */;
+			productName = WorkoutUI;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

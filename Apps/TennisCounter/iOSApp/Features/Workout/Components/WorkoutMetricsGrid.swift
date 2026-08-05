@@ -1,4 +1,5 @@
 import SwiftUI
+import WorkoutCore
 
 struct WorkoutMetricsGrid: View {
     let metrics: WorkoutMetrics
@@ -23,7 +24,7 @@ struct WorkoutMetricsGrid: View {
                 Text(String(localized: "workout_metric_calories"))
                     .font(.system(size: 13))
                     .foregroundColor(.secondary)
-                metricValue(text: String(format: "%.0f", metrics.calories), unit: "kcal")
+                metricValue(text: String(format: "%.0f", metrics.activeCalories), unit: "kcal")
             }
             MetricCard {
                 Text(String(localized: "workout_metric_total_calories"))

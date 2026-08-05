@@ -2,6 +2,7 @@ import Foundation
 import SwiftData
 @testable import TennisCounter
 import Testing
+import WorkoutCore
 
 @MainActor
 final class LiveActivitySpy: LiveActivityControlling {
@@ -190,7 +191,7 @@ struct WorkoutSessionViewModelTests {
         vm.startSession()
         vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
         vm.endSession()
-        #expect(vm.metrics.calories == 0)
+        #expect(vm.metrics.activeCalories == 0)
         #expect(vm.metrics.heartRate == 0)
     }
 

@@ -257,7 +257,7 @@ class WorkoutSessionViewModel: ObservableObject {
         let totalStart = _currentSession?.totalKcalAtStart ?? 0
         let metrics = WorkoutMetrics(
             elapsedSeconds: TimeInterval(healthKit.elapsedSeconds),
-            calories: healthKit.currentCalories - kcalStart,
+            activeCalories: healthKit.currentCalories - kcalStart,
             totalCalories: (healthKit.currentCalories + healthKit.currentBasalCalories) - totalStart,
             heartRate: healthKit.currentHeartRate
         )

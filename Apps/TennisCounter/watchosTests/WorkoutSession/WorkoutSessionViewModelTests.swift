@@ -155,7 +155,7 @@ struct WorkoutSessionViewModelTests {
         vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
         healthKit.setLiveMetricsForTesting(calories: 150)
         vm.broadcastMetrics()
-        #expect(vm.lastMetrics?.calories == 50)
+        #expect(vm.lastMetrics?.activeCalories == 50)
     }
 
     @Test @MainActor func metricsTotalCaloriesIncludeBasalNetOfStart() {

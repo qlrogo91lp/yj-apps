@@ -1,4 +1,5 @@
 import Foundation
+import WorkoutCore
 
 enum SummaryPeriod: String, CaseIterable {
     case today, week, month
