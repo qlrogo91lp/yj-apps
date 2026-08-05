@@ -12,6 +12,7 @@ class WorkoutSessionViewModel: ObservableObject {
     let healthKit: WorkoutSessionService
     let workoutSessionId: UUID = .init()
     @Published private(set) var lastMetrics: WorkoutMetrics?
+    @Published private(set) var currentMetrics = WorkoutMetrics()
 
     private let connectivity = MatchConnectivity.shared
     private let appGroupDefaults = UserDefaults(suiteName: "group.com.yj.TennisCounter")
@@ -40,6 +41,21 @@ class WorkoutSessionViewModel: ObservableObject {
         healthKit.$isPaused
             .receive(on: DispatchQueue.main)
             .assign(to: &$isPaused)
+
+        Publishers.CombineLatest4(
+            healthKit.$elapsedSeconds,
+            healthKit.$currentCalories,
+            healthKit.$currentBasalCalories,
+            healthKit.$currentHeartRate
+        )
+        .receive(on: DispatchQueue.main)
+        .map { elapsed, active, basal, heartRate in
+            WorkoutMetrics(elapsedSeconds: TimeInterval(elapsed),
+                           activeCalories: active,
+                           totalCalories: active + basal,
+                           heartRate: heartRate)
+        }
+        .assign(to: &$currentMetrics)
 
         setupConnectivityBindings()
         setupScoreSync()
