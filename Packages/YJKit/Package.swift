@@ -12,6 +12,7 @@ let package = Package(
     targets: [
         .target(
             name: "WorkoutCore",
+            dependencies: ["ConnectivityCore"],
             swiftSettings: [.swiftLanguageMode(.v5)]
         ),
         .target(
