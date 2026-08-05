@@ -9,7 +9,6 @@ class WorkoutSessionViewModel: ObservableObject {
     @Published var metrics: WorkoutMetrics = .init()
     @Published var watchConnected: Bool = false
     @Published var isPaused: Bool = false
-    @Published var completedMatchCount: Int = 0
     @Published var remoteWorkoutEnded: Bool = false
 
     private var startedAt: Date?
@@ -98,7 +97,6 @@ class WorkoutSessionViewModel: ObservableObject {
                 // 경기 종료 = 결과 화면 표시만. 저장은 사용자가 저장 버튼을 누를 때(receivedMatchSave)만 한다.
                 liveActivity.end()
                 let session = buildSession(from: msg)
-                completedMatchCount += 1
                 phase = .finished(session)
             }
             .store(in: &cancellables)
@@ -210,7 +208,6 @@ class WorkoutSessionViewModel: ObservableObject {
         // 다르게 동작한다. 기존의 "메트릭 없을 때 caloriesBurned가 0으로 폴백"하는 동작과 대칭적인 accepted
         // limitation으로 현재 동작을 유지한다.
         session.totalKcalAtEnd = metrics.totalCalories
-        completedMatchCount += 1
         phase = .finished(session)
         liveActivity.end()
     }

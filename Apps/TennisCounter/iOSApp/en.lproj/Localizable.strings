@@ -35,18 +35,10 @@
 "early_end_confirm_message" = "Your score won't be saved.";
 
 /* Workout */
-"workout_pause" = "Pause";
-"workout_resume" = "Resume";
 "workout_end" = "End Workout";
 "ios_start_workout" = "Start Workout";
 "workout_in_progress" = "In Progress";
 "workout_paused" = "Paused";
-"workout_elapsed_label" = "Elapsed";
-"workout_metric_heartrate" = "Heart Rate";
-"workout_metric_calories" = "Calories";
-"workout_metric_total_calories" = "Total Calories";
-"workout_metric_matches" = "Matches";
-"workout_metric_matches_unit" = "matches";
 
 /* Summary */
 "summary_period_today" = "Today";

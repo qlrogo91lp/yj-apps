@@ -1,4 +1,5 @@
 import SwiftUI
+import WorkoutUI
 
 struct WorkoutSessionView: View {
     let onExit: () -> Void
@@ -17,9 +18,8 @@ struct WorkoutSessionView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            WorkoutTabView(
+            WorkoutDashboardView(
                 metrics: viewModel.metrics,
-                completedMatchCount: viewModel.completedMatchCount,
                 isPaused: viewModel.isPaused,
                 onPauseResume: {
                     viewModel.isPaused ? viewModel.resumeSession() : viewModel.pauseSession()
