@@ -101,9 +101,24 @@ final class GolfRound {
 ```
 
 - 홀 데이터는 별도 `@Model` 관계가 아니라 **병렬 배열**로 처리한다. CloudKit 관계 설정 부담을 피하고, 항상 라운드 단위로 함께 읽고 쓰므로 배열이 적합하다.
-- `holeCount`는 저장하지 않고 `holeScores.count`에서 파생한다. **9홀/18홀 선택 UI 자체가 없다** — "라운드 시작" 버튼 하나만 있고, 종료 시점까지 기록된 홀 수가 그 라운드의 길이다. (전반/후반 이어치기 엣지케이스가 자연히 사라짐)
+- `GolfRound`에 `holeCount`를 저장하지 않고 `holeScores.count`에서 파생하는 것은 유지한다. 다만 **라운드 시작 시 9홀/18홀을 고르고, 그 홀 수를 상한으로 고정한다** (아래 "홀 수 선택" 참조). 저장되는 배열 길이는 선택한 홀 수가 아니라 *실제로 기록된 홀 수*다.
 - 파 대비 스코어(`relativeToPar`, 예: +3)가 절대 타수보다 우선하는 핵심 표시값이다.
 - 컨테이너는 `PersistenceContainerFactory.make(for: [GolfRound.self], cloudKit: true)` 사용. iCloud 미로그인·엔타이틀먼트 부재 시 로컬 폴백은 PersistenceCore가 이미 처리한다. SwiftData 저장은 **iOS 타깃만** 수행한다 (워치는 저장소 없음).
+
+### 홀 수 선택 (plan ④에서 개정)
+
+초안은 "9홀/18홀 선택 UI 자체를 두지 않고 종료 시점까지 기록된 홀 수가 그 라운드의 길이"로 정했으나, **"다음" 버튼에 상한이 없어 마지막 홀에서 한 번 더 누르면 빈 홀이 생기는 문제**가 드러나 뒤집는다.
+
+- 라운드 시작 시 **9홀 / 18홀 중 하나를 고른다**. 선택한 값이 그 라운드의 상한이며 **중간 변경·연장은 없다**.
+- 마지막 홀에서는 "다음" 버튼이 비활성화된다 → 상한을 넘는 홀이 애초에 생기지 않는다.
+- 선택값은 `RoundSnapshot.holeCount`에 저장해 크래시 복구 시 선택 화면을 건너뛴다.
+- 트레이드오프: 초안이 피하려던 **전반/후반 이어치기가 다시 엣지케이스가 된다.** 9홀을 골라 끝낸 뒤 더 치려면 새 라운드를 시작해야 하고, iOS에는 라운드 2개로 기록된다. 홀 수를 고정하는 명확함이 이 비용보다 크다고 판단했다.
+
+### 미기록 홀 트림 (plan ④에서 추가)
+
+18홀을 골라 3번 홀까지 치고 중단하는 등 **상한보다 적게 치고 끝내는 경우**, 남은 홀이 `score 0 · par 0 · putts 0`으로 배열에 남는다. 전송 직전 **배열 말단에서부터 `par == 0`인 홀을 전부 제거**한다.
+
+`par == 0`인 홀은 파 선택 화면이 떠 있어 카운터 화면에 접근할 수 없으므로 `score`·`putts`도 반드시 0이다 — 따라서 이 트림은 **무손실**이다. 홀 중간에 끼어 있는 `par == 0` 홀은 건드리지 않는다 (사용자가 의도적으로 건너뛴 홀일 수 있다).
 
 ### 카운터 규칙 (불변식)
 
@@ -121,7 +136,8 @@ final class GolfRound {
 
 라운드 *진행 중* 상태의 경량 스냅샷 (`Codable` struct):
 
-- 시작 시각, 골프장명, 현재 홀 번호, `holeScores`/`holePars`/`puttCounts` 배열
+- **라운드 id(`UUID`)**, 시작 시각, 골프장명, **선택한 홀 수**, 현재 홀 번호, `holeScores`/`holePars`/`puttCounts` 배열
+- 라운드 id는 **라운드 시작 시 1회 생성**되어 스냅샷에 저장된다. 크래시 복구 후에도 같은 id가 유지되므로, "전송했으나 스냅샷 삭제 전 크래시 → 복구 후 재전송" 시나리오까지 iOS의 id 중복 검사(§5)가 걸러낸다. `GolfRound.id`가 이 값을 그대로 물려받는다.
 - 워치가 상태 변경 시마다 **App Group UserDefaults**에 JSON으로 저장한다.
 - 용도 2가지: ① 워치 앱 강제종료/크래시 후 라운드 복구, ② 컴플리케이션의 "라운드 중" 표시 데이터원. 저장 한 번으로 두 용도를 겸한다.
 - App Group: `group.com.yj.GolfCounter` (워치 앱 + ComplicationApp 공유).
@@ -130,9 +146,15 @@ final class GolfRound {
 
 ### 시작 화면 (`WatchApp/Features/Home/`)
 
-- 버튼 하나: **"라운드 시작"** (9/18홀 선택 없음) + 최근 라운드 요약 한 줄.
-- 탭 시: `requestLocation()` 1회(골프장 자동 감지, 실패해도 무시하고 진행) → 워크아웃 세션 시작(`.golf`, `.indoor`) → 라운드 화면 진입.
-- 실행 시 App Group에 진행 중 스냅샷이 있으면 시작 화면 대신 **라운드를 복구**한다 (HKWorkoutSession 복구와 함께).
+- 버튼 하나: **"라운드 시작"**. (초안의 "최근 라운드 요약 한 줄"은 워치에 완료 기록을 두지 않는다는 §14와 충돌해 plan ③에서 미구현으로 확정)
+- 탭 시 **홀 수 선택 화면**으로 이동한다.
+- 실행 시 App Group에 진행 중 스냅샷이 있으면 시작 화면·홀 수 선택을 건너뛰고 **라운드를 복구**한다 (홀 수는 스냅샷의 값을 쓴다).
+
+### 홀 수 선택 화면 (plan ④에서 추가)
+
+- **9홀 / 18홀** 두 버튼. 원탭 즉시 선택 (파 선택 화면과 같은 원칙).
+- 선택 시: `requestLocation()` 1회(골프장 자동 감지, 실패해도 무시하고 진행) → 워크아웃 세션 시작(`.golf`, `.indoor`) → 라운드 화면 진입.
+- 실수로 들어온 경우 뒤로 나가면 시작 화면으로 돌아간다. 이 화면에서는 아직 라운드가 시작되지 않았으므로 스냅샷도 워크아웃도 만들지 않는다.
 
 ### 파 선택 화면
 
@@ -175,17 +197,22 @@ H2  Par4  3타(1p)  -1
 
 ### 종료 요약
 
-- 총타수 · 총퍼트 · 골프장명 표시 → **"저장 & 전송"** 버튼.
+- 컨트롤 페이지의 "라운드 종료"는 곧바로 끝내지 않고 **확인 다이얼로그**를 띄운다. 오터치로 워크아웃이 끊기는 것을 막고, 트림(§3) 후 **실제로 몇 홀이 기록되는지**를 문구에 명시한다.
+- 확인 시 워크아웃을 종료하고 **요약 화면으로 전환**한다 (라운드 화면 자체가 요약으로 바뀐다 — 별도 화면 push나 모달이 아니다).
+- 요약 화면: 총타수 · 총퍼트 · 골프장명(값이 있을 때만) 표시 → **"저장 & 전송"** 버튼.
 - 워치는 완료 라운드를 로컬 저장하지 않는다. `.reliable`로 즉시 전송하고 iOS가 SwiftData에 저장한다.
+- 워크아웃 메트릭 수집(`stopWorkout()`)은 비동기라 1~3초 걸린다. **버튼은 항상 누를 수 있고**, 아직 수집 중이면 "전송 중" 표시 후 도착하는 대로 전송한다.
 - 전송 트리거 후 App Group 스냅샷을 제거하고 시작 화면으로 복귀한다. (미도달 시 배달은 transferUserInfo 큐가 보장 — §5)
+- **전송하지 않고 요약 화면을 벗어나면 스냅샷을 지우지 않는다** → 다음 실행 시 라운드가 복구되어 다시 종료·전송할 수 있다. 라운드 데이터가 조용히 사라지는 경로를 만들지 않는다. (대가로 워크아웃은 이미 종료된 상태라 그 구간의 심박·칼로리는 이어지지 않는다.)
 
 ## 5. 전송 (워치 → iOS, 단방향)
 
 - `ConnectivityCore`의 `Delivery.reliable` 사용: `sendMessage` 시도 → 미도달 시 `transferUserInfo` 큐잉. 시스템 큐가 iPhone 도달 시점까지 배달을 보장하므로 워치 쪽 재시도 로직은 만들지 않는다.
 - **라운드 종료 시 1회 일괄 전송**. 홀 단위 실시간 전송 없음.
-- `Shared/Services/ConnectivityMessages.swift`에 `RoundCompletedMessage` 정의 (tennis 패턴: `ConnectivityMessage` 채택, `toDictionary()` / `init?(from:)` 직렬화). 페이로드는 `GolfRound`의 전 필드 + 워크아웃 메트릭.
+- `Shared/Services/ConnectivityMessages.swift`에 `RoundCompletedMessage` 정의 (tennis 패턴: `ConnectivityMessage` 채택, `toDictionary()` / `init?(from:)` 직렬화). 페이로드는 `GolfRound`의 전 필드와 정확히 1:1이다 — `id`, `startedAt`, `endedAt`, `courseName`, 세 배열, `calories`, `avgHeartRate`, `distanceMeters`, `steps`. `WorkoutResult`의 `durationSeconds`·`totalCaloriesBurned`는 `GolfRound`에 대응 필드가 없어 싣지 않는다 (소요 시간은 `endedAt - startedAt`으로 파생).
+- 발신은 프로토콜 뒤에 두어(§3의 `RoundSnapshotPublishing`과 같은 방식) ViewModel 테스트가 WatchConnectivity 없이 돌게 한다.
 - iOS 수신 측: `MessageRouter`로 라우팅 → `GolfRound` 생성 → SwiftData 저장. 수신은 앱 실행 중이 아니어도 다음 실행 시 큐에서 배달된다.
-- 중복 방지: 수신 시 동일 `id`의 라운드가 이미 있으면 무시한다 (transferUserInfo 재배달 대비).
+- 중복 방지: 수신 시 동일 `id`의 라운드가 이미 있으면 무시한다 (transferUserInfo 재배달, 그리고 §4의 "전송 후 스냅샷 삭제 전 크래시 → 복구 후 재전송" 대비). id는 라운드 시작 시 생성돼 스냅샷에 실려 복구를 넘어 유지된다 (§3).
 
 ## 6. iOS 화면 흐름
 
@@ -249,6 +276,8 @@ tennis_counter `ComplicationApp` 구조 재활용: App Group UserDefaults 상태
 | 전송 시 iPhone 미도달 | transferUserInfo 큐가 도달 시점까지 보장, 워치 측 재시도 없음 |
 | 동일 라운드 재배달 | iOS 수신부가 `id` 중복 검사로 무시 |
 | 워치 앱 크래시/강제종료 | App Group 스냅샷 + HKWorkoutSession 복구로 라운드 재개 |
+| 요약 화면에서 전송 없이 이탈 | 스냅샷을 남겨 다음 실행 시 복구 — 재종료·재전송 가능 (§4) |
+| 전송 후 스냅샷 삭제 전 크래시 | 복구된 라운드가 같은 `id`로 재전송되고 iOS가 중복으로 무시 (§5) |
 | 위치 실패/권한 거부/POI 미발견 | `courseName = nil` 진행, iOS에서 수동 입력 |
 
 ## 13. 구현 순서
@@ -267,7 +296,7 @@ tennis_counter `ComplicationApp` 구조 재활용: App Group UserDefaults 상태
 | 순서 | plan | 내용 |
 |------|------|------|
 | ③ | watch | **워치 카운터 코어** — 홈·파 선택·카운터·세션(WorkoutCore), `RoundSnapshot` 기록·복구 |
-| ④ | watch | **라운드 전송 (발신)** — `RoundCompletedMessage` 정의(Shared) + 종료 요약 → `.reliable` 발신, 스냅샷 제거 |
+| ④ | watch | **홀 수 선택 + 종료 요약 + 전송(발신)** — 9/18홀 선택 화면과 상한 고정, 미기록 홀 트림, 종료 확인 → 요약 화면, `RoundCompletedMessage` 정의(Shared) + `.reliable` 발신, 스냅샷 제거. 홀 수 선택은 plan ③ 코드(`RoundViewModel`·`RoundSnapshot`·홈)를 함께 고친다 |
 | ⑤ | ios | **수신 + 기록 탭** — MessageRouter 수신·중복 검사·SwiftData 저장, 기록 리스트/상세/편집 시트 |
 | ⑥ | ios | **통계 탭** — Swift Charts (오버파 추이, 베스트/평균 타수, 평균 퍼팅) |
 | ⑦ | common | **로컬라이즈 + 이름 교체** — `.xcstrings` ko/en, 표시명 반영 |
