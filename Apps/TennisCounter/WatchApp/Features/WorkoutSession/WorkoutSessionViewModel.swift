@@ -42,6 +42,12 @@ class WorkoutSessionViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .assign(to: &$isPaused)
 
+        healthKit.$isPaused
+            .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.broadcastMetrics() }
+            .store(in: &cancellables)
+
         Publishers.CombineLatest4(
             healthKit.$elapsedSeconds,
             healthKit.$currentCalories,
@@ -49,12 +55,7 @@ class WorkoutSessionViewModel: ObservableObject {
             healthKit.$currentHeartRate
         )
         .receive(on: DispatchQueue.main)
-        .map { elapsed, active, basal, heartRate in
-            WorkoutMetrics(elapsedSeconds: TimeInterval(elapsed),
-                           activeCalories: active,
-                           totalCalories: active + basal,
-                           heartRate: heartRate)
-        }
+        .map { [healthKit] _, _, _, _ in Self.snapshot(of: healthKit) }
         .assign(to: &$currentMetrics)
 
         setupConnectivityBindings()
@@ -63,10 +64,7 @@ class WorkoutSessionViewModel: ObservableObject {
         healthKit.$currentHeartRate
             .dropFirst()
             .throttle(for: .seconds(metricsThrottle), scheduler: DispatchQueue.main, latest: true)
-            .sink { [weak self] _ in
-                guard let self, case .playing = self.phase else { return }
-                broadcastMetrics()
-            }
+            .sink { [weak self] _ in self?.broadcastMetrics() }
             .store(in: &cancellables)
     }
 
@@ -94,6 +92,12 @@ class WorkoutSessionViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] result in self?.handleMatchSaveResult(result) }
             .store(in: &cancellables)
+
+        connectivity.$receivedPauseCommand
+            .compactMap(\.self)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] msg in self?.handleIncomingPauseCommand(msg) }
+            .store(in: &cancellables)
     }
 
     private func handleMatchSaveResult(_ result: MatchSaveResultMessage) {
@@ -118,6 +122,19 @@ class WorkoutSessionViewModel: ObservableObject {
         startNewMatch(notifyRemote: false)
     }
 
+    /// - Returns: 명령을 적용했으면 true, 다른 세션 것이라 무시했으면 false.
+    @discardableResult
+    private func handleIncomingPauseCommand(_ msg: WorkoutPauseMessage) -> Bool {
+        guard msg.sessionId == activeSessionId else { return false }
+        connectivity.receivedPauseCommand = nil
+        if msg.shouldPause {
+            healthKit.pauseWorkout()
+        } else {
+            healthKit.resumeWorkout()
+        }
+        return true
+    }
+
     #if DEBUG
         func handleIncomingWorkoutEndForTest(_ id: UUID) {
             handleIncomingWorkoutEnd(id)
@@ -125,6 +142,10 @@ class WorkoutSessionViewModel: ObservableObject {
 
         var activeSessionIdForTest: UUID {
             activeSessionId
+        }
+
+        func handleIncomingPauseCommandForTest(_ msg: WorkoutPauseMessage) -> Bool {
+            handleIncomingPauseCommand(msg)
         }
     #endif
 
@@ -268,17 +289,18 @@ class WorkoutSessionViewModel: ObservableObject {
     }
 
     func broadcastMetrics() {
-        guard case .playing = phase else { return }
-        let kcalStart = _currentSession?.kcalAtStart ?? 0
-        let totalStart = _currentSession?.totalKcalAtStart ?? 0
-        let metrics = WorkoutMetrics(
-            elapsedSeconds: TimeInterval(healthKit.elapsedSeconds),
-            activeCalories: healthKit.currentCalories - kcalStart,
-            totalCalories: (healthKit.currentCalories + healthKit.currentBasalCalories) - totalStart,
-            heartRate: healthKit.currentHeartRate
-        )
+        let metrics = Self.snapshot(of: healthKit)
         lastMetrics = metrics
-        connectivity.sendMetrics(metrics)
+        connectivity.sendMetrics(metrics, isPaused: healthKit.isPaused)
+    }
+
+    /// healthKit의 현재 값을 즉시 읽는 동기 스냅샷.
+    /// currentMetrics 파이프라인(비동기)과 broadcastMetrics(동기)가 같은 매핑을 쓰도록 한 곳에 둔다.
+    private static func snapshot(of healthKit: WorkoutSessionService) -> WorkoutMetrics {
+        WorkoutMetrics(elapsedSeconds: TimeInterval(healthKit.elapsedSeconds),
+                       activeCalories: healthKit.currentCalories,
+                       totalCalories: healthKit.currentCalories + healthKit.currentBasalCalories,
+                       heartRate: healthKit.currentHeartRate)
     }
 
     private func handleIncomingSessionStart(_ msg: SessionStartMessage) {

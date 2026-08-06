@@ -15,9 +15,10 @@ final class MatchConnectivity: ObservableObject {
     @Published var receivedMatchEnd: MatchEndMessage?
     @Published var receivedMatchSave: MatchEndMessage?
     @Published var receivedMatchSaveResult: MatchSaveResultMessage?
-    @Published var receivedMetrics: WorkoutMetrics?
+    @Published var receivedMetrics: WorkoutMetricsMessage?
     @Published var receivedWorkoutEnd: UUID?
     @Published var receivedMatchReset: UUID?
+    @Published var receivedPauseCommand: WorkoutPauseMessage?
 
     private let service: ConnectivityService
 
@@ -38,11 +39,12 @@ final class MatchConnectivity: ObservableObject {
         service.onReceive(MatchEndMessage.self) { [weak self] in self?.receivedMatchEnd = $0 }
         service.onReceive(MatchSaveMessage.self) { [weak self] in self?.receivedMatchSave = $0.base }
         service.onReceive(MatchSaveResultMessage.self) { [weak self] in self?.receivedMatchSaveResult = $0 }
-        service.onReceive(WorkoutMetricsMessage.self) { [weak self] in self?.receivedMetrics = $0.metrics }
+        service.onReceive(WorkoutMetricsMessage.self) { [weak self] in self?.receivedMetrics = $0 }
         service.onReceive(WorkoutEndMessage.self, maxAge: Self.workoutEndStalenessThreshold) { [weak self] in
             self?.receivedWorkoutEnd = $0.sessionId
         }
         service.onReceive(MatchResetMessage.self) { [weak self] in self?.receivedMatchReset = $0.sessionId }
+        service.onReceive(WorkoutPauseMessage.self) { [weak self] in self?.receivedPauseCommand = $0 }
     }
 
     // MARK: - Send
@@ -69,8 +71,8 @@ final class MatchConnectivity: ObservableObject {
         service.send(msg, via: .reliable)
     }
 
-    func sendMetrics(_ metrics: WorkoutMetrics) {
-        service.send(WorkoutMetricsMessage(metrics: metrics), via: .realtimeOnly)
+    func sendMetrics(_ metrics: WorkoutMetrics, isPaused: Bool) {
+        service.send(WorkoutMetricsMessage(metrics: metrics, isPaused: isPaused), via: .realtimeOnly)
     }
 
     func sendWorkoutEnd(sessionId: UUID) {
@@ -79,6 +81,11 @@ final class MatchConnectivity: ObservableObject {
 
     func sendMatchReset(sessionId: UUID) {
         service.send(MatchResetMessage(sessionId: sessionId), via: .reliable)
+    }
+
+    /// 폰에는 워크아웃 세션이 없다 — 워치에 pause/resume을 명령하고 결과는 앵커로 되돌아온다.
+    func sendPauseCommand(sessionId: UUID, shouldPause: Bool) {
+        service.send(WorkoutPauseMessage(sessionId: sessionId, shouldPause: shouldPause), via: .reliable)
     }
 
     func clearSessionContext() {

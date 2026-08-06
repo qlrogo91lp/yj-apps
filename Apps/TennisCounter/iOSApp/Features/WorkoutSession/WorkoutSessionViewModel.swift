@@ -12,8 +12,7 @@ class WorkoutSessionViewModel: ObservableObject {
     @Published var remoteWorkoutEnded: Bool = false
 
     private var startedAt: Date?
-    private var pausedAt: Date?
-    private var totalPausedSeconds: TimeInterval = 0
+    private var anchor: WorkoutMetricsMessage?
     private var sessionId: UUID = .init()
     private var hasSyncedSession = false
     private var _currentSession: MatchSession?
@@ -23,6 +22,12 @@ class WorkoutSessionViewModel: ObservableObject {
     private let connectivity = MatchConnectivity.shared
     private let liveActivity: LiveActivityControlling
     private(set) var isDriver = false
+
+    /// 워치가 reachable하다는 것만으로는 pause 명령을 받아줄 워크아웃이 있다는 보장이 없다 —
+    /// 워치로부터 앵커를 한 번이라도 받았어야(즉 실제로 브로드캐스트 중인 워크아웃이 있어야) 가용하다고 본다.
+    var isPauseAvailable: Bool {
+        watchConnected && anchor != nil
+    }
 
     init(liveActivity: LiveActivityControlling = LiveActivityService.shared) {
         self.liveActivity = liveActivity
@@ -65,18 +70,22 @@ class WorkoutSessionViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .assign(to: &$watchConnected)
 
+        // 알려진 좁은 레이스: WorkoutMetricsMessage에는 세션 식별자가 없다. 워크아웃 경계 전환
+        // (endSession()으로 이전 워크아웃이 완전히 끝난 뒤, 이어서 startSession()으로 새 워크아웃이
+        // 시작되는 사이) — 이전(방금 끝난) 워크아웃에서 이미 인플라이트였던 메시지가
+        // .receive(on: .main) 홉을 거쳐 두 리셋 이후에 도착하면 새 워크아웃의 anchor가 잠깐 이전
+        // 워크아웃 값으로 덮어써질 수 있다 — elapsedSeconds가 그 이전 워크아웃의 경과시간(분 단위일 수도
+        // 있음, 상한 없음)으로 튈 수 있다. 새 워치 브로드캐스트(주기 ~5s, metricsThrottle)가 도착하면
+        // 즉시 올바른 anchor로 덮어써지므로 자가 치유되며, 지금까지 관측된 영향은 없다. 메시지에 세션
+        // 식별자를 실어 이 메시지가 어느 세션 소속인지 판별하는 근본 수정은 WorkoutMetricsMessage
+        // 와이어 포맷 변경(ralli-kit, 별도 태스크)이 필요해 이 태스크 범위 밖이다.
+        // 같은 근본 원인(세션 식별자 부재)이 isPauseAvailable에도 좁게 걸쳐 있다: 워치 워크아웃이
+        // 실행 중이지만 세션 동기화 전이면 pause 명령이 워치의 세션 가드에 막힌다 — 이 역시 별도 범위.
+        // (2026-08-06 코드리뷰 finding, 문서화로 수용)
         connectivity.$receivedMetrics
             .compactMap(\.self)
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] received in
-                guard let self else { return }
-                metrics = WorkoutMetrics(
-                    elapsedSeconds: TimeInterval(elapsedSeconds),
-                    activeCalories: received.activeCalories,
-                    totalCalories: received.totalCalories,
-                    heartRate: received.heartRate
-                )
-            }
+            .sink { [weak self] received in self?.applyIncomingMetrics(received) }
             .store(in: &cancellables)
 
         setupMatchLifecycleBindings()
@@ -141,25 +150,18 @@ class WorkoutSessionViewModel: ObservableObject {
 
     func startSession(startDate: Date = Date()) {
         startedAt = startDate
-        totalPausedSeconds = 0
-        pausedAt = nil
+        anchor = nil
         startTimer()
     }
 
-    func pauseSession() {
-        isPaused = true
-        pausedAt = Date()
-        timer?.invalidate()
-        timer = nil
+    /// 폰에는 워크아웃 세션이 없다 — 워치에 명령만 보낸다.
+    /// isPaused는 워치가 보낸 앵커(ack)로만 바뀐다. 명령을 모르는 구버전 워치면 아무 일도 안 일어난다.
+    func requestPause() {
+        connectivity.sendPauseCommand(sessionId: sessionId, shouldPause: true)
     }
 
-    func resumeSession() {
-        if let p = pausedAt {
-            totalPausedSeconds += Date().timeIntervalSince(p)
-            pausedAt = nil
-        }
-        isPaused = false
-        startTimer()
+    func requestResume() {
+        connectivity.sendPauseCommand(sessionId: sessionId, shouldPause: false)
     }
 
     func startMatch(options: MatchOptions, sessionId: UUID? = nil, isRemote: Bool = false) {
@@ -172,7 +174,8 @@ class WorkoutSessionViewModel: ObservableObject {
             workoutSessionId: self.sessionId,
             options: options,
             startedAt: startedAt ?? Date(),
-            kcalAtStart: 0
+            kcalAtStart: metrics.activeCalories,
+            totalKcalAtStart: metrics.totalCalories
         )
 
         if !isRemote {
@@ -241,8 +244,7 @@ class WorkoutSessionViewModel: ObservableObject {
         timer?.invalidate()
         timer = nil
         elapsedSeconds = 0
-        totalPausedSeconds = 0
-        pausedAt = nil
+        anchor = nil
         metrics = .init()
         _currentSession = nil
         phase = .modeSelection
@@ -252,6 +254,13 @@ class WorkoutSessionViewModel: ObservableObject {
     }
 
     // MARK: - Private
+
+    private func applyIncomingMetrics(_ msg: WorkoutMetricsMessage) {
+        anchor = msg
+        metrics = msg.metrics
+        isPaused = msg.isPaused
+        recomputeElapsed()
+    }
 
     private func handleIncomingSessionStart(_ msg: SessionStartMessage) {
         if case .playing = phase {
@@ -276,7 +285,39 @@ class WorkoutSessionViewModel: ObservableObject {
         connectivity.sendMatchSaveResult(MatchSaveResultMessage(sessionId: msg.sessionId, success: success))
     }
 
-    private func buildMatchFromMessage(_ msg: MatchEndMessage) -> Match {
+    private func startTimer() {
+        timer?.invalidate()
+        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
+            Task { @MainActor [weak self] in self?.recomputeElapsed() }
+        }
+    }
+
+    /// 워치 앵커가 있으면 그 기준으로 보간하고, 없으면(폰 단독) 로컬 시작 시각으로 센다.
+    private func recomputeElapsed(now: TimeInterval = Date().timeIntervalSince1970) {
+        let seconds: TimeInterval = if let anchor {
+            WorkoutAnchor.interpolatedElapsed(
+                anchorElapsed: anchor.metrics.elapsedSeconds,
+                isPaused: anchor.isPaused,
+                sentAt: anchor.sentAt,
+                now: now
+            )
+        } else if let startedAt {
+            now - startedAt.timeIntervalSince1970
+        } else {
+            0
+        }
+        elapsedSeconds = Int(seconds)
+        metrics = WorkoutMetrics(elapsedSeconds: seconds,
+                                 activeCalories: metrics.activeCalories,
+                                 totalCalories: metrics.totalCalories,
+                                 heartRate: metrics.heartRate)
+    }
+}
+
+// MARK: - Match building
+
+private extension WorkoutSessionViewModel {
+    func buildMatchFromMessage(_ msg: MatchEndMessage) -> Match {
         let match = Match()
         match.workoutSessionId = msg.sessionId
         match.startedAt = msg.startedAt
@@ -296,7 +337,7 @@ class WorkoutSessionViewModel: ObservableObject {
         return match
     }
 
-    private func buildMatchFromSession(_ session: MatchSession) -> Match {
+    func buildMatchFromSession(_ session: MatchSession) -> Match {
         let match = Match()
         match.workoutSessionId = session.workoutSessionId
         match.startedAt = session.startedAt
@@ -315,7 +356,7 @@ class WorkoutSessionViewModel: ObservableObject {
         return match
     }
 
-    private func buildSession(from msg: MatchEndMessage) -> MatchSession {
+    func buildSession(from msg: MatchEndMessage) -> MatchSession {
         let options = MatchOptions(
             mode: MatchFormat(rawValue: msg.mode) ?? .oneSet,
             noAdRule: msg.noAdRule,
@@ -336,23 +377,6 @@ class WorkoutSessionViewModel: ObservableObject {
         session.totalKcalAtEnd = msg.totalCalories
         session.averageHeartRate = msg.averageHeartRate
         return session
-    }
-
-    private func startTimer() {
-        timer?.invalidate()
-        guard let startedAt else { return }
-        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
-            Task { @MainActor [weak self] in
-                guard let self else { return }
-                elapsedSeconds = Int(Date().timeIntervalSince(startedAt) - totalPausedSeconds)
-                metrics = WorkoutMetrics(
-                    elapsedSeconds: TimeInterval(elapsedSeconds),
-                    activeCalories: metrics.activeCalories,
-                    totalCalories: metrics.totalCalories,
-                    heartRate: metrics.heartRate
-                )
-            }
-        }
     }
 }
 
@@ -380,6 +404,22 @@ class WorkoutSessionViewModel: ObservableObject {
 
         func saveFromWatchForTest(_ msg: MatchEndMessage) {
             saveFromWatch(msg)
+        }
+
+        var currentSessionForTest: MatchSession? {
+            _currentSession
+        }
+
+        func buildMatchForTest(_ session: MatchSession) -> Match {
+            buildMatchFromSession(session)
+        }
+
+        func applyIncomingMetricsForTest(_ msg: WorkoutMetricsMessage) {
+            applyIncomingMetrics(msg)
+        }
+
+        func recomputeElapsedForTest(now: TimeInterval) {
+            recomputeElapsed(now: now)
         }
     }
 #endif

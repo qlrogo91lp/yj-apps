@@ -80,15 +80,6 @@ struct WorkoutSessionViewModelTests {
         #expect(vm.elapsedSeconds == 0)
     }
 
-    @Test @MainActor func matchSessionPauseStopsTimer() {
-        let vm = WorkoutSessionViewModel()
-        vm.startSession()
-        vm.pauseSession()
-        #expect(vm.isPaused == true)
-        vm.resumeSession()
-        #expect(vm.isPaused == false)
-    }
-
     @Test @MainActor func matchSessionRestartMatchUsesSameFormat() {
         let vm = WorkoutSessionViewModel()
         vm.startSession()
@@ -435,5 +426,125 @@ struct WorkoutSessionViewModelTests {
 
         let saved = try MatchPersistenceService.shared.fetchByWorkoutSession(sid)
         #expect(saved.count == 1)
+    }
+
+    /// 워치가 누적 칼로리를 보내는 체제에서, 폰 드라이버로 진행한 경기의 저장 칼로리는
+    /// 워크아웃 전체가 아니라 경기 구간이어야 한다. (kcalAtStart=0 고정이면 전체가 저장된다)
+    @Test @MainActor func phoneDriverSavesMatchSegmentCaloriesNotWorkoutTotal() throws {
+        let vm = WorkoutSessionViewModel()
+        // 경기 시작 전 이미 워크아웃에서 200/260 kcal 태운 상태
+        vm.metrics = WorkoutMetrics(elapsedSeconds: 600, activeCalories: 200, totalCalories: 260, heartRate: 120)
+
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+
+        // 경기 중 50/60 kcal 추가 소모 → 누적 250/320
+        vm.metrics = WorkoutMetrics(elapsedSeconds: 1200, activeCalories: 250, totalCalories: 320, heartRate: 140)
+        vm.finishMatch(result: .win, completedSets: [(my: 6, your: 3)])
+
+        let session = try #require(vm.currentSessionForTest)
+        let match = vm.buildMatchForTest(session)
+        #expect(match.caloriesBurned == 50)
+        #expect(match.totalCaloriesBurned == 60)
+    }
+
+    /// 경기 시작 시점의 누적값이 기준선으로 잡혀야 한다.
+    @Test @MainActor func startMatchCapturesCalorieBaseline() throws {
+        let vm = WorkoutSessionViewModel()
+        vm.metrics = WorkoutMetrics(activeCalories: 200, totalCalories: 260)
+
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+
+        let session = try #require(vm.currentSessionForTest)
+        #expect(session.kcalAtStart == 200)
+        #expect(session.totalKcalAtStart == 260)
+    }
+
+    // MARK: - 경과시간 앵커
+
+    /// 앵커 수신 후에는 워치가 보낸 경과초 + 그 뒤 흐른 시간으로 계산한다.
+    @Test @MainActor func elapsedInterpolatesFromWatchAnchor() throws {
+        let vm = WorkoutSessionViewModel()
+        let dict: [String: Any] = [
+            "elapsed": 100.0, "calories": 10.0, "totalCalories": 12.0,
+            "heartRate": 130.0, "isPaused": false, "sentAt": 1000.0,
+        ]
+        let msg = try #require(WorkoutMetricsMessage(from: dict))
+        vm.applyIncomingMetricsForTest(msg)
+
+        vm.recomputeElapsedForTest(now: 1007)
+
+        #expect(vm.elapsedSeconds == 107)
+    }
+
+    /// 일시정지 앵커를 받으면 시간이 멈춘다.
+    @Test @MainActor func elapsedFreezesOnPausedAnchor() throws {
+        let vm = WorkoutSessionViewModel()
+        let dict: [String: Any] = [
+            "elapsed": 100.0, "isPaused": true, "sentAt": 1000.0,
+        ]
+        let msg = try #require(WorkoutMetricsMessage(from: dict))
+        vm.applyIncomingMetricsForTest(msg)
+
+        vm.recomputeElapsedForTest(now: 1007)
+
+        #expect(vm.elapsedSeconds == 100)
+    }
+
+    /// 앵커의 isPaused가 폰 isPaused에 반영된다 (ack 경로).
+    @Test @MainActor func anchorIsPausedUpdatesViewModel() throws {
+        let vm = WorkoutSessionViewModel()
+        let dict: [String: Any] = ["elapsed": 10.0, "isPaused": true, "sentAt": 1000.0]
+        let msg = try #require(WorkoutMetricsMessage(from: dict))
+        vm.applyIncomingMetricsForTest(msg)
+        #expect(vm.isPaused == true)
+    }
+
+    /// 앵커를 한 번도 못 받은 폰 단독 상태면 로컬 시작 시각 기준으로 센다.
+    @Test @MainActor func elapsedFallsBackToLocalClockWithoutAnchor() {
+        let vm = WorkoutSessionViewModel()
+        vm.startSession(startDate: Date(timeIntervalSince1970: 1000))
+
+        vm.recomputeElapsedForTest(now: 1042)
+
+        #expect(vm.elapsedSeconds == 42)
+    }
+
+    // MARK: - Pause 왕복
+
+    /// 폰은 pause를 낙관적으로 토글하지 않는다 — 워치 ack(앵커)가 와야 바뀐다.
+    @Test @MainActor func requestPauseDoesNotToggleLocallyBeforeAck() {
+        let vm = WorkoutSessionViewModel()
+        vm.startSession()
+
+        vm.requestPause()
+
+        #expect(vm.isPaused == false)
+    }
+
+    /// 워치 ack가 도착하면 그때 isPaused가 바뀐다.
+    @Test @MainActor func pauseAppliesWhenWatchAckArrives() throws {
+        let vm = WorkoutSessionViewModel()
+        vm.startSession()
+        vm.requestPause()
+
+        let dict: [String: Any] = ["elapsed": 50.0, "isPaused": true, "sentAt": 1000.0]
+        try vm.applyIncomingMetricsForTest(#require(WorkoutMetricsMessage(from: dict)))
+
+        #expect(vm.isPaused == true)
+    }
+
+    /// 재개도 같은 경로 — 명령만 보내고 ack로 풀린다.
+    @Test @MainActor func resumeAppliesWhenWatchAckArrives() throws {
+        let vm = WorkoutSessionViewModel()
+        vm.startSession()
+        let paused: [String: Any] = ["elapsed": 50.0, "isPaused": true, "sentAt": 1000.0]
+        try vm.applyIncomingMetricsForTest(#require(WorkoutMetricsMessage(from: paused)))
+
+        vm.requestResume()
+        #expect(vm.isPaused == true) // 아직 ack 전
+
+        let running: [String: Any] = ["elapsed": 50.0, "isPaused": false, "sentAt": 1010.0]
+        try vm.applyIncomingMetricsForTest(#require(WorkoutMetricsMessage(from: running)))
+        #expect(vm.isPaused == false)
     }
 }
