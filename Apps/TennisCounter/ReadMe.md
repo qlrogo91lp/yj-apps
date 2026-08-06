@@ -1,94 +1,38 @@
-# TennisCounter
+# TennisCounter (Ralli)
 
-테니스 점수를 간편하게 기록할 수 있는 iOS + watchOS 앱입니다.
+테니스 경기 점수를 기록하고, Apple Watch와 실시간으로 동기화하며, HealthKit 워크아웃 지표(칼로리·심박수·경과시간)를 함께 추적하는 iOS + watchOS 앱입니다.
 
-## 프로젝트 구조
+- 경기 진행: 모드 선택 → 점수 입력 → 결과 저장 (iOS·Watch 대칭 구조)
+- 폰 ↔ 워치 실시간 점수·워크아웃 동기화 (WatchConnectivity)
+- HealthKit 연동 워크아웃 (칼로리, BPM, 경과시간), 잠금화면 Live Activity, 워치 컴플리케이션
+- 경기 기록 히스토리 + 캘린더, SwiftData 저장
 
-```
-tennis-counter/
-├── Shared/                         # 공유 모듈
-│   └── Models/
-│       └── Score.swift             # 점수 데이터 모델 (ObservableObject)
-│
-├── iOSApp/                         # iOS 앱
-│   ├── iOSApp.swift                # 앱 엔트리포인트 (@main)
-│   ├── Views/
-│   │   ├── ContentView.swift       # 메인 화면 (게임 스코어 + 포인트 카운터)
-│   │   └── CounterButtonView.swift # +/- 버튼 및 포인트 표시 컴포넌트
-│   ├── Assets.xcassets/            # 이미지/색상 리소스
-│   └── Preview Content/            # SwiftUI 프리뷰 리소스
-│
-├── WatchApp/                       # watchOS 앱
-│   ├── WatchApp.swift              # 앱 엔트리포인트 (@main)
-│   ├── Views/
-│   │   ├── ContentView.swift       # 메인 화면 (iOS와 동일한 구조, 워치 사이즈 최적화)
-│   │   └── CounterButtonView.swift # +/- 버튼 컴포넌트 (워치 사이즈 최적화)
-│   ├── Assets.xcassets/            # 이미지/색상 리소스
-│   └── Preview Content/            # SwiftUI 프리뷰 리소스
-│
-├── ComplicationApp/                # watchOS 컴플리케이션 (WidgetKit)
-│   ├── ComplicationAppBundle.swift # 위젯 번들 엔트리포인트 (@main)
-│   ├── ComplicationApp.swift       # 컴플리케이션 위젯 (Circular, Corner, Rectangular)
-│   ├── ComplicationAppControl.swift# ControlWidget (타이머 토글)
-│   ├── Assets.xcassets/            # 컴플리케이션 아이콘 리소스
-│   └── Info.plist
-│
-├── TennisCounter.xcodeproj/        # Xcode 프로젝트 설정
-├── .swiftlint.yml                  # SwiftLint 설정
-├── .swiftformat                    # SwiftFormat 설정
-├── .gitignore
-└── Makefile                        # lint / format / fix 명령어
-```
+## 프로젝트 구조 & 아키텍처
 
-## 아키텍처
-
-### 데이터 모델
-
-`Score` (ObservableObject) — 한 게임 내의 포인트 상태를 관리합니다.
-
-| 프로퍼티 | 타입 | 설명 |
-|---------|------|------|
-| `myScore` | `Int` | 내 현재 포인트 (0, 15, 30, 40, 50) |
-| `yourScore` | `Int` | 상대 현재 포인트 |
-| `myIndex` | `Int` | 포인트 배열 인덱스 (0~4) |
-| `yourIndex` | `Int` | 포인트 배열 인덱스 (0~4) |
-
-포인트 배열: `[0, 15, 30, 40, 50]` — 50은 게임 승리를 의미합니다.
-
-### 화면 구성
-
-**ContentView** — 메인 화면
-- 상단: 게임 스코어 (`myGameScore : yourGameScore`) + Reset 버튼
-- 중앙: 좌/우 `CounterButtonView`로 각 선수의 포인트를 +/- 조작
-- 하단: Confirm 버튼 — 한쪽이 50(Win)에 도달하면 게임 스코어를 +1하고 포인트를 초기화
-
-**CounterButtonView** — 포인트 조작 컴포넌트
-- `flag`로 선수 구분 (0: 나, 1: 상대)
-- `+` / `-` 원형 버튼으로 포인트를 단계별로 증감
-- 50 도달 시 "Win" 텍스트 표시
-
-### 플랫폼별 차이
-
-| 항목 | iOS | watchOS |
-|------|-----|---------|
-| 버튼 크기 | 70x70 | 35x35 |
-| 폰트 크기 | 40~50pt | 20~30pt |
-| 배경 | 검정 (전체화면) | 시스템 기본 |
-| 텍스트 스케일링 | 없음 | `minimumScaleFactor(0.2)` |
-
-### 컴플리케이션
-
-watchOS 워치페이스에 앱 바로가기를 제공합니다.
-
-- **지원 패밀리**: `accessoryCircular`, `accessoryCorner`, `accessoryRectangular`
-- **ControlWidget**: 타이머 토글 컨트롤 (템플릿 상태)
+타겟(iOSApp / WatchApp / ComplicationApp / TennisLiveActivity)별 폴더 구조, 계층별 컴포넌트 배치 규칙, 데이터 모델, 테스트 컨벤션 등 전체 아키텍처는 **[CLAUDE.md](CLAUDE.md)**에 정리되어 있습니다. 코드가 바뀔 때마다 그 문서를 기준으로 갱신하므로, 여기서는 중복해서 적지 않습니다.
 
 ## 개발 환경
 
-- **언어**: Swift 6.0
+- **언어**: Swift 6 (language mode v5)
 - **UI 프레임워크**: SwiftUI
-- **빌드 시스템**: Xcode (xcodeproj)
+- **빌드 시스템**: Xcode (`.xcodeproj`, `PBXFileSystemSynchronizedRootGroup`)
+- **패턴**: 기능(Feature) 단위 폴더 구조 + MVVM
 - **린트/포맷**: SwiftLint + SwiftFormat
+
+### 빌드 & 테스트
+
+```bash
+# iOS 앱
+xcodebuild -project TennisCounter.xcodeproj -scheme "TennisCounter" -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build
+
+# Watch 앱
+xcodebuild -project TennisCounter.xcodeproj -scheme "TennisCounter Watch App" -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)' build
+
+# 테스트
+xcodebuild test -project TennisCounter.xcodeproj -scheme "TennisCounter" -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
+```
+
+전체 빌드/테스트 명령어는 [CLAUDE.md의 Build Commands](CLAUDE.md#build-commands)를 참고하세요.
 
 ### Makefile 명령어
 

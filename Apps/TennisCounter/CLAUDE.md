@@ -49,7 +49,7 @@ Shared/
 └── Services/
     │  # 외부 프레임워크/시스템 API를 래핑하는 서비스 레이어.
     ├── ConnectivityMessages.swift      # 워치↔폰 메시지 정의 (ConnectivityMessage 채택)
-    └── MatchConnectivity.swift         # 폰↔워치 실시간 점수 동기화 (RalliKit ConnectivityCore 기반)
+    └── MatchConnectivity.swift         # 폰↔워치 실시간 점수·워크아웃 앵커 동기화 + pause 명령 왕복 (RalliKit ConnectivityCore/WorkoutCore 기반)
 
 iOSApp/
 │  # iPhone 전용 타겟
@@ -108,7 +108,7 @@ iOSApp/
     │       └── WorkoutTimerRing.swift
     ├── WorkoutSession/                  # iOS 워크아웃 세션 컨테이너
     │   ├── WorkoutSessionView.swift
-    │   ├── WorkoutSessionViewModel.swift
+    │   ├── WorkoutSessionViewModel.swift  # 경과시간은 워치 앵커 기반 보간(WorkoutAnchor). pause는 왕복 요청만 보내고 ack 전엔 낙관적으로 토글하지 않음
     │   └── Components/
     │       └── WorkoutIndicator.swift   # 경기 중 툴바에 표시되는 운동 경과시간
     └── History/
@@ -169,7 +169,7 @@ WatchApp/
         │  # 컨테이너 Feature: 3-탭 TabView [Workout.Controls | Match | Workout.Metrics]
         │  # HealthKit 세션 생명주기 관리, Match 흐름 조정
         ├── WorkoutSessionView.swift      # 좌우 스와이프로 3개 탭 전환
-        └── WorkoutSessionViewModel.swift # MatchPhase 상태 + HealthKit 연동
+        └── WorkoutSessionViewModel.swift # MatchPhase 상태 + HealthKit 연동. 폰의 pause 명령 수신 → HKWorkoutSession 제어, 워크아웃 누적 메트릭을 앵커로 브로드캐스트
 
 ComplicationApp/
 │  # watchOS WidgetKit complication + AppIntents. 잠금화면/항상켜기 화면에 현재 점수 표시.
