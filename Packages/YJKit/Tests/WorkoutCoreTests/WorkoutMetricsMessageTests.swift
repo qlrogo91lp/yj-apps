@@ -37,4 +37,34 @@ struct WorkoutMetricsMessageTests {
         #expect(dict["totalCalories"] as? Double == 30)
         #expect(dict["heartRate"] as? Double == 40)
     }
+
+    @Test func roundTripsIsPaused() {
+        let dict = WorkoutMetricsMessage(
+            metrics: WorkoutMetrics(elapsedSeconds: 10), isPaused: true
+        ).toDictionary()
+        #expect(dict["isPaused"] as? Bool == true)
+        #expect(WorkoutMetricsMessage(from: dict)?.isPaused == true)
+    }
+
+    @Test func isPausedDefaultsToFalseOnConstruction() {
+        #expect(WorkoutMetricsMessage(metrics: WorkoutMetrics()).isPaused == false)
+    }
+
+    /// 구버전 워치 페이로드에는 isPaused 키가 없다 — 진행 중으로 본다.
+    @Test func legacyPayloadWithoutIsPausedDefaultsToRunning() {
+        let dict: [String: Any] = ["elapsed": 600.0, "calories": 120.0]
+        #expect(WorkoutMetricsMessage(from: dict)?.isPaused == false)
+    }
+
+    /// sentAt은 ConnectivityService가 스탬프한다 — 발신 시엔 nil이고 수신 dict에서만 읽힌다.
+    @Test func sentAtIsNilOnConstructionAndReadOnReceive() {
+        #expect(WorkoutMetricsMessage(metrics: WorkoutMetrics()).sentAt == nil)
+        let dict: [String: Any] = ["elapsed": 5.0, "sentAt": 1_700_000_000.0]
+        #expect(WorkoutMetricsMessage(from: dict)?.sentAt == 1_700_000_000)
+    }
+
+    @Test func toDictionaryOmitsSentAt() {
+        let dict = WorkoutMetricsMessage(metrics: WorkoutMetrics()).toDictionary()
+        #expect(dict["sentAt"] == nil)
+    }
 }
