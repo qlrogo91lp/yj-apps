@@ -1,15 +1,15 @@
 # WorkoutSession Feature (iOS)
 
-iOS 워크아웃 세션 컨테이너 Feature. Watch에서 보내는 메시지를 수신해 화면을 전환하고, 자체 타이머로 경과 시간을 관리하며, SwiftData에 경기를 저장한다.
+iOS 워크아웃 세션 컨테이너 Feature. Watch에서 보내는 메시지를 수신해 화면을 전환하고, Watch가 보낸 앵커로 경과 시간을 보간하며, SwiftData에 경기를 저장한다.
 
-Watch 버전과 대칭 구조이지만 HealthKit을 직접 제어하지 않는다는 점이 핵심 차이다.
+Watch 버전과 대칭 구조이지만 HealthKit을 직접 제어하지 않는다는 점이 핵심 차이다. 워크아웃 탭 화면은 RalliKit `WorkoutUI`의 `WorkoutDashboardView`가 소유한다 — 앱에는 워크아웃 UI가 없다.
 
 ## 파일 구조
 
 | 파일 | 역할 |
 |------|------|
 | `WorkoutSessionView.swift` | 2-탭 TabView 컨테이너 (Workout / Match) |
-| `WorkoutSessionViewModel.swift` | 타이머 + MatchPhase + Watch 메시지 수신 + SwiftData 저장 |
+| `WorkoutSessionViewModel.swift` | 경과시간 보간 + MatchPhase + Watch 메시지 수신 + SwiftData 저장 |
 | `Components/WorkoutIndicator.swift` | 경기 중 툴바에 표시되는 운동 경과 시간 |
 
 ---
@@ -19,9 +19,20 @@ Watch 버전과 대칭 구조이지만 HealthKit을 직접 제어하지 않는�
 TabView로 2개 탭을 전환한다.
 
 ```
-[Workout 탭]          [Match 탭 (기본)]
-  칼로리/BPM/경과       phase에 따라
-  일시정지/종료 버튼      ModeView / ScoreView / MatchResultView
+[Workout 탭]                  [Match 탭 (기본)]
+  WorkoutDashboardView          phase에 따라
+  (RalliKit WorkoutUI)          ModeView / ScoreView / MatchResultView
+  링 + 지표 3칸 + 컨트롤
+```
+
+워크아웃 탭에는 값과 콜백만 넘긴다 — 화면은 ViewModel을 모른다.
+
+```swift
+WorkoutDashboardView(metrics: viewModel.metrics,
+                     isPaused: viewModel.isPaused,
+                     isPauseAvailable: viewModel.isPauseAvailable,  // watchConnected && anchor != nil
+                     onPauseResume: { ... },
+                     onEnd: { showEndWorkoutConfirm = true })
 ```
 
 `scoreTabContent`에서 `viewModel.phase`를 switch해 경기 화면을 전환한다.
@@ -56,18 +67,21 @@ ViewModel에 넣지 않고 View에 `@State`로 두는 값들 — 비즈니스 �
 | 프로퍼티 | 역할 |
 |---------|------|
 | `phase: MatchPhase` | 화면 전환 기준 (modeSelection / playing / finished) |
-| `elapsedSeconds: Int` | 자체 타이머로 계산한 경과 시간 (HealthKit 없이 iOS가 직접 측정) |
-| `metrics: WorkoutMetrics` | Watch에서 받은 칼로리/BPM — 수신 즉시 반영 |
+| `elapsedSeconds: Int` | Watch 앵커 기준으로 보간한 경과 시간 (폰 단독일 때만 로컬 시작 시각 폴백) |
+| `metrics: WorkoutMetrics` | Watch에서 받은 칼로리/BPM — 수신 즉시 반영. 칼로리는 **워크아웃 누적값** |
 | `watchConnected: Bool` | Watch 연결 상태 |
-| `isPaused: Bool` | 일시정지 상태 |
-| `completedMatchCount: Int` | 이번 워크아웃 세션에서 완료한 경기 수 |
+| `isPaused: Bool` | 일시정지 상태. **워치가 보낸 앵커로만 갱신된다** (낙관적 토글 금지) |
 | `remoteWorkoutEnded: Bool` | Watch가 워크아웃 종료했을 때 View가 onExit() 트리거로 사용 |
+
+`isPauseAvailable: Bool` (computed) — `watchConnected && anchor != nil`. 폰에는 `HKWorkoutSession`이 없어 누를 대상이 없으므로, 워치 워크아웃이 확인되기 전까지 pause 버튼을 비활성화한다.
 
 ### 내부 핵심 프로퍼티
 
 | 프로퍼티 | 타입 | 역할 |
 |---------|------|------|
 | `sessionId` | `UUID` | 현재 세션 식별자. 원격 채택 시 상대 UUID로 덮어씀 |
+| `anchor` | `WorkoutMetricsMessage?` | 워치가 마지막으로 보낸 메트릭 앵커. 경과시간 보간과 `isPauseAvailable`의 기준 |
+| `startedAt` | `Date?` | 앵커가 없을 때(폰 단독) 쓰는 로컬 폴백 기준 시각 |
 | `isDriver` | `Bool` | iOS가 점수를 주도하면 true, Watch 주도 시 false (mirror) |
 | `hasSyncedSession` | `Bool` | 세션을 한 번이라도 시작했는지 여부. workoutEnd·matchReset sessionId 가드의 전제 조건 |
 
@@ -76,28 +90,42 @@ ViewModel에 넣지 않고 View에 `@State`로 두는 값들 — 비즈니스 �
 | 역할 | Watch | iOS |
 |------|-------|-----|
 | HealthKit | 직접 제어 (startWorkout/stopWorkout) | 없음 |
-| 경과 시간 | HealthKit.elapsedSeconds | 자체 Timer로 측정 |
+| 경과 시간 | HealthKit이 단일 소스 → 앵커로 전송 | 받은 앵커를 매초 보간 |
+| 일시정지 | 명령 수신 → `HKWorkoutSession` 제어 후 앵커 회신 | 명령만 전송, 앵커 도착 시에만 상태 반영 |
 | 칼로리/BPM | HealthKit에서 측정 후 iOS에 전송 | Watch에서 받아 표시 |
 | 저장 | 불가 → iOS에 요청 | MatchPersistenceService로 직접 저장 |
 | Live Activity | 없음 | LiveActivityService로 시작/업데이트/종료 |
 
-### 타이머 동작 방식
+### 경과시간 보간 방식
+
+경과시간은 **워치가 단일 소스**다. 폰이 자체 타이머로 시간을 세면 pause 한 번에 두 기기가 어긋나므로,
+폰의 1초 타이머는 시간을 "세는" 것이 아니라 마지막 앵커를 기준으로 "다시 계산"하기만 한다.
 
 ```
-startSession()
-  startedAt = Date()  ←  기준 시각 저장
+applyIncomingMetrics(msg)          ←  워치의 WorkoutMetricsMessage 수신
+  anchor = msg
+  metrics = msg.metrics            ←  칼로리/BPM
+  isPaused = msg.isPaused          ←  pause 상태의 유일한 갱신 지점
+  recomputeElapsed()
 
-Timer (1초마다)
-  elapsedSeconds = Date() - startedAt - totalPausedSeconds
-
-pauseSession()
-  pausedAt = Date()  ←  멈춘 시각 저장
-  timer 무효화
-
-resumeSession()
-  totalPausedSeconds += Date() - pausedAt  ←  정지 시간 누적
-  timer 재시작
+Timer (1초마다) → recomputeElapsed()
+  anchor 있으면:
+    WorkoutAnchor.interpolatedElapsed(anchorElapsed:isPaused:sentAt:now:)
+    ↑ isPaused면 앵커값 그대로 고정, 아니면 (now - sentAt)만큼 더한다
+  anchor 없으면 (폰 단독):
+    now - startedAt              ←  폴백
 ```
+
+### pause 왕복 (폰 → 워치 → 폰)
+
+```
+폰: requestPause() / requestResume()
+    connectivity.sendPauseCommand(sessionId:shouldPause:)  ←  .reliable 전송. isPaused는 건드리지 않는다
+워치: handleIncomingPauseCommand() → HKWorkoutSession pause/resume → 앵커 브로드캐스트
+폰: applyIncomingMetrics(앵커) → isPaused 갱신 → UI 반영
+```
+
+명령을 모르는 구버전 워치에서는 오동작 대신 **무동작**이 되도록 만든 구조다.
 
 ### init에서 구성하는 Combine 바인딩
 
@@ -109,7 +137,7 @@ setupScoreSync()
 
 setupConnectivityBindings()
   connectivity.$isWatchReachable   →  watchConnected
-  connectivity.$receivedMetrics    →  metrics 업데이트 (칼로리/BPM)
+  connectivity.$receivedMetrics    →  applyIncomingMetrics() (앵커·칼로리/BPM·isPaused)
 
 setupMatchLifecycleBindings()
   connectivity.$receivedSessionStart  →  handleIncomingSessionStart()
@@ -134,6 +162,11 @@ startMatch(options:, sessionId:, isRemote:)
 startNewMatch(notifyRemote:)
   (isDriver + .playing 상태인 경우) connectivity.sendMatchReset(sessionId:)
   phase = .modeSelection
+
+finishMatch(result:completedSets:)
+  session.kcalAtEnd / totalKcalAtEnd = 현재 워크아웃 누적값 기록
+  ↑ buildMatchFromSession에서 `종료값 - 시작값`으로 경기 구간 칼로리를 산출한다.
+    화면에는 누적값, 저장에는 구간값 — 이 구분이 깨지면 세 앱의 숫자 의미가 갈린다.
 
 endSession(notifyRemote:)
   timer 중지, 상태 초기화
@@ -397,9 +430,10 @@ struct WorkoutSessionView: View {
 
 ```swift
 // 부모가 소유한 ViewModel을 자식에게 넘길 때는 @ObservedObject
-WorkoutTabView(
+WorkoutDashboardView(
     metrics: viewModel.metrics,     // 값만 전달하는 경우
     onEnd: { ... }                  // 또는 클로저만 전달
 )
 // 이 프로젝트는 ViewModel 직접 주입 대신 값/클로저를 분리해서 넘기는 방식을 선택함
+// (RalliKit WorkoutUI 화면은 애초에 ViewModel을 받을 수 없다 — 값·콜백만 받는다)
 ```

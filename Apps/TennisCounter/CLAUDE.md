@@ -40,8 +40,8 @@ Shared/
 │   ├── MatchPhase.swift     # 경기 진행 단계 enum (mode → playing → result)
 │   ├── MatchResult.swift    # 경기 결과 struct
 │   ├── MatchSession.swift   # 진행 중 경기 세션 상태
-│   ├── SetScore.swift       # 세트 점수 struct
-│   └── WorkoutMetrics.swift # HealthKit 메트릭 (활동/총 칼로리, BPM, 시간)
+│   └── SetScore.swift       # 세트 점수 struct
+│   # 워크아웃 메트릭(WorkoutMetrics)은 RalliKit WorkoutCore 타입을 쓴다 — 앱에 정의하지 않는다
 ├── Persistence/
 │   │  # SwiftData @Model 클래스. DB 스키마 역할.
 │   ├── Match.swift          # SwiftData 경기 기록 모델
@@ -64,7 +64,7 @@ iOSApp/
 │   ├── BackButton.swift   # 공통 뒤로가기 버튼
 │   ├── BrandTitle.swift   # 앱 브랜드 타이틀 컴포넌트
 │   ├── MatchCard.swift    # Summary·History 공유 경기 카드
-│   └── StatCard.swift     # 통계 수치 카드 (Summary·Workout 공유)
+│   └── StatCard.swift     # 통계 수치 카드 (Summary·History 공유)
 └── Features/
     ├── Home/
     │   └── HomeView.swift           # iOS 홈 화면 (탭 컨테이너)
@@ -98,15 +98,8 @@ iOSApp/
     │       └── Components/
     │           ├── RematchButton.swift
     │           └── SaveButton.swift
-    ├── Workout/                         # 워크아웃 메트릭 탭 (iOS 전용)
-    │   ├── WorkoutTabView.swift
-    │   └── Components/
-    │       ├── HeartRateIcon.swift
-    │       ├── MetricCard.swift
-    │       ├── WorkoutControls.swift
-    │       ├── WorkoutMetricsGrid.swift
-    │       └── WorkoutTimerRing.swift
     ├── WorkoutSession/                  # iOS 워크아웃 세션 컨테이너
+    │   │  # 2-탭 TabView [Workout | Match]. 워크아웃 탭 화면은 RalliKit WorkoutUI(WorkoutDashboardView)가 소유
     │   ├── WorkoutSessionView.swift
     │   ├── WorkoutSessionViewModel.swift  # 경과시간은 워치 앵커 기반 보간(WorkoutAnchor). pause는 왕복 요청만 보내고 ack 전엔 낙관적으로 토글하지 않음
     │   └── Components/
@@ -154,22 +147,13 @@ WatchApp/
     │       └── Components/
     │           ├── RematchButton.swift
     │           └── SaveButton.swift
-    ├── Workout/
-    │   │  # HealthKit 통합 전용 UI (제어, 메트릭 표시)
-    │   ├── Controls/                    # 일시정지/재개/종료 버튼
-    │   │   ├── WorkoutControlsView.swift
-    │   │   └── Components/
-    │   │       ├── WorkoutPauseButton.swift
-    │   │       └── WorkoutEndButton.swift
-    │   └── Metrics/                     # 칼로리/BPM/시간 표시
-    │       ├── WorkoutMetricsView.swift
-    │       └── Components/
-    │           └── WorkoutMetric.swift
     └── WorkoutSession/
-        │  # 컨테이너 Feature: 3-탭 TabView [Workout.Controls | Match | Workout.Metrics]
+        │  # 컨테이너 Feature: 3-탭 TabView [WorkoutControlsView | Match | WorkoutMetricsView]
+        │  # 좌우 두 탭 화면은 RalliKit WorkoutUI가 소유 — 앱에 워크아웃 UI를 두지 않는다
         │  # HealthKit 세션 생명주기 관리, Match 흐름 조정
         ├── WorkoutSessionView.swift      # 좌우 스와이프로 3개 탭 전환
-        └── WorkoutSessionViewModel.swift # MatchPhase 상태 + HealthKit 연동. 폰의 pause 명령 수신 → HKWorkoutSession 제어, 워크아웃 누적 메트릭을 앵커로 브로드캐스트
+        ├── WorkoutSessionViewModel.swift # MatchPhase 상태 + HealthKit 연동. 폰의 pause 명령 수신 → HKWorkoutSession 제어, 워크아웃 누적 메트릭을 앵커로 브로드캐스트
+        └── WorkoutConfiguration+Tennis.swift # 테니스 종목 설정 (RalliKit WorkoutConfiguration 주입값)
 
 ComplicationApp/
 │  # watchOS WidgetKit complication + AppIntents. 잠금화면/항상켜기 화면에 현재 점수 표시.
@@ -191,6 +175,32 @@ TennisLiveActivity/
 - **ScoreView**: `ScoreViewModel`을 바인딩. 경기 종료 시 `MatchResultView`로 전환.
 - **Shared/Persistence/**: SwiftData `@Model` 클래스. `MatchPersistenceService`를 통해서만 접근.
 - **Roadmap**: Phase 1-A (SwiftData + WatchConnectivity) 구현 완료. Phase 1-B에서 HealthKit + Live Activity. Phase 2에서 Firebase 멀티 모드 + StoreKit 2.
+
+## RalliKit (SPM 의존성)
+
+인프라 계층은 별도 패키지 **RalliKit**(`git@github.com:qlrogo91lp/ralli-kit.git`, private)으로 추출돼 있다.
+현재는 **로컬 패키지 참조**(`XCLocalSwiftPackageReference "../ralli-kit"`)라 클론이 **테니스 레포의 형제 폴더**여야 빌드된다.
+릴리즈 전에 원격 참조 + semver 태그로 전환해야 한다 ([추출 현황 로그](docs/superpowers/logs/2026-07-16-rallikit-spm-extraction-status.md) 참조).
+
+| Product | 내용 | 링크되는 타겟 |
+|---|---|---|
+| `WorkoutCore` | HealthKit 세션(`WorkoutSessionService`), `WorkoutConfiguration`/`WorkoutResult`/`WorkoutMetrics`, 앵커 보간(`WorkoutAnchor`), 메트릭·pause 메시지 | iOS, Watch |
+| `WorkoutUI` | 워크아웃 화면 (iOS `WorkoutDashboardView`, Watch `WorkoutControlsView`·`WorkoutMetricsView`) — 라벨·색·로컬라이제이션을 패키지가 소유 | iOS, Watch |
+| `ConnectivityCore` | WCSession 전송·라우팅·콜드런치(`ConnectivityService`, `ConnectivityMessage`, `MessageRouter`) | iOS, Watch |
+| `PersistenceCore` | SwiftData+CloudKit 컨테이너 팩토리, 제너릭 `PersistenceService<Model>` | iOS 전용 |
+
+**앱 레이어가 소유하는 것** — 코어는 도메인을 모른다.
+
+- `Shared/Services/MatchConnectivity.swift` — 코어의 1회성 핸들러를 sticky `@Published`로 복원하는 앱 래퍼
+- `Shared/Services/ConnectivityMessages.swift` — 테니스 도메인 메시지 (`ConnectivityMessage` 채택)
+- `iOSApp/Services/MatchPersistenceService.swift` — 중복 제거·정렬 규칙. CRUD는 `PersistenceCore`에 위임 (Watch는 저장소를 쓰지 않아 `Shared/`가 아닌 `iOSApp/`에 둔다)
+- `WatchApp/Features/WorkoutSession/WorkoutConfiguration+Tennis.swift` — 종목 설정 주입값
+
+**워크아웃 동작 계약** (3개 앱이 같은 규칙을 지켜야 숫자 의미가 갈리지 않는다)
+
+- 화면에 넘기는 칼로리는 **워크아웃 누적값**. 경기 구간 값이 필요하면 저장 시점에 `종료값 - 시작값`으로 계산한다.
+- 경과시간은 **워치가 단일 소스**. 폰은 `WorkoutAnchor.interpolatedElapsed(...)`로 보간하고 자체 타이머로 세지 않는다.
+- pause는 **폰→워치 명령**. 폰은 `WorkoutPauseMessage`를 보내고 `isPaused`는 워치 앵커로만 갱신한다 (낙관적 토글 금지). 워치 미연결이면 `isPauseAvailable: false`.
 
 ## Folder Conventions
 
@@ -291,14 +301,27 @@ docs/superpowers/
 ```
 iosTests/
 ├── Match/
-│   ├── ScoreViewModelTests.swift        # iOSApp/Features/Match/Score/ 대응
-│   └── WorkoutSessionViewModelTests.swift
-└── Shared/
-    └── WorkoutMetricsTests.swift        # Shared/Models/ 대응
+│   └── ScoreViewModelTests.swift        # iOSApp/Features/Match/Score/ 대응
+├── History/
+│   └── HistoryViewModelTests.swift      # iOSApp/Features/History/ 대응
+├── Summary/
+│   └── SummaryViewModelTests.swift      # iOSApp/Features/Summary/ 대응
+├── WorkoutSession/
+│   └── WorkoutSessionViewModelTests.swift  # iOSApp/Features/WorkoutSession/ 대응
+├── Services/
+│   └── MatchPersistenceServiceTests.swift  # iOSApp/Services/ 대응
+└── Shared/                              # Shared/Models·Services 대응
+    ├── ScoreTests.swift
+    ├── ConnectivityMessagesTests.swift
+    ├── MatchConnectivityTests.swift
+    ├── MatchEndMessageTests.swift
+    └── MatchSaveResultMessageTests.swift
 
 watchosTests/
-└── Match/
-    └── ScoreViewModelTests.swift        # WatchApp/Features/Match/Score/ 대응
+├── Match/
+│   └── ScoreViewModelTests.swift        # WatchApp/Features/Match/Score/ 대응
+└── WorkoutSession/
+    └── WorkoutSessionViewModelTests.swift  # WatchApp/Features/WorkoutSession/ 대응
 ```
 
 - 파일명: `{테스트대상}Tests.swift` (e.g., `ScoreViewModelTests.swift`)

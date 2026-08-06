@@ -2,22 +2,26 @@
 
 워크아웃 세션 컨테이너 Feature. HealthKit 세션 생명주기를 관리하고, 경기 흐름(Mode → Score → Result)을 조율하며, iOS 앱과 실시간으로 동기화한다.
 
+HealthKit 제어는 RalliKit `WorkoutCore`의 `WorkoutSessionService`가, 좌우 두 탭 화면은 `WorkoutUI`가 소유한다 — 앱에는 워크아웃 UI가 없다.
+
 ## 파일 구조
 
 | 파일 | 역할 |
 |------|------|
 | `WorkoutSessionView.swift` | 3-탭 TabView 컨테이너 |
 | `WorkoutSessionViewModel.swift` | HealthKit + MatchPhase + iOS 동기화 |
+| `WorkoutConfiguration+Tennis.swift` | 테니스 종목 설정 (`WorkoutSessionService`에 주입) |
 
 ---
 
 ## WorkoutSessionView
 
-TabView로 3개의 화면을 좌우 스와이프로 전환한다.
+TabView로 3개의 화면을 좌우 스와이프로 전환한다. 좌우 두 화면은 RalliKit `WorkoutUI` 제공 — 값과 콜백만 넘긴다.
 
 ```
-[← WorkoutControls] [Match 화면 (기본)] [WorkoutMetrics →]
-     일시정지/종료        phase에 따라          칼로리/BPM
+[← WorkoutControlsView] [Match 화면 (기본)] [WorkoutMetricsView →]
+     일시정지/종료           phase에 따라        칼로리/BPM/경과
+     (RalliKit WorkoutUI)                      (RalliKit WorkoutUI)
 ```
 
 `centerView`에서 `viewModel.phase`를 switch해 경기 흐름을 전환한다.
@@ -41,16 +45,19 @@ phase = .finished       →  MatchResultView
 | 프로퍼티 | 역할 |
 |---------|------|
 | `phase: MatchPhase` | 화면 전환 기준 (modeSelection / playing / finished) |
-| `isPaused: Bool` | HealthKit 일시정지 상태 — View의 버튼 표시에 반영 |
-| `lastMetrics: WorkoutMetrics?` | iOS로 전송하는 칼로리/BPM 스냅샷 |
+| `isPaused: Bool` | HealthKit 일시정지 상태 — View의 버튼 표시 + iOS로 보내는 앵커에 반영 |
+| `currentMetrics: WorkoutMetrics` | 화면 표시용 실시간 스냅샷 (경과/칼로리/기초대사/BPM) |
+| `lastMetrics: WorkoutMetrics?` | iOS로 마지막에 전송한 스냅샷 |
 | `remoteWorkoutEnded: Bool` | iOS가 워크아웃 종료했을 때 View가 dismiss 트리거로 사용 |
 | `saveAckState: SaveAckState` | iOS 저장 ACK 상태 (idle / pending / succeeded / failed) |
+
+칼로리는 **워크아웃 누적값**으로 표시·전송한다. 경기 구간 값은 저장 시점에 `종료값 - 시작값`으로 계산한다.
 
 ### 소유 객체
 
 | 프로퍼티 | 역할 |
 |---------|------|
-| `healthKit` | HealthKitService — 워크아웃 세션, 칼로리/BPM |
+| `healthKit` | RalliKit `WorkoutSessionService` — 워크아웃 세션, 칼로리/BPM. `.tennis` 설정 주입 |
 | `connectivity` | MatchConnectivity — iOS 통신 |
 | `scoreVM` | ScoreViewModel — 점수 상태 (게임/세트 로직) |
 
@@ -121,20 +128,24 @@ endWorkout(notifyRemote:)
 
 ```
 1. healthKit.$isPaused  →  self.$isPaused (assign)
+   healthKit.$isPaused (dropFirst)  →  broadcastMetrics()  ←  pause 상태 변화를 즉시 앵커로 알림
 
-2. setupConnectivityBindings()
+2. CombineLatest4(elapsed, calories, basal, heartRate)  →  currentMetrics (화면 표시용)
+
+3. setupConnectivityBindings()
    connectivity.$receivedSessionStart    →  handleIncomingSessionStart()
    connectivity.$receivedWorkoutEnd      →  handleIncomingWorkoutEnd()
    connectivity.$receivedMatchReset      →  handleIncomingMatchReset()
    connectivity.$receivedMatchSaveResult →  handleMatchSaveResult()
+   connectivity.$receivedPauseCommand    →  handleIncomingPauseCommand()
 
-3. setupScoreSync()
+4. setupScoreSync()
    scoreVM.onMatchFinished               →  finishMatch(result:completedSets:)
    scoreVM.onStateChanged + isDriver     →  connectivity.sendScoreState()
    connectivity.$receivedScoreState      →  scoreVM.applyRemoteState()
    connectivity.$isWatchReachable        →  재연결 시 현재 scoreState 재전송
 
-4. healthKit.$currentHeartRate (5초 throttle)  →  broadcastMetrics()  →  iOS 전송
+5. healthKit.$currentHeartRate (5초 throttle)  →  broadcastMetrics()  →  iOS 전송
 ```
 
 `.receive(on: DispatchQueue.main)`을 Combine 체인마다 붙이는 이유: WatchConnectivity 콜백이 백그라운드 스레드에서 오기 때문에 `@Published` 값을 바꾸기 전 메인 스레드로 전환한다.
@@ -154,6 +165,19 @@ handleIncomingWorkoutEnd(id: UUID)
 ```
 
 `hasSyncedSession`이 false이면 (매치를 한 번도 시작하지 않아 sessionId가 아직 동기화 안 된 상태) 가드를 건너뛰고 무조건 수용한다.
+
+### pause 명령 수신 (폰 → 워치)
+
+폰에는 `HKWorkoutSession`이 없다. 폰의 pause 버튼은 명령을 보낼 뿐이고, 실제 세션 제어와 상태의 진실은 워치가 쥔다.
+
+```
+handleIncomingPauseCommand(msg: WorkoutPauseMessage) -> Bool
+  guard msg.sessionId == activeSessionId   ←  다른 세션 명령은 무시(false 반환)
+  shouldPause ? healthKit.pauseWorkout() : healthKit.resumeWorkout()
+  → healthKit.$isPaused 변화 → broadcastMetrics()로 앵커 회신 → 폰 UI 갱신
+```
+
+워치가 직접 pause 버튼을 눌렀을 때와 경로가 같다 (`$isPaused` → 앵커 브로드캐스트). 폰은 이 앵커를 받기 전까지 `isPaused`를 바꾸지 않는다.
 
 ### 저장 ACK 패턴 (SaveAckState)
 
