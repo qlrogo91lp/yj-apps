@@ -1,5 +1,5 @@
-"metrics_active_kcal" = "ACTIVE KCAL";
-"metrics_total_kcal" = "TOTAL KCAL";
+"metrics_active_kcal" = "활동 칼로리";
+"metrics_total_kcal" = "총 칼로리";
 "metrics_bpm" = "BPM";
 "metrics_elapsed" = "운동 시간";
 "workout_pause" = "일시정지";
