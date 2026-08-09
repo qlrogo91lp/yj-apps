@@ -1,5 +1,6 @@
 import SwiftUI
 import WorkoutCore
+import WorkoutUI
 
 struct RoundSessionView: View {
     @StateObject private var viewModel: RoundViewModel
@@ -22,17 +23,43 @@ struct RoundSessionView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            ControlsView(healthKit: healthKit, onEndRound: endRound)
+            WorkoutControlsView(isPaused: healthKit.isPaused,
+                                onPauseResume: togglePause,
+                                onEnd: endRound)
+                .toolbar {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Color.clear.frame(width: 36, height: 36)
+                    }
+                }
                 .tag(0)
             centerPage
                 .tag(1)
-            MetricsView(healthKit: healthKit)
+            WorkoutMetricsView(metrics: currentMetrics, isPaused: healthKit.isPaused)
                 .tag(2)
         }
         .tabViewStyle(.page)
         .navigationBarBackButtonHidden()
         .onAppear(perform: startRound)
         .onDisappear(perform: stopWorkoutIfNotFinished)
+    }
+
+    /// WorkoutUI의 공유 화면은 값 타입만 받는다 — 서비스의 현재 값을 스냅샷으로 옮긴다.
+    /// healthKit이 이 View의 @StateObject라 관찰이 이미 걸려 있어 computed property로 충분하다.
+    /// (테니스는 같은 매핑을 ViewModel의 @Published로 뺐는데, 그쪽은 View가 서비스를 소유하지 않아
+    /// init에서 매번 새 인스턴스가 만들어지는 함정이 있었기 때문이다. 여기엔 그 함정이 없다.)
+    private var currentMetrics: WorkoutMetrics {
+        WorkoutMetrics(elapsedSeconds: TimeInterval(healthKit.elapsedSeconds),
+                       activeCalories: healthKit.currentCalories,
+                       totalCalories: healthKit.currentCalories + healthKit.currentBasalCalories,
+                       heartRate: healthKit.currentHeartRate)
+    }
+
+    private func togglePause() {
+        if healthKit.isPaused {
+            healthKit.resumeWorkout()
+        } else {
+            healthKit.pauseWorkout()
+        }
     }
 
     @ViewBuilder
