@@ -586,4 +586,70 @@ struct WorkoutSessionViewModelTests {
             return
         }
     }
+
+    // MARK: - matchId 발급·채택 + 경기 시작 시각
+
+    /// 스펙 1-3 재현: 폰의 startedAt 프로퍼티는 워크아웃 시작 시각인데 이를 그대로
+    /// MatchSession.startedAt에 넣고 있었다. 워치 경로는 경기 시작 시각을 넣어 서로 어긋났다.
+    /// startedAt은 History 정렬·캘린더 날짜·Summary 기간 필터에 모두 쓰인다.
+    @Test @MainActor func startMatchUsesMatchStartTimeNotWorkoutStartTime() {
+        let vm = WorkoutSessionViewModel()
+        let workoutStart = Date(timeIntervalSince1970: 1_000_000)
+        vm.startSession(startDate: workoutStart)
+
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+
+        guard let session = vm.currentSessionForTest else {
+            Issue.record("currentSession이 없음")
+            return
+        }
+        #expect(session.startedAt != workoutStart)
+        #expect(session.startedAt.timeIntervalSinceNow > -5)
+    }
+
+    @Test @MainActor func startNewMatchKeepsSessionIdAndIssuesNewMatchId() {
+        let vm = WorkoutSessionViewModel()
+        let options = MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false)
+
+        vm.startMatch(options: options)
+        let firstMatchId = vm.currentSessionForTest?.id
+        let sessionId = vm.currentSessionIdForTest
+
+        vm.startNewMatch(notifyRemote: false)
+        vm.startMatch(options: options)
+
+        #expect(vm.currentSessionIdForTest == sessionId)
+        #expect(firstMatchId != nil)
+        #expect(vm.currentSessionForTest?.id != firstMatchId)
+    }
+
+    @Test @MainActor func restartMatchIssuesNewMatchIdButKeepsSessionId() {
+        let vm = WorkoutSessionViewModel()
+        let options = MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false)
+
+        vm.startMatch(options: options)
+        let firstMatchId = vm.currentSessionForTest?.id
+        let sessionId = vm.currentSessionIdForTest
+        vm.finishMatch(result: .win, completedSets: [(my: 6, your: 4)])
+
+        vm.restartMatch()
+
+        #expect(firstMatchId != nil)
+        #expect(vm.currentSessionForTest?.id != firstMatchId)
+        #expect(vm.currentSessionIdForTest == sessionId)
+    }
+
+    @Test @MainActor func remoteSessionStartAdoptsMatchId() {
+        let vm = WorkoutSessionViewModel()
+        let remoteMatchId = UUID()
+
+        vm.applyIncomingSessionStartForTest(SessionStartMessage(
+            sessionId: UUID(),
+            matchId: remoteMatchId,
+            options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false),
+            workoutStartDate: Date()
+        ))
+
+        #expect(vm.currentSessionForTest?.id == remoteMatchId)
+    }
 }

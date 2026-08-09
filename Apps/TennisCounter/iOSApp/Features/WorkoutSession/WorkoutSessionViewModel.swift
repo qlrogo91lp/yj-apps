@@ -43,6 +43,7 @@ class WorkoutSessionViewModel: ObservableObject {
                 guard let self, isDriver, case let .playing(options) = phase else { return }
                 connectivity.sendSessionStart(SessionStartMessage(
                     sessionId: sessionId,
+                    matchId: _currentSession?.id,
                     options: options,
                     workoutStartDate: startedAt ?? Date()
                 ))
@@ -164,16 +165,20 @@ class WorkoutSessionViewModel: ObservableObject {
         connectivity.sendPauseCommand(sessionId: sessionId, shouldPause: false)
     }
 
-    func startMatch(options: MatchOptions, sessionId: UUID? = nil, isRemote: Bool = false) {
+    func startMatch(options: MatchOptions, sessionId: UUID? = nil, matchId: UUID? = nil, isRemote: Bool = false) {
         isDriver = !isRemote
         hasSyncedSession = true
         // 원격 채택 시 자기 sessionId를 상대 것으로 맞춘다. 안 그러면 workoutEnd·matchReset
         // 같은 sessionId 가드가 걸린 신호를 init UUID와 불일치로 모두 무시해버린다.
         if let sessionId { self.sessionId = sessionId }
+        let mid = matchId ?? UUID()
         _currentSession = MatchSession(
+            id: mid,
             workoutSessionId: self.sessionId,
             options: options,
-            startedAt: startedAt ?? Date(),
+            // 워크아웃 시작 시각(self.startedAt)이 아니라 경기 시작 시각이다.
+            // mirror 경로에서도 수신 시각이 driver의 경기 시작 시각에 근사한다.
+            startedAt: Date(),
             kcalAtStart: metrics.activeCalories,
             totalKcalAtStart: metrics.totalCalories
         )
@@ -189,6 +194,7 @@ class WorkoutSessionViewModel: ObservableObject {
         if !isRemote {
             connectivity.sendSessionStart(SessionStartMessage(
                 sessionId: self.sessionId,
+                matchId: mid,
                 options: options,
                 workoutStartDate: startedAt ?? Date()
             ))
@@ -273,7 +279,7 @@ class WorkoutSessionViewModel: ObservableObject {
         }
         sessionId = msg.sessionId
         startSession(startDate: msg.workoutStartDate)
-        startMatch(options: msg.options, isRemote: true)
+        startMatch(options: msg.options, matchId: msg.matchId, isRemote: true)
     }
 
     private func handleIncomingScoreState(_ state: ScoreState) {
