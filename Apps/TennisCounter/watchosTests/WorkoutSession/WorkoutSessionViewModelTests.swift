@@ -454,4 +454,51 @@ struct WorkoutSessionViewModelTests {
 
         #expect(applied == false)
     }
+
+    /// mirror는 진행 중인 매치를 끝낼 권한이 없다. 로컬로 리셋해버리면 driver는 계속 경기 중인데
+    /// mirror만 모드선택으로 빠져 두 기기가 어긋난다 (sendMatchReset은 isDriver 가드에 막혀 나가지도 않는다).
+    @Test @MainActor func mirrorCannotResetPlayingMatchLocally() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false), isRemote: true) // mirror
+        vm.startNewMatch()
+        guard case .playing = vm.phase else {
+            Issue.record("mirror의 로컬 리셋은 무시되고 playing이 유지되어야 함")
+            return
+        }
+    }
+
+    /// 위 가드가 driver의 정상 리셋까지 막으면 안 된다.
+    @Test @MainActor func driverCanResetPlayingMatchLocally() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false)) // driver
+        vm.startNewMatch()
+        guard case .modeSelection = vm.phase else {
+            Issue.record("driver는 진행 중인 매치를 끝낼 수 있어야 함")
+            return
+        }
+    }
+
+    /// driver가 보낸 matchReset 수신 경로(notifyRemote: false)는 mirror에도 그대로 적용되어야 한다.
+    @Test @MainActor func mirrorAppliesIncomingMatchReset() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false), isRemote: true) // mirror
+        vm.startNewMatch(notifyRemote: false) // handleIncomingMatchReset이 타는 경로
+        guard case .modeSelection = vm.phase else {
+            Issue.record("driver의 matchReset을 받으면 mirror도 모드선택으로 돌아가야 함")
+            return
+        }
+    }
+
+    /// 종료된 매치의 결과 화면은 mirror도 스스로 닫을 수 있다 — 진행 중인 매치가 아니라 어긋날 상태가 없다.
+    /// (가드를 .playing으로 한정한 이유. 여기까지 막으면 mirror가 결과 화면에 갇힌다.)
+    @Test @MainActor func mirrorCanLeaveFinishedResultScreen() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false), isRemote: true) // mirror
+        vm.finishMatch(result: .win, completedSets: [SetScore(my: 6, your: 4)])
+        vm.startNewMatch()
+        guard case .modeSelection = vm.phase else {
+            Issue.record("mirror도 결과 화면에서는 빠져나올 수 있어야 함")
+            return
+        }
+    }
 }

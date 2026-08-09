@@ -36,34 +36,18 @@ struct WorkoutSessionView: View {
         }
         .preferredColorScheme(.dark)
         .navigationBarBackButtonHidden(true)
+        // 툴바는 개별 탭이 아니라 TabView에 걸려 두 탭이 공유한다. 매치 탭 전용 아이템이
+        // 워크아웃 탭에 새어나가지 않도록, 필요 없는 상황에서는 아이템 자체를 올리지 않는다.
+        // (빈 뷰로 자리만 채우면 iOS 26 툴바가 내용 없는 유리 배경만 덩그러니 그린다.)
         .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                switch viewModel.phase {
-                case .modeSelection:
-                    BackButton { selectedTab = 0 }
-                case .playing:
-                    BackButton {
-                        if hasMatchProgress {
-                            showEndMatchConfirm = true
-                        } else {
-                            viewModel.startNewMatch()
-                        }
-                    }
-                case .finished:
-                    BackButton { viewModel.startNewMatch() }
+            if let backAction = matchBackAction {
+                ToolbarItem(placement: .topBarLeading) {
+                    BackButton(action: backAction)
                 }
             }
             ToolbarItem(placement: .principal) {
-                switch viewModel.phase {
-                case .modeSelection:
-                    Text(String(localized: "new_match"))
-                        .font(.system(size: 28, weight: .bold))
-                        .foregroundColor(.white)
-                case .playing, .finished:
-                    if selectedTab == 1 {
-                        WorkoutIndicator(elapsedFormatted: viewModel.metrics.formattedElapsed)
-                    }
-                }
+                matchTitle
+                    .frame(height: Self.toolbarTitleHeight)
             }
         }
         .alert(
@@ -104,6 +88,50 @@ struct WorkoutSessionView: View {
         }
         .onChange(of: viewModel.remoteWorkoutEnded) {
             if viewModel.remoteWorkoutEnded { onExit() }
+        }
+    }
+
+    /// 매치 탭 전용 뒤로가기 동작 — phase별로 다르다. `nil`이면 툴바에 버튼을 올리지 않는다.
+    /// `.playing`에서 진행 중인 매치를 끝낼 권한은 driver에게만 있다 (점수 입력·undo와 같은 규칙).
+    /// mirror에게는 눌러도 아무 일 없는 버튼을 보여주는 대신 아예 노출하지 않는다.
+    private var matchBackAction: (() -> Void)? {
+        guard selectedTab == 1 else { return nil }
+        switch viewModel.phase {
+        case .modeSelection:
+            return { selectedTab = 0 }
+        case .playing:
+            guard viewModel.isDriver else { return nil }
+            return {
+                if hasMatchProgress {
+                    showEndMatchConfirm = true
+                } else {
+                    viewModel.startNewMatch()
+                }
+            }
+        case .finished:
+            return { viewModel.startNewMatch() }
+        }
+    }
+
+    /// 타이틀 자리 높이를 고정해 탭·phase 전환 때 툴바가 위아래로 흔들리지 않게 한다.
+    /// 가장 큰 내용인 28pt 볼드 타이틀의 줄 높이 기준 (경과시간 표시는 이보다 낮다).
+    private static let toolbarTitleHeight: CGFloat = 34
+
+    /// 매치 탭 상단 타이틀 — 모드 선택 중에는 화면 이름, 경기 중에는 운동 경과시간.
+    /// 워크아웃 탭에서는 내용을 비운다 — 자리(높이)는 위 고정값으로 유지된다.
+    @ViewBuilder
+    private var matchTitle: some View {
+        if selectedTab == 1 {
+            switch viewModel.phase {
+            case .modeSelection:
+                Text(String(localized: "new_match"))
+                    .font(.system(size: 28, weight: .bold))
+                    .foregroundColor(.white)
+            case .playing, .finished:
+                WorkoutIndicator(elapsedFormatted: viewModel.metrics.formattedElapsed)
+            }
+        } else {
+            Color.clear.frame(width: 0)
         }
     }
 

@@ -61,14 +61,20 @@ struct ScoreView: View {
         }
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
-                BackButton {
-                    if viewModel.mySetScore == 0, viewModel.yourSetScore == 0,
-                       viewModel.myGameScore == 0, viewModel.yourGameScore == 0
-                    {
-                        flowViewModel.startNewMatch()
-                    } else {
-                        showExitConfirm = true
+                // 진행 중인 매치를 끝낼 권한은 driver에게만 있다 (점수 입력·undo와 같은 규칙).
+                // mirror에게는 눌러도 아무 일 없는 버튼 대신 자리를 비운다 — 워크아웃 탭들과 같은 방식.
+                if flowViewModel.isDriver {
+                    BackButton {
+                        if viewModel.mySetScore == 0, viewModel.yourSetScore == 0,
+                           viewModel.myGameScore == 0, viewModel.yourGameScore == 0
+                        {
+                            flowViewModel.startNewMatch()
+                        } else {
+                            showExitConfirm = true
+                        }
                     }
+                } else {
+                    Color.clear.frame(width: 36, height: 36)
                 }
             }
         }

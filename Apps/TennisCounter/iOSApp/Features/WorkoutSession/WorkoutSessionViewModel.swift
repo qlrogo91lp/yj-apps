@@ -233,7 +233,11 @@ class WorkoutSessionViewModel: ObservableObject {
     }
 
     func startNewMatch(notifyRemote: Bool = true) {
-        if notifyRemote, isDriver, case .playing = phase {
+        if notifyRemote, case .playing = phase {
+            // 진행 중인 매치를 끝낼 권한은 driver에게만 있다. mirror가 로컬로 리셋하면
+            // sendMatchReset이 나가지 않아 driver는 계속 경기 중인데 mirror만 모드선택으로 빠진다.
+            // 수신 경로(notifyRemote: false)는 이 가드를 타지 않는다 — mirror가 driver의 리셋을 받는 유일한 통로다.
+            guard isDriver else { return }
             connectivity.sendMatchReset(sessionId: sessionId)
         }
         _currentSession = nil
