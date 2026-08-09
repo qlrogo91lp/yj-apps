@@ -17,6 +17,10 @@ class Match {
     /// CloudKit 요구사항: optional + inverse 지정
     @Relationship(deleteRule: .cascade, inverse: \SetRecord.match) var sets: [SetRecord]?
 
+    /// 이 경기의 고유 식별자. 폰·워치가 SessionStartMessage로 공유한다. 저장 시 중복 제거 키.
+    /// CloudKit 요구사항상 optional이며, matchId 도입 전 기록은 nil이다.
+    var matchId: UUID?
+
     var workoutSessionId: UUID?
     var mode: String = MatchFormat.oneSet.rawValue
     var noAdRule: Bool = true

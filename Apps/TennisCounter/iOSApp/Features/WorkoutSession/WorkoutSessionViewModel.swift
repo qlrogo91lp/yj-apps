@@ -329,6 +329,7 @@ class WorkoutSessionViewModel: ObservableObject {
 private extension WorkoutSessionViewModel {
     func buildMatchFromMessage(_ msg: MatchEndMessage) -> Match {
         let match = Match()
+        match.matchId = msg.matchId
         match.workoutSessionId = msg.sessionId
         match.startedAt = msg.startedAt
         match.endedAt = msg.endedAt
@@ -349,6 +350,7 @@ private extension WorkoutSessionViewModel {
 
     func buildMatchFromSession(_ session: MatchSession) -> Match {
         let match = Match()
+        match.matchId = session.id
         match.workoutSessionId = session.workoutSessionId
         match.startedAt = session.startedAt
         match.endedAt = session.endedAt ?? Date()
