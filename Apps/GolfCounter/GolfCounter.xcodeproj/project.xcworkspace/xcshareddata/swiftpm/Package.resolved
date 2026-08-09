@@ -1,0 +1,15 @@
+{
+  "originHash" : "36fb341c141d396e0f3c6705d2c9214f6c5943046f04f2463c7dda9acff417ae",
+  "pins" : [
+    {
+      "identity" : "ralli-kit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/qlrogo91lp/ralli-kit",
+      "state" : {
+        "branch" : "main",
+        "revision" : "7e599cc22811817257a03f2ab8db898e88df93db"
+      }
+    }
+  ],
+  "version" : 3
+}
