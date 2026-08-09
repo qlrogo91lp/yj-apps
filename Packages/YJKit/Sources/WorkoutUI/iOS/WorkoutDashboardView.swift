@@ -47,7 +47,7 @@
         }
 
         private var metricsRow: some View {
-            HStack(spacing: 12) {
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 2), spacing: 12) {
                 MetricCard {
                     HStack(spacing: 4) {
                         HeartRateIcon(heartRate: metrics.heartRate, size: 13)
