@@ -38,19 +38,13 @@ struct WorkoutSessionView: View {
         .navigationBarBackButtonHidden(true)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
-                switch viewModel.phase {
-                case .modeSelection:
-                    BackButton { selectedTab = 0 }
-                case .playing:
-                    BackButton {
-                        if hasMatchProgress {
-                            showEndMatchConfirm = true
-                        } else {
-                            viewModel.startNewMatch()
-                        }
-                    }
-                case .finished:
-                    BackButton { viewModel.startNewMatch() }
+                if selectedTab == 1 {
+                    matchBackButton
+                } else {
+                    // 툴바가 개별 탭이 아니라 TabView에 걸려 두 탭이 공유한다. 워크아웃 탭에
+                    // 매치용 뒤로가기가 새어나가지 않도록 자리만 비운다 (워치와 같은 방식 —
+                    // 슬롯을 없애면 .principal 아이템 위치가 흔들린다).
+                    Color.clear.frame(width: 36, height: 36)
                 }
             }
             ToolbarItem(placement: .principal) {
@@ -104,6 +98,31 @@ struct WorkoutSessionView: View {
         }
         .onChange(of: viewModel.remoteWorkoutEnded) {
             if viewModel.remoteWorkoutEnded { onExit() }
+        }
+    }
+
+    /// 매치 탭 전용 뒤로가기 — phase별로 동작이 다르다.
+    /// `.playing`에서 진행 중인 매치를 끝낼 권한은 driver에게만 있다 (점수 입력·undo와 같은 규칙).
+    /// mirror에게는 눌러도 아무 일 없는 버튼을 보여주는 대신 자리를 비운다.
+    @ViewBuilder
+    private var matchBackButton: some View {
+        switch viewModel.phase {
+        case .modeSelection:
+            BackButton { selectedTab = 0 }
+        case .playing:
+            if viewModel.isDriver {
+                BackButton {
+                    if hasMatchProgress {
+                        showEndMatchConfirm = true
+                    } else {
+                        viewModel.startNewMatch()
+                    }
+                }
+            } else {
+                Color.clear.frame(width: 36, height: 36)
+            }
+        case .finished:
+            BackButton { viewModel.startNewMatch() }
         }
     }
 
