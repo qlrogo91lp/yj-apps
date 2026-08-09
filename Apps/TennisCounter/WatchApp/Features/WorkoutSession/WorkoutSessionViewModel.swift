@@ -201,7 +201,8 @@ class WorkoutSessionViewModel: ObservableObject {
             workoutSessionId: id,
             options: options,
             kcalAtStart: healthKit.currentCalories,
-            totalKcalAtStart: healthKit.currentCalories + healthKit.currentBasalCalories
+            totalKcalAtStart: healthKit.currentCalories + healthKit.currentBasalCalories,
+            elapsedAtStart: healthKit.elapsedSeconds
         )
         _currentSession = session
 
@@ -233,6 +234,7 @@ class WorkoutSessionViewModel: ObservableObject {
         session.completedSets = completedSets
         session.kcalAtEnd = healthKit.currentCalories
         session.totalKcalAtEnd = healthKit.currentCalories + healthKit.currentBasalCalories
+        session.elapsedAtEnd = healthKit.elapsedSeconds
         session.mySetScore = completedSets.count(where: { $0.my > $0.your })
         session.yourSetScore = completedSets.count(where: { $0.your > $0.my })
 
@@ -353,13 +355,16 @@ class WorkoutSessionViewModel: ObservableObject {
             completedSets: session.completedSets.map { [$0.my, $0.your] },
             startedAt: session.startedAt,
             endedAt: session.endedAt ?? Date(),
-            durationSeconds: healthKit.elapsedSeconds,
+            durationSeconds: (session.elapsedAtEnd ?? session.elapsedAtStart) - session.elapsedAtStart,
             calories: (session.kcalAtEnd ?? 0) - session.kcalAtStart,
             averageHeartRate: session.averageHeartRate,
             mode: session.options.mode.rawValue,
             noAdRule: session.options.noAdRule,
             totalCalories: session.totalKcalAtEnd.map { $0 - session.totalKcalAtStart },
-            matchId: session.id
+            matchId: session.id,
+            workoutElapsedSeconds: session.elapsedAtEnd,
+            workoutCalories: session.kcalAtEnd,
+            workoutTotalCalories: session.totalKcalAtEnd
         )
     }
 }

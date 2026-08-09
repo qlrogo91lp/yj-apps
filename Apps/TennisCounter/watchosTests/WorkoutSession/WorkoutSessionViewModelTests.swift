@@ -565,4 +565,22 @@ struct WorkoutSessionViewModelTests {
 
         #expect(vm.currentSession()?.id == remoteMatchId)
     }
+
+    @Test @MainActor func matchEndMessageCarriesMatchIntervalAndCumulativeMetrics() {
+        let vm = WorkoutSessionViewModel()
+        vm.healthKit.setLiveMetricsForTesting(calories: 350, basalCalories: 70, elapsedSeconds: 600)
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+
+        vm.healthKit.setLiveMetricsForTesting(calories: 600, basalCalories: 130, elapsedSeconds: 1500)
+        vm.finishMatch(result: .win, completedSets: [SetScore(my: 6, your: 4)])
+
+        guard let session = vm.currentSession() else {
+            Issue.record("currentSession이 없음")
+            return
+        }
+        #expect(session.elapsedAtStart == 600)
+        #expect(session.elapsedAtEnd == 1500)
+        #expect(session.kcalAtEnd == 600)
+        #expect(session.totalKcalAtEnd == 730)
+    }
 }

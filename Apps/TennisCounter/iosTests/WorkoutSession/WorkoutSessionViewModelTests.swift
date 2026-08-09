@@ -652,4 +652,43 @@ struct WorkoutSessionViewModelTests {
 
         #expect(vm.currentSessionForTest?.id == remoteMatchId)
     }
+
+    /// 스펙 1-2 재현: durationSeconds에 워크아웃 누적 경과시간을 넣고 있었다.
+    /// 칼로리는 경기 구간 차분인데 시간만 누적이라 한 레코드 안에서 기준이 갈렸다.
+    @Test @MainActor func buildMatchFromSessionDurationIsMatchIntervalNotWorkoutTotal() {
+        let vm = WorkoutSessionViewModel()
+        // startSession()은 1초 타이머를 돌려 elapsedSeconds를 덮어쓴다. 여기선 값을 직접 주입한다.
+        vm.elapsedSeconds = 600
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.elapsedSeconds = 1500
+        vm.finishMatch(result: .win, completedSets: [(my: 6, your: 4)])
+
+        guard case let .finished(session) = vm.phase else {
+            Issue.record("Expected .finished phase")
+            return
+        }
+        let match = vm.buildMatchForTest(session)
+
+        #expect(match.durationSeconds == 900)
+        #expect(match.workoutElapsedSeconds == 1500)
+    }
+
+    @Test @MainActor func buildMatchFromSessionRecordsCumulativeWorkoutCalories() {
+        let vm = WorkoutSessionViewModel()
+        vm.metrics = WorkoutMetrics(elapsedSeconds: 600, activeCalories: 350, totalCalories: 420, heartRate: 130)
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.metrics = WorkoutMetrics(elapsedSeconds: 1500, activeCalories: 600, totalCalories: 730, heartRate: 140)
+        vm.finishMatch(result: .win, completedSets: [(my: 6, your: 4)])
+
+        guard case let .finished(session) = vm.phase else {
+            Issue.record("Expected .finished phase")
+            return
+        }
+        let match = vm.buildMatchForTest(session)
+
+        #expect(match.caloriesBurned == 250) // 경기 구간
+        #expect(match.workoutCaloriesBurned == 600) // 누적
+        #expect(match.totalCaloriesBurned == 310) // 경기 구간
+        #expect(match.workoutTotalCaloriesBurned == 730) // 누적
+    }
 }

@@ -180,7 +180,8 @@ class WorkoutSessionViewModel: ObservableObject {
             // mirror 경로에서도 수신 시각이 driver의 경기 시작 시각에 근사한다.
             startedAt: Date(),
             kcalAtStart: metrics.activeCalories,
-            totalKcalAtStart: metrics.totalCalories
+            totalKcalAtStart: metrics.totalCalories,
+            elapsedAtStart: elapsedSeconds
         )
 
         if !isRemote {
@@ -217,6 +218,7 @@ class WorkoutSessionViewModel: ObservableObject {
         // 다르게 동작한다. 기존의 "메트릭 없을 때 caloriesBurned가 0으로 폴백"하는 동작과 대칭적인 accepted
         // limitation으로 현재 동작을 유지한다.
         session.totalKcalAtEnd = metrics.totalCalories
+        session.elapsedAtEnd = elapsedSeconds
         phase = .finished(session)
         liveActivity.end()
     }
@@ -336,6 +338,9 @@ private extension WorkoutSessionViewModel {
         match.durationSeconds = msg.durationSeconds
         match.caloriesBurned = msg.calories
         match.totalCaloriesBurned = msg.totalCalories
+        match.workoutElapsedSeconds = msg.workoutElapsedSeconds
+        match.workoutCaloriesBurned = msg.workoutCalories
+        match.workoutTotalCaloriesBurned = msg.workoutTotalCalories
         match.averageHeartRate = msg.averageHeartRate
         match.mode = msg.mode
         match.noAdRule = msg.noAdRule
@@ -354,9 +359,12 @@ private extension WorkoutSessionViewModel {
         match.workoutSessionId = session.workoutSessionId
         match.startedAt = session.startedAt
         match.endedAt = session.endedAt ?? Date()
-        match.durationSeconds = elapsedSeconds
+        match.durationSeconds = (session.elapsedAtEnd ?? session.elapsedAtStart) - session.elapsedAtStart
+        match.workoutElapsedSeconds = session.elapsedAtEnd
         match.caloriesBurned = (session.kcalAtEnd ?? 0) - session.kcalAtStart
+        match.workoutCaloriesBurned = session.kcalAtEnd
         match.totalCaloriesBurned = session.totalKcalAtEnd.map { $0 - session.totalKcalAtStart }
+        match.workoutTotalCaloriesBurned = session.totalKcalAtEnd
         match.mode = session.options.mode.rawValue
         match.noAdRule = session.options.noAdRule
         match.resultRaw = session.result?.rawValue ?? "win"
