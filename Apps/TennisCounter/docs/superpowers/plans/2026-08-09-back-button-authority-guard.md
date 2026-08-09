@@ -563,9 +563,9 @@ git commit -m "📝 뒤로가기 권한 가드 작업 기록"
 
 ## 완료 후 확인
 
-- [ ] iOS 테스트 `** TEST SUCCEEDED **`
-- [ ] Watch 테스트 `** TEST SUCCEEDED **`
-- [ ] iOS·Watch Release 빌드 통과 (Plan 1 교훈 — `#Preview`가 Release에서 깨진 전례가 있다)
+- [x] iOS 테스트 `** TEST SUCCEEDED **`
+- [x] Watch 테스트 `** TEST SUCCEEDED **`
+- [x] iOS·Watch Release 빌드 통과 (Plan 1 교훈 — `#Preview`가 Release에서 깨진 전례가 있다)
 
 ```bash
 xcodebuild -project TennisCounter.xcodeproj -scheme "TennisCounter" \

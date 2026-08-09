@@ -289,9 +289,9 @@ Task 3 리뷰에서 이 사실이 "minor (deferred)"로 기록되어 있다 (진
 
 최종 확인은 아래 체크리스트로 남겨둔다.
 
-- [ ] iOS 테스트 `** TEST SUCCEEDED **`
-- [ ] Watch 테스트 `** TEST SUCCEEDED **`
-- [ ] iOS·Watch Release 빌드 통과
+- [x] iOS 테스트 `** TEST SUCCEEDED **`
+- [x] Watch 테스트 `** TEST SUCCEEDED **`
+- [x] iOS·Watch Release 빌드 통과
 - [ ] 워치에서 매치 시작(워치 driver) → 폰이 자동 합류(mirror) → 폰 점수 화면에 뒤로가기 없음
 - [ ] 같은 상태에서 폰 워크아웃 탭 → 뒤로가기 없음 (원 증상 재현 경로)
 - [ ] 워치에서 점수 진행 → 폰에 계속 반영됨 (가드가 미러링을 막지 않았는지)
