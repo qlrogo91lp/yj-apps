@@ -22,7 +22,8 @@ class WorkoutSessionViewModel: ObservableObject {
     let scoreVM = ScoreViewModel(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
     private(set) var isDriver = false
     /// 워크아웃 식별자. 상대 기기의 id를 채택하면 그 값으로 바뀌고, 워크아웃이 끝날 때까지 유지된다.
-    /// 초기값은 workoutSessionId — 채택 전에도 313행의 동시 시작 race 가드가 같은 값을 비교해야 한다.
+    /// handleIncomingSessionStart의 동시 시작 race 가드는 이 값(workoutSessionId 아님)과 비교한다 —
+    /// 채택 이후에는 이 값이 실제로 주고받는 id이기 때문이다.
     private(set) lazy var activeSessionId: UUID = workoutSessionId
     private var hasSyncedSession = false
 
@@ -318,8 +319,14 @@ class WorkoutSessionViewModel: ObservableObject {
 
     private func handleIncomingSessionStart(_ msg: SessionStartMessage) {
         if case .playing = phase {
-            // 동시 시작 race: 이미 driver로 진행 중이면 더 작은 sessionId 쪽이 우선권을 가진다.
-            guard isDriver, msg.sessionId.uuidString < workoutSessionId.uuidString else { return }
+            // 이미 같은 워크아웃(activeSessionId)의 상대라면 새 경기 시작으로 그냥 수용한다 —
+            // 경쟁하는 다른 워크아웃이 아니므로 레이스 타이브레이크 대상이 아니다.
+            // 다른 워크아웃이 경쟁 중일 때만 더 작은 id 쪽이 우선권을 가진다. workoutSessionId가
+            // 아니라 activeSessionId와 비교해야 한다 — 상대로부터 채택한 뒤에는 이 값이 실제로
+            // 주고받는 id이고, workoutSessionId는 최초 값에 고정된 채 더 이상 쓰이지 않는다.
+            if msg.sessionId != activeSessionId {
+                guard isDriver, msg.sessionId.uuidString < activeSessionId.uuidString else { return }
+            }
         }
         if !healthKit.isWorkoutActive { startWorkout() }
         startMatch(options: msg.options, sessionId: msg.sessionId, matchId: msg.matchId, isRemote: true)
@@ -355,7 +362,9 @@ class WorkoutSessionViewModel: ObservableObject {
             completedSets: session.completedSets.map { [$0.my, $0.your] },
             startedAt: session.startedAt,
             endedAt: session.endedAt ?? Date(),
-            durationSeconds: (session.elapsedAtEnd ?? session.elapsedAtStart) - session.elapsedAtStart,
+            // 워크아웃 경계 앵커 레이스로 elapsedSeconds가 일시적으로 뒤로 갈 수 있다.
+            // 음수 경과시간이 표시 포맷까지 흘러가지 않도록 0에서 바닥을 친다.
+            durationSeconds: Swift.max(0, (session.elapsedAtEnd ?? session.elapsedAtStart) - session.elapsedAtStart),
             calories: (session.kcalAtEnd ?? 0) - session.kcalAtStart,
             averageHeartRate: session.averageHeartRate,
             mode: session.options.mode.rawValue,

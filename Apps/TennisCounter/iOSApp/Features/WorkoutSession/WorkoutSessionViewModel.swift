@@ -359,7 +359,9 @@ private extension WorkoutSessionViewModel {
         match.workoutSessionId = session.workoutSessionId
         match.startedAt = session.startedAt
         match.endedAt = session.endedAt ?? Date()
-        match.durationSeconds = (session.elapsedAtEnd ?? session.elapsedAtStart) - session.elapsedAtStart
+        // 워크아웃 경계 앵커 레이스로 elapsedSeconds가 일시적으로 뒤로 갈 수 있다.
+        // 음수 경과시간이 표시 포맷까지 흘러가지 않도록 0에서 바닥을 친다.
+        match.durationSeconds = Swift.max(0, (session.elapsedAtEnd ?? session.elapsedAtStart) - session.elapsedAtStart)
         match.workoutElapsedSeconds = session.elapsedAtEnd
         match.caloriesBurned = (session.kcalAtEnd ?? 0) - session.kcalAtStart
         match.workoutCaloriesBurned = session.kcalAtEnd

@@ -653,6 +653,25 @@ struct WorkoutSessionViewModelTests {
         #expect(vm.currentSessionForTest?.id == remoteMatchId)
     }
 
+    /// 최종 리뷰 Finding 1: 콜드런치 mirror 경로(WorkoutSessionView.onAppear)는 메시지 싱크를 거치지
+    /// 않고 startMatch를 직접 호출한다. matchId를 넘기지 않으면 mirror가 자기 id를 새로 발급해
+    /// driver와 영구히 어긋난다(저장 시 중복 제거 키 불일치). 호출 계약을 고정한다.
+    @Test @MainActor func startMatchAdoptsExplicitRemoteMatchId() {
+        let vm = WorkoutSessionViewModel()
+        let remoteSessionId = UUID()
+        let remoteMatchId = UUID()
+
+        vm.startMatch(
+            options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false),
+            sessionId: remoteSessionId,
+            matchId: remoteMatchId,
+            isRemote: true
+        )
+
+        #expect(vm.currentSessionForTest?.id == remoteMatchId)
+        #expect(vm.currentSessionIdForTest == remoteSessionId)
+    }
+
     /// 스펙 1-2 재현: durationSeconds에 워크아웃 누적 경과시간을 넣고 있었다.
     /// 칼로리는 경기 구간 차분인데 시간만 누적이라 한 레코드 안에서 기준이 갈렸다.
     @Test @MainActor func buildMatchFromSessionDurationIsMatchIntervalNotWorkoutTotal() {

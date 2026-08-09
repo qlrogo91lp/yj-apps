@@ -566,6 +566,40 @@ struct WorkoutSessionViewModelTests {
         #expect(vm.currentSession()?.id == remoteMatchId)
     }
 
+    /// 최종 리뷰 Finding 2 재현: race 가드가 activeSessionId가 아니라 workoutSessionId와 비교하고 있었다.
+    /// 상대 id를 채택한 뒤에는 두 기기가 같은 activeSessionId를 주고받는데, 가드는 이 기기의
+    /// 최초(전송된 적 없는) workoutSessionId와 비교해 임의로 판정 → 양쪽 다 driver로 남는 split-brain.
+    /// 같은 워크아웃의 새 경기 시작 메시지는 레이스 대상이 아니라 항상 수용해야 한다.
+    @Test @MainActor func acceptsNewMatchFromPeerInSameAdoptedWorkout() throws {
+        let vm = WorkoutSessionViewModel()
+        let options = MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false)
+        // 랜덤 UUID는 항상 이 값보다 작다 → 수정 전 가드라면 반드시 거절되는 조건.
+        let peerSessionId = try #require(UUID(uuidString: "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF"))
+
+        // 1) 상대(peer)의 워크아웃 id를 채택한다 → activeSessionId != workoutSessionId
+        vm.startMatch(options: options, sessionId: peerSessionId, isRemote: true)
+        // 2) 이 기기가 다음 경기의 driver가 된다 (워크아웃 id는 채택한 값 유지)
+        vm.startNewMatch(notifyRemote: false)
+        vm.startMatch(options: options)
+        #expect(vm.isDriver)
+        #expect(vm.activeSessionIdForTest == peerSessionId)
+        #expect(vm.activeSessionIdForTest != vm.workoutSessionId)
+
+        // 3) 같은 워크아웃 안에서 상대가 다음 경기를 시작한다
+        let peerMatchId = UUID()
+        vm.applyIncomingSessionStartForTest(SessionStartMessage(
+            sessionId: peerSessionId,
+            matchId: peerMatchId,
+            options: MatchOptions(mode: .bestOfThree, noAdRule: false, noTieRule: false),
+            workoutStartDate: Date()
+        ))
+
+        #expect(vm.currentSession()?.id == peerMatchId) // 거절되지 않고 수용
+        #expect(vm.scoreVM.options.mode == .bestOfThree)
+        #expect(!vm.isDriver) // 한쪽이 mirror로 양보 → split-brain 아님
+        #expect(vm.activeSessionIdForTest == peerSessionId)
+    }
+
     @Test @MainActor func matchEndMessageCarriesMatchIntervalAndCumulativeMetrics() {
         let vm = WorkoutSessionViewModel()
         vm.healthKit.setLiveMetricsForTesting(calories: 350, basalCalories: 70, elapsedSeconds: 600)
