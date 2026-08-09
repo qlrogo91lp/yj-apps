@@ -21,7 +21,9 @@ class WorkoutSessionViewModel: ObservableObject {
     private var _currentSession: MatchSession?
     let scoreVM = ScoreViewModel(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
     private(set) var isDriver = false
-    private(set) var activeSessionId: UUID = .init()
+    /// 워크아웃 식별자. 상대 기기의 id를 채택하면 그 값으로 바뀌고, 워크아웃이 끝날 때까지 유지된다.
+    /// 초기값은 workoutSessionId — 채택 전에도 313행의 동시 시작 race 가드가 같은 값을 비교해야 한다.
+    private(set) lazy var activeSessionId: UUID = workoutSessionId
     private var hasSyncedSession = false
 
     enum SaveAckState: Equatable {
@@ -184,14 +186,18 @@ class WorkoutSessionViewModel: ObservableObject {
         }
     }
 
-    func startMatch(options: MatchOptions, sessionId: UUID? = nil, isRemote: Bool = false) {
+    func startMatch(options: MatchOptions, sessionId: UUID? = nil, matchId: UUID? = nil, isRemote: Bool = false) {
         isDriver = !isRemote
         hasSyncedSession = true
         saveAckState = .idle
         saveAttemptToken += 1
-        let id = sessionId ?? workoutSessionId
+        // 워크아웃 도중에는 id가 바뀌면 안 된다 — Summary가 이 값으로 워크아웃을 그룹핑한다.
+        // workoutSessionId로 되돌아가면 폰이 driver였던 워크아웃이 두 그룹으로 갈린다.
+        let id = sessionId ?? activeSessionId
         activeSessionId = id
+        let mid = matchId ?? UUID()
         let session = MatchSession(
+            id: mid,
             workoutSessionId: id,
             options: options,
             kcalAtStart: healthKit.currentCalories,
@@ -209,6 +215,7 @@ class WorkoutSessionViewModel: ObservableObject {
         if !isRemote {
             connectivity.sendSessionStart(SessionStartMessage(
                 sessionId: id,
+                matchId: mid,
                 options: options,
                 workoutStartDate: healthKit.startDate ?? Date()
             ))
@@ -313,7 +320,7 @@ class WorkoutSessionViewModel: ObservableObject {
             guard isDriver, msg.sessionId.uuidString < workoutSessionId.uuidString else { return }
         }
         if !healthKit.isWorkoutActive { startWorkout() }
-        startMatch(options: msg.options, sessionId: msg.sessionId, isRemote: true)
+        startMatch(options: msg.options, sessionId: msg.sessionId, matchId: msg.matchId, isRemote: true)
     }
 
     private func handleIncomingScoreState(_ state: ScoreState) {
@@ -351,7 +358,8 @@ class WorkoutSessionViewModel: ObservableObject {
             averageHeartRate: session.averageHeartRate,
             mode: session.options.mode.rawValue,
             noAdRule: session.options.noAdRule,
-            totalCalories: session.totalKcalAtEnd.map { $0 - session.totalKcalAtStart }
+            totalCalories: session.totalKcalAtEnd.map { $0 - session.totalKcalAtStart },
+            matchId: session.id
         )
     }
 }

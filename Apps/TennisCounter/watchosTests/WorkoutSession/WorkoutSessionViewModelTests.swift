@@ -501,4 +501,68 @@ struct WorkoutSessionViewModelTests {
             return
         }
     }
+
+    // MARK: - 워크아웃 id 유지 + matchId
+
+    /// 스펙 1-4 재현: 폰이 driver로 1경기를 진행한 뒤 워치에서 2경기를 시작하면,
+    /// 워치가 폰에서 채택한 워크아웃 id를 버리고 자기 것으로 되돌아갔다.
+    /// 이 id는 Summary의 워크아웃 그룹핑 키라 갈리면 누적 지표가 과대 집계된다.
+    @Test @MainActor func startMatchAfterRemoteDrivenMatchKeepsActiveSessionId() {
+        let vm = WorkoutSessionViewModel()
+        let phoneSessionId = UUID()
+        let options = MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false)
+
+        vm.startMatch(options: options, sessionId: phoneSessionId, isRemote: true)
+        #expect(vm.activeSessionIdForTest == phoneSessionId)
+
+        vm.startNewMatch(notifyRemote: false)
+        vm.startMatch(options: options)
+
+        #expect(vm.activeSessionIdForTest == phoneSessionId)
+    }
+
+    @Test @MainActor func startNewMatchIssuesNewMatchId() {
+        let vm = WorkoutSessionViewModel()
+        let options = MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false)
+
+        vm.startMatch(options: options)
+        let first = vm.currentSession()?.id
+
+        vm.startNewMatch(notifyRemote: false)
+        vm.startMatch(options: options)
+        let second = vm.currentSession()?.id
+
+        #expect(first != nil)
+        #expect(second != nil)
+        #expect(first != second)
+    }
+
+    @Test @MainActor func restartMatchIssuesNewMatchIdButKeepsSessionId() {
+        let vm = WorkoutSessionViewModel()
+        let options = MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false)
+
+        vm.startMatch(options: options)
+        let firstMatchId = vm.currentSession()?.id
+        let sessionId = vm.activeSessionIdForTest
+        vm.finishMatch(result: .win, completedSets: [SetScore(my: 6, your: 4)])
+
+        vm.restartMatch()
+
+        #expect(vm.currentSession()?.id != firstMatchId)
+        #expect(vm.activeSessionIdForTest == sessionId)
+    }
+
+    @Test @MainActor func startMatchAdoptsRemoteMatchId() {
+        let vm = WorkoutSessionViewModel()
+        let remoteMatchId = UUID()
+
+        vm.startMatch(
+            options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false),
+            sessionId: UUID(),
+            matchId: remoteMatchId,
+            isRemote: true
+        )
+
+        #expect(vm.currentSession()?.id == remoteMatchId)
+    }
 }
