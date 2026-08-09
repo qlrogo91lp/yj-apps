@@ -4,7 +4,7 @@ import PackageDescription
 let package = Package(
     name: "RalliKit",
     defaultLocalization: "en",
-    platforms: [.iOS(.v17), .watchOS(.v10), .macOS(.v14)],
+    platforms: [.iOS(.v17), .watchOS(.v10)],
     products: [
         .library(name: "WorkoutCore", targets: ["WorkoutCore"]),
         .library(name: "WorkoutUI", targets: ["WorkoutUI"]),
