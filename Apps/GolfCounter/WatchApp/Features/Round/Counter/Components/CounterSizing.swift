@@ -35,6 +35,11 @@ struct CounterSizing {
                                        spacing: 6)
 
     /// 40mm. 타수 버튼이 최소 탭 타깃(44pt)에 가장 가까워지는 세트다.
+    ///
+    /// `ViewThatFits`가 시도하는 마지막 후보라 이 아래로는 더 이상의 fallback이 없다 —
+    /// 더 작은 기기가 새로 나오거나 고정 pt 대신 scalable/Dynamic Type 폰트로 바꿔서
+    /// `.tight`도 안 맞게 되면 graceful degradation 없이 콘텐츠가 잘리거나 넘친다.
+    /// 그런 변경이 생기면 이 크기 세트를 다시 실측해야 한다.
     static let tight = CounterSizing(headerFont: 13,
                                      scoreFont: 18,
                                      strokeButton: 46,

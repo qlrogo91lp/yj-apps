@@ -492,7 +492,7 @@ EOF
 **Files:**
 - Modify: `WatchApp/Features/Round/RoundViewModel.swift`
 - Modify: `WatchApp/Features/Round/Counter/Components/HoleNavigation.swift`
-- Modify: `WatchApp/Features/Round/Counter/CounterView.swift`
+- Modify: `WatchApp/Features/Round/Counter/Components/CounterPage.swift`
 - Test: `watchosTests/Round/RoundViewModelHoleCapTests.swift`
 
 **Interfaces:**
@@ -669,7 +669,7 @@ Expected: watchosTests **64건** PASS (59 + 5)
 ```bash
 git add WatchApp/Features/Round/RoundViewModel.swift \
   WatchApp/Features/Round/Counter/Components/HoleNavigation.swift \
-  WatchApp/Features/Round/Counter/CounterView.swift \
+  WatchApp/Features/Round/Counter/Components/CounterPage.swift \
   watchosTests/Round/RoundViewModelHoleCapTests.swift
 git commit -m "$(cat <<'EOF'
 ✨ feat: 홀 수 상한 적용 — 마지막 홀에서 다음 이동 차단

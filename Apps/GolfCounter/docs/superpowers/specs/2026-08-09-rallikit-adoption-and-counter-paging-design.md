@@ -44,7 +44,7 @@ RalliKit에는 이미 세 앱이 공유할 워크아웃 화면(`WorkoutUI`)이 �
 | URL | `https://github.com/qlrogo91lp/ralli-kit.git` |
 | 요구사항 | branch `main` |
 
-전환 시점의 ralli-kit `main`은 `bb084ee`이고 `origin/main`과 동일하다 (푸시 완료 확인).
+전환 시점(이 문서 작성 시점)의 ralli-kit `main`은 `bb084ee`이고 `origin/main`과 동일했다 (푸시 완료 확인) — 이후 branch-tracking 특성상 `main`이 계속 이동하므로 이 커밋 해시는 그 시점의 관찰일 뿐 고정 pin이 아니다.
 
 ### 타깃별 링크
 
