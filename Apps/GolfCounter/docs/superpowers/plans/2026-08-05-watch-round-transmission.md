@@ -4,9 +4,9 @@
 
 **Goal:** 라운드 시작 시 9/18홀을 고르게 하고, 종료 시 확인 → 요약 화면 → `.reliable` 전송까지 이어 붙여 워치에서 만든 라운드가 iOS로 넘어갈 수 있게 한다.
 
-**Architecture:** 전송 페이로드는 `Shared/Services/ConnectivityMessages.swift`의 `RoundCompletedMessage`(ConnectivityCore `ConnectivityMessage` 채택)이고, 발신은 `RoundTransmitting` 프로토콜 뒤에 두어 ViewModel 테스트가 WatchConnectivity 없이 돈다 — plan ③의 `RoundSnapshotPublishing`과 같은 방식이다. 홀 수 상한과 미기록 홀 트림은 전부 `RoundViewModel`·`RoundSnapshot`의 순수 로직으로 넣고 `watchosTests`에서 검증한다. 종료 요약은 새 화면을 push하지 않고 `RoundSessionView` 안에서 `phase == .summary`일 때 3페이지 TabView를 통째로 대체한다.
+**Architecture:** 전송 페이로드는 `Shared/Services/ConnectivityMessages.swift`의 `RoundCompletedMessage`(ConnectivityCore `ConnectivityMessage` 채택)이고, 발신은 `RoundTransmitting` 프로토콜 뒤에 두어 ViewModel 테스트가 WatchConnectivity 없이 돈다 — plan ③의 `RoundSnapshotPublishing`과 같은 방식이다. 홀 수 상한과 미기록 홀 트림은 전부 `RoundViewModel`·`RoundSnapshot`의 순수 로직으로 넣고 `watchosTests`에서 검증한다. 종료 요약은 새 화면을 push하지 않고 `RoundSessionView` 안에서 `phase == .summary`일 때 3페이지 TabView를 통째로 대체한다. (컨트롤·메트릭 페이지는 2026-08-09 plan 이후 `WorkoutUI.WorkoutControlsView`·`WorkoutMetricsView`다)
 
-**Tech Stack:** Swift 5(language mode) / SwiftUI / WidgetKit / ralli-kit(`ConnectivityCore`·`WorkoutCore`, 로컬 SPM `../ralli-kit`) / Swift Testing
+**Tech Stack:** Swift 5(language mode) / SwiftUI / WidgetKit / ralli-kit(`ConnectivityCore`·`WorkoutCore`·`WorkoutUI`, 원격 SPM `https://github.com/qlrogo91lp/ralli-kit.git` branch `main`) / Swift Testing
 
 **참조 spec:** `docs/superpowers/specs/2026-07-31-golfcounter-rebuild-design.md` (§3 홀 수 선택·미기록 홀 트림·`RoundSnapshot`, §4 홀 수 선택 화면·종료 요약, §5 전송)
 
@@ -30,7 +30,7 @@
 | 타깃 | 링크된 ralli-kit 제품 |
 |------|---------------------|
 | `GolfCounter` (iOS) | `ConnectivityCore`, `PersistenceCore` |
-| `GolfCounter Watch App` | `ConnectivityCore`, `WorkoutCore` |
+| `GolfCounter Watch App` | `ConnectivityCore`, `WorkoutCore`, `WorkoutUI` |
 | `ComplicationAppExtension` | **없음** (SwiftUI + WidgetKit만) |
 
 따라서:
@@ -79,7 +79,7 @@ xcodebuild -project GolfCounter.xcodeproj -scheme "GolfCounter Watch App" \
   -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)' test 2>&1 | tail -20
 ```
 
-Expected: watchosTests **49건** PASS. 이 숫자가 이 plan의 출발점이다.
+Expected: watchosTests **51건** PASS. 이 숫자가 이 plan의 출발점이다.
 
 ---
 
@@ -296,7 +296,7 @@ xcodebuild -project GolfCounter.xcodeproj -scheme "GolfCounter Watch App" \
   -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)' test 2>&1 | tail -20
 ```
 
-Expected: watchosTests **51건** PASS (49 + 2). 나머지 8개 `RoundSnapshot(` 호출부는 기본값 덕분에 수정 없이 컴파일된다.
+Expected: watchosTests **53건** PASS (51 + 2). 나머지 8개 `RoundSnapshot(` 호출부는 기본값 덕분에 수정 없이 컴파일된다.
 
 - [ ] **Step 6: 커밋**
 
@@ -467,7 +467,7 @@ xcodebuild -project GolfCounter.xcodeproj -scheme "GolfCounter Watch App" \
   -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)' test 2>&1 | tail -20
 ```
 
-Expected: watchosTests **57건** PASS (51 + 6)
+Expected: watchosTests **59건** PASS (53 + 6)
 
 - [ ] **Step 5: 커밋**
 
@@ -497,7 +497,7 @@ EOF
 
 **Interfaces:**
 - Consumes: Task 1의 `RoundViewModel.holeCount`
-- Produces: `RoundViewModel.canGoToNextHole: Bool`, `HoleNavigation(canGoToPrevious:canGoToNext:onPrevious:onNext:)`
+- Produces: `RoundViewModel.canGoToNextHole: Bool`, `HoleNavigation(canGoToPrevious:canGoToNext:height:onPrevious:onNext:)` — `height`는 2026-08-09 plan에서 추가된 기본값 30의 파라미터다
 
 - [ ] **Step 1: 실패하는 테스트 작성**
 
@@ -641,15 +641,18 @@ struct HoleNavigation: View {
 }
 ```
 
-- [ ] **Step 5: `CounterView` 호출부 수정**
+- [ ] **Step 5: `CounterPage` 호출부 수정**
 
-`WatchApp/Features/Round/Counter/CounterView.swift`의 `HoleNavigation(...)` 호출을 교체:
+> 2026-08-09 plan이 카운터 1페이지를 `CounterPage.swift`로 분리했다. `HoleNavigation` 호출부는 이제 `CounterView.swift`가 아니라 여기에 있다.
+
+`WatchApp/Features/Round/Counter/Components/CounterPage.swift`의 `HoleNavigation(...)` 호출을 교체:
 
 ```swift
-                HoleNavigation(canGoToPrevious: viewModel.canGoToPreviousHole,
-                               canGoToNext: viewModel.canGoToNextHole,
-                               onPrevious: viewModel.goToPreviousHole,
-                               onNext: viewModel.goToNextHole)
+            HoleNavigation(canGoToPrevious: viewModel.canGoToPreviousHole,
+                           canGoToNext: viewModel.canGoToNextHole,
+                           height: sizing.navHeight,
+                           onPrevious: viewModel.goToPreviousHole,
+                           onNext: viewModel.goToNextHole)
 ```
 
 - [ ] **Step 6: 테스트 통과 확인**
@@ -659,7 +662,7 @@ xcodebuild -project GolfCounter.xcodeproj -scheme "GolfCounter Watch App" \
   -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)' test 2>&1 | tail -20
 ```
 
-Expected: watchosTests **62건** PASS (57 + 5)
+Expected: watchosTests **64건** PASS (59 + 5)
 
 - [ ] **Step 7: 커밋**
 
@@ -997,7 +1000,7 @@ xcodebuild -project GolfCounter.xcodeproj -scheme "GolfCounter Watch App" \
   -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)' test 2>&1 | tail -20
 ```
 
-Expected: watchosTests **66건** PASS (62 + 4)
+Expected: watchosTests **68건** PASS (64 + 4)
 
 - [ ] **Step 10: 커밋**
 
@@ -1339,7 +1342,7 @@ xcodebuild -project GolfCounter.xcodeproj -scheme "GolfCounter Watch App" \
   -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)' test 2>&1 | tail -20
 ```
 
-Expected: watchosTests **74건** PASS (66 + 8)
+Expected: watchosTests **76건** PASS (68 + 8)
 
 - [ ] **Step 6: 커밋**
 
@@ -1540,7 +1543,7 @@ xcodebuild -project GolfCounter.xcodeproj -scheme "GolfCounter Watch App" \
   -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)' test 2>&1 | tail -20
 ```
 
-Expected: `** TEST SUCCEEDED **`, watchosTests **74건** PASS (View는 테스트하지 않으므로 건수 변화 없음)
+Expected: `** TEST SUCCEEDED **`, watchosTests **76건** PASS (View는 테스트하지 않으므로 건수 변화 없음)
 
 - [ ] **Step 5: 커밋**
 
@@ -1769,7 +1772,7 @@ xcodebuild -project GolfCounter.xcodeproj -scheme "GolfCounter Watch App" \
   -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)' test 2>&1 | tail -20
 ```
 
-Expected: `** TEST SUCCEEDED **`, watchosTests **74건** PASS
+Expected: `** TEST SUCCEEDED **`, watchosTests **76건** PASS
 
 - [ ] **Step 4: 커밋**
 
@@ -1823,7 +1826,7 @@ xcodebuild -project GolfCounter.xcodeproj -scheme "GolfCounter" \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro' test 2>&1 | tail -20
 ```
 
-Expected: watchosTests **74건**, iosTests **3건** PASS.
+Expected: watchosTests **76건**, iosTests **3건** PASS.
 
 > plan ③에서 요약 건수가 실제와 어긋난 전례가 있다. **각 Task의 코드 블록이 원본이고 이 숫자는 파생**이다 — 어긋나면 실제로 회귀가 있는지부터 확인하고, 없으면 이 숫자를 정정한다.
 
@@ -1867,7 +1870,7 @@ gh pr create --base main --title "✨ feat: 홀 수 선택과 라운드 종료 �
 `Shared/`는 세 타깃 모두에 동기화되는데 `ConnectivityCore`는 컴플리케이션에 링크되어 있지 않다. `ConnectivityMessages.swift`·`RoundTransmitter.swift`를 그 타깃에서 제외하는 `PBXFileSystemSynchronizedBuildFileExceptionSet`을 추가했다. `WorkoutCore`는 iOS에 없으므로 메트릭 변환은 워치 타깃 안에 가뒀다.
 
 ## 테스트
-- watchosTests 74건, iosTests 3건 PASS
+- watchosTests 76건, iosTests 3건 PASS
 - 세 스킴 BUILD SUCCEEDED, `make lint`/`make format` 위반 0
 - 시뮬레이터 육안 확인: 홀 수 상한, 트림된 확인 문구, 요약·전송, 복구, 요약 이탈 후 루프 없음
 
@@ -1883,7 +1886,7 @@ EOF
 
 ## 완료 기준
 
-- [ ] `watchosTests` 74건 PASS, `iosTests` 3건 PASS
+- [ ] `watchosTests` 76건 PASS, `iosTests` 3건 PASS
 - [ ] 세 스킴(`GolfCounter`, `GolfCounter Watch App`, `ComplicationAppExtension`) BUILD SUCCEEDED — 특히 **컴플리케이션**이 pbxproj 예외 덕분에 깨지지 않는지
 - [ ] `make lint`·`make format` 위반 0
 - [ ] 시뮬레이터에서 Task 8 Step 4의 14개 항목 전부 확인
