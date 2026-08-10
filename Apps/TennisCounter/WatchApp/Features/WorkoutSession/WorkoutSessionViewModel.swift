@@ -21,7 +21,10 @@ class WorkoutSessionViewModel: ObservableObject {
     private var _currentSession: MatchSession?
     let scoreVM = ScoreViewModel(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
     private(set) var isDriver = false
-    private(set) var activeSessionId: UUID = .init()
+    /// 워크아웃 식별자. 상대 기기의 id를 채택하면 그 값으로 바뀌고, 워크아웃이 끝날 때까지 유지된다.
+    /// handleIncomingSessionStart의 동시 시작 race 가드는 이 값(workoutSessionId 아님)과 비교한다 —
+    /// 채택 이후에는 이 값이 실제로 주고받는 id이기 때문이다.
+    private(set) lazy var activeSessionId: UUID = workoutSessionId
     private var hasSyncedSession = false
 
     enum SaveAckState: Equatable {
@@ -184,18 +187,23 @@ class WorkoutSessionViewModel: ObservableObject {
         }
     }
 
-    func startMatch(options: MatchOptions, sessionId: UUID? = nil, isRemote: Bool = false) {
+    func startMatch(options: MatchOptions, sessionId: UUID? = nil, matchId: UUID? = nil, isRemote: Bool = false) {
         isDriver = !isRemote
         hasSyncedSession = true
         saveAckState = .idle
         saveAttemptToken += 1
-        let id = sessionId ?? workoutSessionId
+        // 워크아웃 도중에는 id가 바뀌면 안 된다 — Summary가 이 값으로 워크아웃을 그룹핑한다.
+        // workoutSessionId로 되돌아가면 폰이 driver였던 워크아웃이 두 그룹으로 갈린다.
+        let id = sessionId ?? activeSessionId
         activeSessionId = id
+        let mid = matchId ?? UUID()
         let session = MatchSession(
+            id: mid,
             workoutSessionId: id,
             options: options,
             kcalAtStart: healthKit.currentCalories,
-            totalKcalAtStart: healthKit.currentCalories + healthKit.currentBasalCalories
+            totalKcalAtStart: healthKit.currentCalories + healthKit.currentBasalCalories,
+            elapsedAtStart: healthKit.elapsedSeconds
         )
         _currentSession = session
 
@@ -209,6 +217,7 @@ class WorkoutSessionViewModel: ObservableObject {
         if !isRemote {
             connectivity.sendSessionStart(SessionStartMessage(
                 sessionId: id,
+                matchId: mid,
                 options: options,
                 workoutStartDate: healthKit.startDate ?? Date()
             ))
@@ -226,6 +235,7 @@ class WorkoutSessionViewModel: ObservableObject {
         session.completedSets = completedSets
         session.kcalAtEnd = healthKit.currentCalories
         session.totalKcalAtEnd = healthKit.currentCalories + healthKit.currentBasalCalories
+        session.elapsedAtEnd = healthKit.elapsedSeconds
         session.mySetScore = completedSets.count(where: { $0.my > $0.your })
         session.yourSetScore = completedSets.count(where: { $0.your > $0.my })
 
@@ -309,11 +319,17 @@ class WorkoutSessionViewModel: ObservableObject {
 
     private func handleIncomingSessionStart(_ msg: SessionStartMessage) {
         if case .playing = phase {
-            // 동시 시작 race: 이미 driver로 진행 중이면 더 작은 sessionId 쪽이 우선권을 가진다.
-            guard isDriver, msg.sessionId.uuidString < workoutSessionId.uuidString else { return }
+            // 이미 같은 워크아웃(activeSessionId)의 상대라면 새 경기 시작으로 그냥 수용한다 —
+            // 경쟁하는 다른 워크아웃이 아니므로 레이스 타이브레이크 대상이 아니다.
+            // 다른 워크아웃이 경쟁 중일 때만 더 작은 id 쪽이 우선권을 가진다. workoutSessionId가
+            // 아니라 activeSessionId와 비교해야 한다 — 상대로부터 채택한 뒤에는 이 값이 실제로
+            // 주고받는 id이고, workoutSessionId는 최초 값에 고정된 채 더 이상 쓰이지 않는다.
+            if msg.sessionId != activeSessionId {
+                guard isDriver, msg.sessionId.uuidString < activeSessionId.uuidString else { return }
+            }
         }
         if !healthKit.isWorkoutActive { startWorkout() }
-        startMatch(options: msg.options, sessionId: msg.sessionId, isRemote: true)
+        startMatch(options: msg.options, sessionId: msg.sessionId, matchId: msg.matchId, isRemote: true)
     }
 
     private func handleIncomingScoreState(_ state: ScoreState) {
@@ -346,12 +362,18 @@ class WorkoutSessionViewModel: ObservableObject {
             completedSets: session.completedSets.map { [$0.my, $0.your] },
             startedAt: session.startedAt,
             endedAt: session.endedAt ?? Date(),
-            durationSeconds: healthKit.elapsedSeconds,
+            // 워크아웃 경계 앵커 레이스로 elapsedSeconds가 일시적으로 뒤로 갈 수 있다.
+            // 음수 경과시간이 표시 포맷까지 흘러가지 않도록 0에서 바닥을 친다.
+            durationSeconds: Swift.max(0, (session.elapsedAtEnd ?? session.elapsedAtStart) - session.elapsedAtStart),
             calories: (session.kcalAtEnd ?? 0) - session.kcalAtStart,
             averageHeartRate: session.averageHeartRate,
             mode: session.options.mode.rawValue,
             noAdRule: session.options.noAdRule,
-            totalCalories: session.totalKcalAtEnd.map { $0 - session.totalKcalAtStart }
+            totalCalories: session.totalKcalAtEnd.map { $0 - session.totalKcalAtStart },
+            matchId: session.id,
+            workoutElapsedSeconds: session.elapsedAtEnd,
+            workoutCalories: session.kcalAtEnd,
+            workoutTotalCalories: session.totalKcalAtEnd
         )
     }
 }

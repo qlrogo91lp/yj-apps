@@ -62,18 +62,14 @@ final class SummaryViewModel: ObservableObject {
         let total = filtered.count
         let winRate = total > 0 ? Double(wins) / Double(total) : 0.0
 
-        let calories = filtered.compactMap(\.caloriesBurned)
-        let totalCalories: Double? = calories.isEmpty ? nil : calories.reduce(0, +)
-
-        let energies = filtered.compactMap(\.totalCaloriesBurned)
-        let totalEnergy: Double? = energies.isEmpty ? nil : energies.reduce(0, +)
-
-        let durations: [Int] = filtered.compactMap { match in
+        let totalCalories = sumOfWorkoutMaxima(filtered) { $0.workoutCaloriesBurned ?? $0.caloriesBurned }
+        let totalEnergy = sumOfWorkoutMaxima(filtered) { $0.workoutTotalCaloriesBurned ?? $0.totalCaloriesBurned }
+        let totalDuration = sumOfWorkoutMaxima(filtered) { match in
+            if let cumulative = match.workoutElapsedSeconds { return cumulative }
             if let d = match.durationSeconds { return d }
             if let end = match.endedAt { return Int(end.timeIntervalSince(match.startedAt)) }
             return nil
         }
-        let totalDuration: Int? = durations.isEmpty ? nil : durations.reduce(0, +)
 
         let heartRates = filtered.compactMap(\.averageHeartRate)
         let avgHeartRate: Double? = heartRates.isEmpty ? nil : heartRates.reduce(0, +) / Double(heartRates.count)
@@ -87,6 +83,26 @@ final class SummaryViewModel: ObservableObject {
             totalDuration: totalDuration,
             avgHeartRate: avgHeartRate
         )
+    }
+
+    /// 워크아웃 누적 지표는 그룹당 최댓값 하나만 취한다 — 같은 워크아웃의 경기들이 하나의
+    /// 누적 축을 공유하므로 단순 합산하면 같은 칼로리·시간을 여러 번 세게 된다.
+    /// workoutSessionId가 없는 레코드는 서로 묶을 근거가 없어 각자 한 워크아웃으로 본다.
+    private func sumOfWorkoutMaxima<T: Comparable & AdditiveArithmetic>(
+        _ matches: [Match], _ value: (Match) -> T?
+    ) -> T? {
+        var maxByWorkout: [UUID: T] = [:]
+        var ungrouped: [T] = []
+        for match in matches {
+            guard let v = value(match) else { continue }
+            if let sid = match.workoutSessionId {
+                maxByWorkout[sid] = Swift.max(maxByWorkout[sid] ?? v, v)
+            } else {
+                ungrouped.append(v)
+            }
+        }
+        let all = Array(maxByWorkout.values) + ungrouped
+        return all.isEmpty ? nil : all.reduce(.zero, +)
     }
 
     func recentMatches(from matches: [Match]) -> [Match] {

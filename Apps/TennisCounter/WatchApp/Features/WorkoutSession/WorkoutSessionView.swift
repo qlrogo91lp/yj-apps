@@ -28,7 +28,7 @@ struct WorkoutSessionView: View {
         .onAppear {
             viewModel.startWorkout()
             if let remote = remoteSession {
-                viewModel.startMatch(options: remote.options, sessionId: remote.sessionId, isRemote: true)
+                viewModel.startMatch(options: remote.options, sessionId: remote.sessionId, matchId: remote.matchId, isRemote: true)
             }
         }
         .onChange(of: viewModel.remoteWorkoutEnded) {

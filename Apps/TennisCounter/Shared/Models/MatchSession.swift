@@ -18,10 +18,15 @@ class MatchSession {
     /// 활동 + 휴식 기준. 경기 구간 총 칼로리 = totalKcalAtEnd - totalKcalAtStart.
     let totalKcalAtStart: Double
     var totalKcalAtEnd: Double?
+    /// 경기 구간 시간 = elapsedAtEnd - elapsedAtStart. elapsed는 일시정지를 제외한 값이라
+    /// 차분을 내면 일시정지 제외가 그대로 따라온다.
+    let elapsedAtStart: Int
+    var elapsedAtEnd: Int?
     var averageHeartRate: Double?
 
     init(id: UUID = UUID(), workoutSessionId: UUID, options: MatchOptions,
-         startedAt: Date = Date(), kcalAtStart: Double, totalKcalAtStart: Double = 0)
+         startedAt: Date = Date(), kcalAtStart: Double, totalKcalAtStart: Double = 0,
+         elapsedAtStart: Int = 0)
     {
         self.id = id
         self.workoutSessionId = workoutSessionId
@@ -29,5 +34,6 @@ class MatchSession {
         self.startedAt = startedAt
         self.kcalAtStart = kcalAtStart
         self.totalKcalAtStart = totalKcalAtStart
+        self.elapsedAtStart = elapsedAtStart
     }
 }

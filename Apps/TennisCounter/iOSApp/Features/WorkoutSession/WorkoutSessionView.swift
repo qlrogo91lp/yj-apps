@@ -81,7 +81,7 @@ struct WorkoutSessionView: View {
         .onAppear {
             if let remote = remoteSession {
                 viewModel.startSession(startDate: remote.workoutStartDate)
-                viewModel.startMatch(options: remote.options, sessionId: remote.sessionId, isRemote: true)
+                viewModel.startMatch(options: remote.options, sessionId: remote.sessionId, matchId: remote.matchId, isRemote: true)
             } else {
                 viewModel.startSession()
             }

@@ -43,6 +43,7 @@ class WorkoutSessionViewModel: ObservableObject {
                 guard let self, isDriver, case let .playing(options) = phase else { return }
                 connectivity.sendSessionStart(SessionStartMessage(
                     sessionId: sessionId,
+                    matchId: _currentSession?.id,
                     options: options,
                     workoutStartDate: startedAt ?? Date()
                 ))
@@ -164,18 +165,23 @@ class WorkoutSessionViewModel: ObservableObject {
         connectivity.sendPauseCommand(sessionId: sessionId, shouldPause: false)
     }
 
-    func startMatch(options: MatchOptions, sessionId: UUID? = nil, isRemote: Bool = false) {
+    func startMatch(options: MatchOptions, sessionId: UUID? = nil, matchId: UUID? = nil, isRemote: Bool = false) {
         isDriver = !isRemote
         hasSyncedSession = true
         // 원격 채택 시 자기 sessionId를 상대 것으로 맞춘다. 안 그러면 workoutEnd·matchReset
         // 같은 sessionId 가드가 걸린 신호를 init UUID와 불일치로 모두 무시해버린다.
         if let sessionId { self.sessionId = sessionId }
+        let mid = matchId ?? UUID()
         _currentSession = MatchSession(
+            id: mid,
             workoutSessionId: self.sessionId,
             options: options,
-            startedAt: startedAt ?? Date(),
+            // 워크아웃 시작 시각(self.startedAt)이 아니라 경기 시작 시각이다.
+            // mirror 경로에서도 수신 시각이 driver의 경기 시작 시각에 근사한다.
+            startedAt: Date(),
             kcalAtStart: metrics.activeCalories,
-            totalKcalAtStart: metrics.totalCalories
+            totalKcalAtStart: metrics.totalCalories,
+            elapsedAtStart: elapsedSeconds
         )
 
         if !isRemote {
@@ -189,6 +195,7 @@ class WorkoutSessionViewModel: ObservableObject {
         if !isRemote {
             connectivity.sendSessionStart(SessionStartMessage(
                 sessionId: self.sessionId,
+                matchId: mid,
                 options: options,
                 workoutStartDate: startedAt ?? Date()
             ))
@@ -211,6 +218,7 @@ class WorkoutSessionViewModel: ObservableObject {
         // 다르게 동작한다. 기존의 "메트릭 없을 때 caloriesBurned가 0으로 폴백"하는 동작과 대칭적인 accepted
         // limitation으로 현재 동작을 유지한다.
         session.totalKcalAtEnd = metrics.totalCalories
+        session.elapsedAtEnd = elapsedSeconds
         phase = .finished(session)
         liveActivity.end()
     }
@@ -273,7 +281,7 @@ class WorkoutSessionViewModel: ObservableObject {
         }
         sessionId = msg.sessionId
         startSession(startDate: msg.workoutStartDate)
-        startMatch(options: msg.options, isRemote: true)
+        startMatch(options: msg.options, matchId: msg.matchId, isRemote: true)
     }
 
     private func handleIncomingScoreState(_ state: ScoreState) {
@@ -323,12 +331,16 @@ class WorkoutSessionViewModel: ObservableObject {
 private extension WorkoutSessionViewModel {
     func buildMatchFromMessage(_ msg: MatchEndMessage) -> Match {
         let match = Match()
+        match.matchId = msg.matchId
         match.workoutSessionId = msg.sessionId
         match.startedAt = msg.startedAt
         match.endedAt = msg.endedAt
         match.durationSeconds = msg.durationSeconds
         match.caloriesBurned = msg.calories
         match.totalCaloriesBurned = msg.totalCalories
+        match.workoutElapsedSeconds = msg.workoutElapsedSeconds
+        match.workoutCaloriesBurned = msg.workoutCalories
+        match.workoutTotalCaloriesBurned = msg.workoutTotalCalories
         match.averageHeartRate = msg.averageHeartRate
         match.mode = msg.mode
         match.noAdRule = msg.noAdRule
@@ -343,12 +355,18 @@ private extension WorkoutSessionViewModel {
 
     func buildMatchFromSession(_ session: MatchSession) -> Match {
         let match = Match()
+        match.matchId = session.id
         match.workoutSessionId = session.workoutSessionId
         match.startedAt = session.startedAt
         match.endedAt = session.endedAt ?? Date()
-        match.durationSeconds = elapsedSeconds
+        // 워크아웃 경계 앵커 레이스로 elapsedSeconds가 일시적으로 뒤로 갈 수 있다.
+        // 음수 경과시간이 표시 포맷까지 흘러가지 않도록 0에서 바닥을 친다.
+        match.durationSeconds = Swift.max(0, (session.elapsedAtEnd ?? session.elapsedAtStart) - session.elapsedAtStart)
+        match.workoutElapsedSeconds = session.elapsedAtEnd
         match.caloriesBurned = (session.kcalAtEnd ?? 0) - session.kcalAtStart
+        match.workoutCaloriesBurned = session.kcalAtEnd
         match.totalCaloriesBurned = session.totalKcalAtEnd.map { $0 - session.totalKcalAtStart }
+        match.workoutTotalCaloriesBurned = session.totalKcalAtEnd
         match.mode = session.options.mode.rawValue
         match.noAdRule = session.options.noAdRule
         match.resultRaw = session.result?.rawValue ?? "win"

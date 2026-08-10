@@ -80,4 +80,58 @@ struct MatchEndMessageTests {
         #expect(restored?.totalCalories == nil)
         #expect(restored?.calories == 320)
     }
+
+    @Test func saveDictionaryRoundTripsMatchIdAndWorkoutMetrics() {
+        let matchId = UUID()
+        let original = MatchEndMessage(
+            sessionId: UUID(),
+            result: "win",
+            completedSets: [[6, 4]],
+            startedAt: Date(timeIntervalSince1970: 1_000_000),
+            endedAt: Date(timeIntervalSince1970: 1_000_900),
+            durationSeconds: 900,
+            calories: 250,
+            averageHeartRate: 140,
+            mode: "oneSet",
+            noAdRule: true,
+            totalCalories: 310,
+            matchId: matchId,
+            workoutElapsedSeconds: 2400,
+            workoutCalories: 600,
+            workoutTotalCalories: 780
+        )
+        guard let decoded = MatchEndMessage(from: original.toSaveDictionary()) else {
+            Issue.record("save 페이로드가 MatchEndMessage로 파싱되지 않음")
+            return
+        }
+        #expect(decoded.matchId == matchId)
+        #expect(decoded.workoutElapsedSeconds == 2400)
+        #expect(decoded.workoutCalories == 600)
+        #expect(decoded.workoutTotalCalories == 780)
+        #expect(decoded.durationSeconds == 900)
+    }
+
+    /// 구버전 워치 페이로드에는 새 키가 없다. 파싱은 성공하고 새 필드만 nil이어야 한다.
+    @Test func fromLegacyPayloadHasNilMatchIdAndWorkoutMetrics() {
+        let legacy: [String: Any] = [
+            "type": "matchSave",
+            "sessionId": UUID().uuidString,
+            "result": "win",
+            "sets": [[6, 4]],
+            "startedAt": 1_000_000.0,
+            "endedAt": 1_000_900.0,
+            "durationSeconds": 900,
+            "calories": 250.0,
+            "mode": "oneSet",
+            "noAdRule": true,
+        ]
+        guard let decoded = MatchEndMessage(from: legacy) else {
+            Issue.record("구버전 페이로드가 거부됨")
+            return
+        }
+        #expect(decoded.matchId == nil)
+        #expect(decoded.workoutElapsedSeconds == nil)
+        #expect(decoded.workoutCalories == nil)
+        #expect(decoded.workoutTotalCalories == nil)
+    }
 }

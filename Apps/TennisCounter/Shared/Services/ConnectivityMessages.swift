@@ -7,11 +7,14 @@ struct SessionStartMessage: ConnectivityMessage {
     static let messageType = "sessionStart"
 
     let sessionId: UUID
+    /// 이 워크아웃 안에서 진행 중인 경기의 식별자. 구버전 워치 페이로드에는 없으므로 optional.
+    /// nil이면 수신 측이 로컬에서 새로 발급한다 — 파싱을 실패시키면 미러링 자체가 깨진다.
+    let matchId: UUID?
     let options: MatchOptions
     let workoutStartDate: Date
 
     func toDictionary() -> [String: Any] {
-        [
+        var dict: [String: Any] = [
             "type": Self.messageType,
             "sessionId": sessionId.uuidString,
             "mode": options.mode.rawValue,
@@ -20,6 +23,8 @@ struct SessionStartMessage: ConnectivityMessage {
             "gameThreshold": options.gameThreshold,
             "workoutStartDate": workoutStartDate.timeIntervalSince1970,
         ]
+        if let matchId { dict["matchId"] = matchId.uuidString }
+        return dict
     }
 
     init?(from dict: [String: Any]) {
@@ -29,6 +34,7 @@ struct SessionStartMessage: ConnectivityMessage {
               let modeRaw = dict["mode"] as? String,
               let mode = MatchFormat(rawValue: modeRaw) else { return nil }
         sessionId = id
+        matchId = (dict["matchId"] as? String).flatMap(UUID.init(uuidString:))
         options = MatchOptions(
             mode: mode,
             noAdRule: dict["noAdRule"] as? Bool ?? true,
@@ -39,8 +45,9 @@ struct SessionStartMessage: ConnectivityMessage {
         workoutStartDate = Date(timeIntervalSince1970: ts)
     }
 
-    init(sessionId: UUID, options: MatchOptions, workoutStartDate: Date = Date()) {
+    init(sessionId: UUID, matchId: UUID? = nil, options: MatchOptions, workoutStartDate: Date = Date()) {
         self.sessionId = sessionId
+        self.matchId = matchId
         self.options = options
         self.workoutStartDate = workoutStartDate
     }
@@ -123,6 +130,12 @@ struct MatchEndMessage: ConnectivityMessage {
     let averageHeartRate: Double?
     let mode: String
     let noAdRule: Bool
+    /// 이 경기의 식별자. 저장 시 중복 제거 키로 쓴다. 구버전 페이로드에는 없으므로 optional.
+    let matchId: UUID?
+    /// 워크아웃 시작부터 이 경기 종료 시점까지의 누적값. Summary가 워크아웃별 최댓값으로 접어 합산한다.
+    let workoutElapsedSeconds: Int?
+    let workoutCalories: Double?
+    let workoutTotalCalories: Double?
 
     func toDictionary() -> [String: Any] {
         dictionary(type: Self.messageType)
@@ -148,6 +161,10 @@ struct MatchEndMessage: ConnectivityMessage {
         ]
         if let total = totalCalories { dict["totalCalories"] = total }
         if let hr = averageHeartRate { dict["heartRate"] = hr }
+        if let matchId { dict["matchId"] = matchId.uuidString }
+        if let workoutElapsedSeconds { dict["workoutElapsedSeconds"] = workoutElapsedSeconds }
+        if let workoutCalories { dict["workoutCalories"] = workoutCalories }
+        if let workoutTotalCalories { dict["workoutTotalCalories"] = workoutTotalCalories }
         return dict
     }
 
@@ -171,11 +188,17 @@ struct MatchEndMessage: ConnectivityMessage {
         averageHeartRate = dict["heartRate"] as? Double
         self.mode = mode
         noAdRule = dict["noAdRule"] as? Bool ?? true
+        matchId = (dict["matchId"] as? String).flatMap(UUID.init(uuidString:))
+        workoutElapsedSeconds = dict["workoutElapsedSeconds"] as? Int
+        workoutCalories = dict["workoutCalories"] as? Double
+        workoutTotalCalories = dict["workoutTotalCalories"] as? Double
     }
 
     init(sessionId: UUID, result: String, completedSets: [[Int]], startedAt: Date,
          endedAt: Date, durationSeconds: Int, calories: Double, averageHeartRate: Double?,
-         mode: String, noAdRule: Bool, totalCalories: Double? = nil)
+         mode: String, noAdRule: Bool, totalCalories: Double? = nil,
+         matchId: UUID? = nil, workoutElapsedSeconds: Int? = nil,
+         workoutCalories: Double? = nil, workoutTotalCalories: Double? = nil)
     {
         self.sessionId = sessionId
         self.result = result
@@ -188,6 +211,10 @@ struct MatchEndMessage: ConnectivityMessage {
         self.mode = mode
         self.noAdRule = noAdRule
         self.totalCalories = totalCalories
+        self.matchId = matchId
+        self.workoutElapsedSeconds = workoutElapsedSeconds
+        self.workoutCalories = workoutCalories
+        self.workoutTotalCalories = workoutTotalCalories
     }
 }
 

@@ -501,4 +501,120 @@ struct WorkoutSessionViewModelTests {
             return
         }
     }
+
+    // MARK: - 워크아웃 id 유지 + matchId
+
+    /// 스펙 1-4 재현: 폰이 driver로 1경기를 진행한 뒤 워치에서 2경기를 시작하면,
+    /// 워치가 폰에서 채택한 워크아웃 id를 버리고 자기 것으로 되돌아갔다.
+    /// 이 id는 Summary의 워크아웃 그룹핑 키라 갈리면 누적 지표가 과대 집계된다.
+    @Test @MainActor func startMatchAfterRemoteDrivenMatchKeepsActiveSessionId() {
+        let vm = WorkoutSessionViewModel()
+        let phoneSessionId = UUID()
+        let options = MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false)
+
+        vm.startMatch(options: options, sessionId: phoneSessionId, isRemote: true)
+        #expect(vm.activeSessionIdForTest == phoneSessionId)
+
+        vm.startNewMatch(notifyRemote: false)
+        vm.startMatch(options: options)
+
+        #expect(vm.activeSessionIdForTest == phoneSessionId)
+    }
+
+    @Test @MainActor func startNewMatchIssuesNewMatchId() {
+        let vm = WorkoutSessionViewModel()
+        let options = MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false)
+
+        vm.startMatch(options: options)
+        let first = vm.currentSession()?.id
+
+        vm.startNewMatch(notifyRemote: false)
+        vm.startMatch(options: options)
+        let second = vm.currentSession()?.id
+
+        #expect(first != nil)
+        #expect(second != nil)
+        #expect(first != second)
+    }
+
+    @Test @MainActor func restartMatchIssuesNewMatchIdButKeepsSessionId() {
+        let vm = WorkoutSessionViewModel()
+        let options = MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false)
+
+        vm.startMatch(options: options)
+        let firstMatchId = vm.currentSession()?.id
+        let sessionId = vm.activeSessionIdForTest
+        vm.finishMatch(result: .win, completedSets: [SetScore(my: 6, your: 4)])
+
+        vm.restartMatch()
+
+        #expect(vm.currentSession()?.id != firstMatchId)
+        #expect(vm.activeSessionIdForTest == sessionId)
+    }
+
+    @Test @MainActor func startMatchAdoptsRemoteMatchId() {
+        let vm = WorkoutSessionViewModel()
+        let remoteMatchId = UUID()
+
+        vm.startMatch(
+            options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false),
+            sessionId: UUID(),
+            matchId: remoteMatchId,
+            isRemote: true
+        )
+
+        #expect(vm.currentSession()?.id == remoteMatchId)
+    }
+
+    /// 최종 리뷰 Finding 2 재현: race 가드가 activeSessionId가 아니라 workoutSessionId와 비교하고 있었다.
+    /// 상대 id를 채택한 뒤에는 두 기기가 같은 activeSessionId를 주고받는데, 가드는 이 기기의
+    /// 최초(전송된 적 없는) workoutSessionId와 비교해 임의로 판정 → 양쪽 다 driver로 남는 split-brain.
+    /// 같은 워크아웃의 새 경기 시작 메시지는 레이스 대상이 아니라 항상 수용해야 한다.
+    @Test @MainActor func acceptsNewMatchFromPeerInSameAdoptedWorkout() throws {
+        let vm = WorkoutSessionViewModel()
+        let options = MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false)
+        // 랜덤 UUID는 항상 이 값보다 작다 → 수정 전 가드라면 반드시 거절되는 조건.
+        let peerSessionId = try #require(UUID(uuidString: "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF"))
+
+        // 1) 상대(peer)의 워크아웃 id를 채택한다 → activeSessionId != workoutSessionId
+        vm.startMatch(options: options, sessionId: peerSessionId, isRemote: true)
+        // 2) 이 기기가 다음 경기의 driver가 된다 (워크아웃 id는 채택한 값 유지)
+        vm.startNewMatch(notifyRemote: false)
+        vm.startMatch(options: options)
+        #expect(vm.isDriver)
+        #expect(vm.activeSessionIdForTest == peerSessionId)
+        #expect(vm.activeSessionIdForTest != vm.workoutSessionId)
+
+        // 3) 같은 워크아웃 안에서 상대가 다음 경기를 시작한다
+        let peerMatchId = UUID()
+        vm.applyIncomingSessionStartForTest(SessionStartMessage(
+            sessionId: peerSessionId,
+            matchId: peerMatchId,
+            options: MatchOptions(mode: .bestOfThree, noAdRule: false, noTieRule: false),
+            workoutStartDate: Date()
+        ))
+
+        #expect(vm.currentSession()?.id == peerMatchId) // 거절되지 않고 수용
+        #expect(vm.scoreVM.options.mode == .bestOfThree)
+        #expect(!vm.isDriver) // 한쪽이 mirror로 양보 → split-brain 아님
+        #expect(vm.activeSessionIdForTest == peerSessionId)
+    }
+
+    @Test @MainActor func matchEndMessageCarriesMatchIntervalAndCumulativeMetrics() {
+        let vm = WorkoutSessionViewModel()
+        vm.healthKit.setLiveMetricsForTesting(calories: 350, basalCalories: 70, elapsedSeconds: 600)
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+
+        vm.healthKit.setLiveMetricsForTesting(calories: 600, basalCalories: 130, elapsedSeconds: 1500)
+        vm.finishMatch(result: .win, completedSets: [SetScore(my: 6, your: 4)])
+
+        guard let session = vm.currentSession() else {
+            Issue.record("currentSession이 없음")
+            return
+        }
+        #expect(session.elapsedAtStart == 600)
+        #expect(session.elapsedAtEnd == 1500)
+        #expect(session.kcalAtEnd == 600)
+        #expect(session.totalKcalAtEnd == 730)
+    }
 }

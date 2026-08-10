@@ -586,4 +586,128 @@ struct WorkoutSessionViewModelTests {
             return
         }
     }
+
+    // MARK: - matchId 발급·채택 + 경기 시작 시각
+
+    /// 스펙 1-3 재현: 폰의 startedAt 프로퍼티는 워크아웃 시작 시각인데 이를 그대로
+    /// MatchSession.startedAt에 넣고 있었다. 워치 경로는 경기 시작 시각을 넣어 서로 어긋났다.
+    /// startedAt은 History 정렬·캘린더 날짜·Summary 기간 필터에 모두 쓰인다.
+    @Test @MainActor func startMatchUsesMatchStartTimeNotWorkoutStartTime() {
+        let vm = WorkoutSessionViewModel()
+        let workoutStart = Date(timeIntervalSince1970: 1_000_000)
+        vm.startSession(startDate: workoutStart)
+
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+
+        guard let session = vm.currentSessionForTest else {
+            Issue.record("currentSession이 없음")
+            return
+        }
+        #expect(session.startedAt != workoutStart)
+        #expect(session.startedAt.timeIntervalSinceNow > -5)
+    }
+
+    @Test @MainActor func startNewMatchKeepsSessionIdAndIssuesNewMatchId() {
+        let vm = WorkoutSessionViewModel()
+        let options = MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false)
+
+        vm.startMatch(options: options)
+        let firstMatchId = vm.currentSessionForTest?.id
+        let sessionId = vm.currentSessionIdForTest
+
+        vm.startNewMatch(notifyRemote: false)
+        vm.startMatch(options: options)
+
+        #expect(vm.currentSessionIdForTest == sessionId)
+        #expect(firstMatchId != nil)
+        #expect(vm.currentSessionForTest?.id != firstMatchId)
+    }
+
+    @Test @MainActor func restartMatchIssuesNewMatchIdButKeepsSessionId() {
+        let vm = WorkoutSessionViewModel()
+        let options = MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false)
+
+        vm.startMatch(options: options)
+        let firstMatchId = vm.currentSessionForTest?.id
+        let sessionId = vm.currentSessionIdForTest
+        vm.finishMatch(result: .win, completedSets: [(my: 6, your: 4)])
+
+        vm.restartMatch()
+
+        #expect(firstMatchId != nil)
+        #expect(vm.currentSessionForTest?.id != firstMatchId)
+        #expect(vm.currentSessionIdForTest == sessionId)
+    }
+
+    @Test @MainActor func remoteSessionStartAdoptsMatchId() {
+        let vm = WorkoutSessionViewModel()
+        let remoteMatchId = UUID()
+
+        vm.applyIncomingSessionStartForTest(SessionStartMessage(
+            sessionId: UUID(),
+            matchId: remoteMatchId,
+            options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false),
+            workoutStartDate: Date()
+        ))
+
+        #expect(vm.currentSessionForTest?.id == remoteMatchId)
+    }
+
+    /// 최종 리뷰 Finding 1: 콜드런치 mirror 경로(WorkoutSessionView.onAppear)는 메시지 싱크를 거치지
+    /// 않고 startMatch를 직접 호출한다. matchId를 넘기지 않으면 mirror가 자기 id를 새로 발급해
+    /// driver와 영구히 어긋난다(저장 시 중복 제거 키 불일치). 호출 계약을 고정한다.
+    @Test @MainActor func startMatchAdoptsExplicitRemoteMatchId() {
+        let vm = WorkoutSessionViewModel()
+        let remoteSessionId = UUID()
+        let remoteMatchId = UUID()
+
+        vm.startMatch(
+            options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false),
+            sessionId: remoteSessionId,
+            matchId: remoteMatchId,
+            isRemote: true
+        )
+
+        #expect(vm.currentSessionForTest?.id == remoteMatchId)
+        #expect(vm.currentSessionIdForTest == remoteSessionId)
+    }
+
+    /// 스펙 1-2 재현: durationSeconds에 워크아웃 누적 경과시간을 넣고 있었다.
+    /// 칼로리는 경기 구간 차분인데 시간만 누적이라 한 레코드 안에서 기준이 갈렸다.
+    @Test @MainActor func buildMatchFromSessionDurationIsMatchIntervalNotWorkoutTotal() {
+        let vm = WorkoutSessionViewModel()
+        // startSession()은 1초 타이머를 돌려 elapsedSeconds를 덮어쓴다. 여기선 값을 직접 주입한다.
+        vm.elapsedSeconds = 600
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.elapsedSeconds = 1500
+        vm.finishMatch(result: .win, completedSets: [(my: 6, your: 4)])
+
+        guard case let .finished(session) = vm.phase else {
+            Issue.record("Expected .finished phase")
+            return
+        }
+        let match = vm.buildMatchForTest(session)
+
+        #expect(match.durationSeconds == 900)
+        #expect(match.workoutElapsedSeconds == 1500)
+    }
+
+    @Test @MainActor func buildMatchFromSessionRecordsCumulativeWorkoutCalories() {
+        let vm = WorkoutSessionViewModel()
+        vm.metrics = WorkoutMetrics(elapsedSeconds: 600, activeCalories: 350, totalCalories: 420, heartRate: 130)
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.metrics = WorkoutMetrics(elapsedSeconds: 1500, activeCalories: 600, totalCalories: 730, heartRate: 140)
+        vm.finishMatch(result: .win, completedSets: [(my: 6, your: 4)])
+
+        guard case let .finished(session) = vm.phase else {
+            Issue.record("Expected .finished phase")
+            return
+        }
+        let match = vm.buildMatchForTest(session)
+
+        #expect(match.caloriesBurned == 250) // 경기 구간
+        #expect(match.workoutCaloriesBurned == 600) // 누적
+        #expect(match.totalCaloriesBurned == 310) // 경기 구간
+        #expect(match.workoutTotalCaloriesBurned == 730) // 누적
+    }
 }
