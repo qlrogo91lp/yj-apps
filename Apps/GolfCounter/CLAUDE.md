@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 GolfCounter — 워치 메인 입력, iOS는 기록·통계 전용인 골프 스트로크 카운터.
 설계는 `docs/superpowers/specs/2026-07-31-golfcounter-rebuild-design.md` 참조 (v1 리빌드 진행 중).
 타깃: `GolfCounter`(iOS 17+) / `GolfCounter Watch App`(watchOS 10+) / `ComplicationAppExtension`(watch 위젯).
-의존성: `../ralli-kit` 로컬 SPM (WorkoutCore / ConnectivityCore / PersistenceCore). 그 외 없음.
+의존성: ralli-kit 원격 SPM (`https://github.com/qlrogo91lp/ralli-kit.git`, branch `main`) — WorkoutCore / ConnectivityCore / PersistenceCore / WorkoutUI. 그 외 없음.
 
 ## Commands
 
@@ -29,7 +29,7 @@ xcodebuild -project GolfCounter.xcodeproj -scheme "ComplicationAppExtension" \
   -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)' build   # 또는 test
 ```
 
-`../ralli-kit`이 SPM 로컬 패키지 의존성(WorkoutCore / ConnectivityCore / PersistenceCore)의 소스이므로, 이 저장소와 형제 디렉터리로 반드시 체크아웃되어 있어야 프로젝트가 패키지 그래프를 resolve할 수 있다.
+패키지 참조가 원격(branch `main`)이므로 `../ralli-kit`을 형제 디렉터리로 체크아웃해 둘 필요는 없다 — 빌드·실행은 원격 참조만으로 패키지 그래프를 resolve한다. ralli-kit 패키지 자체를 고치는 동안에만 예외: 로컬 `../ralli-kit` 폴더를 Xcode 워크스페이스에 끌어다 놓으면 같은 이름의 원격 패키지보다 우선 적용된다(Xcode 기본 동작). 그 local override는 활발히 개발할 때만 쓰고, 끝나면 제거한다 — 커밋되는 pbxproj는 항상 원격 참조를 유지한다.
 
 ## Architecture & Conventions
 

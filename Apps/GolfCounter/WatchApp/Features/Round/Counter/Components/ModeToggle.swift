@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ModeToggle: View {
     @Binding var mode: StrokeInputMode
+    var height: CGFloat = 28
 
     var body: some View {
         HStack(spacing: 4) {
@@ -16,7 +17,7 @@ struct ModeToggle: View {
         } label: {
             Text(title)
                 .font(.system(size: 13, weight: .semibold))
-                .frame(maxWidth: .infinity, minHeight: 28)
+                .frame(maxWidth: .infinity, minHeight: height)
         }
         .buttonStyle(.plain)
         .background(mode == value ? Color.green.opacity(0.8) : Color.gray.opacity(0.25), in: Capsule())

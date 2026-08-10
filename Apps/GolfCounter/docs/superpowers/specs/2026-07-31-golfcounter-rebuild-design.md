@@ -44,7 +44,7 @@ v1.1로 미룸: Digital Crown 카운트 조정, GPS 경로 토글.
 
 ### 의존성
 
-- **ralli-kit 로컬 SPM 패키지** (`../ralli-kit`): `WorkoutCore` / `ConnectivityCore` / `PersistenceCore`.
+- **ralli-kit 원격 SPM 패키지** (`https://github.com/qlrogo91lp/ralli-kit.git`, branch `main`): `WorkoutCore` / `WorkoutUI` / `ConnectivityCore` / `PersistenceCore`. 타깃별 링크와 원격 전환 근거는 `2026-08-09-rallikit-adoption-and-counter-paging-design.md` §4 참조. (앱스토어 릴리즈 시점에 semver 태그로 전환 예정)
 - 그 외 외부 의존성 없음.
 
 ### 폴더 구조 (tennis_counter 컨벤션 그대로)
@@ -167,7 +167,7 @@ final class GolfRound {
 
 ### 라운드 세션 — 3페이지 TabView (tennis WorkoutSession 패턴)
 
-**페이지 1/3 컨트롤**: 일시정지 / 라운드 종료 / 잠금(오터치 방지, water lock 방식)
+**페이지 1/3 컨트롤**: 일시정지 / 라운드 종료. RalliKit `WorkoutUI.WorkoutControlsView`를 그대로 쓴다. (초안의 "잠금(water lock)"은 plan ①~④ 어디에도 들어가지 않은 채 미구현으로 남았고, 손목을 내리면 화면이 꺼지는 watchOS 기본 동작이 오터치를 상당히 막아준다 — 2026-08-09 설계에서 삭제)
 
 **페이지 2/3 메인 카운터 (기본 화면)**:
 
@@ -184,7 +184,7 @@ final class GolfRound {
 ```
 
 - `+`/`−`에 서로 다른 햅틱 패턴 적용 (오조작 인지용).
-- 아래로 스크롤(crown) 시 전체 스코어카드 표시 — 모달 아님:
+- 크라운을 돌리면 **화면 단위로 스냅되며** 전체 스코어카드가 나온다 — 모달 아님. `ScrollView` + `.scrollTargetBehavior(.paging)`이고, 카운터 블록은 `ViewThatFits`가 세 크기 세트 중 화면에 들어가는 것을 골라 맞춘다 (기기 모델 분기 없음 — 2026-08-09 설계 §6):
 
 ```
 H1  Par3  4타(2p)  +1
@@ -193,7 +193,7 @@ H2  Par4  3타(1p)  -1
 합계 41타 · 12퍼트 · +3
 ```
 
-**페이지 3/3 메트릭**: 심박수 · 칼로리 · 거리 · 경과 시간 실시간 표시 (WorkoutCore 경유).
+**페이지 3/3 메트릭**: 경과시간 · 활동 kcal · 총 kcal · 심박수. RalliKit `WorkoutUI.WorkoutMetricsView`를 그대로 쓴다. **실시간 거리는 표시하지 않는다** — 공유 값 타입 `WorkoutMetrics`에 거리 필드가 없기 때문이며, 거리·걸음수의 수집과 기록(`WorkoutResult` → `RoundMetrics` → `GolfRound`)은 전부 그대로 유지된다 (2026-08-09 설계 §5).
 
 ### 종료 요약
 

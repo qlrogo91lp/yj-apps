@@ -2,6 +2,7 @@ import SwiftUI
 
 struct HoleNavigation: View {
     let canGoToPrevious: Bool
+    var height: CGFloat = 30
     let onPrevious: () -> Void
     let onNext: () -> Void
 
@@ -18,7 +19,7 @@ struct HoleNavigation: View {
         Button(action: action) {
             Label(title, systemImage: systemName)
                 .font(.system(size: 12, weight: .semibold))
-                .frame(maxWidth: .infinity, minHeight: 30)
+                .frame(maxWidth: .infinity, minHeight: height)
         }
         .buttonStyle(.plain)
         .background(Color.gray.opacity(0.25), in: Capsule())
