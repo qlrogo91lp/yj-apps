@@ -1,70 +1,30 @@
 import SwiftUI
-import WatchKit
 
+/// 카운터 화면 — 크라운으로 넘기는 세로 페이지 스크롤.
+///
+/// 1페이지는 화면 높이에 정확히 고정된 카운터, 그 아래가 전체 스코어카드다 (spec §4).
+/// 스코어카드가 한 화면을 넘으면 `.paging`이 컨테이너 높이 단위로 알아서 더 나눈다.
+///
+/// 이 화면은 `RoundSessionView`의 **가로** TabView 안에 들어 있다. 크라운(세로)과
+/// 스와이프(가로)는 입력 채널이 달라 충돌하지 않는다 — 세로 TabView를 중첩하지 않은 이유다.
 struct CounterView: View {
     @ObservedObject var viewModel: RoundViewModel
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 8) {
-                header
-                currentHoleScore
-                strokeButtons
-                modeAndPar
-                HoleNavigation(canGoToPrevious: viewModel.canGoToPreviousHole,
-                               onPrevious: viewModel.goToPreviousHole,
-                               onNext: viewModel.goToNextHole)
+            VStack(spacing: 0) {
+                ViewThatFits(in: .vertical) {
+                    CounterPage(viewModel: viewModel, sizing: .regular)
+                    CounterPage(viewModel: viewModel, sizing: .compact)
+                    CounterPage(viewModel: viewModel, sizing: .tight)
+                }
+                .containerRelativeFrame(.vertical)
 
-                Divider().padding(.top, 4)
                 Scorecard(snapshot: viewModel.snapshot)
-            }
-            .padding(.horizontal, 4)
-        }
-    }
-
-    private var header: some View {
-        HStack {
-            Text("H\(viewModel.currentHoleNumber) · Par \(viewModel.currentPar)")
-                .font(.system(size: 15, weight: .semibold))
-            Spacer()
-            Text(ScoreFormat.relativeToPar(viewModel.relativeToPar))
-                .font(.system(size: 15, weight: .bold, design: .rounded))
-                .foregroundStyle(.green)
-        }
-    }
-
-    private var currentHoleScore: some View {
-        Text("\(viewModel.currentScore)타 · \(viewModel.currentPutts)퍼트")
-            .font(.system(size: 22, weight: .bold, design: .rounded))
-            .contentTransition(.numericText())
-    }
-
-    private var strokeButtons: some View {
-        HStack(spacing: 12) {
-            StrokeButton(systemName: "plus", tint: .green) {
-                viewModel.incrementStroke()
-                WKInterfaceDevice.current().play(.click)
-            }
-            StrokeButton(systemName: "minus", tint: .orange) {
-                viewModel.decrementStroke()
-                WKInterfaceDevice.current().play(.directionDown)
+                    .padding(.horizontal, 4)
             }
         }
-    }
-
-    private var modeAndPar: some View {
-        HStack(spacing: 4) {
-            ModeToggle(mode: $viewModel.inputMode)
-            Button {
-                viewModel.beginParEditing()
-            } label: {
-                Text("Par")
-                    .font(.system(size: 13, weight: .semibold))
-                    .frame(minWidth: 44, minHeight: 28)
-            }
-            .buttonStyle(.plain)
-            .background(Color.gray.opacity(0.25), in: Capsule())
-        }
+        .scrollTargetBehavior(.paging)
     }
 }
 
