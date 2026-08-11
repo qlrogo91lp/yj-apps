@@ -1,6 +1,24 @@
 import SwiftUI
 import WorkoutCore
 
+#Preview {
+    let match = Match()
+    match.startedAt = Date()
+    match.myTotalSets = 2
+    match.yourTotalSets = 1
+    match.caloriesBurned = 320
+    match.totalCaloriesBurned = 410
+    match.durationSeconds = 5400
+    match.averageHeartRate = 132
+    match.sets = [
+        SetRecord(myGames: 6, yourGames: 4, setNumber: 1),
+        SetRecord(myGames: 4, yourGames: 6, setNumber: 2),
+        SetRecord(myGames: 6, yourGames: 3, setNumber: 3)
+    ]
+
+    return MatchDetailSheet(match: match)
+}
+
 struct MatchDetailSheet: View {
     let match: Match
 
@@ -45,22 +63,22 @@ struct MatchDetailSheet: View {
                         StatCard(
                             title: String(localized: "summary_total_calories"),
                             value: match.caloriesBurned.map { String(format: "%.0f", $0) } ?? "–",
-                            color: .white
+                            color: .green
                         )
                         StatCard(
                             title: String(localized: "summary_total_energy"),
                             value: match.totalCaloriesBurned.map { String(format: "%.0f", $0) } ?? "–",
-                            color: .white
+                            color: .green
                         )
                         StatCard(
                             title: String(localized: "summary_duration"),
                             value: matchDurationString,
-                            color: .white
+                            color: .green
                         )
                         StatCard(
                             title: String(localized: "summary_avg_heartrate"),
                             value: match.averageHeartRate.map { String(format: "%.0f", $0) } ?? "–",
-                            color: .white
+                            color: .green
                         )
                     }
                     .padding(.horizontal, 8)
