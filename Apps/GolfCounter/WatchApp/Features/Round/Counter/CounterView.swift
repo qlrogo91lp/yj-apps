@@ -11,8 +11,8 @@ import SwiftUI
 struct CounterView: View {
     @ObservedObject var viewModel: RoundViewModel
     /// watchOS의 `.verticalPage` 스타일은 `selection` 바인딩이 없으면 첫 페이지가 아니라
-    /// 마지막 페이지로 초기 진입하는 경우가 있다(실기 확인). 태그를 명시하고 0으로
-    /// 고정 초기화해 항상 카운터 페이지에서 시작하도록 만든다.
+    /// 마지막 페이지로 초기 진입하는 경우가 있다(시뮬레이터 탭 테스트로 확인).
+    /// 태그를 명시하고 0으로 고정 초기화해 항상 카운터 페이지에서 시작하도록 만든다.
     @State private var selectedPage = 0
 
     var body: some View {
