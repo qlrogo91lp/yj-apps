@@ -38,13 +38,6 @@ struct CounterSizing {
 
     let spacing: CGFloat
 
-    // MARK: 구 레이아웃 필드 (CounterPage 재작성 시 제거)
-
-    let strokeButton: CGFloat
-    let strokeIcon: CGFloat
-    let controlHeight: CGFloat
-    let navHeight: CGFloat
-
     /// 초과 링까지 포함한 실제 반지름. 화면 폭 안에 들어가는지 판단하는 값이다.
     var outerRadius: CGFloat {
         ringDiameter / 2 + ringStroke / 2 + overflowGap + overflowStroke
@@ -70,11 +63,7 @@ struct CounterSizing {
                                        arrowSize: 40,
                                        modeHeight: 48,
                                        modeWideWidth: 100,
-                                       spacing: 6,
-                                       strokeButton: 62,
-                                       strokeIcon: 26,
-                                       controlHeight: 28,
-                                       navHeight: 30)
+                                       spacing: 6)
 
     /// 42~44mm.
     static let compact = CounterSizing(headerHeight: 32,
@@ -91,11 +80,7 @@ struct CounterSizing {
                                        arrowSize: 36,
                                        modeHeight: 44,
                                        modeWideWidth: 92,
-                                       spacing: 5,
-                                       strokeButton: 54,
-                                       strokeIcon: 23,
-                                       controlHeight: 26,
-                                       navHeight: 28)
+                                       spacing: 5)
 
     /// 40mm. `ViewThatFits`가 시도하는 마지막 후보라 이 아래로는 fallback이 없다 —
     /// 더 작은 기기가 나오거나 고정 pt 대신 Dynamic Type으로 바꿔서 이 세트도 안 맞게 되면
@@ -114,9 +99,5 @@ struct CounterSizing {
                                      arrowSize: 32,
                                      modeHeight: 38,
                                      modeWideWidth: 84,
-                                     spacing: 4,
-                                     strokeButton: 46,
-                                     strokeIcon: 20,
-                                     controlHeight: 24,
-                                     navHeight: 26)
+                                     spacing: 4)
 }

@@ -3,24 +3,54 @@ import CoreGraphics
 import Testing
 
 struct CounterSizingTests {
+    private let sets: [CounterSizing] = [.regular, .compact, .tight]
+
     /// ViewThatFits는 regular → compact → tight 순으로 시도해 첫 번째로 들어가는 것을 고른다.
     /// 뒤 세트가 앞 세트보다 큰 값이 하나라도 있으면 그 순서가 의미를 잃는다.
     @Test func 크기세트는_regular에서_tight로_갈수록_모든_값이_작아진다() {
-        let sets: [CounterSizing] = [.regular, .compact, .tight]
         for (larger, smaller) in zip(sets, sets.dropFirst()) {
+            #expect(smaller.headerHeight < larger.headerHeight)
             #expect(smaller.headerFont < larger.headerFont)
+            #expect(smaller.parButtonSize < larger.parButtonSize)
+            #expect(smaller.undoSize < larger.undoSize)
+            #expect(smaller.ringDiameter < larger.ringDiameter)
+            #expect(smaller.ringStroke < larger.ringStroke)
+            #expect(smaller.overflowStroke < larger.overflowStroke)
+            #expect(smaller.overflowGap < larger.overflowGap)
             #expect(smaller.scoreFont < larger.scoreFont)
-            #expect(smaller.strokeButton < larger.strokeButton)
-            #expect(smaller.strokeIcon < larger.strokeIcon)
-            #expect(smaller.controlHeight < larger.controlHeight)
-            #expect(smaller.navHeight < larger.navHeight)
+            #expect(smaller.relativeFont < larger.relativeFont)
+            #expect(smaller.arrowSize < larger.arrowSize)
+            #expect(smaller.modeHeight < larger.modeHeight)
+            #expect(smaller.modeWideWidth < larger.modeWideWidth)
             #expect(smaller.spacing < larger.spacing)
         }
     }
 
-    /// 타수 버튼은 라운드 중 가장 많이 눌리는 컨트롤이다.
-    /// 가장 작은 세트에서도 Apple 권장 최소 탭 타깃 44pt 아래로 내려가면 안 된다.
-    @Test func 가장_작은_크기세트도_타수버튼이_44pt_이상이다() {
-        #expect(CounterSizing.tight.strokeButton >= 44)
+    /// 링 안쪽 원반은 라운드 중 가장 많이 눌리는 탭 타깃이다.
+    /// 가장 작은 세트에서도 Apple 권장 최소 44pt 아래로 내려가면 안 된다.
+    @Test func 가장_작은_크기세트도_링_안쪽_원반이_44pt_이상이다() {
+        #expect(CounterSizing.tight.innerDiameter >= 44)
+    }
+
+    /// 취소와 Par는 헤더 안에 들어가므로 헤더 높이를 넘으면 행이 삐져나온다.
+    @Test func 헤더_버튼은_헤더_높이를_넘지_않는다() {
+        for sizing in sets {
+            #expect(sizing.parButtonSize <= sizing.headerHeight)
+            #expect(sizing.undoSize <= sizing.headerHeight)
+        }
+    }
+
+    /// 알약 변형이 원형보다 좁으면 ViewThatFits의 두 후보 순서가 뒤집힌다.
+    @Test func 알약_모드버튼은_원형보다_넓다() {
+        for sizing in sets {
+            #expect(sizing.modeWideWidth > sizing.modeHeight)
+        }
+    }
+
+    /// 40mm에서만 헤더를 축약한다 — 나머지는 전체 표기가 들어간다.
+    @Test func 헤더_축약은_가장_작은_세트에서만_켜진다() {
+        #expect(CounterSizing.regular.usesShortHoleLabel == false)
+        #expect(CounterSizing.compact.usesShortHoleLabel == false)
+        #expect(CounterSizing.tight.usesShortHoleLabel)
     }
 }

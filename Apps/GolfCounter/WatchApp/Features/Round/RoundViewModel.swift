@@ -141,20 +141,6 @@ final class RoundViewModel: ObservableObject {
         publishSnapshot()
     }
 
-    func decrementStroke() {
-        switch inputMode {
-        case .swing:
-            // 퍼팅은 타수에 포함되는 개념이라, 타수가 퍼팅 수 아래로 내려갈 수 없다.
-            // puttCounts는 항상 0 이상이므로 하한 0도 이 식이 함께 보장한다.
-            holeScores[currentHoleIndex] = max(holeScores[currentHoleIndex] - 1, puttCounts[currentHoleIndex])
-        case .putt:
-            guard puttCounts[currentHoleIndex] > 0 else { return }
-            holeScores[currentHoleIndex] -= 1
-            puttCounts[currentHoleIndex] -= 1
-        }
-        publishSnapshot()
-    }
-
     /// 현재 홀의 마지막 입력을 되돌린다. 입력의 정확한 역연산이다.
     /// 상태를 바꾸는 모든 경로가 스냅샷을 발행한다는 규칙을 따라 마지막에 발행한다.
     func undo() {
