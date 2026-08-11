@@ -151,6 +151,14 @@ WorkoutSessionService.currentDistanceMeters
 
 ## 6. 파트 C — 카운터 크라운 스냅 페이징
 
+> **⚠️ 이 절은 `2026-08-11-watch-counter-redesign-design.md`가 개정했다.**
+>
+> 아래의 `ScrollView` + `.scrollTargetBehavior(.paging)` 구조와 "세로 `TabView` 중첩 기각" 결정은 **번복되었다.** 현재 구현은 `TabView` + `.tabViewStyle(.verticalPage)` 중첩이며, 스코어카드를 9홀씩 나눠 페이지 안에 스크롤을 두지 않는다.
+>
+> 번복 근거: 중첩 기각은 *스코어카드가 페이지 안에서 스크롤된다*는 전제 위에 있었는데, 9홀 청킹으로 그 전제가 사라져 크라운을 쓰는 주체가 페이지 전환 하나뿐이 되었다. 자세한 내용은 개정 문서 §4 참조.
+>
+> 아래 `### 작은 화면 대응`의 `CounterSizing` 표도 개정 문서 §10이 대체한다 — 카운터 레이아웃이 바뀌면서 필드가 전부 교체되었다.
+
 ### 구조
 
 ```swift
