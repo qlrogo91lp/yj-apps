@@ -219,6 +219,8 @@ H2  Par4  3타(1p)  -1
 
 ## 6. iOS 화면 흐름
 
+> **개정 (2026-08-13):** 이 절의 골격은 유지되지만 구현 세부는 `2026-08-13-ios-history-stats-design.md`가 확정한다 — 탭 2개(통계·기록) 구성, 상세 화면을 시트가 아닌 push로, 통계 지표를 9홀/18홀 혼재에 맞춰 재정의(평균 타수·평균 오버파는 18홀 라운드만, 홀당 평균 퍼트로 변경, 스코어 분포·파별 성적 추가). 충돌 시 그 문서가 우선한다.
+
 ### 기록 탭 (`iOSApp/Features/History/`)
 
 - 라운드 리스트 (최신순, 날짜·골프장명·총타수·오버파) → 상세 화면.
@@ -300,8 +302,8 @@ tennis_counter `ComplicationApp` 구조 재활용: App Group UserDefaults 상태
 |------|------|------|
 | ③ | watch | **워치 카운터 코어** — 홈·파 선택·카운터·세션(WorkoutCore), `RoundSnapshot` 기록·복구 |
 | ④ | watch | **홀 수 선택 + 종료 요약 + 전송(발신)** — 9/18홀 선택 화면과 상한 고정, 미기록 홀 트림, 종료 확인 → 요약 화면, `RoundCompletedMessage` 정의(Shared) + `.reliable` 발신, 스냅샷 제거. 홀 수 선택은 plan ③ 코드(`RoundViewModel`·`RoundSnapshot`·홈)를 함께 고친다 |
-| ⑤ | ios | **수신 + 기록 탭** — MessageRouter 수신·중복 검사·SwiftData 저장, 기록 리스트/상세/편집 시트 |
-| ⑥ | ios | **통계 탭** — Swift Charts (오버파 추이, 베스트/평균 타수, 평균 퍼팅) |
+| ⑤ | ios | **수신 + 기록 탭** — MessageRouter 수신·중복 검사·SwiftData 저장, 기록 리스트/상세(push)/홀 편집 시트 (`2026-08-13-ios-history-stats-design.md` §4·§6) |
+| ⑥ | ios | **통계 탭** — Swift Charts (오버파 추이, 요약 카드, 스코어 분포, 파별 성적) (`2026-08-13-ios-history-stats-design.md` §5) |
 | ⑦ | common | **로컬라이즈 + 이름 교체** — `.xcstrings` ko/en, 표시명 반영 |
 | ⑧ | watch | **MapKit 골프장 감지 (마지막)** — 위치 1회 조회 + POI 검색 + 수동 입력 폴백. 그 전까지 `courseName`은 항상 nil로 시작하고 iOS에서 수동 입력 |
 | — | | *(v1.1)* Digital Crown 조정, GPS 경로 토글 |
