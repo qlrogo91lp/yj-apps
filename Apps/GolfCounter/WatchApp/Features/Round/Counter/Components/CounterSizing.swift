@@ -6,7 +6,9 @@ import CoreGraphics
 /// 실제로 들어가는 첫 세트를 고른다. **기기 모델을 분기하지 않는다** — 측정은 SwiftUI가 하므로
 /// 여기에 화면 높이나 기기 이름이 등장할 이유가 없다.
 ///
-/// 세로 합계 = headerHeight + spacing + ringDiameter + spacing + modeHeight.
+/// 세로 합계 = headerHeight + spacing + outerRadius*2 + spacing + modeHeight.
+/// `StrokeRing`이 실제로 프레임을 잡는 값은 ringDiameter가 아니라 outerRadius*2다 —
+/// 초과 링이 비어 있어도 그 공간을 항상 예약하기 때문이다. `ringDiameter`는 그 역산 입력값이다.
 /// 취소와 Par가 둘 다 헤더 안에 들어가므로 세로 예산에서 이 둘의 몫은 headerHeight 하나뿐이다.
 struct CounterSizing {
     // MARK: 상단 정보행
@@ -54,7 +56,7 @@ struct CounterSizing {
                                        parButtonSize: 36,
                                        undoSize: 36,
                                        usesShortHoleLabel: false,
-                                       ringDiameter: 132,
+                                       ringDiameter: 103,
                                        ringStroke: 11,
                                        overflowStroke: 5,
                                        overflowGap: 4,
@@ -71,7 +73,7 @@ struct CounterSizing {
                                        parButtonSize: 32,
                                        undoSize: 32,
                                        usesShortHoleLabel: false,
-                                       ringDiameter: 110,
+                                       ringDiameter: 84,
                                        ringStroke: 10,
                                        overflowStroke: 4.5,
                                        overflowGap: 3.5,
@@ -90,7 +92,7 @@ struct CounterSizing {
                                      parButtonSize: 28,
                                      undoSize: 28,
                                      usesShortHoleLabel: true,
-                                     ringDiameter: 92,
+                                     ringDiameter: 70,
                                      ringStroke: 8,
                                      overflowStroke: 4,
                                      overflowGap: 3,

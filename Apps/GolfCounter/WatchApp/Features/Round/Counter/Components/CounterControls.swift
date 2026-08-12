@@ -11,20 +11,21 @@ struct CounterControls: View {
 
     var body: some View {
         HStack(spacing: sizing.spacing) {
-            arrow(systemName: "chevron.left", action: onPrevious)
+            arrow(label: "이전", systemName: "chevron.left", action: onPrevious)
                 .disabled(!canGoToPrevious)
                 .opacity(canGoToPrevious ? 1 : 0.35)
 
             ModeButton(mode: $mode, sizing: sizing)
 
-            arrow(systemName: "chevron.right", action: onNext)
+            arrow(label: "다음", systemName: "chevron.right", action: onNext)
         }
         .frame(height: sizing.modeHeight)
     }
 
-    private func arrow(systemName: String, action: @escaping () -> Void) -> some View {
+    private func arrow(label: String, systemName: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Image(systemName: systemName)
+            Label(label, systemImage: systemName)
+                .labelStyle(.iconOnly)
                 .font(.system(size: sizing.arrowSize * 0.4, weight: .semibold))
                 .frame(width: sizing.arrowSize, height: sizing.arrowSize)
                 .background(Color.gray.opacity(0.25), in: Circle())

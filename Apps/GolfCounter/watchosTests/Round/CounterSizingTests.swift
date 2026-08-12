@@ -53,4 +53,15 @@ struct CounterSizingTests {
         #expect(CounterSizing.compact.usesShortHoleLabel == false)
         #expect(CounterSizing.tight.usesShortHoleLabel)
     }
+
+    /// 링이 실제로 프레임을 잡는 값은 ringDiameter가 아니라 outerRadius*2다 (초과 링 공간을
+    /// 항상 예약하므로). 이 테스트는 그 실제 값 기준으로 세로 합계가 예산 안에 들어가는지 본다.
+    @Test func 세로_합계는_실제_렌더_기준으로_예산_안에_들어간다() {
+        let budgets: [(CounterSizing, CGFloat)] = [(.regular, 228), (.compact, 196), (.tight, 166)]
+        for (sizing, budget) in budgets {
+            let total = sizing.headerHeight + sizing.spacing * 2
+                + sizing.outerRadius * 2 + sizing.modeHeight
+            #expect(total <= budget)
+        }
+    }
 }

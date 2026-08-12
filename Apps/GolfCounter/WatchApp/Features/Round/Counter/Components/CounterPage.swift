@@ -56,11 +56,13 @@ struct CounterPage: View {
                     .foregroundStyle(.secondary)
             }
 
-            Circle()
-                .fill(.clear)
-                .contentShape(Circle())
-                .frame(width: sizing.innerDiameter, height: sizing.innerDiameter)
-                .onTapGesture(perform: addStroke)
+            Button(action: addStroke) {
+                Circle()
+                    .fill(.clear)
+                    .contentShape(Circle())
+            }
+            .buttonStyle(.plain)
+            .frame(width: sizing.innerDiameter, height: sizing.innerDiameter)
         }
     }
 
