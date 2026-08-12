@@ -31,17 +31,6 @@ struct RoundViewModelSnapshotTests {
         #expect(spy.published.last?.holeScores == [1])
     }
 
-    @Test func 타수를_내리면_스냅샷을_발행한다() {
-        let spy = RoundSnapshotPublisherSpy()
-        let viewModel = makeViewModel(spy: spy)
-        viewModel.selectPar(4)
-        viewModel.incrementStroke()
-
-        viewModel.decrementStroke()
-
-        #expect(spy.published.last?.holeScores == [0])
-    }
-
     @Test func 파를_고르면_스냅샷을_발행한다() {
         let spy = RoundSnapshotPublisherSpy()
         let viewModel = makeViewModel(spy: spy)

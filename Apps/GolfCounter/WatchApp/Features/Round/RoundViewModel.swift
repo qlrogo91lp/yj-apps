@@ -17,6 +17,15 @@ final class RoundViewModel: ObservableObject {
     @Published var inputMode: StrokeInputMode = .swing
     /// 파가 이미 설정된 홀에서 [Par] 버튼으로 파 선택 화면을 다시 띄운 상태.
     @Published private(set) var isEditingPar = false
+    /// 현재 홀에서 친 타의 종류 순서. 되돌리기의 유일한 상태다 (spec §7).
+    ///
+    /// `incrementStroke()`가 하는 일이 모드에 따라 (타수 +1) 또는 (타수 +1, 퍼트 +1)
+    /// 두 가지뿐이므로, 어느 쪽이었는지만 알면 정확히 되돌릴 수 있다. 배열 전체를
+    /// 복사할 필요가 없다.
+    ///
+    /// `@Published`인 이유: `canUndo`가 이 값에서 파생되므로, 뷰가 취소 버튼의
+    /// 등장·퇴장을 관찰하려면 변경이 발행되어야 한다.
+    @Published private var strokeHistory: [StrokeInputMode] = []
 
     let startedAt: Date
     var courseName: String?
@@ -80,6 +89,10 @@ final class RoundViewModel: ObservableObject {
         currentHoleIndex > 0
     }
 
+    var canUndo: Bool {
+        !strokeHistory.isEmpty
+    }
+
     var totalStrokes: Int {
         snapshot.totalStrokes
     }
@@ -117,6 +130,7 @@ final class RoundViewModel: ObservableObject {
     // MARK: - 카운터
 
     func incrementStroke() {
+        strokeHistory.append(inputMode)
         switch inputMode {
         case .swing:
             holeScores[currentHoleIndex] += 1
@@ -127,15 +141,12 @@ final class RoundViewModel: ObservableObject {
         publishSnapshot()
     }
 
-    func decrementStroke() {
-        switch inputMode {
-        case .swing:
-            // 퍼팅은 타수에 포함되는 개념이라, 타수가 퍼팅 수 아래로 내려갈 수 없다.
-            // puttCounts는 항상 0 이상이므로 하한 0도 이 식이 함께 보장한다.
-            holeScores[currentHoleIndex] = max(holeScores[currentHoleIndex] - 1, puttCounts[currentHoleIndex])
-        case .putt:
-            guard puttCounts[currentHoleIndex] > 0 else { return }
-            holeScores[currentHoleIndex] -= 1
+    /// 현재 홀의 마지막 입력을 되돌린다. 입력의 정확한 역연산이다.
+    /// 상태를 바꾸는 모든 경로가 스냅샷을 발행한다는 규칙을 따라 마지막에 발행한다.
+    func undo() {
+        guard let mode = strokeHistory.popLast() else { return }
+        holeScores[currentHoleIndex] -= 1
+        if mode == .putt {
             puttCounts[currentHoleIndex] -= 1
         }
         publishSnapshot()
@@ -217,8 +228,10 @@ final class RoundViewModel: ObservableObject {
     }
 
     /// 홀을 옮기면 입력 모드는 스윙으로 리셋되고(spec §3), 진행 중이던 파 편집은 취소된다.
+    /// 되돌리기 기록도 함께 비운다 — 되돌리기 스코프는 현재 홀이다 (spec §7).
     private func resetHoleLocalState() {
         inputMode = .swing
         isEditingPar = false
+        strokeHistory.removeAll()
     }
 }
