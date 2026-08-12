@@ -1814,3 +1814,57 @@ spec §9가 `RingSegments.swift`만 순수 타입으로 명시했으나, 9홀 �
 - `CounterSizing.outerRadius` — Task 4 정의, `StrokeRing.body` 사용 ✓
 - `CounterPage(viewModel:sizing:)` — Task 1의 `CounterView`가 쓰는 시그니처와 Task 5 재작성본이 동일 ✓
 - `viewModel.totalStrokes`·`.relativeToPar`·`.currentPar`·`.currentPutts` — 모두 `RoundViewModel`에 기존 존재 ✓
+
+## 실행 기록 — 최종 전체 브랜치 리뷰에서 잡힌 버그
+
+Task 1~6을 Subagent-Driven Development로 실행하고 각 태스크가 스코프 리뷰를 클린하게 통과한 뒤, 가장 강력한 모델(opus)로 진행한 전체 브랜치 리뷰에서 개별 태스크 리뷰로는 안 보이던 버그를 하나 찾았다. 6개 태스크 각각의 리뷰는 통과했는데도 실제로는 틀려 있었던 사례라 별도로 남긴다.
+
+### 버그: 세로 크기 예산이 실제 렌더 값과 어긋남
+
+`StrokeRing.body`는 `.frame(width: sizing.outerRadius * 2, height: sizing.outerRadius * 2)`로 끝난다. `outerRadius`는 초과 링(파 초과분을 그리는 바깥 얇은 링) 공간까지 포함한 반지름이라, **초과 링이 비어 있어도 항상 그 공간만큼 프레임을 예약**한다.
+
+그런데 `CounterSizing.swift`의 세로 예산 공식(파일 상단 doc comment)과 spec §10 표는 `ringDiameter`가 링의 실제 렌더 크기라고 가정하고 예산을 짰다:
+
+```
+세로 합계 = headerHeight + spacing + ringDiameter + spacing + modeHeight   (틀림)
+```
+
+실제로는 `ringDiameter`가 아니라 `outerRadius * 2`가 렌더되는 값이라, 각 티어가 의도한 예산보다 22~29pt씩 더 컸다. **regular 티어는 실제로 257pt를 차지했는데(예산 228pt), 이는 Apple Watch Ultra 3(257pt) 빼고는 모든 기기 화면 전체 높이보다 크다.** tight 티어도 실제 188pt로 40mm 화면 전체(197pt)에 여유가 9pt밖에 없었다.
+
+**왜 여섯 번의 태스크 리뷰를 다 통과했는가**: `CounterSizingTests`는 단조성(regular>compact>tight)·44pt 최소 탭 타깃·헤더 버튼이 헤더 높이를 안 넘는지·알약이 원보다 넓은지를 검증했지만, **세로 합계가 예산 안에 드는지는 아무도 검증하지 않았다.** Task 4가 `CounterSizing`을 만들 때도, Task 5가 `CounterPage`에 배선할 때도 각자 자기 몫의 정합성만 봤고, "실제로 화면에 렌더되는 총 높이"라는 교차 검증은 전체 브랜치를 한 번에 보는 리뷰에서만 드러났다.
+
+### 수정
+
+`CounterSizing.swift`의 `ringDiameter`를 예산(228/196/166pt)이 그대로 유지되도록 역산해서 고쳤다:
+
+| 티어 | 이전 | 이후 |
+|---|---|---|
+| regular | 132 | **103** |
+| compact | 110 | **84** |
+| tight | 92 | **70** |
+
+`ringStroke`/`overflowGap`/`overflowStroke`는 그대로 두고 `ringDiameter`만 바꿨다. `innerDiameter`(탭 타깃)도 같이 줄지만 tight 기준 62pt로 여전히 44pt 이상이라 기존 제약은 안 깨진다.
+
+재발 방지로 `CounterSizingTests`에 `outerRadius*2` 기준으로 예산을 검증하는 테스트를 추가했다:
+
+```swift
+@Test func 세로_합계는_실제_렌더_기준으로_예산_안에_들어간다() {
+    let budgets: [(CounterSizing, CGFloat)] = [(.regular, 228), (.compact, 196), (.tight, 166)]
+    for (sizing, budget) in budgets {
+        let total = sizing.headerHeight + sizing.spacing * 2
+            + sizing.outerRadius * 2 + sizing.modeHeight
+        #expect(total <= budget)
+    }
+}
+```
+
+같은 리뷰에서 함께 고친 것: 스트로크 탭 영역(`CounterPage.swift`)과 이전/다음 화살표(`CounterControls.swift`)가 삭제된 구 컴포넌트(`StrokeButton`/`HoleNavigation`)가 공짜로 주던 VoiceOver 접근성 시맨틱(`.isButton` trait, 라벨)을 잃은 것 — 진짜 `Button`으로 감싸고 `Label(...).labelStyle(.iconOnly)`로 되돌렸다.
+
+### 커밋
+
+- `5d7ca00` — `ringDiameter` 수정 + 예산 테스트 + 접근성 복원
+- `f081b7f` — spec §10 표를 수정값(103/84/70)으로 동기화
+
+### 남은 한계 (수정 안 됨)
+
+디지털 크라운 회전과 가로(스와이프)/세로(크라운) 제스처 간섭은 이 실행 전체에서 **어떤 도구로도 검증하지 못했다.** watchOS 시뮬레이터에서 크라운 회전을 프로그램적으로 재현할 방법이 없어서, Task 1 구현자도 최종 리뷰어도 빌드 성공 + 탭 기반 상호작용까지만 확인했다. 46mm·40mm 실기 또는 시뮬레이터에서 사람이 직접 크라운을 돌려 확인해야 한다.
