@@ -74,8 +74,8 @@ MainTabView
 
 - **유효 홀**: `holePars[i] > 0` 인 홀. 워치에서 파를 고르지 않은 홀(`par == 0`)은 배열 중간에 남아 있을 수 있다 — 사용자가 의도적으로 건너뛴 홀이며 카운터에 접근한 적이 없으므로 `score`·`putts`도 0이다(스펙 §3).
 - **집계 대상 홀**: 유효 홀 중 `holeScores[i] > 0` 인 홀. 파는 골랐지만 한 타도 치지 않고 넘어간 홀을 제외한다 — 이 홀을 넣으면 `score − par`가 음수가 되어 버디로 잘못 집계된다.
-- **기록 홀 수**: 유효 홀의 개수. 리스트 뱃지에 `N홀`로 그대로 표시한다.
-- **18홀 라운드**: 기록 홀 수가 정확히 18인 라운드. 9홀을 골랐거나 18홀을 고르고 중단한 라운드는 여기 포함되지 않는다.
+- **기록 홀 수**: 유효 홀의 개수. 리스트 뱃지에 `N홀`로 그대로 표시한다. `GolfRound.recordedHoleCount`로 파생한다.
+- **18홀 라운드**: 기록 홀 수가 정확히 18인 라운드(`GolfRound.isFullRound`). 9홀을 골랐거나 18홀을 고르고 중단한 라운드는 여기 포함되지 않는다.
 - **오버파(`relativeToPar`)**: `GolfRound`의 기존 계산 프로퍼티(`totalStrokes − totalPar`). `par == 0` 홀은 양쪽 합에 0으로 기여하므로 값이 왜곡되지 않는다.
 - **오버파 표기**: 양수 `+3`, 0 `E`, 음수 `-2`. 기존 `Shared/Models/ScoreFormat.swift`의 `relativeToPar(_:)`를 재사용한다.
 
@@ -88,7 +88,7 @@ MainTabView
   - 상단: 날짜·시각 / 골프장명 (nil이면 행 자체를 생략, "미입력" 같은 placeholder를 두지 않는다)
   - 하단 좌측: `N홀` 캡슐 뱃지
   - 우측: **오버파를 크게**, 그 아래 총타수를 작게 (`+3` / `75타`)
-- **빈 상태** (`HistoryEmptyState`): "기록된 라운드가 없습니다" + "Apple Watch에서 라운드를 시작하세요" 안내.
+- **빈 상태** (`EmptyRoundsView`): "기록된 라운드가 없습니다" + "Apple Watch에서 라운드를 시작하세요" 안내. 통계 탭도 같은 화면을 쓰므로 앱 루트 `Components/`에 둔다.
 - **삭제**: 행 스와이프 → `confirmationDialog`로 확인 후 삭제. 되돌릴 수 없는 동작이므로 확인 단계를 생략하지 않는다. 삭제 진입점은 **리스트 한 곳뿐**이며, 상세 화면에는 두지 않는다.
 
 ### 상세 (`RoundDetailView`, push)
@@ -148,7 +148,7 @@ UI에서 위반 입력 자체가 불가능하지만, 편집 로직을 담은 `Ro
 
 - 최근 **10라운드**(`startedAt` 최신 10개를 뽑아 오름차순으로 배치), x축 = 날짜 축약 표기, y축 = 오버파
 - `LineMark` + `PointMark`, `E`(0) 위치에 `RuleMark` 기준선
-- 18홀 라운드는 채운 원, 그 외(9홀·중단 라운드)는 빈 원 심볼
+- 18홀 라운드는 원, 그 외(9홀·중단 라운드)는 마름모 심볼 (Swift Charts의 `BasicChartSymbolShape`에 속이 빈 원이 없어 형태로 구분한다)
 - 섹션 헤더에 `총 N라운드` 표기 (라운드 수를 카드 자리에 두지 않는다)
 - 라운드가 1개여도 점 하나를 그대로 그린다. 0개일 때만 빈 상태
 
@@ -186,7 +186,8 @@ Par 3 / Par 4 / Par 5 각각 **홀당 평균 오버파**를 3열 미니 카드�
 
 전송 규약은 리빌드 스펙 §5에서 확정되었다 (`RoundCompletedMessage`, `.reliable`, id 중복 검사). 이 문서는 **iOS 쪽 배치**만 정한다.
 
-- `iOSApp/Services/RoundReceiveService.swift` — tennis의 `MatchPersistenceService` 패턴. 앱 시작 시 `ModelContext`를 주입받고, `MessageRouter`가 라우팅한 `RoundCompletedMessage`를 받아 `GolfRound`를 만들어 저장한다
+- 수신은 두 겹으로 나눈다. `iOSApp/Services/RoundReceiveService.swift`가 `ConnectivityService` 생성과 `onReceive` 등록만 맡고, 실제 적재·중복 검사는 WatchConnectivity를 모르는 `iOSApp/Services/RoundImporter.swift`가 한다 — 후자는 인메모리 컨테이너로 테스트할 수 있다
+- 등록은 **`ConnectivityService`를 만든 그 main-queue turn 안에서** 끝내야 한다. 활성화 콜백(콜드런치 컨텍스트 배달)이 다음 turn에 들어오므로, 늦게 등록하면 앱이 꺼져 있던 동안 도착한 라운드를 놓친다
 - **중복 검사**: 같은 `id`의 라운드가 이미 있으면 저장하지 않고 무시한다 (`transferUserInfo` 재배달, 워치 복구 후 재전송 대비)
 - 앱이 꺼져 있던 동안의 전송은 다음 실행 시 시스템 큐에서 배달된다. 수신 서비스는 콜드 런치 시점에 활성화되어야 한다
 - 저장 후 별도 알림·배지는 두지 않는다 (v1). `@Query`가 자동으로 리스트를 갱신한다
@@ -199,15 +200,17 @@ iOSApp/
 ├── iOSApp.swift                      # 진입점 (MainTabView로 교체)
 ├── MainTabView.swift                 # 2탭
 ├── Components/
-│   └── StatCard.swift                # 통계 탭 + 상세 워크아웃 섹션이 공유
+│   ├── StatCard.swift                # 통계 탭 + 상세 워크아웃 섹션이 공유
+│   ├── EmptyRoundsView.swift         # 기록 탭 + 통계 탭이 공유하는 빈 상태
+│   └── ScorePalette.swift            # 오버파 3상태 색 매핑
 ├── Services/
-│   └── RoundReceiveService.swift
+│   ├── RoundReceiveService.swift     # ConnectivityService 등록 (얇은 배선)
+│   └── RoundImporter.swift           # 적재 + id 중복 검사 (테스트 대상)
 └── Features/
     ├── History/
     │   ├── HistoryView.swift
     │   ├── Components/
-    │   │   ├── RoundCard.swift
-    │   │   └── HistoryEmptyState.swift
+    │   │   └── RoundCard.swift
     │   └── Detail/
     │       ├── RoundDetailView.swift
     │       ├── RoundEditViewModel.swift
@@ -266,7 +269,7 @@ iOSApp/
 - 파 변경이 오버파 파생값에 반영됨
 - `par == 0` 홀에 파를 넣으면 정상 홀이 됨
 
-**`RoundReceiveServiceTests`**
+**`RoundImporterTests`** (`RoundReceiveService`는 등록만 하는 얇은 배선이라 테스트하지 않는다)
 
 - 정상 메시지 → `GolfRound` 저장, 필드 1:1 일치
 - 같은 `id` 재수신 → 저장하지 않음
