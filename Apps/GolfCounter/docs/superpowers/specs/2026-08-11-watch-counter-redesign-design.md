@@ -299,7 +299,7 @@ pbxproj는 `PBXFileSystemSynchronizedRootGroup`이므로 파일 생성·삭제�
 |---|---|---|---|
 | `headerHeight` | 36 | 32 | 28 |
 | `headerFont` | 14 | 13 | 12 |
-| `ringDiameter` | 132 | 110 | 92 |
+| `ringDiameter` | 103 | 84 | 70 |
 | `ringStroke` | 11 | 10 | 8 |
 | `overflowStroke` | 5 | 4.5 | 4 |
 | `overflowGap` | 4 | 3.5 | 3 |
@@ -313,7 +313,9 @@ pbxproj는 `PBXFileSystemSynchronizedRootGroup`이므로 파일 생성·삭제�
 | `usesShortHoleLabel` | false | false | true |
 | `spacing` | 6 | 5 | 4 |
 
-세로 합계 = `headerHeight + spacing + ringDiameter + spacing + modeHeight` → regular 228pt / compact 196pt / tight 166pt.
+세로 합계 = `headerHeight + spacing + outerRadius*2 + spacing + modeHeight` → regular 228pt / compact 196pt / tight 166pt.
+
+**`ringDiameter`가 아니라 `outerRadius*2`가 실제 렌더 값이다** — `StrokeRing`은 초과 링이 비어 있어도 그 공간을 항상 프레임에 예약하기 때문이다(구현 중 발견, 최종 리뷰에서 수정). `ringDiameter`는 위 표의 값이 아니라 `outerRadius*2`가 예산 안에 들어오도록 역산한 값이다.
 
 취소와 Par가 둘 다 헤더 안에 들어가므로 **세로 예산에서 이 둘의 몫은 `headerHeight` 하나뿐이다.** 그래서 `parButtonSize`와 `undoSize`는 `headerHeight`와 같은 값으로 묶는다.
 
