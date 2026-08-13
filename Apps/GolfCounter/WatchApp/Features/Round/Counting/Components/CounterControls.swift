@@ -5,7 +5,7 @@ import SwiftUI
 struct CounterControls: View {
     @Binding var mode: StrokeInputMode
     let canGoToPrevious: Bool
-    let sizing: CounterSizing
+    let sizing: CountingSizing
     let onPrevious: () -> Void
     let onNext: () -> Void
 

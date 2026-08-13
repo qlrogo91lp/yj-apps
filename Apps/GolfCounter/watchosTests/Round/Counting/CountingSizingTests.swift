@@ -2,8 +2,8 @@ import CoreGraphics
 @testable import GolfCounter_Watch_App
 import Testing
 
-struct CounterSizingTests {
-    private let sets: [CounterSizing] = [.regular, .compact, .tight]
+struct CountingSizingTests {
+    private let sets: [CountingSizing] = [.regular, .compact, .tight]
 
     /// ViewThatFits는 regular → compact → tight 순으로 시도해 첫 번째로 들어가는 것을 고른다.
     /// 뒤 세트가 앞 세트보다 큰 값이 하나라도 있으면 그 순서가 의미를 잃는다.
@@ -29,7 +29,7 @@ struct CounterSizingTests {
     /// 링 안쪽 원반은 라운드 중 가장 많이 눌리는 탭 타깃이다.
     /// 가장 작은 세트에서도 Apple 권장 최소 44pt 아래로 내려가면 안 된다.
     @Test func 가장_작은_크기세트도_링_안쪽_원반이_44pt_이상이다() {
-        #expect(CounterSizing.tight.innerDiameter >= 44)
+        #expect(CountingSizing.tight.innerDiameter >= 44)
     }
 
     /// 취소와 Par는 헤더 안에 들어가므로 헤더 높이를 넘으면 행이 삐져나온다.
@@ -49,15 +49,15 @@ struct CounterSizingTests {
 
     /// 40mm에서만 헤더를 축약한다 — 나머지는 전체 표기가 들어간다.
     @Test func 헤더_축약은_가장_작은_세트에서만_켜진다() {
-        #expect(CounterSizing.regular.usesShortHoleLabel == false)
-        #expect(CounterSizing.compact.usesShortHoleLabel == false)
-        #expect(CounterSizing.tight.usesShortHoleLabel)
+        #expect(CountingSizing.regular.usesShortHoleLabel == false)
+        #expect(CountingSizing.compact.usesShortHoleLabel == false)
+        #expect(CountingSizing.tight.usesShortHoleLabel)
     }
 
     /// 링이 실제로 프레임을 잡는 값은 ringDiameter가 아니라 outerRadius*2다 (초과 링 공간을
     /// 항상 예약하므로). 이 테스트는 그 실제 값 기준으로 세로 합계가 예산 안에 들어가는지 본다.
     @Test func 세로_합계는_실제_렌더_기준으로_예산_안에_들어간다() {
-        let budgets: [(CounterSizing, CGFloat)] = [(.regular, 228), (.compact, 196), (.tight, 166)]
+        let budgets: [(CountingSizing, CGFloat)] = [(.regular, 228), (.compact, 196), (.tight, 166)]
         for (sizing, budget) in budgets {
             let total = sizing.headerHeight + sizing.spacing * 2
                 + sizing.outerRadius * 2 + sizing.modeHeight

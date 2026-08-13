@@ -10,7 +10,7 @@ import CoreGraphics
 /// `StrokeRing`이 실제로 프레임을 잡는 값은 ringDiameter가 아니라 outerRadius*2다 —
 /// 초과 링이 비어 있어도 그 공간을 항상 예약하기 때문이다. `ringDiameter`는 그 역산 입력값이다.
 /// 취소와 Par가 둘 다 헤더 안에 들어가므로 세로 예산에서 이 둘의 몫은 headerHeight 하나뿐이다.
-struct CounterSizing {
+struct CountingSizing {
     // MARK: 상단 정보행
 
     let headerHeight: CGFloat
@@ -51,7 +51,7 @@ struct CounterSizing {
     }
 
     /// 46mm 이상.
-    static let regular = CounterSizing(headerHeight: 36,
+    static let regular = CountingSizing(headerHeight: 36,
                                        headerFont: 14,
                                        parButtonSize: 36,
                                        undoSize: 36,
@@ -68,7 +68,7 @@ struct CounterSizing {
                                        spacing: 6)
 
     /// 42~44mm.
-    static let compact = CounterSizing(headerHeight: 32,
+    static let compact = CountingSizing(headerHeight: 32,
                                        headerFont: 13,
                                        parButtonSize: 32,
                                        undoSize: 32,
@@ -87,7 +87,7 @@ struct CounterSizing {
     /// 40mm. `ViewThatFits`가 시도하는 마지막 후보라 이 아래로는 fallback이 없다 —
     /// 더 작은 기기가 나오거나 고정 pt 대신 Dynamic Type으로 바꿔서 이 세트도 안 맞게 되면
     /// graceful degradation 없이 콘텐츠가 잘린다. 그런 변경이 생기면 다시 실측해야 한다.
-    static let tight = CounterSizing(headerHeight: 28,
+    static let tight = CountingSizing(headerHeight: 28,
                                      headerFont: 12,
                                      parButtonSize: 28,
                                      undoSize: 28,

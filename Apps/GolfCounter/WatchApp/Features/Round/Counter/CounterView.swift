@@ -18,9 +18,9 @@ struct CounterView: View {
     var body: some View {
         TabView(selection: $selectedPage) {
             ViewThatFits(in: .vertical) {
-                CounterPage(viewModel: viewModel, sizing: .regular)
-                CounterPage(viewModel: viewModel, sizing: .compact)
-                CounterPage(viewModel: viewModel, sizing: .tight)
+                CountingView(viewModel: viewModel, sizing: .regular)
+                CountingView(viewModel: viewModel, sizing: .compact)
+                CountingView(viewModel: viewModel, sizing: .tight)
             }
             .tag(0)
 

@@ -5,9 +5,9 @@ import WatchKit
 ///
 /// 어떤 크기 세트를 쓸지는 이 뷰가 정하지 않는다. `CounterView`의 `ViewThatFits`가
 /// 화면에 실제로 들어가는 세트를 골라 `sizing`으로 넘겨준다.
-struct CounterPage: View {
+struct CountingView: View {
     @ObservedObject var viewModel: RoundViewModel
-    let sizing: CounterSizing
+    let sizing: CountingSizing
 
     /// Always-On(손목 내림) 상태에서는 애니메이션을 돌리지 않는다.
     @Environment(\.isLuminanceReduced) private var isLuminanceReduced
@@ -87,5 +87,5 @@ struct CounterPage: View {
     let viewModel = RoundViewModel()
     viewModel.selectPar(4)
     viewModel.incrementStroke()
-    return CounterPage(viewModel: viewModel, sizing: .regular)
+    return CountingView(viewModel: viewModel, sizing: .regular)
 }

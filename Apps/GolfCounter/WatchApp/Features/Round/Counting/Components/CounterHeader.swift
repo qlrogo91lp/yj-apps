@@ -12,7 +12,7 @@ struct CounterHeader: View {
     let par: Int
     let totalStrokes: Int
     let canUndo: Bool
-    let sizing: CounterSizing
+    let sizing: CountingSizing
     let onEditPar: () -> Void
     let onUndo: () -> Void
 
