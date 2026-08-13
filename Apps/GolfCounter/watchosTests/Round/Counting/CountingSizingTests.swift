@@ -56,8 +56,13 @@ struct CountingSizingTests {
 
     /// 링이 실제로 프레임을 잡는 값은 ringDiameter가 아니라 outerRadius*2다 (초과 링 공간을
     /// 항상 예약하므로). 이 테스트는 그 실제 값 기준으로 세로 합계가 예산 안에 들어가는지 본다.
+    ///
+    /// 예산은 화면 높이가 아니라 `GeometryReader`로 실측한, `ScoringView`가 실제로 받는
+    /// 가용 세로 공간이다 — 바깥 `TabView(.page)` + 안쪽 `TabView(.verticalPage)`가 중첩되며
+    /// 화면 높이의 상당 부분을 페이지 인디케이터 크롬으로 가져가기 때문에 화면 높이 그대로
+    /// 쓰면 예산이 실제보다 훨씬 크게 잡힌다 (46mm 168pt 아님 — 실측 167.5pt).
     @Test func 세로_합계는_실제_렌더_기준으로_예산_안에_들어간다() {
-        let budgets: [(CountingSizing, CGFloat)] = [(.regular, 228), (.compact, 196), (.tight, 166)]
+        let budgets: [(CountingSizing, CGFloat)] = [(.regular, 167.5), (.compact, 152.0), (.tight, 138.5)]
         for (sizing, budget) in budgets {
             let total = sizing.headerHeight + sizing.spacing * 2
                 + sizing.outerRadius * 2 + sizing.modeHeight

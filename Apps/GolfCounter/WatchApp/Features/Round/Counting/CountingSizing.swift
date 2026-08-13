@@ -51,55 +51,62 @@ struct CountingSizing {
     }
 
     /// 46mm 이상.
-    static let regular = CountingSizing(headerHeight: 36,
-                                        headerFont: 14,
-                                        parButtonSize: 36,
-                                        undoSize: 36,
+    ///
+    /// `RoundSessionView`의 바깥 `TabView(.page)`와 `ScoringView`의 안쪽
+    /// `TabView(.verticalPage)`가 중첩되며 각자의 페이지 인디케이터·크롬이 세로 공간을
+    /// 상당히 잠식한다. `GeometryReader`로 실측한 결과 46mm에서 이 페이지가 실제로 받는
+    /// 세로 공간은 화면 높이가 아니라 약 167.5pt — 아래 세 세트는 화면 크기가 아니라
+    /// 이 실측치를 기준으로 잡았다 (세로 합계 161pt, 여유 6.5pt).
+    static let regular = CountingSizing(headerHeight: 25,
+                                        headerFont: 10,
+                                        parButtonSize: 25,
+                                        undoSize: 25,
                                         usesShortHoleLabel: false,
-                                        ringDiameter: 103,
-                                        ringStroke: 11,
-                                        overflowStroke: 5,
-                                        overflowGap: 4,
-                                        scoreFont: 40,
-                                        relativeFont: 13,
-                                        arrowSize: 40,
-                                        modeHeight: 48,
-                                        modeWideWidth: 100,
-                                        spacing: 6)
-
-    /// 42~44mm.
-    static let compact = CountingSizing(headerHeight: 32,
-                                        headerFont: 13,
-                                        parButtonSize: 32,
-                                        undoSize: 32,
-                                        usesShortHoleLabel: false,
-                                        ringDiameter: 84,
-                                        ringStroke: 10,
-                                        overflowStroke: 4.5,
-                                        overflowGap: 3.5,
-                                        scoreFont: 33,
-                                        relativeFont: 12,
-                                        arrowSize: 36,
-                                        modeHeight: 44,
-                                        modeWideWidth: 92,
+                                        ringDiameter: 71,
+                                        ringStroke: 8,
+                                        overflowStroke: 4,
+                                        overflowGap: 3,
+                                        scoreFont: 28,
+                                        relativeFont: 10,
+                                        arrowSize: 28,
+                                        modeHeight: 33,
+                                        modeWideWidth: 69,
                                         spacing: 5)
+
+    /// 42~44mm. 실측 가용 세로 공간 약 152pt 기준 (세로 합계 143pt, 여유 9pt).
+    static let compact = CountingSizing(headerHeight: 23,
+                                        headerFont: 9,
+                                        parButtonSize: 23,
+                                        undoSize: 23,
+                                        usesShortHoleLabel: false,
+                                        ringDiameter: 61,
+                                        ringStroke: 7,
+                                        overflowStroke: 3.5,
+                                        overflowGap: 2.5,
+                                        scoreFont: 24,
+                                        relativeFont: 9,
+                                        arrowSize: 26,
+                                        modeHeight: 32,
+                                        modeWideWidth: 67,
+                                        spacing: 4)
 
     /// 40mm. `ViewThatFits`가 시도하는 마지막 후보라 이 아래로는 fallback이 없다 —
     /// 더 작은 기기가 나오거나 고정 pt 대신 Dynamic Type으로 바꿔서 이 세트도 안 맞게 되면
     /// graceful degradation 없이 콘텐츠가 잘린다. 그런 변경이 생기면 다시 실측해야 한다.
-    static let tight = CountingSizing(headerHeight: 28,
-                                      headerFont: 12,
-                                      parButtonSize: 28,
-                                      undoSize: 28,
+    /// 실측 가용 세로 공간 약 138.5pt 기준 (세로 합계 129pt, 여유 9.5pt).
+    static let tight = CountingSizing(headerHeight: 22,
+                                      headerFont: 8,
+                                      parButtonSize: 22,
+                                      undoSize: 22,
                                       usesShortHoleLabel: true,
-                                      ringDiameter: 70,
-                                      ringStroke: 8,
-                                      overflowStroke: 4,
-                                      overflowGap: 3,
-                                      scoreFont: 28,
-                                      relativeFont: 11,
-                                      arrowSize: 32,
-                                      modeHeight: 38,
-                                      modeWideWidth: 84,
-                                      spacing: 4)
+                                      ringDiameter: 55,
+                                      ringStroke: 6,
+                                      overflowStroke: 3,
+                                      overflowGap: 2,
+                                      scoreFont: 22,
+                                      relativeFont: 8,
+                                      arrowSize: 25,
+                                      modeHeight: 30,
+                                      modeWideWidth: 66,
+                                      spacing: 3)
 }
