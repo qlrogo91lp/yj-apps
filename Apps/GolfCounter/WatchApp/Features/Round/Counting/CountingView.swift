@@ -14,7 +14,7 @@ struct CountingView: View {
 
     var body: some View {
         VStack(spacing: sizing.spacing) {
-            CounterHeader(holeNumber: viewModel.currentHoleNumber,
+            HoleHeader(holeNumber: viewModel.currentHoleNumber,
                           par: viewModel.currentPar,
                           totalStrokes: viewModel.totalStrokes,
                           canUndo: viewModel.canUndo,
@@ -24,7 +24,7 @@ struct CountingView: View {
 
             ringArea
 
-            CounterControls(mode: $viewModel.inputMode,
+            HoleNavigation(mode: $viewModel.inputMode,
                             canGoToPrevious: viewModel.canGoToPreviousHole,
                             sizing: sizing,
                             onPrevious: viewModel.goToPreviousHole,
