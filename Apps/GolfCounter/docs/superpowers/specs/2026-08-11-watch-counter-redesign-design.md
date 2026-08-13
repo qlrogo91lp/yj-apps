@@ -55,7 +55,7 @@ TabView {
     CountingView(viewModel: viewModel)
 
     ForEach(scorecardChunks, id: \.lowerBound) { range in
-        Scorecard(snapshot: viewModel.snapshot, holeRange: range)
+        ScorecardView(snapshot: viewModel.snapshot, holeRange: range)
     }
 }
 .tabViewStyle(.verticalPage)

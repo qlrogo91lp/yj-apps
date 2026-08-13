@@ -1,6 +1,5 @@
 import SwiftUI
 import WorkoutCore
-import WorkoutUI
 
 struct RoundSessionView: View {
     @StateObject private var viewModel: RoundViewModel
