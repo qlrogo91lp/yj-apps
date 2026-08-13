@@ -23,14 +23,9 @@ struct RoundSessionView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            WorkoutControlsView(isPaused: healthKit.isPaused,
+            SessionControlsView(isPaused: healthKit.isPaused,
                                 onPauseResume: togglePause,
                                 onEnd: endRound)
-                .toolbar {
-                    ToolbarItem(placement: .topBarLeading) {
-                        Color.clear.frame(width: 36, height: 36)
-                    }
-                }
                 .tag(0)
             centerPage
                 .tag(1)
