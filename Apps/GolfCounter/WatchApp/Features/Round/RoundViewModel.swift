@@ -17,15 +17,10 @@ final class RoundViewModel: ObservableObject {
     @Published var inputMode: StrokeInputMode = .swing
     /// 파가 이미 설정된 홀에서 [Par] 버튼으로 파 선택 화면을 다시 띄운 상태.
     @Published private(set) var isEditingPar = false
-    /// 현재 홀에서 친 타의 종류 순서. 되돌리기의 유일한 상태다 (spec §7).
-    ///
-    /// `incrementStroke()`가 하는 일이 모드에 따라 (타수 +1) 또는 (타수 +1, 퍼트 +1)
-    /// 두 가지뿐이므로, 어느 쪽이었는지만 알면 정확히 되돌릴 수 있다. 배열 전체를
-    /// 복사할 필요가 없다.
-    ///
-    /// `@Published`인 이유: `canUndo`가 이 값에서 파생되므로, 뷰가 취소 버튼의
-    /// 등장·퇴장을 관찰하려면 변경이 발행되어야 한다.
-    @Published private var strokeHistory: [StrokeInputMode] = []
+    /// 되돌리기 기록. `canUndo`가 이 값에서 파생되므로 `@Published`여야
+    /// 뷰가 취소 버튼의 등장·퇴장을 관찰할 수 있다.
+    /// 프로퍼티명이 `undo`가 아닌 이유: 같은 이름의 메서드 `undo()`와 충돌한다.
+    @Published private var undoStack = StrokeUndo()
 
     let startedAt: Date
     var courseName: String?
@@ -90,7 +85,7 @@ final class RoundViewModel: ObservableObject {
     }
 
     var canUndo: Bool {
-        !strokeHistory.isEmpty
+        undoStack.canUndo
     }
 
     var totalStrokes: Int {
@@ -130,7 +125,7 @@ final class RoundViewModel: ObservableObject {
     // MARK: - 카운터
 
     func incrementStroke() {
-        strokeHistory.append(inputMode)
+        undoStack.record(inputMode)
         switch inputMode {
         case .swing:
             holeScores[currentHoleIndex] += 1
@@ -144,7 +139,7 @@ final class RoundViewModel: ObservableObject {
     /// 현재 홀의 마지막 입력을 되돌린다. 입력의 정확한 역연산이다.
     /// 상태를 바꾸는 모든 경로가 스냅샷을 발행한다는 규칙을 따라 마지막에 발행한다.
     func undo() {
-        guard let mode = strokeHistory.popLast() else { return }
+        guard let mode = undoStack.pop() else { return }
         holeScores[currentHoleIndex] -= 1
         if mode == .putt {
             puttCounts[currentHoleIndex] -= 1
@@ -232,6 +227,6 @@ final class RoundViewModel: ObservableObject {
     private func resetHoleLocalState() {
         inputMode = .swing
         isEditingPar = false
-        strokeHistory.removeAll()
+        undoStack.clear()
     }
 }
