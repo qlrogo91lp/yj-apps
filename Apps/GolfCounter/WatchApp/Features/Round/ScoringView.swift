@@ -8,7 +8,7 @@ import SwiftUI
 /// 이 화면은 `RoundSessionView`의 **가로** TabView 안에 들어 있다. 크라운(세로)과
 /// 스와이프(가로)는 입력 채널이 달라 충돌하지 않는다. 페이지 안에 `ScrollView`를
 /// 두지 않으므로 크라운을 쓰는 주체가 페이지 전환 하나뿐이고, 다툴 상대가 없다.
-struct CounterView: View {
+struct ScoringView: View {
     @ObservedObject var viewModel: RoundViewModel
     /// watchOS의 `.verticalPage` 스타일은 `selection` 바인딩이 없으면 첫 페이지가 아니라
     /// 마지막 페이지로 초기 진입하는 경우가 있다(시뮬레이터 탭 테스트로 확인).
@@ -48,5 +48,5 @@ struct CounterView: View {
     let viewModel = RoundViewModel()
     viewModel.selectPar(4)
     viewModel.incrementStroke()
-    return CounterView(viewModel: viewModel)
+    return ScoringView(viewModel: viewModel)
 }

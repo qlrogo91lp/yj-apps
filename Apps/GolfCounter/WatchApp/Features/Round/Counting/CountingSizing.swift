@@ -2,7 +2,7 @@ import CoreGraphics
 
 /// 카운터 세로 1페이지를 워치 화면 높이에 맞추기 위한 크기 세트 (spec §10).
 ///
-/// `CounterView`의 `ViewThatFits`가 regular → compact → tight 순으로 시도해
+/// `ScoringView`의 `ViewThatFits`가 regular → compact → tight 순으로 시도해
 /// 실제로 들어가는 첫 세트를 고른다. **기기 모델을 분기하지 않는다** — 측정은 SwiftUI가 하므로
 /// 여기에 화면 높이나 기기 이름이 등장할 이유가 없다.
 ///

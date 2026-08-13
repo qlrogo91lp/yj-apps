@@ -68,7 +68,7 @@ struct RoundSessionView: View {
         case .parSelection:
             ParSelectionView(viewModel: viewModel)
         case .counting:
-            CounterView(viewModel: viewModel)
+            ScoringView(viewModel: viewModel)
         }
     }
 

@@ -3,7 +3,7 @@ import WatchKit
 
 /// 카운터의 세로 1페이지 — 상단 정보행 · 링 · 하단 조작행 세 블록이다 (spec §5).
 ///
-/// 어떤 크기 세트를 쓸지는 이 뷰가 정하지 않는다. `CounterView`의 `ViewThatFits`가
+/// 어떤 크기 세트를 쓸지는 이 뷰가 정하지 않는다. `ScoringView`의 `ViewThatFits`가
 /// 화면에 실제로 들어가는 세트를 골라 `sizing`으로 넘겨준다.
 struct CountingView: View {
     @ObservedObject var viewModel: RoundViewModel
