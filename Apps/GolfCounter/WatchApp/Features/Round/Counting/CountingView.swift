@@ -15,20 +15,20 @@ struct CountingView: View {
     var body: some View {
         VStack(spacing: sizing.spacing) {
             HoleHeader(holeNumber: viewModel.currentHoleNumber,
-                          par: viewModel.currentPar,
-                          totalStrokes: viewModel.totalStrokes,
-                          canUndo: viewModel.canUndo,
-                          sizing: sizing,
-                          onEditPar: viewModel.beginParEditing,
-                          onUndo: undo)
+                       par: viewModel.currentPar,
+                       totalStrokes: viewModel.totalStrokes,
+                       canUndo: viewModel.canUndo,
+                       sizing: sizing,
+                       onEditPar: viewModel.beginParEditing,
+                       onUndo: undo)
 
             ringArea
 
             HoleNavigation(mode: $viewModel.inputMode,
-                            canGoToPrevious: viewModel.canGoToPreviousHole,
-                            sizing: sizing,
-                            onPrevious: viewModel.goToPreviousHole,
-                            onNext: viewModel.goToNextHole)
+                           canGoToPrevious: viewModel.canGoToPreviousHole,
+                           sizing: sizing,
+                           onPrevious: viewModel.goToPreviousHole,
+                           onNext: viewModel.goToNextHole)
         }
         .padding(.horizontal, 4)
         .animation(fillAnimation, value: viewModel.currentScore)

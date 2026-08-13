@@ -62,11 +62,11 @@ private struct ScorecardRow {
 
 #Preview {
     ScorecardView(snapshot: RoundSnapshot(startedAt: Date(),
-                                      courseName: "테스트CC",
-                                      currentHoleIndex: 2,
-                                      holeScores: [4, 3, 6],
-                                      holePars: [4, 3, 5],
-                                      puttCounts: [2, 1, 2]),
-              holeRange: 0 ..< 3,
-              showsTotal: true)
+                                          courseName: "테스트CC",
+                                          currentHoleIndex: 2,
+                                          holeScores: [4, 3, 6],
+                                          holePars: [4, 3, 5],
+                                          puttCounts: [2, 1, 2]),
+                  holeRange: 0 ..< 3,
+                  showsTotal: true)
 }

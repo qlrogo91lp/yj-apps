@@ -36,5 +36,5 @@ struct HoleNavigation: View {
 
 #Preview {
     HoleNavigation(mode: .constant(.swing), canGoToPrevious: false,
-                    sizing: .regular, onPrevious: {}, onNext: {})
+                   sizing: .regular, onPrevious: {}, onNext: {})
 }

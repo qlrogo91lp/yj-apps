@@ -26,8 +26,8 @@ struct ScoringView: View {
 
             ForEach(Array(chunks.enumerated()), id: \.element.lowerBound) { index, range in
                 ScorecardView(snapshot: viewModel.snapshot,
-                          holeRange: range,
-                          showsTotal: range.upperBound == holeCount)
+                              holeRange: range,
+                              showsTotal: range.upperBound == holeCount)
                     .padding(.horizontal, 4)
                     .tag(index + 1)
             }

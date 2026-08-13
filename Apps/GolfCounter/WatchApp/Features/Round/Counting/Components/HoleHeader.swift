@@ -64,8 +64,8 @@ struct HoleHeader: View {
 #Preview {
     VStack {
         HoleHeader(holeNumber: 7, par: 4, totalStrokes: 41, canUndo: true,
-                      sizing: .regular, onEditPar: {}, onUndo: {})
+                   sizing: .regular, onEditPar: {}, onUndo: {})
         HoleHeader(holeNumber: 7, par: 4, totalStrokes: 41, canUndo: false,
-                      sizing: .tight, onEditPar: {}, onUndo: {})
+                   sizing: .tight, onEditPar: {}, onUndo: {})
     }
 }
