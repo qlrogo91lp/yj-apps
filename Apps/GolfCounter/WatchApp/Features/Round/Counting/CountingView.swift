@@ -3,32 +3,32 @@ import WatchKit
 
 /// 카운터의 세로 1페이지 — 상단 정보행 · 링 · 하단 조작행 세 블록이다 (spec §5).
 ///
-/// 어떤 크기 세트를 쓸지는 이 뷰가 정하지 않는다. `CounterView`의 `ViewThatFits`가
+/// 어떤 크기 세트를 쓸지는 이 뷰가 정하지 않는다. `ScoringView`의 `ViewThatFits`가
 /// 화면에 실제로 들어가는 세트를 골라 `sizing`으로 넘겨준다.
-struct CounterPage: View {
+struct CountingView: View {
     @ObservedObject var viewModel: RoundViewModel
-    let sizing: CounterSizing
+    let sizing: CountingSizing
 
     /// Always-On(손목 내림) 상태에서는 애니메이션을 돌리지 않는다.
     @Environment(\.isLuminanceReduced) private var isLuminanceReduced
 
     var body: some View {
         VStack(spacing: sizing.spacing) {
-            CounterHeader(holeNumber: viewModel.currentHoleNumber,
-                          par: viewModel.currentPar,
-                          totalStrokes: viewModel.totalStrokes,
-                          canUndo: viewModel.canUndo,
-                          sizing: sizing,
-                          onEditPar: viewModel.beginParEditing,
-                          onUndo: undo)
+            HoleHeader(holeNumber: viewModel.currentHoleNumber,
+                       par: viewModel.currentPar,
+                       totalStrokes: viewModel.totalStrokes,
+                       canUndo: viewModel.canUndo,
+                       sizing: sizing,
+                       onEditPar: viewModel.beginParEditing,
+                       onUndo: undo)
 
             ringArea
 
-            CounterControls(mode: $viewModel.inputMode,
-                            canGoToPrevious: viewModel.canGoToPreviousHole,
-                            sizing: sizing,
-                            onPrevious: viewModel.goToPreviousHole,
-                            onNext: viewModel.goToNextHole)
+            HoleNavigation(mode: $viewModel.inputMode,
+                           canGoToPrevious: viewModel.canGoToPreviousHole,
+                           sizing: sizing,
+                           onPrevious: viewModel.goToPreviousHole,
+                           onNext: viewModel.goToNextHole)
         }
         .padding(.horizontal, 4)
         .animation(fillAnimation, value: viewModel.currentScore)
@@ -87,5 +87,5 @@ struct CounterPage: View {
     let viewModel = RoundViewModel()
     viewModel.selectPar(4)
     viewModel.incrementStroke()
-    return CounterPage(viewModel: viewModel, sizing: .regular)
+    return CountingView(viewModel: viewModel, sizing: .regular)
 }

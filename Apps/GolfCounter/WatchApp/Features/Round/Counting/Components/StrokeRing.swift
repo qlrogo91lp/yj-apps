@@ -7,7 +7,7 @@ import SwiftUI
 /// 파를 넘긴 타수는 바깥에 얇은 링으로 덧그린다.
 struct StrokeRing: View {
     let segments: RingSegments
-    let sizing: CounterSizing
+    let sizing: CountingSizing
 
     var body: some View {
         ZStack {

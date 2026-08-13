@@ -2,7 +2,7 @@ import SwiftUI
 
 /// 스코어카드 한 페이지. 홀 범위 하나만 그린다 (spec §4).
 /// 합계 줄은 마지막 청크에만 붙이고, 값은 라운드 전체 합계다.
-struct Scorecard: View {
+struct ScorecardView: View {
     let snapshot: RoundSnapshot
     let holeRange: Range<Int>
     let showsTotal: Bool
@@ -61,12 +61,12 @@ private struct ScorecardRow {
 }
 
 #Preview {
-    Scorecard(snapshot: RoundSnapshot(startedAt: Date(),
-                                      courseName: "테스트CC",
-                                      currentHoleIndex: 2,
-                                      holeScores: [4, 3, 6],
-                                      holePars: [4, 3, 5],
-                                      puttCounts: [2, 1, 2]),
-              holeRange: 0 ..< 3,
-              showsTotal: true)
+    ScorecardView(snapshot: RoundSnapshot(startedAt: Date(),
+                                          courseName: "테스트CC",
+                                          currentHoleIndex: 2,
+                                          holeScores: [4, 3, 6],
+                                          holePars: [4, 3, 5],
+                                          puttCounts: [2, 1, 2]),
+                  holeRange: 0 ..< 3,
+                  showsTotal: true)
 }

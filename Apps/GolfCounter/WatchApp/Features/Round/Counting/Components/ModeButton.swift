@@ -11,7 +11,7 @@ import SwiftUI
 /// ("현재 상태인가 누르면 갈 곳인가")이 해소된다.
 struct ModeButton: View {
     @Binding var mode: StrokeInputMode
-    let sizing: CounterSizing
+    let sizing: CountingSizing
 
     var body: some View {
         Button(action: toggle) {

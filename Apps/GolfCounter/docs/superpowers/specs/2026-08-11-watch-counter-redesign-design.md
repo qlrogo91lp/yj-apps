@@ -50,12 +50,12 @@
 ### 구현
 
 ```swift
-// CounterView.swift — 세로 페이지 컨테이너 역할만 한다
+// ScoringView.swift — 세로 페이지 컨테이너 역할만 한다
 TabView {
-    CounterPage(viewModel: viewModel)
+    CountingView(viewModel: viewModel)
 
     ForEach(scorecardChunks, id: \.lowerBound) { range in
-        Scorecard(snapshot: viewModel.snapshot, holeRange: range)
+        ScorecardView(snapshot: viewModel.snapshot, holeRange: range)
     }
 }
 .tabViewStyle(.verticalPage)
@@ -79,7 +79,7 @@ TabView {
 
 가로 `TabView(.page)` 안에 세로 `TabView(.verticalPage)`를 중첩했을 때 스와이프/크라운 제스처가 서로 간섭하지 않는지는 **시뮬레이터에서 확인한다.** 구현 플랜의 첫 스텝으로 넣는다.
 
-**폴백**: 간섭이 발생하면 `ScrollView` + `.scrollTargetBehavior(.paging)`을 유지하고 `.scrollPosition(id:)`으로 현재 페이지를 추적해 세로 점을 직접 그린다. 이 경우 페이지 분할 규칙(9홀 청킹)은 그대로 쓴다 — 컴포넌트는 바뀌지 않고 `CounterView`의 컨테이너만 교체된다.
+**폴백**: 간섭이 발생하면 `ScrollView` + `.scrollTargetBehavior(.paging)`을 유지하고 `.scrollPosition(id:)`으로 현재 페이지를 추적해 세로 점을 직접 그린다. 이 경우 페이지 분할 규칙(9홀 청킹)은 그대로 쓴다 — 컴포넌트는 바뀌지 않고 `ScoringView`의 컨테이너만 교체된다.
 
 ## 5. 카운터 페이지 레이아웃
 
@@ -108,7 +108,7 @@ TabView {
 
 누적 타수에 `+`를 붙이지 않고 `41타`로 쓴다. 골프에서 `+`는 오버파를 뜻하는 기호이므로 `+41`은 "41 오버"로 읽힌다. 링 안의 `+3`(파 대비)과 부호가 겹쳐 서로 다른 의미가 되는 것을 피한다.
 
-**폭 제약**: 40mm(usable 약 150pt)에서 양끝 버튼 28pt 두 개와 간격을 빼면 가운데에 약 82pt가 남는다. `7번 홀 · 41타`는 12pt 폰트로 약 90pt라 들어가지 않으므로, `tight` 세트에서는 `H7 · 41타`(약 58pt)로 축약한다. `CounterSizing`의 `usesShortHoleLabel` 플래그가 이를 결정한다.
+**폭 제약**: 40mm(usable 약 150pt)에서 양끝 버튼 28pt 두 개와 간격을 빼면 가운데에 약 82pt가 남는다. `7번 홀 · 41타`는 12pt 폰트로 약 90pt라 들어가지 않으므로, `tight` 세트에서는 `H7 · 41타`(약 58pt)로 축약한다. `CountingSizing`의 `usesShortHoleLabel` 플래그가 이를 결정한다.
 
 ### 링 영역
 
@@ -145,7 +145,7 @@ TabView {
 - `‹` → `goToPreviousHole()` (첫 홀에서는 비활성)
 - `›` → `goToNextHole()`
 
-**모드 버튼은 반응형이다.** `ViewThatFits(in: .horizontal)`로 알약 버전을 먼저 시도하고, 남는 폭에 안 들어가면 원형으로 떨어진다. `CounterView`가 이미 `ViewThatFits`를 쓰고 있으므로 새로운 패턴이 아니다.
+**모드 버튼은 반응형이다.** `ViewThatFits(in: .horizontal)`로 알약 버전을 먼저 시도하고, 남는 폭에 안 들어가면 원형으로 떨어진다. `ScoringView`가 이미 `ViewThatFits`를 쓰고 있으므로 새로운 패턴이 아니다.
 
 | 변형 | 모양 | 라벨 | 조건 |
 |---|---|---|---|
@@ -262,21 +262,21 @@ var canUndo: Bool { !strokeHistory.isEmpty }
 
 | 파일 | 역할 |
 |---|---|
-| `WatchApp/Features/Round/Counter/Components/StrokeRing.swift` | 링 그리기 (`RingSegments`를 받아 렌더) |
-| `WatchApp/Features/Round/Counter/Components/RingSegments.swift` | 세그먼트 계산 — 순수 타입, UI 프레임워크 미import |
-| `WatchApp/Features/Round/Counter/Components/CounterHeader.swift` | 상단 정보행 (Par 버튼 · 홀번호+누적타수 · 취소 버튼). 취소가 없을 때도 가운데가 안 밀리도록 양끝 슬롯 폭을 고정 |
-| `WatchApp/Features/Round/Counter/Components/CounterControls.swift` | 하단 조작행 (‹ · 모드 · ›) |
-| `WatchApp/Features/Round/Counter/Components/ModeButton.swift` | 모드 버튼 — `ViewThatFits`로 알약/원형 전환 |
-| `WatchApp/Features/Round/Counter/Components/UndoButton.swift` | 원형 아이콘 취소 버튼 (골프 자체 구현 — tennis 복사 아님, §5 참조) |
+| `WatchApp/Features/Round/Counting/Components/StrokeRing.swift` | 링 그리기 (`RingSegments`를 받아 렌더) |
+| `WatchApp/Features/Round/Counting/RingSegments.swift` | 세그먼트 계산 — 순수 타입, UI 프레임워크 미import |
+| `WatchApp/Features/Round/Counting/Components/HoleHeader.swift` | 상단 정보행 (Par 버튼 · 홀번호+누적타수 · 취소 버튼). 취소가 없을 때도 가운데가 안 밀리도록 양끝 슬롯 폭을 고정 |
+| `WatchApp/Features/Round/Counting/Components/HoleNavigation.swift` | 하단 조작행 (‹ · 모드 · ›) |
+| `WatchApp/Features/Round/Counting/Components/ModeButton.swift` | 모드 버튼 — `ViewThatFits`로 알약/원형 전환 |
+| `WatchApp/Features/Round/Counting/Components/UndoButton.swift` | 원형 아이콘 취소 버튼 (골프 자체 구현 — tennis 복사 아님, §5 참조) |
 
 ### 재작성
 
 | 파일 | 변경 |
 |---|---|
-| `Counter/CounterView.swift` | 세로 `TabView(.verticalPage)` 컨테이너. `ViewThatFits` 3단 호출은 `CounterPage` 안으로 이동 |
-| `Counter/Components/CounterPage.swift` | 3블록 레이아웃(헤더 / 링+취소 / 조작행)으로 전면 재작성 |
-| `Counter/Components/CounterSizing.swift` | 새 요소 기준으로 필드 교체 (§10) |
-| `Counter/Components/Scorecard.swift` | `holeRange: Range<Int>` 파라미터 추가. 합계 줄은 **마지막 청크에만** 표시하고 라운드 전체 합계를 쓴다 |
+| `ScoringView.swift` | 세로 `TabView(.verticalPage)` 컨테이너. `ViewThatFits` 3단 호출은 `CountingView` 안으로 이동 |
+| `Counting/CountingView.swift` | 3블록 레이아웃(헤더 / 링+취소 / 조작행)으로 전면 재작성 |
+| `Counting/CountingSizing.swift` | 새 요소 기준으로 필드 교체 (§10) |
+| `Scorecard/ScorecardView.swift` | `holeRange: Range<Int>` 파라미터 추가. 합계 줄은 **마지막 청크에만** 표시하고 라운드 전체 합계를 쓴다 |
 | `Round/RoundViewModel.swift` | `strokeHistory` · `canUndo` · `undo()` 추가, `decrementStroke()` 삭제, `resetHoleLocalState()`에서 히스토리 클리어 |
 
 ### 삭제
@@ -284,14 +284,14 @@ var canUndo: Bool { !strokeHistory.isEmpty }
 | 파일 | 사유 |
 |---|---|
 | `Counter/Components/StrokeButton.swift` | 링 안쪽 원반 탭이 대체 |
-| `Counter/Components/HoleNavigation.swift` | `CounterControls`로 흡수 |
+| `Counter/Components/HoleNavigation.swift` | `CounterControls`로 흡수 (2026-08-13 구조 개편에서 이 이름이 Counting/Components/HoleNavigation.swift로 부활) |
 | `Counter/Components/ModeToggle.swift` | `ModeButton`으로 대체 |
 
 `Shared/`는 손대지 않는다 — `RoundSnapshot`·`GolfRound`·서비스 전부 그대로다. `ParSelectionView`도 변경 없다. 파가 0이면 자동으로 파 선택 화면이 뜨는 현재 동작이 그대로 유지된다.
 
 pbxproj는 `PBXFileSystemSynchronizedRootGroup`이므로 파일 생성·삭제가 빌드에 자동 반영된다.
 
-## 10. CounterSizing 재구성
+## 10. CountingSizing 재구성
 
 기존 필드(`strokeButton`, `strokeIcon`, `navHeight`)는 사라진 요소의 것이므로 전부 교체한다. `ViewThatFits`가 regular → compact → tight 순으로 시도하는 구조는 유지하며, **기기 모델을 분기하지 않는다.**
 
@@ -368,7 +368,7 @@ outerRadius = ringDiameter/2 + ringStroke/2 + overflowGap + overflowStroke
 ### 갱신
 
 - `RoundViewModelTests.swift` — `decrementStroke` 관련 케이스 삭제
-- `CounterSizingTests.swift` — 새 필드 기준으로 재작성
+- `CountingSizingTests.swift` — 새 필드 기준으로 재작성
 
 ## 12. 기존 스펙 개정 사항
 
@@ -377,7 +377,7 @@ outerRadius = ringDiameter/2 + ringStroke/2 + overflowGap + overflowStroke
 | 문서 | 개정 내용 |
 |---|---|
 | `2026-07-31-golfcounter-rebuild-design.md` §4 | "페이지 2/3 메인 카운터" ASCII 다이어그램과 설명을 링 레이아웃으로 교체. 세로 페이징을 `TabView(.verticalPage)` + 9홀 청킹으로 갱신 |
-| `2026-08-09-...-design.md` §6 | 세로 `TabView` 중첩 기각 결정을 번복했음과 그 근거(§4)를 명시. `CounterSizing` 표를 §10으로 대체 |
+| `2026-08-09-...-design.md` §6 | 세로 `TabView` 중첩 기각 결정을 번복했음과 그 근거(§4)를 명시. `CountingSizing` 표를 §10으로 대체 |
 | `CLAUDE.md` | 변경 없음 — 폴더 구조·컨벤션에 영향 없음 |
 
 ## 13. 범위 밖

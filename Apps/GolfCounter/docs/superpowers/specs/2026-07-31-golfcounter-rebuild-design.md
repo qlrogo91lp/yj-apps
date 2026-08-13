@@ -60,14 +60,21 @@ iOSApp/
     ├── History/       # 기록 탭
     └── Stats/         # 통계 탭
 WatchApp/
-├── Components/
+├── Services/          # 워치 전용 시스템 프레임워크 어댑터 (Shared에 두면 iOS 빌드가 깨지는 것)
 └── Features/
     ├── Home/          # 시작 화면
-    └── Round/         # 라운드 세션 (파 선택·카운터·컨트롤·메트릭·요약)
+    └── Round/         # 라운드 세션 — 세션 페이지마다 폴더 하나 + ~View 하나
+        ├── SessionControls/   # 일시정지·종료 (가로 1/3)
+        ├── ParSelection/      # 파 선택 (가로 2/3 · phase)
+        ├── Counting/          # 메인 카운터 (세로 1페이지)
+        ├── Scorecard/         # 스코어카드 (세로 2~N페이지)
+        └── SessionMetrics/    # 메트릭 (가로 3/3)
 ComplicationApp/
 iosTests/              # 소스 폴더 구조 미러링
 watchosTests/
 ```
+
+`WatchApp/Components/`(앱 루트)는 두 Feature 이상이 공유하는 UI가 생기는 시점에 만든다. 상세 구조는 `2026-08-13-watch-folder-structure-design.md` 참조.
 
 - 계층화 컴포넌트 규칙, import 규칙(순환 의존 금지), MVVM(ViewModel은 UI 프레임워크 import 금지), 파일 네이밍(View suffix는 화면만, 한 파일 = 한 타입) 모두 tennis_counter CLAUDE.md 규칙을 따른다.
 - 잔재 정리: 타깃에 속하지 않는 `Widget/`, `GolfCounterWidget/`, `Complications/` 등 leftover 디렉터리는 리빌드 시 삭제한다.

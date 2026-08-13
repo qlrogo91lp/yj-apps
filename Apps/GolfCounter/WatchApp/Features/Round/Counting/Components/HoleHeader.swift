@@ -7,12 +7,12 @@ import SwiftUI
 ///
 /// 누적 타수에 `+`를 붙이지 않는다. 골프에서 `+`는 오버파를 뜻하므로 `+41`은
 /// "41 오버"로 읽히고, 링 안의 파 대비 표시와 부호가 겹친다.
-struct CounterHeader: View {
+struct HoleHeader: View {
     let holeNumber: Int
     let par: Int
     let totalStrokes: Int
     let canUndo: Bool
-    let sizing: CounterSizing
+    let sizing: CountingSizing
     let onEditPar: () -> Void
     let onUndo: () -> Void
 
@@ -63,9 +63,9 @@ struct CounterHeader: View {
 
 #Preview {
     VStack {
-        CounterHeader(holeNumber: 7, par: 4, totalStrokes: 41, canUndo: true,
-                      sizing: .regular, onEditPar: {}, onUndo: {})
-        CounterHeader(holeNumber: 7, par: 4, totalStrokes: 41, canUndo: false,
-                      sizing: .tight, onEditPar: {}, onUndo: {})
+        HoleHeader(holeNumber: 7, par: 4, totalStrokes: 41, canUndo: true,
+                   sizing: .regular, onEditPar: {}, onUndo: {})
+        HoleHeader(holeNumber: 7, par: 4, totalStrokes: 41, canUndo: false,
+                   sizing: .tight, onEditPar: {}, onUndo: {})
     }
 }

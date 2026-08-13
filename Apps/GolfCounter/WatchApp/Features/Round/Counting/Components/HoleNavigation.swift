@@ -2,10 +2,10 @@ import SwiftUI
 
 /// 하단 조작행 — 이전 홀 · 모드 · 다음 홀 (spec §5).
 /// 하단 중앙이 엄지가 가장 닿기 쉬운 자리라 가장 자주 쓰는 모드 전환을 거기 둔다.
-struct CounterControls: View {
+struct HoleNavigation: View {
     @Binding var mode: StrokeInputMode
     let canGoToPrevious: Bool
-    let sizing: CounterSizing
+    let sizing: CountingSizing
     let onPrevious: () -> Void
     let onNext: () -> Void
 
@@ -35,6 +35,6 @@ struct CounterControls: View {
 }
 
 #Preview {
-    CounterControls(mode: .constant(.swing), canGoToPrevious: false,
-                    sizing: .regular, onPrevious: {}, onNext: {})
+    HoleNavigation(mode: .constant(.swing), canGoToPrevious: false,
+                   sizing: .regular, onPrevious: {}, onNext: {})
 }
