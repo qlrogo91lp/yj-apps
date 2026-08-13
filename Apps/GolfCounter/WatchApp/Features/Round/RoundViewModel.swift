@@ -10,10 +10,7 @@ final class RoundViewModel: ObservableObject {
         case counting
     }
 
-    @Published private(set) var holeScores: [Int]
-    @Published private(set) var holePars: [Int]
-    @Published private(set) var puttCounts: [Int]
-    @Published private(set) var currentHoleIndex: Int
+    @Published private var progress = HoleProgress()
     @Published var inputMode: StrokeInputMode = .swing
     /// 파가 이미 설정된 홀에서 [Par] 버튼으로 파 선택 화면을 다시 띄운 상태.
     @Published private(set) var isEditingPar = false
@@ -34,10 +31,6 @@ final class RoundViewModel: ObservableObject {
         self.startedAt = startedAt
         self.courseName = courseName
         self.publisher = publisher
-        holeScores = [0]
-        holePars = [0]
-        puttCounts = [0]
-        currentHoleIndex = 0
     }
 
     /// App Group 스냅샷으로 라운드를 되살린다 (spec §12).
@@ -48,30 +41,29 @@ final class RoundViewModel: ObservableObject {
         startedAt = snapshot.startedAt
         courseName = snapshot.courseName
         self.publisher = publisher
-        holeScores = snapshot.holeScores
-        holePars = snapshot.holePars
-        puttCounts = snapshot.puttCounts
-        currentHoleIndex = max(snapshot.currentHoleIndex, 0)
-        ensureCapacityForCurrentHole()
+        progress = HoleProgress(holeScores: snapshot.holeScores,
+                                holePars: snapshot.holePars,
+                                puttCounts: snapshot.puttCounts,
+                                currentHoleIndex: snapshot.currentHoleIndex)
     }
 
     // MARK: - 표시값
 
     var currentHoleNumber: Int {
-        currentHoleIndex + 1
+        progress.currentHoleNumber
     }
 
     var currentScore: Int {
-        holeScores[currentHoleIndex]
+        progress.currentScore
     }
 
     var currentPutts: Int {
-        puttCounts[currentHoleIndex]
+        progress.currentPutts
     }
 
     /// 0은 "아직 파가 설정되지 않음"을 뜻한다.
     var currentPar: Int {
-        holePars[currentHoleIndex]
+        progress.currentPar
     }
 
     /// 화면 분기 조건은 "홀 이동 방향"이 아니라 "이 홀에 파가 있는가" 하나다 (spec §4).
@@ -81,7 +73,7 @@ final class RoundViewModel: ObservableObject {
     }
 
     var canGoToPreviousHole: Bool {
-        currentHoleIndex > 0
+        progress.canGoToPreviousHole
     }
 
     var canUndo: Bool {
@@ -99,10 +91,10 @@ final class RoundViewModel: ObservableObject {
     var snapshot: RoundSnapshot {
         RoundSnapshot(startedAt: startedAt,
                       courseName: courseName,
-                      currentHoleIndex: currentHoleIndex,
-                      holeScores: holeScores,
-                      holePars: holePars,
-                      puttCounts: puttCounts)
+                      currentHoleIndex: progress.currentHoleIndex,
+                      holeScores: progress.holeScores,
+                      holePars: progress.holePars,
+                      puttCounts: progress.puttCounts)
     }
 
     // MARK: - 라이프사이클
@@ -126,13 +118,7 @@ final class RoundViewModel: ObservableObject {
 
     func incrementStroke() {
         undoStack.record(inputMode)
-        switch inputMode {
-        case .swing:
-            holeScores[currentHoleIndex] += 1
-        case .putt:
-            holeScores[currentHoleIndex] += 1
-            puttCounts[currentHoleIndex] += 1
-        }
+        progress.apply(inputMode)
         publishSnapshot()
     }
 
@@ -140,17 +126,14 @@ final class RoundViewModel: ObservableObject {
     /// 상태를 바꾸는 모든 경로가 스냅샷을 발행한다는 규칙을 따라 마지막에 발행한다.
     func undo() {
         guard let mode = undoStack.pop() else { return }
-        holeScores[currentHoleIndex] -= 1
-        if mode == .putt {
-            puttCounts[currentHoleIndex] -= 1
-        }
+        progress.revert(mode)
         publishSnapshot()
     }
 
     // MARK: - 파 선택
 
     func selectPar(_ par: Int) {
-        holePars[currentHoleIndex] = par
+        progress.setPar(par)
         isEditingPar = false
         publishSnapshot()
     }
@@ -162,15 +145,14 @@ final class RoundViewModel: ObservableObject {
     // MARK: - 홀 이동
 
     func goToNextHole() {
-        currentHoleIndex += 1
-        ensureCapacityForCurrentHole()
+        progress.advanceToNextHole()
         resetHoleLocalState()
         publishSnapshot()
     }
 
     func goToPreviousHole() {
-        guard canGoToPreviousHole else { return }
-        currentHoleIndex -= 1
+        guard progress.canGoToPreviousHole else { return }
+        progress.retreatToPreviousHole()
         resetHoleLocalState()
         publishSnapshot()
     }
@@ -181,45 +163,16 @@ final class RoundViewModel: ObservableObject {
     /// 반대로 이미 점수가 있던 홀을 [Par] 버튼으로 재편집(`beginParEditing()`)하는 중이라면
     /// 지울 phantom hole이 없으므로 일반 `goToPreviousHole()`과 동일하게 동작한다.
     func cancelToPreviousHole() {
-        guard canGoToPreviousHole else { return }
+        guard progress.canGoToPreviousHole else { return }
 
-        guard isPristinePhantomHole else {
+        guard !isEditingPar, progress.isPristinePhantomHole else {
             goToPreviousHole()
             return
         }
 
-        holeScores.removeLast()
-        holePars.removeLast()
-        puttCounts.removeLast()
-        currentHoleIndex -= 1
+        progress.removePhantomHoleAndRetreat()
         resetHoleLocalState()
         publishSnapshot()
-    }
-
-    /// 현재 홀이 "방금 만들어졌고 아직 아무것도 입력되지 않은" phantom hole 상태인지 판단한다.
-    /// 세 배열의 마지막 원소가 현재 홀과 정확히 일치할 때만 안전하게 pop할 수 있다.
-    private var isPristinePhantomHole: Bool {
-        !isEditingPar
-            && currentScore == 0
-            && currentPar == 0
-            && currentPutts == 0
-            && currentHoleIndex == holeScores.count - 1
-            && currentHoleIndex == holePars.count - 1
-            && currentHoleIndex == puttCounts.count - 1
-    }
-
-    /// 홀 배열 세 개의 길이를 현재 홀까지 맞춘다. 세 배열은 항상 같은 길이를 유지한다.
-    private func ensureCapacityForCurrentHole() {
-        let needed = currentHoleIndex + 1
-        while holeScores.count < needed {
-            holeScores.append(0)
-        }
-        while holePars.count < needed {
-            holePars.append(0)
-        }
-        while puttCounts.count < needed {
-            puttCounts.append(0)
-        }
     }
 
     /// 홀을 옮기면 입력 모드는 스윙으로 리셋되고(spec §3), 진행 중이던 파 편집은 취소된다.
