@@ -17,7 +17,9 @@ struct ScoringView: View {
 
     var body: some View {
         TabView(selection: $selectedPage) {
-            ViewThatFits(in: .vertical) {
+            // 화살표가 링 좌우로 오면서 가로도 예산이 됐다 — 두 축 모두로 판정해야
+            // 좁은 기기(예: Ultra 폭 205pt)에서 세로만 통과하는 세트가 잘못 선택되지 않는다.
+            ViewThatFits(in: [.horizontal, .vertical]) {
                 CountingView(viewModel: viewModel, sizing: .regular)
                 CountingView(viewModel: viewModel, sizing: .compact)
                 CountingView(viewModel: viewModel, sizing: .tight)
