@@ -10,7 +10,7 @@ final class RoundViewModel: ObservableObject {
         case counting
     }
 
-    @Published private var progress = HoleProgress()
+    @Published private var progress: HoleProgress
     @Published var inputMode: StrokeInputMode = .swing
     /// 파가 이미 설정된 홀에서 [Par] 버튼으로 파 선택 화면을 다시 띄운 상태.
     @Published private(set) var isEditingPar = false
@@ -24,13 +24,15 @@ final class RoundViewModel: ObservableObject {
 
     private let publisher: RoundSnapshotPublishing
 
-    init(startedAt: Date = Date(),
+    init(holeCount: Int = 18,
+         startedAt: Date = Date(),
          courseName: String? = nil,
          publisher: RoundSnapshotPublishing = RoundSnapshotPublisher())
     {
         self.startedAt = startedAt
         self.courseName = courseName
         self.publisher = publisher
+        progress = HoleProgress(holeCount: holeCount)
     }
 
     /// App Group 스냅샷으로 라운드를 되살린다 (spec §12).
@@ -41,7 +43,8 @@ final class RoundViewModel: ObservableObject {
         startedAt = snapshot.startedAt
         courseName = snapshot.courseName
         self.publisher = publisher
-        progress = HoleProgress(holeScores: snapshot.holeScores,
+        progress = HoleProgress(holeCount: snapshot.holeCount,
+                                holeScores: snapshot.holeScores,
                                 holePars: snapshot.holePars,
                                 puttCounts: snapshot.puttCounts,
                                 currentHoleIndex: snapshot.currentHoleIndex)
