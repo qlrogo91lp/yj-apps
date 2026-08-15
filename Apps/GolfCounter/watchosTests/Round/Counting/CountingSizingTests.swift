@@ -19,7 +19,6 @@ struct CountingSizingTests {
             #expect(smaller.overflowGap < larger.overflowGap)
             #expect(smaller.scoreFont < larger.scoreFont)
             #expect(smaller.relativeFont < larger.relativeFont)
-            #expect(smaller.undoSize < larger.undoSize)
             #expect(smaller.spacing < larger.spacing)
         }
     }
@@ -37,13 +36,12 @@ struct CountingSizingTests {
         }
     }
 
-    /// 헤더 안 두 원형(Par·모드)은 같은 지름이라 시각적으로 대칭을 이룬다.
-    /// `headerButtonSize` 하나를 공유하는 것으로 이 대칭이 보장되므로 별도 필드 비교는
-    /// 필요 없지만, 화살표·취소가 헤더 버튼보다 작다는 위계는 지켜야 한다.
-    @Test func 화살표와_취소는_헤더_버튼보다_작거나_같다() {
+    /// 화살표는 직접 누르는 탭 타깃이라 축소하지 않는다 — regular·compact는 헤더
+    /// 버튼과 같은 크기, tight만 가로 폭 한계로 살짝 작다(그래도 `<=`는 항상 성립).
+    /// 취소도 이제 헤더 버튼과 같은 크기를 쓰므로 이 위계에서 제외한다.
+    @Test func 화살표는_헤더_버튼보다_작거나_같다() {
         for sizing in sets {
             #expect(sizing.arrowSize <= sizing.headerButtonSize)
-            #expect(sizing.undoSize <= sizing.headerButtonSize)
         }
     }
 
@@ -64,14 +62,50 @@ struct CountingSizingTests {
         }
     }
 
+    /// 각 세트가 커버하는 기기 중 **가장 좁은** 화면의 폭.
+    ///
+    /// 현행 제품군은 40 · 42 · 44 · 46 · 49mm 다섯 가지이고, 폭은 시뮬레이터 실측이다
+    /// (2026-08-15): 40mm 162 · 44mm 184 · 42mm 187 · 46mm 208 · Ultra 49mm 211.
+    /// 화면이 클수록 폭도 크다는 법칙이 없다 — 44mm가 42mm보다 좁고, 세트별 하한은
+    /// mm 순서가 아니라 이 실측값에서 나온다.
+    ///
+    /// regular = 46mm · 49mm → 208 / compact = 42mm · 44mm → 184 / tight = 40mm → 162.
+    /// tight는 마지막 후보라 이 아래로는 fallback이 없다.
+    /// 단종 기기(41 · 45mm)는 `ViewThatFits`가 알아서 맞는 세트로 떨어뜨린다.
+    private static let narrowestWidths: [(CountingSizing, CGFloat)] = [
+        (.regular, 208.0), (.compact, 184.0), (.tight, 162.0),
+    ]
+
+    /// 헤더는 양끝 원형(Par·모드) 사이에 최장 라벨까지 들어가야 한다. 세로 페이지
+    /// 인디케이터를 피해 좌우로 물러난 뒤 남는 폭이 기준이다 — 여기서 모자라면
+    /// 가운데 텍스트가 `minimumScaleFactor`로 쪼그라들어, 글자를 키운 의미가 사라진다.
+    ///
+    /// `usesShortHoleLabel`이 켜진 세트는 "Hole 18 · 108"이 아니라 "H18 · 108"이
+    /// 실제로 렌더되므로 그 짧은 라벨 기준으로 검사한다.
+    @Test func 헤더_양끝_버튼_사이에_홀_라벨_공간이_남는다() {
+        for (sizing, screenWidth) in Self.narrowestWidths {
+            let available = screenWidth - CountingSizing.pageIndicatorInset * 2
+            let textRoom = available - sizing.headerButtonSize * 2 - sizing.spacing * 2
+            // "Hole 18 · 108"(13글자, 5.5em) / "H18 · 108"(9글자, 4.0em)의 폭 근사.
+            // 숫자·글자가 섞여 있고 공백과 `·`가 좁아 글자당 폭을 보수적으로 낮게 잡는다.
+            let neededEm: CGFloat = sizing.usesShortHoleLabel ? 4.0 : 5.5
+            #expect(textRoom >= sizing.holeInfoFont * neededEm)
+        }
+    }
+
+    /// 40mm에서만 헤더 라벨을 축약한다 — 나머지는 전체 표기가 들어간다.
+    @Test func 헤더_라벨_축약은_가장_작은_세트에서만_켜진다() {
+        #expect(CountingSizing.regular.usesShortHoleLabel == false)
+        #expect(CountingSizing.compact.usesShortHoleLabel == false)
+        #expect(CountingSizing.tight.usesShortHoleLabel)
+    }
+
     /// 화살표가 링 좌우에 붙으므로 가로도 예산이 된다 — 가로 합계 = 화살표 두 개 + 간격 + 링.
-    /// 예산은 각 세트가 커버하는 기기 중 가장 좁은 화면의 폭에서 좌우 패딩 8pt를 뺀 값이다:
-    /// regular = Ultra 49mm(205pt) → 197, compact = 41mm(176pt) → 168, tight = 40mm(162pt) → 154.
+    /// 링 존은 헤더와 달리 페이지 인디케이터를 피할 필요가 없어 좌우 패딩 4pt씩만 뺀다.
     @Test func 가로_합계는_가장_좁은_대상_기기의_폭_안에_들어간다() {
-        let budgets: [(CountingSizing, CGFloat)] = [(.regular, 197.0), (.compact, 168.0), (.tight, 154.0)]
-        for (sizing, budget) in budgets {
+        for (sizing, screenWidth) in Self.narrowestWidths {
             let total = sizing.arrowSize * 2 + sizing.spacing * 2 + sizing.outerRadius * 2
-            #expect(total <= budget)
+            #expect(total <= screenWidth - 8)
         }
     }
 }

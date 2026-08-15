@@ -20,7 +20,7 @@ struct HoleHeader: View {
         HStack(spacing: sizing.spacing) {
             parButton
             Spacer(minLength: 0)
-            Text("Hole \(holeNumber) · \(totalStrokes)")
+            Text(holeInfoText)
                 .font(.system(size: sizing.holeInfoFont, weight: .semibold, design: .rounded))
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
@@ -28,6 +28,11 @@ struct HoleHeader: View {
             ModeButton(mode: $mode, sizing: sizing)
         }
         .frame(height: sizing.headerButtonSize)
+    }
+
+    private var holeInfoText: String {
+        let hole = sizing.usesShortHoleLabel ? "H\(holeNumber)" : "Hole \(holeNumber)"
+        return "\(hole) · \(totalStrokes)"
     }
 
     private var parButton: some View {
@@ -43,6 +48,7 @@ struct HoleHeader: View {
             .background(Color.gray.opacity(0.25), in: Circle())
         }
         .buttonStyle(.plain)
+        .contentShape(Circle().inset(by: -CountingSizing.headerButtonHitInset))
     }
 }
 

@@ -14,14 +14,17 @@ struct ModeButton: View {
 
     var body: some View {
         Button(action: toggle) {
+            // `figure.*` 계열은 같은 폰트 크기에서도 다른 심볼보다 크게 그려진다.
+            // 0.4를 넘기면 원 테두리에 닿을 듯 답답해진다 (42mm 실측).
             Image(systemName: iconName)
-                .font(.system(size: sizing.headerButtonSize * 0.44, weight: .semibold))
+                .font(.system(size: sizing.headerButtonSize * 0.4, weight: .semibold))
                 .foregroundStyle(tint)
                 .frame(width: sizing.headerButtonSize, height: sizing.headerButtonSize)
                 .background(tint.opacity(0.18), in: Circle())
                 .overlay(Circle().strokeBorder(tint.opacity(0.7), lineWidth: 1))
         }
         .buttonStyle(.plain)
+        .contentShape(Circle().inset(by: -CountingSizing.headerButtonHitInset))
     }
 
     private var tint: Color {

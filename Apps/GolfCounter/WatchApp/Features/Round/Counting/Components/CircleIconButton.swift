@@ -7,6 +7,14 @@ import SwiftUI
 struct CircleIconButton: View {
     let systemName: String
     let size: CGFloat
+    /// 시각 크기 밖으로 균일하게 넓히는 탭 영역. `.contentShape`만 키우므로 레이아웃에
+    /// 보고되는 크기는 그대로다 — 이웃에게 자리를 뺏지 않는다.
+    ///
+    /// 그래도 **양옆에 조작 가능한 뷰가 붙어 있으면 쓰지 말 것** — 겹치는 자리에서
+    /// 어느 쪽이 탭을 가져갈지 SwiftUI가 보장해주지 않는다. 화살표처럼 한쪽이 링(가장
+    /// 자주 쓰는 탭 타깃)인 경우는 호출부에서 세로 방향으로만 `.frame`을 키우는
+    /// 별도 방식을 쓴다 — `CountingView.ringArea` 참조.
+    var hitInset: CGFloat = 0
     let action: () -> Void
 
     var body: some View {
@@ -18,6 +26,7 @@ struct CircleIconButton: View {
                 .background(Color.gray.opacity(0.25), in: Circle())
         }
         .buttonStyle(.plain)
+        .contentShape(Circle().inset(by: -hitInset))
     }
 }
 
