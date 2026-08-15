@@ -11,12 +11,13 @@ struct RoundSessionView: View {
     /// false인 채로 뷰가 사라지면(edge-swipe 등 endRound() 밖의 경로) onDisappear에서 방어적으로 정리한다.
     @State private var didFinish = false
 
-    /// 진행 중 스냅샷이 있으면 그 라운드를 이어서, 없으면 새 라운드를 시작한다.
-    init(resuming snapshot: RoundSnapshot? = nil) {
+    /// 진행 중 스냅샷이 있으면 그 라운드를 이어서, 없으면 고른 홀 수로 새 라운드를 시작한다.
+    /// 복구 라운드는 홈의 선택값을 무시하고 스냅샷의 `holeCount`를 쓴다.
+    init(resuming snapshot: RoundSnapshot? = nil, holeCount: Int = 18) {
         if let snapshot {
             _viewModel = StateObject(wrappedValue: RoundViewModel(resuming: snapshot))
         } else {
-            _viewModel = StateObject(wrappedValue: RoundViewModel())
+            _viewModel = StateObject(wrappedValue: RoundViewModel(holeCount: holeCount))
         }
     }
 
