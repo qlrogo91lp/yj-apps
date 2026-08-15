@@ -7,7 +7,7 @@ struct RoundSnapshot: Equatable {
     ///
     /// 기본값이 있어 멤버와이즈 init에서 생략할 수 있지만, 생략하면 **호출할 때마다 새 UUID가
     /// 생긴다.** `RoundViewModel.snapshot`처럼 라운드 정체성을 실어야 하는 자리는 반드시 명시한다.
-    var id: UUID = UUID()
+    var id = UUID()
     /// 선택한 홀 수 상한 (9 또는 18).
     var holeCount: Int = 18
     var startedAt: Date
