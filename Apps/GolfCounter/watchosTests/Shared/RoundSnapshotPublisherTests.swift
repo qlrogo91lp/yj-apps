@@ -20,10 +20,11 @@ struct RoundSnapshotPublisherTests {
     @Test func publish한_스냅샷을_다시_읽을_수_있다() {
         let defaults = makeDefaults()
         let publisher = RoundSnapshotPublisher(defaults: defaults)
+        let snapshot = makeSnapshot()
 
-        publisher.publish(makeSnapshot())
+        publisher.publish(snapshot)
 
-        #expect(publisher.loadCurrent() == makeSnapshot())
+        #expect(publisher.loadCurrent() == snapshot)
     }
 
     @Test func clear하면_스냅샷이_사라진다() {

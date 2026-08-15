@@ -3,7 +3,7 @@ import Testing
 
 struct HoleProgressTests {
     @Test func 초기상태는_1홀이고_값이_모두_0이다() {
-        let progress = HoleProgress()
+        let progress = HoleProgress(holeCount: 18)
 
         #expect(progress.currentHoleIndex == 0)
         #expect(progress.currentHoleNumber == 1)
@@ -16,7 +16,7 @@ struct HoleProgressTests {
     }
 
     @Test func 스윙_적용은_타수만_올린다() {
-        var progress = HoleProgress()
+        var progress = HoleProgress(holeCount: 18)
 
         progress.apply(.swing)
         progress.apply(.swing)
@@ -26,7 +26,7 @@ struct HoleProgressTests {
     }
 
     @Test func 퍼팅_적용은_타수와_퍼팅을_함께_올린다() {
-        var progress = HoleProgress()
+        var progress = HoleProgress(holeCount: 18)
 
         progress.apply(.putt)
 
@@ -35,7 +35,7 @@ struct HoleProgressTests {
     }
 
     @Test func 스윙_되돌리기는_타수만_내린다() {
-        var progress = HoleProgress()
+        var progress = HoleProgress(holeCount: 18)
         progress.apply(.swing)
         progress.apply(.putt)
 
@@ -47,7 +47,7 @@ struct HoleProgressTests {
     }
 
     @Test func 퍼팅_되돌리기는_타수와_퍼팅을_함께_내린다() {
-        var progress = HoleProgress()
+        var progress = HoleProgress(holeCount: 18)
         progress.apply(.putt)
         progress.apply(.putt)
 
@@ -58,7 +58,7 @@ struct HoleProgressTests {
     }
 
     @Test func 파를_설정하면_현재홀의_파가_바뀐다() {
-        var progress = HoleProgress()
+        var progress = HoleProgress(holeCount: 18)
 
         progress.setPar(4)
 
@@ -67,7 +67,7 @@ struct HoleProgressTests {
     }
 
     @Test func 다음홀로_가면_세_배열이_함께_늘어난다() {
-        var progress = HoleProgress()
+        var progress = HoleProgress(holeCount: 18)
         progress.setPar(4)
         progress.apply(.swing)
 
@@ -80,7 +80,7 @@ struct HoleProgressTests {
     }
 
     @Test func 이전홀로_가면_인덱스만_내려가고_배열은_그대로다() {
-        var progress = HoleProgress()
+        var progress = HoleProgress(holeCount: 18)
         progress.setPar(4)
         progress.advanceToNextHole()
 
@@ -92,13 +92,13 @@ struct HoleProgressTests {
     }
 
     @Test func 첫홀에서는_이전홀로_갈_수_없다() {
-        let progress = HoleProgress()
+        let progress = HoleProgress(holeCount: 18)
 
         #expect(progress.canGoToPreviousHole == false)
     }
 
     @Test func 홀을_옮기면_이전홀로_갈_수_있다() {
-        var progress = HoleProgress()
+        var progress = HoleProgress(holeCount: 18)
 
         progress.advanceToNextHole()
 
@@ -106,7 +106,7 @@ struct HoleProgressTests {
     }
 
     @Test func 길이가_어긋난_배열로_시작해도_현재홀까지_용량이_채워진다() {
-        let progress = HoleProgress(holeScores: [4],
+        let progress = HoleProgress(holeCount: 18, holeScores: [4],
                                     holePars: [4],
                                     puttCounts: [2],
                                     currentHoleIndex: 3)
@@ -118,7 +118,7 @@ struct HoleProgressTests {
     }
 
     @Test func 음수_인덱스로_시작하면_0으로_보정된다() {
-        let progress = HoleProgress(holeScores: [3],
+        let progress = HoleProgress(holeCount: 18, holeScores: [3],
                                     holePars: [4],
                                     puttCounts: [1],
                                     currentHoleIndex: -5)
@@ -128,7 +128,7 @@ struct HoleProgressTests {
     }
 
     @Test func 새로_만든_홀은_phantom_hole이다() {
-        var progress = HoleProgress()
+        var progress = HoleProgress(holeCount: 18)
         progress.setPar(4)
         progress.apply(.swing)
 
@@ -138,7 +138,7 @@ struct HoleProgressTests {
     }
 
     @Test func 타수를_입력하면_phantom_hole이_아니다() {
-        var progress = HoleProgress()
+        var progress = HoleProgress(holeCount: 18)
         progress.advanceToNextHole()
 
         progress.apply(.swing)
@@ -147,7 +147,7 @@ struct HoleProgressTests {
     }
 
     @Test func 파만_설정해도_phantom_hole이_아니다() {
-        var progress = HoleProgress()
+        var progress = HoleProgress(holeCount: 18)
         progress.advanceToNextHole()
 
         progress.setPar(3)
@@ -156,7 +156,7 @@ struct HoleProgressTests {
     }
 
     @Test func 값이_비어도_말단이_아니면_phantom_hole이_아니다() {
-        var progress = HoleProgress()
+        var progress = HoleProgress(holeCount: 18)
         progress.advanceToNextHole()
         progress.advanceToNextHole()
 
@@ -170,7 +170,7 @@ struct HoleProgressTests {
     }
 
     @Test func phantom_hole을_제거하면_이전홀_데이터가_그대로_남는다() {
-        var progress = HoleProgress()
+        var progress = HoleProgress(holeCount: 18)
         progress.setPar(4)
         progress.apply(.putt)
         progress.advanceToNextHole()
@@ -181,5 +181,35 @@ struct HoleProgressTests {
         #expect(progress.holeScores == [1])
         #expect(progress.holePars == [4])
         #expect(progress.puttCounts == [1])
+    }
+
+    @Test func 마지막_홀에서는_다음홀로_갈_수_없다() {
+        var progress = HoleProgress(holeCount: 18)
+        for _ in 1 ..< 18 {
+            progress.advanceToNextHole()
+        }
+
+        #expect(progress.currentHoleNumber == 18)
+        #expect(progress.canGoToNextHole == false)
+    }
+
+    @Test func 상한에_도달하면_다음홀_이동이_아무것도_바꾸지_않는다() {
+        var progress = HoleProgress(holeCount: 9)
+        for _ in 1 ..< 9 {
+            progress.advanceToNextHole()
+        }
+
+        progress.advanceToNextHole()
+
+        #expect(progress.currentHoleIndex == 8)
+        #expect(progress.holeScores.count == 9)
+    }
+
+    @Test func 아홉홀_라운드는_아홉번째_홀이_마지막이다() {
+        var progress = HoleProgress(holeCount: 9)
+        progress.advanceToNextHole()
+
+        #expect(progress.canGoToNextHole)
+        #expect(progress.holeCount == 9)
     }
 }

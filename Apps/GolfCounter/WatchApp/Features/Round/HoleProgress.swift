@@ -6,12 +6,16 @@ import Foundation
 /// 길이가 항상 같아야 한다는 불변식을 이 타입이 책임진다 — 홀을 늘리는 경로가
 /// `advanceToNextHole()`과 복구 `init` 둘뿐이고, 양쪽 다 용량을 함께 맞춘다.
 struct HoleProgress: Equatable {
+    /// 이 라운드의 홀 수 상한 (9 또는 18). 중간 변경·연장은 없다 (spec §3.1).
+    /// 기본값을 두지 않는 이유: 상한 없는 HoleProgress는 의미가 없다.
+    let holeCount: Int
     private(set) var holeScores: [Int]
     private(set) var holePars: [Int]
     private(set) var puttCounts: [Int]
     private(set) var currentHoleIndex: Int
 
-    init() {
+    init(holeCount: Int) {
+        self.holeCount = holeCount
         holeScores = [0]
         holePars = [0]
         puttCounts = [0]
@@ -19,7 +23,8 @@ struct HoleProgress: Equatable {
     }
 
     /// 스냅샷 복구용 (spec §12). 길이가 어긋난 값이 들어와도 현재 홀까지 용량을 맞춘다.
-    init(holeScores: [Int], holePars: [Int], puttCounts: [Int], currentHoleIndex: Int) {
+    init(holeCount: Int, holeScores: [Int], holePars: [Int], puttCounts: [Int], currentHoleIndex: Int) {
+        self.holeCount = holeCount
         self.holeScores = holeScores
         self.holePars = holePars
         self.puttCounts = puttCounts
@@ -48,6 +53,10 @@ struct HoleProgress: Equatable {
 
     var canGoToPreviousHole: Bool {
         currentHoleIndex > 0
+    }
+
+    var canGoToNextHole: Bool {
+        currentHoleIndex + 1 < holeCount
     }
 
     /// 현재 홀이 "방금 만들어졌고 아직 아무것도 입력되지 않은" phantom hole 상태인지 판단한다.
@@ -91,6 +100,7 @@ struct HoleProgress: Equatable {
     // MARK: - 홀 이동
 
     mutating func advanceToNextHole() {
+        guard canGoToNextHole else { return }
         currentHoleIndex += 1
         ensureCapacityForCurrentHole()
     }

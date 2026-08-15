@@ -1,10 +1,8 @@
 import SwiftUI
 
 struct HomeView: View {
-    @State private var isRoundActive = false
-    @State private var resumingSnapshot: RoundSnapshot?
-
-    private let publisher = RoundSnapshotPublisher()
+    @StateObject private var viewModel = HomeViewModel()
+    @State private var isConfirmingNewRound = false
 
     var body: some View {
         NavigationStack {
@@ -14,32 +12,46 @@ struct HomeView: View {
                 Text("Golf Counter")
                     .font(.system(size: 20, weight: .bold))
                     .foregroundStyle(.green)
-                Button {
-                    resumingSnapshot = nil
-                    isRoundActive = true
-                } label: {
-                    Text("라운드 시작")
+
+                Button(action: startTapped) {
+                    Text(viewModel.startButtonLabel)
                         .font(.system(size: 16, weight: .bold))
                         .frame(maxWidth: .infinity, minHeight: 40)
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(.green)
 
+                HoleCountSelector(holeCount: viewModel.holeCount,
+                                  onToggle: viewModel.toggleHoleCount)
+
                 Spacer()
             }
-            .navigationDestination(isPresented: $isRoundActive) {
-                RoundSessionView(resuming: resumingSnapshot)
+            .padding(.horizontal, 8)
+            .navigationDestination(isPresented: $viewModel.isRoundActive) {
+                RoundSessionView(resuming: viewModel.resumingSnapshot,
+                                 holeCount: viewModel.holeCount)
+            }
+            .confirmationDialog("진행 중인 라운드가 있습니다",
+                                isPresented: $isConfirmingNewRound,
+                                titleVisibility: .visible)
+            {
+                Button("새로 시작", role: .destructive, action: viewModel.startNewRound)
+                Button("취소", role: .cancel) {}
+            } message: {
+                Text("새로 시작하면 지워집니다.")
             }
         }
-        .onAppear(perform: resumeIfNeeded)
+        .onAppear(perform: viewModel.resumeIfNeeded)
     }
 
-    /// 크래시·강제종료 후 실행되면 진행 중 스냅샷으로 라운드를 이어간다 (spec §12).
-    /// 워크아웃 세션은 복구하지 않고 RoundSessionView가 새로 시작한다.
-    private func resumeIfNeeded() {
-        guard !isRoundActive, let snapshot = publisher.loadCurrent() else { return }
-        resumingSnapshot = snapshot
-        isRoundActive = true
+    /// 전송 없이 요약을 벗어나면 스냅샷이 남는다(결정 6). 그대로 새 라운드를 시작하면
+    /// start()가 곧바로 새 스냅샷을 발행해 이전 라운드를 덮어쓰므로 먼저 확인한다 (spec §3.6).
+    private func startTapped() {
+        if viewModel.hasPendingRound {
+            isConfirmingNewRound = true
+        } else {
+            viewModel.startNewRound()
+        }
     }
 }
 
