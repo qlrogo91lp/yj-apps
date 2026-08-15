@@ -173,6 +173,28 @@ struct RoundViewModelTransmissionTests {
         #expect(viewModel.currentHoleNumber == 9)
     }
 
+    @Test func 마지막_홀에서_다음홀_시도는_입력모드와_되돌리기_기록을_보존한다() {
+        let viewModel = makeViewModel(holeCount: 9,
+                                      publisher: RoundSnapshotPublisherSpy(),
+                                      transmitter: RoundTransmitterSpy())
+        for _ in 1 ..< 9 {
+            viewModel.selectPar(4)
+            viewModel.goToNextHole()
+        }
+        viewModel.selectPar(4)
+        viewModel.inputMode = .putt
+        viewModel.incrementStroke()
+
+        #expect(viewModel.canGoToNextHole == false)
+        #expect(viewModel.canUndo)
+
+        viewModel.goToNextHole()
+
+        #expect(viewModel.currentHoleNumber == 9)
+        #expect(viewModel.inputMode == .putt)
+        #expect(viewModel.canUndo)
+    }
+
     @Test func 요약_표시값은_트림_기준이다() {
         let viewModel = makeViewModel(publisher: RoundSnapshotPublisherSpy(),
                                       transmitter: RoundTransmitterSpy())

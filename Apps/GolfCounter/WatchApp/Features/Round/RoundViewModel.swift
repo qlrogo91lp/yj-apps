@@ -237,6 +237,7 @@ final class RoundViewModel: ObservableObject {
     // MARK: - 홀 이동
 
     func goToNextHole() {
+        guard progress.canGoToNextHole else { return }
         progress.advanceToNextHole()
         resetHoleLocalState()
         publishSnapshot()
