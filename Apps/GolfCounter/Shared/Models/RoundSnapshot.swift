@@ -35,6 +35,32 @@ struct RoundSnapshot: Equatable {
     }
 }
 
+extension RoundSnapshot {
+    /// 전송 직전, 배열 말단에서부터 `par == 0`인 미기록 홀을 제거한다 (spec §2 결정 2).
+    ///
+    /// `par == 0`이면 파 선택 화면이 떠 카운터에 접근할 수 없으므로 `score`·`putts`도 반드시
+    /// 0이다 — 이 트림은 무손실이다. 중간에 낀 `par == 0` 홀은 건드리지 않는다(사용자가
+    /// 의도적으로 건너뛴 홀일 수 있다).
+    func trimmed() -> RoundSnapshot {
+        var end = holePars.count
+        while end > 0, holePars[end - 1] == 0 {
+            end -= 1
+        }
+
+        var copy = self
+        copy.holeScores = Array(holeScores.prefix(end))
+        copy.holePars = Array(holePars.prefix(end))
+        copy.puttCounts = Array(puttCounts.prefix(end))
+        copy.currentHoleIndex = max(0, min(currentHoleIndex, end - 1))
+        return copy
+    }
+
+    /// 트림 후 실제로 기록된 홀 수. 종료 확인 문구와 요약 헤더가 쓴다.
+    var recordedHoleCount: Int {
+        trimmed().holePars.count
+    }
+}
+
 /// Codable을 확장에 두는 이유: 본문에 init을 선언하면 멤버와이즈 init이 사라져
 /// 기존 생성 호출부 10곳이 전부 깨진다.
 extension RoundSnapshot: Codable {
