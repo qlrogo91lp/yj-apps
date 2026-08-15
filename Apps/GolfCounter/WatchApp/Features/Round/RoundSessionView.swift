@@ -52,6 +52,9 @@ struct RoundSessionView: View {
             ParSelectionView(viewModel: viewModel)
         case .counting:
             ScoringView(viewModel: viewModel)
+        case .summary:
+            // 요약 화면 연결은 Task 9 범위. 지금은 Phase 열거형 완결성만 맞춘다.
+            EmptyView()
         }
     }
 
@@ -71,7 +74,7 @@ struct RoundSessionView: View {
     private func endRound() {
         startTask?.cancel()
         didFinish = true
-        viewModel.finish()
+        viewModel.finishRound()
         let service = healthKit
         Task { _ = await service.stopWorkout() }
         dismiss()

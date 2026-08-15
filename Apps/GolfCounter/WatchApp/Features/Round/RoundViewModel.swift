@@ -8,6 +8,7 @@ final class RoundViewModel: ObservableObject {
     enum Phase: Equatable {
         case parSelection
         case counting
+        case summary
     }
 
     @Published private var progress: HoleProgress
@@ -18,31 +19,52 @@ final class RoundViewModel: ObservableObject {
     /// 뷰가 취소 버튼의 등장·퇴장을 관찰할 수 있다.
     /// 프로퍼티명이 `undo`가 아닌 이유: 같은 이름의 메서드 `undo()`와 충돌한다.
     @Published private var undoStack = StrokeUndo()
+    /// 종료 확인을 거쳤는지. `phase`가 이 값에서 `.summary`로 갈린다.
+    @Published private var isFinished = false
+    /// 워크아웃 집계값. `stopWorkout()`이 1~3초 걸려 뒤늦게 도착한다 (spec §2 결정 9).
+    @Published private(set) var metrics: RoundMetrics?
+    /// "저장 & 전송"을 눌렀지만 메트릭이 아직 안 와 대기 중인 상태. 요약이 "전송 중…"을 띄운다.
+    @Published private(set) var isTransmitting = false
+    /// 전송(또는 0홀 폐기)이 끝나 홈으로 돌아가도 되는 상태. View가 이걸 보고 dismiss한다.
+    @Published private(set) var didComplete = false
 
+    /// 라운드 식별자. 스냅샷에 실려 복구를 넘어 유지되고, iOS가 이 값으로 재전송을 거른다.
+    let id: UUID
+    /// 종료 확인을 누른 시점. 요약 체류 시간이나 전송 지연이 라운드 길이에 섞이지 않는다 (spec §4).
+    private(set) var endedAt: Date?
     let startedAt: Date
     var courseName: String?
 
     private let publisher: RoundSnapshotPublishing
+    private let transmitter: RoundTransmitting
 
-    init(holeCount: Int = 18,
+    init(id: UUID = UUID(),
+         holeCount: Int = 18,
          startedAt: Date = Date(),
          courseName: String? = nil,
-         publisher: RoundSnapshotPublishing = RoundSnapshotPublisher())
+         publisher: RoundSnapshotPublishing = RoundSnapshotPublisher(),
+         transmitter: RoundTransmitting = RoundTransmitter())
     {
+        self.id = id
         self.startedAt = startedAt
         self.courseName = courseName
         self.publisher = publisher
+        self.transmitter = transmitter
         progress = HoleProgress(holeCount: holeCount)
     }
 
     /// App Group 스냅샷으로 라운드를 되살린다 (spec §12).
     /// 워크아웃 세션은 복구하지 않고 새로 시작하므로, 여기서는 스코어 상태만 복원한다.
+    /// `id`를 이어받아야 "전송 후 스냅샷 삭제 전 크래시 → 복구 후 재전송"을 iOS가 걸러낸다.
     init(resuming snapshot: RoundSnapshot,
-         publisher: RoundSnapshotPublishing = RoundSnapshotPublisher())
+         publisher: RoundSnapshotPublishing = RoundSnapshotPublisher(),
+         transmitter: RoundTransmitting = RoundTransmitter())
     {
+        id = snapshot.id
         startedAt = snapshot.startedAt
         courseName = snapshot.courseName
         self.publisher = publisher
+        self.transmitter = transmitter
         progress = HoleProgress(holeCount: snapshot.holeCount,
                                 holeScores: snapshot.holeScores,
                                 holePars: snapshot.holePars,
@@ -70,13 +92,19 @@ final class RoundViewModel: ObservableObject {
     }
 
     /// 화면 분기 조건은 "홀 이동 방향"이 아니라 "이 홀에 파가 있는가" 하나다 (spec §4).
+    /// 종료 확인을 거치면 그 위에 요약이 덮인다.
     var phase: Phase {
+        if isFinished { return .summary }
         if isEditingPar { return .parSelection }
         return currentPar == 0 ? .parSelection : .counting
     }
 
     var canGoToPreviousHole: Bool {
         progress.canGoToPreviousHole
+    }
+
+    var canGoToNextHole: Bool {
+        progress.canGoToNextHole
     }
 
     var canUndo: Bool {
@@ -92,12 +120,33 @@ final class RoundViewModel: ObservableObject {
     }
 
     var snapshot: RoundSnapshot {
-        RoundSnapshot(startedAt: startedAt,
+        RoundSnapshot(id: id,
+                      holeCount: progress.holeCount,
+                      startedAt: startedAt,
                       courseName: courseName,
                       currentHoleIndex: progress.currentHoleIndex,
                       holeScores: progress.holeScores,
                       holePars: progress.holePars,
                       puttCounts: progress.puttCounts)
+    }
+
+    // MARK: - 요약 표시값 (전부 트림 후 기준)
+
+    /// 트림 후 실제로 전송될 홀 수. 종료 확인 문구와 요약 헤더가 쓴다.
+    var recordedHoleCount: Int {
+        snapshot.recordedHoleCount
+    }
+
+    var trimmedTotalStrokes: Int {
+        snapshot.trimmed().totalStrokes
+    }
+
+    var trimmedTotalPutts: Int {
+        snapshot.trimmed().totalPutts
+    }
+
+    var trimmedRelativeToPar: Int {
+        snapshot.trimmed().relativeToPar
     }
 
     // MARK: - 라이프사이클
@@ -107,10 +156,50 @@ final class RoundViewModel: ObservableObject {
         publishSnapshot()
     }
 
-    /// 라운드 종료. 스냅샷을 지워 컴플리케이션을 평상시로 되돌린다.
-    /// 완료 라운드의 저장·전송은 plan ④ 범위다.
-    func finish() {
+    /// 종료 확인에서 호출한다. 워크아웃 종료는 View가 async로 진행하고,
+    /// 도착한 결과는 `applyMetrics(_:)`로 들어온다 (spec §7).
+    func finishRound() {
+        endedAt = Date()
+        isFinished = true
+    }
+
+    /// 워크아웃 종료 결과가 도착했을 때 View가 부른다.
+    /// `nil`이면 0으로 채운다 — HealthKit 거부·워크아웃 미시작·복구 라운드에서 정상 경로다 (spec §8).
+    func applyMetrics(_ result: RoundMetrics?) {
+        metrics = result ?? .empty
+        guard isTransmitting, let metrics else { return }
+        transmit(with: metrics)
+    }
+
+    /// 요약의 "저장 & 전송". 메트릭이 아직 안 왔으면 대기만 하고, 도착하면 이어서 보낸다
+    /// (버튼을 죽이지 않는다 — spec §2 결정 9).
+    func saveAndTransmit() {
+        // 시작하자마자 종료한 경우. iOS에 빈 라운드를 만들지 않는다 (spec §2 결정 10).
+        guard recordedHoleCount > 0 else {
+            publisher.clear()
+            didComplete = true
+            return
+        }
+        guard let metrics else {
+            isTransmitting = true
+            return
+        }
+        transmit(with: metrics)
+    }
+
+    private func transmit(with metrics: RoundMetrics) {
+        let trimmed = snapshot.trimmed()
+        transmitter.send(RoundCompletedMessage(id: id,
+                                               startedAt: startedAt,
+                                               endedAt: endedAt ?? Date(),
+                                               courseName: courseName,
+                                               holeScores: trimmed.holeScores,
+                                               holePars: trimmed.holePars,
+                                               puttCounts: trimmed.puttCounts,
+                                               metrics: metrics))
         publisher.clear()
+        isTransmitting = false
+        didComplete = true
     }
 
     private func publishSnapshot() {

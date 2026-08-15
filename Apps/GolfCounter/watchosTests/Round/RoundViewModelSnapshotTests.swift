@@ -62,15 +62,17 @@ struct RoundViewModelSnapshotTests {
         #expect(spy.published.count == countAfterStart)
     }
 
-    @Test func finish하면_스냅샷을_지운다() {
+    /// 종료 확인만으로는 스냅샷을 지우지 않는다 — 실제로 지우는 시점은 `saveAndTransmit()`이다
+    /// (전송 성공 또는 0홀 폐기, Task 6).
+    @Test func finishRound하면_요약으로_전환되고_스냅샷은_아직_남는다() {
         let spy = RoundSnapshotPublisherSpy()
         let viewModel = makeViewModel(spy: spy)
         viewModel.start()
 
-        viewModel.finish()
+        viewModel.finishRound()
 
-        #expect(spy.clearCallCount == 1)
-        #expect(spy.loadCurrent() == nil)
+        #expect(viewModel.phase == .summary)
+        #expect(spy.clearCallCount == 0)
     }
 
     @Test func 스냅샷으로_라운드를_복구한다() {
