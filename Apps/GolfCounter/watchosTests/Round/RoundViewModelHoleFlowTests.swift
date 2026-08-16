@@ -188,4 +188,59 @@ struct RoundViewModelHoleFlowTests {
         #expect(viewModel.currentScore == 0)
         #expect(viewModel.phase == .parSelection)
     }
+
+    // MARK: - skipCurrentHole (미타구 홀 건너뛰기)
+
+    @Test func 건너뛰기_파를0으로_되돌리고_다음홀로_간다() {
+        let viewModel = makeViewModel()
+        viewModel.selectPar(4)
+
+        viewModel.skipCurrentHole()
+
+        #expect(viewModel.currentHoleNumber == 2)
+        // 파가 0으로 돌아갔으므로 건너뛴 홀은 기록 홀 수에 잡히지 않는다.
+        #expect(viewModel.recordedHoleCount == 0)
+        // 새 홀은 파가 없으므로 다시 파 선택 화면이다.
+        #expect(viewModel.phase == .parSelection)
+    }
+
+    @Test func 건너뛰기_타수가있으면_아무일도_없다() {
+        let viewModel = makeViewModel()
+        viewModel.selectPar(4)
+        viewModel.incrementStroke()
+
+        viewModel.skipCurrentHole()
+
+        // 이미 친 홀은 건너뛸 수 없다 — 파가 지워지면 그 타수가 미아가 된다.
+        #expect(viewModel.currentHoleNumber == 1)
+        #expect(viewModel.currentPar == 4)
+        #expect(viewModel.currentScore == 1)
+    }
+
+    @Test func 건너뛰기_마지막홀에서는_아무일도_없다() {
+        // 이 파일의 makeViewModel()은 holeCount를 받지 않으므로 직접 만든다.
+        let viewModel = RoundViewModel(holeCount: 1,
+                                       startedAt: Date(timeIntervalSince1970: 1000),
+                                       publisher: RoundSnapshotPublisherSpy())
+        viewModel.selectPar(4)
+
+        viewModel.skipCurrentHole()
+
+        #expect(viewModel.currentHoleNumber == 1)
+        #expect(viewModel.currentPar == 4)
+    }
+
+    @Test func 건너뛴홀은_오버파에도_잡히지_않는다() {
+        let viewModel = makeViewModel()
+        viewModel.selectPar(4)
+        viewModel.skipCurrentHole()
+        viewModel.selectPar(3)
+        for _ in 0 ..< 4 {
+            viewModel.incrementStroke()
+        }
+
+        // 1번 홀은 건너뛰었으므로 2번 홀의 +1만 남는다.
+        #expect(viewModel.relativeToPar == 1)
+        #expect(viewModel.recordedHoleCount == 1)
+    }
 }

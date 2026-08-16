@@ -243,6 +243,22 @@ final class RoundViewModel: ObservableObject {
         publishSnapshot()
     }
 
+    /// 한 타도 치지 않은 홀을 건너뛴다 — 파를 0으로 되돌려 "진짜 건너뛴 홀"로 만든 뒤 다음 홀로 간다.
+    ///
+    /// 파를 남긴 채 넘어가면 그 홀이 기록 홀 수에 잡히고(spec §3 유효 홀), 오버파에서는
+    /// 집계 대상 홀이 아니라 빠져서 "18홀인데 17홀치 스코어"라는 어긋남이 생긴다.
+    /// 파를 지우면 두 지표가 같은 홀 집합을 보게 된다.
+    ///
+    /// 타수가 이미 있는 홀에는 아무 일도 하지 않는다 — 파를 지우면 그 타수가 미아가 되고,
+    /// `par == 0 && score > 0`은 어느 화면도 해석할 수 없는 상태다.
+    func skipCurrentHole() {
+        guard progress.canGoToNextHole, progress.currentScore == 0 else { return }
+        progress.setPar(0)
+        progress.advanceToNextHole()
+        resetHoleLocalState()
+        publishSnapshot()
+    }
+
     func goToPreviousHole() {
         guard progress.canGoToPreviousHole else { return }
         progress.retreatToPreviousHole()
