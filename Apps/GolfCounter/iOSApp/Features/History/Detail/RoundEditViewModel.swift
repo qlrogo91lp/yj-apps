@@ -51,13 +51,18 @@ struct RoundEditViewModel: Equatable {
 
     /// 편집 결과를 라운드의 병렬 배열에 되쓴다.
     /// `holeScores`에 없는 홀은 존재하지 않는 홀이므로 무시하고, 나머지 두 배열이 짧으면 0으로 채운다.
+    ///
+    /// 타수가 0이면 파도 0으로 쓴다 — 저장 경계에서의 정규화다 (spec §5.4). 파만 있고
+    /// 타수가 없는 홀은 오버파에서도 기록 홀 수에서도 빠지므로 화면마다 어긋나 보인다.
+    /// 이 규칙 덕분에 타수를 0까지 내리는 것이 "이 홀은 사실 안 쳤다"를 되돌리는
+    /// 구제 경로가 된다 — 라운드가 끝난 뒤 워치 오기록을 고칠 수 있는 유일한 지점이다.
     func apply(to round: GolfRound, holeIndex: Int) {
         guard holeIndex >= 0, holeIndex < round.holeScores.count else { return }
         let count = round.holeScores.count
 
         var pars = Self.padded(round.holePars, to: count)
         var putts = Self.padded(round.puttCounts, to: count)
-        pars[holeIndex] = par
+        pars[holeIndex] = score > 0 ? par : 0
         putts[holeIndex] = self.putts
 
         round.holeScores[holeIndex] = score
