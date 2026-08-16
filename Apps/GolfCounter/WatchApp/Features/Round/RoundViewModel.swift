@@ -132,7 +132,7 @@ final class RoundViewModel: ObservableObject {
 
     // MARK: - 요약 표시값 (전부 트림 후 기준)
 
-    /// 파가 기록된 홀 수(유효 홀 개수) — iOS `GolfRound.recordedHoleCount`와 같은 규칙이다.
+    /// 집계 대상 홀 개수(파와 타수가 모두 있는 홀) — iOS `GolfRound.recordedHoleCount`와 같은 규칙이다.
     /// 종료 확인 문구와 요약 헤더가 쓴다. **전송되는 홀 수와는 다를 수 있다** — `trimmed()`는
     /// 말단만 자르므로 중간에 건너뛴 홀이 있으면 전송 배열이 이 값보다 길 수 있다.
     var recordedHoleCount: Int {
