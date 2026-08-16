@@ -25,6 +25,13 @@ struct RoundEditViewModel: Equatable {
         putts > 0
     }
 
+    /// 저장 버튼 활성화 조건. `par == 0 && score > 0`("해석 불가" 상태, spec §3)이
+    /// 저장될 수 없다는 불변식의 나머지 절반을 여기로 옮겼다 — `HoleEditSheet`는
+    /// 이 프로퍼티를 그리기만 하고, 위반 여부 자체는 여기서 테스트한다.
+    var isSaveable: Bool {
+        Self.parOptions.contains(par)
+    }
+
     mutating func setPar(_ newPar: Int) {
         guard Self.parOptions.contains(newPar) else { return }
         par = newPar
