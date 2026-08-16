@@ -205,4 +205,34 @@ struct RoundViewModelTransmissionTests {
         #expect(viewModel.trimmedTotalStrokes == 5)
         #expect(viewModel.trimmedRelativeToPar == 1)
     }
+
+    // MARK: - discardRound (저장 안 함)
+
+    @Test func 저장안함_전송하지않고_스냅샷을_지운다() {
+        let publisher = RoundSnapshotPublisherSpy()
+        let transmitter = RoundTransmitterSpy()
+        let viewModel = makeViewModel(publisher: publisher, transmitter: transmitter)
+        playHole(viewModel, par: 4, strokes: 5)
+        viewModel.finishRound()
+
+        viewModel.discardRound()
+
+        #expect(transmitter.sent.isEmpty)
+        #expect(publisher.clearCallCount == 1)
+        #expect(viewModel.didComplete == true)
+    }
+
+    @Test func 저장안함_메트릭을_기다리지_않는다() {
+        let publisher = RoundSnapshotPublisherSpy()
+        let transmitter = RoundTransmitterSpy()
+        let viewModel = makeViewModel(publisher: publisher, transmitter: transmitter)
+        playHole(viewModel, par: 4, strokes: 5)
+        viewModel.finishRound()
+
+        // 워크아웃 집계가 아직 안 온 상태에서도 즉시 끝난다 — 버릴 라운드에 메트릭은 필요 없다.
+        viewModel.discardRound()
+
+        #expect(viewModel.didComplete == true)
+        #expect(viewModel.isTransmitting == false)
+    }
 }

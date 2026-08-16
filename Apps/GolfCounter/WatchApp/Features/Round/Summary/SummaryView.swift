@@ -11,6 +11,9 @@ import SwiftUI
 struct SummaryView: View {
     @ObservedObject var viewModel: RoundViewModel
 
+    /// 폐기는 되돌릴 수 없다(스냅샷까지 지운다) — 확인을 한 번 받는다.
+    @State private var isConfirmingDiscard = false
+
     var body: some View {
         VStack(spacing: 4) {
             Spacer()
@@ -41,8 +44,23 @@ struct SummaryView: View {
             }
             .buttonStyle(.borderedProminent)
             .tint(.green)
+
+            if viewModel.recordedHoleCount > 0 {
+                Button("저장 안 함") { isConfirmingDiscard = true }
+                    .buttonStyle(.plain)
+                    .font(.system(size: 13))
+                    .foregroundStyle(.secondary)
+                    .disabled(viewModel.isTransmitting)
+            }
         }
         .padding(.horizontal, 8)
+        .confirmationDialog("이 라운드를 저장하지 않고 버릴까요?",
+                            isPresented: $isConfirmingDiscard,
+                            titleVisibility: .visible)
+        {
+            Button("버리기", role: .destructive, action: viewModel.discardRound)
+            Button("취소", role: .cancel) {}
+        }
     }
 
     private var headline: String {

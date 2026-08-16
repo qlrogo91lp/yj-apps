@@ -187,6 +187,17 @@ final class RoundViewModel: ObservableObject {
         transmit(with: metrics)
     }
 
+    /// 요약의 "저장 안 함". 전송하지 않고 스냅샷만 지운 뒤 홈으로 돌아간다.
+    ///
+    /// `saveAndTransmit()`의 0홀 경로와 같은 처리지만, 이쪽은 기록이 있는데도 사용자가
+    /// 명시적으로 버리기를 고른 경우다 — 뷰가 확인 다이얼로그를 한 번 거치게 한다.
+    /// 스냅샷을 지우므로 다음 실행 때 복구되지 않는다.
+    func discardRound() {
+        publisher.clear()
+        isTransmitting = false
+        didComplete = true
+    }
+
     private func transmit(with metrics: RoundMetrics) {
         let trimmed = snapshot.trimmed()
         transmitter.send(RoundCompletedMessage(id: id,
