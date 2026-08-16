@@ -279,7 +279,9 @@ Expected: 새 테스트 4개 PASS, 기존 워치 테스트 전부 PASS
 
 `WatchApp/Features/Round/Counting/CountingView.swift`를 세 군데 고친다.
 
-**(a)** `private let horizontalPadding: CGFloat = 4` 바로 아래에 상태를 추가한다:
+**주의:** PR #16(`refactor/counting-view-components`, 2026-08-16 머지)이 이 파일의 순수 컴포넌트를 `HoleArrowButton`·`ScoreRing`·`UndoButton`으로 분리했다. 아래는 그 이후 기준이다 — 이 파일을 열었을 때 `CircleIconButton`이 직접 보이면 최신 main이 아니니 먼저 확인할 것.
+
+**(a)** `@Environment(\.isLuminanceReduced) private var isLuminanceReduced` 바로 아래에 상태를 추가한다:
 
 ```swift
     /// 한 타도 치지 않은 홀에서 `>`를 눌렀을 때의 확인. 실수로 홀을 날리는 것을 막는다.
@@ -298,22 +300,22 @@ Expected: 새 테스트 4개 PASS, 기존 워치 테스트 전부 PASS
         }
 ```
 
-**(c)** `ringArea`의 `chevron.right` 버튼 action을 교체한다.
+**(c)** `ringArea`의 `chevron.right` 버튼 action을 교체한다. PR #16 이후 이 버튼은 `HoleArrowButton`이다(내부적으로 `CircleIconButton`을 감싸 히트 영역만 넓힌 컴포넌트) — 컴포넌트 자체는 그대로 두고 `action:` 인자만 바꾼다.
 
 교체 대상(기존):
 
 ```swift
-                CircleIconButton(systemName: "chevron.right",
-                                 size: sizing.arrowSize,
-                                 action: viewModel.goToNextHole)
+                HoleArrowButton(systemName: "chevron.right",
+                                size: sizing.arrowSize,
+                                action: viewModel.goToNextHole)
 ```
 
 교체 결과(신규):
 
 ```swift
-                CircleIconButton(systemName: "chevron.right",
-                                 size: sizing.arrowSize,
-                                 action: goToNextHoleOrConfirm)
+                HoleArrowButton(systemName: "chevron.right",
+                                size: sizing.arrowSize,
+                                action: goToNextHoleOrConfirm)
 ```
 
 그리고 `fillAnimation` 계산 프로퍼티 **아래**에 헬퍼를 추가한다:
