@@ -15,14 +15,18 @@ struct HistoryView: View {
                 } else {
                     List {
                         ForEach(rounds) { round in
-                            RoundCard(round: round)
-                                .swipeActions(edge: .trailing) {
-                                    Button(role: .destructive) {
-                                        pendingDeletion = round
-                                    } label: {
-                                        Label("삭제", systemImage: "trash")
-                                    }
+                            NavigationLink {
+                                RoundDetailView(round: round)
+                            } label: {
+                                RoundCard(round: round)
+                            }
+                            .swipeActions(edge: .trailing) {
+                                Button(role: .destructive) {
+                                    pendingDeletion = round
+                                } label: {
+                                    Label("삭제", systemImage: "trash")
                                 }
+                            }
                         }
                     }
                 }
