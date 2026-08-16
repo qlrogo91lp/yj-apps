@@ -11,7 +11,7 @@ struct HistoryView: View {
         NavigationStack {
             Group {
                 if rounds.isEmpty {
-                    EmptyRoundsView()
+                    EmptyRounds()
                 } else {
                     List {
                         ForEach(rounds) { round in
