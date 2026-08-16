@@ -12,7 +12,7 @@
 
 **선행 plan:** ④ `docs/superpowers/plans/2026-08-05-watch-round-transmission.md` — **반드시 먼저 머지되어 있어야 한다.** 이 plan은 ④가 만드는 `RoundCompletedMessage`·`RoundMetrics`·`RoundSnapshot.id/holeCount`를 그대로 쓴다. ④가 없으면 Task 2부터 컴파일되지 않는다.
 
-**후속 plan:** ⑥ `2026-08-13-ios-stats.md` (통계 탭) — 이 plan이 만드는 `GolfRound.isFullRound`·`StatCard`·`EmptyRoundsView`·`ScorePalette`를 재사용한다.
+**후속 plan:** ⑥ `2026-08-13-ios-stats.md` (통계 탭) — 이 plan이 만드는 `GolfRound.isFullRound`·`StatCard`·`EmptyRounds`·`ScorePalette`를 재사용한다.
 
 ## Global Constraints
 
@@ -32,7 +32,7 @@
 |------|------|
 | `Shared/Persistence/GolfRound.swift` (수정) | `recordedHoleCount`·`isFullRound` 파생값 추가 |
 | `iOSApp/Components/ScorePalette.swift` | 오버파 3상태(언더/이븐/오버) 색 매핑 — 디자인 확정 시 여기만 고친다 |
-| `iOSApp/Components/EmptyRoundsView.swift` | "라운드 없음" 안내 — 기록·통계 두 탭이 공유 |
+| `iOSApp/Components/EmptyRounds.swift` | "라운드 없음" 안내 — 기록·통계 두 탭이 공유 |
 | `iOSApp/Components/StatCard.swift` | 제목+값 카드 — 상세 워크아웃 섹션과 통계 탭이 공유 |
 | `iOSApp/Services/RoundImporter.swift` | 메시지 → `GolfRound` 적재 + id 중복 검사 (WatchConnectivity 무관, 테스트 대상) |
 | `iOSApp/Services/RoundReceiveService.swift` | `ConnectivityService` 수신 등록 (얇은 배선, 테스트 안 함) |
@@ -339,13 +339,13 @@ git commit -m "✨ feat: 수신 라운드를 SwiftData에 적재하는 RoundImpo
 
 **Files:**
 - Create: `iOSApp/Components/ScorePalette.swift`
-- Create: `iOSApp/Components/EmptyRoundsView.swift`
+- Create: `iOSApp/Components/EmptyRounds.swift`
 - Create: `iOSApp/Features/History/Components/RoundCard.swift`
 - Create: `iOSApp/Features/History/HistoryView.swift`
 
 **Interfaces:**
 - Consumes: `GolfRound.recordedHoleCount`(Task 1), `ScoreFormat.relativeToPar(_:)`(기존 `Shared/Models/ScoreFormat.swift`)
-- Produces: `ScorePalette.color(for: Int) -> Color`, `EmptyRoundsView()`, `RoundCard(round:)`, `HistoryView()`
+- Produces: `ScorePalette.color(for: Int) -> Color`, `EmptyRounds()`, `RoundCard(round:)`, `HistoryView()`
 
 이 태스크는 View만 만든다. **View는 테스트하지 않는다**(컨벤션) — 검증은 빌드 성공으로 한다. 상세 화면은 Task 5에서 붙이므로 여기서는 `NavigationLink`를 두지 않는다.
 
@@ -371,15 +371,15 @@ enum ScorePalette {
 }
 ```
 
-- [ ] **Step 2: `EmptyRoundsView` 작성**
+- [ ] **Step 2: `EmptyRounds` 작성**
 
-`iOSApp/Components/EmptyRoundsView.swift` 신규 생성:
+`iOSApp/Components/EmptyRounds.swift` 신규 생성:
 
 ```swift
 import SwiftUI
 
 /// 라운드가 하나도 없을 때의 안내. 기록 탭과 통계 탭이 같은 화면을 쓴다 (spec §4·§5).
-struct EmptyRoundsView: View {
+struct EmptyRounds: View {
     var body: some View {
         ContentUnavailableView {
             Label("기록된 라운드가 없습니다", systemImage: "figure.golf")
@@ -390,7 +390,7 @@ struct EmptyRoundsView: View {
 }
 
 #Preview {
-    EmptyRoundsView()
+    EmptyRounds()
 }
 ```
 
@@ -471,7 +471,7 @@ struct HistoryView: View {
         NavigationStack {
             Group {
                 if rounds.isEmpty {
-                    EmptyRoundsView()
+                    EmptyRounds()
                 } else {
                     List {
                         ForEach(rounds) { round in

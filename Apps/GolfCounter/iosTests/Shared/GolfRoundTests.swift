@@ -36,4 +36,35 @@ struct GolfRoundTests {
         // 새 공식은 짝지어지는 앞 3홀만 더해 0 + 0 + 1 = 1 이어야 한다.
         #expect(round.relativeToPar == 1)
     }
+
+    @Test func recordedHoleCount_파가있는홀만_센다() {
+        let round = GolfRound()
+        round.holeScores = [4, 3, 0, 5]
+        // 3번째 홀은 워치에서 건너뛴 홀 — par 0이라 세지 않는다.
+        round.holePars = [4, 3, 0, 5]
+        round.puttCounts = [2, 1, 0, 2]
+
+        #expect(round.recordedHoleCount == 3)
+        #expect(round.isFullRound == false)
+    }
+
+    @Test func isFullRound_파가18개면_참이다() {
+        let round = GolfRound()
+        round.holeScores = Array(repeating: 5, count: 18)
+        round.holePars = Array(repeating: 4, count: 18)
+        round.puttCounts = Array(repeating: 2, count: 18)
+
+        #expect(round.recordedHoleCount == 18)
+        #expect(round.isFullRound == true)
+    }
+
+    @Test func isFullRound_18홀중_일부만기록되면_거짓이다() {
+        let round = GolfRound()
+        round.holeScores = Array(repeating: 5, count: 9)
+        round.holePars = Array(repeating: 4, count: 9)
+        round.puttCounts = Array(repeating: 2, count: 9)
+
+        #expect(round.recordedHoleCount == 9)
+        #expect(round.isFullRound == false)
+    }
 }

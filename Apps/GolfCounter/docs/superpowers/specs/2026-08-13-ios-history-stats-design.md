@@ -88,7 +88,7 @@ MainTabView
   - 상단: 날짜·시각 / 골프장명 (nil이면 행 자체를 생략, "미입력" 같은 placeholder를 두지 않는다)
   - 하단 좌측: `N홀` 캡슐 뱃지
   - 우측: **오버파를 크게**, 그 아래 총타수를 작게 (`+3` / `75타`)
-- **빈 상태** (`EmptyRoundsView`): "기록된 라운드가 없습니다" + "Apple Watch에서 라운드를 시작하세요" 안내. 통계 탭도 같은 화면을 쓰므로 앱 루트 `Components/`에 둔다.
+- **빈 상태** (`EmptyRounds`): "기록된 라운드가 없습니다" + "Apple Watch에서 라운드를 시작하세요" 안내. 통계 탭도 같은 화면을 쓰므로 앱 루트 `Components/`에 둔다.
 - **삭제**: 행 스와이프 → `confirmationDialog`로 확인 후 삭제. 되돌릴 수 없는 동작이므로 확인 단계를 생략하지 않는다. 삭제 진입점은 **리스트 한 곳뿐**이며, 상세 화면에는 두지 않는다.
 
 ### 상세 (`RoundDetailView`, push)
@@ -201,7 +201,7 @@ iOSApp/
 ├── MainTabView.swift                 # 2탭
 ├── Components/
 │   ├── StatCard.swift                # 통계 탭 + 상세 워크아웃 섹션이 공유
-│   ├── EmptyRoundsView.swift         # 기록 탭 + 통계 탭이 공유하는 빈 상태
+│   ├── EmptyRounds.swift         # 기록 탭 + 통계 탭이 공유하는 빈 상태
 │   └── ScorePalette.swift            # 오버파 3상태 색 매핑
 ├── Services/
 │   ├── RoundReceiveService.swift     # ConnectivityService 등록 (얇은 배선)
