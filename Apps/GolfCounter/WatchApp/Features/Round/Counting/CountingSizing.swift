@@ -73,6 +73,10 @@ struct CountingSizing {
     /// 링 존은 이 값을 쓰지 않는다 — 화살표는 인디케이터보다 아래에 있어 겹치지 않는다.
     static let pageIndicatorInset: CGFloat = 12
 
+    /// 링 존이 화면 좌우에서 물러나는 거리. 헤더(`pageIndicatorInset`)보다 작다 —
+    /// 화살표는 페이지 인디케이터와 겹치지 않아 링에 폭을 더 내준다.
+    static let ringHorizontalPadding: CGFloat = 4
+
     /// Par·모드 원형의 탭 영역을 시각 크기 밖으로 균일하게 넓히는 값.
     /// 양옆 이웃(화면 여백, 헤더 가운데 텍스트)이 전부 비조작 요소라 어느 방향으로
     /// 넓혀도 다른 탭을 가로챌 위험이 없다 — `.contentShape`만 키우므로 양끝 버튼
