@@ -247,6 +247,15 @@ final class RoundViewModel: ObservableObject {
         isEditingPar = true
     }
 
+    /// 카운터의 [Par] 버튼으로 시작한 파 재편집을 취소하고 카운터로 돌아간다.
+    /// 홀은 옮기지 않고 파 값도 그대로 둔다 — 편집 진입 자체를 무르는 것뿐이다.
+    ///
+    /// 스냅샷을 발행하지 않는다: `isEditingPar`는 화면 분기용 UI 상태일 뿐
+    /// `RoundSnapshot`에 들어가지 않으므로 발행할 변경이 없다 (`beginParEditing()`도 같다).
+    func cancelParEditing() {
+        isEditingPar = false
+    }
+
     // MARK: - 홀 이동
 
     func goToNextHole() {

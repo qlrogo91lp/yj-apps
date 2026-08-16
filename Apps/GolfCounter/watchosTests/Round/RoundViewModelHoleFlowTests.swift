@@ -119,6 +119,35 @@ struct RoundViewModelHoleFlowTests {
         #expect(viewModel.relativeToPar == 1)
     }
 
+    // MARK: - cancelParEditing (재편집 취소)
+
+    @Test func 파_재편집을_취소하면_홀을_옮기지_않고_카운팅으로_돌아간다() {
+        let viewModel = makeViewModel()
+        viewModel.selectPar(4)
+        viewModel.incrementStroke()
+        viewModel.incrementStroke()
+        viewModel.beginParEditing()
+        #expect(viewModel.phase == .parSelection)
+
+        viewModel.cancelParEditing()
+
+        #expect(viewModel.phase == .counting)
+        #expect(viewModel.currentHoleNumber == 1)
+        #expect(viewModel.currentPar == 4)
+        #expect(viewModel.currentScore == 2)
+    }
+
+    @Test func 파가_없는_홀에서_재편집_취소는_파선택_단계를_벗어나지_않는다() {
+        let viewModel = makeViewModel()
+        #expect(viewModel.phase == .parSelection)
+
+        viewModel.cancelParEditing()
+
+        #expect(viewModel.phase == .parSelection)
+        #expect(viewModel.currentPar == 0)
+        #expect(viewModel.currentHoleNumber == 1)
+    }
+
     // MARK: - cancelToPreviousHole (phantom hole 정리)
 
     @Test func 실수로_다음홀에_진입한_뒤_취소하면_phantom_hole이_제거되고_이전홀_데이터가_그대로_남는다() {
@@ -149,7 +178,7 @@ struct RoundViewModelHoleFlowTests {
         #expect(viewModel.relativeToPar == 2)
     }
 
-    @Test func 이미_점수가_있던_홀의_파_재편집_중_취소는_아무것도_제거하지_않는다() {
+    @Test func 재편집_중_cancelToPreviousHole은_phantom_hole을_제거하지_않고_이전홀로만_이동한다() {
         let viewModel = makeViewModel()
         viewModel.selectPar(4)
         viewModel.incrementStroke()
@@ -164,7 +193,8 @@ struct RoundViewModelHoleFlowTests {
 
         viewModel.cancelToPreviousHole()
 
-        // 일반 goToPreviousHole()과 동일하게 동작해, hole 1로 이동하되 hole 2 데이터는 보존되어야 한다.
+        // 백버튼은 이제 cancelParEditing()으로 가므로 이 경로는 방어적 분기다.
+        // 불릴 경우 일반 goToPreviousHole()과 동일하게, hole 1로 이동하되 hole 2 데이터는 보존한다.
         #expect(viewModel.currentHoleNumber == 1)
         #expect(viewModel.currentPar == 4)
         #expect(viewModel.currentScore == 1)
