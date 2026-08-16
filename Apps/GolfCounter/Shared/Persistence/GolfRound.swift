@@ -31,18 +31,18 @@ final class GolfRound {
         holePars.reduce(0, +)
     }
 
-    /// 집계 대상 홀(파와 타수가 모두 있는 홀)만 더한다. 규칙은 `ScoreAggregate` 참조 (spec §3).
+    /// 집계 대상 홀(파와 타수가 모두 있는 홀)만 더한다. 규칙은 `ScoreAggregate` 참조 (history spec §3).
     var relativeToPar: Int {
         ScoreAggregate.relativeToPar(holeScores: holeScores, holePars: holePars)
     }
 
-    /// 집계 대상 홀(파와 타수가 모두 있는 홀)의 개수. 규칙은 `ScoreAggregate` 참조 (spec §7).
+    /// 집계 대상 홀(파와 타수가 모두 있는 홀)의 개수. 규칙은 `ScoreAggregate` 참조 (invariant spec §7).
     /// 기록 리스트의 `N홀` 뱃지와 통계의 18홀 판정이 같은 값을 쓴다.
     var recordedHoleCount: Int {
         ScoreAggregate.recordedHoleCount(holeScores: holeScores, holePars: holePars)
     }
 
-    /// 18홀을 끝까지 기록한 라운드. 총타수 기반 통계는 이 라운드만 집계한다 (spec §5).
+    /// 18홀을 끝까지 기록한 라운드. 총타수 기반 통계는 이 라운드만 집계한다 (history spec §5).
     var isFullRound: Bool {
         recordedHoleCount == 18
     }

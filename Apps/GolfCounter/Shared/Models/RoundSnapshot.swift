@@ -1,7 +1,7 @@
 import Foundation
 
 /// 라운드 진행 중 상태 스냅샷.
-/// 워치 크래시/강제종료 복구와 컴플리케이션 표시 데이터원을 겸한다 (spec §3).
+/// 워치 크래시/강제종료 복구와 컴플리케이션 표시 데이터원을 겸한다 (rebuild spec §3).
 struct RoundSnapshot: Equatable {
     /// 라운드 시작 시 생성해 복구를 넘어 유지한다. iOS가 이 값으로 중복 수신을 거른다.
     ///
@@ -29,14 +29,14 @@ struct RoundSnapshot: Equatable {
         puttCounts.reduce(0, +)
     }
 
-    /// 집계 대상 홀(파와 타수가 모두 있는 홀)만 더한다. 규칙은 `ScoreAggregate` 참조 (spec §3).
+    /// 집계 대상 홀(파와 타수가 모두 있는 홀)만 더한다. 규칙은 `ScoreAggregate` 참조 (history spec §3).
     var relativeToPar: Int {
         ScoreAggregate.relativeToPar(holeScores: holeScores, holePars: holePars)
     }
 }
 
 extension RoundSnapshot {
-    /// 전송 직전, 배열 말단에서부터 `par == 0`인 미기록 홀을 제거한다 (spec §2 결정 2).
+    /// 전송 직전, 배열 말단에서부터 `par == 0`인 미기록 홀을 제거한다 (transmission spec §2 결정 2).
     ///
     /// `par == 0`이면 파 선택 화면이 떠 카운터에 접근할 수 없으므로 `score`·`putts`도 반드시
     /// 0이다 — 이 트림은 무손실이다. 중간에 낀 `par == 0` 홀은 건드리지 않는다(사용자가
@@ -55,7 +55,7 @@ extension RoundSnapshot {
         return copy
     }
 
-    /// 집계 대상 홀(파와 타수가 모두 있는 홀)의 개수. 규칙은 `ScoreAggregate` 참조 (spec §7).
+    /// 집계 대상 홀(파와 타수가 모두 있는 홀)의 개수. 규칙은 `ScoreAggregate` 참조 (invariant spec §7).
     ///
     /// 종료 확인 문구와 요약 헤더가 쓴다. `GolfRound.recordedHoleCount`와 같은 규칙이라
     /// 워치 요약과 iOS 기록 뱃지가 같은 수를 보인다. 배열 중간에 낀 건너뛴 홀도, 말단의
@@ -72,7 +72,7 @@ extension RoundSnapshot: Codable {
         case id, holeCount, startedAt, courseName, currentHoleIndex, holeScores, holePars, puttCounts
     }
 
-    /// `id`·`holeCount`가 없던 구버전 스냅샷도 살려낸다 (spec §3.5).
+    /// `id`·`holeCount`가 없던 구버전 스냅샷도 살려낸다 (transmission spec §3.5).
     /// `RoundSnapshotStore.load()`가 `try?`로 디코딩하므로 여기서 던지면
     /// 진행 중 라운드가 조용히 사라진다.
     init(from decoder: any Decoder) throws {
