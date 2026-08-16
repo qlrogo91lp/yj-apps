@@ -2,8 +2,9 @@ import SwiftUI
 
 /// 종료 요약 — 기록 홀 수 · 오버파 · 총타수/총퍼트 · 저장&전송 (spec §3.3).
 ///
-/// 표시값은 전부 **트림 후** 기준이다. 상단의 "N홀 완료"가 실제로 전송될 홀 수를
-/// 발신 직전에 다시 확인시킨다.
+/// 오버파·타수·퍼트는 **트림 후** 기준이다. 상단의 "N홀 완료"는 다르다 — 유효 홀(파가
+/// 있는 홀) 개수라 iOS 기록 뱃지와 같은 수를 보이지만, 중간에 건너뛴 홀이 있으면
+/// 트림 후 전송 배열 길이보다 작을 수 있다 (`RoundViewModel.recordedHoleCount` 참고).
 ///
 /// 워크아웃 메트릭(칼로리·심박·거리·시간)은 여기 띄우지 않고 전송 페이로드에만 싣는다 —
 /// `stopWorkout()`이 1~3초 걸려 대기·도착·미도착 세 상태를 설계해야 하는데, 같은 정보를
@@ -46,6 +47,9 @@ struct SummaryView: View {
             .tint(.green)
 
             if viewModel.recordedHoleCount > 0 {
+                // 전송 자체는 원자적이라 절반만 도착한 라운드가 남을 위험은 없다 —
+                // isTransmitting = false로 대기 중이던 전송도 취소된다. 여기서 막는 이유는
+                // 순전히 화면 혼선: "전송 중…"과 "저장 안 함"이 동시에 떠 있는 걸 피한다.
                 Button("저장 안 함") { isConfirmingDiscard = true }
                     .buttonStyle(.plain)
                     .font(.system(size: 13))

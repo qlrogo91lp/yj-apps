@@ -49,7 +49,10 @@ struct CountingView: View {
     }
 
     /// 타수가 있으면 그냥 넘어가고, 한 타도 없으면 확인부터 받는다.
+    /// 마지막 홀에서는 애초에 넘어갈 곳이 없으므로 다이얼로그도 띄우지 않는다 —
+    /// 띄우고 "건너뛰기"를 눌러도 skipCurrentHole()이 조용히 무시하면 다이얼로그가 거짓말을 하게 된다.
     private func goToNextHoleOrConfirm() {
+        guard viewModel.canGoToNextHole else { return }
         if viewModel.currentScore == 0 {
             isConfirmingSkip = true
         } else {
