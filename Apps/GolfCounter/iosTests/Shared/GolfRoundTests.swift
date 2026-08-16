@@ -67,4 +67,17 @@ struct GolfRoundTests {
         #expect(round.recordedHoleCount == 9)
         #expect(round.isFullRound == false)
     }
+
+    @Test func 파만고르고_한타도치지않은홀은_오버파에_반영되지않는다() {
+        let round = GolfRound()
+        // 3번 홀은 파만 고르고 넘어간 홀 — 워치 종료 직전이나 iOS 홀 편집으로 만들 수 있다.
+        round.holeScores = [4, 3, 0]
+        round.holePars = [4, 3, 4]
+        round.puttCounts = [2, 1, 0]
+
+        // 옛 공식이라면 0 − 4 = −4가 새어 들어간다.
+        #expect(round.relativeToPar == 0)
+        // 파가 있는 홀이므로 기록 홀 수에는 그대로 들어간다 — 유효 홀 ≠ 집계 대상 홀 (spec §3).
+        #expect(round.recordedHoleCount == 3)
+    }
 }

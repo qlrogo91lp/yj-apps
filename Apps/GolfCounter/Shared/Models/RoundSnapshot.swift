@@ -29,9 +29,9 @@ struct RoundSnapshot: Equatable {
         puttCounts.reduce(0, +)
     }
 
-    /// holePars/puttCounts는 holeScores와 같은 개수만 유효 — 아직 파가 없는 홀의 배열 길이 불일치를 자동으로 무시한다
+    /// 집계 대상 홀(파와 타수가 모두 있는 홀)만 더한다. 규칙은 `ScoreAggregate` 참조 (spec §3).
     var relativeToPar: Int {
-        zip(holeScores, holePars).reduce(0) { $0 + $1.0 - $1.1 }
+        ScoreAggregate.relativeToPar(holeScores: holeScores, holePars: holePars)
     }
 }
 

@@ -111,6 +111,17 @@ struct RoundSnapshotTests {
         #expect(snapshot.holeScores.count == 20)
     }
 
+    @Test func 파만고르고_한타도치지않은홀은_오버파에_반영되지않는다() {
+        var snapshot = makeSnapshot()
+        // 8번째 홀에 파만 고르고 넘어간 상태 — 워치에서 실제로 만들 수 있다.
+        snapshot.holeScores.append(0)
+        snapshot.holePars.append(4)
+        snapshot.puttCounts.append(0)
+
+        // 옛 공식이라면 0 − 4 = −4가 새어 들어가 4언더파로 잘못 집계된다.
+        #expect(snapshot.relativeToPar == 0)
+    }
+
     /// `id`·`holeCount`가 없던 시절의 와이어 포맷.
     private static func legacySnapshotJSON(currentHoleIndex: Int,
                                            holeScores: [Int],
