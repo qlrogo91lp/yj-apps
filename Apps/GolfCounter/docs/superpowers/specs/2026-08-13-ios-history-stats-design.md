@@ -72,10 +72,12 @@ MainTabView
 
 이후 모든 지표는 아래 정의를 따른다. `GolfRound`는 `holeScores` / `holePars` / `puttCounts` 세 병렬 배열을 가진다(스펙 §3).
 
+- **홀 기록 불변식**: **저장·전송되는** 모든 홀은 `par > 0 && score > 0`이거나 `par == 0 && score == 0`이다. 즉 `(par > 0) == (score > 0)`. 라운드 진행 중에는 파만 고른 홀이 정상 상태이므로(파 선택 화면이 카운터보다 먼저 온다) 입력을 막지 않고 **경계에서 정규화한다** — 워치 홀 이동(`skipCurrentHole()`), 워치 라운드 종료(`HoleProgress.clearUnplayedHoles()`), iOS 편집 저장(`RoundEditViewModel.apply(to:holeIndex:)`) 세 곳이다 (2026-08-16 추가, spec `2026-08-16-hole-record-invariant-design.md`).
 - **유효 홀**: `holePars[i] > 0` 인 홀. 워치에서 파를 고르지 않은 홀(`par == 0`)은 배열 중간에 남아 있을 수 있다 — 사용자가 의도적으로 건너뛴 홀이며 카운터에 접근한 적이 없으므로 `score`·`putts`도 0이다(스펙 §3).
 - **집계 대상 홀**: 유효 홀 중 `holeScores[i] > 0` 인 홀. 파는 골랐지만 한 타도 치지 않고 넘어간 홀을 제외한다 — 이 홀을 넣으면 `score − par`가 음수가 되어 버디로 잘못 집계된다.
-- **기록 홀 수**: 유효 홀의 개수. 리스트 뱃지에 `N홀`로 그대로 표시한다. `GolfRound.recordedHoleCount`로 파생한다.
-- **18홀 라운드**: 기록 홀 수가 정확히 18인 라운드(`GolfRound.isFullRound`). 9홀을 골랐거나 18홀을 고르고 중단한 라운드는 여기 포함되지 않는다.
+	- 위 불변식이 서면 **유효 홀과 집계 대상 홀은 같은 집합이다.** 두 용어를 남겨 두는 이유는 불변식 이전에 저장된 레거시 라운드를 설명할 때 여전히 필요하기 때문이며, **지표 계산에는 집계 대상 홀만 쓴다.**
+- **기록 홀 수**: 집계 대상 홀의 개수. 리스트 뱃지에 `N홀`로 그대로 표시한다. `ScoreAggregate.recordedHoleCount(holeScores:holePars:)` 한 곳에서 계산하고 `GolfRound`·`RoundSnapshot`이 그것을 부른다 — 오버파와 **같은 필터**라 두 지표가 항상 같은 홀 집합을 본다. 초판은 "유효 홀의 개수"로 적었고, 그러면 파만 고른 홀이 홀 수에는 잡히고 오버파에서는 빠져 "18홀인데 17홀치 스코어"가 된다 (2026-08-16 정정).
+- **18홀 라운드**: 기록 홀 수가 정확히 18인 라운드(`GolfRound.isFullRound`). 9홀을 골랐거나 18홀을 고르고 중단한 라운드는 여기 포함되지 않는다. 기록 홀 수 정정(위)에 따라 **18홀 전부에 실제 점수가 있는 라운드**만 해당한다 — 점수가 빠진 홀이 있으면 총타수 기반 통계가 왜곡되므로 이쪽이 맞다.
 - **오버파(`relativeToPar`)**: **집계 대상 홀에 대해서만** `Σ(score − par)`. `GolfRound`와 `RoundSnapshot`이 같은 규칙을 쓰며, 계산 자체는 `ScoreAggregate.relativeToPar(holeScores:holePars:)` 한 곳에 있다.
 	- `par == 0` 홀은 양쪽 합에 0으로 기여하므로 원래도 무해했지만, **파를 고르고 한 타도 치지 않은 홀(`par > 0 && score == 0`)은 `0 − par`가 그대로 언더파로 새어 든다.** 위 집계 대상 홀 정의가 이 홀을 빼라고 이미 규정하고 있는데 초판 문서의 이 항목이 그 사실을 놓치고 "왜곡되지 않는다"고 잘못 적었다 (2026-08-16 정정, plan `2026-08-16-common-relative-to-par-aggregation.md`).
 	- 이 값은 `totalStrokes − totalPar`와 다를 수 있고, 그것이 의도다 — 두 합계는 필터를 거치지 않는다. `totalPar`는 현재 어느 화면에도 노출되지 않는다.
