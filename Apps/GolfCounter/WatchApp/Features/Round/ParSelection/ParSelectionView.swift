@@ -16,9 +16,23 @@ struct ParSelectionView: View {
     /// 백버튼 원형 지름. 헤더 행 높이도 이 값이다.
     private let backButtonSize: CGFloat = 30
 
+    /// 백버튼 탭 영역을 가로로만 넓힌 폭 — Apple 최소 탭 타깃(44pt)에 맞춘다.
+    /// 세로로는 넓히지 않는다: 바로 아래가 전체 폭을 차지하는 Par 3 버튼이고 둘 사이엔
+    /// `VStack` 간격 6pt밖에 없어, 세로로 키우면 그 탭 영역을 침범한다. 가로는 안전하다 —
+    /// 왼쪽은 화면 가장자리, 오른쪽은 비조작 `Text` 라벨이라 이웃의 탭을 가로챌 일이 없다.
+    /// `CircleIconButton`의 균일한 `hitInset`은 이런 축 하나만의 확장을 표현할 수 없어
+    /// 쓰지 않고, `HoleArrowButton`과 같은 `.frame` + `.contentShape(Rectangle())` 패턴을
+    /// 축만 바꿔 적용한다.
+    private let backButtonHitWidth: CGFloat = 44
+
     /// 하단 가로 페이지 점 인디케이터가 마지막 par 행을 덮지 않도록 두는 여백.
     /// 인디케이터는 콘텐츠 위에 그려지므로 레이아웃이 알아서 피해주지 않는다.
-    private let indicatorClearance: CGFloat = 8
+    ///
+    /// 이 화면의 인디케이터를 실기로 직접 측정하지 못해(라이브 시뮬레이터 검증 단계를
+    /// 이번엔 건너뜀) `CountingSizing.pageIndicatorInset`(관련 시스템 크롬 인디케이터를
+    /// 실기로 측정한 값, 12)을 보수적 기본값으로 그대로 가져왔다. 이 화면 전용으로
+    /// 검증된 수치가 아니므로 사용자가 실기로 확인하면 다시 조정해야 한다.
+    private let indicatorClearance: CGFloat = 12
 
     var body: some View {
         VStack(spacing: 6) {
@@ -44,6 +58,8 @@ struct ParSelectionView: View {
     private var header: some View {
         HStack(spacing: 6) {
             backButton
+                .frame(width: backButtonHitWidth, height: backButtonSize)
+                .contentShape(Rectangle())
 
             Text("\(viewModel.currentHoleNumber)번 홀")
                 .font(.system(size: 15, weight: .semibold))

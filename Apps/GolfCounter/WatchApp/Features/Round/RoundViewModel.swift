@@ -288,11 +288,15 @@ final class RoundViewModel: ObservableObject {
         publishSnapshot()
     }
 
-    /// 파 선택 화면의 "이전" 버튼에서 호출한다.
+    /// 파 선택 화면의 "이전" 버튼에서 호출하되, **새 홀 진입 경로에서만** 쓰인다.
     /// 방금 실수로 다음 홀에 진입해 아직 아무 값도 입력하지 않은 홀(phantom hole)이면
     /// 그 홀을 배열에서 완전히 제거하고 이전 홀로 돌아가, mis-tap 이전 상태를 그대로 복원한다.
-    /// 반대로 이미 점수가 있던 홀을 [Par] 버튼으로 재편집(`beginParEditing()`)하는 중이라면
-    /// 지울 phantom hole이 없으므로 일반 `goToPreviousHole()`과 동일하게 동작한다.
+    ///
+    /// 카운터의 [Par] 버튼으로 이미 점수가 있던 홀을 재편집(`beginParEditing()`)하는
+    /// 경로의 백버튼은 `cancelParEditing()`을 호출하므로 이 메서드를 거치지 않는다.
+    /// 아래 `isEditingPar` 분기는 그래서 UI 관점에서는 죽은 경로다 — `isEditingPar`가
+    /// 참인 채로 이 메서드가 호출되는 경우에도 정의된 동작(`goToPreviousHole()`과 동일)을
+    /// 갖도록 남겨둔 방어용 fallback일 뿐, 실제 화면 흐름이 타는 경로가 아니다.
     func cancelToPreviousHole() {
         guard progress.canGoToPreviousHole else { return }
 
