@@ -7,6 +7,7 @@ struct RoundDetailView: View {
     @Bindable var round: GolfRound
     @Environment(\.modelContext) private var modelContext
     @State private var courseNameDraft = ""
+    @State private var editingHole: EditingHole?
 
     var body: some View {
         List {
@@ -19,6 +20,16 @@ struct RoundDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { courseNameDraft = round.courseName ?? "" }
         .onDisappear(perform: commitCourseName)
+        .sheet(item: $editingHole) { editing in
+            HoleEditSheet(holeNumber: editing.id + 1,
+                          par: value(in: round.holePars, at: editing.id),
+                          score: value(in: round.holeScores, at: editing.id),
+                          putts: value(in: round.puttCounts, at: editing.id))
+            { model in
+                model.apply(to: round, holeIndex: editing.id)
+                try? modelContext.save()
+            }
+        }
     }
 
     private var summarySection: some View {
@@ -49,10 +60,15 @@ struct RoundDetailView: View {
     private var scorecardSection: some View {
         Section("스코어카드") {
             ForEach(Array(round.holeScores.indices), id: \.self) { index in
-                HoleRow(holeNumber: index + 1,
-                        par: value(in: round.holePars, at: index),
-                        score: value(in: round.holeScores, at: index),
-                        putts: value(in: round.puttCounts, at: index))
+                Button {
+                    editingHole = EditingHole(id: index)
+                } label: {
+                    HoleRow(holeNumber: index + 1,
+                            par: value(in: round.holePars, at: index),
+                            score: value(in: round.holeScores, at: index),
+                            putts: value(in: round.puttCounts, at: index))
+                }
+                .buttonStyle(.plain)
             }
 
             HStack {
@@ -88,4 +104,9 @@ struct RoundDetailView: View {
         courseNameDraft = trimmed
         try? modelContext.save()
     }
+}
+
+/// `sheet(item:)`에 넘길 수 있게 홀 인덱스를 감싼다.
+private struct EditingHole: Identifiable {
+    let id: Int
 }
