@@ -76,7 +76,9 @@ MainTabView
 - **집계 대상 홀**: 유효 홀 중 `holeScores[i] > 0` 인 홀. 파는 골랐지만 한 타도 치지 않고 넘어간 홀을 제외한다 — 이 홀을 넣으면 `score − par`가 음수가 되어 버디로 잘못 집계된다.
 - **기록 홀 수**: 유효 홀의 개수. 리스트 뱃지에 `N홀`로 그대로 표시한다. `GolfRound.recordedHoleCount`로 파생한다.
 - **18홀 라운드**: 기록 홀 수가 정확히 18인 라운드(`GolfRound.isFullRound`). 9홀을 골랐거나 18홀을 고르고 중단한 라운드는 여기 포함되지 않는다.
-- **오버파(`relativeToPar`)**: `GolfRound`의 기존 계산 프로퍼티(`totalStrokes − totalPar`). `par == 0` 홀은 양쪽 합에 0으로 기여하므로 값이 왜곡되지 않는다.
+- **오버파(`relativeToPar`)**: **집계 대상 홀에 대해서만** `Σ(score − par)`. `GolfRound`와 `RoundSnapshot`이 같은 규칙을 쓰며, 계산 자체는 `ScoreAggregate.relativeToPar(holeScores:holePars:)` 한 곳에 있다.
+	- `par == 0` 홀은 양쪽 합에 0으로 기여하므로 원래도 무해했지만, **파를 고르고 한 타도 치지 않은 홀(`par > 0 && score == 0`)은 `0 − par`가 그대로 언더파로 새어 든다.** 위 집계 대상 홀 정의가 이 홀을 빼라고 이미 규정하고 있는데 초판 문서의 이 항목이 그 사실을 놓치고 "왜곡되지 않는다"고 잘못 적었다 (2026-08-16 정정, plan `2026-08-16-common-relative-to-par-aggregation.md`).
+	- 이 값은 `totalStrokes − totalPar`와 다를 수 있고, 그것이 의도다 — 두 합계는 필터를 거치지 않는다. `totalPar`는 현재 어느 화면에도 노출되지 않는다.
 - **오버파 표기**: 양수 `+3`, 0 `E`, 음수 `-2`. 기존 `Shared/Models/ScoreFormat.swift`의 `relativeToPar(_:)`를 재사용한다.
 
 ## 4. 기록 탭 (`iOSApp/Features/History/`)
