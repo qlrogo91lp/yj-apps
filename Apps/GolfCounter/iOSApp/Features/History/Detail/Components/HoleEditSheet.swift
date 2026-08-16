@@ -56,6 +56,7 @@ struct HoleEditSheet: View {
                         onSave(model)
                         dismiss()
                     }
+                    .disabled(!RoundEditViewModel.parOptions.contains(model.par))
                 }
             }
         }
