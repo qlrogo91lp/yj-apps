@@ -35,4 +35,15 @@ final class GolfRound {
     var relativeToPar: Int {
         zip(holeScores, holePars).reduce(0) { $0 + $1.0 - $1.1 }
     }
+
+    /// 파가 기록된 홀 수. 워치에서 건너뛴 홀(par == 0)은 세지 않는다 (spec §3).
+    /// 기록 리스트의 `N홀` 뱃지와 통계의 18홀 판정이 같은 값을 쓴다.
+    var recordedHoleCount: Int {
+        holePars.filter { $0 > 0 }.count
+    }
+
+    /// 18홀을 끝까지 기록한 라운드. 총타수 기반 통계는 이 라운드만 집계한다 (spec §5).
+    var isFullRound: Bool {
+        recordedHoleCount == 18
+    }
 }
