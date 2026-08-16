@@ -98,7 +98,7 @@ struct RoundSnapshotTrimTests {
     }
 
     @Test func 기록홀수_파만고르고_한타도치지않은홀은_세지않는다() {
-        // 3번 홀은 파만 고르고 종료한 홀 — 워치 종료 경로로 만들 수 있다 (spec §4.1).
+        // 3번 홀은 파만 고르고 종료한 홀 — 워치 종료 경로로 만들 수 있다 (invariant spec §4.1).
         let value = snapshot(currentHoleIndex: 2,
                              holeScores: [4, 5, 0],
                              holePars: [4, 5, 4],

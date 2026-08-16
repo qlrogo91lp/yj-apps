@@ -278,7 +278,7 @@ struct RoundViewModelTransmissionTests {
         playHole(viewModel, par: 4, strokes: 5)
         viewModel.goToNextHole()
         viewModel.selectPar(3) // 홀 2에 파만 남기고
-        viewModel.goToPreviousHole() // 홀 1로 돌아와 종료 (spec §4.2)
+        viewModel.goToPreviousHole() // 홀 1로 돌아와 종료 (invariant spec §4.2)
 
         viewModel.finishRound()
         viewModel.applyMetrics(nil)
@@ -323,7 +323,7 @@ struct RoundViewModelTransmissionTests {
         viewModel.applyMetrics(nil)
         viewModel.saveAndTransmit()
 
-        // 기록 홀이 0이므로 iOS에 빈 라운드를 만들지 않는다 (spec §5.3).
+        // 기록 홀이 0이므로 iOS에 빈 라운드를 만들지 않는다 (invariant spec §5.3).
         #expect(transmitter.sent.isEmpty)
         #expect(viewModel.didComplete)
     }
