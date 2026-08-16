@@ -12,8 +12,8 @@ struct CircleIconButton: View {
     ///
     /// 그래도 **양옆에 조작 가능한 뷰가 붙어 있으면 쓰지 말 것** — 겹치는 자리에서
     /// 어느 쪽이 탭을 가져갈지 SwiftUI가 보장해주지 않는다. 화살표처럼 한쪽이 링(가장
-    /// 자주 쓰는 탭 타깃)인 경우는 호출부에서 세로 방향으로만 `.frame`을 키우는
-    /// 별도 방식을 쓴다 — `CountingView.ringArea` 참조.
+    /// 자주 쓰는 탭 타깃)인 경우는 세로 방향으로만 `.frame`을 키우는 별도 방식을
+    /// 쓴다 — `HoleArrowButton` 참조.
     var hitInset: CGFloat = 0
     let action: () -> Void
 
