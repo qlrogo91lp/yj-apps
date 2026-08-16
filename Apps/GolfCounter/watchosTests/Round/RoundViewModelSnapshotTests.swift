@@ -51,6 +51,19 @@ struct RoundViewModelSnapshotTests {
         #expect(spy.published.last?.holeScores == [0, 0])
     }
 
+    @Test func 홀을_건너뛰면_스냅샷을_발행한다() {
+        let spy = RoundSnapshotPublisherSpy()
+        let viewModel = makeViewModel(spy: spy)
+        viewModel.selectPar(4)
+
+        viewModel.skipCurrentHole()
+
+        // 컴플리케이션과 크래시 복구가 이 값을 그대로 읽으므로, 파가 실제로 0으로
+        // 되돌아간 스냅샷이 발행되어야 한다.
+        #expect(spy.published.last?.currentHoleIndex == 1)
+        #expect(spy.published.last?.holePars == [0, 0])
+    }
+
     @Test func 이동할_수_없는_이전홀은_스냅샷을_발행하지_않는다() {
         let spy = RoundSnapshotPublisherSpy()
         let viewModel = makeViewModel(spy: spy)

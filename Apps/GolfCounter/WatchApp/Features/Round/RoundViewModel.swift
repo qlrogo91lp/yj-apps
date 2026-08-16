@@ -132,7 +132,9 @@ final class RoundViewModel: ObservableObject {
 
     // MARK: - 요약 표시값 (전부 트림 후 기준)
 
-    /// 트림 후 실제로 전송될 홀 수. 종료 확인 문구와 요약 헤더가 쓴다.
+    /// 파가 기록된 홀 수(유효 홀 개수) — iOS `GolfRound.recordedHoleCount`와 같은 규칙이다.
+    /// 종료 확인 문구와 요약 헤더가 쓴다. **전송되는 홀 수와는 다를 수 있다** — `trimmed()`는
+    /// 말단만 자르므로 중간에 건너뛴 홀이 있으면 전송 배열이 이 값보다 길 수 있다.
     var recordedHoleCount: Int {
         snapshot.recordedHoleCount
     }
@@ -187,6 +189,17 @@ final class RoundViewModel: ObservableObject {
         transmit(with: metrics)
     }
 
+    /// 요약의 "저장 안 함". 전송하지 않고 스냅샷만 지운 뒤 홈으로 돌아간다.
+    ///
+    /// `saveAndTransmit()`의 0홀 경로와 같은 처리지만, 이쪽은 기록이 있는데도 사용자가
+    /// 명시적으로 버리기를 고른 경우다 — 뷰가 확인 다이얼로그를 한 번 거치게 한다.
+    /// 스냅샷을 지우므로 다음 실행 때 복구되지 않는다.
+    func discardRound() {
+        publisher.clear()
+        isTransmitting = false
+        didComplete = true
+    }
+
     private func transmit(with metrics: RoundMetrics) {
         let trimmed = snapshot.trimmed()
         transmitter.send(RoundCompletedMessage(id: id,
@@ -238,6 +251,22 @@ final class RoundViewModel: ObservableObject {
 
     func goToNextHole() {
         guard progress.canGoToNextHole else { return }
+        progress.advanceToNextHole()
+        resetHoleLocalState()
+        publishSnapshot()
+    }
+
+    /// 한 타도 치지 않은 홀을 건너뛴다 — 파를 0으로 되돌려 "진짜 건너뛴 홀"로 만든 뒤 다음 홀로 간다.
+    ///
+    /// 파를 남긴 채 넘어가면 그 홀이 기록 홀 수에 잡히고(spec §3 유효 홀), 오버파에서는
+    /// 집계 대상 홀이 아니라 빠져서 "18홀인데 17홀치 스코어"라는 어긋남이 생긴다.
+    /// 파를 지우면 두 지표가 같은 홀 집합을 보게 된다.
+    ///
+    /// 타수가 이미 있는 홀에는 아무 일도 하지 않는다 — 파를 지우면 그 타수가 미아가 되고,
+    /// `par == 0 && score > 0`은 어느 화면도 해석할 수 없는 상태다.
+    func skipCurrentHole() {
+        guard progress.canGoToNextHole, progress.currentScore == 0 else { return }
+        progress.setPar(0)
         progress.advanceToNextHole()
         resetHoleLocalState()
         publishSnapshot()
