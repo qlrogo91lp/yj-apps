@@ -55,13 +55,13 @@ extension RoundSnapshot {
         return copy
     }
 
-    /// 파가 기록된 홀 수 = 유효 홀의 개수 (spec §3). 종료 확인 문구와 요약 헤더가 쓴다.
+    /// 집계 대상 홀(파와 타수가 모두 있는 홀)의 개수. 규칙은 `ScoreAggregate` 참조 (spec §7).
     ///
-    /// 건너뛴 홀(`par == 0`)은 배열 **중간**에 남아 있어도 세지 않는다 —
-    /// `GolfRound.recordedHoleCount`와 같은 규칙이라 워치 요약과 iOS 기록 뱃지가 같은 수를 보인다.
-    /// 말단 0은 `filter`가 알아서 걸러내므로 `trimmed()`를 거칠 필요가 없다.
+    /// 종료 확인 문구와 요약 헤더가 쓴다. `GolfRound.recordedHoleCount`와 같은 규칙이라
+    /// 워치 요약과 iOS 기록 뱃지가 같은 수를 보인다. 배열 중간에 낀 건너뛴 홀도, 말단의
+    /// 미기록 홀도 필터가 알아서 걸러내므로 `trimmed()`를 거칠 필요가 없다.
     var recordedHoleCount: Int {
-        holePars.filter { $0 > 0 }.count
+        ScoreAggregate.recordedHoleCount(holeScores: holeScores, holePars: holePars)
     }
 }
 
