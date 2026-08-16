@@ -212,4 +212,58 @@ struct HoleProgressTests {
         #expect(progress.canGoToNextHole)
         #expect(progress.holeCount == 9)
     }
+
+    // MARK: - clearUnplayedHoles (종료 시 미타구 홀 정규화)
+
+    @Test func 미타구홀정리_파만있는_현재홀의_파를_지운다() {
+        var progress = HoleProgress(holeCount: 18)
+        progress.setPar(4)
+
+        progress.clearUnplayedHoles()
+
+        #expect(progress.holePars == [0])
+        #expect(progress.holeScores == [0])
+    }
+
+    @Test func 미타구홀정리_이전버튼으로_두고온홀도_지운다() {
+        // 홀 1을 치고 홀 2에서 파만 고른 뒤 이전 버튼으로 홀 1에 돌아온 상태 (spec §4.2).
+        // 홀 2는 현재 홀이 아니므로, 대상을 현재 홀로 좁히면 놓친다.
+        var progress = HoleProgress(holeCount: 18)
+        progress.setPar(4)
+        progress.apply(.swing)
+        progress.advanceToNextHole()
+        progress.setPar(3)
+        progress.retreatToPreviousHole()
+
+        progress.clearUnplayedHoles()
+
+        #expect(progress.holePars == [4, 0])
+        #expect(progress.holeScores == [1, 0])
+        #expect(progress.currentHoleIndex == 0)
+    }
+
+    @Test func 미타구홀정리_타수가있는홀은_건드리지않는다() {
+        var progress = HoleProgress(holeCount: 18)
+        progress.setPar(4)
+        progress.apply(.swing)
+        progress.apply(.putt)
+
+        progress.clearUnplayedHoles()
+
+        #expect(progress.holePars == [4])
+        #expect(progress.holeScores == [2])
+        #expect(progress.puttCounts == [1])
+    }
+
+    @Test func 미타구홀정리_파가_원래_0인홀은_그대로다() {
+        var progress = HoleProgress(holeCount: 18)
+        progress.setPar(4)
+        progress.apply(.swing)
+        progress.advanceToNextHole()
+
+        progress.clearUnplayedHoles()
+
+        #expect(progress.holePars == [4, 0])
+        #expect(progress.holeScores == [1, 0])
+    }
 }
