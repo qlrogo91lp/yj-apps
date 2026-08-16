@@ -37,10 +37,10 @@ struct GolfRoundTests {
         #expect(round.relativeToPar == 1)
     }
 
-    @Test func recordedHoleCount_파가있는홀만_센다() {
+    @Test func recordedHoleCount_파와타수가_모두있는홀만_센다() {
         let round = GolfRound()
         round.holeScores = [4, 3, 0, 5]
-        // 3번째 홀은 워치에서 건너뛴 홀 — par 0이라 세지 않는다.
+        // 3번째 홀은 워치에서 건너뛴 홀 — par와 타수가 모두 0이라 세지 않는다.
         round.holePars = [4, 3, 0, 5]
         round.puttCounts = [2, 1, 0, 2]
 
@@ -77,7 +77,7 @@ struct GolfRoundTests {
 
         // 옛 공식이라면 0 − 4 = −4가 새어 들어간다.
         #expect(round.relativeToPar == 0)
-        // 파가 있는 홀이므로 기록 홀 수에는 그대로 들어간다 — 유효 홀 ≠ 집계 대상 홀 (spec §3).
-        #expect(round.recordedHoleCount == 3)
+        // 기록 홀 수도 오버파와 같은 필터를 쓴다 — 이 홀은 어느 쪽에도 안 들어간다 (spec §7.1).
+        #expect(round.recordedHoleCount == 2)
     }
 }

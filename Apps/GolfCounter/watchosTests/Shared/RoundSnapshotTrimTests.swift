@@ -68,7 +68,7 @@ struct RoundSnapshotTrimTests {
         #expect(original.trimmed() == original)
     }
 
-    @Test func 기록홀수는_파가있는_홀_개수다() {
+    @Test func 기록홀수는_파와타수가_모두있는_홀_개수다() {
         let value = snapshot(currentHoleIndex: 4,
                              holeScores: [4, 5, 0, 0, 0],
                              holePars: [4, 5, 0, 0, 0],
@@ -95,5 +95,16 @@ struct RoundSnapshotTrimTests {
 
         // 옛 공식(trimmed().holePars.count)이라면 말단만 자르므로 4가 나온다.
         #expect(value.recordedHoleCount == 3)
+    }
+
+    @Test func 기록홀수_파만고르고_한타도치지않은홀은_세지않는다() {
+        // 3번 홀은 파만 고르고 종료한 홀 — 워치 종료 경로로 만들 수 있다 (spec §4.1).
+        let value = snapshot(currentHoleIndex: 2,
+                             holeScores: [4, 5, 0],
+                             holePars: [4, 5, 4],
+                             puttCounts: [2, 2, 0])
+
+        // 옛 정의(파가 있는 홀 개수)라면 3이 나온다.
+        #expect(value.recordedHoleCount == 2)
     }
 }

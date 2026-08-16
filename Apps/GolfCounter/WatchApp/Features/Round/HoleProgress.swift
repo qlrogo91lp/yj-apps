@@ -97,6 +97,22 @@ struct HoleProgress: Equatable {
         holePars[currentHoleIndex] = par
     }
 
+    /// 파는 있는데 한 타도 치지 않은 홀의 파를 지워 "기록 없는 홀"로 되돌린다.
+    ///
+    /// `RoundViewModel.skipCurrentHole()`이 홀 이동 경계에서 현재 홀 하나에 하는 일을,
+    /// 라운드 종료 경계에서 남아 있는 **모든** 홀에 대해 한다 (spec §5.2). 이전 홀 버튼으로
+    /// 되돌아가 두고 온 홀은 현재 홀이 아니므로, 대상을 현재 홀로 좁히면 놓친다 (spec §4.2).
+    ///
+    /// 타수가 있는 홀은 건드리지 않는다 — 파를 지우면 그 타수가 미아가 되고,
+    /// `par == 0 && score > 0`은 어느 화면도 해석할 수 없는 상태다.
+    mutating func clearUnplayedHoles() {
+        for index in holePars.indices where index < holeScores.count {
+            if holePars[index] > 0, holeScores[index] == 0 {
+                holePars[index] = 0
+            }
+        }
+    }
+
     // MARK: - 홀 이동
 
     mutating func advanceToNextHole() {

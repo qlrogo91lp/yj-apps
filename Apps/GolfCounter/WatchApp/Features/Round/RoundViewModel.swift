@@ -132,7 +132,7 @@ final class RoundViewModel: ObservableObject {
 
     // MARK: - 요약 표시값 (전부 트림 후 기준)
 
-    /// 파가 기록된 홀 수(유효 홀 개수) — iOS `GolfRound.recordedHoleCount`와 같은 규칙이다.
+    /// 집계 대상 홀 개수(파와 타수가 모두 있는 홀) — iOS `GolfRound.recordedHoleCount`와 같은 규칙이다.
     /// 종료 확인 문구와 요약 헤더가 쓴다. **전송되는 홀 수와는 다를 수 있다** — `trimmed()`는
     /// 말단만 자르므로 중간에 건너뛴 홀이 있으면 전송 배열이 이 값보다 길 수 있다.
     var recordedHoleCount: Int {
@@ -160,7 +160,17 @@ final class RoundViewModel: ObservableObject {
 
     /// 종료 확인에서 호출한다. 워크아웃 종료는 View가 async로 진행하고,
     /// 도착한 결과는 `applyMetrics(_:)`로 들어온다 (spec §7).
+    ///
+    /// 먼저 미타구 홀을 정규화한다 — `isFinished`를 세우는 순간 요약 화면이 뜨므로,
+    /// 그 전에 배열이 정리돼 있어야 요약과 전송이 같은 값을 본다 (spec §5.2).
+    ///
+    /// 정규화를 종료 확인 **다이얼로그보다 뒤**에 두는 것이 핵심이다. 다이얼로그 전에
+    /// 현재 홀의 파를 지우면 `phase`가 파 선택으로 튕겨, 사용자가 "취소"를 눌렀을 때
+    /// 홀이 초기화된 것처럼 보인다 (spec §5.1). 다이얼로그 문구의 정확성은
+    /// `recordedHoleCount`가 집계 대상 홀을 세는 것으로 이미 보장된다.
     func finishRound() {
+        progress.clearUnplayedHoles()
+        publishSnapshot()
         endedAt = Date()
         isFinished = true
     }

@@ -16,4 +16,17 @@ enum ScoreAggregate {
             .filter { $0.0 > 0 && $0.1 > 0 }
             .reduce(0) { $0 + $1.0 - $1.1 }
     }
+
+    /// 집계 대상 홀(`par > 0 && score > 0`)의 개수.
+    ///
+    /// `relativeToPar`와 **같은 필터**를 쓴다 — 두 지표가 항상 같은 홀 집합을 본다 (spec §7.1).
+    /// 파만 고르고 한 타도 치지 않은 홀은 세지 않는다: 저장·전송 경계에서 정규화되어
+    /// 사라질 홀이므로, 세면 홀 수와 오버파가 다른 홀 집합을 보게 된다.
+    ///
+    /// 배열 길이가 다르면 짧은 쪽까지만 본다 — `relativeToPar`와 같다.
+    static func recordedHoleCount(holeScores: [Int], holePars: [Int]) -> Int {
+        zip(holeScores, holePars)
+            .filter { $0.0 > 0 && $0.1 > 0 }
+            .count
+    }
 }

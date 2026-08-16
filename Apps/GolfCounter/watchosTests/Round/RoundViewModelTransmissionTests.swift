@@ -252,4 +252,53 @@ struct RoundViewModelTransmissionTests {
 
         #expect(transmitter.sent.isEmpty)
     }
+
+    // MARK: - 종료 시 미타구 홀 정규화
+
+    @Test func 종료하면_파만고른_말단홀이_전송에서_빠진다() {
+        let transmitter = RoundTransmitterSpy()
+        let viewModel = makeViewModel(publisher: RoundSnapshotPublisherSpy(), transmitter: transmitter)
+        playHole(viewModel, par: 4, strokes: 5)
+        viewModel.goToNextHole()
+        viewModel.selectPar(3) // 파만 고르고 종료
+
+        viewModel.finishRound()
+        viewModel.applyMetrics(nil)
+        viewModel.saveAndTransmit()
+
+        // 파가 0으로 돌아간 뒤 말단이므로 trimmed()가 배열에서 아예 제거한다.
+        #expect(transmitter.sent.first?.holePars == [4])
+        #expect(transmitter.sent.first?.holeScores == [5])
+        #expect(viewModel.recordedHoleCount == 1)
+    }
+
+    @Test func 종료하면_이전버튼으로_두고온_파만고른홀도_정리된다() {
+        let transmitter = RoundTransmitterSpy()
+        let viewModel = makeViewModel(publisher: RoundSnapshotPublisherSpy(), transmitter: transmitter)
+        playHole(viewModel, par: 4, strokes: 5)
+        viewModel.goToNextHole()
+        viewModel.selectPar(3) // 홀 2에 파만 남기고
+        viewModel.goToPreviousHole() // 홀 1로 돌아와 종료 (spec §4.2)
+
+        viewModel.finishRound()
+        viewModel.applyMetrics(nil)
+        viewModel.saveAndTransmit()
+
+        #expect(transmitter.sent.first?.holePars == [4])
+        #expect(viewModel.recordedHoleCount == 1)
+    }
+
+    @Test func 전부_파만고른_라운드는_빈라운드로_처리된다() {
+        let transmitter = RoundTransmitterSpy()
+        let viewModel = makeViewModel(publisher: RoundSnapshotPublisherSpy(), transmitter: transmitter)
+        viewModel.selectPar(4)
+
+        viewModel.finishRound()
+        viewModel.applyMetrics(nil)
+        viewModel.saveAndTransmit()
+
+        // 기록 홀이 0이므로 iOS에 빈 라운드를 만들지 않는다 (spec §5.3).
+        #expect(transmitter.sent.isEmpty)
+        #expect(viewModel.didComplete)
+    }
 }

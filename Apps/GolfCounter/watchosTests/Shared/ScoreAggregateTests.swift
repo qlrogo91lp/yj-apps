@@ -37,4 +37,39 @@ struct ScoreAggregateTests {
     @Test func 빈배열은_0이다() {
         #expect(ScoreAggregate.relativeToPar(holeScores: [], holePars: []) == 0)
     }
+
+    @Test func 기록홀수는_파와타수가_모두있는홀만_센다() {
+        let value = ScoreAggregate.recordedHoleCount(holeScores: [4, 3, 6],
+                                                     holePars: [4, 3, 5])
+
+        #expect(value == 3)
+    }
+
+    @Test func 기록홀수는_파만고른홀을_세지않는다() {
+        // 파는 골랐지만 한 타도 치지 않은 홀. 오버파에서 빠지므로 홀 수에서도 빠져야
+        // "18홀인데 17홀치 스코어"라는 어긋남이 안 생긴다 (spec §2.2).
+        let value = ScoreAggregate.recordedHoleCount(holeScores: [4, 0, 5],
+                                                     holePars: [4, 4, 4])
+
+        #expect(value == 2)
+    }
+
+    @Test func 기록홀수는_파가0인홀을_세지않는다() {
+        // 파 선택 화면을 넘기지 않고 건너뛴 홀. 옛 정의도 세지 않았다.
+        let value = ScoreAggregate.recordedHoleCount(holeScores: [4, 0, 5],
+                                                     holePars: [4, 0, 4])
+
+        #expect(value == 2)
+    }
+
+    @Test func 기록홀수는_배열길이가_다르면_짧은쪽까지만_본다() {
+        let value = ScoreAggregate.recordedHoleCount(holeScores: [4, 3, 6, 5],
+                                                     holePars: [4, 3, 5])
+
+        #expect(value == 3)
+    }
+
+    @Test func 기록홀수는_빈배열이면_0이다() {
+        #expect(ScoreAggregate.recordedHoleCount(holeScores: [], holePars: []) == 0)
+    }
 }

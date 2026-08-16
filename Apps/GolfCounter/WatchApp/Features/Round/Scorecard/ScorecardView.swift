@@ -13,12 +13,12 @@ struct ScorecardView: View {
                 HStack(spacing: 4) {
                     Text("H\(row.holeNumber)")
                         .frame(width: 26, alignment: .leading)
-                    Text(row.par > 0 ? "Par\(row.par)" : "—")
+                    Text(row.isRecorded ? "Par\(row.par)" : "—")
                         .frame(width: 38, alignment: .leading)
                         .foregroundStyle(.secondary)
                     Text("\(row.score)타(\(row.putts)p)")
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    Text(row.par > 0 ? ScoreFormat.relativeToPar(row.score - row.par) : "")
+                    Text(row.isRecorded ? ScoreFormat.relativeToPar(row.score - row.par) : "")
                         .frame(width: 26, alignment: .trailing)
                 }
                 .font(.system(size: 12, weight: .medium, design: .rounded))
@@ -58,6 +58,11 @@ private struct ScorecardRow {
     let par: Int
     let score: Int
     let putts: Int
+
+    /// 기록된 홀 = 파와 타수가 모두 있는 홀. `HoleRow`(iOS)와 같은 규칙이다 (spec §6).
+    var isRecorded: Bool {
+        par > 0 && score > 0
+    }
 }
 
 #Preview {

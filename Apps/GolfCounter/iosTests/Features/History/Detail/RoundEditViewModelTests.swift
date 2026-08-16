@@ -122,4 +122,39 @@ struct RoundEditViewModelTests {
 
         #expect(round.holeScores == [4])
     }
+
+    @Test func 되쓰기_타수가0이면_파도지워_기록없는홀로_되돌린다() {
+        let round = GolfRound()
+        round.holeScores = [4, 3, 5]
+        round.holePars = [4, 3, 5]
+        round.puttCounts = [2, 1, 2]
+        var model = RoundEditViewModel(par: 3, score: 3, putts: 0)
+
+        model.decrementScore()
+        model.decrementScore()
+        model.decrementScore()
+        model.apply(to: round, holeIndex: 1)
+
+        #expect(model.score == 0)
+        // 타수를 0까지 내린 것은 "이 홀은 사실 안 쳤다"는 뜻이다 (spec §5.4).
+        #expect(round.holeScores == [4, 0, 5])
+        #expect(round.holePars == [4, 0, 5])
+        #expect(round.recordedHoleCount == 2)
+    }
+
+    @Test func 되쓰기_건너뛴홀에_파만넣으면_여전히_기록없는홀이다() {
+        let round = GolfRound()
+        round.holeScores = [4, 0, 3]
+        round.holePars = [4, 0, 3]
+        round.puttCounts = [2, 0, 1]
+        var model = RoundEditViewModel(par: 0, score: 0, putts: 0)
+
+        model.setPar(4)
+        model.apply(to: round, holeIndex: 1)
+
+        // 파만 고르고 타수를 안 넣었으므로 par-only 홀이 만들어지지 않는다 (spec §4.4).
+        #expect(round.holePars == [4, 0, 3])
+        #expect(round.holeScores == [4, 0, 3])
+        #expect(round.recordedHoleCount == 2)
+    }
 }
