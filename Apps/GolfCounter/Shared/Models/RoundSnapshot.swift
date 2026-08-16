@@ -55,9 +55,13 @@ extension RoundSnapshot {
         return copy
     }
 
-    /// 트림 후 실제로 기록된 홀 수. 종료 확인 문구와 요약 헤더가 쓴다.
+    /// 파가 기록된 홀 수 = 유효 홀의 개수 (spec §3). 종료 확인 문구와 요약 헤더가 쓴다.
+    ///
+    /// 건너뛴 홀(`par == 0`)은 배열 **중간**에 남아 있어도 세지 않는다 —
+    /// `GolfRound.recordedHoleCount`와 같은 규칙이라 워치 요약과 iOS 기록 뱃지가 같은 수를 보인다.
+    /// 말단 0은 `filter`가 알아서 걸러내므로 `trimmed()`를 거칠 필요가 없다.
     var recordedHoleCount: Int {
-        trimmed().holePars.count
+        holePars.filter { $0 > 0 }.count
     }
 }
 

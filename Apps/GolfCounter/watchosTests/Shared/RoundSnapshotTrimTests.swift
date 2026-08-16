@@ -68,7 +68,7 @@ struct RoundSnapshotTrimTests {
         #expect(original.trimmed() == original)
     }
 
-    @Test func 기록홀수는_트림후_홀_개수다() {
+    @Test func 기록홀수는_파가있는_홀_개수다() {
         let value = snapshot(currentHoleIndex: 4,
                              holeScores: [4, 5, 0, 0, 0],
                              holePars: [4, 5, 0, 0, 0],
@@ -84,5 +84,16 @@ struct RoundSnapshotTrimTests {
                              puttCounts: [0])
 
         #expect(value.recordedHoleCount == 0)
+    }
+
+    @Test func 기록홀수_중간에_건너뛴홀은_세지않는다() {
+        // 3번 홀을 건너뛴 상태(파 0)가 배열 중간에 남아 있다.
+        let value = snapshot(currentHoleIndex: 3,
+                             holeScores: [4, 5, 0, 3],
+                             holePars: [4, 5, 0, 3],
+                             puttCounts: [2, 2, 0, 1])
+
+        // 옛 공식(trimmed().holePars.count)이라면 말단만 자르므로 4가 나온다.
+        #expect(value.recordedHoleCount == 3)
     }
 }
