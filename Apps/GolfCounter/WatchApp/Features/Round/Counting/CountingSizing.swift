@@ -59,6 +59,9 @@ struct CountingSizing {
     /// `TabView(.verticalPage)`의 세로 페이지 인디케이터가 헤더와 같은 높이에 덮어 그려진다 —
     /// 42mm 실측 기준 오른쪽 가장자리에서 약 7pt. 시스템 크롬 상수라 세트별로 나누지 않고,
     /// 링 존은 쓰지 않는다(화살표는 인디케이터보다 아래다).
+    ///
+    /// **세로 인디케이터는 가로와 달리 safe area에 잡히지 않는다** — 좌우 inset이 2pt뿐이라
+    /// 직접 피해야 한다. 하단 가로 인디케이터는 반대로 safe area가 처리한다 (실측 2026-08-17).
     static let pageIndicatorInset: CGFloat = 12
 
     /// 링 존이 화면 좌우에서 물러나는 거리. 헤더(`pageIndicatorInset`)보다 작다 —
@@ -87,7 +90,8 @@ struct CountingSizing {
 
     /// 46mm 이상 (46mm · Ultra 49mm).
     ///
-    /// 세로 예산 167.5pt(`GeometryReader` 실측, 중첩 TabView 크롬이 화면 높이를 잠식한다).
+    /// 세로 예산 167.5pt — 화면 248에서 safe area(위 44.5 · 아래 36)를 뺀 값이다.
+    /// 중첩 TabView 자체는 세로를 먹지 않는다 — 단일/중첩 측정값이 같다 (실측 2026-08-17).
     /// 가로 예산 200pt — 이 세트의 가장 좁은 기기는 Ultra(211pt)가 아니라 46mm(208pt)다.
     /// 세로 합계 156pt(여유 11.5) · 가로 합계 198pt(여유 2).
     static let regular = CountingSizing(headerButtonSize: 36,

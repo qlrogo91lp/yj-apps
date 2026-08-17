@@ -49,7 +49,8 @@ struct CountingSizingTests {
     /// 잡는 프레임). 취소는 오버레이라 세로 예산에 들어가지 않는다.
     ///
     /// 예산은 화면 높이가 아니라 `ScoringView`가 실제로 받는 `GeometryReader` 실측값이다 —
-    /// 중첩 TabView의 인디케이터 크롬이 화면 높이를 잠식한다 (46mm 168pt 아님, 실측 167.5pt).
+    /// safe area가 위아래를 잠식한다 (46mm 168pt 아님, 248 − 44.5 − 36 = 167.5pt).
+    /// 중첩 TabView 자체는 세로를 먹지 않는다 — 단일/중첩 측정값이 같다 (실측 2026-08-17).
     @Test func 세로_합계는_실제_렌더_기준으로_예산_안에_들어간다() {
         let budgets: [(CountingSizing, CGFloat)] = [(.regular, 167.5), (.compact, 152.0), (.tight, 138.5)]
         for (sizing, budget) in budgets {
