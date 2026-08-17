@@ -45,15 +45,12 @@ struct CountingSizingTests {
         }
     }
 
-    /// 링이 실제로 프레임을 잡는 값은 ringDiameter가 아니라 outerRadius*2다 (초과 링 공간을
-    /// 항상 예약하므로). 이 테스트는 그 실제 값 기준으로 세로 합계가 예산 안에 들어가는지 본다.
+    /// 세로 합계 = 헤더 버튼 지름 + spacing(Spacer 최소값) + outerRadius*2(링이 실제로
+    /// 잡는 프레임). 취소는 오버레이라 세로 예산에 들어가지 않는다.
     ///
-    /// 예산은 화면 높이가 아니라 `GeometryReader`로 실측한, `ScoringView`가 실제로 받는
-    /// 가용 세로 공간이다 — 바깥 `TabView(.page)` + 안쪽 `TabView(.verticalPage)`가 중첩되며
-    /// 화면 높이의 상당 부분을 페이지 인디케이터 크롬으로 가져가기 때문에 화면 높이 그대로
-    /// 쓰면 예산이 실제보다 훨씬 크게 잡힌다 (46mm 168pt 아님 — 실측 167.5pt).
-    /// 세로 합계 = 헤더 버튼 지름 + spacing(Spacer 최소값) + 링. 취소는 오버레이라 세로
-    /// 예산에 들어가지 않는다.
+    /// 예산은 화면 높이가 아니라 `ScoringView`가 실제로 받는 `GeometryReader` 실측값이다 —
+    /// safe area가 위아래를 잠식한다 (46mm 168pt 아님, 248 − 44.5 − 36 = 167.5pt).
+    /// 중첩 TabView 자체는 세로를 먹지 않는다 — 단일/중첩 측정값이 같다 (실측 2026-08-17).
     @Test func 세로_합계는_실제_렌더_기준으로_예산_안에_들어간다() {
         let budgets: [(CountingSizing, CGFloat)] = [(.regular, 167.5), (.compact, 152.0), (.tight, 138.5)]
         for (sizing, budget) in budgets {
@@ -64,13 +61,9 @@ struct CountingSizingTests {
 
     /// 각 세트가 커버하는 기기 중 **가장 좁은** 화면의 폭.
     ///
-    /// 현행 제품군은 40 · 42 · 44 · 46 · 49mm 다섯 가지이고, 폭은 시뮬레이터 실측이다
-    /// (2026-08-15): 40mm 162 · 44mm 184 · 42mm 187 · 46mm 208 · Ultra 49mm 211.
-    /// 화면이 클수록 폭도 크다는 법칙이 없다 — 44mm가 42mm보다 좁고, 세트별 하한은
-    /// mm 순서가 아니라 이 실측값에서 나온다.
-    ///
-    /// regular = 46mm · 49mm → 208 / compact = 42mm · 44mm → 184 / tight = 40mm → 162.
-    /// tight는 마지막 후보라 이 아래로는 fallback이 없다.
+    /// 폭은 시뮬레이터 실측이다 (2026-08-15): 40mm 162 · 44mm 184 · 42mm 187 ·
+    /// 46mm 208 · Ultra 49mm 211. 화면이 클수록 폭도 크다는 법칙이 없다 — 44mm가
+    /// 42mm보다 좁고, 세트별 하한은 mm 순서가 아니라 이 실측값에서 나온다.
     /// 단종 기기(41 · 45mm)는 `ViewThatFits`가 알아서 맞는 세트로 떨어뜨린다.
     private static let narrowestWidths: [(CountingSizing, CGFloat)] = [
         (.regular, 208.0), (.compact, 184.0), (.tight, 162.0),

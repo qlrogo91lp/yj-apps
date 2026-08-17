@@ -133,8 +133,8 @@ final class RoundViewModel: ObservableObject {
     // MARK: - 요약 표시값 (전부 트림 후 기준)
 
     /// 집계 대상 홀 개수(파와 타수가 모두 있는 홀) — iOS `GolfRound.recordedHoleCount`와 같은 규칙이다.
-    /// 종료 확인 문구와 요약 헤더가 쓴다. **전송되는 홀 수와는 다를 수 있다** — `trimmed()`는
-    /// 말단만 자르므로 중간에 건너뛴 홀이 있으면 전송 배열이 이 값보다 길 수 있다.
+    /// **전송되는 홀 수와는 다를 수 있다** — `trimmed()`는 말단만 자르므로 중간에 건너뛴 홀이
+    /// 있으면 전송 배열이 이 값보다 길다.
     var recordedHoleCount: Int {
         snapshot.recordedHoleCount
     }
@@ -161,13 +161,9 @@ final class RoundViewModel: ObservableObject {
     /// 종료 확인에서 호출한다. 워크아웃 종료는 View가 async로 진행하고,
     /// 도착한 결과는 `applyMetrics(_:)`로 들어온다 (spec §7).
     ///
-    /// 먼저 미타구 홀을 정규화한다 — `isFinished`를 세우는 순간 요약 화면이 뜨므로,
-    /// 그 전에 배열이 정리돼 있어야 요약과 전송이 같은 값을 본다 (invariant spec §5.2).
-    ///
-    /// 정규화를 종료 확인 **다이얼로그보다 뒤**에 두는 것이 핵심이다. 다이얼로그 전에
-    /// 현재 홀의 파를 지우면 `phase`가 파 선택으로 튕겨, 사용자가 "취소"를 눌렀을 때
-    /// 홀이 초기화된 것처럼 보인다 (invariant spec §5.1). 다이얼로그 문구의 정확성은
-    /// `recordedHoleCount`가 집계 대상 홀을 세는 것으로 이미 보장된다.
+    /// 미타구 홀 정규화를 `isFinished`보다 앞에, 종료 확인 **다이얼로그보다 뒤**에 둔다
+    /// (invariant spec §5.1·§5.2). 다이얼로그 전에 파를 지우면 `phase`가 파 선택으로 튕겨,
+    /// "취소"를 눌렀을 때 홀이 초기화된 것처럼 보인다.
     func finishRound() {
         progress.clearUnplayedHoles()
         publishSnapshot()
@@ -199,11 +195,8 @@ final class RoundViewModel: ObservableObject {
         transmit(with: metrics)
     }
 
-    /// 요약의 "저장 안 함". 전송하지 않고 스냅샷만 지운 뒤 홈으로 돌아간다.
-    ///
-    /// `saveAndTransmit()`의 0홀 경로와 같은 처리지만, 이쪽은 기록이 있는데도 사용자가
-    /// 명시적으로 버리기를 고른 경우다 — 뷰가 확인 다이얼로그를 한 번 거치게 한다.
-    /// 스냅샷을 지우므로 다음 실행 때 복구되지 않는다.
+    /// 요약의 "저장 안 함". 전송하지 않고 스냅샷만 지운 뒤 홈으로 돌아간다 —
+    /// 다음 실행 때 복구되지 않으므로 뷰가 확인 다이얼로그를 한 번 거치게 한다.
     func discardRound() {
         publisher.clear()
         isTransmitting = false
@@ -238,7 +231,6 @@ final class RoundViewModel: ObservableObject {
     }
 
     /// 현재 홀의 마지막 입력을 되돌린다. 입력의 정확한 역연산이다.
-    /// 상태를 바꾸는 모든 경로가 스냅샷을 발행한다는 규칙을 따라 마지막에 발행한다.
     func undo() {
         guard let mode = undoStack.pop() else { return }
         progress.revert(mode)
@@ -257,11 +249,10 @@ final class RoundViewModel: ObservableObject {
         isEditingPar = true
     }
 
-    /// 카운터의 [Par] 버튼으로 시작한 파 재편집을 취소하고 카운터로 돌아간다.
-    /// 홀은 옮기지 않고 파 값도 그대로 둔다 — 편집 진입 자체를 무르는 것뿐이다.
+    /// 카운터의 [Par] 버튼으로 시작한 파 재편집을 취소한다. 홀도 파 값도 그대로 둔다.
     ///
-    /// 스냅샷을 발행하지 않는다: `isEditingPar`는 화면 분기용 UI 상태일 뿐
-    /// `RoundSnapshot`에 들어가지 않으므로 발행할 변경이 없다 (`beginParEditing()`도 같다).
+    /// 스냅샷을 발행하지 않는다: `isEditingPar`는 `RoundSnapshot`에 들어가지 않는
+    /// 화면 분기용 UI 상태라 발행할 변경이 없다 (`beginParEditing()`도 같다).
     func cancelParEditing() {
         isEditingPar = false
     }
@@ -277,9 +268,8 @@ final class RoundViewModel: ObservableObject {
 
     /// 한 타도 치지 않은 홀을 건너뛴다 — 파를 0으로 되돌려 "진짜 건너뛴 홀"로 만든 뒤 다음 홀로 간다.
     ///
-    /// 파를 남긴 채 넘어가면 그 홀이 기록 홀 수에 잡히고(spec §3 유효 홀), 오버파에서는
-    /// 집계 대상 홀이 아니라 빠져서 "18홀인데 17홀치 스코어"라는 어긋남이 생긴다.
-    /// 파를 지우면 두 지표가 같은 홀 집합을 보게 된다.
+    /// 파를 남긴 채 넘어가면 그 홀이 기록 홀 수에는 잡히고 오버파에서는 빠져
+    /// "18홀인데 17홀치 스코어"가 된다 (spec §3 유효 홀).
     ///
     /// 타수가 이미 있는 홀에는 아무 일도 하지 않는다 — 파를 지우면 그 타수가 미아가 되고,
     /// `par == 0 && score > 0`은 어느 화면도 해석할 수 없는 상태다.
@@ -299,14 +289,11 @@ final class RoundViewModel: ObservableObject {
     }
 
     /// 파 선택 화면의 "이전" 버튼에서 호출하되, **새 홀 진입 경로에서만** 쓰인다.
-    /// 방금 실수로 다음 홀에 진입해 아직 아무 값도 입력하지 않은 홀(phantom hole)이면
-    /// 그 홀을 배열에서 완전히 제거하고 이전 홀로 돌아가, mis-tap 이전 상태를 그대로 복원한다.
+    /// 아직 아무 값도 입력하지 않은 홀(phantom hole)이면 배열에서 완전히 제거하고
+    /// 이전 홀로 돌아가, mis-tap 이전 상태를 그대로 복원한다.
     ///
-    /// 카운터의 [Par] 버튼으로 이미 점수가 있던 홀을 재편집(`beginParEditing()`)하는
-    /// 경로의 백버튼은 `cancelParEditing()`을 호출하므로 이 메서드를 거치지 않는다.
-    /// 아래 `isEditingPar` 분기는 그래서 UI 관점에서는 죽은 경로다 — `isEditingPar`가
-    /// 참인 채로 이 메서드가 호출되는 경우에도 정의된 동작(`goToPreviousHole()`과 동일)을
-    /// 갖도록 남겨둔 방어용 fallback일 뿐, 실제 화면 흐름이 타는 경로가 아니다.
+    /// 아래 `isEditingPar` 분기는 UI 관점에서 죽은 경로다 — 재편집 경로의 백버튼은
+    /// `cancelParEditing()`을 부른다. 정의된 동작을 갖도록 남겨둔 방어용 fallback이다.
     func cancelToPreviousHole() {
         guard progress.canGoToPreviousHole else { return }
 

@@ -2,9 +2,8 @@ import Foundation
 
 /// 라운드에 무엇이 기록됐는지 — 홀별 타수·파·퍼트와 현재 홀 위치 (spec §3).
 ///
-/// 홀 데이터는 관계가 아니라 **병렬 배열**이다(인덱스 = 홀 번호 - 1). 세 배열의
-/// 길이가 항상 같아야 한다는 불변식을 이 타입이 책임진다 — 홀을 늘리는 경로가
-/// `advanceToNextHole()`과 복구 `init` 둘뿐이고, 양쪽 다 용량을 함께 맞춘다.
+/// 홀 데이터는 **병렬 배열**이다(인덱스 = 홀 번호 - 1). 세 배열의 길이가 항상 같아야
+/// 한다는 불변식을 이 타입이 책임진다.
 struct HoleProgress: Equatable {
     /// 이 라운드의 홀 수 상한 (9 또는 18). 중간 변경·연장은 없다 (spec §3.1).
     /// 기본값을 두지 않는 이유: 상한 없는 HoleProgress는 의미가 없다.
@@ -59,11 +58,9 @@ struct HoleProgress: Equatable {
         currentHoleIndex + 1 < holeCount
     }
 
-    /// 현재 홀이 "방금 만들어졌고 아직 아무것도 입력되지 않은" phantom hole 상태인지 판단한다.
+    /// 현재 홀이 "방금 만들어졌고 아직 아무것도 입력되지 않은" phantom hole인지 판단한다.
     /// 세 배열의 마지막 원소가 현재 홀과 정확히 일치할 때만 안전하게 pop할 수 있다.
-    ///
-    /// 파 편집 중(`isEditingPar`) 여부는 여기 조건에 없다 — 그것은 `RoundViewModel`의
-    /// 상태이므로 호출부가 판단한다. 이 타입은 "기록 상태" 사실만 본다.
+    /// 파 편집 중(`isEditingPar`)은 조건에 없다 — 이 타입은 "기록 상태" 사실만 본다.
     var isPristinePhantomHole: Bool {
         currentScore == 0
             && currentPar == 0
@@ -99,12 +96,9 @@ struct HoleProgress: Equatable {
 
     /// 파는 있는데 한 타도 치지 않은 홀의 파를 지워 "기록 없는 홀"로 되돌린다.
     ///
-    /// `RoundViewModel.skipCurrentHole()`이 홀 이동 경계에서 현재 홀 하나에 하는 일을,
-    /// 라운드 종료 경계에서 남아 있는 **모든** 홀에 대해 한다 (invariant spec §5.2). 이전 홀 버튼으로
-    /// 되돌아가 두고 온 홀은 현재 홀이 아니므로, 대상을 현재 홀로 좁히면 놓친다 (invariant spec §4.2).
-    ///
-    /// 타수가 있는 홀은 건드리지 않는다 — 파를 지우면 그 타수가 미아가 되고,
-    /// `par == 0 && score > 0`은 어느 화면도 해석할 수 없는 상태다.
+    /// `skipCurrentHole()`이 현재 홀 하나에 하는 일을 라운드 종료 경계에서 **모든** 홀에
+    /// 한다 — 이전 홀 버튼으로 두고 온 홀은 현재 홀이 아니라 대상을 좁히면 놓친다
+    /// (invariant spec §4.2·§5.2). 타수가 있는 홀은 건드리지 않는다.
     mutating func clearUnplayedHoles() {
         for index in holePars.indices where index < holeScores.count {
             if holePars[index] > 0, holeScores[index] == 0 {
@@ -134,7 +128,6 @@ struct HoleProgress: Equatable {
         currentHoleIndex -= 1
     }
 
-    /// 홀 배열 세 개의 길이를 현재 홀까지 맞춘다. 세 배열은 항상 같은 길이를 유지한다.
     private mutating func ensureCapacityForCurrentHole() {
         let needed = currentHoleIndex + 1
         while holeScores.count < needed {

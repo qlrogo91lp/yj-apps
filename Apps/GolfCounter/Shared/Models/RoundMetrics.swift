@@ -4,7 +4,6 @@ import Foundation
 ///
 /// `WorkoutResult`(WorkoutCore)를 그대로 쓰지 않는 이유: `Shared/`에 `import WorkoutCore`를
 /// 두면 iOS 타깃 빌드가 깨진다 — iOS는 WorkoutCore를 링크하지 않는다 (spec §5).
-/// 변환은 워치 타깃의 `RoundMetrics+WorkoutResult.swift`에 있다.
 struct RoundMetrics: Equatable {
     var calories: Double = 0
     var avgHeartRate: Double = 0

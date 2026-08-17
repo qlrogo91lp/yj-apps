@@ -1,8 +1,5 @@
-/// 링에 그릴 세그먼트 구성 (spec §6).
-///
-/// 링 한 바퀴가 파고, 타수 하나가 한 칸이다. 파를 넘긴 타수는 바깥 링으로 넘어간다.
-/// 뷰가 아니라 계산이므로 UI 프레임워크를 import하지 않는다 — 색도 `Color`가 아니라
-/// 자체 enum으로 표현하고, 실제 색 매핑은 `StrokeRing`이 한다.
+/// 링에 그릴 세그먼트 구성 — 링 한 바퀴가 파, 타수 하나가 한 칸이다 (spec §6).
+/// UI 프레임워크를 import하지 않아 색도 자체 enum이고, 색 매핑은 `StrokeRing`이 한다.
 struct RingSegments: Equatable {
     enum Kind: Equatable {
         case swing

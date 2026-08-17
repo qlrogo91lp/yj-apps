@@ -2,7 +2,6 @@ import Foundation
 import SwiftData
 
 /// 워치에서 도착한 완료 라운드를 SwiftData에 적재한다 (spec §6).
-///
 /// WatchConnectivity를 모르기 때문에 인메모리 컨테이너로 테스트할 수 있다 —
 /// 세션 등록은 `RoundReceiveService`가 맡는다.
 @MainActor

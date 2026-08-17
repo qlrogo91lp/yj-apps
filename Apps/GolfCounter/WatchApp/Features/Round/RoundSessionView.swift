@@ -22,8 +22,8 @@ struct RoundSessionView: View {
         }
     }
 
-    /// 요약이면 3페이지 TabView를 통째로 대체한다 — 종료 후에는 컨트롤·메트릭 페이지가
-    /// 의미를 잃으므로 그쪽으로 스와이프할 수 없어야 한다 (spec §3.2).
+    /// 요약이면 3페이지 TabView를 통째로 대체한다 — 종료 후 컨트롤·메트릭 페이지로
+    /// 스와이프할 수 없어야 한다 (spec §3.2).
     ///
     /// `Group`이 아니라 `ZStack`인 이유: `Group`은 modifier를 분기마다 개별 적용해
     /// 전환 시 `onAppear`가 재발화하고 `startRound()`가 다시 돈다.
@@ -104,11 +104,9 @@ struct RoundSessionView: View {
         }
     }
 
-    /// 종료 확인을 거친 뒤 호출된다. 워크아웃을 끝내고 요약으로 전환하며,
-    /// 집계값은 도착하는 대로 ViewModel에 넘긴다 — 화면은 기다리지 않는다 (spec §7).
-    ///
-    /// 인증 대기 중이던 시작 Task를 먼저 취소해, 라운드 종료 후 뒤늦게 startWorkout()이
-    /// 불려 고아 HKWorkoutSession이 남는 경쟁 상태를 막는다.
+    /// 종료 확인을 거친 뒤 호출된다. 집계값은 도착하는 대로 넘긴다 — 화면은 기다리지 않는다 (spec §7).
+    /// 인증 대기 중이던 시작 Task를 먼저 취소해, 뒤늦게 startWorkout()이 불려
+    /// 고아 HKWorkoutSession이 남는 경쟁 상태를 막는다.
     private func endRound() {
         startTask?.cancel()
         didFinish = true

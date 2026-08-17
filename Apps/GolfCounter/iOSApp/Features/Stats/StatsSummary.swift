@@ -3,7 +3,6 @@ import Foundation
 /// 통계 탭이 표시하는 값 전부. `StatsViewModel`이 라운드 배열에서 계산한다 (spec §5).
 /// 중첩 타입으로 묶어 두어 파일 하나가 최상위 타입 하나를 갖는다.
 struct StatsSummary: Equatable {
-    /// 추이 차트의 점 하나.
     struct TrendPoint: Equatable, Identifiable {
         let id: UUID
         let date: Date
@@ -18,7 +17,6 @@ struct StatsSummary: Equatable {
         let holeCount: Int
     }
 
-    /// 홀 하나의 결과가 들어가는 구간.
     enum Bucket: String, CaseIterable, Identifiable {
         case birdieOrBetter
         case par

@@ -1,11 +1,7 @@
 import ConnectivityCore
 import Foundation
 
-/// 라운드 완료 시 워치 → iOS 단방향 전송 페이로드 (spec §4).
-///
-/// 필드는 `GolfRound`와 1:1이다 — iOS(plan ⑤)는 이걸 그대로 옮겨 담아 저장한다.
-/// `WorkoutResult.durationSeconds`·`totalCaloriesBurned`는 `GolfRound`에 대응 필드가 없어
-/// 싣지 않는다(소요 시간은 `endedAt - startedAt`으로 파생).
+/// 라운드 완료 시 워치 → iOS 단방향 전송 페이로드 (spec §4). 필드는 `GolfRound`와 1:1이다.
 ///
 /// **이 파일은 `import ConnectivityCore` 때문에 컴플리케이션 타깃에서 제외되어 있다**
 /// (pbxproj의 `PBXFileSystemSynchronizedBuildFileExceptionSet`). 컴플리케이션은
