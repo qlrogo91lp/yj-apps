@@ -16,17 +16,12 @@ struct ParSelectionView: View {
     /// 균일 확장인 `CircleIconButton.hitInset`으로는 축 하나만의 확장을 표현할 수 없다.
     private let backButtonHitWidth: CGFloat = 44
 
-    /// 하단 가로 페이지 점 인디케이터가 마지막 par 행을 덮지 않도록 두는 여백.
-    /// 인디케이터는 콘텐츠 위에 그려지므로 레이아웃이 알아서 피해주지 않는다.
-    ///
-    /// **이 화면 전용으로 검증된 값이 아니다** — 실기 측정을 못 해
-    /// `CountingSizing.pageIndicatorInset`(12)을 보수적 기본값으로 가져왔다. 실기 확인 후 조정 필요.
-    private let indicatorClearance: CGFloat = 12
-
     var body: some View {
         VStack(spacing: 6) {
             header
 
+            // 하단 페이지 인디케이터는 safe area에 이미 잡혀 있어 따로 여백을 두지 않는다
+            // (시뮬레이터 실측 2026-08-17, bottom inset 22~40pt / 전 기종 5종).
             ScrollView {
                 VStack(spacing: 6) {
                     ForEach([3, 4, 5], id: \.self) { par in
@@ -35,7 +30,6 @@ struct ParSelectionView: View {
                         }
                     }
                 }
-                .padding(.bottom, indicatorClearance)
             }
             .scrollBounceBehavior(.basedOnSize)
         }
