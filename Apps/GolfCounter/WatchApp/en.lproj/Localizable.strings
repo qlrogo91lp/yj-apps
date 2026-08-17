@@ -26,7 +26,7 @@
 "scorecard_total" = "Total %lld · %lldp · %@";
 
 /* Summary */
-"summary_holes_completed" = "%lld holes";
+"summary_holes_completed" = "Holes: %lld";
 "summary_holes_empty" = "No holes recorded";
 "summary_strokes_putts" = "%lld · %lldp";
 "summary_discard_button" = "Discard";
