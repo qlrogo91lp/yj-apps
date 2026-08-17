@@ -294,6 +294,12 @@ final class RoundViewModel: ObservableObject {
     ///
     /// 아래 `isEditingPar` 분기는 UI 관점에서 죽은 경로다 — 재편집 경로의 백버튼은
     /// `cancelParEditing()`을 부른다. 정의된 동작을 갖도록 남겨둔 방어용 fallback이다.
+    ///
+    /// `removePhantomHoleAndRetreat()`는 `undoStack`을 건드리지 않지만, 이는 안전하다:
+    /// `isPristinePhantomHole`은 `currentScore == 0`을 요구하는데, 타수는 항상
+    /// `apply`/`revert`와 `undoStack.record`/`pop`이 짝을 이뤄 오르내리므로 score가 0이면
+    /// 그 홀의 되돌리기 기록도 이미 비어 있다 — 지울 게 없다. 또한 이 함수는 배열에서
+    /// `removeLast()`만 하므로 다른 홀의 인덱스는 밀리지 않아 `StrokeUndo`의 키도 그대로 유효하다.
     func cancelToPreviousHole() {
         guard progress.canGoToPreviousHole else { return }
 

@@ -75,7 +75,9 @@ struct RoundViewModelUndoTests {
 
     /// 홀을 넘긴 뒤 되돌리면 화면이 통째로 이전 홀로 돌아가 예측이 안 된다.
     /// "지금 보고 있는 홀의 마지막 입력을 되돌린다"가 유일하게 예측 가능한 의미다 (spec §7).
-    @Test func 다음홀로_이동하면_되돌릴게_없다() {
+    /// 여기서 canUndo가 false인 이유는 이동이 뭔가를 지워서가 아니라, 도착한 홀(홀 2)
+    /// 자체에 아직 기록된 타수가 없기 때문이다 — 아래 두 번째 테스트도 같은 원리다.
+    @Test func 다음홀로_이동하면_기록이_없는_새_홀이라_되돌릴게_없다() {
         let viewModel = makeViewModel()
         viewModel.selectPar(4)
         viewModel.incrementStroke()
@@ -85,7 +87,9 @@ struct RoundViewModelUndoTests {
         #expect(viewModel.canUndo == false)
     }
 
-    @Test func 이전홀로_이동하면_되돌릴게_없다() {
+    /// 홀 1에는 애초에 타수를 기록하지 않았으므로(파만 선택), 돌아와도 되돌릴 게 없다.
+    /// 이동 자체가 기록을 지운 게 아니라 도착한 홀에 기록이 없을 뿐이다.
+    @Test func 이전홀로_이동해도_그_홀에_기록이_없으면_되돌릴게_없다() {
         let viewModel = makeViewModel()
         viewModel.selectPar(4)
         viewModel.goToNextHole()
