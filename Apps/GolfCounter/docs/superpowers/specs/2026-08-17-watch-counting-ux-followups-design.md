@@ -32,8 +32,10 @@
 1. **Undo 히스토리는 홀별로 보관한다.** "지금 보는 홀의 마지막 입력만 되돌린다"는 스코프는
    그대로 두되, 그 히스토리의 수명을 라운드 전체로 늘린다.
 2. **홀을 옮겨도 히스토리를 지우지 않는다.** `resetHoleLocalState()`에서 undo clear를 뺀다.
-   단, phantom hole을 배열에서 제거할 때(`cancelToPreviousHole()`)는 그 홀의 히스토리도
-   같이 지운다 — 사라진 홀의 기록을 남겨두면 인덱스가 재사용될 때 유령 기록이 된다.
+   phantom hole 제거 경로(`cancelToPreviousHole()`)는 별도 정리가 필요 없다 — `incrementStroke()`와
+   `undo()`가 항상 짝을 이뤄 동작해 `currentScore == 0`인 홀은 애초에 히스토리가 있을 수
+   없고, phantom hole 조건 자체가 `currentScore == 0`을 요구하므로 그 홀의 히스토리는
+   제거 시점에 이미 비어 있음이 보장된다.
 3. **복구 라운드는 여전히 undo 불가.** `init(resuming:)`은 히스토리가 없는 상태로
    시작한다 — 되돌릴 대상을 모르는 채로 되돌리는 것보다 안전하다는 기존 근거를 유지한다.
 4. **마지막 홀의 `›` 자리는 종료 버튼(`flag.checkered`)으로 바뀐다.** 누르면 기존 종료
@@ -75,17 +77,17 @@ struct StrokeUndo: Equatable {
 struct StrokeUndo: Equatable {
     private var historyByHole: [Int: [StrokeInputMode]] = [:]
 
+    func history(forHole hole: Int) -> [StrokeInputMode]
     func canUndo(hole: Int) -> Bool
     mutating func record(_ mode: StrokeInputMode, hole: Int)
     mutating func pop(hole: Int) -> StrokeInputMode?
-    mutating func clear(hole: Int)   // phantom hole 제거 시에만 호출
 }
 ```
 
 `RoundViewModel`의 호출부(`incrementStroke()` / `undo()` / `canUndo` 게터)가 현재 홀
 인덱스를 같이 넘긴다. `resetHoleLocalState()`는 `inputMode` 리셋과 `isEditingPar` 취소만
-남고 undo clear는 빠진다. `removePhantomHoleAndRetreat()` 경로에서만
-`undoStack.clear(hole: 제거되는_인덱스)`를 호출한다.
+남고 undo clear는 빠진다. `cancelToPreviousHole()`의 phantom hole 제거 경로도 그대로 —
+위 근거대로 정리할 대상이 없다.
 
 ### 왜 홀 단위 Dictionary인가
 
@@ -165,8 +167,7 @@ RoundSessionView (isConfirmingEnd, endRound 소유)
 ### 수정
 
 - `WatchApp/Features/Round/RoundViewModel.swift` — undo 호출부에 홀 인덱스 전달,
-  `resetHoleLocalState()`에서 clear 제거, `removePhantomHoleAndRetreat()` 경로에서
-  해당 홀 히스토리 삭제
+  `resetHoleLocalState()`에서 clear 제거
 - `WatchApp/Features/Round/Counting/CountingView.swift` — 마지막 홀 종료 버튼,
   `onRequestEnd` 파라미터
 - `WatchApp/Features/Round/ScoringView.swift` — `onRequestEnd` 콜백 통과
@@ -177,9 +178,10 @@ RoundSessionView (isConfirmingEnd, endRound 소유)
 
 - `watchosTests/Round/StrokeUndoTests.swift` — 홀 인덱스 파라미터 반영, "다른 홀은
   서로 독립" 케이스 추가
-- `watchosTests/Round/RoundViewModelUndoTests.swift` — `다음홀로_이동하면_되돌릴게_없다`·
-  `이전홀로_이동하면_되돌릴게_없다`를 "히스토리가 유지된다"로 뒤집고, 돌아와서 정확히
-  undo되는 케이스 추가
+- `watchosTests/Round/RoundViewModelUndoTests.swift` — 기존 두 "이동하면 되돌릴게 없다"
+  테스트는 유지(이동 *직후* 홀은 기록이 없는 새 홀이라 여전히 참이다). 이번 버그의
+  실제 시나리오 — 기록이 있는 홀을 떠났다가 돌아오면 undo가 살아있는지 — 를 검증하는
+  새 케이스를 추가한다
 
 ## 8. 범위 밖
 
