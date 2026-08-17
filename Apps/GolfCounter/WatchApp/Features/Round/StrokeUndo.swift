@@ -1,25 +1,30 @@
 import Foundation
 
-/// 현재 홀에서 되돌릴 수 있는 입력 기록 (spec §7).
-/// 되돌리기 스코프가 현재 홀이라 홀을 옮기면 `RoundViewModel`이 `clear()`를 부른다.
+/// 현재 홀에서 되돌릴 수 있는 입력 기록 (spec §7, 2026-08-17 개정 — 홀별 보관).
+///
+/// 되돌리기의 **의미**는 여전히 "지금 보는 홀의 마지막 입력만"으로 한정된다. 하지만 그
+/// 기록의 **수명**은 라운드 전체다 — 홀을 옮겼다 돌아와도 그 홀에서 친 기록은 그대로
+/// 남아 있어야 한다(실기 확인, 2026-08-17). `RoundViewModel`은 매 호출마다 현재 홀
+/// 인덱스를 함께 넘긴다.
 struct StrokeUndo: Equatable {
-    /// 현재 홀에서 친 타의 종류 순서. 되돌리기의 유일한 상태다 — `incrementStroke()`가
-    /// 모드에 따라 두 가지 일만 하므로, 어느 쪽이었는지만 알면 정확히 되돌릴 수 있다.
-    private(set) var history: [StrokeInputMode] = []
+    private var historyByHole: [Int: [StrokeInputMode]] = [:]
 
-    var canUndo: Bool {
-        !history.isEmpty
+    func history(forHole hole: Int) -> [StrokeInputMode] {
+        historyByHole[hole] ?? []
     }
 
-    mutating func record(_ mode: StrokeInputMode) {
-        history.append(mode)
+    func canUndo(hole: Int) -> Bool {
+        !history(forHole: hole).isEmpty
     }
 
-    mutating func pop() -> StrokeInputMode? {
-        history.popLast()
+    mutating func record(_ mode: StrokeInputMode, hole: Int) {
+        historyByHole[hole, default: []].append(mode)
     }
 
-    mutating func clear() {
-        history.removeAll()
+    mutating func pop(hole: Int) -> StrokeInputMode? {
+        guard var history = historyByHole[hole], !history.isEmpty else { return nil }
+        let mode = history.removeLast()
+        historyByHole[hole] = history
+        return mode
     }
 }

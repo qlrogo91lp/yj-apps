@@ -108,7 +108,7 @@ final class RoundViewModel: ObservableObject {
     }
 
     var canUndo: Bool {
-        undoStack.canUndo
+        undoStack.canUndo(hole: progress.currentHoleIndex)
     }
 
     var totalStrokes: Int {
@@ -225,14 +225,14 @@ final class RoundViewModel: ObservableObject {
     // MARK: - 카운터
 
     func incrementStroke() {
-        undoStack.record(inputMode)
+        undoStack.record(inputMode, hole: progress.currentHoleIndex)
         progress.apply(inputMode)
         publishSnapshot()
     }
 
     /// 현재 홀의 마지막 입력을 되돌린다. 입력의 정확한 역연산이다.
     func undo() {
-        guard let mode = undoStack.pop() else { return }
+        guard let mode = undoStack.pop(hole: progress.currentHoleIndex) else { return }
         progress.revert(mode)
         publishSnapshot()
     }
@@ -308,10 +308,10 @@ final class RoundViewModel: ObservableObject {
     }
 
     /// 홀을 옮기면 입력 모드는 스윙으로 리셋되고(spec §3), 진행 중이던 파 편집은 취소된다.
-    /// 되돌리기 기록도 함께 비운다 — 되돌리기 스코프는 현재 홀이다 (spec §7).
+    /// 되돌리기 기록은 비우지 않는다 — 히스토리가 홀 인덱스별로 보관되므로 이 홀로 다시
+    /// 돌아오면 그대로 살아난다(spec 2026-08-17 개정).
     private func resetHoleLocalState() {
         inputMode = .swing
         isEditingPar = false
-        undoStack.clear()
     }
 }

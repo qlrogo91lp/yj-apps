@@ -121,6 +121,67 @@ struct RoundViewModelUndoTests {
         #expect(viewModel.canUndo)
     }
 
+    /// 이 파일의 핵심 회귀 테스트 — 2026-08-17 실기 검토에서 발견된 버그.
+    /// 홀 1에서 친 뒤 홀 2로 넘어갔다가 홀 1로 돌아오면, 홀 1의 되돌리기가 살아있어야 한다.
+    @Test func 홀을_옮겼다_돌아오면_그_홀의_되돌리기_기록이_남아있다() {
+        let viewModel = makeViewModel()
+        viewModel.selectPar(4)
+        viewModel.incrementStroke()
+        viewModel.incrementStroke()
+        viewModel.goToNextHole()
+        viewModel.selectPar(3)
+
+        viewModel.goToPreviousHole()
+
+        #expect(viewModel.canUndo)
+
+        viewModel.undo()
+
+        #expect(viewModel.currentScore == 1)
+    }
+
+    /// 퍼팅으로 친 것까지 정확히 기억한다 — 종류 정보가 홀을 넘나들며 유실되지 않는다.
+    @Test func 홀을_옮겼다_돌아와도_입력_종류를_정확히_기억한다() {
+        let viewModel = makeViewModel()
+        viewModel.selectPar(4)
+        viewModel.inputMode = .putt
+        viewModel.incrementStroke()
+        viewModel.inputMode = .swing
+        viewModel.goToNextHole()
+        viewModel.selectPar(3)
+        viewModel.incrementStroke()
+
+        viewModel.goToPreviousHole()
+        viewModel.undo()
+
+        #expect(viewModel.currentScore == 0)
+        #expect(viewModel.currentPutts == 0)
+    }
+
+    /// 두 홀을 오가며 각각 되돌리기를 확인해도 서로 섞이지 않는다.
+    @Test func 여러_홀_사이를_오가도_각_홀의_되돌리기가_독립적으로_유지된다() {
+        let viewModel = makeViewModel()
+        viewModel.selectPar(4)
+        viewModel.incrementStroke()
+        viewModel.goToNextHole()
+        viewModel.selectPar(3)
+        viewModel.incrementStroke()
+        viewModel.incrementStroke()
+
+        viewModel.goToPreviousHole()
+        #expect(viewModel.canUndo)
+        viewModel.goToNextHole()
+        #expect(viewModel.canUndo)
+
+        viewModel.undo()
+        #expect(viewModel.currentScore == 1)
+        #expect(viewModel.canUndo)
+
+        viewModel.undo()
+        #expect(viewModel.currentScore == 0)
+        #expect(viewModel.canUndo == false)
+    }
+
     @Test func 되돌리면_스냅샷을_발행한다() {
         let spy = RoundSnapshotPublisherSpy()
         let viewModel = makeViewModel(spy: spy)
