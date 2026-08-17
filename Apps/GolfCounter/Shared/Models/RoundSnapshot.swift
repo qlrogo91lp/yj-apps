@@ -38,9 +38,8 @@ struct RoundSnapshot: Equatable {
 extension RoundSnapshot {
     /// 전송 직전, 배열 말단에서부터 `par == 0`인 미기록 홀을 제거한다 (transmission spec §2 결정 2).
     ///
-    /// `par == 0`이면 파 선택 화면이 떠 카운터에 접근할 수 없으므로 `score`·`putts`도 반드시
-    /// 0이다 — 이 트림은 무손실이다. 중간에 낀 `par == 0` 홀은 건드리지 않는다(사용자가
-    /// 의도적으로 건너뛴 홀일 수 있다).
+    /// `par == 0`이면 `score`·`putts`도 반드시 0이라 무손실이다. 중간에 낀 `par == 0` 홀은
+    /// 건드리지 않는다 — 사용자가 의도적으로 건너뛴 홀일 수 있다.
     func trimmed() -> RoundSnapshot {
         var end = holePars.count
         while end > 0, holePars[end - 1] == 0 {
@@ -56,10 +55,7 @@ extension RoundSnapshot {
     }
 
     /// 집계 대상 홀(파와 타수가 모두 있는 홀)의 개수. 규칙은 `ScoreAggregate` 참조 (invariant spec §7).
-    ///
-    /// 종료 확인 문구와 요약 헤더가 쓴다. `GolfRound.recordedHoleCount`와 같은 규칙이라
-    /// 워치 요약과 iOS 기록 뱃지가 같은 수를 보인다. 배열 중간에 낀 건너뛴 홀도, 말단의
-    /// 미기록 홀도 필터가 알아서 걸러내므로 `trimmed()`를 거칠 필요가 없다.
+    /// 필터가 중간의 건너뛴 홀도 말단의 미기록 홀도 걸러내므로 `trimmed()`를 거칠 필요가 없다.
     var recordedHoleCount: Int {
         ScoreAggregate.recordedHoleCount(holeScores: holeScores, holePars: holePars)
     }
