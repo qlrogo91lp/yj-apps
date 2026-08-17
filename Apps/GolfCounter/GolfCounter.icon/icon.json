@@ -7,7 +7,14 @@
       "layers" : [
         {
           "image-name" : "golf-counter.svg",
-          "name" : "golf-counter"
+          "name" : "golf-counter",
+          "position" : {
+            "scale" : 0.9,
+            "translation-in-points" : [
+              0,
+              0
+            ]
+          }
         }
       ],
       "shadow" : {
