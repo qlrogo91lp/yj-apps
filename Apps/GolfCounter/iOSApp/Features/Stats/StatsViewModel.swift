@@ -21,6 +21,10 @@ struct StatsViewModel {
         summary.averageStrokes = average(fullRounds.map { Double($0.totalStrokes) })
         summary.averageOverPar = average(fullRounds.map { Double($0.relativeToPar) })
         summary.best = best(from: rounds)
+        let holes = countedHoles(in: rounds)
+        summary.puttsPerHole = average(holes.map { Double($0.putts) })
+        summary.distribution = distribution(of: holes)
+        summary.parPerformance = parPerformance(of: holes)
         return summary
     }
 
@@ -49,6 +53,39 @@ struct StatsViewModel {
         guard let winner = sorted.first else { return nil }
         return StatsSummary.Best(relativeToPar: winner.relativeToPar,
                                  holeCount: winner.recordedHoleCount)
+    }
+
+    private typealias Hole = (par: Int, score: Int, putts: Int)
+
+    /// 라운드마다 `ScoreAggregate.countedHoles`를 불러 모은다 — 필터(`par > 0 && score > 0`)는
+    /// 여기 없다. `relativeToPar`·`recordedHoleCount`와 같은 곳에서 나온 값이라야
+    /// 라운드 단위 지표와 홀 단위 지표가 같은 홀 집합을 본다.
+    private func countedHoles(in rounds: [GolfRound]) -> [Hole] {
+        rounds.flatMap { round in
+            ScoreAggregate.countedHoles(holeScores: round.holeScores,
+                                        holePars: round.holePars,
+                                        puttCounts: round.puttCounts)
+        }
+    }
+
+    /// 항상 네 구간을 `Bucket.allCases` 순서로 돌려준다 — 홀이 없어도 칸이 사라지지 않는다.
+    private func distribution(of holes: [Hole]) -> [StatsSummary.BucketCount] {
+        let total = holes.count
+        return StatsSummary.Bucket.allCases.map { bucket in
+            let count = holes.filter { StatsSummary.Bucket.of(overPar: $0.score - $0.par) == bucket }.count
+            return StatsSummary.BucketCount(bucket: bucket,
+                                            count: count,
+                                            ratio: total == 0 ? 0 : Double(count) / Double(total))
+        }
+    }
+
+    /// 항상 Par 3·4·5 세 칸을 돌려준다. 해당 파의 홀이 없으면 평균은 nil이다.
+    private func parPerformance(of holes: [Hole]) -> [StatsSummary.ParPerformance] {
+        [3, 4, 5].map { par in
+            let matching = holes.filter { $0.par == par }
+            return StatsSummary.ParPerformance(par: par,
+                                               averageOverPar: average(matching.map { Double($0.score - par) }))
+        }
     }
 
     private func average(_ values: [Double]) -> Double? {

@@ -122,4 +122,91 @@ struct StatsViewModelTests {
         #expect(summary.averageStrokes == nil)
         #expect(summary.trend[0].isFullRound == false)
     }
+
+    private func bucketCount(_ summary: StatsSummary, _ bucket: StatsSummary.Bucket) -> Int {
+        summary.distribution.first { $0.bucket == bucket }?.count ?? -1
+    }
+
+    @Test func 홀당퍼트는_9홀과18홀을_함께센다() {
+        // 18홀 × 2퍼트 + 9홀 × 1퍼트 = 45퍼트 / 27홀
+        let rounds = [makeFullRound(daysAgo: 0, scorePerHole: 5, puttsPerHole: 2),
+                      makeHalfRound(daysAgo: 1, scorePerHole: 5, puttsPerHole: 1)]
+
+        let summary = StatsViewModel().summary(from: rounds)
+
+        let puttsPerHole = summary.puttsPerHole ?? 0
+        #expect(abs(puttsPerHole - 45.0 / 27.0) < 0.0001)
+    }
+
+    @Test func 스코어분포_네구간의_경계가_정확하다() {
+        // Par 4 홀에서 3타(버디)·4타(파)·5타(보기)·6타(더블)·7타(더블+)
+        let round = makeRound(daysAgo: 0,
+                              pars: [4, 4, 4, 4, 4],
+                              scores: [3, 4, 5, 6, 7],
+                              putts: [1, 2, 2, 3, 3])
+
+        let summary = StatsViewModel().summary(from: [round])
+
+        #expect(bucketCount(summary, .birdieOrBetter) == 1)
+        #expect(bucketCount(summary, .par) == 1)
+        #expect(bucketCount(summary, .bogey) == 1)
+        #expect(bucketCount(summary, .doubleOrWorse) == 2)
+        #expect(summary.distribution.count == 4)
+    }
+
+    @Test func 스코어분포_비율은_집계대상홀기준이다() {
+        let round = makeRound(daysAgo: 0, pars: [4, 4], scores: [4, 5], putts: [2, 2])
+
+        let summary = StatsViewModel().summary(from: [round])
+
+        let parBucket = summary.distribution.first { $0.bucket == .par }
+        #expect(parBucket?.ratio == 0.5)
+    }
+
+    @Test func 파가0인홀은_모든집계에서_빠진다() {
+        // 2번 홀은 워치에서 건너뛴 홀(par 0)이다.
+        let round = makeRound(daysAgo: 0, pars: [4, 0, 3], scores: [4, 0, 3], putts: [2, 0, 1])
+
+        let summary = StatsViewModel().summary(from: [round])
+
+        #expect(bucketCount(summary, .par) == 2)
+        #expect(bucketCount(summary, .birdieOrBetter) == 0)
+        #expect(summary.puttsPerHole == 1.5)
+    }
+
+    @Test func 타수가0인홀은_버디로_집계되지않는다() {
+        // 파는 골랐지만 한 타도 안 치고 넘어간 홀. score - par = -4라 그냥 넣으면 버디가 된다.
+        let round = makeRound(daysAgo: 0, pars: [4, 4], scores: [4, 0], putts: [2, 0])
+
+        let summary = StatsViewModel().summary(from: [round])
+
+        #expect(bucketCount(summary, .birdieOrBetter) == 0)
+        #expect(bucketCount(summary, .par) == 1)
+        #expect(summary.puttsPerHole == 2)
+    }
+
+    @Test func 파별성적은_par345를_항상_세칸으로_돌려준다() {
+        // Par 3에서 +1, Par 4에서 +1과 +3(평균 +2), Par 5는 친 적 없음
+        let round = makeRound(daysAgo: 0,
+                              pars: [3, 4, 4],
+                              scores: [4, 5, 7],
+                              putts: [2, 2, 3])
+
+        let summary = StatsViewModel().summary(from: [round])
+
+        #expect(summary.parPerformance.map(\.par) == [3, 4, 5])
+        #expect(summary.parPerformance[0].averageOverPar == 1)
+        #expect(summary.parPerformance[1].averageOverPar == 2)
+        #expect(summary.parPerformance[2].averageOverPar == nil)
+    }
+
+    @Test func 집계대상홀이없으면_홀단위지표가_비어있다() {
+        let round = makeRound(daysAgo: 0, pars: [0, 0], scores: [0, 0], putts: [0, 0])
+
+        let summary = StatsViewModel().summary(from: [round])
+
+        #expect(summary.puttsPerHole == nil)
+        #expect(summary.distribution.allSatisfy { $0.count == 0 && $0.ratio == 0 })
+        #expect(summary.parPerformance.allSatisfy { $0.averageOverPar == nil })
+    }
 }

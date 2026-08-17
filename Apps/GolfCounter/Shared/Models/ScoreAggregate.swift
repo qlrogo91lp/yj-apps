@@ -29,4 +29,24 @@ enum ScoreAggregate {
             .filter { $0.0 > 0 && $0.1 > 0 }
             .count
     }
+
+    /// 집계 대상 홀(`par > 0 && score > 0`)의 파·타수·퍼팅을 모은다.
+    ///
+    /// `relativeToPar`·`recordedHoleCount`와 **같은 필터**를 쓴다 — 홀 단위 통계(스코어 분포·
+    /// 파별 성적·홀당 퍼트)가 라운드 단위 지표와 다른 홀 집합을 보지 않게 한다.
+    ///
+    /// `puttCounts`가 짧으면 그 홀의 퍼팅은 0으로 본다 — 파·타수 배열의 길이만 대상 홀을
+    /// 정하고, 퍼팅 배열은 방어적으로만 읽는다. `holeScores`·`holePars` 길이가 다르면
+    /// `relativeToPar`와 같은 규칙으로 짧은 쪽까지만 본다.
+    static func countedHoles(holeScores: [Int],
+                             holePars: [Int],
+                             puttCounts: [Int]) -> [(par: Int, score: Int, putts: Int)]
+    {
+        zip(holeScores, holePars).enumerated().compactMap { index, pair in
+            let (score, par) = pair
+            guard par > 0, score > 0 else { return nil }
+            let putts = index < puttCounts.count ? puttCounts[index] : 0
+            return (par: par, score: score, putts: putts)
+        }
+    }
 }
