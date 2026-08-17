@@ -60,15 +60,6 @@ struct HomeViewModelTests {
         #expect(viewModel.holeCount == 18)
     }
 
-    @Test func 시작_버튼_문구가_홀수를_말한다() {
-        let viewModel = HomeViewModel(publisher: RoundSnapshotPublisherSpy())
-
-        #expect(viewModel.startButtonLabel == "18홀 시작")
-
-        viewModel.toggleHoleCount()
-        #expect(viewModel.startButtonLabel == "9홀 시작")
-    }
-
     @Test func 새_라운드를_시작하면_복구_스냅샷을_비운다() {
         let publisher = RoundSnapshotPublisherSpy()
         publisher.stored = snapshot()

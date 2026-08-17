@@ -1,0 +1,37 @@
+/* Home */
+"home_hole_count" = "Holes";
+/* holeCount는 HomeViewModel에서 9 또는 18로만 고정되어 복수형이 항상 안전하다 — 다른 값이 추가되면 라벨 형식으로 바꿀 것 (spec §5) */
+"home_start_button" = "Start %lld Holes";
+"home_pending_title" = "Round in progress";
+"home_pending_message" = "Starting new will discard it.";
+"home_start_new" = "Start New";
+
+/* Common */
+"common_cancel" = "Cancel";
+
+/* Par Selection */
+"par_hole_number" = "Hole %lld";
+
+/* Counting */
+"counting_skip_title" = "This hole won't be recorded";
+"counting_skip_confirm" = "Skip";
+
+/* Round End */
+"round_end_title_recorded" = "Holes to save: %lld";
+"round_end_title_empty" = "No holes recorded";
+"round_end_confirm" = "End";
+"round_end_confirm_empty" = "End Without Saving";
+
+/* Scorecard — 영문 스코어카드 관습: 타수에 단위를 붙이지 않는다 (spec §4) */
+"scorecard_row" = "%lld (%lldp)";
+"scorecard_total" = "Total %lld · %lldp · %@";
+
+/* Summary */
+"summary_holes_completed" = "Holes: %lld";
+"summary_holes_empty" = "No holes recorded";
+"summary_strokes_putts" = "%lld · %lldp";
+"summary_discard_button" = "Discard";
+"summary_discard_title" = "Discard this round without saving?";
+"summary_discard_confirm" = "Discard";
+"summary_transmitting" = "Sending…";
+"summary_save_send" = "Save & Send";

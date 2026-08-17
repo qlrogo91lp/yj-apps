@@ -68,12 +68,13 @@ struct ComplicationAppEntryView: View {
                 VStack(alignment: .leading, spacing: 0) {
                     Text("\(entry.state.holeText) · \(entry.state.relativeToParText)")
                         .font(.headline)
-                    Text(entry.state.strokesText)
+                    Text(String(format: String(localized: "complication_strokes"),
+                                entry.state.totalStrokes))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
             } else {
-                Text("라운드 시작")
+                Text(String(localized: "complication_start_round"))
                     .font(.headline)
             }
             Spacer(minLength: 0)
@@ -96,7 +97,7 @@ struct ComplicationApp: Widget {
             ComplicationAppEntryView(entry: entry)
         }
         .configurationDisplayName("GolfCounter")
-        .description("라운드 진행 상황")
+        .description(String(localized: "complication_description"))
         .supportedFamilies([.accessoryCircular, .accessoryCorner, .accessoryRectangular])
     }
 }

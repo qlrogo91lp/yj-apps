@@ -35,12 +35,12 @@ struct CountingView: View {
         // UndoButton의 .transition도 이 애니메이션으로 구동된다.
         .animation(fillAnimation, value: viewModel.currentScore)
         .animation(fillAnimation, value: viewModel.canUndo)
-        .confirmationDialog("이 홀은 기록되지 않습니다",
+        .confirmationDialog(String(localized: "counting_skip_title"),
                             isPresented: $isConfirmingSkip,
                             titleVisibility: .visible)
         {
-            Button("건너뛰기", role: .destructive, action: viewModel.skipCurrentHole)
-            Button("취소", role: .cancel) {}
+            Button(String(localized: "counting_skip_confirm"), role: .destructive, action: viewModel.skipCurrentHole)
+            Button(String(localized: "common_cancel"), role: .cancel) {}
         }
     }
 

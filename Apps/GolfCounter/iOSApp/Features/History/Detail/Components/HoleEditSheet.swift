@@ -33,14 +33,14 @@ struct HoleEditSheet: View {
                     .pickerStyle(.segmented)
                 }
 
-                Section("타수") {
-                    Stepper("\(model.score)타",
+                Section(String(localized: "edit_section_strokes")) {
+                    Stepper(String(format: String(localized: "edit_strokes_value"), model.score),
                             onIncrement: { model.incrementScore() },
                             onDecrement: model.canDecrementScore ? { model.decrementScore() } : nil)
                 }
 
-                Section("퍼팅") {
-                    Stepper("\(model.putts)퍼트",
+                Section(String(localized: "edit_section_putts")) {
+                    Stepper(String(format: String(localized: "edit_putts_value"), model.putts),
                             onIncrement: { model.incrementPutts() },
                             onDecrement: model.canDecrementPutts ? { model.decrementPutts() } : nil)
                 }
@@ -49,10 +49,10 @@ struct HoleEditSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("취소") { dismiss() }
+                    Button(String(localized: "common_cancel")) { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("저장") {
+                    Button(String(localized: "common_save")) {
                         onSave(model)
                         dismiss()
                     }

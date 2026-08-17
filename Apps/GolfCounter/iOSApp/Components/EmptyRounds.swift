@@ -4,9 +4,9 @@ import SwiftUI
 struct EmptyRounds: View {
     var body: some View {
         ContentUnavailableView {
-            Label("기록된 라운드가 없습니다", systemImage: "figure.golf")
+            Label(String(localized: "empty_rounds_title"), systemImage: "figure.golf")
         } description: {
-            Text("Apple Watch에서 라운드를 시작하세요")
+            Text(String(localized: "empty_rounds_message"))
         }
     }
 }

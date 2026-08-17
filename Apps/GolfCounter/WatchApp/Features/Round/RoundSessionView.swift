@@ -46,7 +46,7 @@ struct RoundSessionView: View {
                             titleVisibility: .visible)
         {
             Button(endDialogConfirmLabel, role: .destructive, action: endRound)
-            Button("취소", role: .cancel) {}
+            Button(String(localized: "common_cancel"), role: .cancel) {}
         }
     }
 
@@ -67,12 +67,14 @@ struct RoundSessionView: View {
     /// 트림 후 실제로 몇 홀이 기록되는지를 문구에 명시한다 (spec §2 결정 4).
     private var endDialogTitle: String {
         viewModel.recordedHoleCount > 0
-            ? "\(viewModel.recordedHoleCount)홀이 기록됩니다"
-            : "기록된 홀이 없습니다"
+            ? String(format: String(localized: "round_end_title_recorded"), viewModel.recordedHoleCount)
+            : String(localized: "round_end_title_empty")
     }
 
     private var endDialogConfirmLabel: String {
-        viewModel.recordedHoleCount > 0 ? "종료" : "저장 없이 종료"
+        viewModel.recordedHoleCount > 0
+            ? String(localized: "round_end_confirm")
+            : String(localized: "round_end_confirm_empty")
     }
 
     private func togglePause() {

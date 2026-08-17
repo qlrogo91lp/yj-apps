@@ -271,8 +271,8 @@ tennis_counter `ComplicationApp` 구조 재활용: App Group UserDefaults 상태
 
 ## 10. 로컬라이즈
 
-- **String Catalog(`.xcstrings`)** 기반 ko/en. tennis의 lproj 방식 대신 신규 표준 채택 (Xcode 15+).
-- 세 타깃(iOS/워치/컴플리케이션) 각각의 사용자 노출 문자열 전부 + `InfoPlist.xcstrings`(표시명 등).
+- **`.lproj/Localizable.strings`** 기반 ko/en, 상징 키(`home_start_button`). 초판은 String Catalog(`.xcstrings`)를 채택했으나 2026-08-17에 뒤집었다 — `.xcstrings`를 고른 근거였던 복수형 내장 지원이, 복수형을 문구로 회피하기로 하면서 무의미해졌고, 형제 프로젝트 tennis-counter와 같은 방식으로 관리하는 편이 낫다고 판단했다 (spec `2026-08-17-localization-design.md` §2·§5).
+- 세 타깃(iOS/워치/컴플리케이션) 각각의 사용자 노출 문자열 전부 + `InfoPlist.strings`(HealthKit 권한 문구 등).
 
 ## 11. 테스트 (tennis_counter 컨벤션)
 

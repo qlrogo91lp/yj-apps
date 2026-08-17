@@ -16,7 +16,7 @@ struct ScorecardView: View {
                     Text(row.isRecorded ? "Par\(row.par)" : "—")
                         .frame(width: 38, alignment: .leading)
                         .foregroundStyle(.secondary)
-                    Text("\(row.score)타(\(row.putts)p)")
+                    Text(String(format: String(localized: "scorecard_row"), row.score, row.putts))
                         .frame(maxWidth: .infinity, alignment: .leading)
                     Text(row.isRecorded ? ScoreFormat.relativeToPar(row.score - row.par) : "")
                         .frame(width: 26, alignment: .trailing)
@@ -27,7 +27,10 @@ struct ScorecardView: View {
             if showsTotal {
                 Divider()
 
-                Text("합계 \(snapshot.totalStrokes)타 · \(totalPutts)퍼트 · \(ScoreFormat.relativeToPar(snapshot.relativeToPar))")
+                Text(String(format: String(localized: "scorecard_total"),
+                            snapshot.totalStrokes,
+                            totalPutts,
+                            ScoreFormat.relativeToPar(snapshot.relativeToPar)))
                     .font(.system(size: 12, weight: .bold, design: .rounded))
                     .frame(maxWidth: .infinity, alignment: .leading)
             }

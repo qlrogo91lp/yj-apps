@@ -24,21 +24,21 @@ struct HistoryView: View {
                                 Button(role: .destructive) {
                                     pendingDeletion = round
                                 } label: {
-                                    Label("삭제", systemImage: "trash")
+                                    Label(String(localized: "common_delete"), systemImage: "trash")
                                 }
                             }
                         }
                     }
                 }
             }
-            .navigationTitle("기록")
-            .confirmationDialog("이 라운드를 삭제할까요?",
+            .navigationTitle(String(localized: "history_title"))
+            .confirmationDialog(String(localized: "history_delete_title"),
                                 isPresented: deletionDialogBinding,
                                 titleVisibility: .visible,
                                 presenting: pendingDeletion)
             { round in
-                Button("삭제", role: .destructive) { delete(round) }
-                Button("취소", role: .cancel) { pendingDeletion = nil }
+                Button(String(localized: "common_delete"), role: .destructive) { delete(round) }
+                Button(String(localized: "common_cancel"), role: .cancel) { pendingDeletion = nil }
             }
         }
     }

@@ -7,17 +7,17 @@ struct OverParTrendChart: View {
 
     var body: some View {
         Chart {
-            RuleMark(y: .value("이븐파", 0))
+            RuleMark(y: .value(String(localized: "chart_axis_even_par"), 0))
                 .foregroundStyle(.secondary.opacity(0.5))
                 .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 4]))
 
             ForEach(points) { point in
-                LineMark(x: .value("날짜", point.date),
-                         y: .value("오버파", point.relativeToPar))
+                LineMark(x: .value(String(localized: "chart_axis_date"), point.date),
+                         y: .value(String(localized: "chart_axis_over_par"), point.relativeToPar))
                     .foregroundStyle(Color.accentColor)
 
-                PointMark(x: .value("날짜", point.date),
-                          y: .value("오버파", point.relativeToPar))
+                PointMark(x: .value(String(localized: "chart_axis_date"), point.date),
+                          y: .value(String(localized: "chart_axis_over_par"), point.relativeToPar))
                     .foregroundStyle(Color.accentColor)
                     .symbol(point.isFullRound ? .circle : .diamond)
             }

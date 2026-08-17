@@ -1,0 +1,36 @@
+/* Home */
+"home_hole_count" = "홀 수";
+"home_start_button" = "%lld홀 시작";
+"home_pending_title" = "진행 중인 라운드가 있습니다";
+"home_pending_message" = "새로 시작하면 지워집니다.";
+"home_start_new" = "새로 시작";
+
+/* Common */
+"common_cancel" = "취소";
+
+/* Par Selection */
+"par_hole_number" = "%lld번 홀";
+
+/* Counting */
+"counting_skip_title" = "이 홀은 기록되지 않습니다";
+"counting_skip_confirm" = "건너뛰기";
+
+/* Round End */
+"round_end_title_recorded" = "%lld홀이 기록됩니다";
+"round_end_title_empty" = "기록된 홀이 없습니다";
+"round_end_confirm" = "종료";
+"round_end_confirm_empty" = "저장 없이 종료";
+
+/* Scorecard — 영문 스코어카드 관습: 타수에 단위를 붙이지 않는다 (spec §4) */
+"scorecard_row" = "%lld타(%lldp)";
+"scorecard_total" = "합계 %lld타 · %lld퍼트 · %@";
+
+/* Summary */
+"summary_holes_completed" = "%lld홀 완료";
+"summary_holes_empty" = "기록된 홀 없음";
+"summary_strokes_putts" = "%lld타 · %lld퍼트";
+"summary_discard_button" = "저장 안 함";
+"summary_discard_title" = "이 라운드를 저장하지 않고 버릴까요?";
+"summary_discard_confirm" = "버리기";
+"summary_transmitting" = "전송 중…";
+"summary_save_send" = "저장 & 전송";

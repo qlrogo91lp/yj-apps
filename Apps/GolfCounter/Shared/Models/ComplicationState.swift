@@ -22,8 +22,4 @@ struct ComplicationState: Equatable {
     var relativeToParText: String {
         ScoreFormat.relativeToPar(relativeToPar)
     }
-
-    var strokesText: String {
-        "\(totalStrokes)타"
-    }
 }
