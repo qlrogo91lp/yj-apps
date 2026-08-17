@@ -130,7 +130,7 @@ Expected: `** BUILD SUCCEEDED **`
 그다음 **빌드 산출물에 `.lproj`가 들어갔는지 직접 확인한다.** 빌드만 성공하는 것으로는 부족하다 — `.lproj`가 리소스로 복사되지 않아도 빌드는 성공하고, 런타임에 키가 그대로 화면에 뜬다.
 
 ```bash
-find ~/Library/Developer/Xcode/DerivedData -path "*ComplicationApp.appex/*.lproj*" -name "Localizable.strings" 2>/dev/null | head
+find ~/Library/Developer/Xcode/DerivedData -path "*ComplicationAppExtension.appex/*.lproj*" -name "Localizable.strings" 2>/dev/null | head
 ```
 
 Expected: `en.lproj/Localizable.strings`와 `ko.lproj/Localizable.strings` 두 경로가 나온다.
