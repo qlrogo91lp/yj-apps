@@ -27,11 +27,10 @@
 "scorecard_total" = "Total %lld · %lldp · %@";
 
 /* Summary */
-"summary_holes_completed" = "Holes: %lld";
 "summary_holes_empty" = "No holes recorded";
-"summary_strokes_putts" = "%lld · %lldp";
+"summary_holes_putts" = "%lld holes · %lld putts";
 "summary_discard_button" = "Discard";
 "summary_discard_title" = "Discard this round without saving?";
 "summary_discard_confirm" = "Discard";
 "summary_transmitting" = "Sending…";
-"summary_save_send" = "Save & Send";
+"summary_save" = "Save";

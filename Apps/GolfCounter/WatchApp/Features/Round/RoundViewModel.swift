@@ -108,7 +108,7 @@ final class RoundViewModel: ObservableObject {
     }
 
     var canUndo: Bool {
-        undoStack.canUndo
+        undoStack.canUndo(hole: progress.currentHoleIndex)
     }
 
     var totalStrokes: Int {
@@ -225,14 +225,14 @@ final class RoundViewModel: ObservableObject {
     // MARK: - 카운터
 
     func incrementStroke() {
-        undoStack.record(inputMode)
+        undoStack.record(inputMode, hole: progress.currentHoleIndex)
         progress.apply(inputMode)
         publishSnapshot()
     }
 
     /// 현재 홀의 마지막 입력을 되돌린다. 입력의 정확한 역연산이다.
     func undo() {
-        guard let mode = undoStack.pop() else { return }
+        guard let mode = undoStack.pop(hole: progress.currentHoleIndex) else { return }
         progress.revert(mode)
         publishSnapshot()
     }
@@ -294,6 +294,12 @@ final class RoundViewModel: ObservableObject {
     ///
     /// 아래 `isEditingPar` 분기는 UI 관점에서 죽은 경로다 — 재편집 경로의 백버튼은
     /// `cancelParEditing()`을 부른다. 정의된 동작을 갖도록 남겨둔 방어용 fallback이다.
+    ///
+    /// `removePhantomHoleAndRetreat()`는 `undoStack`을 건드리지 않지만, 이는 안전하다:
+    /// `isPristinePhantomHole`은 `currentScore == 0`을 요구하는데, 타수는 항상
+    /// `apply`/`revert`와 `undoStack.record`/`pop`이 짝을 이뤄 오르내리므로 score가 0이면
+    /// 그 홀의 되돌리기 기록도 이미 비어 있다 — 지울 게 없다. 또한 이 함수는 배열에서
+    /// `removeLast()`만 하므로 다른 홀의 인덱스는 밀리지 않아 `StrokeUndo`의 키도 그대로 유효하다.
     func cancelToPreviousHole() {
         guard progress.canGoToPreviousHole else { return }
 
@@ -308,10 +314,10 @@ final class RoundViewModel: ObservableObject {
     }
 
     /// 홀을 옮기면 입력 모드는 스윙으로 리셋되고(spec §3), 진행 중이던 파 편집은 취소된다.
-    /// 되돌리기 기록도 함께 비운다 — 되돌리기 스코프는 현재 홀이다 (spec §7).
+    /// 되돌리기 기록은 비우지 않는다 — 히스토리가 홀 인덱스별로 보관되므로 이 홀로 다시
+    /// 돌아오면 그대로 살아난다(spec 2026-08-17 개정).
     private func resetHoleLocalState() {
         inputMode = .swing
         isEditingPar = false
-        undoStack.clear()
     }
 }

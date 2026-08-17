@@ -75,7 +75,9 @@ struct RoundViewModelUndoTests {
 
     /// 홀을 넘긴 뒤 되돌리면 화면이 통째로 이전 홀로 돌아가 예측이 안 된다.
     /// "지금 보고 있는 홀의 마지막 입력을 되돌린다"가 유일하게 예측 가능한 의미다 (spec §7).
-    @Test func 다음홀로_이동하면_되돌릴게_없다() {
+    /// 여기서 canUndo가 false인 이유는 이동이 뭔가를 지워서가 아니라, 도착한 홀(홀 2)
+    /// 자체에 아직 기록된 타수가 없기 때문이다 — 아래 두 번째 테스트도 같은 원리다.
+    @Test func 다음홀로_이동하면_기록이_없는_새_홀이라_되돌릴게_없다() {
         let viewModel = makeViewModel()
         viewModel.selectPar(4)
         viewModel.incrementStroke()
@@ -85,7 +87,9 @@ struct RoundViewModelUndoTests {
         #expect(viewModel.canUndo == false)
     }
 
-    @Test func 이전홀로_이동하면_되돌릴게_없다() {
+    /// 홀 1에는 애초에 타수를 기록하지 않았으므로(파만 선택), 돌아와도 되돌릴 게 없다.
+    /// 이동 자체가 기록을 지운 게 아니라 도착한 홀에 기록이 없을 뿐이다.
+    @Test func 이전홀로_이동해도_그_홀에_기록이_없으면_되돌릴게_없다() {
         let viewModel = makeViewModel()
         viewModel.selectPar(4)
         viewModel.goToNextHole()
@@ -119,6 +123,67 @@ struct RoundViewModelUndoTests {
         viewModel.selectPar(5)
 
         #expect(viewModel.canUndo)
+    }
+
+    /// 이 파일의 핵심 회귀 테스트 — 2026-08-17 실기 검토에서 발견된 버그.
+    /// 홀 1에서 친 뒤 홀 2로 넘어갔다가 홀 1로 돌아오면, 홀 1의 되돌리기가 살아있어야 한다.
+    @Test func 홀을_옮겼다_돌아오면_그_홀의_되돌리기_기록이_남아있다() {
+        let viewModel = makeViewModel()
+        viewModel.selectPar(4)
+        viewModel.incrementStroke()
+        viewModel.incrementStroke()
+        viewModel.goToNextHole()
+        viewModel.selectPar(3)
+
+        viewModel.goToPreviousHole()
+
+        #expect(viewModel.canUndo)
+
+        viewModel.undo()
+
+        #expect(viewModel.currentScore == 1)
+    }
+
+    /// 퍼팅으로 친 것까지 정확히 기억한다 — 종류 정보가 홀을 넘나들며 유실되지 않는다.
+    @Test func 홀을_옮겼다_돌아와도_입력_종류를_정확히_기억한다() {
+        let viewModel = makeViewModel()
+        viewModel.selectPar(4)
+        viewModel.inputMode = .putt
+        viewModel.incrementStroke()
+        viewModel.inputMode = .swing
+        viewModel.goToNextHole()
+        viewModel.selectPar(3)
+        viewModel.incrementStroke()
+
+        viewModel.goToPreviousHole()
+        viewModel.undo()
+
+        #expect(viewModel.currentScore == 0)
+        #expect(viewModel.currentPutts == 0)
+    }
+
+    /// 두 홀을 오가며 각각 되돌리기를 확인해도 서로 섞이지 않는다.
+    @Test func 여러_홀_사이를_오가도_각_홀의_되돌리기가_독립적으로_유지된다() {
+        let viewModel = makeViewModel()
+        viewModel.selectPar(4)
+        viewModel.incrementStroke()
+        viewModel.goToNextHole()
+        viewModel.selectPar(3)
+        viewModel.incrementStroke()
+        viewModel.incrementStroke()
+
+        viewModel.goToPreviousHole()
+        #expect(viewModel.canUndo)
+        viewModel.goToNextHole()
+        #expect(viewModel.canUndo)
+
+        viewModel.undo()
+        #expect(viewModel.currentScore == 1)
+        #expect(viewModel.canUndo)
+
+        viewModel.undo()
+        #expect(viewModel.currentScore == 0)
+        #expect(viewModel.canUndo == false)
     }
 
     @Test func 되돌리면_스냅샷을_발행한다() {

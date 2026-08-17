@@ -28,7 +28,7 @@ struct ModeButton: View {
     /// 골프 전용 SF Symbol은 `figure.golf` 하나뿐이라 퍼팅에 대응하는 채·공 아이콘이
     /// 없다 (실기 확인, 2026-08-14). `flag.circle.fill`(그린의 깃발)로 대체한다.
     private var iconName: String {
-        mode == .swing ? "figure.golf" : "flag.circle.fill"
+        mode == .swing ? "figure.golf" : "flag.fill"
     }
 
     private func toggle() {

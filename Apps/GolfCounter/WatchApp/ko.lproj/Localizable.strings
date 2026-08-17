@@ -26,11 +26,10 @@
 "scorecard_total" = "합계 %lld타 · %lld퍼트 · %@";
 
 /* Summary */
-"summary_holes_completed" = "%lld홀 완료";
 "summary_holes_empty" = "기록된 홀 없음";
-"summary_strokes_putts" = "%lld타 · %lld퍼트";
-"summary_discard_button" = "저장 안 함";
+"summary_holes_putts" = "%lld홀 · %lld퍼트";
+"summary_discard_button" = "버리기";
 "summary_discard_title" = "이 라운드를 저장하지 않고 버릴까요?";
 "summary_discard_confirm" = "버리기";
 "summary_transmitting" = "전송 중…";
-"summary_save_send" = "저장 & 전송";
+"summary_save" = "저장";
