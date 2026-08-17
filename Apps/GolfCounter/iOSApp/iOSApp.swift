@@ -20,7 +20,7 @@ struct GolfCounterApp: App {
 
     var body: some Scene {
         WindowGroup {
-            HistoryView()
+            MainTabView()
         }
         .modelContainer(container)
     }

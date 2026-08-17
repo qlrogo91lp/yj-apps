@@ -72,4 +72,26 @@ struct ScoreAggregateTests {
     @Test func 기록홀수는_빈배열이면_0이다() {
         #expect(ScoreAggregate.recordedHoleCount(holeScores: [], holePars: []) == 0)
     }
+
+    @Test func 집계대상홀만_파타수퍼팅을_모은다() {
+        let holes = ScoreAggregate.countedHoles(holeScores: [4, 0, 5],
+                                                holePars: [4, 4, 5],
+                                                puttCounts: [2, 0, 3])
+
+        #expect(holes.count == 2)
+        #expect(holes[0].par == 4)
+        #expect(holes[0].score == 4)
+        #expect(holes[0].putts == 2)
+        #expect(holes[1].par == 5)
+        #expect(holes[1].score == 5)
+        #expect(holes[1].putts == 3)
+    }
+
+    @Test func 홀단위집계는_puttCounts가_짧아도_0으로_본다() {
+        let holes = ScoreAggregate.countedHoles(holeScores: [4, 5],
+                                                holePars: [4, 5],
+                                                puttCounts: [])
+
+        #expect(holes.map(\.putts) == [0, 0])
+    }
 }

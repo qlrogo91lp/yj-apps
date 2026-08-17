@@ -12,4 +12,14 @@ enum ScoreFormat {
         }
         return "\(value)"
     }
+
+    /// 평균처럼 소수가 섞인 오버파. 소수 한 자리로 반올림한 값이 0이면 `+0.0` 대신 E로 보여준다.
+    static func averageRelativeToPar(_ value: Double) -> String {
+        let rounded = (value * 10).rounded() / 10
+        if rounded == 0 {
+            return "E"
+        }
+        let text = String(format: "%.1f", abs(rounded))
+        return rounded > 0 ? "+\(text)" : "-\(text)"
+    }
 }
