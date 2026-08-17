@@ -1,0 +1,49 @@
+/* Tabs */
+"tab_stats" = "Stats";
+"tab_history" = "History";
+
+/* Common */
+"common_cancel" = "Cancel";
+"common_save" = "Save";
+"common_delete" = "Delete";
+
+/* Empty State */
+"empty_rounds_title" = "No rounds recorded";
+"empty_rounds_message" = "Start a round on your Apple Watch";
+
+/* History */
+"history_title" = "History";
+"history_delete_title" = "Delete this round?";
+
+/* Round Card — 영문은 골프 약식 표기 (spec §4) */
+"round_card_holes" = "%lldH";
+"round_card_strokes" = "%lld";
+
+/* Round Detail */
+"detail_title" = "Round Detail";
+"detail_section_course" = "Course";
+"detail_course_placeholder" = "Enter course name";
+"detail_section_scorecard" = "Scorecard";
+"detail_section_workout" = "Workout";
+"detail_total" = "Total";
+/* count==1 is reachable (e.g. abandoned round with a single recorded putt) — label form avoids "1 putts" (spec §5) */
+"detail_strokes_putts" = "Strokes: %lld · Putts: %lld";
+
+/* Hole Row — 영문 스코어카드 관습: 타수에 단위를 붙이지 않는다 (spec §4) */
+"hole_row_strokes_putts" = "%lld · %lldp";
+"hole_row_unrecorded" = "Not recorded";
+
+/* Hole Edit */
+"edit_section_strokes" = "Strokes";
+"edit_section_putts" = "Putts";
+"edit_strokes_value" = "%lld";
+"edit_putts_value" = "%lld";
+
+/* Workout Metrics */
+"workout_calories" = "Calories";
+"workout_heart_rate" = "Avg. Heart Rate";
+"workout_distance" = "Distance";
+"workout_steps" = "Steps";
+"workout_duration" = "Duration";
+"workout_duration_hm" = "%lldh %lldm";
+"workout_duration_m" = "%lldm";

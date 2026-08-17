@@ -6,10 +6,10 @@ struct MainTabView: View {
     var body: some View {
         TabView {
             StatsView()
-                .tabItem { Label("통계", systemImage: "chart.bar.fill") }
+                .tabItem { Label(String(localized: "tab_stats"), systemImage: "chart.bar.fill") }
 
             HistoryView()
-                .tabItem { Label("기록", systemImage: "clock.fill") }
+                .tabItem { Label(String(localized: "tab_history"), systemImage: "clock.fill") }
         }
     }
 }

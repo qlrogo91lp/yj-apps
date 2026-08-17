@@ -30,14 +30,14 @@ struct HoleRow: View {
             Spacer()
 
             if isRecorded {
-                Text("\(score)타 · \(putts)퍼트")
+                Text(String(format: String(localized: "hole_row_strokes_putts"), score, putts))
                     .font(.subheadline)
                 Text(ScoreFormat.relativeToPar(score - par))
                     .font(.subheadline.weight(.bold))
                     .foregroundStyle(ScorePalette.color(for: score - par))
                     .frame(width: 34, alignment: .trailing)
             } else {
-                Text("기록 없음")
+                Text(String(localized: "hole_row_unrecorded"))
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }

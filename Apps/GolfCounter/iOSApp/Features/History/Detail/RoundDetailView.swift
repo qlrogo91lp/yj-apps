@@ -16,7 +16,7 @@ struct RoundDetailView: View {
             scorecardSection
             workoutSection
         }
-        .navigationTitle("라운드 상세")
+        .navigationTitle(String(localized: "detail_title"))
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { courseNameDraft = round.courseName ?? "" }
         .onDisappear(perform: commitCourseName)
@@ -38,7 +38,8 @@ struct RoundDetailView: View {
                 Text(ScoreFormat.relativeToPar(round.relativeToPar))
                     .font(.system(size: 40, weight: .bold))
                     .foregroundStyle(ScorePalette.color(for: round.relativeToPar))
-                Text("\(round.totalStrokes)타 · \(round.totalPutts)퍼트")
+                Text(String(format: String(localized: "detail_strokes_putts"),
+                            round.totalStrokes, round.totalPutts))
                     .font(.headline)
                 Text(round.startedAt.formatted(date: .long, time: .shortened))
                     .font(.caption)
@@ -51,14 +52,14 @@ struct RoundDetailView: View {
 
     /// MapKit 자동 감지가 붙기 전(plan ⑧)까지 골프장명을 채우는 유일한 경로다 (spec §1).
     private var courseSection: some View {
-        Section("골프장") {
-            TextField("골프장명 입력", text: $courseNameDraft)
+        Section(String(localized: "detail_section_course")) {
+            TextField(String(localized: "detail_course_placeholder"), text: $courseNameDraft)
                 .onSubmit(commitCourseName)
         }
     }
 
     private var scorecardSection: some View {
-        Section("스코어카드") {
+        Section(String(localized: "detail_section_scorecard")) {
             ForEach(Array(round.holeScores.indices), id: \.self) { index in
                 Button {
                     editingHole = EditingHole(id: index)
@@ -72,9 +73,10 @@ struct RoundDetailView: View {
             }
 
             HStack {
-                Text("합계").font(.subheadline.weight(.semibold))
+                Text(String(localized: "detail_total")).font(.subheadline.weight(.semibold))
                 Spacer()
-                Text("\(round.totalStrokes)타 · \(round.totalPutts)퍼트")
+                Text(String(format: String(localized: "detail_strokes_putts"),
+                            round.totalStrokes, round.totalPutts))
                     .font(.subheadline)
                 Text(ScoreFormat.relativeToPar(round.relativeToPar))
                     .font(.subheadline.weight(.bold))
@@ -85,7 +87,7 @@ struct RoundDetailView: View {
     }
 
     private var workoutSection: some View {
-        Section("워크아웃") {
+        Section(String(localized: "detail_section_workout")) {
             WorkoutMetricsGrid(round: round)
                 .listRowInsets(EdgeInsets())
                 .listRowBackground(Color.clear)

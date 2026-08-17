@@ -6,11 +6,11 @@ struct WorkoutMetricsGrid: View {
 
     var body: some View {
         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-            StatCard(title: "칼로리", value: "\(Int(round.calories.rounded())) kcal")
-            StatCard(title: "평균 심박", value: heartRateText)
-            StatCard(title: "거리", value: String(format: "%.2f km", round.distanceMeters / 1000))
-            StatCard(title: "걸음", value: "\(round.steps)")
-            StatCard(title: "소요 시간", value: durationText)
+            StatCard(title: String(localized: "workout_calories"), value: "\(Int(round.calories.rounded())) kcal")
+            StatCard(title: String(localized: "workout_heart_rate"), value: heartRateText)
+            StatCard(title: String(localized: "workout_distance"), value: String(format: "%.2f km", round.distanceMeters / 1000))
+            StatCard(title: String(localized: "workout_steps"), value: "\(round.steps)")
+            StatCard(title: String(localized: "workout_duration"), value: durationText)
         }
     }
 
@@ -24,6 +24,8 @@ struct WorkoutMetricsGrid: View {
         guard seconds > 0 else { return "–" }
         let hours = seconds / 3600
         let minutes = (seconds % 3600) / 60
-        return hours > 0 ? "\(hours)시간 \(minutes)분" : "\(minutes)분"
+        return hours > 0
+            ? String(format: String(localized: "workout_duration_hm"), hours, minutes)
+            : String(format: String(localized: "workout_duration_m"), minutes)
     }
 }

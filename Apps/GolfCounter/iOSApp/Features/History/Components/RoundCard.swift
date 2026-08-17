@@ -17,7 +17,7 @@ struct RoundCard: View {
                         .font(.headline)
                 }
 
-                Text("\(round.recordedHoleCount)홀")
+                Text(String(format: String(localized: "round_card_holes"), round.recordedHoleCount))
                     .font(.caption)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
@@ -31,7 +31,7 @@ struct RoundCard: View {
                 Text(ScoreFormat.relativeToPar(round.relativeToPar))
                     .font(.system(size: 26, weight: .bold))
                     .foregroundStyle(ScorePalette.color(for: round.relativeToPar))
-                Text("\(round.totalStrokes)타")
+                Text(String(format: String(localized: "round_card_strokes"), round.totalStrokes))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
