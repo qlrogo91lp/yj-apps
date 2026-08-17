@@ -57,7 +57,7 @@ struct SummaryView: View {
             primaryButton(label: String(localized: "summary_transmitting"))
         } else {
             HStack(spacing: 8) {
-                Button(action: { isConfirmingDiscard = true }) {
+                Button(action: requestDiscard) {
                     Text(String(localized: "summary_discard_button"))
                         .font(.system(size: 15, weight: .semibold))
                         .frame(maxWidth: .infinity, minHeight: 38)
@@ -83,6 +83,10 @@ struct SummaryView: View {
         }
         .buttonStyle(.borderedProminent)
         .tint(.green)
+    }
+
+    private func requestDiscard() {
+        isConfirmingDiscard = true
     }
 }
 
