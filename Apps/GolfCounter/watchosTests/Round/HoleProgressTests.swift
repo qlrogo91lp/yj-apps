@@ -226,7 +226,7 @@ struct HoleProgressTests {
     }
 
     @Test func 미타구홀정리_이전버튼으로_두고온홀도_지운다() {
-        // 홀 1을 치고 홀 2에서 파만 고른 뒤 이전 버튼으로 홀 1에 돌아온 상태 (spec §4.2).
+        // 홀 1을 치고 홀 2에서 파만 고른 뒤 이전 버튼으로 홀 1에 돌아온 상태 (invariant spec §4.2).
         // 홀 2는 현재 홀이 아니므로, 대상을 현재 홀로 좁히면 놓친다.
         var progress = HoleProgress(holeCount: 18)
         progress.setPar(4)

@@ -47,7 +47,7 @@ struct ScoreAggregateTests {
 
     @Test func 기록홀수는_파만고른홀을_세지않는다() {
         // 파는 골랐지만 한 타도 치지 않은 홀. 오버파에서 빠지므로 홀 수에서도 빠져야
-        // "18홀인데 17홀치 스코어"라는 어긋남이 안 생긴다 (spec §2.2).
+        // "18홀인데 17홀치 스코어"라는 어긋남이 안 생긴다 (invariant spec §2.2).
         let value = ScoreAggregate.recordedHoleCount(holeScores: [4, 0, 5],
                                                      holePars: [4, 4, 4])
 

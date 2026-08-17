@@ -59,7 +59,7 @@ private struct ScorecardRow {
     let score: Int
     let putts: Int
 
-    /// 기록된 홀 = 파와 타수가 모두 있는 홀. `HoleRow`(iOS)와 같은 규칙이다 (spec §6).
+    /// 기록된 홀 = 파와 타수가 모두 있는 홀. `HoleRow`(iOS)와 같은 규칙이다 (invariant spec §6).
     var isRecorded: Bool {
         par > 0 && score > 0
     }

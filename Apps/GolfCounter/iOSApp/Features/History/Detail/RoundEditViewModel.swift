@@ -1,6 +1,6 @@
 import Foundation
 
-/// 홀 편집 시트의 상태. 워치 카운터와 같은 불변식(타수 ≥ 퍼팅 ≥ 0, 상한 없음)을 강제한다 (spec §4).
+/// 홀 편집 시트의 상태. 워치 카운터와 같은 불변식(타수 ≥ 퍼팅 ≥ 0, 상한 없음)을 강제한다 (history spec §4).
 /// UI 프레임워크를 import하지 않아 시트 없이 테스트할 수 있다.
 struct RoundEditViewModel: Equatable {
     /// 파 선택지. 워치 파 선택 화면과 같은 3개다.
@@ -25,12 +25,19 @@ struct RoundEditViewModel: Equatable {
         putts > 0
     }
 
+    /// 저장 버튼 활성화 조건. `par == 0 && score > 0`("해석 불가" 상태, invariant spec §3)이
+    /// 저장될 수 없다는 불변식의 나머지 절반을 여기로 옮겼다 — `HoleEditSheet`는
+    /// 이 프로퍼티를 그리기만 하고, 위반 여부 자체는 여기서 테스트한다.
+    var isSaveable: Bool {
+        Self.parOptions.contains(par)
+    }
+
     mutating func setPar(_ newPar: Int) {
         guard Self.parOptions.contains(newPar) else { return }
         par = newPar
     }
 
-    /// 상한을 두지 않는다 — par×2 제한은 폐기됐다 (spec §4).
+    /// 상한을 두지 않는다 — par×2 제한은 폐기됐다 (history spec §4).
     mutating func incrementScore() {
         score += 1
     }
@@ -52,7 +59,7 @@ struct RoundEditViewModel: Equatable {
     /// 편집 결과를 라운드의 병렬 배열에 되쓴다.
     /// `holeScores`에 없는 홀은 존재하지 않는 홀이므로 무시하고, 나머지 두 배열이 짧으면 0으로 채운다.
     ///
-    /// 타수가 0이면 파도 0으로 쓴다 — 저장 경계에서의 정규화다 (spec §5.4). 파만 있고
+    /// 타수가 0이면 파도 0으로 쓴다 — 저장 경계에서의 정규화다 (invariant spec §5.4). 파만 있고
     /// 타수가 없는 홀은 오버파에서도 기록 홀 수에서도 빠지므로 화면마다 어긋나 보인다.
     /// 이 규칙 덕분에 타수를 0까지 내리는 것이 "이 홀은 사실 안 쳤다"를 되돌리는
     /// 구제 경로가 된다 — 라운드가 끝난 뒤 워치 오기록을 고칠 수 있는 유일한 지점이다.

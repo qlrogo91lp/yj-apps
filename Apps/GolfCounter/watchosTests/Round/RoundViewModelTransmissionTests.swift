@@ -278,14 +278,40 @@ struct RoundViewModelTransmissionTests {
         playHole(viewModel, par: 4, strokes: 5)
         viewModel.goToNextHole()
         viewModel.selectPar(3) // 홀 2에 파만 남기고
-        viewModel.goToPreviousHole() // 홀 1로 돌아와 종료 (spec §4.2)
+        viewModel.goToPreviousHole() // 홀 1로 돌아와 종료 (invariant spec §4.2)
 
         viewModel.finishRound()
         viewModel.applyMetrics(nil)
         viewModel.saveAndTransmit()
 
         #expect(transmitter.sent.first?.holePars == [4])
+        #expect(transmitter.sent.first?.holeScores == [5])
         #expect(viewModel.recordedHoleCount == 1)
+    }
+
+    /// 정규화된 홀이 배열 **중간**에 남는 경우 — 위 두 테스트는 전부 말단 케이스라
+    /// `trimmed()`가 홀 자체를 지워 버린다. 중간 홀은 파만 0으로 돌아가고 배열엔 남아
+    /// 전송된다. `finishRound()`가 실제로 발행하는 스냅샷도 여기서 처음 검증한다 —
+    /// 이전까지는 스파이를 만들고 버려서 발행 내용이 고정돼 있지 않았다.
+    @Test func 종료하면_중간의_파만고른홀은_파가0인채_배열에남아전송된다() {
+        let publisher = RoundSnapshotPublisherSpy()
+        let transmitter = RoundTransmitterSpy()
+        let viewModel = makeViewModel(publisher: publisher, transmitter: transmitter)
+        playHole(viewModel, par: 4, strokes: 5)
+        viewModel.goToNextHole()
+        viewModel.selectPar(3) // 홀 2에 파만 남기고
+        viewModel.goToNextHole() // 홀 3으로 — 홀 2는 배열 중간에 par-only로 남는다
+        playHole(viewModel, par: 5, strokes: 4)
+
+        viewModel.finishRound()
+        viewModel.applyMetrics(nil)
+        viewModel.saveAndTransmit()
+
+        #expect(transmitter.sent.first?.holePars == [4, 0, 5])
+        #expect(transmitter.sent.first?.holeScores == [5, 0, 4])
+        #expect(viewModel.recordedHoleCount == 2)
+        #expect(publisher.published.last?.holePars == [4, 0, 5])
+        #expect(publisher.published.last?.holeScores == [5, 0, 4])
     }
 
     @Test func 전부_파만고른_라운드는_빈라운드로_처리된다() {
@@ -297,7 +323,7 @@ struct RoundViewModelTransmissionTests {
         viewModel.applyMetrics(nil)
         viewModel.saveAndTransmit()
 
-        // 기록 홀이 0이므로 iOS에 빈 라운드를 만들지 않는다 (spec §5.3).
+        // 기록 홀이 0이므로 iOS에 빈 라운드를 만들지 않는다 (invariant spec §5.3).
         #expect(transmitter.sent.isEmpty)
         #expect(viewModel.didComplete)
     }

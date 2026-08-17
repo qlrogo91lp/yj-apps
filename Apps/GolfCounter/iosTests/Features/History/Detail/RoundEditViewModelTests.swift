@@ -157,4 +157,18 @@ struct RoundEditViewModelTests {
         #expect(round.holeScores == [4, 0, 3])
         #expect(round.recordedHoleCount == 2)
     }
+
+    // MARK: - isSaveable (저장 버튼 활성화 불변식)
+
+    @Test func 저장가능_파가선택지에없으면_불가능하다() {
+        let model = RoundEditViewModel(par: 0, score: 0, putts: 0)
+
+        #expect(model.isSaveable == false)
+    }
+
+    @Test func 저장가능_파가선택지중하나면_가능하다() {
+        let model = RoundEditViewModel(par: 4, score: 0, putts: 0)
+
+        #expect(model.isSaveable == true)
+    }
 }

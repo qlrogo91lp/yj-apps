@@ -77,7 +77,7 @@ struct GolfRoundTests {
 
         // 옛 공식이라면 0 − 4 = −4가 새어 들어간다.
         #expect(round.relativeToPar == 0)
-        // 기록 홀 수도 오버파와 같은 필터를 쓴다 — 이 홀은 어느 쪽에도 안 들어간다 (spec §7.1).
+        // 기록 홀 수도 오버파와 같은 필터를 쓴다 — 이 홀은 어느 쪽에도 안 들어간다 (invariant spec §7.1).
         #expect(round.recordedHoleCount == 2)
     }
 }
