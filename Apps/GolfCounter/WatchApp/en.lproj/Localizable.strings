@@ -16,7 +16,7 @@
 "counting_skip_confirm" = "Skip";
 
 /* Round End */
-"round_end_title_recorded" = "%lld holes will be saved";
+"round_end_title_recorded" = "Holes to save: %lld";
 "round_end_title_empty" = "No holes recorded";
 "round_end_confirm" = "End";
 "round_end_confirm_empty" = "End Without Saving";
