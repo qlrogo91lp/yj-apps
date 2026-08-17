@@ -1,0 +1,6 @@
+/* Complication */
+"complication_start_round" = "라운드 시작";
+"complication_description" = "라운드 진행 상황";
+
+/* 컴플리케이션은 가장 좁은 공간이라 영어는 숫자만 쓴다 (spec §4) */
+"complication_strokes" = "%lld타";

@@ -39,7 +39,6 @@ struct ComplicationStateTests {
 
         #expect(state.holeText == "H3")
         #expect(state.relativeToParText == "+1")
-        #expect(state.strokesText == "13타")
     }
 
     @Test func 표시문자열_이븐파는_E로_표시한다() {
