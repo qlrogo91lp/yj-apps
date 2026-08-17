@@ -1,5 +1,6 @@
 /* Home */
 "home_hole_count" = "Holes";
+/* holeCount는 HomeViewModel에서 9 또는 18로만 고정되어 복수형이 항상 안전하다 — 다른 값이 추가되면 라벨 형식으로 바꿀 것 (spec §5) */
 "home_start_button" = "Start %lld Holes";
 "home_pending_title" = "Round in progress";
 "home_pending_message" = "Starting new will discard it.";
