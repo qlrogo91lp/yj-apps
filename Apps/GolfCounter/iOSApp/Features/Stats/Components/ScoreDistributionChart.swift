@@ -7,11 +7,12 @@ struct ScoreDistributionChart: View {
 
     var body: some View {
         Chart(buckets) { bucket in
-            BarMark(x: .value("홀 수", bucket.count),
-                    y: .value("구간", Self.title(for: bucket.bucket)))
+            BarMark(x: .value(String(localized: "chart_axis_holes"), bucket.count),
+                    y: .value(String(localized: "chart_axis_bucket"), Self.title(for: bucket.bucket)))
                 .foregroundStyle(Color.accentColor)
                 .annotation(position: .trailing) {
-                    Text("\(bucket.count)홀 · \(Self.percent(bucket.ratio))")
+                    Text(String(format: String(localized: "chart_bucket_value"),
+                                bucket.count, Self.percent(bucket.ratio)))
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
@@ -24,10 +25,10 @@ struct ScoreDistributionChart: View {
 
     private static func title(for bucket: StatsSummary.Bucket) -> String {
         switch bucket {
-        case .birdieOrBetter: "버디 이상"
-        case .par: "파"
-        case .bogey: "보기"
-        case .doubleOrWorse: "더블보기+"
+        case .birdieOrBetter: String(localized: "bucket_birdie_or_better")
+        case .par: String(localized: "bucket_par")
+        case .bogey: String(localized: "bucket_bogey")
+        case .doubleOrWorse: String(localized: "bucket_double_or_worse")
         }
     }
 

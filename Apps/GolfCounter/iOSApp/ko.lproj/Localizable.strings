@@ -46,3 +46,33 @@
 "workout_duration" = "소요 시간";
 "workout_duration_hm" = "%lld시간 %lld분";
 "workout_duration_m" = "%lld분";
+
+/* Stats */
+"stats_title" = "통계";
+"stats_section_trend" = "오버파 추이";
+"stats_section_distribution" = "스코어 분포";
+"stats_section_par" = "파별 성적";
+"stats_par_caption" = "홀당 평균 오버파";
+"stats_card_avg_strokes" = "평균 타수";
+"stats_card_best" = "베스트 스코어";
+"stats_card_avg_over_par" = "평균 오버파";
+"stats_card_putts_per_hole" = "홀당 평균 퍼트";
+"stats_best_holes" = "%lld홀";
+
+/* 영어는 복수형을 피해 라벨 형식으로 쓴다 — "1 rounds"를 막는다 (spec §5) */
+"stats_round_total" = "총 %lld라운드";
+"stats_full_round_caption" = "18홀 라운드 %lld개 기준";
+
+/* Distribution Chart */
+"chart_axis_holes" = "홀 수";
+"chart_axis_bucket" = "구간";
+"chart_bucket_value" = "%lld홀 · %@";
+"bucket_birdie_or_better" = "버디 이상";
+"bucket_par" = "파";
+"bucket_bogey" = "보기";
+"bucket_double_or_worse" = "더블보기+";
+
+/* Trend Chart */
+"chart_axis_even_par" = "이븐파";
+"chart_axis_date" = "날짜";
+"chart_axis_over_par" = "오버파";

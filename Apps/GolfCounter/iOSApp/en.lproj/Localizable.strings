@@ -47,3 +47,33 @@
 "workout_duration" = "Duration";
 "workout_duration_hm" = "%lldh %lldm";
 "workout_duration_m" = "%lldm";
+
+/* Stats */
+"stats_title" = "Stats";
+"stats_section_trend" = "Over-Par Trend";
+"stats_section_distribution" = "Score Distribution";
+"stats_section_par" = "By Par";
+"stats_par_caption" = "Avg. over par per hole";
+"stats_card_avg_strokes" = "Avg. Strokes";
+"stats_card_best" = "Best Score";
+"stats_card_avg_over_par" = "Avg. Over Par";
+"stats_card_putts_per_hole" = "Putts per Hole";
+"stats_best_holes" = "%lldH";
+
+/* 영어는 복수형을 피해 라벨 형식으로 쓴다 — "1 rounds"를 막는다 (spec §5) */
+"stats_round_total" = "Rounds: %lld";
+"stats_full_round_caption" = "Full rounds: %lld";
+
+/* Distribution Chart */
+"chart_axis_holes" = "Holes";
+"chart_axis_bucket" = "Bucket";
+"chart_bucket_value" = "%lld · %@";
+"bucket_birdie_or_better" = "Birdie or better";
+"bucket_par" = "Par";
+"bucket_bogey" = "Bogey";
+"bucket_double_or_worse" = "Double+";
+
+/* Trend Chart */
+"chart_axis_even_par" = "Even";
+"chart_axis_date" = "Date";
+"chart_axis_over_par" = "Over par";
