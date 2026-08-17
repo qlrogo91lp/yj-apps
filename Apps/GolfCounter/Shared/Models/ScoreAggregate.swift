@@ -40,13 +40,20 @@ enum ScoreAggregate {
     /// `relativeToPar`와 같은 규칙으로 짧은 쪽까지만 본다.
     static func countedHoles(holeScores: [Int],
                              holePars: [Int],
-                             puttCounts: [Int]) -> [(par: Int, score: Int, putts: Int)]
+                             puttCounts: [Int]) -> [CountedHole]
     {
         zip(holeScores, holePars).enumerated().compactMap { index, pair in
             let (score, par) = pair
             guard par > 0, score > 0 else { return nil }
             let putts = index < puttCounts.count ? puttCounts[index] : 0
-            return (par: par, score: score, putts: putts)
+            return CountedHole(par: par, score: score, putts: putts)
         }
+    }
+
+    /// `countedHoles`가 돌려주는 집계 대상 홀 한 개.
+    struct CountedHole: Equatable {
+        let par: Int
+        let score: Int
+        let putts: Int
     }
 }

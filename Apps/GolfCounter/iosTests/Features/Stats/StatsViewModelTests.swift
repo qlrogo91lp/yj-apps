@@ -195,9 +195,7 @@ struct StatsViewModelTests {
         let summary = StatsViewModel().summary(from: [round])
 
         #expect(summary.parPerformance.map(\.par) == [3, 4, 5])
-        #expect(summary.parPerformance[0].averageOverPar == 1)
-        #expect(summary.parPerformance[1].averageOverPar == 2)
-        #expect(summary.parPerformance[2].averageOverPar == nil)
+        #expect(summary.parPerformance.map(\.averageOverPar) == [1, 2, nil])
     }
 
     @Test func 집계대상홀이없으면_홀단위지표가_비어있다() {

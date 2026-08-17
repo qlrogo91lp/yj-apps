@@ -6,22 +6,19 @@ struct StatsView: View {
     @Query(sort: \GolfRound.startedAt, order: .reverse) private var rounds: [GolfRound]
     private let viewModel = StatsViewModel()
 
-    private var summary: StatsSummary {
-        viewModel.summary(from: rounds)
-    }
-
     var body: some View {
         NavigationStack {
             Group {
                 if rounds.isEmpty {
                     EmptyRounds()
                 } else {
+                    let summary = viewModel.summary(from: rounds)
                     ScrollView {
                         VStack(alignment: .leading, spacing: 28) {
-                            trendSection
-                            cardsSection
-                            distributionSection
-                            parSection
+                            trendSection(summary)
+                            cardsSection(summary)
+                            distributionSection(summary)
+                            parSection(summary)
                         }
                         .padding()
                     }
@@ -31,37 +28,37 @@ struct StatsView: View {
         }
     }
 
-    private var trendSection: some View {
+    private func trendSection(_ summary: StatsSummary) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             sectionHeader("오버파 추이", caption: "총 \(summary.roundCount)라운드")
             OverParTrendChart(points: summary.trend)
         }
     }
 
-    private var cardsSection: some View {
+    private func cardsSection(_ summary: StatsSummary) -> some View {
         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
             StatCard(title: "평균 타수",
                      value: summary.averageStrokes.map { String(format: "%.1f", $0) } ?? "–",
-                     caption: fullRoundCaption)
+                     caption: fullRoundCaption(summary))
             StatCard(title: "베스트 스코어",
                      value: summary.best.map { ScoreFormat.relativeToPar($0.relativeToPar) } ?? "–",
                      caption: summary.best.map { "\($0.holeCount)홀" })
             StatCard(title: "평균 오버파",
                      value: summary.averageOverPar.map(ScoreFormat.averageRelativeToPar) ?? "–",
-                     caption: fullRoundCaption)
+                     caption: fullRoundCaption(summary))
             StatCard(title: "홀당 평균 퍼트",
                      value: summary.puttsPerHole.map { String(format: "%.1f", $0) } ?? "–")
         }
     }
 
-    private var distributionSection: some View {
+    private func distributionSection(_ summary: StatsSummary) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             sectionHeader("스코어 분포", caption: nil)
             ScoreDistributionChart(buckets: summary.distribution)
         }
     }
 
-    private var parSection: some View {
+    private func parSection(_ summary: StatsSummary) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             sectionHeader("파별 성적", caption: "홀당 평균 오버파")
             ParPerformanceRow(items: summary.parPerformance)
@@ -69,7 +66,7 @@ struct StatsView: View {
     }
 
     /// 평균 타수·평균 오버파의 모집단을 밝힌다 — 9홀 라운드가 빠져 있다는 사실이 드러나야 한다.
-    private var fullRoundCaption: String {
+    private func fullRoundCaption(_ summary: StatsSummary) -> String {
         "18홀 라운드 \(summary.fullRoundCount)개 기준"
     }
 

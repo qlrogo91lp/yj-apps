@@ -55,7 +55,7 @@ struct StatsViewModel {
                                  holeCount: winner.recordedHoleCount)
     }
 
-    private typealias Hole = (par: Int, score: Int, putts: Int)
+    private typealias Hole = ScoreAggregate.CountedHole
 
     /// 라운드마다 `ScoreAggregate.countedHoles`를 불러 모은다 — 필터(`par > 0 && score > 0`)는
     /// 여기 없다. `relativeToPar`·`recordedHoleCount`와 같은 곳에서 나온 값이라야
