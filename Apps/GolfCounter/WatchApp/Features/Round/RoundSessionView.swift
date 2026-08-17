@@ -91,7 +91,7 @@ struct RoundSessionView: View {
         case .parSelection:
             ParSelectionView(viewModel: viewModel)
         case .counting, .summary:
-            ScoringView(viewModel: viewModel)
+            ScoringView(viewModel: viewModel, onRequestEnd: { isConfirmingEnd = true })
         }
     }
 

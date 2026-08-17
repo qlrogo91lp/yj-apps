@@ -4,6 +4,7 @@ import WatchKit
 struct CountingView: View {
     @ObservedObject var viewModel: RoundViewModel
     let sizing: CountingSizing
+    let onRequestEnd: () -> Void
 
     /// Always-On(손목 내림) 상태에서는 애니메이션을 돌리지 않는다.
     @Environment(\.isLuminanceReduced) private var isLuminanceReduced
@@ -49,10 +50,7 @@ struct CountingView: View {
     }
 
     /// 타수가 있으면 그냥 넘어가고, 한 타도 없으면 확인부터 받는다.
-    /// 마지막 홀에서는 애초에 넘어갈 곳이 없으므로 다이얼로그도 띄우지 않는다 —
-    /// 띄우고 "건너뛰기"를 눌러도 skipCurrentHole()이 조용히 무시하면 다이얼로그가 거짓말을 하게 된다.
     private func goToNextHoleOrConfirm() {
-        guard viewModel.canGoToNextHole else { return }
         if viewModel.currentScore == 0 {
             isConfirmingSkip = true
         } else {
@@ -79,9 +77,15 @@ struct CountingView: View {
 
                 Spacer()
 
-                HoleArrowButton(systemName: "chevron.right",
-                                size: sizing.arrowSize,
-                                action: goToNextHoleOrConfirm)
+                if viewModel.canGoToNextHole {
+                    HoleArrowButton(systemName: "chevron.right",
+                                    size: sizing.arrowSize,
+                                    action: goToNextHoleOrConfirm)
+                } else {
+                    HoleArrowButton(systemName: "flag.checkered",
+                                    size: sizing.arrowSize,
+                                    action: onRequestEnd)
+                }
             }
 
             if viewModel.canUndo {
@@ -105,5 +109,5 @@ struct CountingView: View {
     let viewModel = RoundViewModel()
     viewModel.selectPar(4)
     viewModel.incrementStroke()
-    return CountingView(viewModel: viewModel, sizing: .regular)
+    return CountingView(viewModel: viewModel, sizing: .regular, onRequestEnd: {})
 }
