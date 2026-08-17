@@ -21,10 +21,6 @@ final class HomeViewModel: ObservableObject {
         self.publisher = publisher
     }
 
-    var startButtonLabel: String {
-        "\(holeCount)홀 시작"
-    }
-
     /// 진행 중 스냅샷이 남아 있는지. 새 라운드 시작 전 확인 다이얼로그를 띄울지 판단한다 (spec §3.6).
     var hasPendingRound: Bool {
         publisher.loadCurrent() != nil

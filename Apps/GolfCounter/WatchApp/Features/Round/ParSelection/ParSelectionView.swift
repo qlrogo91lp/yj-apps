@@ -61,7 +61,7 @@ struct ParSelectionView: View {
                 .frame(width: backButtonHitWidth, height: backButtonSize)
                 .contentShape(Rectangle())
 
-            Text("\(viewModel.currentHoleNumber)번 홀")
+            Text(String(format: String(localized: "par_hole_number"), viewModel.currentHoleNumber))
                 .font(.system(size: 15, weight: .semibold))
                 .foregroundStyle(.secondary)
 

@@ -26,7 +26,9 @@ struct SummaryView: View {
             Text(ScoreFormat.relativeToPar(viewModel.trimmedRelativeToPar))
                 .font(.system(size: 42, weight: .bold, design: .rounded))
 
-            Text("\(viewModel.trimmedTotalStrokes)타 · \(viewModel.trimmedTotalPutts)퍼트")
+            Text(String(format: String(localized: "summary_strokes_putts"),
+                        viewModel.trimmedTotalStrokes,
+                        viewModel.trimmedTotalPutts))
                 .font(.system(size: 15))
                 .foregroundStyle(.secondary)
 
@@ -50,7 +52,7 @@ struct SummaryView: View {
                 // 전송 자체는 원자적이라 절반만 도착한 라운드가 남을 위험은 없다 —
                 // isTransmitting = false로 대기 중이던 전송도 취소된다. 여기서 막는 이유는
                 // 순전히 화면 혼선: "전송 중…"과 "저장 안 함"이 동시에 떠 있는 걸 피한다.
-                Button("저장 안 함") { isConfirmingDiscard = true }
+                Button(String(localized: "summary_discard_button")) { isConfirmingDiscard = true }
                     .buttonStyle(.plain)
                     .font(.system(size: 13))
                     .foregroundStyle(.secondary)
@@ -58,25 +60,27 @@ struct SummaryView: View {
             }
         }
         .padding(.horizontal, 8)
-        .confirmationDialog("이 라운드를 저장하지 않고 버릴까요?",
+        .confirmationDialog(String(localized: "summary_discard_title"),
                             isPresented: $isConfirmingDiscard,
                             titleVisibility: .visible)
         {
-            Button("버리기", role: .destructive, action: viewModel.discardRound)
-            Button("취소", role: .cancel) {}
+            Button(String(localized: "summary_discard_confirm"), role: .destructive, action: viewModel.discardRound)
+            Button(String(localized: "common_cancel"), role: .cancel) {}
         }
     }
 
     private var headline: String {
         viewModel.recordedHoleCount > 0
-            ? "\(viewModel.recordedHoleCount)홀 완료"
-            : "기록된 홀 없음"
+            ? String(format: String(localized: "summary_holes_completed"), viewModel.recordedHoleCount)
+            : String(localized: "summary_holes_empty")
     }
 
     /// 메트릭 대기 중에도 버튼은 살아 있다 — 문구만 바뀐다 (spec §2 결정 9).
     private var buttonLabel: String {
-        if viewModel.isTransmitting { return "전송 중…" }
-        return viewModel.recordedHoleCount > 0 ? "저장 & 전송" : "저장 없이 종료"
+        if viewModel.isTransmitting { return String(localized: "summary_transmitting") }
+        return viewModel.recordedHoleCount > 0
+            ? String(localized: "summary_save_send")
+            : String(localized: "round_end_confirm_empty")
     }
 }
 

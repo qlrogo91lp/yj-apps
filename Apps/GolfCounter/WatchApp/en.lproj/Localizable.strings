@@ -1,0 +1,36 @@
+/* Home */
+"home_hole_count" = "Holes";
+"home_start_button" = "Start %lld Holes";
+"home_pending_title" = "Round in progress";
+"home_pending_message" = "Starting new will discard it.";
+"home_start_new" = "Start New";
+
+/* Common */
+"common_cancel" = "Cancel";
+
+/* Par Selection */
+"par_hole_number" = "Hole %lld";
+
+/* Counting */
+"counting_skip_title" = "This hole won't be recorded";
+"counting_skip_confirm" = "Skip";
+
+/* Round End */
+"round_end_title_recorded" = "%lld holes will be saved";
+"round_end_title_empty" = "No holes recorded";
+"round_end_confirm" = "End";
+"round_end_confirm_empty" = "End Without Saving";
+
+/* Scorecard — 영문 스코어카드 관습: 타수에 단위를 붙이지 않는다 (spec §4) */
+"scorecard_row" = "%lld (%lldp)";
+"scorecard_total" = "Total %lld · %lldp · %@";
+
+/* Summary */
+"summary_holes_completed" = "%lld holes";
+"summary_holes_empty" = "No holes recorded";
+"summary_strokes_putts" = "%lld · %lldp";
+"summary_discard_button" = "Discard";
+"summary_discard_title" = "Discard this round without saving?";
+"summary_discard_confirm" = "Discard";
+"summary_transmitting" = "Sending…";
+"summary_save_send" = "Save & Send";

@@ -10,7 +10,7 @@ struct HoleCountSelector: View {
 
     var body: some View {
         HStack {
-            Text("홀 수")
+            Text(String(localized: "home_hole_count"))
                 .font(.system(size: 14))
             Spacer()
             Button(action: onToggle) {

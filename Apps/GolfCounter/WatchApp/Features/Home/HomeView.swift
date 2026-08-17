@@ -14,7 +14,7 @@ struct HomeView: View {
                     .foregroundStyle(.green)
 
                 Button(action: startTapped) {
-                    Text(viewModel.startButtonLabel)
+                    Text(String(format: String(localized: "home_start_button"), viewModel.holeCount))
                         .font(.system(size: 16, weight: .bold))
                         .frame(maxWidth: .infinity, minHeight: 40)
                 }
@@ -31,14 +31,14 @@ struct HomeView: View {
                 RoundSessionView(resuming: viewModel.resumingSnapshot,
                                  holeCount: viewModel.holeCount)
             }
-            .confirmationDialog("진행 중인 라운드가 있습니다",
+            .confirmationDialog(String(localized: "home_pending_title"),
                                 isPresented: $isConfirmingNewRound,
                                 titleVisibility: .visible)
             {
-                Button("새로 시작", role: .destructive, action: viewModel.startNewRound)
-                Button("취소", role: .cancel) {}
+                Button(String(localized: "home_start_new"), role: .destructive, action: viewModel.startNewRound)
+                Button(String(localized: "common_cancel"), role: .cancel) {}
             } message: {
-                Text("새로 시작하면 지워집니다.")
+                Text(String(localized: "home_pending_message"))
             }
         }
         .onAppear(perform: viewModel.resumeIfNeeded)
