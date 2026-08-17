@@ -1,10 +1,7 @@
 import SwiftUI
 
-/// 파 칸수만큼 나뉜 링 (spec §6).
-///
-/// 회색 트랙 위에 채워진 칸을 덧그린다. 채워진 칸은 `trim`의 끝값을 시작값에서
-/// 끝값으로 움직여 호가 그려지듯 차오른다 — 애니메이션은 호출부가 건다.
-/// 파를 넘긴 타수는 바깥에 얇은 링으로 덧그린다.
+/// 파 칸수만큼 나뉜 링 (spec §6). 회색 트랙 위에 채워진 칸을, 파를 넘긴 타수는
+/// 바깥 얇은 링으로 덧그린다. 칸은 `trim`으로 차오르고 애니메이션은 호출부가 건다.
 struct StrokeRing: View {
     let segments: RingSegments
     let sizing: CountingSizing
