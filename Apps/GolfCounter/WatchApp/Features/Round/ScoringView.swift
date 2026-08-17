@@ -28,7 +28,7 @@ struct ScoringView: View {
                 ScorecardView(snapshot: viewModel.snapshot,
                               holeRange: range,
                               showsTotal: range.upperBound == holeCount)
-                    .padding(.horizontal, 4)
+                    .padding(.horizontal, CountingSizing.pageIndicatorInset)
                     .tag(index + 1)
             }
         }
