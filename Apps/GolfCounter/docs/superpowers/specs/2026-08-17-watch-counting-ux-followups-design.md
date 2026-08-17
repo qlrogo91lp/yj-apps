@@ -150,7 +150,8 @@ RoundSessionView (isConfirmingEnd, endRound 소유)
 |---|---|---|---|
 | `summary_save` | "저장" | "Save" | 신규 |
 | `summary_holes_putts` | "%lld홀 · %lld퍼트" | "%lld holes · %lld putts" | 신규 |
-| `summary_discard_button` | "버리기" | "Discard" | 값 변경(기존 "저장 안 함") |
+| `summary_discard_button` | "버리기" | "Discard" | 값 변경(기존 "저장 안 함", en은 이미 "Discard"라 변경 없음) |
+| `summary_save_send` | — | — | 삭제 (기존 "저장 & 전송" — `summary_save`로 대체) |
 | `summary_strokes_putts` | — | — | 삭제 |
 | `summary_holes_completed` | — | — | 삭제 |
 
