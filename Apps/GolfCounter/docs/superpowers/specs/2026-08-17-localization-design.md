@@ -88,7 +88,9 @@ Text(String(format: String(localized: "home_start_button"), holeCount))
 "scorecard_row_score" = "%lld (%lldp)";    (en)
 ```
 
-이미 언어 중립인 표기는 건드리지 않는다 — `ComplicationState.holeText`(`"H3"`)와 `ScoreFormat.relativeToPar`(`"+1"`/`"E"`/`"-1"`)는 골프 표기라 두 언어에서 같다.
+이미 언어 중립인 표기는 건드리지 않는다 — `ComplicationState.holeText`(`"H3"`)와 `ScoreFormat.relativeToPar`(`"+1"`/`"-1"`, 이븐파는 2026-08-18부터 `"E"`가 아니라 `"0"` — `2026-08-18-watch-scorecard-relayout-design.md` §2.3 참조)는 골프 표기라 두 언어에서 같다.
+
+> **개정 (2026-08-18):** `scorecard_row`·`scorecard_total`(위 예시의 `scorecard_row_score`) 두 키를 폐기했다. 워치 실기기 크래시(정수 포맷 지정자 `%lld` 버그)를 계기로 스코어카드를 2열 격자로 재배치하며, 홀별 문구 대신 숫자만 직접 배치하는 방식으로 바꿨다. `2026-08-18-watch-scorecard-relayout-design.md` 참조.
 
 ## 5. 복수형(`.stringsdict`)을 쓰지 않는다
 

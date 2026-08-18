@@ -297,6 +297,8 @@ var canUndo: Bool { !strokeHistory.isEmpty }
 | `Scorecard/ScorecardView.swift` | `holeRange: Range<Int>` 파라미터 추가. 합계 줄은 **마지막 청크에만** 표시하고 라운드 전체 합계를 쓴다 |
 | `Round/RoundViewModel.swift` | `strokeHistory` · `canUndo` · `undo()` 추가, `decrementStroke()` 삭제, `resetHoleLocalState()`에서 히스토리 클리어 |
 
+> **개정 (2026-08-18):** 위 `ScorecardView.swift` 행의 "합계는 마지막 청크에만" 결정을 뒤집었다. 라운드가 진행될수록 합계가 실리는 페이지가 계속 바뀌는 문제가 있었고, 실기기 크래시(정수 포맷 지정자 버그) 계기로 스코어카드 전체를 2열 격자로 재배치하며 헤더에 합계를 페이지마다 고정했다. 자세한 내용과 근거는 `2026-08-18-watch-scorecard-relayout-design.md` 참조. 9홀 청킹 자체는 유지된다.
+
 ### 삭제
 
 | 파일 | 사유 |
