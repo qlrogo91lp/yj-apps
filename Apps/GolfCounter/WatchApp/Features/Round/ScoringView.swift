@@ -25,11 +25,13 @@ struct ScoringView: View {
             .tag(0)
 
             ForEach(Array(chunks.enumerated()), id: \.element.lowerBound) { index, range in
-                ScorecardView(snapshot: viewModel.snapshot,
-                              holeRange: range,
-                              showsTotal: range.upperBound == holeCount)
-                    .padding(.horizontal, CountingSizing.pageIndicatorInset)
-                    .tag(index + 1)
+                ViewThatFits(in: .vertical) {
+                    ScorecardView(snapshot: viewModel.snapshot, holeRange: range, sizing: .regular)
+                    ScorecardView(snapshot: viewModel.snapshot, holeRange: range, sizing: .compact)
+                    ScorecardView(snapshot: viewModel.snapshot, holeRange: range, sizing: .tight)
+                }
+                .padding(.horizontal, CountingSizing.pageIndicatorInset)
+                .tag(index + 1)
             }
         }
         .tabViewStyle(.verticalPage)

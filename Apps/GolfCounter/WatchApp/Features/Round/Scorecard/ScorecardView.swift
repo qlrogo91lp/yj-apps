@@ -1,46 +1,71 @@
 import SwiftUI
 
-/// 스코어카드 한 페이지. 홀 범위 하나만 그린다 (spec §4).
-/// 합계 줄은 마지막 청크에만 붙이고, 값은 라운드 전체 합계다.
+/// 스코어카드 한 페이지. 홀 범위 하나를 2열 격자로 그린다.
+/// 헤더는 페이지마다 라운드 전체 합계를 고정 표시한다 — 마지막 페이지에만 붙던
+/// 이전 방식과 달리 어느 페이지에서도 합계를 바로 볼 수 있다 (spec §4, 2026-08-18 개정).
 struct ScorecardView: View {
     let snapshot: RoundSnapshot
     let holeRange: Range<Int>
-    let showsTotal: Bool
+    let sizing: ScorecardSizing
 
     var body: some View {
-        VStack(spacing: 3) {
-            ForEach(rows, id: \.holeNumber) { row in
-                HStack(spacing: 4) {
-                    Text("H\(row.holeNumber)")
-                        .frame(width: 26, alignment: .leading)
-                    Text(row.isRecorded ? "Par\(row.par)" : "—")
-                        .frame(width: 38, alignment: .leading)
-                        .foregroundStyle(.secondary)
-                    Text(String(format: String(localized: "scorecard_row"), row.score, row.putts))
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    Text(row.isRecorded ? ScoreFormat.relativeToPar(row.score - row.par) : "")
-                        .frame(width: 26, alignment: .trailing)
+        VStack(spacing: 0) {
+            ScorecardHeader(totalStrokes: snapshot.totalStrokes,
+                            relativeToPar: snapshot.relativeToPar,
+                            sizing: sizing)
+
+            Spacer(minLength: sizing.gap)
+            Divider()
+            Spacer(minLength: sizing.gap)
+
+            ForEach(Array(pairs.enumerated()), id: \.offset) { index, pair in
+                gridRow(pair)
+
+                if index < pairs.count - 1 {
+                    Divider()
                 }
-                .font(.system(size: 12, weight: .medium, design: .rounded))
-            }
-
-            if showsTotal {
-                Divider()
-
-                Text(String(format: String(localized: "scorecard_total"),
-                            snapshot.totalStrokes,
-                            totalPutts,
-                            ScoreFormat.relativeToPar(snapshot.relativeToPar)))
-                    .font(.system(size: 12, weight: .bold, design: .rounded))
-                    .frame(maxWidth: .infinity, alignment: .leading)
             }
 
             Spacer(minLength: 0)
         }
     }
 
-    private var totalPutts: Int {
-        snapshot.puttCounts.reduce(0, +)
+    private func gridRow(_ pair: [ScorecardRow]) -> some View {
+        HStack(spacing: 0) {
+            cell(pair[0])
+
+            if pair.count > 1 {
+                Divider()
+                cell(pair[1])
+            } else {
+                Color.clear.frame(maxWidth: .infinity)
+            }
+        }
+        .padding(.vertical, sizing.rowPadding)
+    }
+
+    private func cell(_ row: ScorecardRow) -> some View {
+        HStack(spacing: 6) {
+            HoleBadge(holeNumber: row.holeNumber, sizing: sizing)
+
+            Text("\(row.score)")
+                .font(.system(size: sizing.valueFont, weight: .semibold, design: .rounded))
+
+            Text(row.isRecorded ? ScoreFormat.relativeToPar(row.score - row.par) : "–")
+                .font(.system(size: sizing.valueFont, weight: .regular, design: .rounded))
+                .foregroundStyle(.secondary)
+                .frame(minWidth: sizing.relativeColumnWidth, alignment: .trailing)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    /// 홀을 2개씩 묶어 격자 행으로 만든다. 홀 수가 홀수면 마지막 행은 한 칸만 채운다.
+    private var pairs: [[ScorecardRow]] {
+        stride(from: 0, to: rows.count, by: 2).map { start in
+            Array(rows[start ..< min(start + 2, rows.count)])
+        }
     }
 
     /// 세 배열의 길이가 어긋난 값이 들어와도 인덱스를 벗어나지 않도록 가장 짧은 길이에 맞춘다.
@@ -50,8 +75,7 @@ struct ScorecardView: View {
         return safeRange.map { index in
             ScorecardRow(holeNumber: index + 1,
                          par: snapshot.holePars[index],
-                         score: snapshot.holeScores[index],
-                         putts: snapshot.puttCounts[index])
+                         score: snapshot.holeScores[index])
         }
     }
 }
@@ -60,7 +84,6 @@ private struct ScorecardRow {
     let holeNumber: Int
     let par: Int
     let score: Int
-    let putts: Int
 
     /// 기록된 홀 = 파와 타수가 모두 있는 홀. `HoleRow`(iOS)와 같은 규칙이다 (invariant spec §6).
     var isRecorded: Bool {
@@ -71,10 +94,10 @@ private struct ScorecardRow {
 #Preview {
     ScorecardView(snapshot: RoundSnapshot(startedAt: Date(),
                                           courseName: "테스트CC",
-                                          currentHoleIndex: 2,
-                                          holeScores: [4, 3, 6],
-                                          holePars: [4, 3, 5],
-                                          puttCounts: [2, 1, 2]),
-                  holeRange: 0 ..< 3,
-                  showsTotal: true)
+                                          currentHoleIndex: 8,
+                                          holeScores: [4, 3, 6, 5, 4, 3, 5, 4, 6],
+                                          holePars: [4, 3, 5, 4, 4, 3, 4, 4, 5],
+                                          puttCounts: [2, 1, 2, 2, 2, 1, 2, 2, 2]),
+                  holeRange: 0 ..< 9,
+                  sizing: .regular)
 }
