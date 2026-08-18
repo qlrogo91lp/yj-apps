@@ -8,6 +8,8 @@ struct GolfCounterApp: App {
     /// 참조를 잡아 두기만 하면 된다 — 살아 있는 동안 WCSession 수신 등록이 유지된다.
     private let receiver: RoundReceiveService
 
+    @State private var isLaunching = true
+
     init() {
         let container = PersistenceContainerFactory.make(for: [GolfRound.self])
         self.container = container
@@ -20,7 +22,11 @@ struct GolfCounterApp: App {
 
     var body: some Scene {
         WindowGroup {
-            MainTabView()
+            if isLaunching {
+                LaunchScreenView(onFinished: { isLaunching = false })
+            } else {
+                MainTabView()
+            }
         }
         .modelContainer(container)
     }
