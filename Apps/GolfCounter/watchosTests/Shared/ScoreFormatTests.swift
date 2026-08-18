@@ -3,8 +3,8 @@ import Foundation
 import Testing
 
 struct ScoreFormatTests {
-    @Test func 이븐파는_E로_표시한다() {
-        #expect(ScoreFormat.relativeToPar(0) == "E")
+    @Test func 이븐파는_0으로_표시한다() {
+        #expect(ScoreFormat.relativeToPar(0) == "0")
     }
 
     @Test func 오버파는_플러스부호를_붙인다() {

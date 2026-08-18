@@ -12,9 +12,9 @@ struct ScoreFormatAverageTests {
         #expect(ScoreFormat.averageRelativeToPar(-2.34) == "-2.3")
     }
 
-    @Test func 반올림해서0이되면_E로_표기한다() {
-        #expect(ScoreFormat.averageRelativeToPar(0) == "E")
-        #expect(ScoreFormat.averageRelativeToPar(0.04) == "E")
-        #expect(ScoreFormat.averageRelativeToPar(-0.04) == "E")
+    @Test func 반올림해서0이되면_부호없이_0점0으로_표기한다() {
+        #expect(ScoreFormat.averageRelativeToPar(0) == "0.0")
+        #expect(ScoreFormat.averageRelativeToPar(0.04) == "0.0")
+        #expect(ScoreFormat.averageRelativeToPar(-0.04) == "0.0")
     }
 }

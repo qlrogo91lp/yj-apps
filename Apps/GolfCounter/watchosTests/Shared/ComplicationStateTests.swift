@@ -41,12 +41,12 @@ struct ComplicationStateTests {
         #expect(state.relativeToParText == "+1")
     }
 
-    @Test func 표시문자열_이븐파는_E로_표시한다() {
+    @Test func 표시문자열_이븐파는_0으로_표시한다() {
         let snapshot = makeSnapshot(holeScores: [4, 3], holePars: [4, 3], currentHoleIndex: 1)
 
         let state = ComplicationState(snapshot: snapshot)
 
-        #expect(state.relativeToParText == "E")
+        #expect(state.relativeToParText == "0")
     }
 
     @Test func 표시문자열_언더파는_음수부호를_유지한다() {
