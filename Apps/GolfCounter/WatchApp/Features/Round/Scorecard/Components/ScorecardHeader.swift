@@ -4,7 +4,7 @@ import SwiftUI
 /// 스크롤 없이 총타수·오버파를 바로 볼 수 있게 한다.
 ///
 /// 총타수만 기본색, 오버파는 `.secondary` — 카운터 링 중앙(`ScoreRing`)과 같은 위계다.
-/// 구분 기호나 단위 없이 숫자 두 개만 나란히 둔다("44 +8").
+/// `Total:` 라벨은 두 언어 공통으로 쓰므로 번역표에 두지 않는다.
 struct ScorecardHeader: View {
     let totalStrokes: Int
     let relativeToPar: Int
@@ -12,11 +12,14 @@ struct ScorecardHeader: View {
 
     var body: some View {
         HStack(spacing: 6) {
-            Text("\(totalStrokes)")
+            Text("Total: \(totalStrokes)")
             Text(ScoreFormat.relativeToPar(relativeToPar))
                 .foregroundStyle(.secondary)
         }
         .font(.system(size: sizing.headerFont, weight: .semibold, design: .rounded))
+        .lineLimit(1)
+        .minimumScaleFactor(0.8)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 

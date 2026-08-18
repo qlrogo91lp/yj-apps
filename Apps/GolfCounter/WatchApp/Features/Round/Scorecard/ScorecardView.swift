@@ -14,9 +14,9 @@ struct ScorecardView: View {
                             relativeToPar: snapshot.relativeToPar,
                             sizing: sizing)
 
-            Spacer(minLength: sizing.gap)
+            Color.clear.frame(height: sizing.gap)
             Divider()
-            Spacer(minLength: sizing.gap)
+            Color.clear.frame(height: sizing.gap)
 
             ForEach(Array(pairs.enumerated()), id: \.offset) { index, pair in
                 gridRow(pair)
@@ -30,6 +30,8 @@ struct ScorecardView: View {
         }
     }
 
+    /// 높이를 명시한다 — 안의 세로 `Divider`가 늘어나려 해서, 비워 두면 홀이 적은 페이지에서
+    /// 행이 벌어진다 (`ScorecardSizing.rowHeight` 주석 참조).
     private func gridRow(_ pair: [ScorecardRow]) -> some View {
         HStack(spacing: 0) {
             cell(pair[0])
@@ -41,15 +43,17 @@ struct ScorecardView: View {
                 Color.clear.frame(maxWidth: .infinity)
             }
         }
-        .padding(.vertical, sizing.rowPadding)
+        .frame(height: sizing.rowHeight)
     }
 
     private func cell(_ row: ScorecardRow) -> some View {
-        HStack(spacing: 6) {
+        HStack(spacing: ScorecardSizing.badgeSpacing) {
             HoleBadge(holeNumber: row.holeNumber, sizing: sizing)
 
             Text("\(row.score)")
                 .font(.system(size: sizing.valueFont, weight: .semibold, design: .rounded))
+
+            Spacer(minLength: ScorecardSizing.valueSpacing)
 
             Text(row.isRecorded ? ScoreFormat.relativeToPar(row.score - row.par) : "–")
                 .font(.system(size: sizing.valueFont, weight: .regular, design: .rounded))
@@ -58,6 +62,7 @@ struct ScorecardView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
         }
+        .padding(.horizontal, ScorecardSizing.cellPadding)
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
