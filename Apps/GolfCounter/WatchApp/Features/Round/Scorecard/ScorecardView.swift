@@ -46,14 +46,18 @@ struct ScorecardView: View {
         .frame(height: sizing.rowHeight)
     }
 
+    /// 홀 배지만 왼쪽에 고정하고, 타수·오버파는 한 덩어리로 묶어 오른쪽에 붙인다.
     private func cell(_ row: ScorecardRow) -> some View {
-        HStack(spacing: ScorecardSizing.badgeSpacing) {
+        HStack(spacing: 0) {
             HoleBadge(holeNumber: row.holeNumber, sizing: sizing)
+
+            Spacer(minLength: ScorecardSizing.badgeSpacing)
 
             Text("\(row.score)")
                 .font(.system(size: sizing.valueFont, weight: .semibold, design: .rounded))
 
             Spacer(minLength: ScorecardSizing.valueSpacing)
+                .frame(maxWidth: ScorecardSizing.valueSpacing)
 
             Text(row.isRecorded ? ScoreFormat.relativeToPar(row.score - row.par) : "–")
                 .font(.system(size: sizing.valueFont, weight: .regular, design: .rounded))
