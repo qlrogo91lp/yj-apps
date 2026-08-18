@@ -8,16 +8,17 @@ import SwiftUI
 struct ParSelectionView: View {
     @ObservedObject var viewModel: RoundViewModel
 
-    /// 백버튼 원형 지름. 헤더 행 높이도 이 값이다.
-    private let backButtonSize: CGFloat = 30
+    /// 백버튼 원형 지름. 헤더 행 높이도 이 값이다. 카운터의 홀 이동 버튼(`arrowSize` regular
+    /// 세트)과 동일한 크기로 맞춰, 화면이 바뀌어도 같은 조작이 같은 크기로 느껴지게 한다.
+    private let backButtonSize: CGFloat = 36
 
     /// 백버튼 탭 영역을 가로로만 넓힌 폭 — Apple 최소 탭 타깃(44pt)에 맞춘다.
-    /// 세로로는 넓히지 않는다: 바로 아래 Par 3 버튼과 간격이 6pt뿐이라 그 탭 영역을 침범한다.
+    /// 세로로는 넓히지 않는다: 바로 아래 Par 3 버튼과 간격이 12pt뿐이라 그 탭 영역을 침범한다.
     /// 균일 확장인 `CircleIconButton.hitInset`으로는 축 하나만의 확장을 표현할 수 없다.
     private let backButtonHitWidth: CGFloat = 44
 
     var body: some View {
-        VStack(spacing: 6) {
+        VStack(spacing: 12) {
             header
 
             // 하단 페이지 인디케이터는 safe area에 이미 잡혀 있어 따로 여백을 두지 않는다
