@@ -26,9 +26,13 @@
 ### 2.2 결정된 디자인
 
 - **9홀 청킹은 유지한다** — `ScorecardChunks.holesPerPage = 9`는 그대로. 18홀 라운드는 스코어카드 2페이지.
-- **헤더로 합계를 페이지마다 고정한다.** `ScorecardHeader`가 라운드 전체 합계(`총타수` + `오버파`, 예: `44 +8`)를 모든 스코어카드 페이지 상단에 표시한다. 마지막 청크에만 붙던 합계 줄은 삭제했다. 단위·구분 기호 없이 숫자 두 개만 — 한국어·영어 표기를 통일했다(기존에는 한국어만 "타" 단위가 붙었다).
+- **헤더로 합계를 페이지마다 고정한다.** `ScorecardHeader`가 라운드 전체 합계(예: `Total: 44 +8`)를 모든 스코어카드 페이지 상단에 **왼쪽 정렬로** 표시한다. 마지막 청크에만 붙던 합계 줄은 삭제했다. 숫자에 단위를 붙이지 않아 한국어·영어 표기가 같고(기존에는 한국어만 "타" 단위가 붙었다), `Total:` 라벨도 두 언어 공통이라 번역표에 키를 두지 않는다.
 - **Par 열과 홀별 퍼트를 뺐다.** Par는 `타수 − 오버파`로 유도되는 중복 정보였다. 퍼트는 요약 화면·iOS 기록에서 계속 볼 수 있다.
 - **2열 × 5행 격자 + 격자선.** 홀 번호는 원형 배지(왼쪽), 타수(굵게)·오버파(회색, 고정폭 오른쪽 정렬)는 오른쪽에 모은다. 열 사이 세로선, 행 사이 가로선(마지막 행 제외). 9홀은 홀수라 마지막 행은 왼쪽 칸만 채운다.
+
+  간격은 세 값으로 잡는다 (실측 2026-08-18, 40mm 기준 셀 폭 여유 2.8pt): 배지와 타수 사이 `badgeSpacing` 8pt(붙어 있으면 배지 숫자와 타수가 한 덩어리로 읽힌다), 셀 좌우 `cellPadding` 4pt(오버파가 가운데 세로 구분선에 달라붙지 않게 — 셀마다 좌우로 들어가 한 행에서 네 배가 소모된다), 타수와 오버파 사이 최소 `valueSpacing` 2pt.
+
+- **행 높이(`rowHeight`)와 헤더 간격(`gap`)은 고정값으로 명시한다.** SwiftUI 자율에 맡기면 안 된다: 행 안의 세로 `Divider`는 축에 수직으로 최대한 늘어나려 하고 `Spacer(minLength:)`도 남는 공간을 흡수하므로, 높이를 비워 두면 `VStack`이 남는 공간을 행들에 나눠 준다. 그러면 **홀이 적은 페이지일수록 행이 세로로 벌어져** 페이지마다 레이아웃이 달라진다. 실제로 첫 구현이 이 상태였고 시뮬레이터에서 3홀 화면과 5홀 화면의 행 간격이 달랐다. 세로 예산 계산에 쓴 `max(badgeDiameter, valueFont lineHeight) + 여백` 값을 `rowHeight`로 못 박고, 간격은 `Spacer` 대신 고정 높이로 넣어 남는 공간은 격자 아래 `Spacer` 하나만 흡수하게 한다.
 - **`CountingSizing`과 같은 패턴으로 3단 크기 세트**(`ScorecardSizing.regular/compact/tight`)를 두고 `ViewThatFits(in: .vertical)`로 기기에 맞는 세트를 고른다 — 여유 공간을 그냥 버리지 않고 큰 화면에서는 글자를 더 키운다.
 
 | | regular (Ultra·46mm) | compact (44mm·45mm) | tight (40mm·41mm) |
@@ -52,8 +56,8 @@
 | `ComplicationApp/ko·en.lproj/Localizable.strings` | `complication_strokes` → `%ld` |
 | `iOSApp/ko·en.lproj/Localizable.strings` | 정수 지정자 `%ld` 통일 |
 | `watchosTests/Localization/FormatSpecifierWidthTests.swift` | 신규 — 회귀 방지 |
-| `WatchApp/Features/Round/Scorecard/ScorecardSizing.swift` | 신규 — 3단 크기 세트 |
-| `WatchApp/Features/Round/Scorecard/Components/ScorecardHeader.swift` | 신규 |
+| `WatchApp/Features/Round/Scorecard/ScorecardSizing.swift` | 신규 — 3단 크기 세트 + 고정 `rowHeight`, 간격 상수(`badgeSpacing`·`cellPadding`·`valueSpacing`) |
+| `WatchApp/Features/Round/Scorecard/Components/ScorecardHeader.swift` | 신규 — `Total: N ±M` 왼쪽 정렬 |
 | `WatchApp/Features/Round/Scorecard/Components/HoleBadge.swift` | 신규 |
 | `WatchApp/Features/Round/Scorecard/ScorecardView.swift` | 2열 격자로 재작성, `showsTotal` 제거 |
 | `WatchApp/Features/Round/ScoringView.swift` | 스코어카드 페이지에 `ViewThatFits(in: .vertical)` 적용 |
