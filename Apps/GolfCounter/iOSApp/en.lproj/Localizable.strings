@@ -16,8 +16,8 @@
 "history_delete_title" = "Delete this round?";
 
 /* Round Card — 영문은 골프 약식 표기 (spec §4) */
-"round_card_holes" = "%lldH";
-"round_card_strokes" = "%lld";
+"round_card_holes" = "%ldH";
+"round_card_strokes" = "%ld";
 
 /* Round Detail */
 "detail_title" = "Round Detail";
@@ -27,17 +27,17 @@
 "detail_section_workout" = "Workout";
 "detail_total" = "Total";
 /* count==1 is reachable (e.g. abandoned round with a single recorded putt) — label form avoids "1 putts" (spec §5) */
-"detail_strokes_putts" = "Strokes: %lld · Putts: %lld";
+"detail_strokes_putts" = "Strokes: %ld · Putts: %ld";
 
 /* Hole Row — 영문 스코어카드 관습: 타수에 단위를 붙이지 않는다 (spec §4) */
-"hole_row_strokes_putts" = "%lld · %lldp";
+"hole_row_strokes_putts" = "%ld · %ldp";
 "hole_row_unrecorded" = "Not recorded";
 
 /* Hole Edit */
 "edit_section_strokes" = "Strokes";
 "edit_section_putts" = "Putts";
-"edit_strokes_value" = "%lld";
-"edit_putts_value" = "%lld";
+"edit_strokes_value" = "%ld";
+"edit_putts_value" = "%ld";
 
 /* Workout Metrics */
 "workout_calories" = "Calories";
@@ -45,8 +45,8 @@
 "workout_distance" = "Distance";
 "workout_steps" = "Steps";
 "workout_duration" = "Duration";
-"workout_duration_hm" = "%lldh %lldm";
-"workout_duration_m" = "%lldm";
+"workout_duration_hm" = "%ldh %ldm";
+"workout_duration_m" = "%ldm";
 
 /* Stats */
 "stats_title" = "Stats";
@@ -58,16 +58,16 @@
 "stats_card_best" = "Best Score";
 "stats_card_avg_over_par" = "Avg. Over Par";
 "stats_card_putts_per_hole" = "Putts per Hole";
-"stats_best_holes" = "%lldH";
+"stats_best_holes" = "%ldH";
 
 /* 영어는 복수형을 피해 라벨 형식으로 쓴다 — "1 rounds"를 막는다 (spec §5) */
-"stats_round_total" = "Rounds: %lld";
-"stats_full_round_caption" = "Full rounds: %lld";
+"stats_round_total" = "Rounds: %ld";
+"stats_full_round_caption" = "Full rounds: %ld";
 
 /* Distribution Chart */
 "chart_axis_holes" = "Holes";
 "chart_axis_bucket" = "Bucket";
-"chart_bucket_value" = "%lld · %@";
+"chart_bucket_value" = "%ld · %@";
 "bucket_birdie_or_better" = "Birdie or better";
 "bucket_par" = "Par";
 "bucket_bogey" = "Bogey";

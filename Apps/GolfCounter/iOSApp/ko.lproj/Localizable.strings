@@ -16,8 +16,8 @@
 "history_delete_title" = "이 라운드를 삭제할까요?";
 
 /* Round Card — 영문은 골프 약식 표기 (spec §4) */
-"round_card_holes" = "%lld홀";
-"round_card_strokes" = "%lld타";
+"round_card_holes" = "%ld홀";
+"round_card_strokes" = "%ld타";
 
 /* Round Detail */
 "detail_title" = "라운드 상세";
@@ -26,17 +26,17 @@
 "detail_section_scorecard" = "스코어카드";
 "detail_section_workout" = "워크아웃";
 "detail_total" = "합계";
-"detail_strokes_putts" = "%lld타 · %lld퍼트";
+"detail_strokes_putts" = "%ld타 · %ld퍼트";
 
 /* Hole Row — 영문 스코어카드 관습: 타수에 단위를 붙이지 않는다 (spec §4) */
-"hole_row_strokes_putts" = "%lld타 · %lld퍼트";
+"hole_row_strokes_putts" = "%ld타 · %ld퍼트";
 "hole_row_unrecorded" = "기록 없음";
 
 /* Hole Edit */
 "edit_section_strokes" = "타수";
 "edit_section_putts" = "퍼팅";
-"edit_strokes_value" = "%lld타";
-"edit_putts_value" = "%lld퍼트";
+"edit_strokes_value" = "%ld타";
+"edit_putts_value" = "%ld퍼트";
 
 /* Workout Metrics */
 "workout_calories" = "칼로리";
@@ -44,8 +44,8 @@
 "workout_distance" = "거리";
 "workout_steps" = "걸음";
 "workout_duration" = "소요 시간";
-"workout_duration_hm" = "%lld시간 %lld분";
-"workout_duration_m" = "%lld분";
+"workout_duration_hm" = "%ld시간 %ld분";
+"workout_duration_m" = "%ld분";
 
 /* Stats */
 "stats_title" = "통계";
@@ -57,16 +57,16 @@
 "stats_card_best" = "베스트 스코어";
 "stats_card_avg_over_par" = "평균 오버파";
 "stats_card_putts_per_hole" = "홀당 평균 퍼트";
-"stats_best_holes" = "%lld홀";
+"stats_best_holes" = "%ld홀";
 
 /* 영어는 복수형을 피해 라벨 형식으로 쓴다 — "1 rounds"를 막는다 (spec §5) */
-"stats_round_total" = "총 %lld라운드";
-"stats_full_round_caption" = "18홀 라운드 %lld개 기준";
+"stats_round_total" = "총 %ld라운드";
+"stats_full_round_caption" = "18홀 라운드 %ld개 기준";
 
 /* Distribution Chart */
 "chart_axis_holes" = "홀 수";
 "chart_axis_bucket" = "구간";
-"chart_bucket_value" = "%lld홀 · %@";
+"chart_bucket_value" = "%ld홀 · %@";
 "bucket_birdie_or_better" = "버디 이상";
 "bucket_par" = "파";
 "bucket_bogey" = "보기";

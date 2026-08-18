@@ -3,4 +3,4 @@
 "complication_description" = "Round progress";
 
 /* 컴플리케이션은 가장 좁은 공간이라 영어는 숫자만 쓴다 (spec §4) */
-"complication_strokes" = "%lld";
+"complication_strokes" = "%ld";
