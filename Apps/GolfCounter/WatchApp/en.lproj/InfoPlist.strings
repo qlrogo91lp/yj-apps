@@ -1,2 +1,2 @@
-"NSHealthShareUsageDescription" = "Used to record heart rate and calories during a round.";
-"NSHealthUpdateUsageDescription" = "Used to record heart rate and calories during a round.";
+"NSHealthShareUsageDescription" = "GolfCounter uses HealthKit to track heart rate and calories during a round.";
+"NSHealthUpdateUsageDescription" = "GolfCounter saves your golf round to Apple Health.";

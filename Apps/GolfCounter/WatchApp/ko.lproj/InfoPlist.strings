@@ -1,2 +1,2 @@
-"NSHealthShareUsageDescription" = "라운드 중 심박수·칼로리를 기록하기 위해 사용합니다.";
-"NSHealthUpdateUsageDescription" = "라운드 중 심박수·칼로리를 기록하기 위해 사용합니다.";
+"NSHealthShareUsageDescription" = "GolfCounter가 라운드 중 심박수와 칼로리를 측정합니다.";
+"NSHealthUpdateUsageDescription" = "GolfCounter가 골프 라운드를 건강 앱에 저장합니다.";
