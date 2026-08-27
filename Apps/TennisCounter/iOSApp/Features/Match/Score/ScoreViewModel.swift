@@ -1,0 +1,204 @@
+import Combine
+import Foundation
+
+@MainActor
+final class ScoreViewModel: ObservableObject {
+    @Published private(set) var options: MatchOptions
+
+    @Published var score = Score()
+    @Published var myGameScore: Int = 0
+    @Published var yourGameScore: Int = 0
+    @Published var mySetScore: Int = 0
+    @Published var yourSetScore: Int = 0
+    @Published var currentSetNumber: Int = 1
+    @Published var completedSets: [(my: Int, your: Int)] = []
+    @Published private(set) var matchResult: MatchResult?
+
+    /// 포인트 하나마다 쌓이는 경기 전체 상태. 게임·세트 경계를 넘어 되돌리기 위해
+    /// Score뿐 아니라 게임·세트 스코어와 완료 세트까지 함께 봉인한다.
+    private struct Snapshot {
+        let score: Score.Snapshot
+        let myGameScore: Int
+        let yourGameScore: Int
+        let mySetScore: Int
+        let yourSetScore: Int
+        let currentSetNumber: Int
+        let completedSets: [(my: Int, your: Int)]
+        let tieBreakInProgress: Bool
+        let matchResult: MatchResult?
+    }
+
+    private var snapshots: [Snapshot] = []
+
+    var isMatchOver: Bool {
+        matchResult != nil
+    }
+
+    var didWin: Bool {
+        matchResult == .win
+    }
+
+    var isTieBreak: Bool {
+        score.gameMode == .tieBreak
+    }
+
+    var canUndo: Bool {
+        !snapshots.isEmpty
+    }
+
+    var hasProgress: Bool {
+        myGameScore > 0 || yourGameScore > 0 ||
+            mySetScore > 0 || yourSetScore > 0 ||
+            !completedSets.isEmpty ||
+            canUndo
+    }
+
+    private var tieBreakInProgress = false
+    private var cancellables = Set<AnyCancellable>()
+
+    var onStateChanged: (() -> Void)?
+
+    init(options: MatchOptions = MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false)) {
+        self.options = options
+        score.noAdRule = options.noAdRule
+
+        score.objectWillChange
+            .sink { [weak self] _ in self?.objectWillChange.send() }
+            .store(in: &cancellables)
+    }
+
+    func addPoint(_ side: PlayerSide) {
+        guard !isMatchOver else { return }
+        snapshots.append(captureSnapshot())
+        let gameWon = score.addPoint(side)
+        if gameWon != nil {
+            if side == .me { myGameScore += 1 } else { yourGameScore += 1 }
+            score.resetData()
+            checkSetUpdate()
+        }
+        onStateChanged?()
+    }
+
+    /// 경기 시작까지 되돌린다 — 게임·세트 경계를 넘는다.
+    func undo() {
+        guard let snapshot = snapshots.popLast() else { return }
+        apply(snapshot)
+        onStateChanged?()
+    }
+
+    /// ScoreEditSheet 수동 수정 경로. 수정은 새 기준점이므로 이전 스택을 버린다
+    /// (버리지 않으면 undo가 수정 이전 과거로 튄다).
+    func applyManualEdit() {
+        snapshots.removeAll()
+        onStateChanged?()
+    }
+
+    func resetAll(options: MatchOptions) {
+        self.options = options
+        myGameScore = 0
+        yourGameScore = 0
+        mySetScore = 0
+        yourSetScore = 0
+        currentSetNumber = 1
+        completedSets = []
+        matchResult = nil
+        tieBreakInProgress = false
+        snapshots.removeAll()
+        score.noAdRule = options.noAdRule
+        score.resetData()
+    }
+
+    func applyRemoteState(_ state: ScoreState) {
+        myGameScore = state.myGameScore
+        yourGameScore = state.yourGameScore
+        mySetScore = state.mySetScore
+        yourSetScore = state.yourSetScore
+        completedSets = state.completedSets.map { (my: $0[0], your: $0[1]) }
+        score.applyRemote(myScore: state.myScore, yourScore: state.yourScore, isTieBreak: state.isTieBreak)
+        tieBreakInProgress = state.isTieBreak
+        // mirror 측은 스스로 되돌릴 수 없다 — 권한은 driver에 있다.
+        snapshots.removeAll()
+    }
+
+    func makeScoreState() -> ScoreState {
+        let myS = score.gameMode == .tieBreak ? score.myTieBreak : score.myScore
+        let yourS = score.gameMode == .tieBreak ? score.yourTieBreak : score.yourScore
+        return ScoreState(
+            myScore: myS, yourScore: yourS,
+            myGameScore: myGameScore, yourGameScore: yourGameScore,
+            mySetScore: mySetScore, yourSetScore: yourSetScore,
+            completedSets: completedSets.map { [$0.my, $0.your] },
+            isTieBreak: score.gameMode == .tieBreak
+        )
+    }
+
+    // MARK: - Private
+
+    private func captureSnapshot() -> Snapshot {
+        Snapshot(
+            score: score.makeSnapshot(),
+            myGameScore: myGameScore,
+            yourGameScore: yourGameScore,
+            mySetScore: mySetScore,
+            yourSetScore: yourSetScore,
+            currentSetNumber: currentSetNumber,
+            completedSets: completedSets,
+            tieBreakInProgress: tieBreakInProgress,
+            matchResult: matchResult
+        )
+    }
+
+    private func apply(_ snapshot: Snapshot) {
+        score.restore(snapshot.score)
+        myGameScore = snapshot.myGameScore
+        yourGameScore = snapshot.yourGameScore
+        mySetScore = snapshot.mySetScore
+        yourSetScore = snapshot.yourSetScore
+        currentSetNumber = snapshot.currentSetNumber
+        completedSets = snapshot.completedSets
+        tieBreakInProgress = snapshot.tieBreakInProgress
+        matchResult = snapshot.matchResult
+    }
+
+    private func checkSetUpdate() {
+        let threshold = options.gameThreshold
+        let my = myGameScore, your = yourGameScore
+
+        if tieBreakInProgress {
+            if (my == threshold + 1 && your == threshold) || (your == threshold + 1 && my == threshold) {
+                tieBreakInProgress = false
+                finalizeSet(winner: my > your ? .me : .opponent)
+            }
+            return
+        }
+
+        if my == threshold, your == threshold {
+            if options.noTieRule {
+                completedSets.append((my: my, your: your))
+                matchResult = .draw
+            } else {
+                score.setTieBreakMode()
+                tieBreakInProgress = true
+            }
+            return
+        }
+
+        let maxG = max(my, your), minG = min(my, your)
+        guard maxG >= threshold, (maxG - minG) >= 2 else { return }
+        finalizeSet(winner: my > your ? .me : .opponent)
+    }
+
+    private func finalizeSet(winner: PlayerSide) {
+        completedSets.append((my: myGameScore, your: yourGameScore))
+        if winner == .me { mySetScore += 1 } else { yourSetScore += 1 }
+        myGameScore = 0
+        yourGameScore = 0
+        currentSetNumber += 1
+
+        if mySetScore >= options.mode.setsToWin {
+            matchResult = .win
+        } else if yourSetScore >= options.mode.setsToWin {
+            matchResult = .loss
+        }
+    }
+}

@@ -1,0 +1,8 @@
+--swiftversion 6.0
+--indent 4
+--maxwidth 150
+--self remove
+--header ignore
+--trimwhitespace always
+--importgrouping alpha
+--disable acronyms, blankLinesAtStartOfScope, blankLinesAtEndOfScope

@@ -1,0 +1,379 @@
+import Combine
+import Foundation
+import WidgetKit
+import WorkoutCore
+
+@MainActor
+class WorkoutSessionViewModel: ObservableObject {
+    @Published var phase: MatchPhase = .modeSelection
+    @Published var isPaused: Bool = false
+    @Published var remoteWorkoutEnded: Bool = false
+
+    let healthKit: WorkoutSessionService
+    let workoutSessionId: UUID = .init()
+    @Published private(set) var lastMetrics: WorkoutMetrics?
+    @Published private(set) var currentMetrics = WorkoutMetrics()
+
+    private let connectivity = MatchConnectivity.shared
+    private let appGroupDefaults = UserDefaults(suiteName: "group.com.yj.TennisCounter")
+    private let metricsThrottle: TimeInterval
+    private var cancellables = Set<AnyCancellable>()
+    private var _currentSession: MatchSession?
+    let scoreVM = ScoreViewModel(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+    private(set) var isDriver = false
+    /// 워크아웃 식별자. 상대 기기의 id를 채택하면 그 값으로 바뀌고, 워크아웃이 끝날 때까지 유지된다.
+    /// handleIncomingSessionStart의 동시 시작 race 가드는 이 값(workoutSessionId 아님)과 비교한다 —
+    /// 채택 이후에는 이 값이 실제로 주고받는 id이기 때문이다.
+    private(set) lazy var activeSessionId: UUID = workoutSessionId
+    private var hasSyncedSession = false
+
+    enum SaveAckState: Equatable {
+        case idle, pending, succeeded, failed
+    }
+
+    @Published var saveAckState: SaveAckState = .idle
+    private var saveAttemptToken = 0
+    private let ackTimeoutSeconds: TimeInterval
+
+    init(healthKit: WorkoutSessionService = WorkoutSessionService(configuration: .tennis),
+         metricsThrottle: TimeInterval = 5, ackTimeoutSeconds: TimeInterval = 8)
+    {
+        self.healthKit = healthKit
+        self.metricsThrottle = metricsThrottle
+        self.ackTimeoutSeconds = ackTimeoutSeconds
+        healthKit.$isPaused
+            .receive(on: DispatchQueue.main)
+            .assign(to: &$isPaused)
+
+        healthKit.$isPaused
+            .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.broadcastMetrics() }
+            .store(in: &cancellables)
+
+        Publishers.CombineLatest4(
+            healthKit.$elapsedSeconds,
+            healthKit.$currentCalories,
+            healthKit.$currentBasalCalories,
+            healthKit.$currentHeartRate
+        )
+        .receive(on: DispatchQueue.main)
+        .map { [healthKit] _, _, _, _ in Self.snapshot(of: healthKit) }
+        .assign(to: &$currentMetrics)
+
+        setupConnectivityBindings()
+        setupScoreSync()
+
+        healthKit.$currentHeartRate
+            .dropFirst()
+            .throttle(for: .seconds(metricsThrottle), scheduler: DispatchQueue.main, latest: true)
+            .sink { [weak self] _ in self?.broadcastMetrics() }
+            .store(in: &cancellables)
+    }
+
+    private func setupConnectivityBindings() {
+        connectivity.$receivedSessionStart
+            .compactMap(\.self)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] msg in self?.handleIncomingSessionStart(msg) }
+            .store(in: &cancellables)
+
+        connectivity.$receivedWorkoutEnd
+            .compactMap(\.self)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] id in self?.handleIncomingWorkoutEnd(id) }
+            .store(in: &cancellables)
+
+        connectivity.$receivedMatchReset
+            .compactMap(\.self)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] id in self?.handleIncomingMatchReset(id) }
+            .store(in: &cancellables)
+
+        connectivity.$receivedMatchSaveResult
+            .compactMap(\.self)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] result in self?.handleMatchSaveResult(result) }
+            .store(in: &cancellables)
+
+        connectivity.$receivedPauseCommand
+            .compactMap(\.self)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] msg in self?.handleIncomingPauseCommand(msg) }
+            .store(in: &cancellables)
+    }
+
+    private func handleMatchSaveResult(_ result: MatchSaveResultMessage) {
+        guard result.sessionId == activeSessionId else { return }
+        guard saveAckState == .pending || saveAckState == .failed else { return }
+        connectivity.receivedMatchSaveResult = nil
+        saveAckState = result.success ? .succeeded : .failed
+    }
+
+    private func handleIncomingWorkoutEnd(_ id: UUID) {
+        // 매치가 한 번도 시작되지 않았으면 sessionId가 아직 상대와 동기화되지 않았으므로 무조건 수용한다.
+        if hasSyncedSession, id != activeSessionId { return }
+        connectivity.receivedWorkoutEnd = nil
+        endWorkout(notifyRemote: false)
+        remoteWorkoutEnded = true
+    }
+
+    private func handleIncomingMatchReset(_ id: UUID) {
+        guard !isDriver else { return }
+        if hasSyncedSession, id != activeSessionId { return }
+        connectivity.receivedMatchReset = nil
+        startNewMatch(notifyRemote: false)
+    }
+
+    /// - Returns: 명령을 적용했으면 true, 다른 세션 것이라 무시했으면 false.
+    @discardableResult
+    private func handleIncomingPauseCommand(_ msg: WorkoutPauseMessage) -> Bool {
+        guard msg.sessionId == activeSessionId else { return false }
+        connectivity.receivedPauseCommand = nil
+        if msg.shouldPause {
+            healthKit.pauseWorkout()
+        } else {
+            healthKit.resumeWorkout()
+        }
+        return true
+    }
+
+    #if DEBUG
+        func handleIncomingWorkoutEndForTest(_ id: UUID) {
+            handleIncomingWorkoutEnd(id)
+        }
+
+        var activeSessionIdForTest: UUID {
+            activeSessionId
+        }
+
+        func handleIncomingPauseCommandForTest(_ msg: WorkoutPauseMessage) -> Bool {
+            handleIncomingPauseCommand(msg)
+        }
+    #endif
+
+    private func setupScoreSync() {
+        scoreVM.onMatchFinished = { [weak self] result, sets in
+            self?.finishMatch(result: result, completedSets: sets)
+        }
+
+        scoreVM.onStateChanged = { [weak self] in
+            guard let self, isDriver else { return }
+            connectivity.sendScoreState(scoreVM.makeScoreState())
+        }
+
+        connectivity.$receivedScoreState
+            .compactMap(\.self)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] state in self?.handleIncomingScoreState(state) }
+            .store(in: &cancellables)
+
+        connectivity.$isWatchReachable
+            .filter(\.self)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                guard let self, isDriver, case .playing = phase else { return }
+                connectivity.sendScoreState(scoreVM.makeScoreState())
+            }
+            .store(in: &cancellables)
+    }
+
+    func startWorkout() {
+        Task {
+            await healthKit.requestAuthorization()
+            healthKit.startWorkout()
+            appGroupDefaults?.set(true, forKey: "isWorkoutActive")
+            WidgetCenter.shared.reloadTimelines(ofKind: "ComplicationApp")
+        }
+    }
+
+    func startMatch(options: MatchOptions, sessionId: UUID? = nil, matchId: UUID? = nil, isRemote: Bool = false) {
+        isDriver = !isRemote
+        hasSyncedSession = true
+        saveAckState = .idle
+        saveAttemptToken += 1
+        // 워크아웃 도중에는 id가 바뀌면 안 된다 — Summary가 이 값으로 워크아웃을 그룹핑한다.
+        // workoutSessionId로 되돌아가면 폰이 driver였던 워크아웃이 두 그룹으로 갈린다.
+        let id = sessionId ?? activeSessionId
+        activeSessionId = id
+        let mid = matchId ?? UUID()
+        let session = MatchSession(
+            id: mid,
+            workoutSessionId: id,
+            options: options,
+            kcalAtStart: healthKit.currentCalories,
+            totalKcalAtStart: healthKit.currentCalories + healthKit.currentBasalCalories,
+            elapsedAtStart: healthKit.elapsedSeconds
+        )
+        _currentSession = session
+
+        if !isRemote {
+            connectivity.receivedScoreState = nil
+        }
+
+        scoreVM.resetAll(options: options)
+        phase = .playing(options)
+
+        if !isRemote {
+            connectivity.sendSessionStart(SessionStartMessage(
+                sessionId: id,
+                matchId: mid,
+                options: options,
+                workoutStartDate: healthKit.startDate ?? Date()
+            ))
+        }
+    }
+
+    func currentSession() -> MatchSession? {
+        _currentSession
+    }
+
+    func finishMatch(result: MatchResult, completedSets: [SetScore]) {
+        guard let session = _currentSession else { return }
+        session.endedAt = Date()
+        session.result = result
+        session.completedSets = completedSets
+        session.kcalAtEnd = healthKit.currentCalories
+        session.totalKcalAtEnd = healthKit.currentCalories + healthKit.currentBasalCalories
+        session.elapsedAtEnd = healthKit.elapsedSeconds
+        session.mySetScore = completedSets.count(where: { $0.my > $0.your })
+        session.yourSetScore = completedSets.count(where: { $0.your > $0.my })
+
+        phase = .finished(session)
+
+        Task {
+            session.averageHeartRate = await healthKit.averageHeartRate(
+                from: session.startedAt,
+                to: session.endedAt ?? Date()
+            )
+            sendMatchEndToiOS(session: session)
+        }
+    }
+
+    /// Watch엔 로컬 저장소가 없다. 저장 버튼 → iOS에 저장 요청을 보내고 iOS가 히스토리에 persist 한다.
+    /// iOS의 ack(`matchSaveResult`)를 받아 실제 결과를 반영하며, ackTimeoutSeconds 안에 ack가
+    /// 없으면 failed로 전환한다. saveAttemptToken은 재시도로 새 시도가 시작된 뒤 이전 시도의
+    /// 지연된 타임아웃이 새 상태를 덮어쓰지 않게 막는 표식이다.
+    func saveCurrentMatch() {
+        guard let session = _currentSession else { return }
+        saveAttemptToken += 1
+        let token = saveAttemptToken
+        saveAckState = .pending
+        connectivity.sendMatchSave(makeMatchEndMessage(session: session))
+        DispatchQueue.main.asyncAfter(deadline: .now() + ackTimeoutSeconds) { [weak self] in
+            guard let self, saveAttemptToken == token, saveAckState == .pending else { return }
+            saveAckState = .failed
+        }
+    }
+
+    func startNewMatch(notifyRemote: Bool = true) {
+        if notifyRemote, case .playing = phase {
+            // 진행 중인 매치를 끝낼 권한은 driver에게만 있다. mirror가 로컬로 리셋하면
+            // sendMatchReset이 나가지 않아 driver는 계속 경기 중인데 mirror만 모드선택으로 빠진다.
+            // 수신 경로(notifyRemote: false)는 이 가드를 타지 않는다 — mirror가 driver의 리셋을 받는 유일한 통로다.
+            guard isDriver else { return }
+            connectivity.sendMatchReset(sessionId: activeSessionId)
+        }
+        _currentSession = nil
+        phase = .modeSelection
+        saveAckState = .idle
+        saveAttemptToken += 1
+    }
+
+    func restartMatch() {
+        guard let options = _currentSession?.options else { return }
+        startMatch(options: options, sessionId: activeSessionId, isRemote: !isDriver)
+    }
+
+    func pauseWorkout() {
+        healthKit.pauseWorkout()
+    }
+
+    func resumeWorkout() {
+        healthKit.resumeWorkout()
+    }
+
+    func endWorkout(notifyRemote: Bool = true) {
+        _currentSession = nil
+        appGroupDefaults?.set(false, forKey: "isWorkoutActive")
+        WidgetCenter.shared.reloadTimelines(ofKind: "ComplicationApp")
+        connectivity.clearSessionContext()
+        if notifyRemote { connectivity.sendWorkoutEnd(sessionId: activeSessionId) }
+        Task { _ = await healthKit.stopWorkout() }
+    }
+
+    func broadcastMetrics() {
+        let metrics = Self.snapshot(of: healthKit)
+        lastMetrics = metrics
+        connectivity.sendMetrics(metrics, isPaused: healthKit.isPaused)
+    }
+
+    /// healthKit의 현재 값을 즉시 읽는 동기 스냅샷.
+    /// currentMetrics 파이프라인(비동기)과 broadcastMetrics(동기)가 같은 매핑을 쓰도록 한 곳에 둔다.
+    private static func snapshot(of healthKit: WorkoutSessionService) -> WorkoutMetrics {
+        WorkoutMetrics(elapsedSeconds: TimeInterval(healthKit.elapsedSeconds),
+                       activeCalories: healthKit.currentCalories,
+                       totalCalories: healthKit.currentCalories + healthKit.currentBasalCalories,
+                       heartRate: healthKit.currentHeartRate)
+    }
+
+    private func handleIncomingSessionStart(_ msg: SessionStartMessage) {
+        if case .playing = phase {
+            // 이미 같은 워크아웃(activeSessionId)의 상대라면 새 경기 시작으로 그냥 수용한다 —
+            // 경쟁하는 다른 워크아웃이 아니므로 레이스 타이브레이크 대상이 아니다.
+            // 다른 워크아웃이 경쟁 중일 때만 더 작은 id 쪽이 우선권을 가진다. workoutSessionId가
+            // 아니라 activeSessionId와 비교해야 한다 — 상대로부터 채택한 뒤에는 이 값이 실제로
+            // 주고받는 id이고, workoutSessionId는 최초 값에 고정된 채 더 이상 쓰이지 않는다.
+            if msg.sessionId != activeSessionId {
+                guard isDriver, msg.sessionId.uuidString < activeSessionId.uuidString else { return }
+            }
+        }
+        if !healthKit.isWorkoutActive { startWorkout() }
+        startMatch(options: msg.options, sessionId: msg.sessionId, matchId: msg.matchId, isRemote: true)
+    }
+
+    private func handleIncomingScoreState(_ state: ScoreState) {
+        guard !isDriver, case .playing = phase else { return }
+        scoreVM.applyRemoteState(state)
+    }
+
+    #if DEBUG
+        func applyIncomingScoreStateForTest(_ state: ScoreState) {
+            handleIncomingScoreState(state)
+        }
+
+        func applyIncomingSessionStartForTest(_ msg: SessionStartMessage) {
+            handleIncomingSessionStart(msg)
+        }
+
+        func handleMatchSaveResultForTest(_ result: MatchSaveResultMessage) {
+            handleMatchSaveResult(result)
+        }
+    #endif
+
+    private func sendMatchEndToiOS(session: MatchSession) {
+        connectivity.sendMatchEnd(makeMatchEndMessage(session: session))
+    }
+
+    private func makeMatchEndMessage(session: MatchSession) -> MatchEndMessage {
+        MatchEndMessage(
+            sessionId: session.workoutSessionId,
+            result: session.result?.rawValue ?? "win",
+            completedSets: session.completedSets.map { [$0.my, $0.your] },
+            startedAt: session.startedAt,
+            endedAt: session.endedAt ?? Date(),
+            // 워크아웃 경계 앵커 레이스로 elapsedSeconds가 일시적으로 뒤로 갈 수 있다.
+            // 음수 경과시간이 표시 포맷까지 흘러가지 않도록 0에서 바닥을 친다.
+            durationSeconds: Swift.max(0, (session.elapsedAtEnd ?? session.elapsedAtStart) - session.elapsedAtStart),
+            calories: (session.kcalAtEnd ?? 0) - session.kcalAtStart,
+            averageHeartRate: session.averageHeartRate,
+            mode: session.options.mode.rawValue,
+            noAdRule: session.options.noAdRule,
+            totalCalories: session.totalKcalAtEnd.map { $0 - session.totalKcalAtStart },
+            matchId: session.id,
+            workoutElapsedSeconds: session.elapsedAtEnd,
+            workoutCalories: session.kcalAtEnd,
+            workoutTotalCalories: session.totalKcalAtEnd
+        )
+    }
+}

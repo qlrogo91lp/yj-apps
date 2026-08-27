@@ -1,0 +1,313 @@
+import ConnectivityCore
+import Foundation
+
+// MARK: - 세션 시작
+
+struct SessionStartMessage: ConnectivityMessage {
+    static let messageType = "sessionStart"
+
+    let sessionId: UUID
+    /// 이 워크아웃 안에서 진행 중인 경기의 식별자. 구버전 워치 페이로드에는 없으므로 optional.
+    /// nil이면 수신 측이 로컬에서 새로 발급한다 — 파싱을 실패시키면 미러링 자체가 깨진다.
+    let matchId: UUID?
+    let options: MatchOptions
+    let workoutStartDate: Date
+
+    func toDictionary() -> [String: Any] {
+        var dict: [String: Any] = [
+            "type": Self.messageType,
+            "sessionId": sessionId.uuidString,
+            "mode": options.mode.rawValue,
+            "noAdRule": options.noAdRule,
+            "noTieRule": options.noTieRule,
+            "gameThreshold": options.gameThreshold,
+            "workoutStartDate": workoutStartDate.timeIntervalSince1970,
+        ]
+        if let matchId { dict["matchId"] = matchId.uuidString }
+        return dict
+    }
+
+    init?(from dict: [String: Any]) {
+        guard dict["type"] as? String == Self.messageType,
+              let idStr = dict["sessionId"] as? String,
+              let id = UUID(uuidString: idStr),
+              let modeRaw = dict["mode"] as? String,
+              let mode = MatchFormat(rawValue: modeRaw) else { return nil }
+        sessionId = id
+        matchId = (dict["matchId"] as? String).flatMap(UUID.init(uuidString:))
+        options = MatchOptions(
+            mode: mode,
+            noAdRule: dict["noAdRule"] as? Bool ?? true,
+            noTieRule: dict["noTieRule"] as? Bool ?? false,
+            gameThreshold: dict["gameThreshold"] as? Int ?? 6
+        )
+        let ts = dict["workoutStartDate"] as? Double ?? Date().timeIntervalSince1970
+        workoutStartDate = Date(timeIntervalSince1970: ts)
+    }
+
+    init(sessionId: UUID, matchId: UUID? = nil, options: MatchOptions, workoutStartDate: Date = Date()) {
+        self.sessionId = sessionId
+        self.matchId = matchId
+        self.options = options
+        self.workoutStartDate = workoutStartDate
+    }
+}
+
+// MARK: - 점수 상태
+
+struct ScoreState: ConnectivityMessage {
+    static let messageType = "scoreState"
+
+    let myScore: Int
+    let yourScore: Int
+    let myGameScore: Int
+    let yourGameScore: Int
+    let mySetScore: Int
+    let yourSetScore: Int
+    let completedSets: [[Int]]
+    let isTieBreak: Bool
+
+    func toDictionary() -> [String: Any] {
+        [
+            "type": Self.messageType,
+            "myScore": myScore,
+            "yourScore": yourScore,
+            "myGame": myGameScore,
+            "yourGame": yourGameScore,
+            "mySet": mySetScore,
+            "yourSet": yourSetScore,
+            "sets": completedSets,
+            "tieBreak": isTieBreak,
+        ]
+    }
+
+    init?(from dict: [String: Any]) {
+        guard dict["type"] as? String == Self.messageType,
+              let myScore = dict["myScore"] as? Int,
+              let yourScore = dict["yourScore"] as? Int,
+              let myGame = dict["myGame"] as? Int,
+              let yourGame = dict["yourGame"] as? Int,
+              let mySet = dict["mySet"] as? Int,
+              let yourSet = dict["yourSet"] as? Int else { return nil }
+        self.myScore = myScore
+        self.yourScore = yourScore
+        myGameScore = myGame
+        yourGameScore = yourGame
+        mySetScore = mySet
+        yourSetScore = yourSet
+        completedSets = dict["sets"] as? [[Int]] ?? []
+        isTieBreak = dict["tieBreak"] as? Bool ?? false
+    }
+
+    init(myScore: Int, yourScore: Int, myGameScore: Int, yourGameScore: Int,
+         mySetScore: Int, yourSetScore: Int, completedSets: [[Int]], isTieBreak: Bool)
+    {
+        self.myScore = myScore
+        self.yourScore = yourScore
+        self.myGameScore = myGameScore
+        self.yourGameScore = yourGameScore
+        self.mySetScore = mySetScore
+        self.yourSetScore = yourSetScore
+        self.completedSets = completedSets
+        self.isTieBreak = isTieBreak
+    }
+}
+
+// MARK: - 경기 종료/저장
+
+struct MatchEndMessage: ConnectivityMessage {
+    static let messageType = "matchEnd"
+
+    let sessionId: UUID
+    let result: String
+    let completedSets: [[Int]]
+    let startedAt: Date
+    let endedAt: Date
+    let durationSeconds: Int
+    let calories: Double
+    /// 활동 + 휴식. 구버전 워치 페이로드에는 없으므로 optional.
+    let totalCalories: Double?
+    let averageHeartRate: Double?
+    let mode: String
+    let noAdRule: Bool
+    /// 이 경기의 식별자. 저장 시 중복 제거 키로 쓴다. 구버전 페이로드에는 없으므로 optional.
+    let matchId: UUID?
+    /// 워크아웃 시작부터 이 경기 종료 시점까지의 누적값. Summary가 워크아웃별 최댓값으로 접어 합산한다.
+    let workoutElapsedSeconds: Int?
+    let workoutCalories: Double?
+    let workoutTotalCalories: Double?
+
+    func toDictionary() -> [String: Any] {
+        dictionary(type: Self.messageType)
+    }
+
+    /// 사용자가 저장 버튼을 눌렀을 때 전송하는 페이로드 (iOS가 이때만 persist)
+    func toSaveDictionary() -> [String: Any] {
+        dictionary(type: MatchSaveMessage.messageType)
+    }
+
+    private func dictionary(type: String) -> [String: Any] {
+        var dict: [String: Any] = [
+            "type": type,
+            "sessionId": sessionId.uuidString,
+            "result": result,
+            "sets": completedSets,
+            "startedAt": startedAt.timeIntervalSince1970,
+            "endedAt": endedAt.timeIntervalSince1970,
+            "durationSeconds": durationSeconds,
+            "calories": calories,
+            "mode": mode,
+            "noAdRule": noAdRule,
+        ]
+        if let total = totalCalories { dict["totalCalories"] = total }
+        if let hr = averageHeartRate { dict["heartRate"] = hr }
+        if let matchId { dict["matchId"] = matchId.uuidString }
+        if let workoutElapsedSeconds { dict["workoutElapsedSeconds"] = workoutElapsedSeconds }
+        if let workoutCalories { dict["workoutCalories"] = workoutCalories }
+        if let workoutTotalCalories { dict["workoutTotalCalories"] = workoutTotalCalories }
+        return dict
+    }
+
+    init?(from dict: [String: Any]) {
+        let type = dict["type"] as? String
+        guard type == Self.messageType || type == MatchSaveMessage.messageType,
+              let idStr = dict["sessionId"] as? String,
+              let id = UUID(uuidString: idStr),
+              let result = dict["result"] as? String,
+              let startTs = dict["startedAt"] as? Double,
+              let endTs = dict["endedAt"] as? Double,
+              let mode = dict["mode"] as? String else { return nil }
+        sessionId = id
+        self.result = result
+        completedSets = dict["sets"] as? [[Int]] ?? []
+        startedAt = Date(timeIntervalSince1970: startTs)
+        endedAt = Date(timeIntervalSince1970: endTs)
+        durationSeconds = dict["durationSeconds"] as? Int ?? Int(endTs - startTs)
+        calories = dict["calories"] as? Double ?? 0
+        totalCalories = dict["totalCalories"] as? Double
+        averageHeartRate = dict["heartRate"] as? Double
+        self.mode = mode
+        noAdRule = dict["noAdRule"] as? Bool ?? true
+        matchId = (dict["matchId"] as? String).flatMap(UUID.init(uuidString:))
+        workoutElapsedSeconds = dict["workoutElapsedSeconds"] as? Int
+        workoutCalories = dict["workoutCalories"] as? Double
+        workoutTotalCalories = dict["workoutTotalCalories"] as? Double
+    }
+
+    init(sessionId: UUID, result: String, completedSets: [[Int]], startedAt: Date,
+         endedAt: Date, durationSeconds: Int, calories: Double, averageHeartRate: Double?,
+         mode: String, noAdRule: Bool, totalCalories: Double? = nil,
+         matchId: UUID? = nil, workoutElapsedSeconds: Int? = nil,
+         workoutCalories: Double? = nil, workoutTotalCalories: Double? = nil)
+    {
+        self.sessionId = sessionId
+        self.result = result
+        self.completedSets = completedSets
+        self.startedAt = startedAt
+        self.endedAt = endedAt
+        self.durationSeconds = durationSeconds
+        self.calories = calories
+        self.averageHeartRate = averageHeartRate
+        self.mode = mode
+        self.noAdRule = noAdRule
+        self.totalCalories = totalCalories
+        self.matchId = matchId
+        self.workoutElapsedSeconds = workoutElapsedSeconds
+        self.workoutCalories = workoutCalories
+        self.workoutTotalCalories = workoutTotalCalories
+    }
+}
+
+/// MatchEndMessage와 같은 페이로드를 "matchSave" 타입으로 실어 나르는 래퍼.
+/// 결과 표시(matchEnd)와 저장 요청(matchSave)을 타입 라우팅으로 구분하기 위해 존재한다.
+struct MatchSaveMessage: ConnectivityMessage {
+    static let messageType = "matchSave"
+
+    let base: MatchEndMessage
+
+    init(base: MatchEndMessage) {
+        self.base = base
+    }
+
+    init?(from dictionary: [String: Any]) {
+        guard dictionary["type"] as? String == Self.messageType,
+              let base = MatchEndMessage(from: dictionary) else { return nil }
+        self.base = base
+    }
+
+    func toDictionary() -> [String: Any] {
+        base.toSaveDictionary()
+    }
+}
+
+struct MatchSaveResultMessage: ConnectivityMessage {
+    static let messageType = "matchSaveResult"
+
+    let sessionId: UUID
+    let success: Bool
+
+    func toDictionary() -> [String: Any] {
+        [
+            "type": Self.messageType,
+            "sessionId": sessionId.uuidString,
+            "success": success,
+        ]
+    }
+
+    init?(from dict: [String: Any]) {
+        guard dict["type"] as? String == Self.messageType,
+              let idStr = dict["sessionId"] as? String,
+              let id = UUID(uuidString: idStr),
+              let success = dict["success"] as? Bool else { return nil }
+        sessionId = id
+        self.success = success
+    }
+
+    init(sessionId: UUID, success: Bool) {
+        self.sessionId = sessionId
+        self.success = success
+    }
+}
+
+// MARK: - 신호 메시지 (구 서비스에서는 raw dict였던 것들 — type/sentAt은 코어가 스탬프)
+
+struct WorkoutEndMessage: ConnectivityMessage {
+    static let messageType = "workoutEnd"
+
+    let sessionId: UUID
+
+    init(sessionId: UUID) {
+        self.sessionId = sessionId
+    }
+
+    init?(from dictionary: [String: Any]) {
+        guard let idStr = dictionary["sessionId"] as? String,
+              let id = UUID(uuidString: idStr) else { return nil }
+        sessionId = id
+    }
+
+    func toDictionary() -> [String: Any] {
+        ["sessionId": sessionId.uuidString]
+    }
+}
+
+/// 드라이버가 진행 중 매치를 중간에 버릴 때(뒤로가기) 미러도 모드선택으로 돌아가게 하는 신호.
+struct MatchResetMessage: ConnectivityMessage {
+    static let messageType = "matchReset"
+
+    let sessionId: UUID
+
+    init(sessionId: UUID) {
+        self.sessionId = sessionId
+    }
+
+    init?(from dictionary: [String: Any]) {
+        guard let idStr = dictionary["sessionId"] as? String,
+              let id = UUID(uuidString: idStr) else { return nil }
+        sessionId = id
+    }
+
+    func toDictionary() -> [String: Any] {
+        ["sessionId": sessionId.uuidString]
+    }
+}

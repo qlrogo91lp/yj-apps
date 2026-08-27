@@ -1,0 +1,94 @@
+/* Tabs */
+"tab_summary" = "Summary";
+"tab_match" = "Match";
+"tab_history" = "History";
+"tab_workout" = "Workout";
+
+/* Match Format */
+"match_format_one_set" = "One Set";
+"match_format_best_of_3" = "Best of 3";
+"match_format_one_set_desc" = "Quick practice, one set";
+"match_format_best_of_3_desc" = "Official match, first to win 2 sets";
+
+/* Match Screen */
+"new_match" = "New Match";
+"mode_game_threshold" = "Games";
+"mode_no_ad" = "No-AD";
+"mode_no_tie" = "No Tiebreak";
+"score_label_me" = "ME";
+"score_label_opp" = "OPP";
+"btn_confirm" = "Confirm";
+"btn_reset" = "Reset";
+"btn_undo" = "Undo";
+"btn_end_match" = "End Match";
+"btn_end_set" = "End Set";
+"btn_new_match" = "New Match";
+"set_indicator_format" = "Set %d";
+"match_over_win" = "Victory!";
+"match_over_lose" = "Defeat";
+"game_score_label" = "Games";
+"score_edit_title" = "Edit Score";
+"watch_score_me" = "ME";
+"watch_score_opp" = "OPP";
+"early_end_confirm_title" = "Quit Match?";
+"early_end_confirm_yes" = "Confirm";
+"early_end_confirm_message" = "Your score won't be saved.";
+
+/* Workout */
+"workout_end" = "End Workout";
+"ios_start_workout" = "Start Workout";
+"workout_in_progress" = "In Progress";
+"workout_paused" = "Paused";
+
+/* Summary */
+"summary_period_today" = "Today";
+"summary_period_week" = "This Week";
+"summary_period_month" = "This Month";
+"summary_period_all" = "All Time";
+"summary_total_matches" = "Matches";
+"summary_wins" = "Wins";
+"summary_win_rate" = "Win Rate";
+"summary_streak" = "Day Streak";
+"summary_recent_matches" = "Recent Matches";
+"summary_no_matches" = "No matches this period";
+"summary_section_workout" = "Workout";
+"summary_total_calories" = "Active kcal";
+"summary_total_energy" = "Total kcal";
+"summary_duration" = "Duration";
+"summary_avg_heartrate" = "Avg BPM";
+
+/* Match Detail */
+"match_detail_title" = "Match Detail";
+"match_detail_section_sets" = "Sets";
+"match_detail_section_info" = "Info";
+
+/* History */
+"history_title" = "History";
+"history_empty" = "No matches recorded yet";
+"history_view_calendar" = "Calendar";
+"history_view_list" = "List";
+
+/* Match Score */
+"set_tiebreak" = "TIE";
+"watch_set_label" = "SET";
+
+/* Match Result */
+"result_save" = "Save";
+"result_saved" = "Saved";
+"result_save_failed" = "Save Failed, Retry";
+"watch_victory" = "Victory!";
+"watch_defeat" = "Defeat";
+"result_draw" = "Draw";
+
+/* End Workout Dialog */
+"end_workout_confirm_title" = "End Workout";
+"end_workout_confirm_message" = "End this workout session?";
+"end_workout_with_match_message" = "A match is in progress. Ending the workout will void the match result.";
+
+/* Mirror View */
+"mirror_view_only" = "Entering on Watch · View only";
+
+/* Common */
+"btn_cancel" = "Cancel";
+"btn_save" = "Save";
+"vs_label" = "vs";

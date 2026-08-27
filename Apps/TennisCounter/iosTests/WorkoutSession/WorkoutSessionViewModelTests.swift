@@ -1,0 +1,713 @@
+import Foundation
+import SwiftData
+@testable import TennisCounter
+import Testing
+import WorkoutCore
+
+@MainActor
+final class LiveActivitySpy: LiveActivityControlling {
+    var startCount = 0
+    var endCount = 0
+    func start(mode _: MatchFormat) {
+        startCount += 1
+    }
+
+    func update(from _: ScoreState, score _: Score) {}
+    func end() {
+        endCount += 1
+    }
+}
+
+@Suite(.serialized)
+struct WorkoutSessionViewModelTests {
+    @Test @MainActor func remoteSessionStartStartsLiveActivityOnce() {
+        let spy = LiveActivitySpy()
+        let vm = WorkoutSessionViewModel(liveActivity: spy)
+        vm.applyIncomingSessionStartForTest(SessionStartMessage(
+            sessionId: UUID(),
+            options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false),
+            workoutStartDate: Date()
+        ))
+        #expect(spy.startCount == 1)
+    }
+
+    @Test @MainActor func matchSessionStartMatchSetsPlayingPhase() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        guard case let .playing(options) = vm.phase else {
+            Issue.record("Expected .playing phase")
+            return
+        }
+        #expect(options.mode == .oneSet)
+        #expect(options.noAdRule == true)
+    }
+
+    @Test @MainActor func matchSessionFinishMatchSetsFinishedPhase() {
+        let vm = WorkoutSessionViewModel()
+        vm.startSession()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.finishMatch(result: .win, completedSets: [(my: 6, your: 4)])
+        guard case let .finished(session) = vm.phase else {
+            Issue.record("Expected .finished phase")
+            return
+        }
+        #expect(session.result == .win)
+        #expect(session.completedSets.count == 1)
+        #expect(session.mySetScore == 1)
+        #expect(session.yourSetScore == 0)
+    }
+
+    @Test @MainActor func matchSessionStartNewMatchResetsToModeSelection() {
+        let vm = WorkoutSessionViewModel()
+        vm.startSession()
+        vm.startMatch(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false))
+        vm.startNewMatch()
+        guard case .modeSelection = vm.phase else {
+            Issue.record("Expected .modeSelection after startNewMatch")
+            return
+        }
+    }
+
+    @Test @MainActor func matchSessionEndSessionResetsState() {
+        let vm = WorkoutSessionViewModel()
+        vm.startSession()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.endSession()
+        guard case .modeSelection = vm.phase else {
+            Issue.record("Expected .modeSelection after endSession")
+            return
+        }
+        #expect(vm.elapsedSeconds == 0)
+    }
+
+    @Test @MainActor func matchSessionRestartMatchUsesSameFormat() {
+        let vm = WorkoutSessionViewModel()
+        vm.startSession()
+        vm.startMatch(options: MatchOptions(mode: .bestOfThree, noAdRule: false, noTieRule: true))
+        vm.finishMatch(result: .loss, completedSets: [(my: 3, your: 6)])
+        vm.restartMatch()
+        guard case let .playing(newOptions) = vm.phase else {
+            Issue.record("Expected .playing after restartMatch")
+            return
+        }
+        #expect(newOptions.mode == .bestOfThree)
+    }
+
+    @Test @MainActor func matchSessionRestartWithoutMatchIsNoOp() {
+        let vm = WorkoutSessionViewModel()
+        vm.restartMatch()
+        guard case .modeSelection = vm.phase else {
+            Issue.record("Expected .modeSelection — restartMatch without prior match should be no-op")
+            return
+        }
+    }
+
+    @Test @MainActor func matchSessionSaveWithNoSessionIsNoOp() {
+        let vm = WorkoutSessionViewModel()
+        #expect(vm.saveCurrentMatch() == false) // _currentSession nil이면 guard에서 false 리턴
+    }
+
+    @Test @MainActor func saveCurrentMatchReturnsTrueOnSuccess() throws {
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        let container = try ModelContainer(for: Match.self, SetRecord.self, configurations: config)
+        MatchPersistenceService.shared.configure(with: ModelContext(container))
+
+        let vm = WorkoutSessionViewModel()
+        vm.startSession()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.finishMatch(result: .win, completedSets: [(my: 6, your: 4)])
+
+        #expect(vm.saveCurrentMatch() == true)
+    }
+
+    @Test @MainActor func matchSessionFinishMatchStoresSession() {
+        let vm = WorkoutSessionViewModel()
+        vm.startSession()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.finishMatch(result: .win, completedSets: [(my: 6, your: 4)])
+        guard case let .finished(session) = vm.phase else {
+            Issue.record("Expected .finished")
+            return
+        }
+        #expect(session.result == .win)
+        #expect(session.mySetScore == 1)
+        #expect(session.yourSetScore == 0)
+        #expect(session.completedSets.count == 1)
+    }
+
+    @Test @MainActor func matchSessionStartNewMatchClearsToModeSelection() {
+        let vm = WorkoutSessionViewModel()
+        vm.startSession()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.finishMatch(result: .win, completedSets: [(my: 6, your: 4)])
+        vm.startNewMatch()
+        guard case .modeSelection = vm.phase else {
+            Issue.record("Expected .modeSelection after startNewMatch")
+            return
+        }
+    }
+
+    @Test @MainActor func workoutSessionRemoteWorkoutEndedDefaultsFalse() {
+        let vm = WorkoutSessionViewModel()
+        #expect(vm.remoteWorkoutEnded == false)
+    }
+
+    @Test @MainActor func workoutSessionEndSessionDuringPlayingResetsPhase() {
+        let vm = WorkoutSessionViewModel()
+        vm.startSession()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.endSession()
+        guard case .modeSelection = vm.phase else {
+            Issue.record("Expected .modeSelection after remote workout end triggers endSession")
+            return
+        }
+        #expect(vm.elapsedSeconds == 0)
+        #expect(vm.isPaused == false)
+    }
+
+    @Test @MainActor func workoutSessionEndSessionAfterFinishedResetsPhase() {
+        let vm = WorkoutSessionViewModel()
+        vm.startSession()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.finishMatch(result: .win, completedSets: [(my: 6, your: 4)])
+        vm.endSession()
+        guard case .modeSelection = vm.phase else {
+            Issue.record("Expected .modeSelection after endSession from .finished state")
+            return
+        }
+    }
+
+    @Test @MainActor func workoutSessionEndSessionResetsMetrics() {
+        let vm = WorkoutSessionViewModel()
+        vm.startSession()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.endSession()
+        #expect(vm.metrics.activeCalories == 0)
+        #expect(vm.metrics.heartRate == 0)
+    }
+
+    @Test @MainActor func startOwnMatchClearsStaleRemoteScoreState() {
+        let service = MatchConnectivity.shared
+        service.receivedScoreState = ScoreState(
+            myScore: 15, yourScore: 0,
+            myGameScore: 3, yourGameScore: 2,
+            mySetScore: 1, yourSetScore: 0,
+            completedSets: [], isTieBreak: false
+        )
+        defer { service.receivedScoreState = nil }
+
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false), isRemote: false)
+
+        #expect(service.receivedScoreState == nil)
+    }
+
+    @Test @MainActor func remoteMatchStartDoesNotClearScoreState() {
+        let service = MatchConnectivity.shared
+        let existing = ScoreState(
+            myScore: 15, yourScore: 0,
+            myGameScore: 3, yourGameScore: 2,
+            mySetScore: 1, yourSetScore: 0,
+            completedSets: [], isTieBreak: false
+        )
+        service.receivedScoreState = existing
+        defer { service.receivedScoreState = nil }
+
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false), isRemote: true)
+
+        #expect(service.receivedScoreState != nil)
+    }
+
+    @Test @MainActor func restartMatchResetsScoreVM() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.scoreVM.myGameScore = 3
+        vm.scoreVM.mySetScore = 1
+        vm.scoreVM.completedSets = [(my: 6, your: 4)]
+
+        vm.restartMatch()
+
+        #expect(vm.scoreVM.myGameScore == 0)
+        #expect(vm.scoreVM.mySetScore == 0)
+        #expect(vm.scoreVM.completedSets.isEmpty)
+    }
+
+    @Test @MainActor func startMatchAppliesOptionsToScoreVM() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .bestOfThree, noAdRule: false, noTieRule: false))
+        #expect(vm.scoreVM.options.mode == .bestOfThree)
+        #expect(vm.scoreVM.score.noAdRule == false)
+    }
+
+    @Test @MainActor func driverIgnoresRemoteScoreState() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false)) // isDriver = true
+        vm.scoreVM.myGameScore = 2
+        vm.applyIncomingScoreStateForTest(ScoreState(
+            myScore: 0, yourScore: 0, myGameScore: 5, yourGameScore: 5,
+            mySetScore: 0, yourSetScore: 0, completedSets: [], isTieBreak: false
+        ))
+        #expect(vm.scoreVM.myGameScore == 2) // driver는 덮어쓰지 않음
+    }
+
+    @Test @MainActor func mirrorAppliesRemoteScoreState() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false), isRemote: true) // mirror
+        vm.applyIncomingScoreStateForTest(ScoreState(
+            myScore: 30, yourScore: 15, myGameScore: 3, yourGameScore: 2,
+            mySetScore: 0, yourSetScore: 0, completedSets: [], isTieBreak: false
+        ))
+        #expect(vm.scoreVM.myGameScore == 3)
+        #expect(vm.scoreVM.score.myScore == 30)
+    }
+
+    @Test @MainActor func restartMatchPreservesMirrorRole() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false), isRemote: true) // mirror
+        vm.finishMatch(result: .win, completedSets: [(my: 6, your: 4)])
+        vm.restartMatch()
+        vm.applyIncomingScoreStateForTest(ScoreState(
+            myScore: 30, yourScore: 15, myGameScore: 3, yourGameScore: 2,
+            mySetScore: 0, yourSetScore: 0, completedSets: [], isTieBreak: false
+        ))
+        #expect(vm.scoreVM.myGameScore == 3) // restartMatch 후에도 mirror 역할이 유지되어 원격 상태를 적용
+    }
+
+    @Test @MainActor func mirrorIgnoresScoreStateAfterMatchFinished() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false), isRemote: true) // mirror
+        vm.finishMatch(result: .win, completedSets: [(my: 6, your: 4)])
+        vm.applyIncomingScoreStateForTest(ScoreState(
+            myScore: 30, yourScore: 15, myGameScore: 3, yourGameScore: 2,
+            mySetScore: 0, yourSetScore: 0, completedSets: [], isTieBreak: false
+        ))
+        #expect(vm.scoreVM.myGameScore == 0) // 경기 종료 후 늦게 도착한 상태는 무시
+    }
+
+    @Test @MainActor func driverYieldsToSmallerSessionIdOnSimultaneousStart() throws {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false)) // driver, random sessionId
+        let smallerId = try #require(UUID(uuidString: "00000000-0000-0000-0000-000000000000"))
+        vm.applyIncomingSessionStartForTest(SessionStartMessage(
+            sessionId: smallerId,
+            options: MatchOptions(mode: .bestOfThree, noAdRule: false, noTieRule: false),
+            workoutStartDate: Date()
+        ))
+        #expect(vm.scoreVM.options.mode == .bestOfThree) // 더 작은 sessionId가 우선해 mirror로 전환
+    }
+
+    @Test @MainActor func driverKeepsDrivingAgainstLargerSessionIdOnSimultaneousStart() throws {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false)) // driver, random sessionId
+        let largerId = try #require(UUID(uuidString: "FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF"))
+        vm.applyIncomingSessionStartForTest(SessionStartMessage(
+            sessionId: largerId,
+            options: MatchOptions(mode: .bestOfThree, noAdRule: false, noTieRule: false),
+            workoutStartDate: Date()
+        ))
+        #expect(vm.scoreVM.options.mode == .oneSet) // 더 큰 sessionId는 우선권이 없어 무시되고 driver 유지
+    }
+
+    @Test @MainActor func workoutEndIgnoredWhenSessionIdMismatch() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.handleIncomingWorkoutEndForTest(UUID()) // 다른 세션
+        #expect(vm.remoteWorkoutEnded == false)
+        guard case .playing = vm.phase else {
+            Issue.record("playing 유지 기대")
+            return
+        }
+    }
+
+    @Test @MainActor func workoutEndAppliedWhenSessionIdMatches() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.handleIncomingWorkoutEndForTest(vm.currentSessionIdForTest)
+        #expect(vm.remoteWorkoutEnded == true)
+    }
+
+    @Test @MainActor func workoutEndAppliedBeforeAnyMatchStarted() {
+        // 매치를 한 번도 시작하지 않으면 sessionId가 상대와 동기화되지 않으므로, 어떤 id가 와도 종료를 수용해야 한다.
+        let vm = WorkoutSessionViewModel()
+        vm.handleIncomingWorkoutEndForTest(UUID())
+        #expect(vm.remoteWorkoutEnded == true)
+    }
+
+    @Test @MainActor func staleWorkoutEndDoesNotEndCurrentMatch() {
+        let vm = WorkoutSessionViewModel()
+        vm.startSession()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        let unrelated = UUID()
+        vm.handleIncomingWorkoutEndForTest(unrelated)
+        #expect(vm.remoteWorkoutEnded == false)
+        guard case .playing = vm.phase else {
+            Issue.record("stale 종료는 무시되고 playing 유지되어야 함")
+            return
+        }
+    }
+
+    @Test @MainActor func remoteStartMatchSyncsSessionIdForWorkoutEnd() {
+        let vm = WorkoutSessionViewModel()
+        let sid = UUID()
+        vm.startSession()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false), sessionId: sid, isRemote: true)
+        #expect(vm.currentSessionIdForTest == sid) // 원격 채택 시 sessionId가 상대 것으로 동기화됨
+        vm.handleIncomingWorkoutEndForTest(sid)
+        #expect(vm.remoteWorkoutEnded == true) // 동기화된 sessionId 덕분에 workoutEnd가 적용됨
+    }
+
+    @Test @MainActor func remoteStartMatchSyncsSessionIdForMatchReset() {
+        let vm = WorkoutSessionViewModel()
+        let sid = UUID()
+        vm.startSession()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false), sessionId: sid, isRemote: true)
+        vm.handleIncomingMatchResetForTest(sid)
+        guard case .modeSelection = vm.phase else {
+            Issue.record("sessionId 동기화 후 matchReset이 적용되어 모드선택으로 복귀해야 함")
+            return
+        }
+    }
+
+    @Test @MainActor func mirrorMatchResetReturnsToModeSelection() {
+        let vm = WorkoutSessionViewModel()
+        vm.startSession()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false), isRemote: true) // mirror
+        vm.handleIncomingMatchResetForTest(vm.currentSessionIdForTest)
+        guard case .modeSelection = vm.phase else {
+            Issue.record("미러는 드라이버의 matchReset을 받으면 모드선택으로 돌아가야 함")
+            return
+        }
+    }
+
+    @Test @MainActor func driverIgnoresMatchReset() {
+        let vm = WorkoutSessionViewModel()
+        vm.startSession()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false)) // driver
+        vm.handleIncomingMatchResetForTest(vm.currentSessionIdForTest)
+        guard case .playing = vm.phase else {
+            Issue.record("드라이버는 matchReset을 무시하고 playing 유지해야 함")
+            return
+        }
+    }
+
+    @Test @MainActor func mirrorIgnoresMatchResetForDifferentSession() {
+        let vm = WorkoutSessionViewModel()
+        vm.startSession()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false), isRemote: true) // mirror
+        vm.handleIncomingMatchResetForTest(UUID()) // 다른 세션
+        guard case .playing = vm.phase else {
+            Issue.record("다른 세션의 matchReset은 무시되어야 함")
+            return
+        }
+    }
+
+    @Test @MainActor func saveFromWatchPersistsMatch() throws {
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        let container = try ModelContainer(for: Match.self, SetRecord.self, configurations: config)
+        MatchPersistenceService.shared.configure(with: ModelContext(container))
+
+        let sid = UUID()
+        let msg = MatchEndMessage(
+            sessionId: sid,
+            result: "win",
+            completedSets: [[6, 4]],
+            startedAt: Date(timeIntervalSince1970: 1_000_000),
+            endedAt: Date(timeIntervalSince1970: 1_001_800),
+            durationSeconds: 1800,
+            calories: 200,
+            averageHeartRate: 130,
+            mode: "oneSet",
+            noAdRule: true
+        )
+
+        let vm = WorkoutSessionViewModel()
+        vm.saveFromWatchForTest(msg)
+
+        let saved = try MatchPersistenceService.shared.fetchByWorkoutSession(sid)
+        #expect(saved.count == 1)
+    }
+
+    /// 워치가 누적 칼로리를 보내는 체제에서, 폰 드라이버로 진행한 경기의 저장 칼로리는
+    /// 워크아웃 전체가 아니라 경기 구간이어야 한다. (kcalAtStart=0 고정이면 전체가 저장된다)
+    @Test @MainActor func phoneDriverSavesMatchSegmentCaloriesNotWorkoutTotal() throws {
+        let vm = WorkoutSessionViewModel()
+        // 경기 시작 전 이미 워크아웃에서 200/260 kcal 태운 상태
+        vm.metrics = WorkoutMetrics(elapsedSeconds: 600, activeCalories: 200, totalCalories: 260, heartRate: 120)
+
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+
+        // 경기 중 50/60 kcal 추가 소모 → 누적 250/320
+        vm.metrics = WorkoutMetrics(elapsedSeconds: 1200, activeCalories: 250, totalCalories: 320, heartRate: 140)
+        vm.finishMatch(result: .win, completedSets: [(my: 6, your: 3)])
+
+        let session = try #require(vm.currentSessionForTest)
+        let match = vm.buildMatchForTest(session)
+        #expect(match.caloriesBurned == 50)
+        #expect(match.totalCaloriesBurned == 60)
+    }
+
+    /// 경기 시작 시점의 누적값이 기준선으로 잡혀야 한다.
+    @Test @MainActor func startMatchCapturesCalorieBaseline() throws {
+        let vm = WorkoutSessionViewModel()
+        vm.metrics = WorkoutMetrics(activeCalories: 200, totalCalories: 260)
+
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+
+        let session = try #require(vm.currentSessionForTest)
+        #expect(session.kcalAtStart == 200)
+        #expect(session.totalKcalAtStart == 260)
+    }
+
+    // MARK: - 경과시간 앵커
+
+    /// 앵커 수신 후에는 워치가 보낸 경과초 + 그 뒤 흐른 시간으로 계산한다.
+    @Test @MainActor func elapsedInterpolatesFromWatchAnchor() throws {
+        let vm = WorkoutSessionViewModel()
+        let dict: [String: Any] = [
+            "elapsed": 100.0, "calories": 10.0, "totalCalories": 12.0,
+            "heartRate": 130.0, "isPaused": false, "sentAt": 1000.0,
+        ]
+        let msg = try #require(WorkoutMetricsMessage(from: dict))
+        vm.applyIncomingMetricsForTest(msg)
+
+        vm.recomputeElapsedForTest(now: 1007)
+
+        #expect(vm.elapsedSeconds == 107)
+    }
+
+    /// 일시정지 앵커를 받으면 시간이 멈춘다.
+    @Test @MainActor func elapsedFreezesOnPausedAnchor() throws {
+        let vm = WorkoutSessionViewModel()
+        let dict: [String: Any] = [
+            "elapsed": 100.0, "isPaused": true, "sentAt": 1000.0,
+        ]
+        let msg = try #require(WorkoutMetricsMessage(from: dict))
+        vm.applyIncomingMetricsForTest(msg)
+
+        vm.recomputeElapsedForTest(now: 1007)
+
+        #expect(vm.elapsedSeconds == 100)
+    }
+
+    /// 앵커의 isPaused가 폰 isPaused에 반영된다 (ack 경로).
+    @Test @MainActor func anchorIsPausedUpdatesViewModel() throws {
+        let vm = WorkoutSessionViewModel()
+        let dict: [String: Any] = ["elapsed": 10.0, "isPaused": true, "sentAt": 1000.0]
+        let msg = try #require(WorkoutMetricsMessage(from: dict))
+        vm.applyIncomingMetricsForTest(msg)
+        #expect(vm.isPaused == true)
+    }
+
+    /// 앵커를 한 번도 못 받은 폰 단독 상태면 로컬 시작 시각 기준으로 센다.
+    @Test @MainActor func elapsedFallsBackToLocalClockWithoutAnchor() {
+        let vm = WorkoutSessionViewModel()
+        vm.startSession(startDate: Date(timeIntervalSince1970: 1000))
+
+        vm.recomputeElapsedForTest(now: 1042)
+
+        #expect(vm.elapsedSeconds == 42)
+    }
+
+    // MARK: - Pause 왕복
+
+    /// 폰은 pause를 낙관적으로 토글하지 않는다 — 워치 ack(앵커)가 와야 바뀐다.
+    @Test @MainActor func requestPauseDoesNotToggleLocallyBeforeAck() {
+        let vm = WorkoutSessionViewModel()
+        vm.startSession()
+
+        vm.requestPause()
+
+        #expect(vm.isPaused == false)
+    }
+
+    /// 워치 ack가 도착하면 그때 isPaused가 바뀐다.
+    @Test @MainActor func pauseAppliesWhenWatchAckArrives() throws {
+        let vm = WorkoutSessionViewModel()
+        vm.startSession()
+        vm.requestPause()
+
+        let dict: [String: Any] = ["elapsed": 50.0, "isPaused": true, "sentAt": 1000.0]
+        try vm.applyIncomingMetricsForTest(#require(WorkoutMetricsMessage(from: dict)))
+
+        #expect(vm.isPaused == true)
+    }
+
+    /// 재개도 같은 경로 — 명령만 보내고 ack로 풀린다.
+    @Test @MainActor func resumeAppliesWhenWatchAckArrives() throws {
+        let vm = WorkoutSessionViewModel()
+        vm.startSession()
+        let paused: [String: Any] = ["elapsed": 50.0, "isPaused": true, "sentAt": 1000.0]
+        try vm.applyIncomingMetricsForTest(#require(WorkoutMetricsMessage(from: paused)))
+
+        vm.requestResume()
+        #expect(vm.isPaused == true) // 아직 ack 전
+
+        let running: [String: Any] = ["elapsed": 50.0, "isPaused": false, "sentAt": 1010.0]
+        try vm.applyIncomingMetricsForTest(#require(WorkoutMetricsMessage(from: running)))
+        #expect(vm.isPaused == false)
+    }
+
+    /// mirror는 진행 중인 매치를 끝낼 권한이 없다. 로컬로 리셋해버리면 driver는 계속 경기 중인데
+    /// mirror만 모드선택으로 빠져 두 기기가 어긋난다 (sendMatchReset은 isDriver 가드에 막혀 나가지도 않는다).
+    @Test @MainActor func mirrorCannotResetPlayingMatchLocally() {
+        let vm = WorkoutSessionViewModel()
+        vm.startSession()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false), isRemote: true) // mirror
+        vm.startNewMatch()
+        guard case .playing = vm.phase else {
+            Issue.record("mirror의 로컬 리셋은 무시되고 playing이 유지되어야 함")
+            return
+        }
+    }
+
+    /// 위 가드가 driver의 정상 리셋까지 막으면 안 된다.
+    @Test @MainActor func driverCanResetPlayingMatchLocally() {
+        let vm = WorkoutSessionViewModel()
+        vm.startSession()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false)) // driver
+        vm.startNewMatch()
+        guard case .modeSelection = vm.phase else {
+            Issue.record("driver는 진행 중인 매치를 끝낼 수 있어야 함")
+            return
+        }
+    }
+
+    /// 종료된 매치의 결과 화면은 mirror도 스스로 닫을 수 있다 — 진행 중인 매치가 아니라 어긋날 상태가 없다.
+    /// (가드를 .playing으로 한정한 이유. 여기까지 막으면 mirror가 결과 화면에 갇힌다.)
+    @Test @MainActor func mirrorCanLeaveFinishedResultScreen() {
+        let vm = WorkoutSessionViewModel()
+        vm.startSession()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false), isRemote: true) // mirror
+        vm.finishMatch(result: .win, completedSets: [(my: 6, your: 4)])
+        vm.startNewMatch()
+        guard case .modeSelection = vm.phase else {
+            Issue.record("mirror도 결과 화면에서는 빠져나올 수 있어야 함")
+            return
+        }
+    }
+
+    // MARK: - matchId 발급·채택 + 경기 시작 시각
+
+    /// 스펙 1-3 재현: 폰의 startedAt 프로퍼티는 워크아웃 시작 시각인데 이를 그대로
+    /// MatchSession.startedAt에 넣고 있었다. 워치 경로는 경기 시작 시각을 넣어 서로 어긋났다.
+    /// startedAt은 History 정렬·캘린더 날짜·Summary 기간 필터에 모두 쓰인다.
+    @Test @MainActor func startMatchUsesMatchStartTimeNotWorkoutStartTime() {
+        let vm = WorkoutSessionViewModel()
+        let workoutStart = Date(timeIntervalSince1970: 1_000_000)
+        vm.startSession(startDate: workoutStart)
+
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+
+        guard let session = vm.currentSessionForTest else {
+            Issue.record("currentSession이 없음")
+            return
+        }
+        #expect(session.startedAt != workoutStart)
+        #expect(session.startedAt.timeIntervalSinceNow > -5)
+    }
+
+    @Test @MainActor func startNewMatchKeepsSessionIdAndIssuesNewMatchId() {
+        let vm = WorkoutSessionViewModel()
+        let options = MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false)
+
+        vm.startMatch(options: options)
+        let firstMatchId = vm.currentSessionForTest?.id
+        let sessionId = vm.currentSessionIdForTest
+
+        vm.startNewMatch(notifyRemote: false)
+        vm.startMatch(options: options)
+
+        #expect(vm.currentSessionIdForTest == sessionId)
+        #expect(firstMatchId != nil)
+        #expect(vm.currentSessionForTest?.id != firstMatchId)
+    }
+
+    @Test @MainActor func restartMatchIssuesNewMatchIdButKeepsSessionId() {
+        let vm = WorkoutSessionViewModel()
+        let options = MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false)
+
+        vm.startMatch(options: options)
+        let firstMatchId = vm.currentSessionForTest?.id
+        let sessionId = vm.currentSessionIdForTest
+        vm.finishMatch(result: .win, completedSets: [(my: 6, your: 4)])
+
+        vm.restartMatch()
+
+        #expect(firstMatchId != nil)
+        #expect(vm.currentSessionForTest?.id != firstMatchId)
+        #expect(vm.currentSessionIdForTest == sessionId)
+    }
+
+    @Test @MainActor func remoteSessionStartAdoptsMatchId() {
+        let vm = WorkoutSessionViewModel()
+        let remoteMatchId = UUID()
+
+        vm.applyIncomingSessionStartForTest(SessionStartMessage(
+            sessionId: UUID(),
+            matchId: remoteMatchId,
+            options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false),
+            workoutStartDate: Date()
+        ))
+
+        #expect(vm.currentSessionForTest?.id == remoteMatchId)
+    }
+
+    /// 최종 리뷰 Finding 1: 콜드런치 mirror 경로(WorkoutSessionView.onAppear)는 메시지 싱크를 거치지
+    /// 않고 startMatch를 직접 호출한다. matchId를 넘기지 않으면 mirror가 자기 id를 새로 발급해
+    /// driver와 영구히 어긋난다(저장 시 중복 제거 키 불일치). 호출 계약을 고정한다.
+    @Test @MainActor func startMatchAdoptsExplicitRemoteMatchId() {
+        let vm = WorkoutSessionViewModel()
+        let remoteSessionId = UUID()
+        let remoteMatchId = UUID()
+
+        vm.startMatch(
+            options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false),
+            sessionId: remoteSessionId,
+            matchId: remoteMatchId,
+            isRemote: true
+        )
+
+        #expect(vm.currentSessionForTest?.id == remoteMatchId)
+        #expect(vm.currentSessionIdForTest == remoteSessionId)
+    }
+
+    /// 스펙 1-2 재현: durationSeconds에 워크아웃 누적 경과시간을 넣고 있었다.
+    /// 칼로리는 경기 구간 차분인데 시간만 누적이라 한 레코드 안에서 기준이 갈렸다.
+    @Test @MainActor func buildMatchFromSessionDurationIsMatchIntervalNotWorkoutTotal() {
+        let vm = WorkoutSessionViewModel()
+        // startSession()은 1초 타이머를 돌려 elapsedSeconds를 덮어쓴다. 여기선 값을 직접 주입한다.
+        vm.elapsedSeconds = 600
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.elapsedSeconds = 1500
+        vm.finishMatch(result: .win, completedSets: [(my: 6, your: 4)])
+
+        guard case let .finished(session) = vm.phase else {
+            Issue.record("Expected .finished phase")
+            return
+        }
+        let match = vm.buildMatchForTest(session)
+
+        #expect(match.durationSeconds == 900)
+        #expect(match.workoutElapsedSeconds == 1500)
+    }
+
+    @Test @MainActor func buildMatchFromSessionRecordsCumulativeWorkoutCalories() {
+        let vm = WorkoutSessionViewModel()
+        vm.metrics = WorkoutMetrics(elapsedSeconds: 600, activeCalories: 350, totalCalories: 420, heartRate: 130)
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.metrics = WorkoutMetrics(elapsedSeconds: 1500, activeCalories: 600, totalCalories: 730, heartRate: 140)
+        vm.finishMatch(result: .win, completedSets: [(my: 6, your: 4)])
+
+        guard case let .finished(session) = vm.phase else {
+            Issue.record("Expected .finished phase")
+            return
+        }
+        let match = vm.buildMatchForTest(session)
+
+        #expect(match.caloriesBurned == 250) // 경기 구간
+        #expect(match.workoutCaloriesBurned == 600) // 누적
+        #expect(match.totalCaloriesBurned == 310) // 경기 구간
+        #expect(match.workoutTotalCaloriesBurned == 730) // 누적
+    }
+}
