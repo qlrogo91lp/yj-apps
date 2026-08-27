@@ -158,18 +158,69 @@ SwiftLint 0.64.1에서 `parent_config` 상속이 정상 동작함을 실측 확�
 
 완료 조건: 세 레포 모두 `origin/main`과 일치하고, 전 타깃 빌드·테스트 통과 기록이 있다.
 
-### 1단계 — 레포 골격 + 히스토리 이관
+### 1단계 — 레포 골격 + 히스토리 이관 ✅ 완료 (2026-08-27)
 
-- [ ] `yj-apps` 로컬 레포 생성 (완료)
-- [ ] `git subtree add --prefix=Packages/YJKit <ralli-kit> main`
-- [ ] `git subtree add --prefix=Apps/GolfCounter <golf_counter> main`
-- [ ] `git subtree add --prefix=Apps/TennisCounter <tennis_counter> main`
+#### 방식: `git subtree`가 아니라 `git filter-branch`
 
-완료 조건:
-- `git log --oneline Apps/GolfCounter | wc -l` → 229 이상
-- `git log --oneline Apps/TennisCounter | wc -l` → 310 이상
-- `git log --oneline Packages/YJKit | wc -l` → 33 이상
-- `git log --follow` 로 임의 파일의 과거 이력이 추적된다
+당초 `git subtree add`를 계획했으나 **완료 조건을 만족하지 못한다.** 실측 결과:
+
+| | `subtree add` | `filter-branch` |
+|---|---|---|
+| 커밋 유입 | O | O |
+| 과거 커밋의 파일 경로 | **원본 경로 유지** | **새 경로로 재작성** |
+| `git log -- <prefix>` | **1건** (머지 커밋만) | 전체 |
+| `git log --follow <파일>` | **0건 (추적 끊김)** | 정상 |
+
+`subtree`는 다른 레포의 히스토리를 머지로 접붙일 뿐 과거 커밋을 다시 쓰지 않는다. 따라서
+`git log Apps/GolfCounter/`로 이력을 볼 수 없다. 경로 기반 추적이 이 전환의 완료 조건이므로
+`filter-branch --index-filter`로 **모든 과거 커밋의 경로를 재작성한 뒤 병합**하는 방식을 택했다.
+
+#### 절차
+
+1. 원본 레포를 `/tmp/migrate/`로 클론 (원본은 읽기만 하고 수정하지 않는다)
+2. 클론에서 `filter-branch --index-filter`로 전 커밋의 경로 앞에 prefix를 붙인다
+3. `yj-apps`에서 클론을 remote로 추가 → fetch → `merge --allow-unrelated-histories --no-ff`
+4. remote 제거
+
+```bash
+# 2단계의 index-filter (경로에 공백이 있어도 안전, 인용 경로도 처리)
+git filter-branch -f --index-filter '
+  git ls-files -s | sed "s-\t\"*-&<PREFIX>/-" |
+  GIT_INDEX_FILE=$GIT_INDEX_FILE.new git update-index --index-info &&
+  mv "$GIT_INDEX_FILE.new" "$GIT_INDEX_FILE"
+' main
+```
+
+> 경로 확인 결과 golf 4건 / tennis 4건이 공백을 포함하고(`GolfCounter Watch App` 등),
+> 따옴표 인용이 필요한 비ASCII 경로는 없었다.
+
+#### 실행 결과
+
+- [x] `yj-apps` 로컬 레포 생성
+- [x] `Packages/YJKit` ← ralli-kit 33커밋
+- [x] `Apps/GolfCounter` ← golf_counter 229커밋
+- [x] `Apps/TennisCounter` ← tennis_counter 310커밋
+
+완료 조건 검증:
+
+| 항목 | 결과 |
+|---|---|
+| 총 커밋 | 577 (문서 2 + 원본 572 + 병합 3) |
+| 경로별 이력 `--full-history` | YJKit 36 / GolfCounter 231 / TennisCounter 311 |
+| `git log --follow` | `WorkoutSessionService.swift` 6커밋, `iOSApp.swift` 8커밋 — 정상 |
+| 최초 커밋 경로 | `Apps/GolfCounter/GolfCounter Watch App/...` — 재작성 확인 |
+| **추적 파일 목록 대조** | 세 prefix 모두 원본과 **완전 일치** |
+| `.git` 크기 | 3.2 MB |
+
+> 경로 지정 `git log -- <prefix>`는 기본 히스토리 단순화로 머지 커밋이 생략되어 205/280/29건으로
+> 표시된다. `--full-history`를 붙이면 전부 나온다. 정상 동작이다.
+
+#### 이관되지 않은 것 (git 미추적 파일 — 정상)
+
+- `.claude/settings.local.json` (양쪽 앱) — 로컬 전용 설정
+- `*.xcodeproj/**/xcuserdata/` — 사용자별 Xcode 상태, `.gitignore` 대상
+- `golf_counter/appstore-screenshots-en/` — **빈 디렉터리(0B)**
+- tennis의 `Package.resolved` — 원본에서 git에 추가되지 않은 상태였다 (2단계에서 정리)
 
 > 커밋 메시지 안의 `#30` 같은 PR 참조는 텍스트로 남지만 링크는 새 레포를 가리키게 된다. 기존 레포를
 > archive로 유지하면 원본 PR은 그대로 열람 가능하다.
