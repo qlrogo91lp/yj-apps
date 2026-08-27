@@ -1,0 +1,302 @@
+import Foundation
+import HealthKit
+
+public final class WorkoutSessionService: NSObject, ObservableObject {
+    @Published public private(set) var isWorkoutActive = false
+    @Published public private(set) var isPaused: Bool = false
+    @Published public private(set) var currentHeartRate: Double = 0
+    @Published public private(set) var currentCalories: Double = 0
+    @Published public private(set) var currentBasalCalories: Double = 0
+    @Published public private(set) var elapsedSeconds: Int = 0
+    @Published public private(set) var currentDistanceMeters: Double = 0
+    @Published public private(set) var currentSteps: Int = 0
+
+    public let configuration: WorkoutConfiguration
+
+    private let store = HKHealthStore()
+    #if os(watchOS)
+        private var workoutSession: HKWorkoutSession?
+        private var liveWorkoutBuilder: HKLiveWorkoutBuilder?
+    #endif
+    public private(set) var startDate: Date?
+    private var timer: Timer?
+
+    /// 기본 4종 + configuration이 지정한 추가 타입. 지정이 없으면 기존 소비자와 완전히 동일하다.
+    /// `HKLiveWorkoutDataSource.enableCollection`으로 추가 타입을 수집하면 `finishWorkout()`이
+    /// 그 샘플도 저장하려 하므로, read뿐 아니라 share 권한도 함께 요청해야 한다.
+    var typesToShare: Set<HKSampleType> {
+        var types: Set<HKSampleType> = [
+            HKQuantityType(.activeEnergyBurned),
+            HKQuantityType(.basalEnergyBurned),
+            HKQuantityType(.heartRate),
+            HKObjectType.workoutType(),
+        ]
+        for identifier in configuration.additionalReadTypes {
+            types.insert(HKQuantityType(identifier))
+        }
+        return types
+    }
+
+    /// 기본 4종 + configuration이 지정한 추가 타입. 지정이 없으면 기존 소비자와 완전히 동일하다.
+    var typesToRead: Set<HKObjectType> {
+        var types: Set<HKObjectType> = [
+            HKQuantityType(.activeEnergyBurned),
+            HKQuantityType(.basalEnergyBurned),
+            HKQuantityType(.heartRate),
+            HKObjectType.workoutType(),
+        ]
+        for identifier in configuration.additionalReadTypes {
+            types.insert(HKQuantityType(identifier))
+        }
+        return types
+    }
+
+    public init(configuration: WorkoutConfiguration) {
+        self.configuration = configuration
+        super.init()
+    }
+
+    /// 타이머 클로저가 [weak self]라 순환 참조는 없지만, 서비스가 해제되면
+    /// 런루프에 남은 타이머가 빈 틱을 계속 돌린다 — 해제 시점에 정리한다.
+    deinit {
+        timer?.invalidate()
+    }
+
+    public var isAvailable: Bool {
+        HKHealthStore.isHealthDataAvailable()
+    }
+
+    public func requestAuthorization() async -> Bool {
+        guard isAvailable else { return false }
+        do {
+            try await store.requestAuthorization(toShare: typesToShare, read: typesToRead)
+            return true
+        } catch {
+            return false
+        }
+    }
+
+    #if os(watchOS)
+        public func startWorkout() {
+            guard isAvailable, workoutSession == nil else { return }
+
+            let config = HKWorkoutConfiguration()
+            config.activityType = configuration.activityType
+            config.locationType = configuration.locationType
+
+            do {
+                let session = try HKWorkoutSession(healthStore: store, configuration: config)
+                let builder = session.associatedWorkoutBuilder()
+                let dataSource = HKLiveWorkoutDataSource(healthStore: store, workoutConfiguration: config)
+                for identifier in configuration.additionalReadTypes {
+                    dataSource.enableCollection(for: HKQuantityType(identifier), predicate: nil)
+                }
+                builder.dataSource = dataSource
+
+                session.delegate = self
+                builder.delegate = self
+
+                workoutSession = session
+                liveWorkoutBuilder = builder
+
+                let now = Date()
+                startDate = now
+                currentDistanceMeters = 0
+                currentSteps = 0
+                startTimer()
+
+                session.startActivity(with: now)
+                builder.beginCollection(withStart: now) { [weak self] _, _ in
+                    DispatchQueue.main.async {
+                        self?.isWorkoutActive = true
+                    }
+                }
+            } catch {}
+        }
+
+        public func pauseWorkout() {
+            guard let session = workoutSession else { return }
+            session.pause()
+            DispatchQueue.main.async { self.isPaused = true }
+            timer?.invalidate()
+            timer = nil
+        }
+
+        public func resumeWorkout() {
+            guard let session = workoutSession else { return }
+            session.resume()
+            DispatchQueue.main.async { self.isPaused = false }
+            timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
+                DispatchQueue.main.async {
+                    self?.elapsedSeconds += 1
+                }
+            }
+        }
+
+        public func stopWorkout() async -> WorkoutResult? {
+            guard let session = workoutSession,
+                  let builder = liveWorkoutBuilder,
+                  let start = startDate else { return nil }
+
+            workoutSession = nil
+            liveWorkoutBuilder = nil
+            startDate = nil
+
+            session.end()
+            stopTimer()
+
+            let elapsed = Int(Date().timeIntervalSince(start))
+            let endDate = Date()
+
+            await withCheckedContinuation { continuation in
+                builder.endCollection(withEnd: endDate) { _, _ in continuation.resume() }
+            }
+
+            let calories = await collectCalories(builder: builder)
+            let basal = await collectBasalCalories(builder: builder)
+            let heartRate = await collectAverageHeartRate(builder: builder)
+            let distance = await collectDistance(builder: builder)
+            let steps = await collectSteps(builder: builder)
+
+            try? await builder.finishWorkout()
+
+            DispatchQueue.main.async { self.isWorkoutActive = false }
+            return WorkoutResult(durationSeconds: elapsed,
+                                 caloriesBurned: calories,
+                                 averageHeartRate: heartRate,
+                                 totalCaloriesBurned: calories + basal,
+                                 distanceMeters: distance,
+                                 steps: steps)
+        }
+
+        private func collectCalories(builder: HKLiveWorkoutBuilder) async -> Double {
+            builder.statistics(for: HKQuantityType(.activeEnergyBurned))?
+                .sumQuantity()?.doubleValue(for: .kilocalorie()) ?? 0
+        }
+
+        private func collectDistance(builder: HKLiveWorkoutBuilder) async -> Double {
+            builder.statistics(for: HKQuantityType(.distanceWalkingRunning))?
+                .sumQuantity()?.doubleValue(for: .meter()) ?? 0
+        }
+
+        private func collectSteps(builder: HKLiveWorkoutBuilder) async -> Int {
+            let value = builder.statistics(for: HKQuantityType(.stepCount))?
+                .sumQuantity()?.doubleValue(for: .count())
+            return value.map { Int($0) } ?? 0
+        }
+
+        private func collectBasalCalories(builder: HKLiveWorkoutBuilder) async -> Double {
+            builder.statistics(for: HKQuantityType(.basalEnergyBurned))?
+                .sumQuantity()?.doubleValue(for: .kilocalorie()) ?? 0
+        }
+
+        private func collectAverageHeartRate(builder: HKLiveWorkoutBuilder) async -> Double? {
+            builder.statistics(for: HKQuantityType(.heartRate))?
+                .averageQuantity()?.doubleValue(for: HKUnit(from: "count/min"))
+        }
+    #endif
+
+    public func averageHeartRate(from startDate: Date, to endDate: Date) async -> Double? {
+        #if os(watchOS)
+            let hrType = HKQuantityType(.heartRate)
+            let predicate = HKQuery.predicateForSamples(withStart: startDate, end: endDate)
+            return await withCheckedContinuation { continuation in
+                let query = HKStatisticsQuery(
+                    quantityType: hrType,
+                    quantitySamplePredicate: predicate,
+                    options: .discreteAverage
+                ) { _, stats, _ in
+                    let value = stats?.averageQuantity()?.doubleValue(for: HKUnit(from: "count/min"))
+                    continuation.resume(returning: value)
+                }
+                store.execute(query)
+            }
+        #else
+            return nil
+        #endif
+    }
+
+    private func startTimer() {
+        elapsedSeconds = 0
+        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
+            DispatchQueue.main.async {
+                self?.elapsedSeconds += 1
+            }
+        }
+    }
+
+    private func stopTimer() {
+        timer?.invalidate()
+        timer = nil
+    }
+
+    public func formattedElapsed() -> String {
+        let hours = elapsedSeconds / 3600
+        let minutes = (elapsedSeconds % 3600) / 60
+        let seconds = elapsedSeconds % 60
+        if hours > 0 {
+            return String(format: "%d:%02d:%02d", hours, minutes, seconds)
+        }
+        return String(format: "%02d:%02d", minutes, seconds)
+    }
+}
+
+#if os(watchOS)
+    extension WorkoutSessionService: HKWorkoutSessionDelegate, HKLiveWorkoutBuilderDelegate {
+        public func workoutSession(_: HKWorkoutSession,
+                                   didChangeTo toState: HKWorkoutSessionState,
+                                   from _: HKWorkoutSessionState,
+                                   date _: Date)
+        {
+            DispatchQueue.main.async {
+                self.isWorkoutActive = toState == .running
+                self.isPaused = toState == .paused
+            }
+        }
+
+        public func workoutSession(_: HKWorkoutSession, didFailWithError _: Error) {}
+
+        public func workoutBuilderDidCollectEvent(_: HKLiveWorkoutBuilder) {}
+
+        public func workoutBuilder(_ workoutBuilder: HKLiveWorkoutBuilder, didCollectDataOf _: Set<HKSampleType>) {
+            DispatchQueue.main.async {
+                if let stats = workoutBuilder.statistics(for: HKQuantityType(.heartRate)) {
+                    self.currentHeartRate = stats.mostRecentQuantity()?.doubleValue(for: HKUnit(from: "count/min")) ?? self.currentHeartRate
+                }
+                if let stats = workoutBuilder.statistics(for: HKQuantityType(.activeEnergyBurned)) {
+                    self.currentCalories = stats.sumQuantity()?.doubleValue(for: .kilocalorie()) ?? self.currentCalories
+                }
+                if let stats = workoutBuilder.statistics(for: HKQuantityType(.basalEnergyBurned)) {
+                    self.currentBasalCalories = stats.sumQuantity()?.doubleValue(for: .kilocalorie()) ?? self.currentBasalCalories
+                }
+                if let stats = workoutBuilder.statistics(for: HKQuantityType(.distanceWalkingRunning)) {
+                    self.currentDistanceMeters = stats.sumQuantity()?.doubleValue(for: .meter()) ?? self.currentDistanceMeters
+                }
+                if let stats = workoutBuilder.statistics(for: HKQuantityType(.stepCount)) {
+                    let value = stats.sumQuantity()?.doubleValue(for: .count())
+                    self.currentSteps = value.map { Int($0) } ?? self.currentSteps
+                }
+            }
+        }
+    }
+#endif
+
+#if DEBUG
+    public extension WorkoutSessionService {
+        /// 테스트·프리뷰 전용: HealthKit 세션 없이 표시 값을 주입한다. 릴리즈 빌드에는 포함되지 않는다.
+        func setLiveMetricsForTesting(heartRate: Double? = nil,
+                                      calories: Double? = nil,
+                                      basalCalories: Double? = nil,
+                                      elapsedSeconds: Int? = nil,
+                                      distanceMeters: Double? = nil,
+                                      steps: Int? = nil)
+        {
+            if let heartRate { currentHeartRate = heartRate }
+            if let calories { currentCalories = calories }
+            if let basalCalories { currentBasalCalories = basalCalories }
+            if let elapsedSeconds { self.elapsedSeconds = elapsedSeconds }
+            if let distanceMeters { currentDistanceMeters = distanceMeters }
+            if let steps { currentSteps = steps }
+        }
+    }
+#endif
