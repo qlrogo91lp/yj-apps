@@ -1,0 +1,97 @@
+import Foundation
+@testable import GolfCounter_Watch_App
+import Testing
+
+struct ScoreAggregateTests {
+    @Test func 파와타수가_모두있는홀만_합산한다() {
+        let value = ScoreAggregate.relativeToPar(holeScores: [4, 3, 6],
+                                                 holePars: [4, 3, 5])
+
+        #expect(value == 1)
+    }
+
+    @Test func 파는골랐지만_타수가0인홀은_제외한다() {
+        // 파만 고르고 한 타도 치지 않고 넘어간 홀. 옛 공식이라면 0 − 4 = −4가 새어 든다.
+        let value = ScoreAggregate.relativeToPar(holeScores: [4, 0],
+                                                 holePars: [4, 4])
+
+        #expect(value == 0)
+    }
+
+    @Test func 파가0인홀은_제외한다() {
+        // 파 선택 화면을 넘기지 않은 홀. 원래도 0으로 기여했지만 규칙으로 명시한다.
+        let value = ScoreAggregate.relativeToPar(holeScores: [4, 0, 5],
+                                                 holePars: [4, 0, 4])
+
+        #expect(value == 1)
+    }
+
+    @Test func 배열길이가_다르면_짧은쪽까지만_본다() {
+        // 타수는 쳤지만 파가 아직 배열에 없는 말단 홀을 자동으로 무시한다.
+        let value = ScoreAggregate.relativeToPar(holeScores: [4, 3, 6, 5],
+                                                 holePars: [4, 3, 5])
+
+        #expect(value == 1)
+    }
+
+    @Test func 빈배열은_0이다() {
+        #expect(ScoreAggregate.relativeToPar(holeScores: [], holePars: []) == 0)
+    }
+
+    @Test func 기록홀수는_파와타수가_모두있는홀만_센다() {
+        let value = ScoreAggregate.recordedHoleCount(holeScores: [4, 3, 6],
+                                                     holePars: [4, 3, 5])
+
+        #expect(value == 3)
+    }
+
+    @Test func 기록홀수는_파만고른홀을_세지않는다() {
+        // 파는 골랐지만 한 타도 치지 않은 홀. 오버파에서 빠지므로 홀 수에서도 빠져야
+        // "18홀인데 17홀치 스코어"라는 어긋남이 안 생긴다 (invariant spec §2.2).
+        let value = ScoreAggregate.recordedHoleCount(holeScores: [4, 0, 5],
+                                                     holePars: [4, 4, 4])
+
+        #expect(value == 2)
+    }
+
+    @Test func 기록홀수는_파가0인홀을_세지않는다() {
+        // 파 선택 화면을 넘기지 않고 건너뛴 홀. 옛 정의도 세지 않았다.
+        let value = ScoreAggregate.recordedHoleCount(holeScores: [4, 0, 5],
+                                                     holePars: [4, 0, 4])
+
+        #expect(value == 2)
+    }
+
+    @Test func 기록홀수는_배열길이가_다르면_짧은쪽까지만_본다() {
+        let value = ScoreAggregate.recordedHoleCount(holeScores: [4, 3, 6, 5],
+                                                     holePars: [4, 3, 5])
+
+        #expect(value == 3)
+    }
+
+    @Test func 기록홀수는_빈배열이면_0이다() {
+        #expect(ScoreAggregate.recordedHoleCount(holeScores: [], holePars: []) == 0)
+    }
+
+    @Test func 집계대상홀만_파타수퍼팅을_모은다() {
+        let holes = ScoreAggregate.countedHoles(holeScores: [4, 0, 5],
+                                                holePars: [4, 4, 5],
+                                                puttCounts: [2, 0, 3])
+
+        #expect(holes.count == 2)
+        #expect(holes[0].par == 4)
+        #expect(holes[0].score == 4)
+        #expect(holes[0].putts == 2)
+        #expect(holes[1].par == 5)
+        #expect(holes[1].score == 5)
+        #expect(holes[1].putts == 3)
+    }
+
+    @Test func 홀단위집계는_puttCounts가_짧아도_0으로_본다() {
+        let holes = ScoreAggregate.countedHoles(holeScores: [4, 5],
+                                                holePars: [4, 5],
+                                                puttCounts: [])
+
+        #expect(holes.map(\.putts) == [0, 0])
+    }
+}

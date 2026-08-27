@@ -1,0 +1,1048 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 70;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		3974B8F52EBCDFA5002D0EA7 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 39BF174F2EBA37F60026184E /* WidgetKit.framework */; };
+		3974B8F62EBCDFA5002D0EA7 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 39BF17512EBA37F60026184E /* SwiftUI.framework */; };
+		3974B9032EBCDFA6002D0EA7 /* ComplicationAppExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3974B8F42EBCDFA5002D0EA7 /* ComplicationAppExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		3983EDD430292CA500733C35 /* ConnectivityCore in Frameworks */ = {isa = PBXBuildFile; productRef = 3983EDD330292CA500733C35 /* ConnectivityCore */; };
+		3983EDD630292CA500733C35 /* WorkoutCore in Frameworks */ = {isa = PBXBuildFile; productRef = 3983EDD530292CA500733C35 /* WorkoutCore */; };
+		3983EDD830292CA500733C35 /* WorkoutUI in Frameworks */ = {isa = PBXBuildFile; productRef = 3983EDD730292CA500733C35 /* WorkoutUI */; };
+		3983EDDA30292CAF00733C35 /* ConnectivityCore in Frameworks */ = {isa = PBXBuildFile; productRef = 3983EDD930292CAF00733C35 /* ConnectivityCore */; };
+		3983EDDC30292CAF00733C35 /* PersistenceCore in Frameworks */ = {isa = PBXBuildFile; productRef = 3983EDDB30292CAF00733C35 /* PersistenceCore */; };
+		399700FD2A1D9BC900D0D486 /* GolfCounter Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 399700FC2A1D9BC900D0D486 /* GolfCounter Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		39CDA6E12FB3173B009825BA /* GolfCounter.icon in Resources */ = {isa = PBXBuildFile; fileRef = 39CDA6E02FB3173B009825BA /* GolfCounter.icon */; };
+		39CDA6E22FB3173B009825BA /* GolfCounter.icon in Resources */ = {isa = PBXBuildFile; fileRef = 39CDA6E02FB3173B009825BA /* GolfCounter.icon */; };
+		39CDA6E32FB3173B009825BA /* GolfCounter.icon in Resources */ = {isa = PBXBuildFile; fileRef = 39CDA6E02FB3173B009825BA /* GolfCounter.icon */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		3974B9012EBCDFA6002D0EA7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 399700E42A1D9BC800D0D486 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3974B8F32EBCDFA5002D0EA7;
+			remoteInfo = ComplicationAppExtension;
+		};
+		399700FE2A1D9BC900D0D486 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 399700E42A1D9BC800D0D486 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 399700FB2A1D9BC900D0D486;
+			remoteInfo = "GolfCounter Watch App";
+		};
+		39D9AB802FA1D86B006DC9F5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 399700E42A1D9BC800D0D486 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 399700EB2A1D9BC800D0D486;
+			remoteInfo = GolfCounter;
+		};
+		39D9AB8D2FA1D882006DC9F5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 399700E42A1D9BC800D0D486 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 399700FB2A1D9BC900D0D486;
+			remoteInfo = "GolfCounter Watch App";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		3997010F2A1D9BCA00D0D486 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				399700FD2A1D9BC900D0D486 /* GolfCounter Watch App.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		39BF17602EBA37F70026184E /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				3974B9032EBCDFA6002D0EA7 /* ComplicationAppExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		39670C362FA1BBA1009C0010 /* ComplicationAppExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ComplicationAppExtension.entitlements; sourceTree = "<group>"; };
+		39670C372FA1BD0E009C0010 /* GolfCounter.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = GolfCounter.entitlements; sourceTree = "<group>"; };
+		39670C382FA1BD20009C0010 /* GolfCounter Watch App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "GolfCounter Watch App.entitlements"; sourceTree = "<group>"; };
+		3974B8F42EBCDFA5002D0EA7 /* ComplicationAppExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ComplicationAppExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		399700EC2A1D9BC800D0D486 /* GolfCounter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GolfCounter.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		399700FC2A1D9BC900D0D486 /* GolfCounter Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "GolfCounter Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		39BF174F2EBA37F60026184E /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		39BF17512EBA37F60026184E /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		39CDA6E02FB3173B009825BA /* GolfCounter.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = GolfCounter.icon; sourceTree = "<group>"; };
+		39D472092FBC37D4005FBA12 /* GolfCounter-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "GolfCounter-Info.plist"; sourceTree = "<group>"; };
+		39D9AB7C2FA1D86B006DC9F5 /* iosTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iosTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		39D9AB892FA1D882006DC9F5 /* watchosTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = watchosTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		3974B9042EBCDFA6002D0EA7 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 3974B8F32EBCDFA5002D0EA7 /* ComplicationAppExtension */;
+		};
+		39D4A1002FBD0001005FBA12 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Services/ConnectivityMessages.swift,
+			);
+			target = 3974B8F32EBCDFA5002D0EA7 /* ComplicationAppExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		3974B8F72EBCDFA5002D0EA7 /* ComplicationApp */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (3974B9042EBCDFA6002D0EA7 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = ComplicationApp; sourceTree = "<group>"; };
+		399289F72EB8EC9E005F1856 /* WatchApp */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = WatchApp; sourceTree = "<group>"; };
+		39928A012EB95F0D005F1856 /* Shared */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (39D4A1002FBD0001005FBA12 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = Shared; sourceTree = "<group>"; };
+		399700EE2A1D9BC800D0D486 /* iOSApp */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = iOSApp; sourceTree = "<group>"; };
+		39D9AB7D2FA1D86B006DC9F5 /* iosTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = iosTests; sourceTree = "<group>"; };
+		39D9AB8A2FA1D882006DC9F5 /* watchosTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = watchosTests; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		3974B8F12EBCDFA5002D0EA7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3974B8F62EBCDFA5002D0EA7 /* SwiftUI.framework in Frameworks */,
+				3974B8F52EBCDFA5002D0EA7 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		399700E92A1D9BC800D0D486 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3983EDDA30292CAF00733C35 /* ConnectivityCore in Frameworks */,
+				3983EDDC30292CAF00733C35 /* PersistenceCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		399700F92A1D9BC900D0D486 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3983EDD430292CA500733C35 /* ConnectivityCore in Frameworks */,
+				3983EDD630292CA500733C35 /* WorkoutCore in Frameworks */,
+				3983EDD830292CA500733C35 /* WorkoutUI in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		39D9AB792FA1D86B006DC9F5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		39D9AB862FA1D882006DC9F5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		399700E32A1D9BC800D0D486 = {
+			isa = PBXGroup;
+			children = (
+				39D472092FBC37D4005FBA12 /* GolfCounter-Info.plist */,
+				39670C382FA1BD20009C0010 /* GolfCounter Watch App.entitlements */,
+				39670C372FA1BD0E009C0010 /* GolfCounter.entitlements */,
+				39670C362FA1BBA1009C0010 /* ComplicationAppExtension.entitlements */,
+				39928A012EB95F0D005F1856 /* Shared */,
+				399700EE2A1D9BC800D0D486 /* iOSApp */,
+				3974B8F72EBCDFA5002D0EA7 /* ComplicationApp */,
+				39D9AB7D2FA1D86B006DC9F5 /* iosTests */,
+				39D9AB8A2FA1D882006DC9F5 /* watchosTests */,
+				39BF174E2EBA37F60026184E /* Frameworks */,
+				399700ED2A1D9BC800D0D486 /* Products */,
+				399289F72EB8EC9E005F1856 /* WatchApp */,
+				39CDA6E02FB3173B009825BA /* GolfCounter.icon */,
+			);
+			sourceTree = "<group>";
+		};
+		399700ED2A1D9BC800D0D486 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				399700EC2A1D9BC800D0D486 /* GolfCounter.app */,
+				399700FC2A1D9BC900D0D486 /* GolfCounter Watch App.app */,
+				3974B8F42EBCDFA5002D0EA7 /* ComplicationAppExtension.appex */,
+				39D9AB7C2FA1D86B006DC9F5 /* iosTests.xctest */,
+				39D9AB892FA1D882006DC9F5 /* watchosTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		39BF174E2EBA37F60026184E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				39BF174F2EBA37F60026184E /* WidgetKit.framework */,
+				39BF17512EBA37F60026184E /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		3974B8F32EBCDFA5002D0EA7 /* ComplicationAppExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3974B9052EBCDFA6002D0EA7 /* Build configuration list for PBXNativeTarget "ComplicationAppExtension" */;
+			buildPhases = (
+				3974B8F02EBCDFA5002D0EA7 /* Sources */,
+				3974B8F12EBCDFA5002D0EA7 /* Frameworks */,
+				3974B8F22EBCDFA5002D0EA7 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				3974B8F72EBCDFA5002D0EA7 /* ComplicationApp */,
+				39928A012EB95F0D005F1856 /* Shared */,
+			);
+			name = ComplicationAppExtension;
+			productName = ComplicationAppExtension;
+			productReference = 3974B8F42EBCDFA5002D0EA7 /* ComplicationAppExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		399700EB2A1D9BC800D0D486 /* GolfCounter */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 399701102A1D9BCA00D0D486 /* Build configuration list for PBXNativeTarget "GolfCounter" */;
+			buildPhases = (
+				399700E82A1D9BC800D0D486 /* Sources */,
+				399700E92A1D9BC800D0D486 /* Frameworks */,
+				399700EA2A1D9BC800D0D486 /* Resources */,
+				3997010F2A1D9BCA00D0D486 /* Embed Watch Content */,
+				390E3BDD2F3B62B9003599BF /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				399700FF2A1D9BC900D0D486 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				39928A012EB95F0D005F1856 /* Shared */,
+				399700EE2A1D9BC800D0D486 /* iOSApp */,
+			);
+			name = GolfCounter;
+			productName = GolfCounter;
+			productReference = 399700EC2A1D9BC800D0D486 /* GolfCounter.app */;
+			productType = "com.apple.product-type.application";
+		};
+		399700FB2A1D9BC900D0D486 /* GolfCounter Watch App */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3997010C2A1D9BCA00D0D486 /* Build configuration list for PBXNativeTarget "GolfCounter Watch App" */;
+			buildPhases = (
+				399700F82A1D9BC900D0D486 /* Sources */,
+				399700F92A1D9BC900D0D486 /* Frameworks */,
+				399700FA2A1D9BC900D0D486 /* Resources */,
+				39BF17602EBA37F70026184E /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				3974B9022EBCDFA6002D0EA7 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				399289F72EB8EC9E005F1856 /* WatchApp */,
+				39928A012EB95F0D005F1856 /* Shared */,
+			);
+			name = "GolfCounter Watch App";
+			productName = "GolfCounter Watch App";
+			productReference = 399700FC2A1D9BC900D0D486 /* GolfCounter Watch App.app */;
+			productType = "com.apple.product-type.application";
+		};
+		39D9AB7B2FA1D86B006DC9F5 /* iosTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 39D9AB842FA1D86B006DC9F5 /* Build configuration list for PBXNativeTarget "iosTests" */;
+			buildPhases = (
+				39D9AB782FA1D86B006DC9F5 /* Sources */,
+				39D9AB792FA1D86B006DC9F5 /* Frameworks */,
+				39D9AB7A2FA1D86B006DC9F5 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				39D9AB812FA1D86B006DC9F5 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				39D9AB7D2FA1D86B006DC9F5 /* iosTests */,
+			);
+			name = iosTests;
+			productName = iosTests;
+			productReference = 39D9AB7C2FA1D86B006DC9F5 /* iosTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		39D9AB882FA1D882006DC9F5 /* watchosTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 39D9AB8F2FA1D882006DC9F5 /* Build configuration list for PBXNativeTarget "watchosTests" */;
+			buildPhases = (
+				39D9AB852FA1D882006DC9F5 /* Sources */,
+				39D9AB862FA1D882006DC9F5 /* Frameworks */,
+				39D9AB872FA1D882006DC9F5 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				39D9AB8E2FA1D882006DC9F5 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				39D9AB8A2FA1D882006DC9F5 /* watchosTests */,
+			);
+			name = watchosTests;
+			productName = watchosTests;
+			productReference = 39D9AB892FA1D882006DC9F5 /* watchosTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		399700E42A1D9BC800D0D486 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2650;
+				LastUpgradeCheck = 2660;
+				TargetAttributes = {
+					3974B8F32EBCDFA5002D0EA7 = {
+						CreatedOnToolsVersion = 26.1;
+					};
+					399700EB2A1D9BC800D0D486 = {
+						CreatedOnToolsVersion = 14.3;
+					};
+					399700FB2A1D9BC900D0D486 = {
+						CreatedOnToolsVersion = 14.3;
+					};
+					39D9AB7B2FA1D86B006DC9F5 = {
+						CreatedOnToolsVersion = 26.4.1;
+						TestTargetID = 399700EB2A1D9BC800D0D486;
+					};
+					39D9AB882FA1D882006DC9F5 = {
+						CreatedOnToolsVersion = 26.4.1;
+						TestTargetID = 399700FB2A1D9BC900D0D486;
+					};
+				};
+			};
+			buildConfigurationList = 399700E72A1D9BC800D0D486 /* Build configuration list for PBXProject "GolfCounter" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+				ko,
+			);
+			mainGroup = 399700E32A1D9BC800D0D486;
+			packageReferences = (
+				3983EDD230292C8900733C35 /* XCRemoteSwiftPackageReference "ralli-kit" */,
+			);
+			productRefGroup = 399700ED2A1D9BC800D0D486 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				399700EB2A1D9BC800D0D486 /* GolfCounter */,
+				399700FB2A1D9BC900D0D486 /* GolfCounter Watch App */,
+				3974B8F32EBCDFA5002D0EA7 /* ComplicationAppExtension */,
+				39D9AB7B2FA1D86B006DC9F5 /* iosTests */,
+				39D9AB882FA1D882006DC9F5 /* watchosTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		3974B8F22EBCDFA5002D0EA7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				39CDA6E22FB3173B009825BA /* GolfCounter.icon in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		399700EA2A1D9BC800D0D486 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				39CDA6E32FB3173B009825BA /* GolfCounter.icon in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		399700FA2A1D9BC900D0D486 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				39CDA6E12FB3173B009825BA /* GolfCounter.icon in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		39D9AB7A2FA1D86B006DC9F5 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		39D9AB872FA1D882006DC9F5 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		390E3BDD2F3B62B9003599BF /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nexport PATH=\"$PATH:/opt/homebrew/bin\"\nif which swiftlint > /dev/null; then\n  swiftlint\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		3974B8F02EBCDFA5002D0EA7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		399700E82A1D9BC800D0D486 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		399700F82A1D9BC900D0D486 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		39D9AB782FA1D86B006DC9F5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		39D9AB852FA1D882006DC9F5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		3974B9022EBCDFA6002D0EA7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3974B8F32EBCDFA5002D0EA7 /* ComplicationAppExtension */;
+			targetProxy = 3974B9012EBCDFA6002D0EA7 /* PBXContainerItemProxy */;
+		};
+		399700FF2A1D9BC900D0D486 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 399700FB2A1D9BC900D0D486 /* GolfCounter Watch App */;
+			targetProxy = 399700FE2A1D9BC900D0D486 /* PBXContainerItemProxy */;
+		};
+		39D9AB812FA1D86B006DC9F5 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 399700EB2A1D9BC800D0D486 /* GolfCounter */;
+			targetProxy = 39D9AB802FA1D86B006DC9F5 /* PBXContainerItemProxy */;
+		};
+		39D9AB8E2FA1D882006DC9F5 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 399700FB2A1D9BC900D0D486 /* GolfCounter Watch App */;
+			targetProxy = 39D9AB8D2FA1D882006DC9F5 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		3974B9062EBCDFA6002D0EA7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = ComplicationAppExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 6;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ComplicationApp/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = GolfCounter;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 2.1.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yj.GolfCounter.watchkitapp.ComplicationApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10;
+			};
+			name = Debug;
+		};
+		3974B9072EBCDFA6002D0EA7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = ComplicationAppExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 6;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ComplicationApp/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = GolfCounter;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 2.1.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yj.GolfCounter.watchkitapp.ComplicationApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 10;
+			};
+			name = Release;
+		};
+		3997010A2A1D9BCA00D0D486 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = P2TU28W32L;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		3997010B2A1D9BCA00D0D486 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = P2TU28W32L;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		3997010D2A1D9BCA00D0D486 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = GolfCounter;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = "GolfCounter Watch App.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 6;
+				DEVELOPMENT_ASSET_PATHS = "\"WatchApp/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = GolfCounter;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "GolfCounter가 라운드 중 심박수와 칼로리를 측정합니다.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "GolfCounter가 골프 라운드를 건강 앱에 저장합니다.";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.yj.GolfCounter;
+				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 2.1.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yj.GolfCounter.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10;
+			};
+			name = Debug;
+		};
+		3997010E2A1D9BCA00D0D486 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = GolfCounter;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = "GolfCounter Watch App.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 6;
+				DEVELOPMENT_ASSET_PATHS = "\"WatchApp/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = GolfCounter;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "GolfCounter가 라운드 중 심박수와 칼로리를 측정합니다.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "GolfCounter가 골프 라운드를 건강 앱에 저장합니다.";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.yj.GolfCounter;
+				INFOPLIST_KEY_WKRunsIndependentlyOfCompanionApp = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 2.1.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yj.GolfCounter.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 10;
+			};
+			name = Release;
+		};
+		399701112A1D9BCA00D0D486 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = GolfCounter;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = GolfCounter.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 6;
+				DEVELOPMENT_ASSET_PATHS = "\"iOSApp/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "GolfCounter-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = GolfCounter;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.sports";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 2.1.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yj.GolfCounter;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		399701122A1D9BCA00D0D486 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = GolfCounter;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = GolfCounter.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 6;
+				DEVELOPMENT_ASSET_PATHS = "\"iOSApp/Preview Content\"";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "GolfCounter-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = GolfCounter;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.sports";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 2.1.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yj.GolfCounter;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		39D9AB822FA1D86B006DC9F5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yj.iosTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/GolfCounter.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/GolfCounter";
+			};
+			name = Debug;
+		};
+		39D9AB832FA1D86B006DC9F5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.4;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yj.iosTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/GolfCounter.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/GolfCounter";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		39D9AB902FA1D882006DC9F5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yj.watchosTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/GolfCounter Watch App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/GolfCounter Watch App";
+				WATCHOS_DEPLOYMENT_TARGET = 26.4;
+			};
+			name = Debug;
+		};
+		39D9AB912FA1D882006DC9F5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.yj.watchosTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/GolfCounter Watch App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/GolfCounter Watch App";
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 26.4;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		3974B9052EBCDFA6002D0EA7 /* Build configuration list for PBXNativeTarget "ComplicationAppExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3974B9062EBCDFA6002D0EA7 /* Debug */,
+				3974B9072EBCDFA6002D0EA7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		399700E72A1D9BC800D0D486 /* Build configuration list for PBXProject "GolfCounter" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3997010A2A1D9BCA00D0D486 /* Debug */,
+				3997010B2A1D9BCA00D0D486 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3997010C2A1D9BCA00D0D486 /* Build configuration list for PBXNativeTarget "GolfCounter Watch App" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3997010D2A1D9BCA00D0D486 /* Debug */,
+				3997010E2A1D9BCA00D0D486 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		399701102A1D9BCA00D0D486 /* Build configuration list for PBXNativeTarget "GolfCounter" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				399701112A1D9BCA00D0D486 /* Debug */,
+				399701122A1D9BCA00D0D486 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		39D9AB842FA1D86B006DC9F5 /* Build configuration list for PBXNativeTarget "iosTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				39D9AB822FA1D86B006DC9F5 /* Debug */,
+				39D9AB832FA1D86B006DC9F5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		39D9AB8F2FA1D882006DC9F5 /* Build configuration list for PBXNativeTarget "watchosTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				39D9AB902FA1D882006DC9F5 /* Debug */,
+				39D9AB912FA1D882006DC9F5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		3983EDD230292C8900733C35 /* XCRemoteSwiftPackageReference "ralli-kit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/qlrogo91lp/ralli-kit";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		3983EDD330292CA500733C35 /* ConnectivityCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3983EDD230292C8900733C35 /* XCRemoteSwiftPackageReference "ralli-kit" */;
+			productName = ConnectivityCore;
+		};
+		3983EDD530292CA500733C35 /* WorkoutCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3983EDD230292C8900733C35 /* XCRemoteSwiftPackageReference "ralli-kit" */;
+			productName = WorkoutCore;
+		};
+		3983EDD730292CA500733C35 /* WorkoutUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3983EDD230292C8900733C35 /* XCRemoteSwiftPackageReference "ralli-kit" */;
+			productName = WorkoutUI;
+		};
+		3983EDD930292CAF00733C35 /* ConnectivityCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3983EDD230292C8900733C35 /* XCRemoteSwiftPackageReference "ralli-kit" */;
+			productName = ConnectivityCore;
+		};
+		3983EDDB30292CAF00733C35 /* PersistenceCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3983EDD230292C8900733C35 /* XCRemoteSwiftPackageReference "ralli-kit" */;
+			productName = PersistenceCore;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 399700E42A1D9BC800D0D486 /* Project object */;
+}
