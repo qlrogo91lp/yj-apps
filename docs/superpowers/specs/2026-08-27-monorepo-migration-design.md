@@ -321,9 +321,18 @@ xcodebuild -scheme YJKit-Package -destination 'platform=iOS Simulator,name=iPhon
 
 ### 7단계 — 마무리
 
-- [ ] GitHub에 `yj-apps` 생성(public) 후 푸시
+- [x] GitHub에 `yj-apps` 생성(public) 후 푸시 — **2026-08-27, 순서를 앞당겨 2단계 중 실행**
 - [ ] 기존 3개 레포 archive
 - [ ] 후속 문서 [2] CI, [3] 코드 스타일 진행 여부 판단
+
+> **순서 변경 사유**: 다른 환경(집)에서 작업을 이어가기 위해 원격 저장소가 먼저 필요했다.
+> 전환이 미완인 상태로 push되지만, 원본 3개 레포가 그대로 살아있어 정본 역할을 하므로 문제되지
+> 않는다. 루트 `README.md`에 현재 단계와 남은 작업 절차를 기록해 두었다.
+>
+> 푸시 검증: 새로 클론해 확인한 결과 580커밋, 경로별 이력(YJKit 37 / GolfCounter 231 /
+> TennisCounter 311)과 `--follow` 추적 모두 정상.
+>
+> URL: https://github.com/qlrogo91lp/yj-apps (public)
 
 ---
 
