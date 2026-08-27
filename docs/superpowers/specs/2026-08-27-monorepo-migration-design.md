@@ -11,9 +11,9 @@
 
 | 레포 | 성격 | Swift LOC | 커밋 | git 크기 |
 |---|---|---|---|---|
-| `golf_counter` | iOS + Watch + Complication 앱 | 6,576 | 228 | 948 KiB |
-| `tennis_counter` | iOS + Watch + Complication + LiveActivity 앱 | 7,631 | 309 | 1.13 MiB |
-| `ralli-kit` | SPM 공용 라이브러리 | ~1,000 | 18 | 55 KiB |
+| `golf_counter` | iOS + Watch + Complication 앱 | 6,576 | 229 | 948 KiB |
+| `tennis_counter` | iOS + Watch + Complication + LiveActivity 앱 | 7,631 | 310 | 1.13 MiB |
+| `ralli-kit` | SPM 공용 라이브러리 | 1,780 | 33 | ~110 KiB |
 
 두 앱은 `ralli-kit`을 **원격 SPM `branch: main`** 으로 참조하며 `WorkoutCore` / `WorkoutUI` /
 `ConnectivityCore` / `PersistenceCore` 4개 프로덕트를 사용한다. 즉 공용 코어 계층은 이미 분리되어
@@ -22,8 +22,9 @@
 ### 현재 구조의 문제
 
 1. **버전 핀이 없다.** `branch = main` 참조라 `ralli-kit`에 커밋하는 순간 두 앱이 동시에 영향받는다.
-   실제로 로컬 `ralli-kit`이 `origin/main`보다 15커밋 뒤처져 있고, 로컬 `Package.swift`에는
-   `WorkoutUI`가 없는데 두 앱 pbxproj는 이미 `WorkoutUI`를 참조한다. 로컬만으로는 빌드되지 않는 상태다.
+   실제로 2026-08-27 조사 시점에 로컬 `ralli-kit`이 `origin/main`보다 15커밋 뒤처져 있었고, 로컬
+   `Package.swift`에는 `WorkoutUI`가 없는데 두 앱 pbxproj는 이미 `WorkoutUI`를 참조하고 있었다.
+   로컬만으로는 빌드되지 않는 상태였다. (동기화 완료 — 0단계 참조)
 
 2. **로컬 override 수작업.** `golf_counter/CLAUDE.md`에 "ralli-kit을 고칠 땐 로컬 폴더를 Xcode
    워크스페이스에 끌어다 놓고, 끝나면 제거하라"는 절차가 문서화되어 있다. 이 절차 자체가 마찰의 증거다.
@@ -47,7 +48,7 @@
 
 ### 목표
 
-- 3개 레포를 `yj-apps` 단일 저장소로 통합하고 **555개 커밋 히스토리를 전부 보존**한다.
+- 3개 레포를 `yj-apps` 단일 저장소로 통합하고 **572개 커밋 히스토리를 전부 보존**한다.
 - `ralli-kit`을 로컬 SPM 패키지 `Packages/YJKit`으로 전환해 **코어와 앱의 변경을 원자화**한다.
 - Xcode 워크스페이스 하나로 전 앱을 열고 빌드할 수 있게 한다.
 - 이름 충돌(타깃·스킴·테스트 번들 ID)을 제거해 CLI 빌드가 모호하지 않게 한다.
@@ -151,8 +152,8 @@ SwiftLint 0.64.1에서 `parent_config` 상속이 정상 동작함을 실측 확�
 
 ### 0단계 — 선행 조건
 
-- [ ] 로컬 `ralli-kit`을 `origin/main`으로 동기화한다. **현재 15커밋 뒤처져 있어, 이 상태로 subtree하면 낡은 트리(WorkoutUI 없음)가 들어간다.**
-- [ ] `golf_counter`, `tennis_counter`의 워킹 트리가 깨끗하고 `origin/main`과 동기화되어 있는지 확인한다.
+- [x] 로컬 `ralli-kit`을 `origin/main`으로 동기화한다. (2026-08-27 완료 — 15커밋 fast-forward, `WorkoutUI` 확보)
+- [x] `golf_counter`, `tennis_counter`의 워킹 트리가 깨끗하고 `origin/main`과 동기화되어 있는지 확인한다. (2026-08-27 완료 — tennis 1커밋 fast-forward, golf 이미 최신)
 - [ ] 세 레포 각각에서 현재 빌드·테스트가 통과함을 확인하고 결과를 기록한다. **이것이 전환 후 비교 기준선이다.**
 
 완료 조건: 세 레포 모두 `origin/main`과 일치하고, 전 타깃 빌드·테스트 통과 기록이 있다.
@@ -165,9 +166,9 @@ SwiftLint 0.64.1에서 `parent_config` 상속이 정상 동작함을 실측 확�
 - [ ] `git subtree add --prefix=Apps/TennisCounter <tennis_counter> main`
 
 완료 조건:
-- `git log --oneline Apps/GolfCounter | wc -l` → 228 이상
-- `git log --oneline Apps/TennisCounter | wc -l` → 309 이상
-- `git log --oneline Packages/YJKit | wc -l` → 18 이상
+- `git log --oneline Apps/GolfCounter | wc -l` → 229 이상
+- `git log --oneline Apps/TennisCounter | wc -l` → 310 이상
+- `git log --oneline Packages/YJKit | wc -l` → 33 이상
 - `git log --follow` 로 임의 파일의 과거 이력이 추적된다
 
 > 커밋 메시지 안의 `#30` 같은 PR 참조는 텍스트로 남지만 링크는 새 레포를 가리키게 된다. 기존 레포를
@@ -212,7 +213,7 @@ SwiftLint 0.64.1에서 `parent_config` 상속이 정상 동작함을 실측 확�
 완료 조건:
 - `xcodebuild -workspace YJApps.xcworkspace -list`에 중복 이름이 없다
 - 전 타깃 빌드·테스트 통과
-- 앱 타깃의 `MARKETING_VERSION`(golf `2.1.1` / tennis `1.1.6`)과 `CURRENT_PROJECT_VERSION`(6 / 25)이 **변하지 않았다**
+- 앱 타깃의 `MARKETING_VERSION`(golf `2.1.1` / tennis `1.1.7`)과 `CURRENT_PROJECT_VERSION`(6 / 26)이 **변하지 않았다**
 
 ### 5단계 — 툴링 구조화
 
@@ -252,7 +253,7 @@ SwiftLint 0.64.1에서 `parent_config` 상속이 정상 동작함을 실측 확�
 | 테스트 | 전 타깃 통과 | 동일 |
 | 린트 위반 | 기록된 목록 | **동일** (증가·감소 모두 이상 신호) |
 | 소스 코드 diff | — | **0** (파일 이동 외 내용 변경 없음) |
-| 버전 | golf 2.1.1(6) / tennis 1.1.6(25) | 동일 |
+| 버전 | golf 2.1.1(6) / tennis 1.1.7(26) | 동일 |
 | 번들 ID | `com.yj.*` | 앱·확장 모두 동일. 테스트 번들만 분리 |
 
 소스 diff가 0이어야 한다는 점이 중요하다. 전환 중 코드 내용이 바뀌면 이후 문제 발생 시
@@ -278,7 +279,7 @@ SwiftLint 0.64.1에서 `parent_config` 상속이 정상 동작함을 실측 확�
 | 타깃 개명 시 `PRODUCT_NAME` 연쇄 변경 | 산출물 파일명 변경 | 메인 앱·워치 앱 타깃은 개명하지 않음 |
 | `.build/` 커밋 | 레포 비대(165MB) | 1단계 이전에 루트 `.gitignore` 확인 |
 | 전환 중 앱 기능 작업 병행 | 머지 충돌 | 전환 기간 동안 기능 작업 중단 |
-| 릴리즈 시점 충돌 | 배포 지연 | golf 2.1.1 / tennis 1.1.6이 배포 상태. 릴리즈 사이 빈 구간에 진행 |
+| 릴리즈 시점 충돌 | 배포 지연 | golf 2.1.1 / tennis 1.1.7이 배포 상태. 릴리즈 사이 빈 구간에 진행 |
 
 ### 리스크가 아닌 것 (확인 완료)
 
