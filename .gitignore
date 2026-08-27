@@ -1,0 +1,27 @@
+# macOS
+.DS_Store
+
+# Xcode - user-specific state
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+*.xccheckout
+
+# Xcode - build products
+build/
+DerivedData/
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# Build logs
+*.log
+
+# Superpowers SDD scratch workspace
+.superpowers/
