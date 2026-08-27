@@ -2,7 +2,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "RalliKit",
+    name: "YJKit",
     defaultLocalization: "en",
     platforms: [.iOS(.v17), .watchOS(.v10)],
     products: [

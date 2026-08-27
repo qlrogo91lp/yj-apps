@@ -227,10 +227,44 @@ git filter-branch -f --index-filter '
 
 ### 2단계 — 패키지 로컬화 (가장 위험한 구간)
 
-- [ ] `Packages/YJKit/Package.swift`의 `name: "RalliKit"` → `"YJKit"`. products/targets 이름은 불변
+- [x] `Packages/YJKit/Package.swift`의 `name: "RalliKit"` → `"YJKit"`. products/targets 이름은 불변 (2026-08-27)
+- [x] `Packages/YJKit/README.md` 제목·설명 갱신
 - [ ] `Apps/GolfCounter/GolfCounter.xcodeproj`: 원격 패키지 참조 제거 → 로컬 참조(`../../Packages/YJKit`) 추가
 - [ ] `Apps/TennisCounter/TennisCounter.xcodeproj`: 동일
-- [ ] 각 타깃의 `packageProductDependencies`가 기존과 동일한 프로덕트를 가리키는지 확인
+- [ ] 각 타깃의 프로덕트 연결이 기존과 동일한지 확인 (아래 표가 기준)
+
+#### 전환 전 프로덕트 연결 — 복원 기준
+
+Xcode 16+ 프로젝트는 타깃의 `packageProductDependencies`가 아니라 **Frameworks 빌드 페이즈의
+`productRef`** 로 패키지 프로덕트를 연결한다. 전환 전 상태는 다음과 같다.
+
+| 프로젝트 | 타깃 | 연결된 프로덕트 |
+|---|---|---|
+| GolfCounter | `GolfCounter` | ConnectivityCore, PersistenceCore |
+| GolfCounter | `GolfCounter Watch App` | ConnectivityCore, WorkoutCore, WorkoutUI |
+| TennisCounter | `TennisCounter` | ConnectivityCore, PersistenceCore, WorkoutCore, WorkoutUI |
+| TennisCounter | `TennisCounter Watch App` | ConnectivityCore, WorkoutCore, WorkoutUI |
+
+`ComplicationAppExtension`, `TennisLiveActivityExtension`, 테스트 타깃은 패키지 프로덕트를
+직접 연결하지 않는다.
+
+원격 참조 URL이 두 프로젝트에서 미묘하게 다르다 —
+golf는 `https://github.com/qlrogo91lp/ralli-kit`, tennis는 `...ralli-kit.git`. 로컬 참조로
+바꾸면 이 차이는 사라진다.
+
+#### 패키지 단독 검증 결과 (2026-08-27)
+
+```
+xcodebuild -scheme YJKit-Package -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
+  build → ** BUILD SUCCEEDED **
+  test  → 51 tests in 6 suites passed, ** TEST SUCCEEDED **
+```
+
+> **`swift build` / `swift test`는 이 패키지에서 동작하지 않는다.** `Package.swift`가
+> `platforms: [.iOS(.v17), .watchOS(.v10)]`만 선언하고 macOS를 뺐기 때문에
+> (`🔧 macOS 플랫폼 지원 제거` 커밋), 호스트 빌드 시 SwiftData API가 macOS 14 미만으로 판정되어
+> 51개 에러가 난다. **전환 이전 원본 `ralli-kit`에서도 동일하게 실패**하므로 전환과 무관한
+> 기존 특성이다. 검증에는 반드시 iOS 시뮬레이터 destination을 쓴다.
 
 **Xcode UI로 진행한다.** pbxproj 직접 편집은 하지 않는다. 원격 참조는
 `XCRemoteSwiftPackageReference`, 로컬 참조는 `XCLocalSwiftPackageReference`로 구조가 다르고,
@@ -281,7 +315,7 @@ git filter-branch -f --index-filter '
 
 - [ ] 전 타깃 클린 빌드 (`DerivedData` 삭제 후)
 - [ ] 전 테스트 타깃 실행
-- [ ] `swift test` (Packages/YJKit 단독)
+- [ ] `xcodebuild -scheme YJKit-Package -destination 'platform=iOS Simulator,...' test` (패키지 단독 — `swift test`는 macOS 플랫폼 미선언으로 불가, 2단계 참조)
 - [ ] 시뮬레이터에서 두 앱 실행 — 워치↔iOS 연동 동작 확인
 - [ ] 0단계 기준선과 결과 대조
 

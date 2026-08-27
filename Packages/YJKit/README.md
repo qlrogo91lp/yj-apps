@@ -1,6 +1,7 @@
-# RalliKit
+# YJKit
 
-Ralli(테니스 카운터)에서 추출한 iOS+watchOS 워크아웃 앱 인프라. 독립 라이브러리를 필요한 것만 골라 의존한다.
+yj-apps 모노레포의 공용 iOS+watchOS 앱 인프라. 독립 라이브러리를 필요한 것만 골라 의존한다.
+(Ralli 테니스 카운터에서 처음 추출했고, 이후 GolfCounter 등 다른 앱이 함께 쓴다.)
 
 | Product | 역할 | 상태 |
 |---|---|---|
