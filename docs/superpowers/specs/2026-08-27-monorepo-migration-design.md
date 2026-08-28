@@ -498,13 +498,54 @@ yj-apps/
 | `Packages/` 추적 가능 여부 | 무시되지 않음 확인 |
 | 빌드 회귀 | GolfCounter ✅ / TennisCounter ✅ |
 
-### 6단계 — 최종 검증
+### 6단계 — 최종 검증 🔄 자동 검증 완료 (2026-08-28), 실기 연동 확인 보류
 
-- [ ] 전 타깃 클린 빌드 (`DerivedData` 삭제 후)
-- [ ] 전 테스트 타깃 실행
-- [ ] `xcodebuild -scheme YJKit-Package -destination 'platform=iOS Simulator,...' test` (패키지 단독 — `swift test`는 macOS 플랫폼 미선언으로 불가, 2단계 참조)
-- [ ] 시뮬레이터에서 두 앱 실행 — 워치↔iOS 연동 동작 확인
-- [ ] 0단계 기준선과 결과 대조
+- [x] 전 타깃 클린 빌드 (`DerivedData` 삭제 후)
+- [x] 전 테스트 타깃 실행
+- [x] `xcodebuild -scheme YJKit-Package ... test` (패키지 단독)
+- [ ] **워치↔iOS 연동 동작 확인 → TestFlight 배포 시점으로 이월**
+
+#### 클린 빌드
+
+`~/Library/Developer/Xcode/DerivedData/YJApps-*`(470MB)를 삭제한 뒤 공유 스킴 7개를 순차 빌드했다.
+기존 레포의 DerivedData는 건드리지 않았다.
+
+```
+GolfCounter                    ✅  36초   (최초 빌드 — 패키지 컴파일 포함)
+GolfCounter Watch App          ✅   9초
+GolfComplicationExtension      ✅   9초
+TennisCounter                  ✅  20초
+TennisCounter Watch App        ✅  14초
+RalliComplicationExtension     ✅  10초
+TennisLiveActivityExtension    ✅   8초
+                                  총 106초
+```
+
+#### 테스트
+
+| 스킴 / 대상 | 결과 |
+|---|---|
+| GolfCounter | `TEST SUCCEEDED` |
+| GolfCounter Watch App | `TEST SUCCEEDED` |
+| TennisCounter | `TEST SUCCEEDED` |
+| TennisCounter Watch App | `TEST SUCCEEDED` |
+| YJKit-Package | `TEST SUCCEEDED` — 51 tests in 6 suites |
+
+테스트 규모 (소스 기준):
+
+```
+Apps/GolfCounter/iosTests          파일  6개 / 테스트  47개
+Apps/GolfCounter/watchosTests      파일 23개 / 테스트 177개
+Apps/TennisCounter/iosTests        파일 10개 / 테스트 124개
+Apps/TennisCounter/watchosTests    파일  2개 / 테스트  64개
+Packages/YJKit/Tests               파일  9개 / 테스트  69개
+```
+
+#### 보류한 항목
+
+**워치↔iOS 연동 동작 확인**은 시뮬레이터 수동 조작이 필요해 자동화하지 않았다.
+TestFlight 배포 시점에 실기기로 확인한다. 전환이 통신 코드나 App Group·번들 ID를 건드리지 않았으므로
+회귀 가능성은 낮지만, 확인 전까지는 **미검증 항목으로 남긴다.**
 
 ### 7단계 — 마무리
 

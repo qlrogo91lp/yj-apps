@@ -27,12 +27,14 @@ yj-apps/
 | 3 | 워크스페이스 + 스킴 공유 | ✅ 완료 |
 | 4 | 타깃·스킴 이름 정리 | ✅ 완료 |
 | 5 | 툴링 구조화 | ✅ 완료 |
-| 6~7 | 최종 검증 + 마무리 | ⬜ |
+| 6 | 최종 검증 | 🔄 자동 검증 완료, 실기 연동 확인은 TestFlight 시점 |
 
-### 다음에 할 일 — 6단계 최종 검증
+### 다음에 할 일 — 7단계 마무리
 
-클린 빌드(DerivedData 삭제 후) · 전 타깃 테스트 · 시뮬레이터에서 워치↔iOS 연동 확인.
-이후 7단계에서 기존 3개 레포(golf_counter / tennis_counter / ralli-kit)를 archive 한다.
+기존 3개 레포(golf_counter / tennis_counter / ralli-kit)를 GitHub에서 archive 한다.
+**삭제는 전환 완료 + 릴리즈 1회 통과 후 재판단한다.**
+
+미검증으로 남은 항목: **워치↔iOS 연동 동작.** TestFlight 배포 시 실기기로 확인한다.
 
 ---
 
