@@ -1,30 +1,32 @@
-# CLAUDE.md
+# CLAUDE.md — TennisCounter (Ralli)
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+**공통 규약(작업 방식·Git Workflow·빌드 개요·YJKit 사용법)은 저장소 루트 `CLAUDE.md` 를 먼저 본다.**
+이 문서는 이 앱 고유 내용만 다룬다. 사용자에게 보이는 앱 이름은 `Ralli` 다.
 
 ## Build Commands
 
+루트에서 실행한다. 워치 UDID 주의사항은 루트 `CLAUDE.md` 참조.
+
 ```bash
-# Build iOS app
-xcodebuild -project TennisCounter.xcodeproj -scheme "TennisCounter" -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build
+# iOS 앱 (test 로 바꾸면 RalliTests 실행)
+xcodebuild -workspace YJApps.xcworkspace -scheme "TennisCounter" \
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build
 
-# Build Watch app
-xcodebuild -project TennisCounter.xcodeproj -scheme "TennisCounter Watch App" -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)' build
+# Watch 앱 (test 로 바꾸면 RalliTests + RalliWatchTests 실행)
+xcodebuild -workspace YJApps.xcworkspace -scheme "TennisCounter Watch App" \
+  -destination "id=<워치 시뮬레이터 UDID>" build
 
-# Build Complication widget
-xcodebuild -project TennisCounter.xcodeproj -scheme "ComplicationAppExtension" -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)' build
+# Complication 위젯
+xcodebuild -workspace YJApps.xcworkspace -scheme "RalliComplicationExtension" \
+  -destination "id=<워치 시뮬레이터 UDID>" build
 
-# Run iOS tests
-xcodebuild test -project TennisCounter.xcodeproj -scheme "TennisCounter" -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
-
-# Run Watch tests
-xcodebuild test -project TennisCounter.xcodeproj -scheme "TennisCounter Watch App" -destination 'platform=watchOS Simulator,id=8502B1AE-7DCB-4442-9D80-FD34FD0370E1'
-
-# Lint & Format
-make lint      # Run swiftlint
-make format    # SwiftFormat --lint check
-make fix       # Auto-fix: swiftformat + swiftlint --fix
+# Live Activity
+xcodebuild -workspace YJApps.xcworkspace -scheme "TennisLiveActivityExtension" \
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build
 ```
+
+> 스킴은 `RalliComplicationExtension` 이지만 타깃 이름은 `ComplicationAppExtension` 이다
+> (출시 산출물명 유지 목적). 테스트 타깃은 `RalliTests` / `RalliWatchTests`.
 
 ## Architecture
 
@@ -41,7 +43,7 @@ Shared/
 │   ├── MatchResult.swift    # 경기 결과 struct
 │   ├── MatchSession.swift   # 진행 중 경기 세션 상태
 │   └── SetScore.swift       # 세트 점수 struct
-│   # 워크아웃 메트릭(WorkoutMetrics)은 RalliKit WorkoutCore 타입을 쓴다 — 앱에 정의하지 않는다
+│   # 워크아웃 메트릭(WorkoutMetrics)은 YJKit WorkoutCore 타입을 쓴다 — 앱에 정의하지 않는다
 ├── Persistence/
 │   │  # SwiftData @Model 클래스. DB 스키마 역할.
 │   ├── Match.swift          # SwiftData 경기 기록 모델
@@ -49,7 +51,7 @@ Shared/
 └── Services/
     │  # 외부 프레임워크/시스템 API를 래핑하는 서비스 레이어.
     ├── ConnectivityMessages.swift      # 워치↔폰 메시지 정의 (ConnectivityMessage 채택)
-    └── MatchConnectivity.swift         # 폰↔워치 실시간 점수·워크아웃 앵커 동기화 + pause 명령 왕복 (RalliKit ConnectivityCore/WorkoutCore 기반)
+    └── MatchConnectivity.swift         # 폰↔워치 실시간 점수·워크아웃 앵커 동기화 + pause 명령 왕복 (YJKit ConnectivityCore/WorkoutCore 기반)
 
 iOSApp/
 │  # iPhone 전용 타겟
@@ -59,7 +61,7 @@ iOSApp/
 │   └── Date+Month.swift   # Date 월 표기 헬퍼
 ├── Services/
 │   ├── LiveActivityService.swift  # Live Activity 시작/업데이트/종료
-│   └── MatchPersistenceService.swift  # SwiftData 경기 저장/조회 (RalliKit PersistenceCore 위임)
+│   └── MatchPersistenceService.swift  # SwiftData 경기 저장/조회 (YJKit PersistenceCore 위임)
 ├── Components/
 │   ├── BackButton.swift   # 공통 뒤로가기 버튼
 │   ├── BrandTitle.swift   # 앱 브랜드 타이틀 컴포넌트
@@ -99,7 +101,7 @@ iOSApp/
     │           ├── RematchButton.swift
     │           └── SaveButton.swift
     ├── WorkoutSession/                  # iOS 워크아웃 세션 컨테이너
-    │   │  # 2-탭 TabView [Workout | Match]. 워크아웃 탭 화면은 RalliKit WorkoutUI(WorkoutDashboardView)가 소유
+    │   │  # 2-탭 TabView [Workout | Match]. 워크아웃 탭 화면은 YJKit WorkoutUI(WorkoutDashboardView)가 소유
     │   ├── WorkoutSessionView.swift
     │   ├── WorkoutSessionViewModel.swift  # 경과시간은 워치 앵커 기반 보간(WorkoutAnchor). pause는 왕복 요청만 보내고 ack 전엔 낙관적으로 토글하지 않음
     │   └── Components/
@@ -149,11 +151,11 @@ WatchApp/
     │           └── SaveButton.swift
     └── WorkoutSession/
         │  # 컨테이너 Feature: 3-탭 TabView [WorkoutControlsView | Match | WorkoutMetricsView]
-        │  # 좌우 두 탭 화면은 RalliKit WorkoutUI가 소유 — 앱에 워크아웃 UI를 두지 않는다
+        │  # 좌우 두 탭 화면은 YJKit WorkoutUI가 소유 — 앱에 워크아웃 UI를 두지 않는다
         │  # HealthKit 세션 생명주기 관리, Match 흐름 조정
         ├── WorkoutSessionView.swift      # 좌우 스와이프로 3개 탭 전환
         ├── WorkoutSessionViewModel.swift # MatchPhase 상태 + HealthKit 연동. 폰의 pause 명령 수신 → HKWorkoutSession 제어, 워크아웃 누적 메트릭을 앵커로 브로드캐스트
-        └── WorkoutConfiguration+Tennis.swift # 테니스 종목 설정 (RalliKit WorkoutConfiguration 주입값)
+        └── WorkoutConfiguration+Tennis.swift # 테니스 종목 설정 (YJKit WorkoutConfiguration 주입값)
 
 ComplicationApp/
 │  # watchOS WidgetKit complication + AppIntents. 잠금화면/항상켜기 화면에 현재 점수 표시.
@@ -176,18 +178,10 @@ TennisLiveActivity/
 - **Shared/Persistence/**: SwiftData `@Model` 클래스. `MatchPersistenceService`를 통해서만 접근.
 - **Roadmap**: Phase 1-A (SwiftData + WatchConnectivity) 구현 완료. Phase 1-B에서 HealthKit + Live Activity. Phase 2에서 Firebase 멀티 모드 + StoreKit 2.
 
-## RalliKit (SPM 의존성)
+## YJKit 의존성
 
-인프라 계층은 별도 패키지 **RalliKit**(`git@github.com:qlrogo91lp/ralli-kit.git`, private)으로 추출돼 있다.
-현재는 **로컬 패키지 참조**(`XCLocalSwiftPackageReference "../ralli-kit"`)라 클론이 **테니스 레포의 형제 폴더**여야 빌드된다.
-릴리즈 전에 원격 참조 + semver 태그로 전환해야 한다 ([추출 현황 로그](docs/superpowers/logs/2026-07-16-rallikit-spm-extraction-status.md) 참조).
-
-| Product | 내용 | 링크되는 타겟 |
-|---|---|---|
-| `WorkoutCore` | HealthKit 세션(`WorkoutSessionService`), `WorkoutConfiguration`/`WorkoutResult`/`WorkoutMetrics`, 앵커 보간(`WorkoutAnchor`), 메트릭·pause 메시지 | iOS, Watch |
-| `WorkoutUI` | 워크아웃 화면 (iOS `WorkoutDashboardView`, Watch `WorkoutControlsView`·`WorkoutMetricsView`) — 라벨·색·로컬라이제이션을 패키지가 소유 | iOS, Watch |
-| `ConnectivityCore` | WCSession 전송·라우팅·콜드런치(`ConnectivityService`, `ConnectivityMessage`, `MessageRouter`) | iOS, Watch |
-| `PersistenceCore` | SwiftData+CloudKit 컨테이너 팩토리, 제너릭 `PersistenceService<Model>` | iOS 전용 |
+인프라 계층은 모노레포의 로컬 패키지 `Packages/YJKit` 이다. 프로덕트 구성·워크아웃 동작 계약은
+루트 `CLAUDE.md` 와 `Packages/YJKit/README.md` 를 본다.
 
 **앱 레이어가 소유하는 것** — 코어는 도메인을 모른다.
 
@@ -195,12 +189,6 @@ TennisLiveActivity/
 - `Shared/Services/ConnectivityMessages.swift` — 테니스 도메인 메시지 (`ConnectivityMessage` 채택)
 - `iOSApp/Services/MatchPersistenceService.swift` — 중복 제거·정렬 규칙. CRUD는 `PersistenceCore`에 위임 (Watch는 저장소를 쓰지 않아 `Shared/`가 아닌 `iOSApp/`에 둔다)
 - `WatchApp/Features/WorkoutSession/WorkoutConfiguration+Tennis.swift` — 종목 설정 주입값
-
-**워크아웃 동작 계약** (3개 앱이 같은 규칙을 지켜야 숫자 의미가 갈리지 않는다)
-
-- 화면에 넘기는 칼로리는 **워크아웃 누적값**. 경기 구간 값이 필요하면 저장 시점에 `종료값 - 시작값`으로 계산한다.
-- 경과시간은 **워치가 단일 소스**. 폰은 `WorkoutAnchor.interpolatedElapsed(...)`로 보간하고 자체 타이머로 세지 않는다.
-- pause는 **폰→워치 명령**. 폰은 `WorkoutPauseMessage`를 보내고 `isPaused`는 워치 앵커로만 갱신한다 (낙관적 토글 금지). 워치 미연결이면 `isPauseAvailable: false`.
 
 ## Folder Conventions
 
@@ -274,14 +262,6 @@ docs/superpowers/
 - 파일명: `YYYY-MM-DD-{설명}.md` (e.g., `2026-05-29-workout-connectivity-bug-fix.md`)
 - 플랫폼 구분 없이 `logs/` 아래 flat하게 둔다 (한 작업이 여러 타겟에 걸치는 경우가 많으므로)
 - logs 파일은 완료된 작업만 커밋한다
-
-## Xcode 프로젝트 파일
-
-이 프로젝트는 **Xcode 16의 `PBXFileSystemSynchronizedRootGroup`** 방식을 사용한다.
-
-- Swift 파일을 생성하거나 삭제하면 Xcode가 폴더를 자동 스캔해서 빌드 대상에 포함/제외한다.
-- `.xcodeproj/project.pbxproj`를 직접 수정하거나 `xcodeproj` gem 등 프로젝트 파일 편집 도구를 사용할 필요가 없다.
-- 파일 이동/생성/삭제는 파일시스템 조작만으로 충분하다.
 
 ## Testing
 
@@ -359,11 +339,3 @@ watchosTests/
 - View suffix: 독립적인 화면/페이지만 (e.g., `ModeView.swift`, `MatchView.swift`, `WorkoutSessionView.swift`)
 - Components 폴더의 순수 컴포넌트: suffix 없음 (e.g., `UndoButton.swift`, `GameScores.swift`, `PlayerPointButton.swift`)
 - 한 파일 = 한 타입: 같은 파일에 여러 View/ViewModel 정의 금지 (단, private helper component는 제외)
-
-## Git Workflow
-
-PR 머지 시 squash 금지. 항상 일반 merge commit을 사용한다.
-
-```bash
-gh pr merge <number> --merge --delete-branch
-```

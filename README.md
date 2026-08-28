@@ -26,20 +26,13 @@ yj-apps/
 | 2 | 패키지 로컬화 | ✅ 완료 |
 | 3 | 워크스페이스 + 스킴 공유 | ✅ 완료 |
 | 4 | 타깃·스킴 이름 정리 | ✅ 완료 |
-| 5 | 툴링 구조화 | ⬜ |
+| 5 | 툴링 구조화 | ✅ 완료 |
 | 6~7 | 최종 검증 + 마무리 | ⬜ |
 
-### 다음에 할 일 — 5단계 툴링 구조화
+### 다음에 할 일 — 6단계 최종 검증
 
-앱별 `.swiftlint.yml` / `.swiftformat`을 각 앱 폴더에 둔 채, 루트에 공통 `.swiftlint.yml`을 만들고
-앱별 설정이 `parent_config`로 상속하게 한다. `.gitignore` 통합, 루트 `Makefile`(앱 순회),
-`CLAUDE.md` 분리도 함께.
-
-**`--swiftversion` 값은 건드리지 않는다** (golf 5.0 / tennis 6.0 그대로).
-5 vs 6 판단은 [코드 스타일 문서](docs/superpowers/specs/2026-08-27-code-style-tooling-design.md)의
-미결 논의 항목이다.
-
-완료 조건: **린트 결과가 전환 전과 동일할 것.** 새로 생기거나 사라진 위반이 없어야 한다.
+클린 빌드(DerivedData 삭제 후) · 전 타깃 테스트 · 시뮬레이터에서 워치↔iOS 연동 확인.
+이후 7단계에서 기존 3개 레포(golf_counter / tennis_counter / ralli-kit)를 archive 한다.
 
 ---
 

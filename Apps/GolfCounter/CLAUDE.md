@@ -1,55 +1,36 @@
-# CLAUDE.md
+# CLAUDE.md — GolfCounter
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
-## 작업 방식
-
-**구현은 승인된 플랜에서 출발한다. 플랜 없이 코드를 건드리지 않는다.**
-
-기본 흐름: 분석·브레인스토밍 → 플랜 제시 → **사용자 승인** → 구현 → 검증 → 커밋
-
-- "분석해줘", "구조 파악해줘", "어떻게 생각해?", "이거 왜 이래?"는 전부 **분석 요청이지
-  구현 요청이 아니다.** 분석 결과와 제안까지만 내놓고 멈춘다.
-- 스코프나 방식을 되묻고 답을 받은 것은 **질문에 대한 답일 뿐 구현 승인이 아니다.**
-  받은 답을 반영한 플랜을 다시 제시하고, 거기서 승인을 한 번 더 받는다.
-- 사용자가 구현을 지시했더라도, 파일을 새로 만들거나 지우거나 두 개 이상을 고치는
-  변경이면 먼저 플랜(바꿀 파일 목록 + 각 파일에서 할 일)을 보이고 승인을 받는다.
-- 브랜치 생성·커밋·PR도 승인 대상이다. 플랜에 포함해서 함께 확인받는다.
-
-물어보지 않고 바로 해도 되는 것 — 읽기·검색, 빌드·테스트·lint 실행, 한 곳짜리
-오타나 컴파일 에러 수정, 직전 턴에 승인받은 플랜의 실행.
-
-플랜은 **바꿀 파일 단위로** 적는다. 규모가 크면 `docs/superpowers/plans/`에 문서로
-남기고, 작으면 대화 안에서 제시해도 된다.
+**공통 규약(작업 방식·Git Workflow·빌드 개요·YJKit 사용법)은 저장소 루트 `CLAUDE.md` 를 먼저 본다.**
+이 문서는 GolfCounter 앱 고유 내용만 다룬다.
 
 ## Project overview
 
 GolfCounter — 워치 메인 입력, iOS는 기록·통계 전용인 골프 스트로크 카운터.
 설계는 `docs/superpowers/specs/2026-07-31-golfcounter-rebuild-design.md` 참조 (v1 리빌드 진행 중).
 타깃: `GolfCounter`(iOS 17+) / `GolfCounter Watch App`(watchOS 10+) / `ComplicationAppExtension`(watch 위젯).
-의존성: ralli-kit 원격 SPM (`https://github.com/qlrogo91lp/ralli-kit.git`, branch `main`) — WorkoutCore / ConnectivityCore / PersistenceCore / WorkoutUI. 그 외 없음.
+의존성: 모노레포 로컬 패키지 `Packages/YJKit` — WorkoutCore / ConnectivityCore / PersistenceCore / WorkoutUI. 그 외 없음.
+스킴 이름은 `GolfComplicationExtension` 이지만 타깃 이름은 `ComplicationAppExtension` 이다 (출시 산출물명 유지 목적).
 
 ## Commands
 
-```bash
-make lint      # swiftlint
-make format    # swiftformat --lint (검사만)
-make fix       # 자동 수정
+루트에서 실행한다. 공통 명령·워치 UDID 주의사항은 루트 `CLAUDE.md` 참조.
 
-# iOS 빌드/테스트
-xcodebuild -project GolfCounter.xcodeproj -scheme "GolfCounter" \
+```bash
+# iOS
+xcodebuild -workspace YJApps.xcworkspace -scheme "GolfCounter" \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build   # 또는 test
 
-# watch 빌드/테스트 (기기명은 xcrun simctl list devices available로 확인)
-xcodebuild -project GolfCounter.xcodeproj -scheme "GolfCounter Watch App" \
-  -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)' build   # 또는 test
+# watch (UDID는 xcrun simctl list devices available 로 확인)
+xcodebuild -workspace YJApps.xcworkspace -scheme "GolfCounter Watch App" \
+  -destination "id=<워치 시뮬레이터 UDID>" build   # 또는 test
 
-# complication 빌드/테스트 (기기명은 xcrun simctl list devices available로 확인)
-xcodebuild -project GolfCounter.xcodeproj -scheme "ComplicationAppExtension" \
-  -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)' build   # 또는 test
+# complication
+xcodebuild -workspace YJApps.xcworkspace -scheme "GolfComplicationExtension" \
+  -destination "id=<워치 시뮬레이터 UDID>" build
 ```
 
-패키지 참조가 원격(branch `main`)이므로 `../ralli-kit`을 형제 디렉터리로 체크아웃해 둘 필요는 없다 — 빌드·실행은 원격 참조만으로 패키지 그래프를 resolve한다. ralli-kit 패키지 자체를 고치는 동안에만 예외: 로컬 `../ralli-kit` 폴더를 Xcode 워크스페이스에 끌어다 놓으면 같은 이름의 원격 패키지보다 우선 적용된다(Xcode 기본 동작). 그 local override는 활발히 개발할 때만 쓰고, 끝나면 제거한다 — 커밋되는 pbxproj는 항상 원격 참조를 유지한다.
+린트는 이 앱 폴더에서 `swiftlint` / `swiftformat --lint .` 를 직접 돌리거나,
+루트에서 `make lint` / `make format` 으로 두 앱을 함께 검사한다.
 
 ## Architecture & Conventions
 
@@ -102,12 +83,9 @@ ScreenName/Components/  ← 특정 View 전용 (가장 낮은 계층)
 - `Components/` 안의 순수 컴포넌트: suffix 없음 (e.g., `UndoButton.swift`)
 - 한 파일 = 한 타입: 같은 파일에 여러 View/ViewModel 정의 금지 (단, private helper component는 예외)
 
-## Git Workflow
-
-- `main` 직접 push 금지 — 브랜치 + PR, 머지는 항상 일반 merge commit (`gh pr merge <n> --merge --delete-branch`)
-- 예외: `docs/superpowers/specs/`·`plans/`의 스펙/플랜 문서는 코드 변경이 없으므로 브랜치+PR 없이 `main`에 직접 커밋·push 가능
-- 커밋 메시지는 gitmoji prefix: ✨ feat / 🐛 fix / ♻️ refactor / 🎨 style / 📝 docs / ✅ test / 🔧 chore / 🔥 remove / ⏪ revert
-
 ## Docs
 
-`docs/superpowers/specs/`(설계)·`plans/`(구현 계획, 파일명에 common-/watch-/ios- prefix). 사용자 검토 전에는 커밋하지 않는다.
+커밋 시점 등 공통 규약은 루트 `CLAUDE.md` 를 따른다. 이 앱의 배치 규칙만 여기 적는다.
+
+- `docs/superpowers/specs/` — 설계
+- `docs/superpowers/plans/` — 구현 계획. 파일명에 `common-` / `watch-` / `ios-` prefix를 붙인다

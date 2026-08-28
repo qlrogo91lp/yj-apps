@@ -411,16 +411,92 @@ tennis 쪽 테스트·스킴에는 `TennisCounter`가 아니라 **`Ralli`** 를 
 
 - `MARKETING_VERSION = 1.0`은 테스트 타깃에만 남아 있다. 배포되지 않으므로 그대로 둔다.
 
-### 5단계 — 툴링 구조화
+### 5단계 — 툴링 구조화 ✅ 완료 (2026-08-28)
 
-- [ ] 루트 `.gitignore` 통합 (golf의 것이 가장 완전하며 ralli-kit의 `.build/` 누락 시 165MB가 커밋될 수 있다)
-- [ ] 루트 `.swiftlint.yml` 신설(공통 규칙) + 앱별 `.swiftlint.yml`에 `parent_config` 추가
-- [ ] 앱별 `.swiftformat`은 **현재 값 그대로 유지** (D1)
-- [ ] 루트 `Makefile` — 앱 순회 방식
-- [ ] `CLAUDE.md` 분리: 공통 작업 규약은 루트로, 앱별 아키텍처·명령어는 각 앱 폴더로
+- [x] 루트 `.gitignore` 통합, 앱별 `.gitignore` 제거
+- [x] 루트 `.swiftlint.yml` 신설 + 앱별 `parent_config` 상속
+- [x] 앱별 `.swiftformat` 은 현재 값 그대로 유지 (D1)
+- [x] 루트 `Makefile` — 앱 순회
+- [x] `CLAUDE.md` 분리: 공통 규약 → 루트, 앱별 아키텍처·명령 → 각 앱
 
-완료 조건: **린트 결과가 전환 전과 동일하다.** 0단계에서 기록한 기준선과 비교해 새로 발생하거나
-사라진 위반이 없어야 한다. (기존에 존재하던 `trailingCommas` 실패 1건은 그대로 남아 있어야 정상이다.)
+#### 기준선 대조 (완료 조건)
+
+작업 전 기록: golf `swiftlint 0 / swiftformat 0`, tennis `swiftlint 0 / swiftformat 1`
+(`MatchDetailSheet.swift:16 trailingCommas` — 기존부터 있던 것).
+
+**작업 후 네 값 모두 기준선과 동일.** 새로 생기거나 사라진 위반이 없다.
+
+0건은 "규칙이 아예 안 도는 것"과 구별되지 않으므로, 부모 규칙만으로 잡히는 위반을 담은 임시 파일을
+넣어 능동 검증했다.
+
+```
+__LintProbe.swift:4  Empty Count Violation (empty_count)          ← 루트 설정에서 옴
+__LintProbe.swift:5  Force Unwrapping Violation (force_unwrapping) ← 루트 설정에서 옴
+```
+
+`parent_config` 의 리스트 병합 방식도 별도 실측했다. 자식이 `opt_in_rules` 를 재정의해도 **부모 항목이
+사라지지 않고 병합된다.** 따라서 자식 설정에 부모 규칙을 다시 나열할 필요가 없다.
+
+#### 정정 — `force_unwrapping` 은 golf 전용이 아니었다
+
+설계 초안에서 "golf 에만 `force_unwrapping` opt-in" 이라고 기록했으나 **두 앱 모두 켜져 있었다.**
+실제 앱별 차이는 golf 의 주석 2줄과 tennis 의 `type_name.excluded` 뿐이다. 따라서
+`force_unwrapping` 은 루트 공통 규칙으로 올렸고, 주석도 함께 옮겼다.
+
+#### `.gitignore` 통합에서 의도적으로 제외한 패턴
+
+기존 `tennis_counter/.gitignore` 에 있던 두 항목은 루트로 올리지 않았다.
+
+| 패턴 | 제외 이유 |
+|---|---|
+| `Packages/` | **루트 `Packages/YJKit` 전체가 무시된다.** 모노레포에서는 치명적 |
+| `Package.resolved` | 외부 의존이 생기면 커밋하는 편이 재현성에 유리 |
+
+`git check-ignore` 로 `Packages/`, `Packages/YJKit/Package.swift` 등이 추적 가능한지, 그리고
+`DerivedData/`, `xcuserdata/`, `.build/`, `.superpowers/`, `.worktrees/` 가 무시되는지 각각 확인했다.
+
+> 디렉터리 전용 패턴(`DerivedData/` 처럼 슬래시로 끝나는 것)은 존재하지 않는 경로로 `git check-ignore`
+> 하면 매칭되지 않는다. 실제 디렉터리를 만들어 검사해야 한다.
+
+#### `CLAUDE.md` 분리와 함께 고친 낡은 서술
+
+두 문서 모두 `ralli-kit` 을 전제로 쓰여 있어 현재 상태와 맞지 않았다.
+
+- golf: *"패키지 참조가 원격(branch main)이므로 … 로컬 `../ralli-kit` 폴더를 워크스페이스에 끌어다 놓으면 …
+  local override 는 끝나면 제거한다"* → 로컬 패키지 전환으로 **절차 자체가 불필요**해져 삭제
+- tennis: *"로컬 패키지 참조(`../ralli-kit`)라 클론이 형제 폴더여야 빌드된다. 릴리즈 전에 원격 참조 +
+  semver 태그로 전환해야 한다"* → 사실과 다름. `Packages/YJKit` 기준으로 재작성
+- 빌드 명령의 `-project` → `-workspace`, 스킴 이름 갱신, 워치 UDID 주의 추가
+- 본문의 `RalliKit` 언급 6곳 → `YJKit`
+
+#### 구조
+
+```
+yj-apps/
+├─ CLAUDE.md              작업 방식 · 공통 명령 · YJKit 규칙 · Xcode 프로젝트 파일 · Git Workflow · Docs 공통
+├─ .swiftlint.yml         공통 규칙
+├─ Makefile               lint / format / fix / kit-test (앱 순회)
+├─ .gitignore             통합본
+├─ Apps/GolfCounter/
+│   ├─ CLAUDE.md          Project overview · Commands · Architecture · Docs 배치
+│   ├─ .swiftlint.yml     parent_config + included
+│   └─ .swiftformat       --swiftversion 5.0 (유지)
+└─ Apps/TennisCounter/
+    ├─ CLAUDE.md          Build Commands · Architecture · YJKit 의존성 · Folder/Docs/Testing/Code Conventions
+    ├─ .swiftlint.yml     parent_config + included + type_name.excluded
+    └─ .swiftformat       --swiftversion 6.0 (유지)
+```
+
+#### 검증
+
+| 항목 | 결과 |
+|---|---|
+| swiftlint 결과 (앱 2개) | 기준선과 **동일** |
+| swiftformat 결과 (앱 2개) | 기준선과 **동일** |
+| 부모 규칙 상속 능동 검증 | `empty_count`·`force_unwrapping` 정상 동작 |
+| `make lint` / `make format` | 정상 |
+| `Packages/` 추적 가능 여부 | 무시되지 않음 확인 |
+| 빌드 회귀 | GolfCounter ✅ / TennisCounter ✅ |
 
 ### 6단계 — 최종 검증
 
