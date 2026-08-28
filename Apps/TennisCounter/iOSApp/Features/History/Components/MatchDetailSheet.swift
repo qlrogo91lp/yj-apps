@@ -13,7 +13,7 @@ import WorkoutCore
     match.sets = [
         SetRecord(myGames: 6, yourGames: 4, setNumber: 1),
         SetRecord(myGames: 4, yourGames: 6, setNumber: 2),
-        SetRecord(myGames: 6, yourGames: 3, setNumber: 3)
+        SetRecord(myGames: 6, yourGames: 3, setNumber: 3),
     ]
 
     return MatchDetailSheet(match: match)
