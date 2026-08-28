@@ -15,6 +15,10 @@ env:
   XCODE_VERSION: "26.6"
   IOS_DEVICE: "^iPhone"
   WATCH_DEVICE: "^Apple Watch"
+  # 린트 도구는 로컬과 같은 버전으로 고정한다. 러너 이미지의 기본 버전을 그대로 쓰면
+  # 규칙이 추가된 버전에서 없던 위반이 잡혀 CI 만 빨간불이 된다.
+  SWIFTFORMAT_VERSION: "0.61.1"
+  SWIFTLINT_VERSION: "0.64.1"
 
 jobs:
   # 변경된 경로로 이후 job 의 실행 여부를 정한다.
@@ -28,7 +32,7 @@ jobs:
       golf: ${{ steps.filter.outputs.golf }}
       tennis: ${{ steps.filter.outputs.tennis }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -84,21 +88,35 @@ jobs:
     name: 린트
     needs: changes
     if: needs.changes.outputs.golf == 'true' || needs.changes.outputs.tennis == 'true'
-    runs-on: macos-15
+    runs-on: macos-26
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - name: 도구 확인
+      # 러너에 미리 깔린 버전을 쓰면 이미지가 바뀔 때마다 결과가 흔들린다.
+      # 실제로 brew 가 설치한 swiftformat 0.62.1 이 로컬(0.61.1)에 없던
+      # wrapIfStatementBodies 위반 3건을 잡아 실패한 적이 있다.
+      - name: 린트 도구 설치 (버전 고정)
         run: |
-          for tool in swiftlint swiftformat; do
-            if command -v "$tool" >/dev/null 2>&1; then
-              echo "$tool: $("$tool" --version 2>&1 | head -1)"
-            else
-              echo "::warning::${tool} 이 러너에 없다 — brew 로 설치한다"
-              brew install "$tool"
-            fi
-          done
+          tools="$RUNNER_TEMP/lint-tools"
+          mkdir -p "$tools"
+
+          curl -fsSL -o "$tools/swiftformat.zip" \
+            "https://github.com/nicklockwood/SwiftFormat/releases/download/${SWIFTFORMAT_VERSION}/swiftformat.zip"
+          curl -fsSL -o "$tools/swiftlint.zip" \
+            "https://github.com/realm/SwiftLint/releases/download/${SWIFTLINT_VERSION}/portable_swiftlint.zip"
+
+          unzip -q -o "$tools/swiftformat.zip" -d "$tools"
+          unzip -q -o "$tools/swiftlint.zip" -d "$tools"
+          chmod +x "$tools/swiftformat" "$tools/swiftlint"
+
+          # 러너 기본 설치본보다 앞서도록 PATH 맨 앞에 둔다.
+          echo "$tools" >> "$GITHUB_PATH"
+
+      - name: 도구 버전 확인
+        run: |
+          echo "swiftformat: $(swiftformat --version)"
+          echo "swiftlint:   $(swiftlint --version)"
 
       # 기준선이 초록이므로 위반이 하나라도 생기면 실패한다 (설계 문서 5.4).
       - name: swiftlint
@@ -111,10 +129,10 @@ jobs:
     name: YJKit 테스트
     needs: changes
     if: needs.changes.outputs.kit == 'true'
-    runs-on: macos-15
+    runs-on: macos-26
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Xcode 선택
         run: |
@@ -144,10 +162,10 @@ jobs:
     name: GolfCounter
     needs: changes
     if: needs.changes.outputs.golf == 'true'
-    runs-on: macos-15
+    runs-on: macos-26
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Xcode 선택
         run: |
@@ -191,10 +209,10 @@ jobs:
     name: TennisCounter
     needs: changes
     if: needs.changes.outputs.tennis == 'true'
-    runs-on: macos-15
+    runs-on: macos-26
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Xcode 선택
         run: |
