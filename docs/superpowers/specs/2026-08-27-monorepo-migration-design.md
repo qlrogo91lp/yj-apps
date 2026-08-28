@@ -229,9 +229,42 @@ git filter-branch -f --index-filter '
 
 - [x] `Packages/YJKit/Package.swift`의 `name: "RalliKit"` → `"YJKit"`. products/targets 이름은 불변 (2026-08-27)
 - [x] `Packages/YJKit/README.md` 제목·설명 갱신
-- [ ] `Apps/GolfCounter/GolfCounter.xcodeproj`: 원격 패키지 참조 제거 → 로컬 참조(`../../Packages/YJKit`) 추가
-- [ ] `Apps/TennisCounter/TennisCounter.xcodeproj`: 동일
-- [ ] 각 타깃의 프로덕트 연결이 기존과 동일한지 확인 (아래 표가 기준)
+- [x] `Apps/GolfCounter/GolfCounter.xcodeproj`: 원격 패키지 참조 제거 → 로컬 참조(`../../Packages/YJKit`) 추가 (2026-08-28)
+- [x] `Apps/TennisCounter/TennisCounter.xcodeproj`: 동일 (2026-08-28)
+- [x] 각 타깃의 프로덕트 연결이 기존과 동일한지 확인 (아래 표가 기준) — **전부 일치**
+- [x] 사용되지 않게 된 `Package.resolved`(ralli-kit 핀) 삭제
+
+#### 실행 중 확인된 것 — 워크스페이스는 패키지 그래프를 공유한다
+
+한 프로젝트의 원격 참조만 지우고 로컬 패키지를 추가하면 다음 오류가 난다.
+
+```
+Package Resolution Failed — YJKit could not be resolved:
+multiple packages ('ralli-kit' from 'https://github.com/qlrogo91lp/ralli-kit',
+'yjkit' at '.../Packages/YJKit') declare products with a conflicting name: 'WorkoutUI';
+product names need to be unique across the package graph
+```
+
+워크스페이스 안의 모든 프로젝트가 하나의 패키지 그래프를 공유하므로, **두 프로젝트의 원격 참조를
+모두 제거한 뒤에** 로컬 패키지를 추가해야 한다. 앱을 하나씩 순차 처리하는 방식은 성립하지 않는다.
+
+또한 Xcode에서 Package Dependencies의 패키지를 제거해도 **각 타깃에 연결된 프로덕트 항목은
+자동으로 정리되지 않는다.** 끊어진 링크로 남으므로 타깃별 Frameworks에서 직접 제거 후 재연결해야 한다.
+
+#### 검증 결과 (2026-08-28)
+
+| 항목 | 결과 |
+|---|---|
+| `XCRemoteSwiftPackageReference` | golf 0건 / tennis 0건 |
+| `ralli-kit` 문자열 잔재 | golf 0건 / tennis 0건 |
+| 로컬 참조 경로 | `relativePath = ../../Packages/YJKit` — **상대 경로**, 다른 머신에서도 유효 |
+| 타깃별 프로덕트 연결 | 아래 기준표와 **전부 일치** |
+| 빌드 | GolfCounter ✅ / GolfCounter Watch App ✅ / TennisCounter ✅ / TennisCounter Watch App ✅ |
+| **로컬 소스 즉시 반영** | `WorkoutSessionService.swift`에 임시 구문 오류를 넣자 워치 앱 빌드가 그 파일을 지목하며 실패 — 원격이 아닌 로컬 소스가 컴파일됨을 확인 |
+
+> **워치 앱 빌드 시 destination 주의.** `name=Apple Watch Series 11 (46mm)`으로 지정하면
+> OS 26.4·26.5 두 기기가 같은 이름을 갖고 있어 매칭에 실패한다. `-destination "id=<UDID>"`로
+> 지정해야 한다. CI 문서에서 지적한 "시뮬레이터 이름 하드코딩" 취약점이 실제로 재현된 사례다.
 
 #### 전환 전 프로덕트 연결 — 복원 기준
 
@@ -282,6 +315,10 @@ xcodebuild -scheme YJKit-Package -destination 'platform=iOS Simulator,name=iPhon
 > 이 파일 자체가 불필요해진다. 전환 시 두 앱의 처리를 일치시킨다.
 
 ### 3단계 — 워크스페이스 + 스킴 공유
+
+> **`YJApps.xcworkspace`는 2단계 중에 먼저 생성했다.** 앱별 `.xcodeproj`를 따로 여는 혼동을 줄이고,
+> 패키지 그래프 공유 문제 때문에 두 프로젝트를 한 창에서 다뤄야 했기 때문이다. 프로젝트 2개만
+> 등록했고 패키지는 프로젝트가 참조하면서 자동으로 나타났다. 남은 것은 스킴 공유 처리다.
 
 - [ ] `YJApps.xcworkspace` 생성. `Packages/YJKit`, `Apps/GolfCounter/*.xcodeproj`, `Apps/TennisCounter/*.xcodeproj` 추가
 - [ ] 현재 user-level로만 존재하는 스킴(`ComplicationAppExtension`, `iosTests`, `watchosTests`)을 **공유(shared)로 전환**하여 커밋되게 한다

@@ -10,13 +10,6 @@
 		3974B8F52EBCDFA5002D0EA7 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 39BF174F2EBA37F60026184E /* WidgetKit.framework */; };
 		3974B8F62EBCDFA5002D0EA7 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 39BF17512EBA37F60026184E /* SwiftUI.framework */; };
 		3974B9032EBCDFA6002D0EA7 /* ComplicationAppExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3974B8F42EBCDFA5002D0EA7 /* ComplicationAppExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		3983E7D13028590B00733C35 /* ConnectivityCore in Frameworks */ = {isa = PBXBuildFile; productRef = 3983E7D03028590B00733C35 /* ConnectivityCore */; };
-		3983E7D33028590B00733C35 /* PersistenceCore in Frameworks */ = {isa = PBXBuildFile; productRef = 3983E7D23028590B00733C35 /* PersistenceCore */; };
-		3983E7D53028590B00733C35 /* WorkoutCore in Frameworks */ = {isa = PBXBuildFile; productRef = 3983E7D43028590B00733C35 /* WorkoutCore */; };
-		3983E7D73028590B00733C35 /* WorkoutUI in Frameworks */ = {isa = PBXBuildFile; productRef = 3983E7D63028590B00733C35 /* WorkoutUI */; };
-		3983E7D93028591700733C35 /* ConnectivityCore in Frameworks */ = {isa = PBXBuildFile; productRef = 3983E7D83028591700733C35 /* ConnectivityCore */; };
-		3983E7DB3028591700733C35 /* WorkoutCore in Frameworks */ = {isa = PBXBuildFile; productRef = 3983E7DA3028591700733C35 /* WorkoutCore */; };
-		3983E7DD3028591700733C35 /* WorkoutUI in Frameworks */ = {isa = PBXBuildFile; productRef = 3983E7DC3028591700733C35 /* WorkoutUI */; };
 		399700FD2A1D9BC900D0D486 /* TennisCounter Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 399700FC2A1D9BC900D0D486 /* TennisCounter Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		39CDA6E12FB3173B009825BA /* Ralli.icon in Resources */ = {isa = PBXBuildFile; fileRef = 39CDA6E02FB3173B009825BA /* Ralli.icon */; };
 		39CDA6E22FB3173B009825BA /* Ralli.icon in Resources */ = {isa = PBXBuildFile; fileRef = 39CDA6E02FB3173B009825BA /* Ralli.icon */; };
@@ -24,6 +17,13 @@
 		39D471E92FBC32EF005FBA12 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 39BF174F2EBA37F60026184E /* WidgetKit.framework */; };
 		39D471EA2FBC32EF005FBA12 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 39BF17512EBA37F60026184E /* SwiftUI.framework */; };
 		39D471F72FBC32F1005FBA12 /* TennisLiveActivityExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 39D471E82FBC32EF005FBA12 /* TennisLiveActivityExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		39FF852A30410CD0006D41AA /* ConnectivityCore in Frameworks */ = {isa = PBXBuildFile; productRef = 39FF852930410CD0006D41AA /* ConnectivityCore */; };
+		39FF852C30410CD0006D41AA /* PersistenceCore in Frameworks */ = {isa = PBXBuildFile; productRef = 39FF852B30410CD0006D41AA /* PersistenceCore */; };
+		39FF852E30410CD0006D41AA /* WorkoutCore in Frameworks */ = {isa = PBXBuildFile; productRef = 39FF852D30410CD0006D41AA /* WorkoutCore */; };
+		39FF853030410CD0006D41AA /* WorkoutUI in Frameworks */ = {isa = PBXBuildFile; productRef = 39FF852F30410CD0006D41AA /* WorkoutUI */; };
+		39FF853230410CDE006D41AA /* ConnectivityCore in Frameworks */ = {isa = PBXBuildFile; productRef = 39FF853130410CDE006D41AA /* ConnectivityCore */; };
+		39FF853430410CDE006D41AA /* WorkoutCore in Frameworks */ = {isa = PBXBuildFile; productRef = 39FF853330410CDE006D41AA /* WorkoutCore */; };
+		39FF853630410CDE006D41AA /* WorkoutUI in Frameworks */ = {isa = PBXBuildFile; productRef = 39FF853530410CDE006D41AA /* WorkoutUI */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -164,10 +164,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3983E7D13028590B00733C35 /* ConnectivityCore in Frameworks */,
-				3983E7D33028590B00733C35 /* PersistenceCore in Frameworks */,
-				3983E7D73028590B00733C35 /* WorkoutUI in Frameworks */,
-				3983E7D53028590B00733C35 /* WorkoutCore in Frameworks */,
+				39FF852A30410CD0006D41AA /* ConnectivityCore in Frameworks */,
+				39FF852C30410CD0006D41AA /* PersistenceCore in Frameworks */,
+				39FF853030410CD0006D41AA /* WorkoutUI in Frameworks */,
+				39FF852E30410CD0006D41AA /* WorkoutCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -175,9 +175,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3983E7D93028591700733C35 /* ConnectivityCore in Frameworks */,
-				3983E7DB3028591700733C35 /* WorkoutCore in Frameworks */,
-				3983E7DD3028591700733C35 /* WorkoutUI in Frameworks */,
+				39FF853230410CDE006D41AA /* ConnectivityCore in Frameworks */,
+				39FF853430410CDE006D41AA /* WorkoutCore in Frameworks */,
+				39FF853630410CDE006D41AA /* WorkoutUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -428,7 +428,7 @@
 			);
 			mainGroup = 399700E32A1D9BC800D0D486;
 			packageReferences = (
-				3983E7CF3028589000733C35 /* XCRemoteSwiftPackageReference "ralli-kit" */,
+				39FF851D30410BA1006D41AA /* XCLocalSwiftPackageReference "../../Packages/YJKit" */,
 			);
 			productRefGroup = 399700ED2A1D9BC800D0D486 /* Products */;
 			projectDirPath = "";
@@ -1191,51 +1191,47 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		3983E7CF3028589000733C35 /* XCRemoteSwiftPackageReference "ralli-kit" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/qlrogo91lp/ralli-kit.git";
-			requirement = {
-				branch = main;
-				kind = branch;
-			};
+/* Begin XCLocalSwiftPackageReference section */
+		39FF851D30410BA1006D41AA /* XCLocalSwiftPackageReference "../../Packages/YJKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../Packages/YJKit;
 		};
-/* End XCRemoteSwiftPackageReference section */
+/* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		3983E7D03028590B00733C35 /* ConnectivityCore */ = {
+		39FF852930410CD0006D41AA /* ConnectivityCore */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 3983E7CF3028589000733C35 /* XCRemoteSwiftPackageReference "ralli-kit" */;
+			package = 39FF851D30410BA1006D41AA /* XCLocalSwiftPackageReference "../../Packages/YJKit" */;
 			productName = ConnectivityCore;
 		};
-		3983E7D23028590B00733C35 /* PersistenceCore */ = {
+		39FF852B30410CD0006D41AA /* PersistenceCore */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 3983E7CF3028589000733C35 /* XCRemoteSwiftPackageReference "ralli-kit" */;
+			package = 39FF851D30410BA1006D41AA /* XCLocalSwiftPackageReference "../../Packages/YJKit" */;
 			productName = PersistenceCore;
 		};
-		3983E7D43028590B00733C35 /* WorkoutCore */ = {
+		39FF852D30410CD0006D41AA /* WorkoutCore */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 3983E7CF3028589000733C35 /* XCRemoteSwiftPackageReference "ralli-kit" */;
+			package = 39FF851D30410BA1006D41AA /* XCLocalSwiftPackageReference "../../Packages/YJKit" */;
 			productName = WorkoutCore;
 		};
-		3983E7D63028590B00733C35 /* WorkoutUI */ = {
+		39FF852F30410CD0006D41AA /* WorkoutUI */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 3983E7CF3028589000733C35 /* XCRemoteSwiftPackageReference "ralli-kit" */;
+			package = 39FF851D30410BA1006D41AA /* XCLocalSwiftPackageReference "../../Packages/YJKit" */;
 			productName = WorkoutUI;
 		};
-		3983E7D83028591700733C35 /* ConnectivityCore */ = {
+		39FF853130410CDE006D41AA /* ConnectivityCore */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 3983E7CF3028589000733C35 /* XCRemoteSwiftPackageReference "ralli-kit" */;
+			package = 39FF851D30410BA1006D41AA /* XCLocalSwiftPackageReference "../../Packages/YJKit" */;
 			productName = ConnectivityCore;
 		};
-		3983E7DA3028591700733C35 /* WorkoutCore */ = {
+		39FF853330410CDE006D41AA /* WorkoutCore */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 3983E7CF3028589000733C35 /* XCRemoteSwiftPackageReference "ralli-kit" */;
+			package = 39FF851D30410BA1006D41AA /* XCLocalSwiftPackageReference "../../Packages/YJKit" */;
 			productName = WorkoutCore;
 		};
-		3983E7DC3028591700733C35 /* WorkoutUI */ = {
+		39FF853530410CDE006D41AA /* WorkoutUI */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 3983E7CF3028589000733C35 /* XCRemoteSwiftPackageReference "ralli-kit" */;
+			package = 39FF851D30410BA1006D41AA /* XCLocalSwiftPackageReference "../../Packages/YJKit" */;
 			productName = WorkoutUI;
 		};
 /* End XCSwiftPackageProductDependency section */

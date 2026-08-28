@@ -10,15 +10,15 @@
 		3974B8F52EBCDFA5002D0EA7 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 39BF174F2EBA37F60026184E /* WidgetKit.framework */; };
 		3974B8F62EBCDFA5002D0EA7 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 39BF17512EBA37F60026184E /* SwiftUI.framework */; };
 		3974B9032EBCDFA6002D0EA7 /* ComplicationAppExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3974B8F42EBCDFA5002D0EA7 /* ComplicationAppExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		3983EDD430292CA500733C35 /* ConnectivityCore in Frameworks */ = {isa = PBXBuildFile; productRef = 3983EDD330292CA500733C35 /* ConnectivityCore */; };
-		3983EDD630292CA500733C35 /* WorkoutCore in Frameworks */ = {isa = PBXBuildFile; productRef = 3983EDD530292CA500733C35 /* WorkoutCore */; };
-		3983EDD830292CA500733C35 /* WorkoutUI in Frameworks */ = {isa = PBXBuildFile; productRef = 3983EDD730292CA500733C35 /* WorkoutUI */; };
-		3983EDDA30292CAF00733C35 /* ConnectivityCore in Frameworks */ = {isa = PBXBuildFile; productRef = 3983EDD930292CAF00733C35 /* ConnectivityCore */; };
-		3983EDDC30292CAF00733C35 /* PersistenceCore in Frameworks */ = {isa = PBXBuildFile; productRef = 3983EDDB30292CAF00733C35 /* PersistenceCore */; };
 		399700FD2A1D9BC900D0D486 /* GolfCounter Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 399700FC2A1D9BC900D0D486 /* GolfCounter Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		39CDA6E12FB3173B009825BA /* GolfCounter.icon in Resources */ = {isa = PBXBuildFile; fileRef = 39CDA6E02FB3173B009825BA /* GolfCounter.icon */; };
 		39CDA6E22FB3173B009825BA /* GolfCounter.icon in Resources */ = {isa = PBXBuildFile; fileRef = 39CDA6E02FB3173B009825BA /* GolfCounter.icon */; };
 		39CDA6E32FB3173B009825BA /* GolfCounter.icon in Resources */ = {isa = PBXBuildFile; fileRef = 39CDA6E02FB3173B009825BA /* GolfCounter.icon */; };
+		39FF852030410C5A006D41AA /* ConnectivityCore in Frameworks */ = {isa = PBXBuildFile; productRef = 39FF851F30410C5A006D41AA /* ConnectivityCore */; };
+		39FF852230410C62006D41AA /* PersistenceCore in Frameworks */ = {isa = PBXBuildFile; productRef = 39FF852130410C62006D41AA /* PersistenceCore */; };
+		39FF852430410C6C006D41AA /* ConnectivityCore in Frameworks */ = {isa = PBXBuildFile; productRef = 39FF852330410C6C006D41AA /* ConnectivityCore */; };
+		39FF852630410C75006D41AA /* WorkoutCore in Frameworks */ = {isa = PBXBuildFile; productRef = 39FF852530410C75006D41AA /* WorkoutCore */; };
+		39FF852830410C75006D41AA /* WorkoutUI in Frameworks */ = {isa = PBXBuildFile; productRef = 39FF852730410C75006D41AA /* WorkoutUI */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -132,8 +132,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3983EDDA30292CAF00733C35 /* ConnectivityCore in Frameworks */,
-				3983EDDC30292CAF00733C35 /* PersistenceCore in Frameworks */,
+				39FF852030410C5A006D41AA /* ConnectivityCore in Frameworks */,
+				39FF852230410C62006D41AA /* PersistenceCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -141,9 +141,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3983EDD430292CA500733C35 /* ConnectivityCore in Frameworks */,
-				3983EDD630292CA500733C35 /* WorkoutCore in Frameworks */,
-				3983EDD830292CA500733C35 /* WorkoutUI in Frameworks */,
+				39FF852430410C6C006D41AA /* ConnectivityCore in Frameworks */,
+				39FF852630410C75006D41AA /* WorkoutCore in Frameworks */,
+				39FF852830410C75006D41AA /* WorkoutUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -357,7 +357,7 @@
 			);
 			mainGroup = 399700E32A1D9BC800D0D486;
 			packageReferences = (
-				3983EDD230292C8900733C35 /* XCRemoteSwiftPackageReference "ralli-kit" */,
+				39FF851E30410BBC006D41AA /* XCLocalSwiftPackageReference "../../Packages/YJKit" */,
 			);
 			productRefGroup = 399700ED2A1D9BC800D0D486 /* Products */;
 			projectDirPath = "";
@@ -1005,42 +1005,38 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		3983EDD230292C8900733C35 /* XCRemoteSwiftPackageReference "ralli-kit" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/qlrogo91lp/ralli-kit";
-			requirement = {
-				branch = main;
-				kind = branch;
-			};
+/* Begin XCLocalSwiftPackageReference section */
+		39FF851E30410BBC006D41AA /* XCLocalSwiftPackageReference "../../Packages/YJKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../Packages/YJKit;
 		};
-/* End XCRemoteSwiftPackageReference section */
+/* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		3983EDD330292CA500733C35 /* ConnectivityCore */ = {
+		39FF851F30410C5A006D41AA /* ConnectivityCore */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 3983EDD230292C8900733C35 /* XCRemoteSwiftPackageReference "ralli-kit" */;
+			package = 39FF851E30410BBC006D41AA /* XCLocalSwiftPackageReference "../../Packages/YJKit" */;
 			productName = ConnectivityCore;
 		};
-		3983EDD530292CA500733C35 /* WorkoutCore */ = {
+		39FF852130410C62006D41AA /* PersistenceCore */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 3983EDD230292C8900733C35 /* XCRemoteSwiftPackageReference "ralli-kit" */;
+			package = 39FF851E30410BBC006D41AA /* XCLocalSwiftPackageReference "../../Packages/YJKit" */;
+			productName = PersistenceCore;
+		};
+		39FF852330410C6C006D41AA /* ConnectivityCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 39FF851E30410BBC006D41AA /* XCLocalSwiftPackageReference "../../Packages/YJKit" */;
+			productName = ConnectivityCore;
+		};
+		39FF852530410C75006D41AA /* WorkoutCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 39FF851E30410BBC006D41AA /* XCLocalSwiftPackageReference "../../Packages/YJKit" */;
 			productName = WorkoutCore;
 		};
-		3983EDD730292CA500733C35 /* WorkoutUI */ = {
+		39FF852730410C75006D41AA /* WorkoutUI */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 3983EDD230292C8900733C35 /* XCRemoteSwiftPackageReference "ralli-kit" */;
+			package = 39FF851E30410BBC006D41AA /* XCLocalSwiftPackageReference "../../Packages/YJKit" */;
 			productName = WorkoutUI;
-		};
-		3983EDD930292CAF00733C35 /* ConnectivityCore */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 3983EDD230292C8900733C35 /* XCRemoteSwiftPackageReference "ralli-kit" */;
-			productName = ConnectivityCore;
-		};
-		3983EDDB30292CAF00733C35 /* PersistenceCore */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 3983EDD230292C8900733C35 /* XCRemoteSwiftPackageReference "ralli-kit" */;
-			productName = PersistenceCore;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
