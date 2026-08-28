@@ -1,8 +1,8 @@
 # CI 파이프라인 설계 — yj-apps
 
 작성일: 2026-08-27
-갱신일: 2026-08-28 — 모노레포 전환 실행 결과를 반영해 4·5·6절 정정
-상태: 설계 완료, 실행 대기
+갱신일: 2026-08-28 — 구현 완료. 실행 결과를 8절에 기록하고 4·5·9절을 실측으로 정정
+상태: **구현 완료** (PR #2)
 선행 조건: `2026-08-27-monorepo-migration-design.md` — **충족** (6절 참조)
 
 ---
@@ -126,19 +126,21 @@ cd Packages/YJKit && xcodebuild -scheme YJKit-Package -destination '<iOS 시뮬�
 # 로컬 실측: 51 tests in 6 suites passed
 ```
 
-### 예상 소요
+### 소요 — 실측 (2026-08-28, macos-26)
 
-| Job | 소요 |
-|---|---|
-| lint | ~1분 |
-| kit-test | ~2분 |
-| golf (iOS + watchOS) | ~10분 |
-| tennis (iOS + watchOS) | ~10분 |
+| Job | 설계 추정 | **실측** |
+|---|---|---|
+| changes | — | 0.1분 |
+| lint | ~1분 | 0.2분 |
+| kit-test | ~2분 | 3.4분 |
+| golf (iOS + watchOS) | ~10분 | 13.7분 |
+| tennis (iOS + watchOS) | ~10분 | **20.4분** |
 
-앱 job들은 병렬 실행된다. 코어 변경 PR의 최악 소요는 약 12분, 단일 앱 변경은 약 10분.
+앱 job들은 병렬 실행되므로 코어 변경 PR의 전체 소요는 **약 21분**이다. 추정보다 두 배 가까이
+길다. tennis 가 특히 느린 것은 확장 타깃이 하나 더 있고(LiveActivity) 테스트 수가 많기 때문이다.
 
-> 참고로 로컬 클린 빌드(DerivedData 삭제 후) 실측은 공유 스킴 7개 합계 **106초**였다. CI 러너는
-> 캐시가 없고 시뮬레이터 부팅·패키지 해석이 매번 붙으므로 위 추정치가 이보다 훨씬 크다.
+> 로컬 클린 빌드(DerivedData 삭제 후)는 공유 스킴 7개 합계 **106초**였다. CI 는 캐시가 없고
+> 시뮬레이터 부팅·패키지 해석이 매번 붙어 10배 이상 걸린다. 캐싱은 후속 검토 항목이다.
 
 ---
 
@@ -178,12 +180,37 @@ CI 세팅 공수의 대부분이 여기에 들어간다.
 러너의 기본 Xcode가 바뀌면 빌드 결과가 흔들린다. `xcode-select`로 사용할 버전을 명시하고, 그 값을
 워크플로 상단 한 곳(`env`)에서 관리한다.
 
-로컬 환경 실측(2026-08-28): **Xcode 26.6 (17F113) / Swift 6.3.3**. 로컬과 CI의 버전을 맞춰두면
-"로컬은 되는데 CI는 안 되는" 상황을 줄일 수 있다.
+로컬 환경 실측(2026-08-28): **Xcode 26.6 (17F113) / Swift 6.3.3**.
 
-> 러너 이미지에 Xcode 26.6이 실제로 존재하는지는 워크플로 첫 실행 때 확인해야 한다. 없으면
-> 사용 가능한 최신 버전으로 내리고 그 값을 이 문서에 기록한다. 두 앱의 `--swiftversion`이
-> 5.0/6.0으로 다른 상태이나 이는 swiftformat 설정일 뿐 컴파일러 버전과 무관하다.
+**확정 — `macos-26` 러너의 기본 Xcode가 26.6 (17F113) 으로 로컬과 정확히 일치한다.** 워크플로는
+`/Applications/Xcode_26.6.app` 이 있으면 `xcode-select` 로 고정하고, 없으면 경고를 남기고 러너
+기본값으로 진행한다.
+
+> 두 앱의 `--swiftversion`이 5.0/6.0으로 다른 상태이나 이는 swiftformat 설정일 뿐 컴파일러
+> 버전과 무관하다.
+
+### 5.2.1 러너 이미지 — `macos-15` 로는 테스트가 돌지 않는다
+
+첫 실행을 `macos-15` 에서 돌렸다가 두 앱 job 이 모두 실패했다.
+
+```
+Cannot test target "GolfCounterTests" on "iPhone 17":
+  iPhone 17's iOS Simulator 26.2 doesn't match GolfCounterTests's iOS Simulator 26.4 deployment target
+```
+
+`macos-15` 의 기본 Xcode 는 16.4, 최신 시뮬레이터는 26.2 다. 그런데 **네 개 테스트 타깃의
+배포 타깃이 26.4** 로 잡혀 있다 (앱 본체는 iOS 17.0 / watchOS 10).
+
+```
+앱 iOS       17.0 / 17
+앱 watchOS   10
+테스트 타깃  26.4   ← 양쪽 앱 모두
+```
+
+`macos-26` 은 2026-02 GA 이고 기본 Xcode 가 26.6 이라 이 문제가 없다. 다만 **테스트가 앱보다
+9세대 높은 OS 를 요구하는 상태 자체가 정상은 아니다.** 낮은 OS 에서의 회귀를 테스트로 잡을 수
+없고, CI 가 최신 러너 이미지에 묶인다. 배포 타깃 정리는 전환 문서의 비목표였으므로 별건으로
+남긴다 (9절).
 
 ### 5.3 코드 서명
 
@@ -206,6 +233,25 @@ make format  golf 0/96          / tennis 0/93
 ```
 
 앞으로 lint 규칙을 추가할 때도 같은 순서를 지킨다 — **규칙을 켜기 전에 기존 위반을 먼저 정리한다.**
+
+### 5.5 린트 도구 버전 고정
+
+기준선이 초록이어도 **도구 버전이 다르면 CI 만 빨간불이 된다.** 첫 실행에서 실제로 겪었다.
+`macos-15` 에 swiftformat 이 없어 `brew` 가 최신 **0.62.1** 을 설치했고, 로컬 **0.61.1** 에는
+없던 `wrapIfStatementBodies` 규칙이 golf 3개 파일에서 위반을 잡아 실패했다.
+
+러너 이미지의 기본 버전에 의존하면 이미지가 갱신될 때마다 같은 일이 반복된다. 릴리스 바이너리를
+받아 **로컬과 같은 버전으로 고정**한다.
+
+```yaml
+SWIFTFORMAT_VERSION: "0.61.1"   # swiftformat.zip
+SWIFTLINT_VERSION:   "0.64.1"   # portable_swiftlint.zip
+```
+
+받은 바이너리 디렉터리를 `$GITHUB_PATH` 에 넣어 러너 기본 설치본보다 앞세운다.
+
+도구를 올릴 때는 **버전 상수와 그로 인한 코드 변경을 같은 PR 에서 함께** 처리한다. CI 도입 자체는
+현재 상태를 지키는 안전망이므로, 도구 업그레이드를 여기에 섞지 않았다.
 
 ---
 
@@ -243,9 +289,64 @@ CI가 제대로 동작하려면 전환 문서의 다음 항목이 선행되어�
 
 ---
 
-## 8. 후속 검토 항목
+## 8. 구현 결과 (2026-08-28, PR #2)
 
-- 브랜치 보호 규칙 — CI 통과를 머지 조건으로 강제할지
+### 파일
+
+```
+.github/workflows/ci.yml           5개 job
+.github/scripts/pick-simulator.sh  최신 런타임에서 기기 UDID 선택
+Makefile                           kit-test 에 KIT_DESTINATION 오버라이드 추가 (기본값 불변)
+```
+
+### 실행 이력
+
+| 회차 | 결과 | 원인 |
+|---|---|---|
+| 1차 | changes ✅ / kit-test ✅ / lint ❌ / golf ❌ / tennis ❌ | 러너 이미지(5.2.1)와 도구 버전(5.5) |
+| 2차 | **전 job 통과** | — |
+
+### 확인된 러너 환경 (`macos-26`)
+
+| 항목 | 값 |
+|---|---|
+| Xcode | 26.6 (17F113) — **로컬과 동일** |
+| 선택된 iOS 시뮬레이터 | `iPhone 17` (스크립트가 자동 선택) |
+| swiftlint | 러너 기본값 대신 0.64.1 고정 |
+| swiftformat | 러너에 미설치 → 0.61.1 고정 |
+| `actions/checkout` | v4 는 Node 20 대상이라 deprecation 경고 → v7 |
+
+### 경로 필터 검증
+
+PR 이벤트는 `base...head` **누적 diff** 를 본다. 따라서 `.github/` 를 건드리는 PR(이 PR 자신
+포함)은 언제나 "루트 설정 → 전부" 규칙에 걸려, **그 PR 안에서는 앱별 좁히기를 관찰할 수 없다.**
+tennis 폴더에만 프로브 파일을 넣어 확인해 봤으나 예상대로 전 job 이 돌았다.
+
+판정 로직 자체는 동일한 규칙을 로컬에서 시나리오별로 돌려 검증했다.
+
+| 변경 | kit | golf | tennis |
+|---|---|---|---|
+| `Apps/TennisCounter/` 만 | false | false | **true** |
+| `Apps/GolfCounter/` 만 | false | **true** | false |
+| 두 앱 동시 | false | true | true |
+| `Packages/YJKit/` (코어) | true | true | true |
+| 루트 `Makefile` / `.swiftlint.yml` | true | true | true |
+| 앱별 `.swiftlint.yml` (golf) | false | **true** | false |
+| `docs/` 또는 `README.md` 만 | false | false | false |
+
+실제 앱별 좁히기는 이 PR 머지 후 **앱 코드만 건드리는 첫 PR** 에서 확인된다.
+
+---
+
+## 9. 후속 검토 항목
+
+- **브랜치 보호 규칙** — CI 통과를 머지 조건으로 강제할지.
+  주의: `docs/` 나 `README.md` 만 바뀐 PR 은 전 job 이 스킵되어 체크가 하나도 붙지 않는다.
+  이를 required check 로 지정하면 그런 PR 이 영원히 머지 대기 상태가 된다.
+- **빌드 캐시** — DerivedData / SPM 캐시로 20분대 소요를 줄일지
+- **테스트 타깃 배포 타깃 정리** (26.4 → 앱과 동일하게). CI 가 최신 러너 이미지에 묶인 원인이며,
+  낮은 OS 회귀를 테스트로 잡지 못하는 문제이기도 하다 (5.2.1)
+- 린트 도구 버전 업그레이드 — 버전 상수와 코드 변경을 같은 PR 에서 함께 (5.5)
 - 앱이 3개 이상이 되었을 때 job 매트릭스로 전환할지
 - 코드 커버리지 리포팅
 - 배포 자동화 (fastlane + App Store Connect API 키)
