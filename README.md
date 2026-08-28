@@ -23,62 +23,51 @@ yj-apps/
 |---|---|---|
 | 0 | 선행 조건 — 원본 레포 동기화 | ✅ 완료 |
 | 1 | 히스토리 이관 (`filter-branch` 경로 재작성 후 병합) | ✅ 완료 |
-| 2 | 패키지 로컬화 | 🔄 **진행 중** |
-| 3 | 워크스페이스 + 스킴 공유 | ⬜ |
-| 4 | 타깃·스킴 이름 정리 | ⬜ |
+| 2 | 패키지 로컬화 | ✅ 완료 |
+| 3 | 워크스페이스 + 스킴 공유 | ✅ 완료 |
+| 4 | 타깃·스킴 이름 정리 | ✅ 완료 |
 | 5 | 툴링 구조화 | ⬜ |
 | 6~7 | 최종 검증 + 마무리 | ⬜ |
 
-### 2단계에서 다음에 할 일
+### 다음에 할 일 — 5단계 툴링 구조화
 
-`Package.swift`의 이름 변경(`RalliKit` → `YJKit`)은 끝났고 패키지 단독 빌드·테스트도 통과했다.
-**남은 것은 두 앱의 Xcode 프로젝트에서 원격 패키지 참조를 로컬 참조로 바꾸는 작업이다.**
+앱별 `.swiftlint.yml` / `.swiftformat`을 각 앱 폴더에 둔 채, 루트에 공통 `.swiftlint.yml`을 만들고
+앱별 설정이 `parent_config`로 상속하게 한다. `.gitignore` 통합, 루트 `Makefile`(앱 순회),
+`CLAUDE.md` 분리도 함께.
 
-앱 하나씩(golf 먼저 권장) 다음 절차로 진행한다.
+**`--swiftversion` 값은 건드리지 않는다** (golf 5.0 / tennis 6.0 그대로).
+5 vs 6 판단은 [코드 스타일 문서](docs/superpowers/specs/2026-08-27-code-style-tooling-design.md)의
+미결 논의 항목이다.
 
-```
-1. Apps/GolfCounter/GolfCounter.xcodeproj 를 Xcode로 연다
-2. 프로젝트 선택 → Package Dependencies 탭
-     → ralli-kit 원격 참조를 [-] 로 제거          ← 반드시 제거를 먼저
-3. File → Add Package Dependencies... → [Add Local...]
-     → Packages/YJKit 폴더 선택
-4. 각 타깃 → General → Frameworks, Libraries, and Embedded Content
-     → 아래 표대로 프로덕트를 다시 연결
-5. ⌘B 로 빌드 확인
-```
-
-제거를 먼저 하는 이유: 같은 이름의 프로덕트(`WorkoutCore` 등)를 제공하는 패키지가 둘이 되면
-Xcode가 어느 쪽을 쓸지 모호해진다.
-
-#### 복원 기준 — 전환 전 프로덕트 연결
-
-| 프로젝트 | 타깃 | 연결된 프로덕트 |
-|---|---|---|
-| GolfCounter | `GolfCounter` | ConnectivityCore, PersistenceCore |
-| GolfCounter | `GolfCounter Watch App` | ConnectivityCore, WorkoutCore, WorkoutUI |
-| TennisCounter | `TennisCounter` | ConnectivityCore, PersistenceCore, WorkoutCore, WorkoutUI |
-| TennisCounter | `TennisCounter Watch App` | ConnectivityCore, WorkoutCore, WorkoutUI |
-
-`ComplicationAppExtension`, `TennisLiveActivityExtension`, 테스트 타깃은 패키지 프로덕트를
-직접 연결하지 않는다.
-
-#### 완료 조건
-
-- 두 앱의 전 타깃이 빌드된다
-- `Packages/YJKit` 소스를 고치면 재빌드 시 **즉시 반영된다** (푸시 없이)
-- pbxproj에 `XCRemoteSwiftPackageReference`가 남아있지 않다
+완료 조건: **린트 결과가 전환 전과 동일할 것.** 새로 생기거나 사라진 위반이 없어야 한다.
 
 ---
 
 ## 빌드
 
-전환 3단계에서 최상위 `YJApps.xcworkspace`가 생기기 전까지는 앱별 `.xcodeproj`를 직접 연다.
+**최상위 `YJApps.xcworkspace` 하나만 연다.** 앱별 `.xcodeproj`를 따로 열 필요가 없다.
+
+공유 스킴 7개: `GolfCounter` / `GolfCounter Watch App` / `GolfComplicationExtension` /
+`TennisCounter` / `TennisCounter Watch App` / `RalliComplicationExtension` /
+`TennisLiveActivityExtension`
 
 ```bash
+# iOS
+xcodebuild -workspace YJApps.xcworkspace -scheme "GolfCounter" \
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro' test
+
+# watchOS — 이름 대신 UDID로 지정할 것 (아래 참고)
+xcodebuild -workspace YJApps.xcworkspace -scheme "GolfCounter Watch App" \
+  -destination "id=$(xcrun simctl list devices available -j \
+    | python3 -c 'import json,sys;print(next(d["udid"] for v in json.load(sys.stdin)["devices"].values() for d in v if "Apple Watch" in d["name"]))')" test
+
 # 패키지 단독 (swift build 는 동작하지 않는다 — 아래 참고)
 cd Packages/YJKit
 xcodebuild -scheme YJKit-Package -destination 'platform=iOS Simulator,name=iPhone 17 Pro' test
 ```
+
+> **워치 시뮬레이터를 이름으로 지정하면 실패한다.** `Apple Watch Series 11 (46mm)` 같은 이름이
+> OS 26.4·26.5 두 기기와 겹쳐 매칭되지 않는다. `-destination "id=<UDID>"`를 쓴다.
 
 > `swift build` / `swift test`는 이 패키지에서 실패한다. `Package.swift`가 macOS 플랫폼을
 > 선언하지 않아 호스트 빌드 시 SwiftData API가 macOS 14 미만으로 판정되기 때문이다.

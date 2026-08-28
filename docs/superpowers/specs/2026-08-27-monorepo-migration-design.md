@@ -320,22 +320,96 @@ xcodebuild -scheme YJKit-Package -destination 'platform=iOS Simulator,name=iPhon
 > 패키지 그래프 공유 문제 때문에 두 프로젝트를 한 창에서 다뤄야 했기 때문이다. 프로젝트 2개만
 > 등록했고 패키지는 프로젝트가 참조하면서 자동으로 나타났다. 남은 것은 스킴 공유 처리다.
 
-- [ ] `YJApps.xcworkspace` 생성. `Packages/YJKit`, `Apps/GolfCounter/*.xcodeproj`, `Apps/TennisCounter/*.xcodeproj` 추가
-- [ ] 현재 user-level로만 존재하는 스킴(`ComplicationAppExtension`, `iosTests`, `watchosTests`)을 **공유(shared)로 전환**하여 커밋되게 한다
+- [x] `YJApps.xcworkspace` 생성 (2단계 중 실행). 프로젝트 2개 등록, 패키지는 참조로 자동 등장
+- [x] 확장 스킴을 **공유(shared)로 전환**하여 커밋되게 한다 (2026-08-28)
 
-완료 조건: 워크스페이스를 열었을 때 스킴 선택기에 전 타깃이 나타나고, 각각 빌드된다.
+**테스트 스킴은 공유하지 않는다.** 앱 스킴의 `TestAction`이 이미 테스트 타깃을 포함하기 때문이다.
 
-### 4단계 — 이름 정리
+```
+GolfCounter 스킴            TestAction → GolfCounterTests
+GolfCounter Watch App 스킴  TestAction → GolfCounterTests, GolfCounterWatchTests
+TennisCounter 스킴          TestAction → RalliTests
+TennisCounter Watch App     TestAction → RalliTests, RalliWatchTests
+```
 
-- [ ] D3 표에 따라 확장·테스트 타깃 개명
-- [ ] 테스트 번들 ID 분리
-- [ ] 개명에 따라 스킴 이름과 `Embed Foundation Extensions` 빌드 페이즈가 정상 갱신되었는지 확인
-- [ ] 일부 타깃에 남아있는 `MARKETING_VERSION = 1.0` 정리
+공유 스킴 최종 7개:
 
-완료 조건:
-- `xcodebuild -workspace YJApps.xcworkspace -list`에 중복 이름이 없다
-- 전 타깃 빌드·테스트 통과
-- 앱 타깃의 `MARKETING_VERSION`(golf `2.1.1` / tennis `1.1.7`)과 `CURRENT_PROJECT_VERSION`(6 / 26)이 **변하지 않았다**
+```
+Apps/GolfCounter/.../xcshareddata/xcschemes/
+    GolfCounter.xcscheme  |  GolfCounter Watch App.xcscheme  |  GolfComplicationExtension.xcscheme
+Apps/TennisCounter/.../xcshareddata/xcschemes/
+    TennisCounter.xcscheme  |  TennisCounter Watch App.xcscheme
+    RalliComplicationExtension.xcscheme  |  TennisLiveActivityExtension.xcscheme
+```
+
+> **함정**: 두 프로젝트의 컴플리케이션 스킴 이름이 같으면 Xcode의 자동 생성이 한쪽만 만든다. golf 것을
+> 개명한 뒤에도 tennis 쪽은 자동으로 채워지지 않아 `Manage Schemes`의 `+`로 직접 추가해야 했다.
+> `Autocreate Schemes Now`를 누르면 원래 이름으로 다시 만들어 충돌이 되살아난다.
+
+완료 조건: 워크스페이스 스킴 목록에 **중복 이름이 없고**, 공유 스킴 7개가 각각 빌드된다. → 충족
+
+### 4단계 — 이름 정리 ✅ 완료 (2026-08-28)
+
+#### 방침 변경: A안 → B안
+
+문서 원안(A안)은 컴플리케이션 **타깃**까지 개명하는 것이었으나, `PRODUCT_NAME = "$(TARGET_NAME)"`
+이므로 타깃 개명은 출시 중인 앱의 산출물 파일명을 바꾼다
+(`ComplicationAppExtension.appex` → `GolfComplicationExtension.appex`).
+
+그런데 D3의 목적은 `xcodebuild -scheme` 인자의 모호성 제거이고, **스킴 이름은 타깃 이름과 독립적으로
+지을 수 있다.** 따라서 타깃을 건드리지 않고 스킴만 개명해도 목적이 달성된다.
+
+| 대상 | 타깃 이름 | 스킴 이름 | 번들 ID |
+|---|---|---|---|
+| 컴플리케이션 ×2 | **유지** | 개명 | 유지 |
+| 테스트 타깃 ×4 | 개명 | 개명 | 개명 |
+| 앱·워치 앱 | 유지 | 유지 | 유지 |
+
+배포되는 산출물은 하나도 변하지 않는다.
+
+#### 브랜드 반영
+
+tennis 쪽 테스트·스킴에는 `TennisCounter`가 아니라 **`Ralli`** 를 쓴다.
+`INFOPLIST_KEY_CFBundleDisplayName = Ralli` 로 **사용자에게 보이는 앱 이름이 이미 Ralli**이기 때문이다.
+배포되지 않는 이름이라 위험이 없고, 나중에 전면 개명할 때 손댈 필요도 없어진다.
+
+#### 실행 결과
+
+- [x] 테스트 타깃 개명 — `iosTests`/`watchosTests` → `GolfCounterTests`/`GolfCounterWatchTests`,
+      `RalliTests`/`RalliWatchTests`
+- [x] 테스트 번들 ID 분리 (CLI 값 치환)
+- [x] 컴플리케이션 스킴 개명 — `GolfComplicationExtension` / `RalliComplicationExtension`
+- [x] 컴플리케이션 타깃 이름은 양쪽 다 `ComplicationAppExtension` 유지 확인
+
+번들 ID 최종 상태 — **두 앱 간 중복 0**:
+
+```
+[GolfCounter]                          [TennisCounter]
+  com.yj.GolfCounter                     com.yj.TennisCounter
+  com.yj.GolfCounter.watchkitapp         com.yj.TennisCounter.watchkitapp
+  com.yj.GolfCounter.watchkitapp.…       com.yj.TennisCounter.watchkitapp.widget
+                                         com.yj.TennisCounter.TennisLiveActivity
+  com.yj.GolfCounterTests                com.yj.RalliTests
+  com.yj.GolfCounterWatchTests           com.yj.RalliWatchTests
+```
+
+> `productName` 속성은 Xcode가 타깃 개명 시 갱신하지 않아 pbxproj에 `iosTests`로 남는다.
+> 실제 타깃 이름은 `PBXNativeTarget.name`이며 `PRODUCT_NAME = "$(TARGET_NAME)"`도 이쪽을 쓴다.
+> 잔여 속성이므로 무해하다.
+
+#### 검증
+
+| 항목 | 결과 |
+|---|---|
+| 워크스페이스 스킴 중복 | 없음 |
+| 빌드 (공유 스킴 7개) | 전부 성공 |
+| 테스트 (앱 스킴 4개) | 전부 통과 |
+| 번들 ID 중복 | 없음 |
+| 컴플리케이션 산출물명 | `ComplicationAppExtension.appex` 유지 |
+
+#### 남긴 것
+
+- `MARKETING_VERSION = 1.0`은 테스트 타깃에만 남아 있다. 배포되지 않으므로 그대로 둔다.
 
 ### 5단계 — 툴링 구조화
 
@@ -436,7 +510,30 @@ xcodebuild -scheme YJKit-Package -destination 'platform=iOS Simulator,name=iPhon
 
 ---
 
-## 10. 후속 문서
+## 10. 후속 작업 — TennisCounter → Ralli 전면 개명
+
+앱의 사용자 표시 이름은 이미 `Ralli`(`INFOPLIST_KEY_CFBundleDisplayName`)이고, 리브랜딩 계획은
+`Apps/TennisCounter/docs/brainstorming-roadmap.md`에 **"Phase 1-B 출시 시점, 앱 아이콘 리뉴얼과 함께"**
+로 명시되어 있다. 전환과 섞지 않고 그 시점에 일괄 처리한다.
+
+한 번에 바꿀 목록:
+
+```
+Apps/TennisCounter/              → Apps/Ralli/
+TennisCounter.xcodeproj          → Ralli.xcodeproj
+타깃 TennisCounter               → Ralli
+타깃 TennisCounter Watch App     → Ralli Watch App
+타깃 TennisLiveActivityExtension → (표시 이름 TennisLiveActivity 포함 검토)
+스킴 이름들
+TEST_HOST 경로 2곳 (TennisCounter.app 을 하드코딩 중)
+YJApps.xcworkspace 참조
+```
+
+**번들 ID는 유지한다** — 로드맵에도 *"기존 그대로 유지 (사용자 데이터/리뷰/별점 자산 보존)"* 로 명시.
+
+4단계에서 테스트 타깃·스킴에 이미 `Ralli`를 붙여두었으므로 그때 손댈 대상에서 빠진다.
+
+## 11. 후속 문서
 
 | 문서 | 내용 | 의존성 |
 |---|---|---|

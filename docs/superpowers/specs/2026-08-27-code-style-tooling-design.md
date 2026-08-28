@@ -229,31 +229,62 @@ diff 0 원칙이 깨진다.
 - 전환 완료 직후 **독립 커밋**으로 정리
 - 논의 1(swiftversion 통일)과 함께 한 번에 재포맷
 
-## 논의 5 — 배포 타깃 `17.0` / `26.4` 혼재
+## 논의 5 — 배포 타깃 `26.4` 혼재 → **해소됨, 조치 불필요**
 
-### 현황
+### 조사 결과 (2026-08-28)
 
-양쪽 프로젝트에 두 값이 섞여 있다.
+`26.4`는 **테스트 타깃에만** 설정되어 있었다.
 
 ```
-IPHONEOS_DEPLOYMENT_TARGET = 17.0  /  26.4
-WATCHOS_DEPLOYMENT_TARGET  = 10    /  26.4
+GolfCounterTests / RalliTests            IPHONEOS_DEPLOYMENT_TARGET = 26.4
+GolfCounterWatchTests / RalliWatchTests  WATCHOS_DEPLOYMENT_TARGET  = 26.4
 ```
 
-`26.4`는 Xcode 26이 새 타깃을 만들 때 넣은 기본값으로 추정된다. 어느 타깃이 26.4인지 확인이 필요하다.
+Xcode가 테스트 타깃을 만들 때 넣은 기본값이며, **배포되는 앱·확장은 전부 17.0 / 10.0**이다.
+사용자 지원 OS 범위에 아무 영향이 없다. 테스트 타깃과 함께 남아 있는 `MARKETING_VERSION = 1.0`도
+같은 성격이다.
+
+**조치 없이 그대로 둔다.**
+
+## 논의 7 — 지원 대상 기기(Supported Destinations) 정리
+
+### 현황 (2026-08-28)
+
+```
+GolfCounter                  SDK=iphoneos  기기=iPhone
+GolfCounter Watch App        SDK=watchos   기기=Apple Watch
+ComplicationAppExtension ×2  SDK=watchos   기기=Apple Watch
+TennisCounter                SDK=iphoneos  기기=iPhone
+TennisCounter Watch App      SDK=watchos   기기=Apple Watch
+TennisLiveActivityExtension  SDK=iphoneos  기기=iPhone+iPad   ← 유일한 불일치
+테스트 타깃 4개                             기기=iPhone+iPad   (배포 무관)
+
+SUPPORTS_MACCATALYST                  = NO   (이미 꺼짐)
+SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO   (이미 꺼짐)
+SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD  = 미설정
+```
+
+Mac 관련은 이미 정리되어 있고 앱 타깃은 iPhone 전용이다. 정리할 것이 거의 없다.
 
 ### 쟁점
 
-배포 타깃이 26.4인 타깃이 **앱에 포함되어 배포되는 것**이라면 지원 OS 범위가 의도치 않게 좁아진다.
-확장(Complication, LiveActivity)이라면 해당 확장만 최신 OS에서 동작하게 된다.
+**`TennisLiveActivityExtension`만 iPhone+iPad다.** 호스트 앱 `TennisCounter`는 iPhone 전용이고
+Live Activity는 iPhone에서만 동작하므로 iPad 지원은 무의미하다. 다만 **배포되는 확장**이라 변경 시
+검증이 필요하다.
 
-`YJKit`의 `Package.swift`는 `.iOS(.v17)`, `.watchOS(.v10)`으로 선언되어 있으므로 패키지 쪽 기준은
-17/10이다.
+**Vision Pro 노출 여부는 빌드 설정만으로 판단할 수 없다.**
+`SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD`가 명시되어 있지 않고, visionOS 스토어 가용성은
+App Store Connect 설정에서도 관리된다. 실제 노출 상태는 App Store Connect에서 확인해야 한다.
+
+### 선택지
+
+- A: `TennisLiveActivityExtension`을 iPhone 전용으로 맞춤 (호스트 앱과 일치)
+- B: 현상 유지 — 동작에 문제가 없고 iPad에 설치될 일도 없음
+- 테스트 타깃 4개는 배포 무관이므로 어느 쪽이든 무해
 
 ### 확인 필요
 
-- 26.4로 설정된 타깃 목록
-- 의도된 설정인지, Xcode 기본값이 남은 것인지
+- App Store Connect에서 두 앱의 Vision Pro 가용성 상태
 
 ## 논의 6 — 새 앱을 위한 툴링 템플릿
 

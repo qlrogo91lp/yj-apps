@@ -36,8 +36,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "39D9AB7B2FA1D86B006DC9F5"
-               BuildableName = "iosTests.xctest"
-               BlueprintName = "iosTests"
+               BuildableName = "RalliTests.xctest"
+               BlueprintName = "RalliTests"
                ReferencedContainer = "container:TennisCounter.xcodeproj">
             </BuildableReference>
          </TestableReference>

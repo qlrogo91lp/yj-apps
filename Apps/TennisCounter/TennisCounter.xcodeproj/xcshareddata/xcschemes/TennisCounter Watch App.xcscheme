@@ -50,8 +50,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "39D9AB7B2FA1D86B006DC9F5"
-               BuildableName = "iosTests.xctest"
-               BlueprintName = "iosTests"
+               BuildableName = "RalliTests.xctest"
+               BlueprintName = "RalliTests"
                ReferencedContainer = "container:TennisCounter.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -61,8 +61,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "39D9AB882FA1D882006DC9F5"
-               BuildableName = "watchosTests.xctest"
-               BlueprintName = "watchosTests"
+               BuildableName = "RalliWatchTests.xctest"
+               BlueprintName = "RalliWatchTests"
                ReferencedContainer = "container:TennisCounter.xcodeproj">
             </BuildableReference>
          </TestableReference>
