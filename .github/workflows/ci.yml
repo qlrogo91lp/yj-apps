@@ -1,0 +1,259 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  WORKSPACE: YJApps.xcworkspace
+  XCODE_VERSION: "26.6"
+  IOS_DEVICE: "^iPhone"
+  WATCH_DEVICE: "^Apple Watch"
+  # 린트 도구는 로컬과 같은 버전으로 고정한다. 러너 이미지의 기본 버전을 그대로 쓰면
+  # 규칙이 추가된 버전에서 없던 위반이 잡혀 CI 만 빨간불이 된다.
+  SWIFTFORMAT_VERSION: "0.61.1"
+  SWIFTLINT_VERSION: "0.64.1"
+
+jobs:
+  # 변경된 경로로 이후 job 의 실행 여부를 정한다.
+  # 코어(Packages/YJKit)가 바뀌면 파급을 잡기 위해 전 앱을 빌드한다 — 여기서 좁히면 안 된다.
+  changes:
+    name: 변경 경로 판별
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      kit: ${{ steps.filter.outputs.kit }}
+      golf: ${{ steps.filter.outputs.golf }}
+      tennis: ${{ steps.filter.outputs.tennis }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: 경로 판별
+        id: filter
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base="${{ github.event.pull_request.base.sha }}"
+            head="${{ github.event.pull_request.head.sha }}"
+          else
+            base="${{ github.event.before }}"
+            head="${{ github.sha }}"
+          fi
+
+          kit=false
+          golf=false
+          tennis=false
+
+          # base 를 못 구하는 경우(첫 푸시, force-push)에는 안전하게 전부 실행한다.
+          if [ -z "$base" ] || ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
+            echo "base 커밋을 확인할 수 없다 — 전 대상을 실행한다"
+            kit=true; golf=true; tennis=true
+          else
+            changed=$(git diff --name-only "$base" "$head")
+            echo "--- 변경된 파일 ---"
+            echo "$changed"
+            echo "-------------------"
+
+            # 루트 설정과 워크스페이스는 전 대상에 영향을 준다.
+            if echo "$changed" | grep -qE '^(\.github/|Makefile|\.swiftlint\.yml|YJApps\.xcworkspace/)'; then
+              kit=true; golf=true; tennis=true
+            fi
+            # 코어 변경은 전 앱으로 파급된다.
+            if echo "$changed" | grep -qE '^Packages/YJKit/'; then
+              kit=true; golf=true; tennis=true
+            fi
+            if echo "$changed" | grep -qE '^Apps/GolfCounter/'; then
+              golf=true
+            fi
+            if echo "$changed" | grep -qE '^Apps/TennisCounter/'; then
+              tennis=true
+            fi
+          fi
+
+          {
+            echo "kit=$kit"
+            echo "golf=$golf"
+            echo "tennis=$tennis"
+          } >> "$GITHUB_OUTPUT"
+          echo "판별 결과 — kit=$kit golf=$golf tennis=$tennis"
+
+  lint:
+    name: 린트
+    needs: changes
+    if: needs.changes.outputs.golf == 'true' || needs.changes.outputs.tennis == 'true'
+    runs-on: macos-26
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      # 러너에 미리 깔린 버전을 쓰면 이미지가 바뀔 때마다 결과가 흔들린다.
+      # 실제로 brew 가 설치한 swiftformat 0.62.1 이 로컬(0.61.1)에 없던
+      # wrapIfStatementBodies 위반 3건을 잡아 실패한 적이 있다.
+      - name: 린트 도구 설치 (버전 고정)
+        run: |
+          tools="$RUNNER_TEMP/lint-tools"
+          mkdir -p "$tools"
+
+          curl -fsSL -o "$tools/swiftformat.zip" \
+            "https://github.com/nicklockwood/SwiftFormat/releases/download/${SWIFTFORMAT_VERSION}/swiftformat.zip"
+          curl -fsSL -o "$tools/swiftlint.zip" \
+            "https://github.com/realm/SwiftLint/releases/download/${SWIFTLINT_VERSION}/portable_swiftlint.zip"
+
+          unzip -q -o "$tools/swiftformat.zip" -d "$tools"
+          unzip -q -o "$tools/swiftlint.zip" -d "$tools"
+          chmod +x "$tools/swiftformat" "$tools/swiftlint"
+
+          # 러너 기본 설치본보다 앞서도록 PATH 맨 앞에 둔다.
+          echo "$tools" >> "$GITHUB_PATH"
+
+      - name: 도구 버전 확인
+        run: |
+          echo "swiftformat: $(swiftformat --version)"
+          echo "swiftlint:   $(swiftlint --version)"
+
+      # 기준선이 초록이므로 위반이 하나라도 생기면 실패한다 (설계 문서 5.4).
+      - name: swiftlint
+        run: make lint
+
+      - name: swiftformat --lint
+        run: make format
+
+  kit-test:
+    name: YJKit 테스트
+    needs: changes
+    if: needs.changes.outputs.kit == 'true'
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Xcode 선택
+        run: |
+          echo "--- 설치된 Xcode ---"
+          ls -d /Applications/Xcode*.app 2>/dev/null || true
+          target="/Applications/Xcode_${XCODE_VERSION}.app"
+          if [ -d "$target" ]; then
+            sudo xcode-select -s "$target"
+          else
+            echo "::warning::Xcode ${XCODE_VERSION} 이 러너에 없다 — 기본 버전을 쓴다"
+          fi
+          xcodebuild -version
+
+      - name: 시뮬레이터 선택
+        id: sim
+        run: |
+          udid=$(.github/scripts/pick-simulator.sh iOS "$IOS_DEVICE")
+          echo "ios=$udid" >> "$GITHUB_OUTPUT"
+          xcrun simctl list devices available | grep "$udid"
+
+      # swift test 는 쓸 수 없다 — Package.swift 가 macOS 플랫폼을 선언하지 않아
+      # 호스트 빌드가 실패한다 (설계 문서 4절).
+      - name: 패키지 테스트
+        run: make kit-test KIT_DESTINATION="id=${{ steps.sim.outputs.ios }}"
+
+  golf:
+    name: GolfCounter
+    needs: changes
+    if: needs.changes.outputs.golf == 'true'
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Xcode 선택
+        run: |
+          echo "--- 설치된 Xcode ---"
+          ls -d /Applications/Xcode*.app 2>/dev/null || true
+          target="/Applications/Xcode_${XCODE_VERSION}.app"
+          if [ -d "$target" ]; then
+            sudo xcode-select -s "$target"
+          else
+            echo "::warning::Xcode ${XCODE_VERSION} 이 러너에 없다 — 기본 버전을 쓴다"
+          fi
+          xcodebuild -version
+
+      - name: 시뮬레이터 선택
+        id: sim
+        run: |
+          {
+            echo "ios=$(.github/scripts/pick-simulator.sh iOS "$IOS_DEVICE")"
+            echo "watch=$(.github/scripts/pick-simulator.sh watchOS "$WATCH_DEVICE")"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: iOS 앱 테스트
+        run: |
+          xcodebuild -workspace "$WORKSPACE" -scheme "GolfCounter" \
+            -destination "id=${{ steps.sim.outputs.ios }}" \
+            CODE_SIGNING_ALLOWED=NO -quiet test
+
+      - name: Watch 앱 테스트
+        run: |
+          xcodebuild -workspace "$WORKSPACE" -scheme "GolfCounter Watch App" \
+            -destination "id=${{ steps.sim.outputs.watch }}" \
+            CODE_SIGNING_ALLOWED=NO -quiet test
+
+      - name: 컴플리케이션 빌드
+        run: |
+          xcodebuild -workspace "$WORKSPACE" -scheme "GolfComplicationExtension" \
+            -destination "id=${{ steps.sim.outputs.watch }}" \
+            CODE_SIGNING_ALLOWED=NO -quiet build
+
+  tennis:
+    name: TennisCounter
+    needs: changes
+    if: needs.changes.outputs.tennis == 'true'
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Xcode 선택
+        run: |
+          echo "--- 설치된 Xcode ---"
+          ls -d /Applications/Xcode*.app 2>/dev/null || true
+          target="/Applications/Xcode_${XCODE_VERSION}.app"
+          if [ -d "$target" ]; then
+            sudo xcode-select -s "$target"
+          else
+            echo "::warning::Xcode ${XCODE_VERSION} 이 러너에 없다 — 기본 버전을 쓴다"
+          fi
+          xcodebuild -version
+
+      - name: 시뮬레이터 선택
+        id: sim
+        run: |
+          {
+            echo "ios=$(.github/scripts/pick-simulator.sh iOS "$IOS_DEVICE")"
+            echo "watch=$(.github/scripts/pick-simulator.sh watchOS "$WATCH_DEVICE")"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: iOS 앱 테스트
+        run: |
+          xcodebuild -workspace "$WORKSPACE" -scheme "TennisCounter" \
+            -destination "id=${{ steps.sim.outputs.ios }}" \
+            CODE_SIGNING_ALLOWED=NO -quiet test
+
+      - name: Watch 앱 테스트
+        run: |
+          xcodebuild -workspace "$WORKSPACE" -scheme "TennisCounter Watch App" \
+            -destination "id=${{ steps.sim.outputs.watch }}" \
+            CODE_SIGNING_ALLOWED=NO -quiet test
+
+      - name: 컴플리케이션 빌드
+        run: |
+          xcodebuild -workspace "$WORKSPACE" -scheme "RalliComplicationExtension" \
+            -destination "id=${{ steps.sim.outputs.watch }}" \
+            CODE_SIGNING_ALLOWED=NO -quiet build
+
+      - name: LiveActivity 빌드
+        run: |
+          xcodebuild -workspace "$WORKSPACE" -scheme "TennisLiveActivityExtension" \
+            -destination "id=${{ steps.sim.outputs.ios }}" \
+            CODE_SIGNING_ALLOWED=NO -quiet build
