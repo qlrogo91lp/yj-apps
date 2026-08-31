@@ -13,20 +13,23 @@ GolfCounter — 워치 메인 입력, iOS는 기록·통계 전용인 골프 스
 
 ## Commands
 
-루트에서 실행한다. 공통 명령·워치 UDID 주의사항은 루트 `CLAUDE.md` 참조.
+루트에서 실행한다. 공통 명령·시뮬레이터 지정 규칙은 루트 `CLAUDE.md` 참조.
 
 ```bash
+IOS=$(.github/scripts/pick-simulator.sh iOS '^iPhone')
+WATCH=$(.github/scripts/pick-simulator.sh watchOS '^Apple Watch')
+
 # iOS
 xcodebuild -workspace YJApps.xcworkspace -scheme "GolfCounter" \
-  -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build   # 또는 test
+  -destination "id=$IOS" build   # 또는 test
 
-# watch (UDID는 xcrun simctl list devices available 로 확인)
+# watch
 xcodebuild -workspace YJApps.xcworkspace -scheme "GolfCounter Watch App" \
-  -destination "id=<워치 시뮬레이터 UDID>" build   # 또는 test
+  -destination "id=$WATCH" build   # 또는 test
 
 # complication
 xcodebuild -workspace YJApps.xcworkspace -scheme "GolfComplicationExtension" \
-  -destination "id=<워치 시뮬레이터 UDID>" build
+  -destination "id=$WATCH" build
 ```
 
 린트는 이 앱 폴더에서 `swiftlint` / `swiftformat --lint .` 를 직접 돌리거나,

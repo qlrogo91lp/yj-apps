@@ -5,24 +5,27 @@
 
 ## Build Commands
 
-루트에서 실행한다. 워치 UDID 주의사항은 루트 `CLAUDE.md` 참조.
+루트에서 실행한다. 시뮬레이터 지정 규칙은 루트 `CLAUDE.md` 참조.
 
 ```bash
+IOS=$(.github/scripts/pick-simulator.sh iOS '^iPhone')
+WATCH=$(.github/scripts/pick-simulator.sh watchOS '^Apple Watch')
+
 # iOS 앱 (test 로 바꾸면 RalliTests 실행)
 xcodebuild -workspace YJApps.xcworkspace -scheme "TennisCounter" \
-  -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build
+  -destination "id=$IOS" build
 
 # Watch 앱 (test 로 바꾸면 RalliTests + RalliWatchTests 실행)
 xcodebuild -workspace YJApps.xcworkspace -scheme "TennisCounter Watch App" \
-  -destination "id=<워치 시뮬레이터 UDID>" build
+  -destination "id=$WATCH" build
 
 # Complication 위젯
 xcodebuild -workspace YJApps.xcworkspace -scheme "RalliComplicationExtension" \
-  -destination "id=<워치 시뮬레이터 UDID>" build
+  -destination "id=$WATCH" build
 
 # Live Activity
 xcodebuild -workspace YJApps.xcworkspace -scheme "TennisLiveActivityExtension" \
-  -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build
+  -destination "id=$IOS" build
 ```
 
 > 스킴은 `RalliComplicationExtension` 이지만 타깃 이름은 `ComplicationAppExtension` 이다

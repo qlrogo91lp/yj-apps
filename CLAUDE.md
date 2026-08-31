@@ -53,9 +53,21 @@ xcodebuild -workspace YJApps.xcworkspace -scheme "<스킴>" -destination "<대�
 공유 스킴 7개 — `GolfCounter` / `GolfCounter Watch App` / `GolfComplicationExtension` /
 `TennisCounter` / `TennisCounter Watch App` / `RalliComplicationExtension` / `TennisLiveActivityExtension`
 
-> **워치 시뮬레이터는 이름 대신 UDID로 지정한다.** `name=Apple Watch Series 11 (46mm)` 는 OS 26.4·26.5
-> 두 기기와 겹쳐 매칭에 실패한다. `xcrun simctl list devices available` 로 UDID를 얻어
-> `-destination "id=<UDID>"` 를 쓴다.
+> **시뮬레이터는 이름이 아니라 UDID로 지정한다.** 런타임이 둘 이상 설치되면 같은 이름의 기기가
+> 중복되어 매칭에 실패한다 — `iPhone 17 Pro` 가 iOS 26.4·26.5 에, `Apple Watch Series 11 (46mm)` 이
+> watchOS 26.4·26.5 에 동시에 존재한다.
+
+`.github/scripts/pick-simulator.sh <iOS|watchOS> <기기 이름 정규식>` 이 **최신 런타임에서 세대
+숫자가 가장 큰 기기**를 골라 UDID를 출력한다. 후보가 없으면 조용히 대체하지 않고 실패한다.
+CI와 로컬이 같은 스크립트를 쓴다.
+
+```bash
+IOS=$(.github/scripts/pick-simulator.sh iOS '^iPhone')
+WATCH=$(.github/scripts/pick-simulator.sh watchOS '^Apple Watch')
+
+xcodebuild -workspace YJApps.xcworkspace -scheme "<스킴>" -destination "id=$IOS" test
+make kit-test KIT_DESTINATION="id=$IOS"
+```
 
 ## Packages/YJKit
 
