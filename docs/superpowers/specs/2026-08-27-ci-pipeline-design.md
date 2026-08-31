@@ -373,8 +373,9 @@ tennis 폴더에만 프로브 파일을 넣어 확인해 봤으나 예상대로 
 | 앱별 `.swiftlint.yml` (golf) | false | **true** | false |
 | `docs/` 또는 `README.md` 만 | false | false | false |
 
-**실증 (PR #3, 2026-08-31).** CLAUDE.md 3개만 바꾼 PR — 즉 `.github/` 를 건드리지 않고 앱
-폴더만 건드린 첫 PR — 에서 좁히기가 실제로 동작했다.
+**실증 (PR #3 초기 커밋, 2026-08-31).** CLAUDE.md 3개만 바뀐 상태 — `.github/` 를 건드리지 않고
+앱 폴더만 건드린 첫 실행 — 에서 좁히기가 실제로 동작했다. (같은 PR 에 나중에 `ci.yml` 변경이
+추가되면서 최종 실행에서는 전 job 이 돈다. 판정이 PR 누적 diff 기준이라 정상이다.)
 
 ```
 변경: CLAUDE.md, Apps/GolfCounter/CLAUDE.md, Apps/TennisCounter/CLAUDE.md
