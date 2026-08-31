@@ -80,10 +80,12 @@ CI는 이 위험에 대한 안전망이며, 앱이 늘어날수록 값어치가 
 │    루트 설정 파일       → 전부                      │
 └────────────────────────────────────────────────────┘
         │
-        ├─→ lint         (make lint + make format)
-        ├─→ kit-test     (xcodebuild — Packages/YJKit, 아래 주의)
-        ├─→ golf         (iOS 빌드+테스트, watchOS 빌드+테스트)
-        └─→ tennis       (iOS 빌드+테스트, watchOS 빌드+테스트)
+        ├─→ lint          (make lint + make format)
+        ├─→ kit-test      (xcodebuild — Packages/YJKit, 아래 주의)
+        ├─→ golf-ios      ┐ 병렬
+        ├─→ golf-watch    ┘
+        ├─→ tennis-ios    ┐ 병렬
+        └─→ tennis-watch  ┘
 ```
 
 `changes` job이 핵심이다. `Apps/GolfCounter/`만 수정된 PR에서 tennis 빌드를 돌리지 않는다.
@@ -106,6 +108,39 @@ CI는 이 위험에 대한 안전망이며, 앱이 늘어날수록 값어치가 
 
 테스트는 **앱 스킴 4개**로 돌린다. 각 앱 스킴의 `TestAction`이 테스트 타깃을 이미 포함하므로
 테스트 전용 스킴은 없다. 확장 스킴 3개는 빌드만 한다.
+
+### iOS / watchOS job 분리와 `-only-testing`
+
+앱당 job 을 하나로 두면 iOS 와 watchOS 가 순차 실행되어 느리고, 더 큰 문제로 **iOS 테스트가 두 번
+돈다.**
+
+```
+GolfCounter 스킴            → GolfCounter, GolfCounterTests
+GolfCounter Watch App 스킴  → GolfCounter Watch App, GolfCounter,
+                              GolfCounterTests, GolfCounterWatchTests
+                                         ↑ iOS 앱과 iOS 테스트가 딸려온다
+```
+
+watchOS 앱은 iOS 앱에 임베드되는 구조라 Xcode 가 호스트 앱을 워치 스킴에 자동으로 넣고, iOS 테스트
+타깃은 `TEST_HOST` 가 그 앱이라 함께 따라온다. 초기 구성의 스텝별 실측이 이를 그대로 보여줬다.
+
+| 스텝 | golf | tennis |
+|---|---|---|
+| iOS 앱 테스트 | 5.1분 | 4.7분 |
+| **Watch 앱 테스트** | **12.6분** | **10.2분** |
+| 확장 빌드 | 0.8분 | 0.8분 |
+
+두 가지를 함께 적용했다.
+
+1. **job 을 `*-ios` / `*-watch` 로 분리** — 순차(5.1 + 12.6)가 아니라 병렬이 된다.
+   macOS 러너가 public 레포에서 무료·무제한이라 job 을 늘려도 비용이 없다.
+2. **워치 테스트에 `-only-testing`** — `GolfCounterWatchTests` / `RalliWatchTests` 로 좁혀
+   `*-ios` job 이 이미 돌린 테스트를 다시 돌리지 않는다. iOS 앱 *빌드* 는 임베드 때문에 여전히
+   필요하다.
+
+> `-only-testing` 은 지정한 이름이 틀려도 **"테스트 0개"로 조용히 통과**할 수 있어 위험하다.
+> `** TEST SUCCEEDED **` 만으로는 구분되지 않으므로, 적용 전 `-resultBundlePath` 로 실행 수를
+> 확인했다 — golf 177개 / tennis 64개로 각 앱의 워치 테스트 수와 일치한다.
 
 빌드·테스트는 **워크스페이스 기준**이다. `-project`가 아니라 `-workspace YJApps.xcworkspace`를 쓴다.
 
@@ -338,7 +373,16 @@ tennis 폴더에만 프로브 파일을 넣어 확인해 봤으나 예상대로 
 | 앱별 `.swiftlint.yml` (golf) | false | **true** | false |
 | `docs/` 또는 `README.md` 만 | false | false | false |
 
-실제 앱별 좁히기는 이 PR 머지 후 **앱 코드만 건드리는 첫 PR** 에서 확인된다.
+**실증 (PR #3, 2026-08-31).** CLAUDE.md 3개만 바꾼 PR — 즉 `.github/` 를 건드리지 않고 앱
+폴더만 건드린 첫 PR — 에서 좁히기가 실제로 동작했다.
+
+```
+변경: CLAUDE.md, Apps/GolfCounter/CLAUDE.md, Apps/TennisCounter/CLAUDE.md
+판별: kit=false golf=true tennis=true
+결과: YJKit 테스트 → skipped
+```
+
+루트 `CLAUDE.md` 는 어떤 job 도 트리거하지 않는다. 빌드에 영향이 없는 문서이므로 의도된 동작이다.
 
 ---
 
