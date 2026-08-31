@@ -135,16 +135,7 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Xcode 선택
-        run: |
-          echo "--- 설치된 Xcode ---"
-          ls -d /Applications/Xcode*.app 2>/dev/null || true
-          target="/Applications/Xcode_${XCODE_VERSION}.app"
-          if [ -d "$target" ]; then
-            sudo xcode-select -s "$target"
-          else
-            echo "::warning::Xcode ${XCODE_VERSION} 이 러너에 없다 — 기본 버전을 쓴다"
-          fi
-          xcodebuild -version
+        run: .github/scripts/select-xcode.sh
 
       - name: 시뮬레이터 선택
         id: sim
@@ -158,34 +149,22 @@ jobs:
       - name: 패키지 테스트
         run: make kit-test KIT_DESTINATION="id=${{ steps.sim.outputs.ios }}"
 
-  golf:
-    name: GolfCounter
+  golf-ios:
+    name: GolfCounter (iOS)
     needs: changes
     if: needs.changes.outputs.golf == 'true'
     runs-on: macos-26
-    timeout-minutes: 45
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
 
       - name: Xcode 선택
-        run: |
-          echo "--- 설치된 Xcode ---"
-          ls -d /Applications/Xcode*.app 2>/dev/null || true
-          target="/Applications/Xcode_${XCODE_VERSION}.app"
-          if [ -d "$target" ]; then
-            sudo xcode-select -s "$target"
-          else
-            echo "::warning::Xcode ${XCODE_VERSION} 이 러너에 없다 — 기본 버전을 쓴다"
-          fi
-          xcodebuild -version
+        run: .github/scripts/select-xcode.sh
 
       - name: 시뮬레이터 선택
         id: sim
         run: |
-          {
-            echo "ios=$(.github/scripts/pick-simulator.sh iOS "$IOS_DEVICE")"
-            echo "watch=$(.github/scripts/pick-simulator.sh watchOS "$WATCH_DEVICE")"
-          } >> "$GITHUB_OUTPUT"
+          echo "ios=$(.github/scripts/pick-simulator.sh iOS "$IOS_DEVICE")" >> "$GITHUB_OUTPUT"
 
       - name: iOS 앱 테스트
         run: |
@@ -193,10 +172,31 @@ jobs:
             -destination "id=${{ steps.sim.outputs.ios }}" \
             CODE_SIGNING_ALLOWED=NO -quiet test
 
+  golf-watch:
+    name: GolfCounter (watchOS)
+    needs: changes
+    if: needs.changes.outputs.golf == 'true'
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Xcode 선택
+        run: .github/scripts/select-xcode.sh
+
+      - name: 시뮬레이터 선택
+        id: sim
+        run: |
+          echo "watch=$(.github/scripts/pick-simulator.sh watchOS "$WATCH_DEVICE")" >> "$GITHUB_OUTPUT"
+
+      # 워치 앱 스킴에는 iOS 앱과 iOS 테스트 타깃까지 들어 있다 — watchOS 앱이 iOS 앱에
+      # 임베드되는 구조라 Xcode 가 호스트 앱을 스킴에 자동으로 넣기 때문이다.
+      # -only-testing 으로 좁히지 않으면 *-ios job 이 이미 돌린 테스트를 그대로 다시 돌린다.
       - name: Watch 앱 테스트
         run: |
           xcodebuild -workspace "$WORKSPACE" -scheme "GolfCounter Watch App" \
             -destination "id=${{ steps.sim.outputs.watch }}" \
+            -only-testing:GolfCounterWatchTests \
             CODE_SIGNING_ALLOWED=NO -quiet test
 
       - name: 컴플리케이션 빌드
@@ -205,34 +205,22 @@ jobs:
             -destination "id=${{ steps.sim.outputs.watch }}" \
             CODE_SIGNING_ALLOWED=NO -quiet build
 
-  tennis:
-    name: TennisCounter
+  tennis-ios:
+    name: TennisCounter (iOS)
     needs: changes
     if: needs.changes.outputs.tennis == 'true'
     runs-on: macos-26
-    timeout-minutes: 45
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
 
       - name: Xcode 선택
-        run: |
-          echo "--- 설치된 Xcode ---"
-          ls -d /Applications/Xcode*.app 2>/dev/null || true
-          target="/Applications/Xcode_${XCODE_VERSION}.app"
-          if [ -d "$target" ]; then
-            sudo xcode-select -s "$target"
-          else
-            echo "::warning::Xcode ${XCODE_VERSION} 이 러너에 없다 — 기본 버전을 쓴다"
-          fi
-          xcodebuild -version
+        run: .github/scripts/select-xcode.sh
 
       - name: 시뮬레이터 선택
         id: sim
         run: |
-          {
-            echo "ios=$(.github/scripts/pick-simulator.sh iOS "$IOS_DEVICE")"
-            echo "watch=$(.github/scripts/pick-simulator.sh watchOS "$WATCH_DEVICE")"
-          } >> "$GITHUB_OUTPUT"
+          echo "ios=$(.github/scripts/pick-simulator.sh iOS "$IOS_DEVICE")" >> "$GITHUB_OUTPUT"
 
       - name: iOS 앱 테스트
         run: |
@@ -240,20 +228,41 @@ jobs:
             -destination "id=${{ steps.sim.outputs.ios }}" \
             CODE_SIGNING_ALLOWED=NO -quiet test
 
+      - name: LiveActivity 빌드
+        run: |
+          xcodebuild -workspace "$WORKSPACE" -scheme "TennisLiveActivityExtension" \
+            -destination "id=${{ steps.sim.outputs.ios }}" \
+            CODE_SIGNING_ALLOWED=NO -quiet build
+
+  tennis-watch:
+    name: TennisCounter (watchOS)
+    needs: changes
+    if: needs.changes.outputs.tennis == 'true'
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Xcode 선택
+        run: .github/scripts/select-xcode.sh
+
+      - name: 시뮬레이터 선택
+        id: sim
+        run: |
+          echo "watch=$(.github/scripts/pick-simulator.sh watchOS "$WATCH_DEVICE")" >> "$GITHUB_OUTPUT"
+
+      # 워치 앱 스킴에는 iOS 앱과 iOS 테스트 타깃까지 들어 있다 — watchOS 앱이 iOS 앱에
+      # 임베드되는 구조라 Xcode 가 호스트 앱을 스킴에 자동으로 넣기 때문이다.
+      # -only-testing 으로 좁히지 않으면 *-ios job 이 이미 돌린 테스트를 그대로 다시 돌린다.
       - name: Watch 앱 테스트
         run: |
           xcodebuild -workspace "$WORKSPACE" -scheme "TennisCounter Watch App" \
             -destination "id=${{ steps.sim.outputs.watch }}" \
+            -only-testing:RalliWatchTests \
             CODE_SIGNING_ALLOWED=NO -quiet test
 
       - name: 컴플리케이션 빌드
         run: |
           xcodebuild -workspace "$WORKSPACE" -scheme "RalliComplicationExtension" \
             -destination "id=${{ steps.sim.outputs.watch }}" \
-            CODE_SIGNING_ALLOWED=NO -quiet build
-
-      - name: LiveActivity 빌드
-        run: |
-          xcodebuild -workspace "$WORKSPACE" -scheme "TennisLiveActivityExtension" \
-            -destination "id=${{ steps.sim.outputs.ios }}" \
             CODE_SIGNING_ALLOWED=NO -quiet build
