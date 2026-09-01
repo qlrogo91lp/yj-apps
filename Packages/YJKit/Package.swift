@@ -10,6 +10,7 @@ let package = Package(
         .library(name: "WorkoutUI", targets: ["WorkoutUI"]),
         .library(name: "ConnectivityCore", targets: ["ConnectivityCore"]),
         .library(name: "PersistenceCore", targets: ["PersistenceCore"]),
+        .library(name: "WorkoutShareUI", targets: ["WorkoutShareUI"]),
     ],
     targets: [
         .target(
@@ -19,6 +20,12 @@ let package = Package(
         ),
         .target(
             name: "WorkoutUI",
+            dependencies: ["WorkoutCore"],
+            resources: [.process("Resources")],
+            swiftSettings: [.swiftLanguageMode(.v5)]
+        ),
+        .target(
+            name: "WorkoutShareUI",
             dependencies: ["WorkoutCore"],
             resources: [.process("Resources")],
             swiftSettings: [.swiftLanguageMode(.v5)]
@@ -44,6 +51,11 @@ let package = Package(
         .testTarget(
             name: "PersistenceCoreTests",
             dependencies: ["PersistenceCore"],
+            swiftSettings: [.swiftLanguageMode(.v5)]
+        ),
+        .testTarget(
+            name: "WorkoutShareUITests",
+            dependencies: ["WorkoutShareUI"],
             swiftSettings: [.swiftLanguageMode(.v5)]
         ),
     ]
