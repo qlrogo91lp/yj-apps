@@ -72,7 +72,7 @@
   - `struct WorkoutShareCardModel.Row: Equatable { let metric: Metric; let value: String; let unit: String? }`
   - `let rows: [Row]`, `init(result: WorkoutResult)`
 
-- [ ] **Step 1: `Package.swift`에 product·target·testTarget 추가**
+- [x] **Step 1: `Package.swift`에 product·target·testTarget 추가**
 
 `products` 배열 마지막 항목 뒤에 추가:
 
@@ -101,7 +101,7 @@
         ),
 ```
 
-- [ ] **Step 2: 로컬라이징 파일 생성**
+- [x] **Step 2: 로컬라이징 파일 생성**
 
 `resources: [.process("Resources")]`는 디렉터리가 없으면 SPM이 에러를 낸다. 지금 만들어 둔다.
 
@@ -123,7 +123,7 @@
 "share_metric_heart_rate" = "Avg HR";
 ```
 
-- [ ] **Step 3: 타입 껍데기 작성 (테스트가 컴파일되도록)**
+- [x] **Step 3: 타입 껍데기 작성 (테스트가 컴파일되도록)**
 
 `Sources/WorkoutShareUI/Card/WorkoutShareCardModel.swift`:
 
@@ -156,7 +156,7 @@
 #endif
 ```
 
-- [ ] **Step 4: 실패하는 테스트 작성**
+- [x] **Step 4: 실패하는 테스트 작성**
 
 `Tests/WorkoutShareUITests/WorkoutShareCardModelTests.swift`:
 
@@ -220,7 +220,7 @@
 #endif
 ```
 
-- [ ] **Step 5: 테스트가 실패하는지 확인**
+- [x] **Step 5: 테스트가 실패하는지 확인**
 
 Run:
 ```bash
@@ -228,7 +228,7 @@ make kit-test 2>&1 | grep -E "WorkoutShareCardModelTests|Test run"
 ```
 Expected: `WorkoutShareCardModelTests`의 7개 테스트가 모두 FAIL. `rows`가 빈 배열이라 `map(\.metric)`이 `[]`이고 인덱스 접근은 범위를 벗어난다.
 
-- [ ] **Step 6: 최소 구현**
+- [x] **Step 6: 최소 구현**
 
 `WorkoutShareCardModel.swift`의 `init`을 교체:
 
@@ -253,7 +253,7 @@ Expected: `WorkoutShareCardModelTests`의 7개 테스트가 모두 FAIL. `rows`�
         }
 ```
 
-- [ ] **Step 7: 테스트 통과 확인**
+- [x] **Step 7: 테스트 통과 확인**
 
 Run:
 ```bash
@@ -261,7 +261,7 @@ make kit-test 2>&1 | grep -E "WorkoutShareCardModelTests|Test run"
 ```
 Expected: `WorkoutShareCardModelTests` 7개 PASS, 기존 51개 포함 전체 PASS.
 
-- [ ] **Step 8: 커밋**
+- [x] **Step 8: 커밋**
 
 ```bash
 git add Package.swift Sources/WorkoutShareUI Tests/WorkoutShareUITests
@@ -284,7 +284,7 @@ git commit -m "✨ WorkoutShareUI 타깃과 공유 카드 모델 추가"
   - `static func hexPair(from accent: Color) -> (top: String, bottom: String)`
   - `static func colors(from accent: Color) -> (top: Color, bottom: Color)`
 
-- [ ] **Step 1: 껍데기 작성**
+- [x] **Step 1: 껍데기 작성**
 
 `Sources/WorkoutShareUI/Render/StoryGradient.swift`:
 
@@ -310,7 +310,7 @@ git commit -m "✨ WorkoutShareUI 타깃과 공유 카드 모델 추가"
 #endif
 ```
 
-- [ ] **Step 2: 실패하는 테스트 작성**
+- [x] **Step 2: 실패하는 테스트 작성**
 
 `Tests/WorkoutShareUITests/StoryGradientTests.swift`:
 
@@ -360,7 +360,7 @@ git commit -m "✨ WorkoutShareUI 타깃과 공유 카드 모델 추가"
 #endif
 ```
 
-- [ ] **Step 3: 테스트가 실패하는지 확인**
+- [x] **Step 3: 테스트가 실패하는지 확인**
 
 Run:
 ```bash
@@ -368,7 +368,7 @@ make kit-test 2>&1 | grep -E "StoryGradientTests|Test run"
 ```
 Expected: 5개 FAIL. `hexPair`가 빈 문자열을 돌려준다.
 
-- [ ] **Step 4: 구현**
+- [x] **Step 4: 구현**
 
 `StoryGradient`의 두 함수를 교체하고 헬퍼를 추가:
 
@@ -406,7 +406,7 @@ Expected: 5개 FAIL. `hexPair`가 빈 문자열을 돌려준다.
         }
 ```
 
-- [ ] **Step 5: 테스트 통과 확인**
+- [x] **Step 5: 테스트 통과 확인**
 
 Run:
 ```bash
@@ -414,7 +414,7 @@ make kit-test 2>&1 | grep -E "StoryGradientTests|Test run"
 ```
 Expected: 5개 PASS, 전체 PASS.
 
-- [ ] **Step 6: 커밋**
+- [x] **Step 6: 커밋**
 
 ```bash
 git add Sources/WorkoutShareUI/Render/StoryGradient.swift Tests/WorkoutShareUITests/StoryGradientTests.swift
@@ -438,7 +438,7 @@ git commit -m "✨ 강조색에서 스토리 배경 그라디언트를 뽑는 St
   - `static func storyURL(appID: String) -> URL?`
   - `static func pasteboardItems(stickerPNG: Data, topColor: String, bottomColor: String) -> [[String: Any]]`
 
-- [ ] **Step 1: 껍데기 작성**
+- [x] **Step 1: 껍데기 작성**
 
 `Sources/WorkoutShareUI/Share/InstagramStoryLink.swift`:
 
@@ -468,7 +468,7 @@ git commit -m "✨ 강조색에서 스토리 배경 그라디언트를 뽑는 St
 #endif
 ```
 
-- [ ] **Step 2: 실패하는 테스트 작성**
+- [x] **Step 2: 실패하는 테스트 작성**
 
 `Tests/WorkoutShareUITests/InstagramStoryLinkTests.swift`:
 
@@ -519,7 +519,7 @@ git commit -m "✨ 강조색에서 스토리 배경 그라디언트를 뽑는 St
 #endif
 ```
 
-- [ ] **Step 3: 테스트가 실패하는지 확인**
+- [x] **Step 3: 테스트가 실패하는지 확인**
 
 Run:
 ```bash
@@ -527,7 +527,7 @@ make kit-test 2>&1 | grep -E "InstagramStoryLinkTests|Test run"
 ```
 Expected: 5개 FAIL. URL이 nil이고 아이템 배열이 비어 있다.
 
-- [ ] **Step 4: 구현**
+- [x] **Step 4: 구현**
 
 세 멤버를 교체:
 
@@ -556,7 +556,7 @@ Expected: 5개 FAIL. URL이 nil이고 아이템 배열이 비어 있다.
         }
 ```
 
-- [ ] **Step 5: 테스트 통과 확인**
+- [x] **Step 5: 테스트 통과 확인**
 
 Run:
 ```bash
@@ -564,7 +564,7 @@ make kit-test 2>&1 | grep -E "InstagramStoryLinkTests|Test run"
 ```
 Expected: 5개 PASS, 전체 PASS.
 
-- [ ] **Step 6: 커밋**
+- [x] **Step 6: 커밋**
 
 ```bash
 git add Sources/WorkoutShareUI/Share/InstagramStoryLink.swift Tests/WorkoutShareUITests/InstagramStoryLinkTests.swift
@@ -587,7 +587,7 @@ git commit -m "✨ 인스타그램 스토리 딥링크 URL·페이스트보드 �
   - `static func stickerSize(rowCount: Int, hasLogo: Bool) -> CGSize`
   - `static let standaloneSize: CGSize`
 
-- [ ] **Step 1: 껍데기 작성**
+- [x] **Step 1: 껍데기 작성**
 
 `Sources/WorkoutShareUI/Render/ShareCanvas.swift`:
 
@@ -616,7 +616,7 @@ git commit -m "✨ 인스타그램 스토리 딥링크 URL·페이스트보드 �
 #endif
 ```
 
-- [ ] **Step 2: 실패하는 테스트 작성**
+- [x] **Step 2: 실패하는 테스트 작성**
 
 `Tests/WorkoutShareUITests/ShareCanvasTests.swift`:
 
@@ -661,7 +661,7 @@ git commit -m "✨ 인스타그램 스토리 딥링크 URL·페이스트보드 �
 #endif
 ```
 
-- [ ] **Step 3: 테스트가 실패하는지 확인**
+- [x] **Step 3: 테스트가 실패하는지 확인**
 
 Run:
 ```bash
@@ -669,7 +669,7 @@ make kit-test 2>&1 | grep -E "ShareCanvasTests|Test run"
 ```
 Expected: `stickerSize`를 쓰는 4개 FAIL(`.zero`를 돌려준다). `standaloneCanvasIsStorySize`는 PASS.
 
-- [ ] **Step 4: 구현**
+- [x] **Step 4: 구현**
 
 `stickerSize`를 교체:
 
@@ -682,7 +682,7 @@ Expected: `stickerSize`를 쓰는 4개 FAIL(`.zero`를 돌려준다). `standalon
         }
 ```
 
-- [ ] **Step 5: 테스트 통과 확인**
+- [x] **Step 5: 테스트 통과 확인**
 
 Run:
 ```bash
@@ -690,7 +690,7 @@ make kit-test 2>&1 | grep -E "ShareCanvasTests|Test run"
 ```
 Expected: 5개 PASS, 전체 PASS.
 
-- [ ] **Step 6: 커밋**
+- [x] **Step 6: 커밋**
 
 ```bash
 git add Sources/WorkoutShareUI/Render/ShareCanvas.swift Tests/WorkoutShareUITests/ShareCanvasTests.swift
@@ -716,7 +716,7 @@ git commit -m "✨ 공유 카드 캔버스 크기 계산 추가"
   - `WorkoutShareCard(model:style:mode:)`
   - `extension WorkoutShareCardModel.Metric { var localizedLabel: String }`
 
-- [ ] **Step 1: `WorkoutShareStyle` 작성**
+- [x] **Step 1: `WorkoutShareStyle` 작성**
 
 `Sources/WorkoutShareUI/WorkoutShareStyle.swift`:
 
@@ -739,7 +739,7 @@ git commit -m "✨ 공유 카드 캔버스 크기 계산 추가"
 #endif
 ```
 
-- [ ] **Step 2: 카드 뷰 작성**
+- [x] **Step 2: 카드 뷰 작성**
 
 `Sources/WorkoutShareUI/Card/WorkoutShareCard.swift`:
 
@@ -891,7 +891,7 @@ git commit -m "✨ 공유 카드 캔버스 크기 계산 추가"
 #endif
 ```
 
-- [ ] **Step 3: 빌드 확인**
+- [x] **Step 3: 빌드 확인**
 
 Run:
 ```bash
@@ -899,7 +899,7 @@ make kit-test 2>&1 | tail -5
 ```
 Expected: `** BUILD SUCCEEDED **`
 
-- [ ] **Step 4: 기존 테스트가 깨지지 않았는지 확인**
+- [x] **Step 4: 기존 테스트가 깨지지 않았는지 확인**
 
 Run:
 ```bash
@@ -909,6 +909,8 @@ Expected: 전체 PASS.
 
 - [ ] **Step 5: Preview 육안 확인**
 
+> **미완료.** 코드는 PR #4로 머지 대기 중이고 빌드·테스트는 통과했지만, Preview를 눈으로 본 사람이 아직 없다.
+
 Xcode에서 `WorkoutShareCard.swift`를 열고 네 개 Preview를 확인한다. 볼 것:
 
 - 3행 카드에서 라벨은 왼쪽, 값과 단위는 오른쪽에 붙어 있는가
@@ -917,7 +919,7 @@ Xcode에서 `WorkoutShareCard.swift`를 열고 네 개 Preview를 확인한다. 
 - 전체 이미지 Preview에서 카드가 세로 중앙에 있고 위아래로 그라디언트 여백이 넉넉한가
 - 스티커 Preview의 모서리가 둥글고 그 바깥이 비어 있는가
 
-- [ ] **Step 6: 커밋**
+- [x] **Step 6: 커밋**
 
 ```bash
 git add Sources/WorkoutShareUI/WorkoutShareStyle.swift Sources/WorkoutShareUI/Card/WorkoutShareCard.swift
@@ -939,7 +941,7 @@ git commit -m "✨ 공유 카드 뷰와 스타일 추가"
   - `static func stickerImage(model: WorkoutShareCardModel, style: WorkoutShareStyle) -> UIImage?`
   - `static func standaloneImage(model: WorkoutShareCardModel, style: WorkoutShareStyle) -> UIImage?`
 
-- [ ] **Step 1: 껍데기 작성**
+- [x] **Step 1: 껍데기 작성**
 
 `Sources/WorkoutShareUI/Render/WorkoutShareRenderer.swift`:
 
@@ -969,7 +971,7 @@ git commit -m "✨ 공유 카드 뷰와 스타일 추가"
 #endif
 ```
 
-- [ ] **Step 2: 실패하는 테스트 작성**
+- [x] **Step 2: 실패하는 테스트 작성**
 
 `Tests/WorkoutShareUITests/WorkoutShareRendererTests.swift`:
 
@@ -1044,7 +1046,7 @@ git commit -m "✨ 공유 카드 뷰와 스타일 추가"
 
 1행 캔버스는 로고 없이 74pt이므로 74 × 4 = 296px이다.
 
-- [ ] **Step 3: 테스트가 실패하는지 확인**
+- [x] **Step 3: 테스트가 실패하는지 확인**
 
 Run:
 ```bash
@@ -1052,7 +1054,7 @@ make kit-test 2>&1 | grep -E "WorkoutShareRendererTests|Test run"
 ```
 Expected: 4개 FAIL. 렌더러가 nil을 돌려준다.
 
-- [ ] **Step 4: 구현**
+- [x] **Step 4: 구현**
 
 두 함수를 교체하고 헬퍼를 추가:
 
@@ -1083,7 +1085,7 @@ Expected: 4개 FAIL. 렌더러가 nil을 돌려준다.
         }
 ```
 
-- [ ] **Step 5: 테스트 통과 확인**
+- [x] **Step 5: 테스트 통과 확인**
 
 Run:
 ```bash
@@ -1093,7 +1095,7 @@ Expected: 4개 PASS, 전체 PASS.
 
 높이가 어긋나면 `WorkoutShareCard`의 `.frame` 계산이 `ShareCanvas`와 다르다는 뜻이다. 테스트의 기대값을 고치지 말고 뷰를 고칠 것 — `ShareCanvas`가 크기의 단일 소스다.
 
-- [ ] **Step 6: 커밋**
+- [x] **Step 6: 커밋**
 
 ```bash
 git add Sources/WorkoutShareUI/Render/WorkoutShareRenderer.swift Tests/WorkoutShareUITests/WorkoutShareRendererTests.swift
@@ -1118,7 +1120,7 @@ git commit -m "✨ 공유 카드를 이미지로 굽는 렌더러 추가"
   - `static func share(stickerPNG: Data, topColor: String, bottomColor: String, appID: String, completion: @escaping (Bool) -> Void)`
   - `struct ShareSheet: UIViewControllerRepresentable`, `init(image: UIImage)` (멤버와이즈)
 
-- [ ] **Step 1: `InstagramStoryShare` 작성**
+- [x] **Step 1: `InstagramStoryShare` 작성**
 
 `Sources/WorkoutShareUI/Share/InstagramStoryShare.swift`:
 
@@ -1164,7 +1166,7 @@ git commit -m "✨ 공유 카드를 이미지로 굽는 렌더러 추가"
 #endif
 ```
 
-- [ ] **Step 2: `ShareSheet` 작성**
+- [x] **Step 2: `ShareSheet` 작성**
 
 `Sources/WorkoutShareUI/Share/ShareSheet.swift`:
 
@@ -1187,7 +1189,7 @@ git commit -m "✨ 공유 카드를 이미지로 굽는 렌더러 추가"
 #endif
 ```
 
-- [ ] **Step 3: 빌드 확인**
+- [x] **Step 3: 빌드 확인**
 
 Run:
 ```bash
@@ -1195,7 +1197,7 @@ make kit-test 2>&1 | tail -5
 ```
 Expected: `** BUILD SUCCEEDED **`
 
-- [ ] **Step 4: 기존 테스트가 깨지지 않았는지 확인**
+- [x] **Step 4: 기존 테스트가 깨지지 않았는지 확인**
 
 Run:
 ```bash
@@ -1203,7 +1205,7 @@ make kit-test 2>&1 | grep -E "Test run"
 ```
 Expected: 전체 PASS.
 
-- [ ] **Step 5: 커밋**
+- [x] **Step 5: 커밋**
 
 ```bash
 git add Sources/WorkoutShareUI/Share/InstagramStoryShare.swift Sources/WorkoutShareUI/Share/ShareSheet.swift
@@ -1224,7 +1226,7 @@ git commit -m "✨ 인스타그램 딥링크 공유와 공유 시트 폴백 추�
   - `public struct WorkoutShareButton: View`
   - `public init(result: WorkoutResult, style: WorkoutShareStyle, instagramAppID: String)`
 
-- [ ] **Step 1: 버튼 작성**
+- [x] **Step 1: 버튼 작성**
 
 `Sources/WorkoutShareUI/WorkoutShareButton.swift`:
 
@@ -1312,7 +1314,7 @@ git commit -m "✨ 인스타그램 딥링크 공유와 공유 시트 폴백 추�
 #endif
 ```
 
-- [ ] **Step 2: 빌드와 테스트 확인**
+- [x] **Step 2: 빌드와 테스트 확인**
 
 Run:
 ```bash
@@ -1322,6 +1324,8 @@ Expected: 빌드 성공, 전체 PASS.
 
 - [ ] **Step 3: 시뮬레이터에서 폴백 경로 확인**
 
+> **미완료.** 위와 같다. 시뮬레이터로 확인되는 것은 폴백 경로뿐이며 딥링크는 실기기 몫이다.
+
 시뮬레이터에는 인스타그램이 없고 테스트 호스트에 `LSApplicationQueriesSchemes`도 없으므로 `isAvailable`이 false다. 즉 **폴백 경로가 그대로 확인된다.**
 
 Xcode에서 `WorkoutShareButton.swift`의 Preview를 시뮬레이터로 실행하고 버튼을 누른다. 볼 것:
@@ -1330,7 +1334,7 @@ Xcode에서 `WorkoutShareButton.swift`의 Preview를 시뮬레이터로 실행�
 - 시트 상단 썸네일에 그라디언트 배경 위 카드가 세로 중앙으로 보인다
 - 이미지를 사진에 저장한 뒤 크기가 1080×1920인지 확인한다
 
-- [ ] **Step 4: README에 사용법 절 추가**
+- [x] **Step 4: README에 사용법 절 추가**
 
 `README.md`에서 `## ConnectivityCore 사용법` 바로 앞에 아래를 삽입한다.
 
@@ -1368,7 +1372,7 @@ WorkoutShareButton(
 - [ ] **iOS 전용이다.** 워치 타깃에서 임포트해도 심볼이 없다.
 ````
 
-- [ ] **Step 5: 커밋**
+- [x] **Step 5: 커밋**
 
 ```bash
 git add Sources/WorkoutShareUI/WorkoutShareButton.swift README.md
@@ -1376,6 +1380,33 @@ git commit -m "✨ WorkoutShareButton 추가와 사용법 문서화"
 ```
 
 ---
+
+## 구현 결과
+
+2026-09-01, Task 1~8 구현 완료. PR [#4](https://github.com/qlrogo91lp/yj-apps/pull/4).
+
+| Task | 커밋 | 게이트 |
+|---|---|---|
+| 1 타깃·카드 모델 | `d5f24f4` | 테스트 7 |
+| 2 StoryGradient | `2ff51f4` | 테스트 5 |
+| 3 InstagramStoryLink | `47ec262` | 테스트 5 |
+| 4 ShareCanvas | `ab54987` | 테스트 5 |
+| 5 카드 뷰·스타일 | `7bcb7d4` | 빌드 |
+| 6 WorkoutShareRenderer | `ec3a858` | 테스트 4 |
+| 7 공유 경로 | `415e1c2` | 빌드 |
+| 8 WorkoutShareButton·문서 | `dd73b2c` | 빌드 |
+
+테스트 26개가 늘었고 기존 69개(51/9/9)와 함께 전부 통과한다. 모든 태스크에서 RED를 먼저 확인한 뒤 구현했다.
+CI는 `Packages/YJKit/` 변경을 코어 변경으로 잡아 두 앱까지 전부 빌드했고, 새 타깃이 기존 앱을 깨지 않는 것이 확인됐다.
+
+### 플랜과 달랐던 것
+
+1. **README 상단 Product 표에 `WorkoutShareUI` 행을 추가했다.** 플랜은 사용법 절만 지시했으나 그 표가 프로덕트 목록이라 누락이 된다.
+2. **RED 단계 실패 개수가 두 곳에서 플랜 기대보다 1개 적었다.** Task 2의 `colorsAgreeWithHexPair`와 Task 4의 `tallestStickerFitsInsideTheStorySafeArea`가 껍데기 상태(`""`, `.zero`)에서 우연히 통과한다. 구현 후에야 검증력을 갖는 테스트이므로 문제는 아니다.
+
+### 남은 육안 확인
+
+Task 5 Step 5(카드 Preview 4개)와 Task 8 Step 3(시뮬레이터 폴백 경로)은 미체크로 남겼다. 자동 검증이 닿지 않는 부분이라 사람이 봐야 한다.
 
 ## 구현 후 실기기 확인
 
