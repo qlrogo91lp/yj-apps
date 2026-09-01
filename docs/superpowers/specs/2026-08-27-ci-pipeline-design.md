@@ -73,6 +73,7 @@ CI는 이 위험에 대한 안전망이며, 앱이 늘어날수록 값어치가 
 ```
 ┌─ changes ──────────────────────────────────────────┐
 │  변경 경로 판별 → 이후 job들의 실행 여부를 결정     │
+│    (먼저 문서를 판정 대상에서 제외한다)             │
 │    Packages/YJKit/**   → kit=true, golf=true,      │
 │                          tennis=true (전부)        │
 │    Apps/GolfCounter/** → golf=true                 │
@@ -91,6 +92,25 @@ CI는 이 위험에 대한 안전망이며, 앱이 늘어날수록 값어치가 
 `changes` job이 핵심이다. `Apps/GolfCounter/`만 수정된 PR에서 tennis 빌드를 돌리지 않는다.
 반대로 `Packages/YJKit/`이 수정되면 **전 앱을 빌드한다** — 코어 변경의 파급을 잡는 것이 목적이므로
 여기서 좁히면 안 된다.
+
+#### 문서는 판정 대상에서 뺀다
+
+경로 패턴을 적용하기 **전에** 문서를 걸러낸다. `(^|/)docs/` 또는 `.md` 로 끝나는 파일이 대상이다.
+
+```bash
+relevant=$(echo "$changed" | grep -vE '(^|/)docs/|\.md$' || true)
+```
+
+이것이 없으면 `Packages/YJKit/docs/`, `Packages/YJKit/README.md`, `Apps/*/CLAUDE.md` 처럼
+**코드 디렉터리 안에 있는 문서**가 코어·앱 패턴에 걸려 전 앱 빌드를 돌린다. 루트 `docs/` 와
+루트 `README.md` 는 애초에 어떤 패턴에도 안 걸려 이미 스킵되고 있었으므로, 문제는 정확히
+"코드 디렉터리 안의 문서"였다.
+
+도입 시점(2026-09-01) 기준 최근 커밋 13개 중 9개가 문서만 바꾼 커밋이었고, 그중 4건이
+이 이유로 전 job 을 돌렸다. 회당 약 22 러너-분이다.
+
+`|| true` 는 생략할 수 없다. 러너 셸이 `set -eo pipefail` 로 도는데 `grep` 은 한 줄도 못 맞히면
+종료 코드 1 을 내므로, 문서만 바뀐 변경에서 스텝 자체가 실패한다.
 
 ### 사용할 스킴 — 공유 스킴 7개
 
@@ -378,6 +398,10 @@ tennis 폴더에만 프로브 파일을 넣어 확인해 봤으나 예상대로 
 | 루트 `Makefile` / `.swiftlint.yml` | true | true | true |
 | 앱별 `.swiftlint.yml` (golf) | false | **true** | false |
 | `docs/` 또는 `README.md` 만 | false | false | false |
+| `Packages/YJKit/docs/` 만 | false | false | false |
+| `Packages/YJKit/README.md` 만 | false | false | false |
+| `Apps/GolfCounter/CLAUDE.md` 만 | false | false | false |
+| 코어 문서 + golf 코드 | false | **true** | false |
 
 **실증 (PR #3 초기 커밋, 2026-08-31).** CLAUDE.md 3개만 바뀐 상태 — `.github/` 를 건드리지 않고
 앱 폴더만 건드린 첫 실행 — 에서 좁히기가 실제로 동작했다. (같은 PR 에 나중에 `ci.yml` 변경이
@@ -391,13 +415,21 @@ tennis 폴더에만 프로브 파일을 넣어 확인해 봤으나 예상대로 
 
 루트 `CLAUDE.md` 는 어떤 job 도 트리거하지 않는다. 빌드에 영향이 없는 문서이므로 의도된 동작이다.
 
+> **이 실증은 문서 제외 도입(2026-09-01) 이전 규칙 기준이다.** 지금 같은 변경이 오면
+> `Apps/*/CLAUDE.md` 도 문서로 걸러져 `kit=false golf=false tennis=false` 가 되고 전 job 이 스킵된다.
+> 당시 관찰은 "앱별 좁히기가 동작한다"는 것을 보이려던 것이고, 그 성질 자체는 지금도 유효하다.
+
 ---
 
 ## 9. 후속 검토 항목
 
 - **브랜치 보호 규칙** — CI 통과를 머지 조건으로 강제할지.
-  주의: `docs/` 나 `README.md` 만 바뀐 PR 은 전 job 이 스킵되어 체크가 하나도 붙지 않는다.
-  이를 required check 로 지정하면 그런 PR 이 영원히 머지 대기 상태가 된다.
+  주의: 문서만 바뀐 PR 은 전 job 이 스킵되어 체크가 하나도 붙지 않는다. 이를 required check 로
+  지정하면 그런 PR 이 영원히 머지 대기 상태가 된다.
+  **문서 제외를 도입(2026-09-01)하면서 이 상황이 눈에 띄게 늘었다** — 이전에는 루트 `docs/` 만
+  해당했지만 이제 `Packages/YJKit/docs/`·`Apps/*/CLAUDE.md` 도 전 job 을 스킵한다. 최근 커밋
+  기준으로 문서만 바꾼 커밋이 3분의 2였으므로, 보호 규칙을 걸 때 반드시 함께 풀어야 한다
+  (스킵을 성공으로 보는 게이트 job 을 하나 두는 방식이 흔하다).
 - **빌드 캐시** — DerivedData / SPM 캐시로 20분대 소요를 줄일지
 - **테스트 타깃 배포 타깃 정리** (26.4 → 앱과 동일하게). CI 가 최신 러너 이미지에 묶인 원인이며,
   낮은 OS 회귀를 테스트로 잡지 못하는 문제이기도 하다 (5.2.1)
