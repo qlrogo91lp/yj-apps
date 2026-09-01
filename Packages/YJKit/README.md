@@ -9,6 +9,7 @@ yj-apps 모노레포의 공용 iOS+watchOS 앱 인프라. 독립 라이브러리
 | `WorkoutUI` | 폰·워치 공유 워크아웃 화면 (경과시간·kcal·BPM) | ✅ |
 | `ConnectivityCore` | 폰↔워치 전송 (실시간/큐잉/컨텍스트) | ✅ |
 | `PersistenceCore` | SwiftData + CloudKit 컨테이너/서비스 | ✅ |
+| `WorkoutShareUI` | 워크아웃 결과 카드를 인스타그램 스토리로 공유 (iOS 전용) | ✅ |
 
 ## WorkoutCore 사용법
 
@@ -71,6 +72,38 @@ WorkoutDashboardView(metrics: viewModel.metrics,
 `WorkoutMetricsMessage`의 키는 `elapsed`/`calories`/`totalCalories`/`heartRate`/`isPaused`.
 앞 넷은 초기 버전부터의 계약이라 이름을 바꾸지 않는다. 구버전이 `totalCalories`를 안 보내면
 `calories`로, `isPaused`를 안 보내면 `false`로 폴백한다.
+
+## WorkoutShareUI 사용법
+
+워크아웃 결과를 인스타그램 스토리에 공유하는 버튼. 앱은 한 줄만 쓰면 된다.
+
+```swift
+import WorkoutShareUI
+
+WorkoutShareButton(
+    result: workoutResult,
+    style: WorkoutShareStyle(accentColor: .tennisGreen, logo: Image("AppLogo")),
+    instagramAppID: "1234567890"
+)
+```
+
+탭하면 인스타그램이 설치된 경우 스토리 편집기가 열린다. 배경은 `accentColor`에서 파생한 그라디언트,
+그 위에 지표 카드가 **스티커**로 올라가므로 사용자가 자기 사진·영상으로 배경을 바꾸고 카드를 끌어
+배치할 수 있다. 인스타그램이 없으면 배경이 합성된 1080×1920 이미지를 iOS 공유 시트로 넘긴다.
+
+카드에 들어가는 지표는 **시간·활동 kcal·평균 심박 최대 3개**다. 스티커는 사용자가 축소할 수 있어
+적게 넣고 크게 보여주는 쪽이 유리하다. 값이 없는 지표(`averageHeartRate`가 nil, 칼로리가 0)는
+`--`를 표시하지 않고 **행 자체를 뺀다** — 카드 높이도 그만큼 줄어든다.
+
+버튼 라벨·지표 라벨·레이아웃은 패키지가 소유한다. 앱이 문자열을 관리하지 않는다.
+
+### 소비자 책임 (패키지가 대신 못 해주는 것)
+
+- [ ] **`Info.plist`에 `LSApplicationQueriesSchemes` → `instagram-stories`를 추가한다.** 빠지면 크래시가 아니라 **항상 공유 시트로 폴백된다** — 조용히 동작이 달라지므로 실기기에서 딥링크가 실제로 열리는지 확인할 것.
+- [ ] **Meta 개발자 대시보드에서 Facebook App ID를 발급해 `instagramAppID`로 주입한다.** Meta 문서상 2022년 10월부터 필수다. 빈 문자열을 넘기면 딥링크를 만들지 않고 폴백으로 넘어간다.
+- [ ] **`WorkoutResult`는 워크아웃 누적값으로 넘긴다.** 구간 델타를 넘기면 두 앱의 숫자 의미가 갈린다 — `WorkoutUI`와 같은 규칙이다.
+- [ ] **`accentColor`에서 배경 그라디언트가 파생된다.** 아래쪽 색은 각 RGB 채널에 0.6을 곱한 값이다. 너무 밝은 색을 주면 흰 텍스트와 대비가 떨어진다.
+- [ ] **iOS 전용이다.** 워치 타깃에서 임포트해도 심볼이 없다.
 
 ## ConnectivityCore 사용법
 
