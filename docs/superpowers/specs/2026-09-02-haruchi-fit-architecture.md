@@ -62,11 +62,22 @@ HKWorkoutSession  (전체 1:12:24)
 └─ HKWorkoutActivity  .traditionalStrengthTraining  1:00–1:12
 ```
 
-> **검증 필요** — `HKWorkoutActivity` / `HKWorkoutBuilder.addWorkoutActivity(_:completion:)`는
-> iOS 16 · watchOS 9에서 도입된 것으로 알고 있으나(현재 배포 타깃은 iOS 17 / watchOS 10이라 문제없음),
-> **라이브 빌더에서 구간을 실시간으로 추가·종료하는 동작과, 저장 후 `HKWorkout.workoutActivities`로
-> 되읽을 때의 정확도는 실기기로 확인해야 한다.** 시뮬레이터에서는 신뢰할 수 없다.
-> 이 검증이 실패하면 아래 폴백으로 간다.
+**API 가용성은 SDK 헤더로 확인했다** (`WatchOS26.5.sdk/…/HealthKit.framework/Headers/`):
+
+| 심볼 | 가용성 | 용도 |
+|---|---|---|
+| `HKWorkoutSession.beginNewActivity(configuration:date:metadata:)` | watchOS 9.0+ / iOS 17.0+ | 라이브 세션의 구간 시작 — **이걸 쓴다** |
+| `HKWorkoutSession.endCurrentActivity(on:)` | watchOS 9.0+ / iOS 17.0+ | 현재 구간 종료 |
+| `HKWorkout.workoutActivities` | watchOS 9.0+ | 저장된 워크아웃에서 구간 되읽기 |
+| `HKWorkoutBuilder.addWorkoutActivity(_:completion:)` | watchOS 9.0+ | 수동 빌더용 — 라이브 세션에는 쓰지 않는다 |
+
+배포 타깃이 watchOS 10.0이라 **가용성 문제는 없다.**
+
+> ⚠️ **동작은 아직 검증되지 않았다.** API가 존재하는 것과 기대대로 동작하는 것은 다른 문제다.
+> **구간이 실제로 저장되는지, 시각이 정확한지, 짧은 구간이 버려지지 않는지는 실기기로 확인해야 한다** —
+> 시뮬레이터에서는 HealthKit 워크아웃을 신뢰할 수 없다.
+> 검증 절차는 `plans/2026-09-03-haruchi-fit-target-scaffold.md`의 Task 6이며,
+> 실패하면 아래 폴백으로 간다.
 
 **폴백** — HealthKit에 구간을 남기지 못하면, 세그먼트를 **SwiftData 전용 데이터**로 취급한다.
 HealthKit에는 단일 워크아웃만 남고 세그먼트는 앱 안에서만 보인다.
