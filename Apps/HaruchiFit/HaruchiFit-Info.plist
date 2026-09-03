@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- canOpenURL 은 iOS 9 부터 화이트리스트 방식이다. 여기 없는 스킴은
+	     해당 앱이 설치돼 있어도 항상 false 를 돌려주므로, WorkoutShareUI 의
+	     인스타그램 스토리 경로가 조용히 공유 시트로 폴백한다.
+	     배열 값이라 INFOPLIST_KEY_* 빌드 설정으로는 넣을 수 없어 이 파일이 필요하다. -->
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>instagram-stories</string>
+	</array>
+</dict>
+</plist>

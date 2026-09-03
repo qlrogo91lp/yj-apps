@@ -1,0 +1,1172 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Xcode 타깃 구성 규약</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --ground:#F2F5F7;
+  --surface:#FFFFFF;
+  --surface-2:#E7EDF1;
+  --ink:#0F151B;
+  --ink-2:#4B5A66;
+  --ink-3:#7A8894;
+  --rule:#D6DEE5;
+  --rule-strong:#B7C3CC;
+  --accent:#0C6B78;
+  --accent-soft:#DBEDEF;
+  --loud:#A81F28;
+  --loud-soft:#FAE4E5;
+  --silent:#8F5400;
+  --silent-soft:#FAEDD8;
+  --ok:#22664A;
+  --ok-soft:#DCEFE4;
+  --shadow:0 1px 2px rgba(15,21,27,.05), 0 8px 24px -18px rgba(15,21,27,.35);
+
+  --f-display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --f-body:"Newsreader","Iowan Old Style",Georgia,serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0B1015;
+    --surface:#141B21;
+    --surface-2:#1B242C;
+    --ink:#E8EFF4;
+    --ink-2:#A0B1BD;
+    --ink-3:#74848F;
+    --rule:#232F38;
+    --rule-strong:#35454F;
+    --accent:#5CC6D3;
+    --accent-soft:#113136;
+    --loud:#F0929A;
+    --loud-soft:#33191C;
+    --silent:#E3AC60;
+    --silent-soft:#2F2411;
+    --ok:#77CCA2;
+    --ok-soft:#11301F;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -18px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0B1015;
+  --surface:#141B21;
+  --surface-2:#1B242C;
+  --ink:#E8EFF4;
+  --ink-2:#A0B1BD;
+  --ink-3:#74848F;
+  --rule:#232F38;
+  --rule-strong:#35454F;
+  --accent:#5CC6D3;
+  --accent-soft:#113136;
+  --loud:#F0929A;
+  --loud-soft:#33191C;
+  --silent:#E3AC60;
+  --silent-soft:#2F2411;
+  --ok:#77CCA2;
+  --ok-soft:#11301F;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -18px rgba(0,0,0,.8);
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--ground);
+  color:var(--ink);
+  font-family:var(--f-body);
+  font-size:17px;
+  line-height:1.72;
+  overflow-x:hidden;
+}
+a{color:var(--accent);text-underline-offset:.18em;text-decoration-thickness:.06em}
+a:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+
+.wrap{max-width:1160px;margin:0 auto;padding:0 28px}
+
+/* ── header ─────────────────────────────────────────── */
+.masthead{border-bottom:1px solid var(--rule);background:var(--surface)}
+.masthead .wrap{padding-top:56px;padding-bottom:40px}
+.eyebrow{
+  font-family:var(--f-mono);font-size:12px;font-weight:500;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--accent);
+  margin:0 0 18px;
+}
+h1{
+  font-family:var(--f-display);font-weight:700;
+  font-size:clamp(34px,5.2vw,54px);line-height:1.06;letter-spacing:-.022em;
+  margin:0 0 20px;text-wrap:balance;max-width:16ch;
+}
+.standfirst{font-size:20px;line-height:1.6;color:var(--ink-2);max-width:60ch;margin:0 0 28px}
+.standfirst strong{color:var(--ink);font-weight:500}
+.meta{
+  display:flex;flex-wrap:wrap;gap:8px 28px;
+  font-family:var(--f-mono);font-size:12.5px;color:var(--ink-3);
+  border-top:1px solid var(--rule);padding-top:18px;margin:0;
+}
+.meta b{font-weight:500;color:var(--ink-2)}
+
+/* ── layout ─────────────────────────────────────────── */
+.doc{display:grid;grid-template-columns:1fr;gap:0}
+@media (min-width:1000px){
+  .doc{grid-template-columns:186px minmax(0,1fr);gap:56px;align-items:start}
+}
+.doc .wrap{padding-top:0}
+.shell{padding:52px 0 96px}
+
+nav.toc{font-family:var(--f-mono);font-size:12.5px;line-height:1.5}
+@media (min-width:1000px){nav.toc{position:sticky;top:28px}}
+nav.toc p{
+  margin:0 0 12px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-3);
+}
+nav.toc ol{list-style:none;margin:0;padding:0;display:grid;gap:9px}
+nav.toc a{
+  color:var(--ink-2);text-decoration:none;display:grid;
+  grid-template-columns:22px 1fr;gap:4px;
+}
+nav.toc a:hover{color:var(--accent)}
+nav.toc a span{color:var(--ink-3);font-variant-numeric:tabular-nums}
+nav.toc li.is-lead a span{color:var(--silent)}
+
+main{min-width:0}
+section{margin:0 0 66px;scroll-margin-top:24px}
+main > section:last-child{margin-bottom:0}
+
+h2{
+  font-family:var(--f-display);font-weight:600;
+  font-size:clamp(23px,2.6vw,30px);line-height:1.2;letter-spacing:-.016em;
+  margin:0 0 6px;text-wrap:balance;
+}
+h2 .num{
+  font-family:var(--f-mono);font-size:.52em;font-weight:500;color:var(--accent);
+  letter-spacing:.06em;vertical-align:.42em;margin-right:.7em;
+}
+h3{
+  font-family:var(--f-display);font-weight:600;font-size:17.5px;letter-spacing:-.008em;
+  margin:38px 0 10px;text-wrap:balance;
+}
+.deck{color:var(--ink-2);font-size:16.5px;margin:0 0 26px;max-width:64ch;border-bottom:1px solid var(--rule);padding-bottom:20px}
+p{margin:0 0 16px;max-width:66ch}
+ul{margin:0 0 16px;padding-left:1.15em;max-width:66ch}
+li{margin:0 0 7px}
+strong{font-weight:500;color:var(--ink)}
+code{
+  font-family:var(--f-mono);font-size:.855em;
+  background:var(--surface-2);padding:.12em .38em;border-radius:3px;
+  word-break:break-word;
+}
+
+/* ── code blocks ───────────────────────────────────── */
+pre{
+  font-family:var(--f-mono);font-size:13px;line-height:1.62;
+  background:var(--surface);color:var(--ink-2);
+  border:1px solid var(--rule);border-left:2px solid var(--rule-strong);
+  border-radius:0 4px 4px 0;
+  margin:0 0 20px;padding:16px 18px;overflow-x:auto;
+}
+pre code{background:none;padding:0;font-size:inherit}
+pre .c{color:var(--ink-3)}
+pre .k{color:var(--accent)}
+
+/* ── tables ────────────────────────────────────────── */
+.tablewrap{overflow-x:auto;margin:0 0 22px;border:1px solid var(--rule);border-radius:5px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-family:var(--f-mono);font-size:12.8px;line-height:1.5}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--rule);vertical-align:top}
+thead th{
+  font-weight:600;color:var(--ink-3);background:var(--surface-2);
+  font-size:11px;letter-spacing:.09em;text-transform:uppercase;white-space:nowrap;
+}
+tbody tr:last-child td{border-bottom:0}
+td b{font-weight:600;color:var(--ink)}
+td.ko{font-family:var(--f-body);font-size:14.5px;line-height:1.55}
+.mono-cell{white-space:nowrap}
+
+/* ── severity chips ────────────────────────────────── */
+.chip{
+  display:inline-block;font-family:var(--f-mono);font-size:10.5px;font-weight:600;
+  letter-spacing:.07em;text-transform:uppercase;
+  padding:2.5px 7px;border-radius:3px;white-space:nowrap;
+}
+.chip.loud{background:var(--loud-soft);color:var(--loud)}
+.chip.silent{background:var(--silent-soft);color:var(--silent)}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}
+
+/* ── callouts ──────────────────────────────────────── */
+.note{
+  border:1px solid var(--rule);border-left:3px solid var(--rule-strong);
+  background:var(--surface);border-radius:0 5px 5px 0;
+  padding:18px 20px 4px;margin:0 0 22px;box-shadow:var(--shadow);
+}
+.note > .label{
+  display:flex;align-items:center;gap:10px;margin:0 0 10px;
+  font-family:var(--f-display);font-weight:600;font-size:15px;color:var(--ink);
+}
+.note p:last-child{margin-bottom:16px}
+.note.trap{border-left-color:var(--silent);background:var(--surface)}
+.note.fail{border-left-color:var(--loud)}
+
+/* ── lead summary ──────────────────────────────────── */
+.lead{
+  background:var(--surface);border:1px solid var(--rule);border-radius:6px;
+  padding:26px 26px 8px;margin:0 0 60px;box-shadow:var(--shadow);
+}
+.lead h2{font-size:21px;margin-bottom:4px}
+.lead h2 .num{display:none}
+.lead .deck{border-bottom:0;padding-bottom:0;margin-bottom:20px;font-size:15.5px}
+.lead .tablewrap{border-radius:4px}
+
+/* ── figures ───────────────────────────────────────── */
+figure{margin:26px 0 24px}
+.diagram{
+  background:var(--surface);border:1px solid var(--rule);border-radius:6px;
+  padding:22px 20px 14px;overflow-x:auto;
+}
+.diagram svg{display:block;width:100%;min-width:520px;max-width:100%;height:auto;color:var(--ink-2)}
+figcaption{
+  font-family:var(--f-mono);font-size:11.5px;line-height:1.55;color:var(--ink-3);
+  margin-top:11px;max-width:70ch;
+}
+.d-box{fill:var(--surface-2);stroke:var(--rule-strong);stroke-width:1}
+.d-box-ok{fill:var(--ok-soft);stroke:var(--ok);stroke-width:1}
+.d-box-silent{fill:var(--silent-soft);stroke:var(--silent);stroke-width:1;stroke-dasharray:4 3}
+.d-box-loud{fill:var(--loud-soft);stroke:var(--loud);stroke-width:1}
+.d-line{stroke:currentColor;stroke-width:1.4;fill:none}
+.d-line-silent{stroke:var(--silent);stroke-width:1.4;fill:none;stroke-dasharray:5 4}
+.d-line-loud{stroke:var(--loud);stroke-width:1.4;fill:none}
+.d-t{font-family:var(--f-mono);font-size:12px;fill:var(--ink)}
+.d-t-s{font-family:var(--f-mono);font-size:10.5px;fill:var(--ink-3)}
+.d-t-hd{font-family:var(--f-display);font-size:12.5px;font-weight:600;fill:var(--ink)}
+.d-t-ok{fill:var(--ok)}
+.d-t-silent{fill:var(--silent)}
+.d-t-loud{fill:var(--loud)}
+
+/* ── checklist ─────────────────────────────────────── */
+.steps{list-style:none;margin:0 0 24px;padding:0;counter-reset:s}
+.steps li{
+  counter-increment:s;position:relative;padding-left:36px;margin:0 0 14px;
+  max-width:64ch;
+}
+.steps li::before{
+  content:counter(s);position:absolute;left:0;top:2px;
+  font-family:var(--f-mono);font-size:11px;font-weight:600;color:var(--accent);
+  background:var(--accent-soft);width:23px;height:23px;border-radius:50%;
+  display:grid;place-items:center;
+}
+
+/* ── footer ────────────────────────────────────────── */
+footer{border-top:1px solid var(--rule);background:var(--surface);margin-top:20px}
+footer .wrap{padding-top:32px;padding-bottom:48px}
+footer p{font-family:var(--f-mono);font-size:12.5px;color:var(--ink-3);margin:0 0 7px;max-width:none}
+footer b{color:var(--ink-2);font-weight:500}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap">
+    <p class="eyebrow">yj-apps 모노레포 · 인프라 규약</p>
+    <h1>Xcode 타깃 구성 규약</h1>
+    <p class="standfirst">
+      세 앱이 같은 골격을 쓴다. 새 앱이나 타깃을 추가할 때 <strong>Xcode GUI의 기본값이 규약과
+      어긋나는 지점은 정해져 있고, 그중 몇 개는 빌드가 통과하므로 조용히 넘어간다.</strong>
+      이 문서는 그 지점들과 검증 방법을 모은다.
+    </p>
+    <p class="meta">
+      <span><b>근거</b> 2026-09-03 하루치 핏 타깃 생성</span>
+      <span><b>대상</b> GolfCounter · TennisCounter · HaruchiFit</span>
+      <span><b>원본</b> 2026-09-03-xcode-target-conventions.md</span>
+    </p>
+  </div>
+</header>
+
+<div class="wrap shell">
+<div class="doc">
+
+  <nav class="toc" aria-label="목차">
+    <p>목차</p>
+    <ol>
+      <li><a href="#s1"><span>01</span> 이름 규약</a></li>
+      <li><a href="#s2"><span>02</span> 폴더 규약</a></li>
+      <li class="is-lead"><a href="#s3"><span>03</span> rename의 사각지대</a></li>
+      <li class="is-lead"><a href="#s4"><span>04</span> 스킴 공유</a></li>
+      <li class="is-lead"><a href="#s5"><span>05</span> Info.plist 두 갈래</a></li>
+      <li class="is-lead"><a href="#s6"><span>06</span> 로컬라이제이션</a></li>
+      <li><a href="#s7"><span>07</span> Capability</a></li>
+      <li class="is-lead"><a href="#s8"><span>08</span> 스킴 화이트리스트</a></li>
+      <li><a href="#s9"><span>09</span> 프로덕트 링크</a></li>
+      <li><a href="#s10"><span>10</span> 새 앱 체크리스트</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+    <!-- ══ 요약 ══════════════════════════════════════ -->
+    <section class="lead" id="top">
+      <h2>빌드가 통과해도 틀린 것들</h2>
+      <p class="deck">
+        이 문서가 다루는 문제 중 <strong>빌드로는 안 잡히는 것</strong>만 먼저 모은다.
+        새 타깃을 만든 뒤 이것만은 눈으로 확인한다.
+      </p>
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr><th>항목</th><th>드러나는 시점</th><th>확인 방법</th><th>절</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="ko">스킴 공유</td>
+              <td><span class="chip silent">CI에서만 실패</span></td>
+              <td>ls …/xcshareddata/xcschemes/</td>
+              <td><a href="#s4">§4</a></td>
+            </tr>
+            <tr>
+              <td class="ko">배포 타깃</td>
+              <td><span class="chip silent">구형 기기에서만</span></td>
+              <td>grep DEPLOYMENT_TARGET</td>
+              <td><a href="#s10">§10</a></td>
+            </tr>
+            <tr>
+              <td class="ko">PROJECT 레벨 배포 타깃</td>
+              <td><span class="chip silent">다음 타깃이 물려받음</span></td>
+              <td>grep 결과가 두 값이면 의심</td>
+              <td><a href="#s10">§10</a></td>
+            </tr>
+            <tr>
+              <td class="ko">HealthKit 권한 문구 누락</td>
+              <td><span class="chip loud">실행 시 크래시</span></td>
+              <td>실기기에서 권한 요청</td>
+              <td><a href="#s7">§7</a></td>
+            </tr>
+            <tr>
+              <td class="ko">권한 문구가 한 타깃에만</td>
+              <td><span class="chip loud">그 타깃에서만 크래시</span></td>
+              <td>grep -c 가 <b>타깃 수 × 2</b></td>
+              <td><a href="#s7">§7</a></td>
+            </tr>
+            <tr>
+              <td class="ko">권한 문구에 후행 개행</td>
+              <td><span class="chip silent">다이얼로그에 빈 줄</span></td>
+              <td>값 길이 비교</td>
+              <td><a href="#s6">§6</a></td>
+            </tr>
+            <tr>
+              <td class="ko">권한 문구가 한글만</td>
+              <td><span class="chip silent">영어권에만 한글이 뜬다</span></td>
+              <td>산출물 Info.plist + lproj</td>
+              <td><a href="#s6">§6</a></td>
+            </tr>
+            <tr>
+              <td class="ko">LSApplicationQueriesSchemes</td>
+              <td><span class="chip silent">조용히 공유 시트로 폴백</span></td>
+              <td>산출물 plutil -p</td>
+              <td><a href="#s8">§8</a></td>
+            </tr>
+            <tr>
+              <td class="ko">INFOPLIST_KEY_ 로 넣은 배열 키</td>
+              <td><span class="chip silent">키가 통째로 사라짐</span></td>
+              <td>산출물 plutil -p</td>
+              <td><a href="#s5">§5</a></td>
+            </tr>
+            <tr>
+              <td class="ko">TEST_HOST</td>
+              <td><span class="chip loud">테스트 실행 실패</span></td>
+              <td>Host Application이 <b>Custom</b>인지</td>
+              <td><a href="#s3">§3</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="max-width:66ch;margin-bottom:20px">
+        <strong>확인의 절반이 "산출물 <code>Info.plist</code> 를 직접 열어보기"다.</strong>
+        빌드 로그는 이 부류를 알려주지 않는다.
+      </p>
+    </section>
+
+    <!-- ══ 1 ═════════════════════════════════════════ -->
+    <section id="s1">
+      <h2><span class="num">01</span>이름 규약</h2>
+      <p class="deck">
+        스킴 이름은 <strong>워크스페이스 전체에서 유일</strong>해야 한다 — CI가 이름 하나로 찾기 때문이다.
+        그래서 타깃 이름과 스킴 이름이 갈라지는 경우가 생긴다.
+      </p>
+
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr><th></th><th>GolfCounter</th><th>TennisCounter</th><th>HaruchiFit</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="ko">iOS 타깃</td><td>GolfCounter</td><td>TennisCounter</td><td>HaruchiFit</td></tr>
+            <tr><td class="ko">워치 타깃</td><td>GolfCounter Watch App</td><td>TennisCounter Watch App</td><td>HaruchiFit Watch App</td></tr>
+            <tr><td class="ko">컴플리케이션 <b>타깃</b></td><td>ComplicationAppExtension</td><td>ComplicationAppExtension</td><td><b>HaruchiComplicationExtension</b></td></tr>
+            <tr><td class="ko">컴플리케이션 <b>스킴</b></td><td>GolfComplicationExtension</td><td>RalliComplicationExtension</td><td><b>HaruchiComplicationExtension</b></td></tr>
+            <tr><td class="ko">워치 테스트</td><td>GolfCounterWatchTests</td><td>RalliWatchTests</td><td>HaruchiFitWatchTests</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>
+        Golf·Tennis는 타깃 이름(<code>ComplicationAppExtension</code>)과 스킴 이름이 갈라져 있다 —
+        출시 산출물명을 유지하려고 그렇게 뒀고, 타깃 이름이 두 앱에서 겹치므로 스킴은 달라야 했다.
+        하루치 핏은 신규라 그럴 이유가 없어 <strong>타깃과 스킴 이름을 일치</strong>시켰다.
+      </p>
+
+      <h3>번들 ID</h3>
+<pre><code>com.yj.&lt;앱&gt;
+com.yj.&lt;앱&gt;.watchkitapp
+com.yj.&lt;앱&gt;.watchkitapp.&lt;컴플리케이션&gt;
+com.yj.&lt;테스트 타깃 이름&gt;</code></pre>
+      <p>
+        마지막 조각은 Golf·Haruchi가 <code>ComplicationApp</code>, Tennis만 <code>widget</code> 이다.
+        통일되어 있지 않다.
+      </p>
+
+      <div class="note trap">
+        <p class="label"><span class="chip silent">함정</span> 이름이 두 번 붙는다</p>
+        <p>
+          watchOS App 타깃은 Product Name에 <code>" Watch App"</code> 을 <strong>자동으로 덧붙인다.</strong>
+          생성 시트에 <code>HaruchiFit Watch App</code> 을 입력하면 타깃 이름이
+          <code>HaruchiFit Watch App Watch App</code> 이 된다. <code>HaruchiFit</code> 만 입력해야 한다.
+        </p>
+        <p>
+          Widget Extension도 마찬가지로 <code>"Extension"</code> 을 덧붙여
+          <code>…ExtensionExtension</code> 이 된다.
+        </p>
+        <p>
+          이걸 놓치면 rename을 해야 하고, rename은 <a href="#s3">§3</a>의 문제를 부른다.
+          <strong>생성 시점에 이름을 맞추는 것이 가장 싸다.</strong>
+        </p>
+      </div>
+    </section>
+
+    <!-- ══ 2 ═════════════════════════════════════════ -->
+    <section id="s2">
+      <h2><span class="num">02</span>폴더 규약</h2>
+      <p class="deck">
+        Xcode 16의 <code>PBXFileSystemSynchronizedRootGroup</code> 을 쓴다.
+        폴더가 곧 빌드 대상이라 <strong>Swift 파일을 만들거나 지울 때 pbxproj를 건드릴 필요가 없다.</strong>
+      </p>
+
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>폴더</th><th>소속 타깃</th></tr></thead>
+          <tbody>
+            <tr><td class="mono-cell">iOSApp/</td><td class="ko">iOS 앱</td></tr>
+            <tr><td class="mono-cell">WatchApp/</td><td class="ko">워치 앱</td></tr>
+            <tr><td class="mono-cell">ComplicationApp/</td><td class="ko">컴플리케이션</td></tr>
+            <tr><td class="mono-cell">Shared/</td><td class="ko">iOS 앱 + 워치 앱 + 컴플리케이션 (<a href="#s9">§9</a>)</td></tr>
+            <tr><td class="mono-cell">iosTests/ · watchosTests/</td><td class="ko">각 테스트 타깃</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>
+        <strong>폴더 rename은 반드시 Xcode 네비게이터에서 한다.</strong>
+        Finder에서 바꾸면 pbxproj의 <code>path</code> 가 옛 이름으로 남아 빌드 입력을 못 찾는다.
+        파일 추가·삭제는 파일시스템만 건드려도 된다.
+      </p>
+
+      <h3>파일 단위로 소속을 빼려면</h3>
+      <p>
+        폴더는 타깃에 통째로 붙지만, 특정 파일만 특정 타깃에서 뺄 수 있다.
+        GolfCounter가 그렇게 쓴다:
+      </p>
+<pre><code>membershipExceptions = ( Services/ConnectivityMessages.swift );
+target = ComplicationAppExtension</code></pre>
+      <p>
+        컴플리케이션은 WatchConnectivity를 쓰지 않으므로 그 파일만 빠진다.
+        Xcode에서는 파일을 고르고 우측 File Inspector의 <strong>Target Membership</strong> 체크를 끄면 된다.
+      </p>
+    </section>
+
+    <!-- ══ 3 ═════════════════════════════════════════ -->
+    <section id="s3">
+      <h2><span class="num">03</span>rename의 사각지대</h2>
+      <p class="deck">
+        <strong>이 절이 이 문서의 핵심이다.</strong> Xcode의 rename은 이름과 참조까지는 따라오지만,
+        <strong>경로가 문자열로 박힌 빌드 설정은 그대로 둔다.</strong>
+      </p>
+
+      <figure>
+        <div class="diagram">
+          <svg viewBox="0 0 700 320" role="img" aria-label="Xcode의 타깃·폴더 rename은 타깃 이름·productName·product reference·스킴 이름은 갱신하지만, TEST_HOST와 INFOPLIST_FILE은 옛 경로 문자열 그대로 남긴다">
+            <defs>
+              <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+              </marker>
+              <marker id="ar-s" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0,0 L10,5 L0,10 z" fill="var(--silent)"/>
+              </marker>
+            </defs>
+
+            <rect class="d-box" x="14" y="128" width="152" height="64" rx="5"/>
+            <text class="d-t-hd" x="90" y="153" text-anchor="middle">타깃·폴더</text>
+            <text class="d-t-hd" x="90" y="172" text-anchor="middle">rename</text>
+
+            <path class="d-line" d="M166,150 L286,86" marker-end="url(#ar)"/>
+            <text class="d-t-s" x="212" y="106">자동 반영</text>
+
+            <path class="d-line-silent" d="M166,172 L286,236" marker-end="url(#ar-s)"/>
+            <text class="d-t-s d-t-silent" x="200" y="222">손대지 않음</text>
+
+            <rect class="d-box-ok" x="290" y="18" width="396" height="122" rx="5"/>
+            <text class="d-t-hd d-t-ok" x="308" y="42">갱신된다</text>
+            <text class="d-t" x="308" y="70">name · productName</text>
+            <text class="d-t" x="308" y="94">product reference (.app / .xctest)</text>
+            <text class="d-t" x="308" y="118">스킴 이름 · 동기화 그룹 path</text>
+
+            <rect class="d-box-silent" x="290" y="176" width="396" height="126" rx="5"/>
+            <text class="d-t-hd d-t-silent" x="308" y="200">그대로 남는다</text>
+            <text class="d-t" x="308" y="228">TEST_HOST</text>
+            <text class="d-t-s" x="308" y="246">→ 호스트 앱을 못 찾는다. 드롭다운이 Custom으로 잠긴다</text>
+            <text class="d-t" x="308" y="272">INFOPLIST_FILE</text>
+            <text class="d-t-s" x="308" y="290">→ Build input file cannot be found + Ld failed</text>
+          </svg>
+        </div>
+        <figcaption>
+          Xcode rename이 갱신하는 것과 남기는 것. 오른쪽 아래 두 설정은 경로를 문자열로 들고 있어
+          이름 변경을 따라오지 않는다.
+        </figcaption>
+      </figure>
+
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>설정</th><th>가리키는 것</th><th>어긋났을 때</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="mono-cell">TEST_HOST</td>
+              <td class="ko">호스트 앱 실행파일 경로</td>
+              <td class="ko">General &gt; Host Application이 <b>Custom</b>으로 회색 처리되어 드롭다운이 잠긴다. 테스트 실행 실패</td>
+            </tr>
+            <tr>
+              <td class="mono-cell">INFOPLIST_FILE</td>
+              <td class="ko">Info.plist 경로</td>
+              <td class="ko"><code>Build input file cannot be found</code>. 타깃 태스크가 취소되며 <b>Command Ld failed가 딸려 나온다</b> — Ld 쪽을 파면 헛수고다</td>
+            </tr>
+            <tr>
+              <td class="mono-cell">productName · remoteInfo</td>
+              <td class="ko">표시용</td>
+              <td class="ko"><span class="chip ok">무해</span> 빌드에 영향 없음</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note fail">
+        <p class="label"><span class="chip loud">막힘</span> Host Application 드롭다운이 잠겼을 때</p>
+        <p>
+          General 탭에서는 못 고친다. <strong>Build Settings &gt; <code>Test Host</code></strong> 에서
+          값을 지워 초기화하거나 직접 교체한다.
+        </p>
+<pre><code>$(BUILT_PRODUCTS_DIR)/&lt;앱&gt; Watch App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/&lt;앱&gt; Watch App</code></pre>
+      </div>
+
+      <h3>rename 뒤에 돌리는 검증</h3>
+<pre><code><span class="c"># 출력된 경로가 실제 폴더 이름과 맞는지 눈으로 확인한다</span>
+APP=HaruchiFit
+P=Apps/$APP/$APP.xcodeproj/project.pbxproj
+
+grep -oE '(TEST_HOST|INFOPLIST_FILE) = [^;]+;' $P | sort -u
+sed -n '/Begin PBXFileSystemSynchronizedRootGroup/,/End PBXFileSystemSynchronizedRootGroup/p' $P \
+  | grep -oE 'path = [^;]+;'</code></pre>
+    </section>
+
+    <!-- ══ 4 ═════════════════════════════════════════ -->
+    <section id="s4">
+      <h2><span class="num">04</span>스킴은 공유해야 커밋된다</h2>
+      <p class="deck">
+        <code>.gitignore</code> 에 <code>xcuserdata/</code> 가 있다. 스킴의 기본 저장 위치가 거기라
+        <strong>공유하지 않은 스킴은 저장소에 들어가지 않고, CI 러너에는 존재하지 않는다.</strong>
+      </p>
+
+      <figure>
+        <div class="diagram">
+          <svg viewBox="0 0 700 250" role="img" aria-label="공유하지 않은 스킴은 xcuserdata에 저장되어 gitignore에 걸려 CI 러너에 존재하지 않는다. Shared를 켜면 xcshareddata로 옮겨져 커밋되고 CI가 이름으로 찾을 수 있다">
+            <defs>
+              <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+              </marker>
+              <marker id="ar2s" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0,0 L10,5 L0,10 z" fill="var(--silent)"/>
+              </marker>
+            </defs>
+
+            <rect class="d-box" x="14" y="94" width="126" height="60" rx="5"/>
+            <text class="d-t-hd" x="77" y="120" text-anchor="middle">스킴</text>
+            <text class="d-t-s" x="77" y="139" text-anchor="middle">HaruchiFit.xcscheme</text>
+
+            <path class="d-line-silent" d="M140,112 L232,54" marker-end="url(#ar2s)"/>
+            <text class="d-t-s d-t-silent" x="150" y="72">기본값</text>
+
+            <path class="d-line" d="M140,138 L232,192" marker-end="url(#ar2)"/>
+            <text class="d-t-s" x="146" y="186">Shared 체크</text>
+
+            <rect class="d-box-silent" x="236" y="24" width="164" height="58" rx="5"/>
+            <text class="d-t" x="252" y="48">xcuserdata/</text>
+            <text class="d-t-s" x="252" y="68">.gitignore 대상</text>
+
+            <path class="d-line-silent" d="M400,53 L470,53"/>
+            <line class="d-line-silent" x1="474" y1="41" x2="496" y2="65"/>
+            <line class="d-line-silent" x1="496" y1="41" x2="474" y2="65"/>
+            <text class="d-t d-t-silent" x="512" y="49">커밋되지 않는다</text>
+            <text class="d-t-s" x="512" y="68">CI: scheme not found</text>
+
+            <rect class="d-box-ok" x="236" y="164" width="164" height="58" rx="5"/>
+            <text class="d-t" x="252" y="188">xcshareddata/</text>
+            <text class="d-t-s" x="252" y="208">xcschemes/*.xcscheme</text>
+
+            <path class="d-line" d="M400,193 L494,193" marker-end="url(#ar2)"/>
+            <text class="d-t-s" x="414" y="184">git</text>
+            <text class="d-t d-t-ok" x="502" y="189">CI 러너가 찾는다</text>
+            <text class="d-t-s" x="502" y="208">xcodebuild -scheme "…"</text>
+          </svg>
+        </div>
+        <figcaption>
+          스킴이 어디에 저장되느냐가 CI 성패를 가른다. 왼쪽 경로는 로컬에서만 동작한다.
+        </figcaption>
+      </figure>
+
+      <p>
+        <code>Product &gt; Scheme &gt; Manage Schemes…</code> 에서 <strong>Shared</strong> 를 체크하면
+        파일이 <code>&lt;앱&gt;.xcodeproj/xcshareddata/xcschemes/</code> 로 옮겨진다.
+      </p>
+
+      <div class="note trap">
+        <p class="label"><span class="chip silent">함정</span> 체크만으로는 파일이 안 생긴다</p>
+        <p>
+          "Autocreate schemes" 로 자동 생성된 스킴은 <strong>실체 파일 없이 메모리상으로만</strong> 존재한다.
+          Shared를 켜도 <code>xcshareddata/xcschemes/</code> 디렉터리가 아예 안 생길 수 있다.
+        </p>
+        <p>
+          이때는 Manage Schemes에서 해당 행을 <code>−</code> 로 지우고
+          <strong>Autocreate Schemes Now</strong> 를 눌러 실체화한 뒤 Shared를 켠다.
+          rename 전 이름이 스킴 목록에 남아 있을 때도 같은 방법으로 정리한다.
+        </p>
+      </div>
+
+<pre><code><span class="c"># .xcscheme 파일이 실제로 있어야 한다</span>
+ls Apps/&lt;앱&gt;/&lt;앱&gt;.xcodeproj/xcshareddata/xcschemes/
+
+<span class="c"># 앱 스킴 10개 (+ YJKit 프로덕트 스킴 5개)</span>
+xcodebuild -workspace YJApps.xcworkspace -list</code></pre>
+    </section>
+
+    <!-- ══ 5 ═════════════════════════════════════════ -->
+    <section id="s5">
+      <h2><span class="num">05</span>Info.plist는 두 갈래를 병용한다</h2>
+      <p class="deck">
+        Xcode 13부터 Info.plist 파일 없이 빌드 설정만으로 plist를 만들 수 있다. 그런데 이 방식만으로는
+        표현 못 하는 값이 있어서, <strong>세 앱 모두 두 방식을 같이 쓴다.</strong>
+      </p>
+
+<pre><code>GENERATE_INFOPLIST_FILE = YES              <span class="c"># INFOPLIST_KEY_* 를 생성 plist 에 주입</span>
+INFOPLIST_FILE = "&lt;앱&gt;-Info.plist"          <span class="c"># 이 파일을 base 로 두고 병합</span></code></pre>
+
+      <p><strong>두 설정은 배타적이지 않다.</strong> 파일이 base가 되고 <code>INFOPLIST_KEY_*</code> 가 그 위에 얹힌다.</p>
+
+      <figure>
+        <div class="diagram">
+          <svg viewBox="0 0 700 268" role="img" aria-label="INFOPLIST_KEY 빌드 설정과 앱-Info.plist 파일이 병합되어 산출물 Info.plist가 된다. Xcode가 모르는 키는 병합 전에 버려진다">
+            <defs>
+              <marker id="ar3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+              </marker>
+              <marker id="ar3s" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0,0 L10,5 L0,10 z" fill="var(--silent)"/>
+              </marker>
+            </defs>
+
+            <rect class="d-box" x="14" y="20" width="196" height="66" rx="5"/>
+            <text class="d-t" x="30" y="44">INFOPLIST_KEY_*</text>
+            <text class="d-t-s" x="30" y="63">빌드 설정</text>
+            <text class="d-t-s" x="30" y="78">아는 키만 · 배열은 공백 구분</text>
+
+            <rect class="d-box" x="14" y="164" width="196" height="62" rx="5"/>
+            <text class="d-t" x="30" y="188">&lt;앱&gt;-Info.plist</text>
+            <text class="d-t-s" x="30" y="207">파일 · 배열/딕셔너리 가능</text>
+
+            <path class="d-line" d="M210,53 L318,110" marker-end="url(#ar3)"/>
+            <path class="d-line" d="M210,195 L318,142" marker-end="url(#ar3)"/>
+
+            <path class="d-line-silent" d="M120,86 L120,142" marker-end="url(#ar3s)"/>
+            <line class="d-line-silent" x1="108" y1="150" x2="132" y2="174"/>
+            <line class="d-line-silent" x1="132" y1="150" x2="108" y2="174"/>
+            <text class="d-t-s d-t-silent" x="140" y="152">모르는 키는</text>
+            <text class="d-t-s d-t-silent" x="140" y="168">버려진다 · 경고 없음</text>
+
+            <rect class="d-box" x="322" y="96" width="112" height="60" rx="5"/>
+            <text class="d-t-hd" x="378" y="131" text-anchor="middle">병합</text>
+
+            <path class="d-line" d="M434,126 L500,126" marker-end="url(#ar3)"/>
+
+            <rect class="d-box-ok" x="504" y="88" width="182" height="76" rx="5"/>
+            <text class="d-t d-t-ok" x="520" y="114">&lt;앱&gt;.app/Info.plist</text>
+            <text class="d-t-s" x="520" y="134">산출물 · 최종 결과</text>
+            <text class="d-t-s" x="520" y="152">plutil -p 로 확인한다</text>
+          </svg>
+        </div>
+        <figcaption>
+          두 소스가 병합된다. 왼쪽 위 경로에서 Xcode가 모르는 키는 조용히 사라지므로,
+          확인은 반드시 오른쪽 산출물에서 한다.
+        </figcaption>
+      </figure>
+
+      <h3><code>INFOPLIST_KEY_*</code> 는 Xcode가 아는 키에만 동작한다</h3>
+      <p>
+        빌드 설정 값은 문자열이지만, Xcode는 아는 키에 한해 타입을 알고 변환한다.
+        <strong>모르는 키는 문자열로도 안 들어가고 통째로 버려진다 — 경고도 없다.</strong>
+      </p>
+
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>오버라이드</th><th>생성된 plist</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>INFOPLIST_KEY_NSHealthShareUsageDescription="대조군"</td>
+              <td><span class="chip ok">들어감</span> "NSHealthShareUsageDescription" =&gt; "대조군"</td>
+            </tr>
+            <tr>
+              <td>INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad="A B C"</td>
+              <td><span class="chip ok">들어감</span> 공백으로 쪼개져 <b>배열</b>로</td>
+            </tr>
+            <tr>
+              <td>INFOPLIST_KEY_LSApplicationQueriesSchemes="instagram-stories"</td>
+              <td><span class="chip silent">사라짐</span> <b>키 자체가 없음</b></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-family:var(--f-mono);font-size:12px;color:var(--ink-3);max-width:70ch">
+        2026-09-03 실측 — <code>xcodebuild … INFOPLIST_KEY_X=Y</code> 로 오버라이드한 뒤 산출물 Info.plist 확인.
+      </p>
+
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>넣을 값</th><th>어디에</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="ko">Xcode가 <b>아는</b> 키<br><code>NSHealthShareUsageDescription</code>, <code>WKCompanionAppBundleIdentifier</code>, <code>UISupportedInterfaceOrientations</code> …</td>
+              <td>INFOPLIST_KEY_&lt;키&gt; 빌드 설정</td>
+            </tr>
+            <tr>
+              <td class="ko">Xcode가 <b>모르는</b> 키<br><code>LSApplicationQueriesSchemes</code>, <code>NSAppTransportSecurity</code> …</td>
+              <td>&lt;앱&gt;-Info.plist 파일</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>
+        <code>GolfCounter-Info.plist</code> 와 <code>TennisCounter-Info.plist</code> 는 현재 내용이 비어 있다
+        (<code>{}</code>). 아직 배열 키가 필요 없었을 뿐, 자리는 잡혀 있다.
+      </p>
+
+      <h3>같은 자리에 있는 Packaging 설정들</h3>
+      <p>
+        <code>Build Settings &gt; Packaging</code> 에서 함께 보이는 항목들이다.
+        <strong><code>INFOPLIST_FILE</code> 말고는 전부 기본값을 둔다.</strong>
+      </p>
+
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>표시 이름</th><th>빌드 설정</th><th>기본</th><th>하는 일</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="ko"><b>Generate Info.plist File</b></td>
+              <td>GENERATE_INFOPLIST_FILE</td><td>YES</td>
+              <td class="ko"><code>INFOPLIST_KEY_*</code> 를 Info.plist로 생성·주입</td>
+            </tr>
+            <tr>
+              <td class="ko"><b>Info.plist File</b></td>
+              <td>INFOPLIST_FILE</td><td>없음</td>
+              <td class="ko">병합의 <b>base</b> 파일. 경로는 <b>프로젝트 폴더 기준 상대경로</b></td>
+            </tr>
+            <tr>
+              <td class="ko">Expand Build Settings in Info.plist File</td>
+              <td>INFOPLIST_EXPAND_BUILD_SETTINGS</td><td>YES</td>
+              <td class="ko">plist 안의 <code>$(PRODUCT_NAME)</code> 같은 변수를 실제 값으로 치환</td>
+            </tr>
+            <tr>
+              <td class="ko">Preprocess Info.plist File</td>
+              <td>INFOPLIST_PREPROCESS</td><td>NO</td>
+              <td class="ko">plist를 C 전처리기(<code>#if</code>)에 통과시킬지. 구식 기능</td>
+            </tr>
+            <tr>
+              <td class="ko">Don't Force Info.plist Generation</td>
+              <td>DONT_GENERATE_INFOPLIST_FILE</td><td>NO</td>
+              <td class="ko">이중 부정이다. <code>YES</code> 면 위의 Generate를 무시한다</td>
+            </tr>
+            <tr>
+              <td class="ko">Adjust Strings File Names for Info.plist</td>
+              <td>STRINGS_FILE_INFOPLIST_RENAME</td><td>YES</td>
+              <td class="ko">로컬라이즈 strings 파일 이름을 산출물에서 <code>InfoPlist.strings</code> 로 맞춘다</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>
+        마지막 항목은 <code>INFOPLIST_FILE</code> 을 <code>HaruchiFit-Info.plist</code> 같은 비표준 이름으로
+        뒀을 때 "그럼 strings 파일 이름도 맞춰야 하나" 하고 헷갈리기 쉽다.
+        <strong>둘은 무관하다</strong> — 소스가 이미 <code>InfoPlist.xcstrings</code>
+        (→ <code>InfoPlist.strings</code>)면 바꿀 이름이 없다.
+        2026-09-03 실측으로 <code>NO</code> 로 두고 빌드해도 산출물이 같음을 확인했다.
+      </p>
+    </section>
+
+    <!-- ══ 6 ═════════════════════════════════════════ -->
+    <section id="s6">
+      <h2><span class="num">06</span>로컬라이제이션 — String Catalog</h2>
+      <p class="deck">
+        권한 문구는 <strong>언어별로 달라야 한다.</strong> <code>INFOPLIST_KEY_*</code> 에 넣은 값은
+        개발 언어(<code>developmentRegion = en</code>, 세 앱 공통)의 기본값일 뿐이고,
+        실제 표시 문구는 로컬라이제이션이 결정한다.
+      </p>
+
+      <figure>
+        <div class="diagram">
+          <svg viewBox="0 0 700 232" role="img" aria-label="빌드 설정의 영문 기본값이 Info.plist에 박히고, InfoPlist.xcstrings가 컴파일된 언어별 lproj 파일이 그 위를 덮어써서 기기 언어에 맞는 문구가 표시된다">
+            <defs>
+              <marker id="ar4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+              </marker>
+              <marker id="ar4s" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0,0 L10,5 L0,10 z" fill="var(--silent)"/>
+              </marker>
+            </defs>
+
+            <rect class="d-box" x="14" y="18" width="188" height="60" rx="5"/>
+            <text class="d-t" x="30" y="42">INFOPLIST_KEY_NSHealth*</text>
+            <text class="d-t-s" x="30" y="62">영문 기본값 · 폴백</text>
+
+            <rect class="d-box-ok" x="14" y="140" width="188" height="60" rx="5"/>
+            <text class="d-t d-t-ok" x="30" y="164">InfoPlist.xcstrings</text>
+            <text class="d-t-s" x="30" y="184">en · ko 한 파일에</text>
+
+            <path class="d-line" d="M202,48 L302,48" marker-end="url(#ar4)"/>
+            <path class="d-line" d="M202,170 L302,170" marker-end="url(#ar4)"/>
+            <text class="d-t-s" x="216" y="40">주입</text>
+            <text class="d-t-s" x="216" y="162">xcstringstool</text>
+
+            <rect class="d-box" x="306" y="18" width="170" height="60" rx="5"/>
+            <text class="d-t" x="322" y="42">App/Info.plist</text>
+            <text class="d-t-s" x="322" y="62">키가 여기 없으면 크래시</text>
+
+            <rect class="d-box" x="306" y="140" width="170" height="60" rx="5"/>
+            <text class="d-t" x="322" y="164">en.lproj · ko.lproj</text>
+            <text class="d-t-s" x="322" y="184">InfoPlist.strings</text>
+
+            <path class="d-line" d="M476,48 L556,88" marker-end="url(#ar4)"/>
+            <path class="d-line" d="M476,170 L556,130" marker-end="url(#ar4)"/>
+            <text class="d-t-s" x="486" y="112">덮어쓰기</text>
+
+            <rect class="d-box-ok" x="560" y="80" width="126" height="58" rx="5"/>
+            <text class="d-t d-t-ok" x="623" y="105" text-anchor="middle">표시되는 문구</text>
+            <text class="d-t-s" x="623" y="124" text-anchor="middle">기기 언어에 맞춰</text>
+          </svg>
+        </div>
+        <figcaption>
+          두 층이 겹친다. 빌드 설정은 키의 존재와 기본값을, String Catalog는 언어별 표시 문구를 담당한다.
+        </figcaption>
+      </figure>
+
+      <p>
+        빌드 설정에는 <strong>영문</strong>을 넣는다. 한글을 넣으면 영어권 사용자에게 한글 문구가 뜬다 —
+        빌드도 되고 한국어 기기에서는 정상으로 보여서 심사에서야 발견되기 쉽다.
+      </p>
+
+      <h3>두 가지 방식</h3>
+      <p>
+        Golf·Tennis와 YJKit은 전부 레거시 <code>.strings</code> 다.
+        <strong>하루치 핏만 <code>.xcstrings</code>(String Catalog, Xcode 15+)를 쓴다</strong> —
+        신규 앱이 낮은 방식을 물려받을 이유가 없다
+        (<code>.swiftformat</code> 의 <code>--swiftversion 6.0</code> 과 같은 논리).
+      </p>
+
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th></th><th>.strings</th><th>.xcstrings</th></tr></thead>
+          <tbody>
+            <tr><td class="ko">파일 수</td><td class="ko">언어 × 타깃</td><td class="ko"><b>타깃당 1개</b></td></tr>
+            <tr><td class="ko">편집</td><td class="ko">텍스트 파일 각각</td><td class="ko">Xcode 에디터에서 표로, 언어가 나란히</td></tr>
+            <tr><td class="ko">번역 상태</td><td class="ko">없음</td><td class="ko"><code>needs review</code> / <code>stale</code> 추적</td></tr>
+            <tr><td class="ko">소스 자동 추출</td><td class="ko">없음</td><td class="ko"><code>String(localized:)</code> 를 <b>Xcode가 자동 수집</b></td></tr>
+            <tr><td class="ko">산출물</td><td class="ko">lproj/*.strings</td><td class="ko">동일 — 빌드 때 <code>xcstringstool</code> 이 컴파일</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>기존 앱은 파일 우클릭 → <strong>Migrate to String Catalog</strong> 로 옮길 수 있다.</p>
+
+      <h3>배치</h3>
+      <p>동기화 폴더(<a href="#s2">§2</a>)에 파일만 두면 된다. pbxproj를 건드리지 않는다.</p>
+<pre><code>Apps/HaruchiFit/iOSApp/InfoPlist.xcstrings
+Apps/HaruchiFit/WatchApp/InfoPlist.xcstrings</code></pre>
+      <p>
+        파일 이름은 <strong><code>InfoPlist</code></strong> 여야 한다.
+        <code>INFOPLIST_FILE</code> 이 어떤 이름이든 무관하다(<a href="#s5">§5</a>).
+      </p>
+
+      <div class="note trap">
+        <p class="label"><span class="chip ok">실측</span> <code>knownRegions</code> 에 언어를 추가할 필요가 없다</p>
+        <p>
+          2026-09-03 — <code>knownRegions = (en, Base)</code> 인 채로 <code>ko</code> 가 든
+          <code>.xcstrings</code> 를 넣고 빌드하니 번들에 <code>ko.lproj/InfoPlist.strings</code> 가
+          정상 생성됐다. <strong>빌드는 <code>knownRegions</code> 가 아니라 <code>.xcstrings</code> 안의
+          언어 목록을 따른다.</strong> Xcode UI에서 한국어를 따로 추가하지 않아도 된다.
+        </p>
+      </div>
+
+      <h3>검증</h3>
+      <p>빌드 산출물을 직접 연다. <code>.xcstrings</code> 만 단독으로 컴파일해볼 수도 있다.</p>
+<pre><code>APP="$DERIVED/Build/Products/Debug-iphonesimulator/HaruchiFit.app"
+find "$APP" -maxdepth 2 -name '*.lproj'       <span class="c"># en.lproj / ko.lproj 가 있어야 한다</span>
+plutil -p "$APP/ko.lproj/InfoPlist.strings"   <span class="c"># 한글 문구</span>
+plutil -p "$APP/Info.plist" | grep Health     <span class="c"># 영문 기본값</span>
+
+xcstringstool compile --output-directory /tmp/out Apps/HaruchiFit/iOSApp/InfoPlist.xcstrings</code></pre>
+
+      <div class="note trap">
+        <p class="label"><span class="chip silent">함정</span> 붙여넣기로 들어간 개행</p>
+        <p>
+          Build Settings 값에 후행 개행이 섞이면 권한 다이얼로그에 빈 줄이 생긴다.
+          빌드는 통과하고 눈에도 잘 안 띈다. 실제로 2026-09-03에 워치 타깃의
+          <code>NSHealthShareUsageDescription</code> 이 그렇게 들어갔다(80자 → 82자).
+          값 길이를 비교하면 잡힌다.
+        </p>
+<pre><code>grep -oE 'INFOPLIST_KEY_NSHealth[A-Za-z]+ = "[^"]*";' $P</code></pre>
+      </div>
+    </section>
+
+    <!-- ══ 6 ═════════════════════════════════════════ -->
+    <section id="s7">
+      <h2><span class="num">07</span>Capability와 entitlements</h2>
+      <p class="deck">
+        <code>Signing &amp; Capabilities &gt; + Capability &gt; HealthKit</code> 을 켜면 Xcode가
+        <code>.entitlements</code> 파일을 만들고 코드사이닝 때 바이너리에 박는다.
+      </p>
+
+<pre><code>&lt;key&gt;com.apple.developer.healthkit&lt;/key&gt;&lt;true/&gt;</code></pre>
+
+      <ul>
+        <li><strong>없으면 <code>HKHealthStore</code> 접근이 OS 수준에서 거부된다.</strong> 코드가 맞아도 권한 요청이 실패한다</li>
+        <li><strong>iOS 앱과 워치 앱에 각각 필요하다.</strong> 워치 앱은 별개 바이너리라 따로 서명된다</li>
+        <li>컴플리케이션에는 필요 없다 — HealthKit을 직접 쓰지 않는다</li>
+      </ul>
+
+      <div class="note fail">
+        <p class="label"><span class="chip loud">크래시</span> 권한 문구가 없으면 경고가 아니다</p>
+        <p>
+          문구 없이 <code>requestAuthorization</code> 을 호출하면 앱이 <strong>강제 종료된다.</strong>
+          애플이 개발 단계에서 반드시 잡히도록 일부러 강하게 만든 장치다.
+          빌드는 통과하므로 <strong>실행해봐야 발견된다.</strong>
+        </p>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>키</th><th>의미</th></tr></thead>
+            <tbody>
+              <tr><td>NSHealthShareUsageDescription</td><td class="ko"><b>읽기</b> — 건강 앱에서 운동 기록을 가져올 때</td></tr>
+              <tr><td>NSHealthUpdateUsageDescription</td><td class="ko"><b>쓰기</b> — 워크아웃을 건강 앱에 저장할 때</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ 7 ═════════════════════════════════════════ -->
+    <section id="s8">
+      <h2><span class="num">08</span>조용히 실패하는 스킴 화이트리스트</h2>
+      <p class="deck">
+        iOS 9부터 <code>UIApplication.canOpenURL(_:)</code> 은 화이트리스트 방식이다.
+        <strong>선언되지 않은 스킴은 그 앱이 실제로 설치돼 있어도 항상 <code>false</code></strong> 를 돌려준다.
+      </p>
+
+      <p>
+        앱이 설치된 앱 목록을 스캔해 사용자를 프로파일링하던 것을 막으려는 조치다.
+        물어볼 스킴을 <code>LSApplicationQueriesSchemes</code> 에 미리 선언해야 한다.
+        <code>WorkoutShareUI</code> 가 이 함수를 쓴다:
+      </p>
+
+<pre><code><span class="c">// Packages/YJKit/Sources/WorkoutShareUI/Share/InstagramStoryShare.swift</span>
+<span class="k">static var</span> isAvailable: <span class="k">Bool</span> {
+    <span class="k">guard let</span> url = InstagramStoryLink.probeURL <span class="k">else</span> { <span class="k">return false</span> }   <span class="c">// instagram-stories://share</span>
+    <span class="k">return</span> UIApplication.shared.canOpenURL(url)
+}</code></pre>
+
+      <p>
+        선언이 없으면 <code>isAvailable</code> 이 영원히 <code>false</code> →
+        인스타그램이 설치돼 있어도 항상 일반 공유 시트로 떨어진다.
+        <strong>폴백 자체는 의도된 설계지만</strong>(설정 누락과 미설치가 같은 경로를 타는 것),
+        설정 누락 때문에 인스타 경로가 아예 켜지지 않는 것은 다른 문제다.
+        크래시가 아니라 대체 동작이므로 원인을 찾기 어렵다.
+      </p>
+
+      <p>
+        <code>WorkoutShareUI</code> 를 링크하는 앱은 <strong>반드시</strong> 이 키를 넣는다.
+        2026-09-03 기준 링크한 앱은 하루치 핏뿐이다.
+      </p>
+    </section>
+
+    <!-- ══ 8 ═════════════════════════════════════════ -->
+    <section id="s9">
+      <h2><span class="num">09</span>YJKit 프로덕트 링크</h2>
+      <p class="deck">
+        <code>Package Dependencies &gt; + &gt; Add Local…</code> 로 참조하면 pbxproj에
+        <code>XCLocalSwiftPackageReference "../../Packages/YJKit"</code> 가 기록된다.
+        버전 고정도, 체크아웃도, <code>Package.resolved</code> 도 없다 —
+        <strong>패키지 소스를 고치면 다음 빌드에 즉시 반영된다.</strong>
+      </p>
+
+      <p>
+        이 단계는 "패키지가 존재한다"만 알린다. 어느 타깃이 무엇을 쓸지는 각 타깃의
+        <code>General &gt; Frameworks, Libraries, and Embedded Content</code> 에서 따로 정한다.
+      </p>
+
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>타깃</th><th>링크</th></tr></thead>
+          <tbody>
+            <tr><td>GolfCounter</td><td>ConnectivityCore · PersistenceCore</td></tr>
+            <tr><td>GolfCounter Watch App</td><td>ConnectivityCore · WorkoutCore · WorkoutUI</td></tr>
+            <tr><td>TennisCounter</td><td>ConnectivityCore · PersistenceCore · WorkoutCore · WorkoutUI</td></tr>
+            <tr><td>TennisCounter Watch App</td><td>ConnectivityCore · WorkoutCore · WorkoutUI</td></tr>
+            <tr><td>HaruchiFit</td><td>ConnectivityCore · PersistenceCore · WorkoutCore · WorkoutUI · <b>WorkoutShareUI</b></td></tr>
+            <tr><td>HaruchiFit Watch App</td><td>ConnectivityCore · WorkoutCore · WorkoutUI</td></tr>
+            <tr><td>컴플리케이션 (전 앱)</td><td><b>없음</b></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>왜 전부 링크하지 않나</h3>
+      <ul>
+        <li><strong>플랫폼 제약</strong> — <code>WorkoutShareUI</code> 는 소스 전체가 <code>#if os(iOS)</code>,
+          <code>WorkoutSessionService</code> 의 세션 제어부는 <code>#if os(watchOS)</code> 안에 있다.
+          맞지 않는 플랫폼에 링크해봐야 빈 모듈이다</li>
+        <li><strong>설계 의도를 강제</strong> — 컴플리케이션이 YJKit을 쓰지 않는 것은 결정 사항이다.
+          로컬 스냅샷만 읽는다. 링크해두면 무심코 쓰게 되고, 위젯 익스텐션의 좁은 메모리 예산을 잡아먹는다</li>
+        <li><strong>빌드 시간과 바이너리 크기</strong></li>
+      </ul>
+
+      <p>
+        <code>Shared/</code> 폴더가 3개 타깃에 걸리는 것도 같은 맥락이다.
+        <strong>컴플리케이션은 YJKit을 링크하지 않으므로, 컴플리케이션이 읽어야 할 스냅샷 타입은
+        앱의 <code>Shared/</code> 에 있어야 한다.</strong>
+        종목별 도메인 타입을 YJKit이 아니라 앱이 소유하는 이유는 루트 <code>CLAUDE.md</code> 의
+        "코어는 도메인을 모른다".
+      </p>
+    </section>
+
+    <!-- ══ 9 ═════════════════════════════════════════ -->
+    <section id="s10">
+      <h2><span class="num">10</span>새 앱을 추가할 때</h2>
+      <p class="deck">
+        Xcode GUI가 해야 하는 일과 명령으로 확인할 수 있는 일을 갈라 적는다.
+        <strong>pbxproj를 직접 편집하지 않는다.</strong>
+      </p>
+
+      <h3>Xcode에서</h3>
+      <ol class="steps">
+        <li><strong>워크스페이스를 연 채</strong> <code>File &gt; New &gt; Project… &gt; iOS &gt; App</code> —
+          저장 위치 <code>Apps/</code>, <strong>Add to: YJApps</strong>, Git 저장소 생성 <strong>해제</strong></li>
+        <li>네비게이터에서 <strong>새 프로젝트를 선택한 뒤</strong>
+          <code>File &gt; New &gt; Target… &gt; watchOS &gt; App</code> —
+          Product Name은 <strong>&lt;앱&gt;만</strong>(<a href="#s1">§1</a>), Companion은 iOS 앱,
+          Testing System은 <strong>Swift Testing</strong></li>
+        <li>같은 방식으로 <code>watchOS &gt; Widget Extension</code> —
+          Include Live Activity <strong>해제</strong>, Embed in <strong>워치 앱</strong></li>
+        <li>폴더 이름을 <a href="#s2">§2</a>대로 정리 — 네비게이터에서 rename</li>
+        <li>배포 타깃 iOS <code>17.0</code> / watchOS <code>10.0</code>.
+          <strong>PROJECT 레벨도 함께 맞춘다.</strong>
+          드롭다운 목록에 없으면 값 칸에 <code>17.0</code> 을 직접 입력한다 —
+          <code>iOS 17</code>, <code>17.6</code> 같은 값이 들어가기 쉽다</li>
+        <li>번들 ID를 <a href="#s1">§1</a>대로 (<code>Build Settings &gt; Product Bundle Identifier</code>)</li>
+        <li><code>Package Dependencies &gt; + &gt; Add Local… &gt; Packages/YJKit</code> →
+          타깃별 프로덕트 링크 (<a href="#s9">§9</a>)</li>
+        <li>HealthKit Capability와 권한 문구 (<a href="#s7">§7</a>).
+          문구는 <strong>영문</strong>으로 넣는다 (<a href="#s6">§6</a>)</li>
+        <li>배열 키가 필요하면 <code>&lt;앱&gt;-Info.plist</code> 를 만들고
+          <code>INFOPLIST_FILE</code> 로 가리킨다 (<a href="#s5">§5</a>)</li>
+        <li>각 타깃 폴더에 <code>InfoPlist.xcstrings</code> 를 두고 언어별 문구를 채운다
+          (<a href="#s6">§6</a>)</li>
+        <li><code>Manage Schemes…</code> → 스킴 <strong>Shared</strong> 체크 (<a href="#s4">§4</a>)</li>
+      </ol>
+
+      <h3>명령으로 확인</h3>
+<pre><code>APP=&lt;앱&gt;; P=Apps/$APP/$APP.xcodeproj/project.pbxproj
+
+xcodebuild -project Apps/$APP/$APP.xcodeproj -list          <span class="c"># 타깃 이름</span>
+grep -oE 'PRODUCT_BUNDLE_IDENTIFIER = [^;]+;' $P | sort -u  <span class="c"># 번들 ID</span>
+grep -oE '(IPHONEOS|WATCHOS)_DEPLOYMENT_TARGET = [^;]+;' $P | sort -u
+grep -oE '(TEST_HOST|INFOPLIST_FILE) = [^;]+;' $P | sort -u <span class="c"># §3</span>
+ls Apps/$APP/$APP.xcodeproj/xcshareddata/xcschemes/          <span class="c"># §4</span>
+xcodebuild -workspace YJApps.xcworkspace -list               <span class="c"># 워크스페이스에서 보이는지</span>
+git status --short Apps/$APP                                 <span class="c"># xcuserdata/ 가 빠졌는지</span></code></pre>
+
+      <p>그다음 세 스킴을 전부 빌드한다.</p>
+
+<pre><code>IOS=$(.github/scripts/pick-simulator.sh iOS '^iPhone')
+WATCH=$(.github/scripts/pick-simulator.sh watchOS '^Apple Watch')
+
+xcodebuild -workspace YJApps.xcworkspace -scheme "&lt;iOS 스킴&gt;"    -destination "id=$IOS"   CODE_SIGNING_ALLOWED=NO build
+xcodebuild -workspace YJApps.xcworkspace -scheme "&lt;워치 스킴&gt;"    -destination "id=$WATCH" CODE_SIGNING_ALLOWED=NO build
+xcodebuild -workspace YJApps.xcworkspace -scheme "&lt;컴플리케이션&gt;" -destination "id=$WATCH" CODE_SIGNING_ALLOWED=NO build</code></pre>
+
+      <p>
+        마지막으로 <code>Makefile</code> 의 <code>APPS</code>,
+        <code>.github/workflows/ci.yml</code> 의 경로 필터와 빌드 잡,
+        앱 폴더의 <code>.swiftlint.yml</code> · <code>.swiftformat</code> 을 추가한다.
+      </p>
+
+      <h3>Xcode 26 신규 프로젝트가 기존 앱과 다른 기본값</h3>
+      <p>
+        새로 만든 프로젝트에는 기존 두 앱에 없는 빌드 설정이 붙는다.
+        세 앱의 <code>SWIFT_VERSION</code> 은 다 같이 <code>5.0</code> 이지만 동시성 기본값이 다르다.
+      </p>
+
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>설정</th><th>신규 (HaruchiFit)</th><th>기존 (Golf·Tennis)</th></tr></thead>
+          <tbody>
+            <tr><td>SWIFT_DEFAULT_ACTOR_ISOLATION</td><td><b>MainActor</b></td><td class="ko">없음 (= nonisolated)</td></tr>
+            <tr><td>SWIFT_APPROACHABLE_CONCURRENCY</td><td><b>YES</b></td><td class="ko">없음</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>
+        <code>SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor</code> 는
+        <strong>타입이 기본으로 MainActor 에 격리된다</strong>는 뜻이다. SwiftUI 앱에는 대체로 맞는
+        기본값이지만, YJKit 타입을 확장하는 상수에 걸린다.
+      </p>
+<pre><code><span class="k">extension</span> WorkoutConfiguration {
+    <span class="c">// nonisolated 가 없으면 이 상수가 MainActor 로 격리된다.</span>
+    <span class="c">// 기본 인자는 호출 지점(비격리일 수 있다)에서 평가되므로 경고가 난다.</span>
+    <span class="k">nonisolated static let</span> strength = WorkoutConfiguration(activityType: .traditionalStrengthTraining,
+                                                           locationType: .indoor)
+}</code></pre>
+      <p>
+        에러가 아니라 <strong>경고</strong>라 빌드는 통과한다.
+        <code>WorkoutConfiguration+Golf.swift</code> 같은 기존 앱 코드를 그대로 옮겨 붙이면 이 차이가
+        드러난다. 값이 <code>Sendable</code> 이면 <code>nonisolated</code> 를 붙이는 것이 맞다.
+      </p>
+    </section>
+
+  </main>
+</div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <p><b>원본</b> docs/superpowers/specs/2026-09-03-xcode-target-conventions.md — 내용이 바뀌면 둘 다 고친다</p>
+    <p><b>관련</b> 2026-08-27-monorepo-migration-design.md · 2026-08-27-ci-pipeline-design.md · 2026-08-27-code-style-tooling-design.md</p>
+    <p><b>근거</b> 2026-09-03 하루치 핏 타깃 생성에서 실제로 걸린 것들</p>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -34,7 +34,7 @@ spec에서 가져온 프로젝트 전역 요구사항이다. **모든 태스크�
 - **워크아웃 동작 계약 3조** (`CLAUDE.md`) — ① 칼로리는 워크아웃 누적값 ② 경과시간은 워치가 단일 소스, 폰은 `WorkoutAnchor.interpolatedElapsed(...)`로 보간 ③ pause는 폰→워치 명령, `isPaused`는 워치 앵커로만 갱신(낙관적 토글 금지)
 - **`ConnectivityService`는 프로세스당 정확히 하나**, `onReceive` 등록은 생성한 main-queue turn 안에서 끝낸다
 - **커밋 메시지는 gitmoji prefix** — ✨ feat / 🐛 fix / ♻️ refactor / 🎨 style / 📝 docs / ✅ test / 🔧 chore / 🔥 remove / ⏪ revert
-- **`main` 직접 push 금지** — 브랜치 + PR, 머지는 일반 merge commit. 현재 작업 브랜치는 `feature/haruchi-fit`
+- **`main` 직접 push 금지** — 브랜치 + PR, 머지는 일반 merge commit. 현재 작업 브랜치는 `feat/haruchi-fit-scaffold`
 - **pbxproj를 직접 편집하지 않는다** — Task 1의 최초 생성만 예외이며, 그것도 Xcode GUI가 수행한다
 
 ---

@@ -2,6 +2,9 @@
 <Workspace
    version = "1.0">
    <FileRef
+      location = "group:Apps/HaruchiFit/HaruchiFit.xcodeproj">
+   </FileRef>
+   <FileRef
       location = "group:Apps/TennisCounter/TennisCounter.xcodeproj">
    </FileRef>
    <FileRef
