@@ -1,8 +1,9 @@
 # 하루치 핏 — 기술 설계
 
 작성일: 2026-09-02
-갱신일: 2026-09-03 — 미결 항목 M1~M7 **전부 결정**. 6절을 결정 사항으로 전환하고 관련 절에 반영
-상태: **확정** — 구현 착수 가능. 남은 선행 작업은 `HKWorkoutActivity` 실기기 검증(2절)뿐
+갱신일: 2026-09-03 — `HKWorkoutActivity` 실기기 검증 완료. 이종 구간 전환 불가로 **폴백 확정**(2절),
+세션 타입 고정을 D-M8로 결정. `WorkoutCore` 확장 계획 철회
+상태: **확정** — 선행 검증이 끝나 구현 착수 가능
 선행 문서: `2026-09-02-haruchi-fit-product-spec.md` (무엇을 만들지)
 
 이 문서는 **어떻게 만들지**를 다룬다. 제품 결정은 선행 문서가 소유하므로 여기서 다시 논하지 않는다.
@@ -29,7 +30,7 @@ Notion「화면 구성」의 **"⚠️ ralli-kit 재사용 범위 정정 (2026-0
 
 | Product | 역할 | 하루치 핏에서 |
 |---|---|---|
-| `WorkoutCore` | HKWorkoutSession·칼로리·심박 | **확장 필요** — 세그먼트 (2절) |
+| `WorkoutCore` | HKWorkoutSession·칼로리·심박 | **그대로 사용** — 확장 불필요 (2절) |
 | `WorkoutUI` | 폰·워치 공유 워크아웃 화면 | **확장 필요** — 기본값 파라미터 (D-M1) |
 | `ConnectivityCore` | 폰↔워치 전송 | 그대로 사용 |
 | `PersistenceCore` | SwiftData + CloudKit | 그대로 사용 |
@@ -50,16 +51,24 @@ Notion「화면 구성」의 **"⚠️ ralli-kit 재사용 범위 정정 (2026-0
 - `WorkoutResult`에 세그먼트를 담을 필드가 없다
 - 세그먼트를 추가할 API(`addWorkoutActivity`)가 **서비스에 노출돼 있지 않다**
 
-### 설계 방향
+### 당초 설계 방향 — 검증에서 무효화됐다
 
-세션은 **하나의 activityType으로 시작**하고, 내부 구간을 `HKWorkoutActivity`로 나눈다.
-근력↔유산소 전환은 "세션 재시작"이 아니라 "활동 구간 교체"다.
+세션은 하나의 activityType으로 시작하고 내부 구간을 `HKWorkoutActivity`로 나눈다는 구상이었다.
+근력↔유산소 전환을 "세션 재시작"이 아니라 "활동 구간 교체"로 보는 방식이다.
 
 ```
-HKWorkoutSession  (전체 1:12:24)
+HKWorkoutSession  (전체 1:12:24)          ← ❌ 이 구조는 만들 수 없다
 ├─ HKWorkoutActivity  .traditionalStrengthTraining  0:00–0:42
 ├─ HKWorkoutActivity  .running (또는 유산소 타입)    0:42–1:00
 └─ HKWorkoutActivity  .traditionalStrengthTraining  1:00–1:12
+```
+
+**아래 실기기 검증에서 이 구조가 불가능함이 확인됐다.** 실제 채택안은 폴백이다 —
+HealthKit에는 근력 세션 하나만 남기고(D-M8), 구간은 SwiftData가 소유한다(3절).
+
+```
+HKWorkoutSession  .traditionalStrengthTraining  (전체 1:12:24)   ← HealthKit
+SwiftData  Segment[근력 0:00–0:42 / 유산소 0:42–1:00 / 근력 1:00–1:12]  ← 앱이 소유
 ```
 
 **API 가용성은 SDK 헤더로 확인했다** (`WatchOS26.5.sdk/…/HealthKit.framework/Headers/`):
@@ -73,24 +82,43 @@ HKWorkoutSession  (전체 1:12:24)
 
 배포 타깃이 watchOS 10.0이라 **가용성 문제는 없다.**
 
-> ⚠️ **동작은 아직 검증되지 않았다.** API가 존재하는 것과 기대대로 동작하는 것은 다른 문제다.
-> **구간이 실제로 저장되는지, 시각이 정확한지, 짧은 구간이 버려지지 않는지는 실기기로 확인해야 한다** —
-> 시뮬레이터에서는 HealthKit 워크아웃을 신뢰할 수 없다.
-> 검증 절차는 `plans/2026-09-03-haruchi-fit-target-scaffold.md`의 Task 6이며,
-> 실패하면 아래 폴백으로 간다.
+### 실기기 검증 결과 (2026-09-03) — 이종 구간 전환은 불가능하다
 
-**폴백** — HealthKit에 구간을 남기지 못하면, 세그먼트를 **SwiftData 전용 데이터**로 취급한다.
-HealthKit에는 단일 워크아웃만 남고 세그먼트는 앱 안에서만 보인다.
-기능은 유지되지만 다른 앱·기기와의 이식성을 잃는다.
+`plans/2026-09-03-haruchi-fit-target-scaffold.md`의 Task 6 스파이크를 실기기(Apple Watch Ultra /
+watchOS 26.6)에서 실행한 결과다. 세션 설정은 `.traditionalStrengthTraining` + `.indoor`.
 
-### WorkoutCore에 필요한 확장
+| 시도 | 결과 |
+|---|---|
+| 근력 → **유산소**(`.running`) `beginNewActivity` | **5회 전부 실패** — `com.apple.healthkit Code=3 "Cannot add subactivity of type HKWorkoutActivityTypeRunning"` |
+| 근력 → **근력** `beginNewActivity` | **성공** — 구간이 버튼 시각대로 정확히 쪼개진다 |
+| `endCurrentActivity(on:)` | **성공** — 메인 활동으로 복귀 |
+| 저장 후 `workout.workoutActivities` 되읽기 | **정상** — 전체 102초 / 구간 3개, 시각 일치 |
 
-- 세션 도중 활동 구간을 전환하는 API (`switchActivity(to:)` 형태)
-- 구간 목록을 담은 결과 타입 — `WorkoutResult`에 세그먼트 배열 추가 (기존 소비자 2개가 깨지지 않도록 **기본값 있는 필드**로)
-- **구간별 시간만 집계한다.** 구간별 칼로리·심박은 내지 않는다 (D-M3)
+저장된 3개 구간은 **전부 `activityType=50`(근력)** 이었다. `running=37`은 한 번도 세션에 들어가지 못했다.
 
-> ⚠️ `WorkoutCore`는 **GolfCounter와 Ralli가 함께 쓴다.** 시그니처를 바꾸면 두 앱이 영향받는다.
-> 추가는 하되 **기존 API는 건드리지 않는** 방향으로 간다.
+**결론** — `beginNewActivity` API 자체는 정상 동작하며 시각 정확도도 충분하다. 그러나 HealthKit이
+**근력↔유산소처럼 카테고리가 다른 activityType으로의 전환을 거부한다.** 하루치 핏이 필요로 하는
+전환이 정확히 이것이므로 아래 폴백으로 확정한다.
+
+> 에러가 5회 재현됐고 세션 상태가 `running`에 도달한 뒤의 호출이었으므로 타이밍 문제가 아니다.
+> 같은 타입 재구간이 매번 성공한 것이 이를 뒷받침한다.
+
+**폴백 (확정)** — 세그먼트는 **SwiftData 전용 데이터**다. HealthKit에는 단일 워크아웃만 남고
+세그먼트는 앱 안에서만 보인다. 기능은 유지되지만 다른 앱·기기와의 이식성은 갖지 못한다.
+세션을 어떤 타입으로 고정할지는 **D-M8**에서 결정했다.
+
+### WorkoutCore 확장 — 불필요해졌다
+
+폴백 확정으로 원래 계획했던 확장 세 가지가 전부 무효가 됐다.
+
+| 계획했던 확장 | 현재 |
+|---|---|
+| 세션 도중 활동 구간을 전환하는 API (`switchActivity(to:)` 형태) | **불필요** — HealthKit에 구간을 남길 수 없어 세션은 단일 타입을 유지한다 (D-M8) |
+| `WorkoutResult`에 세그먼트 배열 추가 | **불필요** — 세그먼트는 앱 레이어(SwiftData)가 소유한다 (3절) |
+| 구간별 시간 집계 | **앱 레이어 책임으로 이동** — 구간 경계는 앱이 전환 시각으로 직접 기록한다 (D-M3) |
+
+**`WorkoutCore`는 수정 없이 그대로 쓴다.** 시그니처를 건드리지 않으므로
+GolfCounter·Ralli 회귀 리스크도 함께 사라졌다 (9절).
 
 ---
 
@@ -103,7 +131,7 @@ HealthKit에 **자리가 없는 데이터**가 있다. 부위 태그와 메모�
 | 데이터 | HealthKit | SwiftData |
 |---|---|---|
 | 워크아웃 시각·시간·칼로리·심박 | ✅ 원본 | 캐시 |
-| 세그먼트 | ⚠️ `HKWorkoutActivity` (검증 필요) | ✅ 원본 또는 미러 |
+| 세그먼트 | ❌ 없음 (2절 실측) | ✅ **원본** |
 | **부위 태그** | ❌ 없음 | ✅ **원본** |
 | **메모** | ❌ 없음 | ✅ **원본** |
 | 잔디 일별 집계 | ❌ | 파생 (5절) |
@@ -314,6 +342,27 @@ Ralli(테니스)·GolfCounter(골프)가 저장한 워크아웃도 잔디에 반
 - **표시 로직을 `Shared/`로 내려 워치 테스트 타깃에서 검증한다** —
   위젯 타깃에는 테스트 타깃을 붙일 수 없기 때문이다 (골프의 `ComplicationState` 패턴)
 
+### D-M8. 워크아웃 세션 타입 — 근력으로 고정한다 (2026-09-03)
+
+근력↔유산소 구간 전환이 HealthKit에서 거부되므로(2절), 세션은
+`.traditionalStrengthTraining` + `.indoor` 하나로 시작해 끝까지 유지한다.
+**유산소 위주 세션도 건강 앱에는 "근력 운동"으로 기록된다 — 의도된 동작이다.**
+
+유산소 구간은 **시간만 필요하고**(D-M3), 그 시간은 SwiftData 세그먼트가 갖는다.
+HealthKit의 도움 없이 앱이 전환 시각을 직접 적으므로 기능에는 영향이 없다.
+
+**감수하는 것 — 칼로리 추정 모델 차이.** watchOS는 `activityType`에 따라 다른 모델로
+활동 칼로리를 추정하므로, 유산소 구간도 근력 모델로 계산된다. 다음 이유로 영향이 제한적이라 판단했다.
+
+- 잔디 농도의 **기본 기준이 운동 시간**이다 (제품 스펙 D4). 칼로리 기준은 설정 전환 옵션이며 컷도 미정
+- **강도형 지표(칼로리 추이·심박존)를 쓰지 않기로 이미 결정했다** (제품 스펙 D5)
+- 칼로리가 나오는 곳은 기록 행·요약 3칸·공유 카드로, 전부 참고 표시값이다
+- 세션이 실내 전제라 심박이 지배적 신호다. GPS 보정이 빠지는 야외 러닝 시나리오는 대상이 아니다
+
+`.mixedCardio` / `.other`로 고정하는 안도 검토했으나, 얻는 것은 추정 정확도가 나아질
+**가능성**뿐인 반면 근력 위주 앱의 모든 기록이 건강 앱에서 "복합 운동"이 되는 손해는 확정적이다.
+실제로 칼로리가 문제가 되면 그때 다시 연다.
+
 ## 7. 타깃 구조
 
 ```
@@ -367,8 +416,8 @@ Apps/HaruchiFit/
 
 | 리스크 | 영향 | 완화 |
 |---|---|---|
-| `HKWorkoutActivity` 실시간 구간 기록이 기대대로 동작하지 않음 | 세그먼트 이식성 상실 | 2절 폴백 — SwiftData 전용 세그먼트. 기능은 유지 |
-| `WorkoutCore` 확장이 GolfCounter·Ralli를 깨뜨림 | 기존 앱 회귀 | 기존 시그니처 무변경 + 기본값 파라미터. CI가 3개 앱 전부 빌드 |
+| ~~`HKWorkoutActivity` 실시간 구간 기록이 기대대로 동작하지 않음~~ → **발생함** (2026-09-03 실측) | 세그먼트 이식성 상실 | **폴백 적용됨** — SwiftData 전용 세그먼트 (2절). 기능은 유지 |
+| ~~`WorkoutCore` 확장이 GolfCounter·Ralli를 깨뜨림~~ → **해소됨** | — | 확장 자체가 불필요해졌다 (2절). `WorkoutCore` 무수정 |
 | 햅틱을 시뮬레이터에서 검증 불가 | 운동 중 유일한 확인 수단이 동작 안 함 | **실기기 테스트를 완료 조건에 포함** |
 | CloudKit이 `.unique`를 막아 워크아웃 중복 저장 | 잔디가 부풀려짐 | `healthKitUUID` 중복 검사를 앱 코드로. 동기화 경로 단일화 |
 | 인스타 딥링크가 조용히 폴백 | 공유 경험 저하를 인지 못 함 | `LSApplicationQueriesSchemes` 확인 + 실기기에서 딥링크 실제 오픈 검증 |
@@ -377,19 +426,21 @@ Apps/HaruchiFit/
 
 ## 10. 다음 단계
 
-미결 항목은 전부 결정됐다 (6절). 남은 것은 검증과 구현이다.
+미결 항목은 전부 결정됐다 (6절). 세그먼트 검증도 끝났다 (2절). 남은 것은 구현이다.
 
-1. **`HKWorkoutActivity` 실기기 검증** (2절) ← 여기가 다음 시작점.
-   실패하면 폴백(SwiftData 전용 세그먼트)으로 확정하고 3절 표를 고친다
-2. `Apps/HaruchiFit/` 타깃 3개 생성 + 워크스페이스 스킴 공유 + CI 경로 필터 등록
-3. `WorkoutCore` 세그먼트 확장 — 기존 두 앱 회귀 검증 포함
-4. `WorkoutUI` 기본값 파라미터 추가 (D-M1) — 색 처리는 실제 화면 보고 결정
-5. 구현 플랜 작성 → `docs/superpowers/plans/`
+- [x] **`HKWorkoutActivity` 실기기 검증** (2절) — 이종 전환 불가 확인, 폴백 확정 (2026-09-03)
+- [x] `Apps/HaruchiFit/` 타깃 3개 생성 + 워크스페이스 스킴 공유 + CI 경로 필터 등록
+- [ ] **스파이크 코드 제거** ← 여기가 다음 시작점.
+  `SegmentSpike.swift` · `SpikeView.swift` · `HomeView`의 진입 버튼
+  (플랜 Task 6 Step 8). **코드 변경이므로 브랜치 + PR**
+- [ ] `WorkoutUI` 기본값 파라미터 추가 (D-M1) — 색 처리는 실제 화면 보고 결정
+- [ ] 구현 플랜 작성 → `docs/superpowers/plans/`
+
+> `WorkoutCore` 세그먼트 확장은 목록에서 빠졌다 — 폴백 확정으로 불필요해졌다 (2절).
 
 ### 검증이 남은 항목
 
 | 항목 | 왜 시뮬레이터로 안 되는가 | 관련 |
 |---|---|---|
-| `HKWorkoutActivity` 실시간 구간 기록·되읽기 | HealthKit 워크아웃 동작이 실기기와 다름 | 2절 |
 | 햅틱 8종 | 시뮬레이터에 햅틱 엔진이 없음 | 제품 스펙 5절 |
 | 인스타그램 스토리 딥링크 | 인스타그램 앱이 설치돼 있어야 함 | D-M2 |
