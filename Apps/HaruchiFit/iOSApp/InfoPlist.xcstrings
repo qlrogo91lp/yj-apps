@@ -1,0 +1,40 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "NSHealthShareUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Haruchi Fit reads your workouts from Apple Health to fill in your activity grid."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "운동 기록을 가져와 잔디를 채우기 위해 건강 앱 데이터를 읽습니다."
+          }
+        }
+      }
+    },
+    "NSHealthUpdateUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Haruchi Fit saves workouts recorded on your Apple Watch to Apple Health."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "애플워치로 기록한 운동을 건강 앱에 저장합니다."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

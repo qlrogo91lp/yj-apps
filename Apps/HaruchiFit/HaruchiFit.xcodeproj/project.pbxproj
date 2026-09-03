@@ -11,6 +11,14 @@
 		3999D2CC3048FA54005343C7 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3999D2CB3048FA54005343C7 /* WidgetKit.framework */; };
 		3999D2CE3048FA54005343C7 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3999D2CD3048FA54005343C7 /* SwiftUI.framework */; };
 		3999D2D93048FA55005343C7 /* HaruchiComplicationExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3999D2C93048FA54005343C7 /* HaruchiComplicationExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		3999D531304909AF005343C7 /* ConnectivityCore in Frameworks */ = {isa = PBXBuildFile; productRef = 3999D530304909AF005343C7 /* ConnectivityCore */; };
+		3999D533304909AF005343C7 /* PersistenceCore in Frameworks */ = {isa = PBXBuildFile; productRef = 3999D532304909AF005343C7 /* PersistenceCore */; };
+		3999D535304909AF005343C7 /* WorkoutCore in Frameworks */ = {isa = PBXBuildFile; productRef = 3999D534304909AF005343C7 /* WorkoutCore */; };
+		3999D537304909AF005343C7 /* WorkoutShareUI in Frameworks */ = {isa = PBXBuildFile; productRef = 3999D536304909AF005343C7 /* WorkoutShareUI */; };
+		3999D539304909AF005343C7 /* WorkoutUI in Frameworks */ = {isa = PBXBuildFile; productRef = 3999D538304909AF005343C7 /* WorkoutUI */; };
+		3999D53B304909C4005343C7 /* ConnectivityCore in Frameworks */ = {isa = PBXBuildFile; productRef = 3999D53A304909C4005343C7 /* ConnectivityCore */; };
+		3999D53D304909C4005343C7 /* WorkoutCore in Frameworks */ = {isa = PBXBuildFile; productRef = 3999D53C304909C4005343C7 /* WorkoutCore */; };
+		3999D53F304909C4005343C7 /* WorkoutUI in Frameworks */ = {isa = PBXBuildFile; productRef = 3999D53E304909C4005343C7 /* WorkoutUI */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -69,6 +77,8 @@
 		3999D2C93048FA54005343C7 /* HaruchiComplicationExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = HaruchiComplicationExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		3999D2CB3048FA54005343C7 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		3999D2CD3048FA54005343C7 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		3999D540304909FD005343C7 /* HaruchiFit Watch App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "HaruchiFit Watch App.entitlements"; sourceTree = "<group>"; };
+		3999D54130490A87005343C7 /* HaruchiFit.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HaruchiFit.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -112,6 +122,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3999D531304909AF005343C7 /* ConnectivityCore in Frameworks */,
+				3999D533304909AF005343C7 /* PersistenceCore in Frameworks */,
+				3999D537304909AF005343C7 /* WorkoutShareUI in Frameworks */,
+				3999D539304909AF005343C7 /* WorkoutUI in Frameworks */,
+				3999D535304909AF005343C7 /* WorkoutCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -119,6 +134,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3999D53B304909C4005343C7 /* ConnectivityCore in Frameworks */,
+				3999D53D304909C4005343C7 /* WorkoutCore in Frameworks */,
+				3999D53F304909C4005343C7 /* WorkoutUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -144,6 +162,8 @@
 		3999D27F3048F77F005343C7 = {
 			isa = PBXGroup;
 			children = (
+				3999D54130490A87005343C7 /* HaruchiFit.entitlements */,
+				3999D540304909FD005343C7 /* HaruchiFit Watch App.entitlements */,
 				3999D28A3048F77F005343C7 /* iOSApp */,
 				3999D29B3048F8B8005343C7 /* WatchApp */,
 				3999D2A93048F8B9005343C7 /* watchosTests */,
@@ -195,6 +215,11 @@
 			);
 			name = HaruchiFit;
 			packageProductDependencies = (
+				3999D530304909AF005343C7 /* ConnectivityCore */,
+				3999D532304909AF005343C7 /* PersistenceCore */,
+				3999D534304909AF005343C7 /* WorkoutCore */,
+				3999D536304909AF005343C7 /* WorkoutShareUI */,
+				3999D538304909AF005343C7 /* WorkoutUI */,
 			);
 			productName = HaruchiFit;
 			productReference = 3999D2883048F77F005343C7 /* HaruchiFit.app */;
@@ -219,6 +244,9 @@
 			);
 			name = "HaruchiFit Watch App";
 			packageProductDependencies = (
+				3999D53A304909C4005343C7 /* ConnectivityCore */,
+				3999D53C304909C4005343C7 /* WorkoutCore */,
+				3999D53E304909C4005343C7 /* WorkoutUI */,
 			);
 			productName = "HaruchiFit Watch App Watch App";
 			productReference = 3999D29A3048F8B8005343C7 /* HaruchiFit Watch App.app */;
@@ -303,6 +331,9 @@
 			);
 			mainGroup = 3999D27F3048F77F005343C7;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				3999D52F3049099C005343C7 /* XCLocalSwiftPackageReference "../../Packages/YJKit" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 3999D2893048F77F005343C7 /* Products */;
 			projectDirPath = "";
@@ -523,11 +554,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = HaruchiFit.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = P2TU28W32L;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "HaruchiFit-Info.plist";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Haruchi Fit reads your workouts from Apple Health to fill in your activity grid.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Haruchi Fit saves workouts recorded on your Apple Watch to Apple Health.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -556,11 +591,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = HaruchiFit.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = P2TU28W32L;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "HaruchiFit-Info.plist";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Haruchi Fit reads your workouts from Apple Health to fill in your activity grid.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Haruchi Fit saves workouts recorded on your Apple Watch to Apple Health.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -589,12 +628,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "HaruchiFit Watch App.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = P2TU28W32L;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "HaruchiFit Watch App";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Haruchi Fit reads your workouts from Apple Health to fill in your activity grid.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Haruchi Fit saves workouts recorded on your Apple Watch to Apple Health.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.yj.HaruchiFit;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -622,12 +664,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "HaruchiFit Watch App.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = P2TU28W32L;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "HaruchiFit Watch App";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Haruchi Fit reads your workouts from Apple Health to fill in your activity grid.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Haruchi Fit saves workouts recorded on your Apple Watch to Apple Health.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.yj.HaruchiFit;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -809,6 +854,56 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		3999D52F3049099C005343C7 /* XCLocalSwiftPackageReference "../../Packages/YJKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../../Packages/YJKit;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		3999D530304909AF005343C7 /* ConnectivityCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3999D52F3049099C005343C7 /* XCLocalSwiftPackageReference "../../Packages/YJKit" */;
+			productName = ConnectivityCore;
+		};
+		3999D532304909AF005343C7 /* PersistenceCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3999D52F3049099C005343C7 /* XCLocalSwiftPackageReference "../../Packages/YJKit" */;
+			productName = PersistenceCore;
+		};
+		3999D534304909AF005343C7 /* WorkoutCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3999D52F3049099C005343C7 /* XCLocalSwiftPackageReference "../../Packages/YJKit" */;
+			productName = WorkoutCore;
+		};
+		3999D536304909AF005343C7 /* WorkoutShareUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3999D52F3049099C005343C7 /* XCLocalSwiftPackageReference "../../Packages/YJKit" */;
+			productName = WorkoutShareUI;
+		};
+		3999D538304909AF005343C7 /* WorkoutUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3999D52F3049099C005343C7 /* XCLocalSwiftPackageReference "../../Packages/YJKit" */;
+			productName = WorkoutUI;
+		};
+		3999D53A304909C4005343C7 /* ConnectivityCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3999D52F3049099C005343C7 /* XCLocalSwiftPackageReference "../../Packages/YJKit" */;
+			productName = ConnectivityCore;
+		};
+		3999D53C304909C4005343C7 /* WorkoutCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3999D52F3049099C005343C7 /* XCLocalSwiftPackageReference "../../Packages/YJKit" */;
+			productName = WorkoutCore;
+		};
+		3999D53E304909C4005343C7 /* WorkoutUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3999D52F3049099C005343C7 /* XCLocalSwiftPackageReference "../../Packages/YJKit" */;
+			productName = WorkoutUI;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 3999D2803048F77F005343C7 /* Project object */;
 }
