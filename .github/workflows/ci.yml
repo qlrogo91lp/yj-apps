@@ -31,6 +31,7 @@ jobs:
       kit: ${{ steps.filter.outputs.kit }}
       golf: ${{ steps.filter.outputs.golf }}
       tennis: ${{ steps.filter.outputs.tennis }}
+      haruchi: ${{ steps.filter.outputs.haruchi }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -50,11 +51,12 @@ jobs:
           kit=false
           golf=false
           tennis=false
+          haruchi=false
 
           # base 를 못 구하는 경우(첫 푸시, force-push)에는 안전하게 전부 실행한다.
           if [ -z "$base" ] || ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
             echo "base 커밋을 확인할 수 없다 — 전 대상을 실행한다"
-            kit=true; golf=true; tennis=true
+            kit=true; golf=true; tennis=true; haruchi=true
           else
             changed=$(git diff --name-only "$base" "$head")
             echo "--- 변경된 파일 ---"
@@ -72,11 +74,11 @@ jobs:
 
             # 루트 설정과 워크스페이스는 전 대상에 영향을 준다.
             if echo "$relevant" | grep -qE '^(\.github/|Makefile|\.swiftlint\.yml|YJApps\.xcworkspace/)'; then
-              kit=true; golf=true; tennis=true
+              kit=true; golf=true; tennis=true; haruchi=true
             fi
             # 코어 변경은 전 앱으로 파급된다.
             if echo "$relevant" | grep -qE '^Packages/YJKit/'; then
-              kit=true; golf=true; tennis=true
+              kit=true; golf=true; tennis=true; haruchi=true
             fi
             if echo "$relevant" | grep -qE '^Apps/GolfCounter/'; then
               golf=true
@@ -84,19 +86,23 @@ jobs:
             if echo "$relevant" | grep -qE '^Apps/TennisCounter/'; then
               tennis=true
             fi
+            if echo "$relevant" | grep -qE '^Apps/HaruchiFit/'; then
+              haruchi=true
+            fi
           fi
 
           {
             echo "kit=$kit"
             echo "golf=$golf"
             echo "tennis=$tennis"
+            echo "haruchi=$haruchi"
           } >> "$GITHUB_OUTPUT"
-          echo "판별 결과 — kit=$kit golf=$golf tennis=$tennis"
+          echo "판별 결과 — kit=$kit golf=$golf tennis=$tennis haruchi=$haruchi"
 
   lint:
     name: 린트
     needs: changes
-    if: needs.changes.outputs.golf == 'true' || needs.changes.outputs.tennis == 'true'
+    if: needs.changes.outputs.golf == 'true' || needs.changes.outputs.tennis == 'true' || needs.changes.outputs.haruchi == 'true'
     runs-on: macos-26
     timeout-minutes: 15
     steps:
@@ -273,5 +279,61 @@ jobs:
       - name: 컴플리케이션 빌드
         run: |
           xcodebuild -workspace "$WORKSPACE" -scheme "RalliComplicationExtension" \
+            -destination "id=${{ steps.sim.outputs.watch }}" \
+            CODE_SIGNING_ALLOWED=NO -quiet build
+
+  haruchi-ios:
+    name: HaruchiFit (iOS)
+    needs: changes
+    if: needs.changes.outputs.haruchi == 'true'
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Xcode 선택
+        run: .github/scripts/select-xcode.sh
+
+      - name: 시뮬레이터 선택
+        id: sim
+        run: |
+          echo "ios=$(.github/scripts/pick-simulator.sh iOS "$IOS_DEVICE")" >> "$GITHUB_OUTPUT"
+
+      # 아직 iOS 테스트 타깃이 없어 빌드만 한다. 화면이 생기면 test 로 바꾼다.
+      - name: iOS 앱 빌드
+        run: |
+          xcodebuild -workspace "$WORKSPACE" -scheme "HaruchiFit" \
+            -destination "id=${{ steps.sim.outputs.ios }}" \
+            CODE_SIGNING_ALLOWED=NO -quiet build
+
+  haruchi-watch:
+    name: HaruchiFit (watchOS)
+    needs: changes
+    if: needs.changes.outputs.haruchi == 'true'
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Xcode 선택
+        run: .github/scripts/select-xcode.sh
+
+      - name: 시뮬레이터 선택
+        id: sim
+        run: |
+          echo "watch=$(.github/scripts/pick-simulator.sh watchOS "$WATCH_DEVICE")" >> "$GITHUB_OUTPUT"
+
+      # HaruchiFitWatchTests 타깃은 있지만 스킴의 test 액션에 연결되어 있지 않아
+      # 지금은 빌드만 한다. Edit Scheme > Test 에 타깃을 추가하면
+      # golf/tennis 처럼 -only-testing:HaruchiFitWatchTests test 로 바꾼다.
+      - name: Watch 앱 빌드
+        run: |
+          xcodebuild -workspace "$WORKSPACE" -scheme "HaruchiFit Watch App" \
+            -destination "id=${{ steps.sim.outputs.watch }}" \
+            CODE_SIGNING_ALLOWED=NO -quiet build
+
+      - name: 컴플리케이션 빌드
+        run: |
+          xcodebuild -workspace "$WORKSPACE" -scheme "HaruchiComplicationExtension" \
             -destination "id=${{ steps.sim.outputs.watch }}" \
             CODE_SIGNING_ALLOWED=NO -quiet build
