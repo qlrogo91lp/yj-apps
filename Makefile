@@ -1,4 +1,4 @@
-APPS := GolfCounter TennisCounter
+APPS := GolfCounter TennisCounter HaruchiFit
 WORKSPACE := YJApps.xcworkspace
 
 .PHONY: help lint format fix kit-test
