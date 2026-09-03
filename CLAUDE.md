@@ -100,6 +100,12 @@ override 붙였다 떼는 절차도 필요 없다.
 - Swift 파일을 생성하거나 삭제하면 Xcode가 폴더를 자동 스캔해서 빌드 대상에 포함/제외한다.
 - `.xcodeproj/project.pbxproj`를 직접 수정하거나 `xcodeproj` gem 등 프로젝트 파일 편집 도구를 사용할 필요가 없다.
 - 파일 이동/생성/삭제는 파일시스템 조작만으로 충분하다.
+- **폴더 rename은 Xcode 네비게이터에서 한다.** Finder에서 바꾸면 pbxproj의 `path` 가 남는다.
+
+**타깃을 새로 만들거나 이름을 바꿀 때는 `docs/superpowers/specs/2026-09-03-xcode-target-conventions.md`
+를 먼저 본다.** 이름·번들 ID 규약, 프로덕트 링크 표, 그리고 **빌드가 통과해도 틀려 있는 항목들**
+(공유 안 된 스킴, rename이 갱신하지 않는 `TEST_HOST`·`INFOPLIST_FILE`, 배열 키를 넣을 수 없는
+`INFOPLIST_KEY_*`, 없으면 크래시하는 HealthKit 권한 문구)의 확인 방법이 거기 있다.
 
 ## Git Workflow
 
