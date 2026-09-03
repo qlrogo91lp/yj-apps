@@ -323,14 +323,15 @@ jobs:
         run: |
           echo "watch=$(.github/scripts/pick-simulator.sh watchOS "$WATCH_DEVICE")" >> "$GITHUB_OUTPUT"
 
-      # HaruchiFitWatchTests 타깃은 있지만 스킴의 test 액션에 연결되어 있지 않아
-      # 지금은 빌드만 한다. Edit Scheme > Test 에 타깃을 추가하면
-      # golf/tennis 처럼 -only-testing:HaruchiFitWatchTests test 로 바꾼다.
-      - name: Watch 앱 빌드
+      # golf/tennis 는 앱 스킴에 -only-testing 을 걸어 테스트한다 — 그쪽 워치 스킴에는
+      # iOS 테스트 타깃까지 들어 있어 좁히지 않으면 중복 실행되기 때문이다.
+      # 하루치 핏은 전용 테스트 스킴을 쓰므로 좁힐 필요가 없다.
+      # 이 스킴이 호스트인 워치 앱까지 빌드하므로 별도 빌드 스텝을 두지 않는다.
+      - name: Watch 앱 테스트
         run: |
-          xcodebuild -workspace "$WORKSPACE" -scheme "HaruchiFit Watch App" \
+          xcodebuild -workspace "$WORKSPACE" -scheme "HaruchiFitWatchTests" \
             -destination "id=${{ steps.sim.outputs.watch }}" \
-            CODE_SIGNING_ALLOWED=NO -quiet build
+            CODE_SIGNING_ALLOWED=NO -quiet test
 
       - name: 컴플리케이션 빌드
         run: |
