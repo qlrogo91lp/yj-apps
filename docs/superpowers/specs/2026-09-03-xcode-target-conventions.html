@@ -1121,6 +1121,39 @@ xcodebuild -workspace YJApps.xcworkspace -scheme "&lt;컴플리케이션&gt;" -d
         <code>.github/workflows/ci.yml</code> 의 경로 필터와 빌드 잡,
         앱 폴더의 <code>.swiftlint.yml</code> · <code>.swiftformat</code> 을 추가한다.
       </p>
+
+      <h3>Xcode 26 신규 프로젝트가 기존 앱과 다른 기본값</h3>
+      <p>
+        새로 만든 프로젝트에는 기존 두 앱에 없는 빌드 설정이 붙는다.
+        세 앱의 <code>SWIFT_VERSION</code> 은 다 같이 <code>5.0</code> 이지만 동시성 기본값이 다르다.
+      </p>
+
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>설정</th><th>신규 (HaruchiFit)</th><th>기존 (Golf·Tennis)</th></tr></thead>
+          <tbody>
+            <tr><td>SWIFT_DEFAULT_ACTOR_ISOLATION</td><td><b>MainActor</b></td><td class="ko">없음 (= nonisolated)</td></tr>
+            <tr><td>SWIFT_APPROACHABLE_CONCURRENCY</td><td><b>YES</b></td><td class="ko">없음</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>
+        <code>SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor</code> 는
+        <strong>타입이 기본으로 MainActor 에 격리된다</strong>는 뜻이다. SwiftUI 앱에는 대체로 맞는
+        기본값이지만, YJKit 타입을 확장하는 상수에 걸린다.
+      </p>
+<pre><code><span class="k">extension</span> WorkoutConfiguration {
+    <span class="c">// nonisolated 가 없으면 이 상수가 MainActor 로 격리된다.</span>
+    <span class="c">// 기본 인자는 호출 지점(비격리일 수 있다)에서 평가되므로 경고가 난다.</span>
+    <span class="k">nonisolated static let</span> strength = WorkoutConfiguration(activityType: .traditionalStrengthTraining,
+                                                           locationType: .indoor)
+}</code></pre>
+      <p>
+        에러가 아니라 <strong>경고</strong>라 빌드는 통과한다.
+        <code>WorkoutConfiguration+Golf.swift</code> 같은 기존 앱 코드를 그대로 옮겨 붙이면 이 차이가
+        드러난다. 값이 <code>Sendable</code> 이면 <code>nonisolated</code> 를 붙이는 것이 맞다.
+      </p>
     </section>
 
   </main>

@@ -404,6 +404,31 @@ xcodebuild -workspace YJApps.xcworkspace -scheme "<컴플리케이션>" -destina
 마지막으로 `Makefile` 의 `APPS`, `.github/workflows/ci.yml` 의 경로 필터·빌드 잡,
 앱 폴더의 `.swiftlint.yml` / `.swiftformat` 을 추가한다.
 
+### Xcode 26 신규 프로젝트가 기존 앱과 다른 기본값
+
+새로 만든 프로젝트에는 기존 두 앱에 없는 빌드 설정이 붙는다. 세 앱의
+`SWIFT_VERSION` 은 다 같이 `5.0` 이지만 동시성 기본값이 다르다.
+
+| 설정 | 신규 (HaruchiFit) | 기존 (Golf·Tennis) |
+|---|---|---|
+| `SWIFT_DEFAULT_ACTOR_ISOLATION` | `MainActor` | 없음 (= `nonisolated`) |
+| `SWIFT_APPROACHABLE_CONCURRENCY` | `YES` | 없음 |
+
+`SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor` 는 **타입이 기본으로 MainActor 에 격리된다**는
+뜻이다. SwiftUI 앱에는 대체로 맞는 기본값이지만, YJKit 타입을 확장하는 상수에 걸린다:
+
+```swift
+extension WorkoutConfiguration {
+    // nonisolated 가 없으면 이 상수가 MainActor 로 격리된다.
+    // 기본 인자는 호출 지점(비격리일 수 있다)에서 평가되므로 경고가 난다.
+    nonisolated static let strength = WorkoutConfiguration(activityType: .traditionalStrengthTraining,
+                                                           locationType: .indoor)
+}
+```
+
+에러가 아니라 **경고**라 빌드는 통과한다. `WorkoutConfiguration+Golf.swift` 같은 기존 앱 코드를
+그대로 옮겨 붙이면 이 차이가 드러난다. 값이 `Sendable` 이면 `nonisolated` 를 붙이는 것이 맞다.
+
 ---
 
 ## 11. 빌드가 통과해도 틀린 것들 — 요약
