@@ -1,6 +1,11 @@
 import SwiftUI
 import WorkoutUI
 
+extension Color {
+    /// #FF9500 — 하루치 핏 브랜드 오렌지.
+    static let brandOrange = Color(red: 1.0, green: 0.58, blue: 0.0)
+}
+
 struct HomeView: View {
     @EnvironmentObject private var viewModel: WorkoutViewModel
 
@@ -15,9 +20,12 @@ struct HomeView: View {
     /// W1 — 지표 / 컨트롤 세로 페이징. 모드 라벨과 전환 행은 후속 플랜(D-M1)이다.
     private var sessionPages: some View {
         TabView {
-            WorkoutMetricsView(metrics: viewModel.metrics, isPaused: viewModel.isPaused)
+            WorkoutMetricsView(metrics: viewModel.metrics,
+                               isPaused: viewModel.isPaused,
+                               statusText: "진행 중 · \(viewModel.mode.title)")
             WorkoutControlsView(
                 isPaused: viewModel.isPaused,
+                modeSelection: modeSelection,
                 onPauseResume: { viewModel.togglePause() },
                 onEnd: { Task { await viewModel.end() } }
             )
@@ -25,12 +33,28 @@ struct HomeView: View {
         .tabViewStyle(.verticalPage)
     }
 
+    /// 전환 행에 넘길 값. **제목과 색을 앱이 소유한다** — `WorkoutUI` 는 근력·유산소를 모른다.
+    private var modeSelection: WorkoutModeSelection {
+        WorkoutModeSelection(
+            options: WorkoutMode.allCases.map {
+                WorkoutModeOption(id: $0.rawValue,
+                                  title: $0.title,
+                                  tint: $0 == .strength ? .brandOrange : .blue)
+            },
+            selectedID: viewModel.mode.rawValue,
+            onSelect: { id in
+                guard let mode = WorkoutMode(rawValue: id) else { return }
+                viewModel.switchMode(to: mode)
+            }
+        )
+    }
+
     /// W0 — 최소 골격. 잔디와 오늘 요약은 후속 플랜이다.
     private var startScreen: some View {
         VStack(spacing: 12) {
             Text("Haruchi Fit")
                 .font(.headline)
-                .foregroundStyle(Color(red: 1.0, green: 0.58, blue: 0.0)) // #FF9500 브랜드 오렌지
+                .foregroundStyle(Color.brandOrange)
             Button("운동 시작") { viewModel.start() }
                 .buttonStyle(.borderedProminent)
         }
