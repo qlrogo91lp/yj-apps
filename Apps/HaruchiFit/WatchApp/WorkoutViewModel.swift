@@ -1,22 +1,8 @@
 import Combine
+import ConnectivityCore
 import Foundation
 import WatchKit
 import WorkoutCore
-
-/// 세션 안의 현재 운동 구간. **HealthKit 은 이 전환을 모른다** — 근력↔유산소처럼
-/// 카테고리가 다른 activityType 전환을 거부하기 때문이다 (아키텍처 2절 · D-M8).
-/// 세션은 근력 하나로 유지되고, 구간은 앱이 소유한다.
-enum WorkoutMode: Int, CaseIterable {
-    case strength
-    case cardio
-
-    var title: String {
-        switch self {
-        case .strength: "근력"
-        case .cardio: "유산소"
-        }
-    }
-}
 
 /// 워치 워크아웃 세션의 소유자.
 /// `WorkoutSessionService` 는 싱글톤이 아니므로 앱 루트에서 한 번 만들어 주입한다 (YJKit README).
@@ -25,12 +11,25 @@ final class WorkoutViewModel: ObservableObject {
     @Published private(set) var isActive = false
     @Published private(set) var isPaused = false
     @Published private(set) var metrics = WorkoutMetrics()
-    @Published private(set) var mode: WorkoutMode = .strength
+    /// 현재 구간. **HealthKit 은 이 전환을 모른다** — 근력↔유산소처럼 카테고리가 다른
+    /// activityType 전환을 거부하기 때문이다 (아키텍처 2절 · D-M8).
+    /// 세션은 근력 하나로 유지되고, 구간은 앱이 소유한다.
+    @Published private(set) var mode: SegmentKind = .strength
 
     let session: WorkoutSessionService
+    private let connectivity: ConnectivityService
 
-    init(session: WorkoutSessionService = WorkoutSessionService(configuration: .strength)) {
+    /// 닫힌 구간들. 열려 있는 마지막 구간은 `openSegmentStart` 로만 들고 있다가 종료 시 닫는다.
+    private var closedSegments: [WorkoutRecordMessage.SegmentPayload] = []
+    /// 현재 구간이 시작된 오프셋(초). 경과시간은 워치가 단일 소스라 여기서도 그 값을 쓴다.
+    private var openSegmentStart = 0
+    private var startedAt = Date()
+
+    init(session: WorkoutSessionService = WorkoutSessionService(configuration: .strength),
+         connectivity: ConnectivityService)
+    {
         self.session = session
+        self.connectivity = connectivity
 
         // 서비스의 개별 @Published 값을 뷰가 쓸 형태로 모아 다시 발행한다.
         // 감싸기만 하면 뷰가 갱신되지 않는다 — 서비스와 이 뷰모델은 서로 다른
@@ -58,18 +57,33 @@ final class WorkoutViewModel: ObservableObject {
         session.startWorkout()
         isActive = true
         mode = .strength
+        closedSegments = []
+        openSegmentStart = 0
+        startedAt = Date()
     }
 
-    /// 구간을 바꾼다. 저장은 아직 하지 않는다 — 전환 시각을 SwiftData 세그먼트로 남기는 것은
-    /// 데이터 모델이 생긴 뒤의 별도 플랜이다. 지금은 화면 표시만 바뀐다.
+    /// 구간을 바꾼다. 열려 있던 구간을 닫고 새 구간을 연다.
     ///
     /// **햅틱이 필수다.** watchOS 커스텀 버튼은 햅틱이 자동으로 나지 않는데, 운동 중에는
     /// 화면을 계속 볼 수 없어 촉각이 유일한 확인 수단이다 (제품 스펙 5절).
-    func switchMode(to newMode: WorkoutMode) {
+    func switchMode(to newMode: SegmentKind) {
         guard newMode != mode else { return }
+        closeOpenSegment(at: session.elapsedSeconds)
         mode = newMode
         // 눈 없이 방향을 구분할 수 있도록 상행·하행을 대칭으로 쓴다.
         WKInterfaceDevice.current().play(newMode == .cardio ? .directionUp : .directionDown)
+    }
+
+    /// 열린 구간을 닫아 `closedSegments` 에 넣는다. 길이가 0이면 버린다 —
+    /// 전환을 연달아 눌렀을 때 빈 구간이 쌓이는 것을 막는다.
+    private func closeOpenSegment(at elapsed: Int) {
+        let duration = elapsed - openSegmentStart
+        if duration > 0 {
+            closedSegments.append(.init(kind: mode,
+                                        startOffset: openSegmentStart,
+                                        durationSeconds: duration))
+        }
+        openSegmentStart = elapsed
     }
 
     /// pause 는 워치가 소유한다. 폰에서 오는 명령은 후속 플랜에서 붙인다.
@@ -81,10 +95,31 @@ final class WorkoutViewModel: ObservableObject {
         }
     }
 
+    /// 세션을 끝내고 기록을 폰으로 보낸다.
+    ///
+    /// **저장은 폰이 한다** — 워치 타깃은 `PersistenceCore` 를 링크하지 않는다 (아키텍처 7절).
+    /// `.reliable` 이라 폰이 꺼져 있어도 `transferUserInfo` 가 큐잉하므로 기록이 유실되지 않는다.
     @discardableResult
     func end() async -> WorkoutResult? {
+        // 마지막 구간은 stopWorkout() 이 타이머를 멈추기 전의 경과시간으로 닫는다.
+        closeOpenSegment(at: session.elapsedSeconds)
+
         let result = await session.stopWorkout()
         isActive = false
+
+        if let result {
+            connectivity.send(
+                WorkoutRecordMessage(healthKitUUID: result.healthKitUUID,
+                                     startedAt: startedAt,
+                                     endedAt: Date(),
+                                     totalSeconds: result.durationSeconds,
+                                     activeCalories: result.caloriesBurned,
+                                     totalCalories: result.totalCaloriesBurned,
+                                     averageHeartRate: result.averageHeartRate,
+                                     segments: closedSegments),
+                via: .reliable
+            )
+        }
         return result
     }
 

@@ -158,7 +158,9 @@ public final class WorkoutSessionService: NSObject, ObservableObject {
             let distance = await collectDistance(builder: builder)
             let steps = await collectSteps(builder: builder)
 
-            try? await builder.finishWorkout()
+            // finishWorkout()이 방금 저장된 HKWorkout을 돌려준다. 앱이 자기 저장소의 기록과
+            // 잇는 매칭 키로 쓰므로 버리지 않는다. 저장 실패 시엔 nil이 되고 앱은 시간으로 맞춘다.
+            let saved = try? await builder.finishWorkout()
 
             DispatchQueue.main.async { self.isWorkoutActive = false }
             return WorkoutResult(durationSeconds: elapsed,
@@ -166,7 +168,8 @@ public final class WorkoutSessionService: NSObject, ObservableObject {
                                  averageHeartRate: heartRate,
                                  totalCaloriesBurned: calories + basal,
                                  distanceMeters: distance,
-                                 steps: steps)
+                                 steps: steps,
+                                 healthKitUUID: saved?.uuid)
         }
 
         private func collectCalories(builder: HKLiveWorkoutBuilder) async -> Double {
