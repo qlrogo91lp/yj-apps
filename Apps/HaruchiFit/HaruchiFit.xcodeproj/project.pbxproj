@@ -92,6 +92,11 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		396475DE304E10DF008DAFD1 /* Shared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Shared;
+			sourceTree = "<group>";
+		};
 		3999D28A3048F77F005343C7 /* iOSApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = iOSApp;
@@ -162,6 +167,7 @@
 		3999D27F3048F77F005343C7 = {
 			isa = PBXGroup;
 			children = (
+				396475DE304E10DF008DAFD1 /* Shared */,
 				3999D54130490A87005343C7 /* HaruchiFit.entitlements */,
 				3999D540304909FD005343C7 /* HaruchiFit Watch App.entitlements */,
 				3999D28A3048F77F005343C7 /* iOSApp */,
@@ -211,6 +217,7 @@
 				3999D2B93048F8B9005343C7 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
+				396475DE304E10DF008DAFD1 /* Shared */,
 				3999D28A3048F77F005343C7 /* iOSApp */,
 			);
 			name = HaruchiFit;
@@ -240,6 +247,7 @@
 				3999D2D83048FA55005343C7 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
+				396475DE304E10DF008DAFD1 /* Shared */,
 				3999D29B3048F8B8005343C7 /* WatchApp */,
 			);
 			name = "HaruchiFit Watch App";

@@ -11,13 +11,17 @@ public struct WorkoutResult: Equatable, Sendable {
     public let distanceMeters: Double
     /// 워크아웃 구간의 걸음수. 종목이 stepCount를 수집하지 않으면 0.
     public let steps: Int
+    /// HealthKit에 저장된 워크아웃의 UUID. 앱이 자기 저장소의 기록을 HealthKit 워크아웃과
+    /// 잇는 매칭 키로 쓴다. 저장에 실패했거나 소비자가 값을 주지 않으면 nil.
+    public let healthKitUUID: UUID?
 
     public init(durationSeconds: Int,
                 caloriesBurned: Double,
                 averageHeartRate: Double?,
                 totalCaloriesBurned: Double = 0,
                 distanceMeters: Double = 0,
-                steps: Int = 0)
+                steps: Int = 0,
+                healthKitUUID: UUID? = nil)
     {
         self.durationSeconds = durationSeconds
         self.caloriesBurned = caloriesBurned
@@ -25,5 +29,6 @@ public struct WorkoutResult: Equatable, Sendable {
         self.totalCaloriesBurned = totalCaloriesBurned
         self.distanceMeters = distanceMeters
         self.steps = steps
+        self.healthKitUUID = healthKitUUID
     }
 }

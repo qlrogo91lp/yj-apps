@@ -36,15 +36,16 @@ struct HomeView: View {
     /// 전환 행에 넘길 값. **제목과 색을 앱이 소유한다** — `WorkoutUI` 는 근력·유산소를 모른다.
     private var modeSelection: WorkoutModeSelection {
         WorkoutModeSelection(
-            options: WorkoutMode.allCases.map {
-                WorkoutModeOption(id: $0.rawValue,
-                                  title: $0.title,
-                                  tint: $0 == .strength ? .brandOrange : .blue)
+            options: SegmentKind.allCases.enumerated().map { index, kind in
+                WorkoutModeOption(id: index,
+                                  title: kind.title,
+                                  tint: kind == .strength ? .brandOrange : .blue)
             },
-            selectedID: viewModel.mode.rawValue,
-            onSelect: { id in
-                guard let mode = WorkoutMode(rawValue: id) else { return }
-                viewModel.switchMode(to: mode)
+            selectedID: SegmentKind.allCases.firstIndex(of: viewModel.mode) ?? 0,
+            onSelect: { index in
+                let kinds = SegmentKind.allCases
+                guard kinds.indices.contains(index) else { return }
+                viewModel.switchMode(to: kinds[index])
             }
         )
     }
