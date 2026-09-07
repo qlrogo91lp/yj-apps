@@ -9,8 +9,8 @@
 **Tech Stack:** Swift 6 / SwiftUI · iOS 17.0 · watchOS 10.0 · HealthKit · SwiftData(+CloudKit) · WidgetKit · Xcode 16 FileSystemSynchronized 프로젝트
 
 **Spec:**
-- `docs/superpowers/specs/2026-09-02-haruchi-fit-product-spec.md` — 무엇을 만들지
-- `docs/superpowers/specs/2026-09-02-haruchi-fit-architecture.md` — 어떻게 만들지 (결정 사항은 6절 D-M1~D-M7)
+- `Apps/HaruchiFit/docs/superpowers/specs/2026-09-02-haruchi-fit-product-spec.md` — 무엇을 만들지
+- `Apps/HaruchiFit/docs/superpowers/specs/2026-09-02-haruchi-fit-architecture.md` — 어떻게 만들지 (결정 사항은 6절 D-M1~D-M7)
 
 ## 이 플랜의 범위
 
@@ -617,7 +617,7 @@ WorkoutMetricsView·WorkoutControlsView 로 세션 화면을 구성한다.
 
 **Files:**
 - Modify: `Apps/HaruchiFit/WatchApp/WorkoutViewModel.swift`
-- Modify: `docs/superpowers/specs/2026-09-02-haruchi-fit-architecture.md` — 2절·3절에 결과 반영
+- Modify: `Apps/HaruchiFit/docs/superpowers/specs/2026-09-02-haruchi-fit-architecture.md` — 2절·3절에 결과 반영
 
 **Interfaces:**
 - Consumes: Task 5의 `WorkoutViewModel`
@@ -842,7 +842,7 @@ activityType이 근력(`.traditionalStrengthTraining` = **50**) → 유산소(`.
 
 - [ ] **Step 7: 결과를 아키텍처 문서에 반영한다**
 
-`docs/superpowers/specs/2026-09-02-haruchi-fit-architecture.md`를 고친다.
+`Apps/HaruchiFit/docs/superpowers/specs/2026-09-02-haruchi-fit-architecture.md`를 고친다.
 
 **성공했다면** 2절의 "검증 필요" 블록을 실측 결과로 바꾼다 — 확인한 SDK 시그니처,
 구간 수, 시각 정확도, 검증한 watchOS 버전과 기기를 적는다. 폴백 문단은 남기되
@@ -878,7 +878,7 @@ Expected: `** BUILD SUCCEEDED **`
 - [ ] **Step 9: 커밋**
 
 ```bash
-git add -A Apps/HaruchiFit docs/superpowers/specs/2026-09-02-haruchi-fit-architecture.md
+git add -A Apps/HaruchiFit
 git commit -m "📝 HKWorkoutActivity 구간 기록을 실기기로 검증
 
 세그먼트를 HealthKit 에 남길 수 있는지 확인하고 결과를 아키텍처 문서

@@ -434,7 +434,7 @@ Apps/HaruchiFit/
   `SegmentSpike.swift` · `SpikeView.swift` · `HomeView`의 진입 버튼
   (플랜 Task 6 Step 8). **코드 변경이므로 브랜치 + PR**
 - [ ] `WorkoutUI` 기본값 파라미터 추가 (D-M1) — 색 처리는 실제 화면 보고 결정
-- [ ] 구현 플랜 작성 → `docs/superpowers/plans/`
+- [ ] 구현 플랜 작성 → `Apps/HaruchiFit/docs/superpowers/plans/`
 
 > `WorkoutCore` 세그먼트 확장은 목록에서 빠졌다 — 폴백 확정으로 불필요해졌다 (2절).
 
