@@ -9,7 +9,7 @@ struct HaruchiFitWatchApp: App {
 
     var body: some Scene {
         WindowGroup {
-            HomeView()
+            WorkoutRootView()
                 .environmentObject(viewModel)
                 .task { _ = await viewModel.requestAuthorization() }
         }

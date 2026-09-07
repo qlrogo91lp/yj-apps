@@ -2,8 +2,11 @@ import SwiftUI
 
 /// 세션의 구간 구성을 **길이 비율대로** 보여주는 가로 바.
 ///
-/// `Shared/` 에 두는 이유는 iOS 기록 상세가 같은 바를 쓰기 때문이다 (제품 스펙 04a).
 /// 세그먼트는 이 앱의 유일한 차별점이라 어느 화면에서도 생략하지 않는다.
+///
+/// **지금은 워치 요약 화면 전용이다.** iOS 기록 상세도 같은 바를 쓰지만(제품 스펙 04a)
+/// 그건 Phase 3 라, 실제로 두 곳에서 필요해질 때 `WorkoutUI/Shared/` 로 올리거나
+/// 복제한다 — 앱의 `Shared/` 는 UI 를 두는 자리가 아니다 (루트 `CLAUDE.md`).
 struct SegmentBar: View {
     let segments: [WorkoutRecordMessage.SegmentPayload]
     var height: CGFloat = 8

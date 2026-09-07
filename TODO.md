@@ -97,7 +97,7 @@ Localizable(2·5·6) / 워치 `WorkoutSessionViewModel`(3·7)
 |---|---|---|---|
 | W2 | 종료 후 요약 화면 (저장 / 버리기) | [PR #12](https://github.com/qlrogo91lp/yj-apps/pull/12) **머지됨** · 실기기 검증만 남음 | [플랜](Apps/HaruchiFit/docs/plans/watch/2026/2026-09-07-haruchi-fit-w2-summary.md) |
 | W0 | 홈 시작 유형 토글 (근력 / 유산소) | **다음** · 플랜 완료 · 구현 대기 | [플랜](Apps/HaruchiFit/docs/plans/watch/2026/2026-09-08-haruchi-fit-w0-start-kind.md) |
-| WC | 컴플리케이션 — 세션 상태만 | 로드맵만 · 플랜 대기 (선행: W0) | 로드맵 Phase 1 ② · 로컬 스냅샷 스토어 필요 |
+| WC | 컴플리케이션 — 세션 상태만 | 로드맵만 · 플랜 대기 (선행: W0) | 로드맵 Phase 1 ② · **착수 전 Xcode 에서 컴플리케이션 타깃에 `Shared` 추가 필요** (앱 `CLAUDE.md` 참고) |
 
 **Phase 1 이 끝나면 폰을 한 번도 안 열어도 흐름 A(해피패스)가 완결된다.**
 그 뒤 Phase 2(잔디 집계 · HealthKit import) → Phase 3~5(iOS 화면 12개)로 간다.
@@ -108,6 +108,8 @@ Localizable(2·5·6) / 워치 `WorkoutSessionViewModel`(3·7)
 - [ ] **W2 실기기 검증 4항목** — 햅틱 5종, **버리기 후 건강 앱에서도 사라지는지** (플랜 "실기기" 절).
       끝나면 위 W2 행에 취소선
 - [ ] W0 플랜 실행 — Task 1 은 TDD, Task 2 는 뷰라 실기기 확인
+- [ ] WC 착수 전 — Xcode 에서 `HaruchiComplicationExtension` 타깃에 `Shared` 폴더 추가
+      (지금은 워치 앱·iOS 앱에만 들어 있어 스냅샷 스토어를 `Shared/` 에 두면 컴파일이 안 된다)
 
 > **아직 실기기에서 한 번도 안 돈 경로가 있다** — `HKHealthStore.delete`. 시뮬레이터에서는 실행되지
 > 않고 테스트는 "지워달라고 요청했다"까지만 보장한다. 워치에서 거부되면 W2 플랜 1절 B안
