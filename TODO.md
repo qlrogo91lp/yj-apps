@@ -91,12 +91,12 @@ Localizable(2·5·6) / 워치 `WorkoutSessionViewModel`(3·7)
 ## HaruchiFit — 첫 출시 전 (Phase 1 진행 중)
 
 순서·진행 상태의 단일 출처는 [로드맵](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-07-haruchi-fit-roadmap.md)이다.
-여기엔 **지금 손대는 것과 바로 다음**만 적는다. 남은 15개 전체는 로드맵에 있다.
+여기엔 **지금 손대는 것과 바로 다음**만 적는다. 남은 13개 전체는 로드맵에 있다.
 
 | # | 항목 | 상태 | 문서 |
 |---|---|---|---|
-| W2 | 종료 후 요약 화면 (저장 / 버리기) | [PR #12](https://github.com/qlrogo91lp/yj-apps/pull/12) 열림 · **실기기 검증 대기** | [플랜](Apps/HaruchiFit/docs/plans/watch/2026/2026-09-07-haruchi-fit-w2-summary.md) |
-| W0 | 홈 시작 유형 토글 (근력 / 유산소) | **다음** · 플랜 대기 | 로드맵 Phase 1 ① |
+| W2 | 종료 후 요약 화면 (저장 / 버리기) | [PR #12](https://github.com/qlrogo91lp/yj-apps/pull/12) **머지됨** · 실기기 검증만 남음 | [플랜](Apps/HaruchiFit/docs/plans/watch/2026/2026-09-07-haruchi-fit-w2-summary.md) |
+| W0 | 홈 시작 유형 토글 (근력 / 유산소) | **다음** · 플랜 완료 · 구현 대기 | [플랜](Apps/HaruchiFit/docs/plans/watch/2026/2026-09-08-haruchi-fit-w0-start-kind.md) |
 | WC | 컴플리케이션 — 세션 상태만 | 로드맵만 · 플랜 대기 (선행: W0) | 로드맵 Phase 1 ② · 로컬 스냅샷 스토어 필요 |
 
 **Phase 1 이 끝나면 폰을 한 번도 안 열어도 흐름 A(해피패스)가 완결된다.**
@@ -104,12 +104,14 @@ Localizable(2·5·6) / 워치 `WorkoutSessionViewModel`(3·7)
 
 ### 집 맥북에서 할 것
 
-- [x] W2 구현 — ViewModel 테스트 7개 통과. `BUNDLE_LOADER` 누락도 함께 고침
-- [ ] W2 실기기 검증 4항목 — 햅틱 5종, **버리기 후 건강 앱에서도 사라지는지** (플랜 "실기기" 절)
-- [ ] W2 실기기 확인 끝나면 [PR #12](https://github.com/qlrogo91lp/yj-apps/pull/12) 머지 → 이 행 취소선
+- [x] W2 구현 — ViewModel 테스트 7개 통과. `BUNDLE_LOADER` 누락도 함께 고침. PR #12 머지
+- [ ] **W2 실기기 검증 4항목** — 햅틱 5종, **버리기 후 건강 앱에서도 사라지는지** (플랜 "실기기" 절).
+      끝나면 위 W2 행에 취소선
+- [ ] W0 플랜 실행 — Task 1 은 TDD, Task 2 는 뷰라 실기기 확인
 
-> 막히면 멈출 지점 — `HKHealthStore.delete` 가 워치에서 거부되면 플랜 1절 B안(`WorkoutCore` 에
-> 보류 API)으로 가야 한다. 3개 앱 공유 패키지라 **그때 다시 승인받는다.**
+> **아직 실기기에서 한 번도 안 돈 경로가 있다** — `HKHealthStore.delete`. 시뮬레이터에서는 실행되지
+> 않고 테스트는 "지워달라고 요청했다"까지만 보장한다. 워치에서 거부되면 W2 플랜 1절 B안
+> (`WorkoutCore` 에 보류 API)으로 가야 하고, 3개 앱 공유 패키지라 **그때 다시 승인받는다.**
 
 ## GolfCounter
 

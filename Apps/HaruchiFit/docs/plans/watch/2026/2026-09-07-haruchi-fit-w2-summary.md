@@ -1,7 +1,7 @@
 # W2 요약 화면 — 구현 플랜
 
 작성일: 2026-09-07
-상태: **검토 대기**
+상태: **구현 완료** — PR #12 머지 (`1ebe5c0`). 실기기 검증 4항목만 남음
 선행 문서: `specs/2026-09-02-haruchi-fit-product-spec.md` W2절 · `specs/2026-09-02-haruchi-fit-architecture.md`
 선행 작업: PR #9 (세그먼트 SwiftData 저장) — `868d172`
 
