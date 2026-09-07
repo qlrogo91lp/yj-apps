@@ -17,11 +17,11 @@
 | 1 | WorkoutShareUI 붙이기 (인스타 스토리 공유) | 플랜 완료 · 구현 대기 | [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-07-workout-share-button.md) · [Kit 사용법](Packages/YJKit/README.md#workoutshareui-사용법) |
 | 5 | String Catalog(xcstrings) 전환 | 플랜 완료 · 구현 대기 | [플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-07-string-catalog-migration.md) |
 | 3 | 햅틱 (워치 전용) | 플랜 완료 · 구현 대기 | [플랜](Apps/TennisCounter/docs/plans/watch/2026/2026-09-07-match-haptics.md) — 설정 연동은 #8 때 `MatchHaptics.play` 첫 줄에서 |
-| 7 | Firebase Crashlytics (iOS + 워치, 익스텐션 제외) | 설계 합의 · 문서 작성 중 | 스펙 `Packages/YJKit/docs/specs/shared/2026/2026-09-07-crash-reporting-design.md` → YJKit 플랜 `Packages/YJKit/docs/plans/shared/2026/2026-09-07-monitoring-core.md` → Ralli 플랜 `Apps/TennisCounter/docs/plans/shared/2026/2026-09-07-crashlytics-integration.md` (선행: YJKit 플랜) |
+| 7 | Firebase Crashlytics (iOS + 워치, 익스텐션 제외) | 스펙·플랜 완료 · 구현 대기 | [스펙](Packages/YJKit/docs/specs/shared/2026/2026-09-07-crash-reporting-design.md) → [YJKit 플랜](Packages/YJKit/docs/plans/shared/2026/2026-09-07-monitoring-core.md) (Task 0 스파이크 → PR 머지) → [Ralli 플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-07-crashlytics-integration.md) |
 | 2 | iOS 통계 UI 리디자인 | **집 맥북 로컬 워크트리 확인** | [Notion: 통계 페이지 기능 개선 (1.1.6 이후)](https://app.notion.com/p/3bacd15e48f180b3a810e95f63854aa6) |
 | 4 | 크라운 점수 입력 (워치, 위=나 아래=상대) | 플랜 완료 · 구현 대기 (선행: #3 햅틱) | [플랜](Apps/TennisCounter/docs/plans/watch/2026/2026-09-07-crown-scoring.md) — 온보딩(#6) 항목 하나 파생 |
 | 6 | 온보딩 4페이지 (스크린샷 3 + 목록 1, iOS 만) | 스펙·플랜 완료 · 구현 대기 (선행: #1·#4) | [스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-09-07-onboarding-design.md) · [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-07-onboarding.md) — 뼈대(Task 1~3)는 먼저, 스크린샷(Task 4)만 뒤로 |
-| 8 | 설정 페이지 + 다른 앱 노출 | 아이디어 단계 | 진입점 메모: 햅틱 on/off(`MatchHaptics.play`), 크래시 수집 on/off(`setCrashlyticsCollectionEnabled`) |
+| 8 | 설정 페이지 + 다른 앱 노출 | **논의 필요 — 아직 브레인스토밍 전** | 아래 "남은 논의" 참고 |
 
 ### 집 맥북에서 할 것
 
@@ -37,11 +37,21 @@
 - [ ] 6번 — 뼈대(Task 1~3) 먼저, #1·#4 끝난 뒤 스크린샷 3장 × ko/en (Task 4)
 - [ ] Xcode Organizer › Crashes 에서 Ralli 1.1.7 한 번 열어보기 (분석 공유 켠 사용자 표본만 보임)
 
+### 남은 논의 — #8 설정 페이지 (2026-09-07 시점)
+
+아직 아이디어 단계. 다음 세션에서 브레인스토밍부터 시작한다. 지금까지 다른 항목에서 **설정 페이지로 미뤄 둔 것들**:
+
+- 햅틱 on/off — 진입점 `MatchHaptics.play(_:)` 첫 줄. 전체 하나 또는 3그룹(점수 / 저장 알림 / 일시정지 알림). 값을 워치 로컬에 둘지 iOS 에서 `applicationContext` 로 동기화할지 미정
+- 크래시 수집 on/off — `Crashlytics.setCrashlyticsCollectionEnabled(false)`. Kit 에 래퍼 추가 필요
+- "사용법 다시 보기" — `OnboardingView` 를 시트로 재사용, 플래그는 안 건드림
+- 다른 앱(골프·하루치) 노출 — 어떤 형태로(App Store 링크 / 배너 / "yj 의 다른 앱" 섹션), 어느 위치에. 완전 미논의
+- 열린 질문: iOS 설정 탭을 4번째 탭으로 둘지 요약 탭 우상단 기어로 둘지 / 워치에도 설정 화면을 둘지 / 모드 옵션(No-Ad 등) 설명을 여기 둘지 모드 화면 ⓘ 로 둘지
+
 ## YJKit
 
 | 항목 | 상태 | 문서 |
 |---|---|---|
-| `MonitoringCore` (CrashReporting 프로토콜 + Crashlytics 구현) | 설계 합의 · 문서 작성 중 | 위 Ralli #7 과 같은 스펙·플랜. 골프·하루치 연동은 별도 |
+| `MonitoringCore` (CrashReporting 프로토콜 + Crashlytics 구현) | 스펙·플랜 완료 · 구현 대기 | 위 Ralli #7 과 같은 문서. 골프·하루치 연동은 별도 (Firebase 프로젝트 앱마다 새로) |
 
 ## GolfCounter · HaruchiFit
 
