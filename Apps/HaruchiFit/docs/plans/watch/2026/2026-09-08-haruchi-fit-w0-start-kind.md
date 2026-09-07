@@ -35,26 +35,27 @@ HealthKit 은 카테고리가 다른 activityType 전환을 거부한다 (`Code=
 
 | 파일 | 할 일 |
 |---|---|
-| `Apps/HaruchiFit/watchosTests/RecordFixture.swift` | **신규** — 테스트용 `WorkoutRecordMessage` 생성기. 두 스위트가 함께 쓴다 |
-| `Apps/HaruchiFit/watchosTests/WorkoutViewModelTests.swift` | 수정 — 자체 `makeRecord` 를 fixture 로 교체 |
-| `Apps/HaruchiFit/watchosTests/StartKindTests.swift` | **신규** — 기본값·토글·영속·가드 5개 |
-| `Apps/HaruchiFit/WatchApp/WorkoutViewModel.swift` | 수정 — `defaults` 주입, 생성 시 로드, `toggleStartKind()`, `start()` 에서 `mode` 덮어쓰기 제거 |
-| `Apps/HaruchiFit/WatchApp/HomeView.swift` | 수정 — `startScreen` 에 토글 행 + CTA 오렌지 고정 |
+| `Apps/HaruchiFit/watchosTests/Support/RecordFixture.swift` | **신규** — 테스트용 `WorkoutRecordMessage` 생성기. 두 스위트가 함께 쓴다 |
+| `Apps/HaruchiFit/watchosTests/Workout/WorkoutViewModelTests.swift` | 수정 — 자체 `makeRecord` 를 fixture 로 교체 |
+| `Apps/HaruchiFit/watchosTests/Workout/StartKindTests.swift` | **신규** — 기본값·토글·영속·가드 5개 |
+| `Apps/HaruchiFit/WatchApp/Features/Workout/WorkoutViewModel.swift` | 수정 — `defaults` 주입, 생성 시 로드, `toggleStartKind()`, `start()` 에서 `mode` 덮어쓰기 제거 |
+| `Apps/HaruchiFit/WatchApp/Features/Workout/Start/StartView.swift` | 수정 — 토글 행 + CTA 오렌지 고정 |
 | `Apps/HaruchiFit/docs/specs/.../2026-09-07-haruchi-fit-roadmap.md` | 수정 — Phase 1 에서 W0 를 완료로 |
 | `TODO.md` | 수정 — 하루치 행 갱신 |
 
-토글 행은 **`HomeView` 안의 private 계산 속성**으로 둔다. `startScreen` 에서만 쓰는 15줄이라 타입을
-새로 만들 이유가 없다 (루트 `CLAUDE.md` 의 private helper 예외).
+토글 행은 **`StartView` 안의 private 계산 속성**으로 둔다. 그 화면에서만 쓰는 15줄이라 타입을
+새로 만들 이유가 없다 (루트 `CLAUDE.md` 의 private helper 예외). 더 커지면
+`Start/Components/` 로 뺀다.
 
 ---
 
 ## Task 1 — 시작 유형을 기억하고 토글한다
 
 **Files:**
-- Create: `Apps/HaruchiFit/watchosTests/RecordFixture.swift`
-- Modify: `Apps/HaruchiFit/watchosTests/WorkoutViewModelTests.swift`
-- Create: `Apps/HaruchiFit/watchosTests/StartKindTests.swift`
-- Modify: `Apps/HaruchiFit/WatchApp/WorkoutViewModel.swift`
+- Create: `Apps/HaruchiFit/watchosTests/Support/RecordFixture.swift`
+- Modify: `Apps/HaruchiFit/watchosTests/Workout/WorkoutViewModelTests.swift`
+- Create: `Apps/HaruchiFit/watchosTests/Workout/StartKindTests.swift`
+- Modify: `Apps/HaruchiFit/WatchApp/Features/Workout/WorkoutViewModel.swift`
 
 **Produces:** `WorkoutViewModel.toggleStartKind()` · `init(..., defaults: UserDefaults = .standard)`
 · `RecordFixture.make(healthKitUUID:totalSeconds:)`
@@ -65,7 +66,7 @@ HealthKit 은 카테고리가 다른 activityType 전환을 거부한다 (`Code=
 같은 값이 필요해 중복이 생긴다.
 
 ```swift
-// watchosTests/RecordFixture.swift
+// watchosTests/Support/RecordFixture.swift
 import Foundation
 @testable import HaruchiFit_Watch_App
 
@@ -99,12 +100,12 @@ WATCH=$(.github/scripts/pick-simulator.sh watchOS '^Apple Watch')
 xcodebuild -workspace YJApps.xcworkspace -scheme "HaruchiFitWatchTests" -destination "id=$WATCH" test
 ```
 
-기대: `** TEST SUCCEEDED **`, 8개 통과. 여기서 깨지면 옮기다 흘린 것이다.
+기대: `** TEST SUCCEEDED **`, 7개 통과. 여기서 깨지면 옮기다 흘린 것이다.
 
 - [ ] **Step 4: 실패하는 테스트를 쓴다**
 
 ```swift
-// watchosTests/StartKindTests.swift
+// watchosTests/Workout/StartKindTests.swift
 import Foundation
 @testable import HaruchiFit_Watch_App
 import Testing
@@ -244,12 +245,12 @@ WATCH=$(.github/scripts/pick-simulator.sh watchOS '^Apple Watch')
 xcodebuild -workspace YJApps.xcworkspace -scheme "HaruchiFitWatchTests" -destination "id=$WATCH" test
 ```
 
-기대: `** TEST SUCCEEDED **`, **13개 통과** (기존 8 + 신규 5).
+기대: `** TEST SUCCEEDED **`, **12개 통과** (기존 7 + 신규 5).
 
 - [ ] **Step 8: 커밋**
 
 ```bash
-git add Apps/HaruchiFit/WatchApp/WorkoutViewModel.swift Apps/HaruchiFit/watchosTests
+git add Apps/HaruchiFit/WatchApp/Features/Workout/WorkoutViewModel.swift Apps/HaruchiFit/watchosTests
 git commit -m "✨ 시작 유형을 기억하고 첫 구간을 그 유형으로 연다 (W0)"
 ```
 
@@ -258,17 +259,20 @@ git commit -m "✨ 시작 유형을 기억하고 첫 구간을 그 유형으로 
 ## Task 2 — 홈 화면에 토글 행을 붙인다
 
 **Files:**
-- Modify: `Apps/HaruchiFit/WatchApp/HomeView.swift`
+- Modify: `Apps/HaruchiFit/WatchApp/Features/Workout/Start/StartView.swift`
 
 **Consumes:** Task 1 의 `viewModel.toggleStartKind()` · `viewModel.mode`
 
 뷰는 테스트하지 않는다 (앱 `CLAUDE.md`). 확인은 프리뷰와 실기기다.
 
-- [ ] **Step 1: `startScreen` 을 바꾼다**
+- [ ] **Step 1: `StartView` 를 바꾼다**
 
 ```swift
-    /// W0 — 시작 유형 토글까지. 잔디와 오늘 요약은 후속 플랜이다.
-    private var startScreen: some View {
+/// W0 — 시작 유형 토글까지. 잔디와 오늘 요약은 후속 플랜이다.
+struct StartView: View {
+    @ObservedObject var viewModel: WorkoutViewModel
+
+    var body: some View {
         VStack(spacing: 10) {
             Text("Haruchi Fit")
                 .font(.headline)
@@ -297,6 +301,7 @@ git commit -m "✨ 시작 유형을 기억하고 첫 구간을 그 유형으로 
         }
         .buttonStyle(.plain)
     }
+}
 ```
 
 `.tint(Color.brandOrange)` 는 새로 붙는다 — 지금 CTA 는 시스템 기본 강조색이라 스펙의
@@ -314,7 +319,7 @@ xcodebuild -workspace YJApps.xcworkspace -scheme "HaruchiFit Watch App" -destina
 - [ ] **Step 3: 커밋**
 
 ```bash
-git add Apps/HaruchiFit/WatchApp/HomeView.swift
+git add Apps/HaruchiFit/WatchApp/Features/Workout/Start/StartView.swift
 git commit -m "✨ 홈에 시작 유형 토글 행을 붙인다 (W0)"
 ```
 

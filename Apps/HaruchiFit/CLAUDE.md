@@ -58,15 +58,33 @@ xcodebuild -workspace YJApps.xcworkspace -scheme "HaruchiComplicationExtension" 
 ## Architecture & Conventions
 
 ```
-iOSApp/           iOS 앱
-WatchApp/         watchOS 앱
-ComplicationApp/  컴플리케이션 익스텐션
-Shared/           워치 앱 ↔ 컴플리케이션 공유 (스냅샷·표시 상태)
-watchosTests/     Swift Testing
+WatchApp/
+  WatchApp.swift                    진입점
+  BrandColor.swift                  색 토큰 (타깃마다 따로 둔다 — 골프·테니스도 그렇다)
+  Features/Workout/                 단계별 화면 + 뷰모델
+    WorkoutRootView.swift           phase 분기만
+    WorkoutViewModel.swift · SessionPhase.swift
+    Start/ · Session/ · Summary/    각 단계의 화면
+    Summary/Components/             그 화면 전용 순수 컴포넌트
+  Services/                         시스템 프레임워크 래퍼와 그 프로토콜
+iOSApp/
+  iOSApp.swift · ContentView.swift  ContentView 는 저장 확인용 임시 화면이다
+  Services/
+ComplicationApp/                    컴플리케이션 익스텐션
+Shared/                             워치 앱 ↔ iOS 앱 공유
+  Persistence/                      SwiftData @Model
+  Services/                         전송 메시지
+watchosTests/
+  Workout/ · Support/               테스트는 대상 폴더를 따라간다
 ```
 
-- **`Shared/` 가 있는 이유** — 위젯 타깃에는 테스트 타깃을 붙일 수 없다. 컴플리케이션의 표시
-  로직을 `Shared/` 에 두고 워치 테스트 타깃에서 검증한다 (GolfCounter 와 같은 구조).
+- **`Shared/` 에 UI 를 두지 않는다.** 루트 `CLAUDE.md` 규약이고, 골프·테니스의 `Shared/` 에도
+  SwiftUI 파일이 하나도 없다. 워치·iOS 가 같은 뷰를 써야 하면 `Packages/YJKit` 의 `WorkoutUI`
+  프로덕트로 올리거나(거기 `Shared/`·`Watch/`·`iOS/` 로 갈라 둔 자리가 있다) 복제한다.
+- ⚠️ **`Shared/` 는 컴플리케이션 타깃에 들어 있지 않다** (워치 앱 + iOS 앱만). 골프는 들어 있어
+  `Shared/Models/ComplicationState.swift` 로 표시 로직을 공유하고 워치 테스트로 검증하는데,
+  하루치는 그 구조가 아직 없다. **WC 작업 전에 Xcode 에서 컴플리케이션 타깃에 `Shared` 를
+  추가해야 한다** — 안 그러면 스냅샷 스토어를 `Shared/` 에 둔 순간 컴파일이 안 된다.
 - pbxproj는 Xcode 16 `PBXFileSystemSynchronizedRootGroup` — 파일 생성/삭제는 파일시스템 조작만으로 반영된다.
 - 폴더·컴포넌트 계층·Import·네이밍 컨벤션은 루트 `CLAUDE.md` 의 **앱 코드 컨벤션**을 따른다
 - 테스트: Swift Testing, ViewModel 우선, View는 테스트하지 않는다.
