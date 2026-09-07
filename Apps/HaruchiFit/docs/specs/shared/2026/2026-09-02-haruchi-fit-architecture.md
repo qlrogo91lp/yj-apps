@@ -428,15 +428,19 @@ Apps/HaruchiFit/
 
 미결 항목은 전부 결정됐다 (6절). 세그먼트 검증도 끝났다 (2절). 남은 것은 구현이다.
 
-- [x] **`HKWorkoutActivity` 실기기 검증** (2절) — 이종 전환 불가 확인, 폴백 확정 (2026-09-03)
-- [x] `Apps/HaruchiFit/` 타깃 3개 생성 + 워크스페이스 스킴 공유 + CI 경로 필터 등록
-- [ ] **스파이크 코드 제거** ← 여기가 다음 시작점.
-  `SegmentSpike.swift` · `SpikeView.swift` · `HomeView`의 진입 버튼
-  (플랜 Task 6 Step 8). **코드 변경이므로 브랜치 + PR**
-- [ ] `WorkoutUI` 기본값 파라미터 추가 (D-M1) — 색 처리는 실제 화면 보고 결정
-- [ ] 구현 플랜 작성 → `Apps/HaruchiFit/docs/plans/`
+이 문서가 설계 전제로 삼은 선행 작업은 **전부 끝났다.**
+
+- **`HKWorkoutActivity` 실기기 검증** (2절) — 이종 전환 불가 확인, 폴백 확정 (2026-09-03)
+- 타깃 3개 생성 + 워크스페이스 스킴 공유 + CI 경로 필터 등록 (PR #6)
+- 스파이크 코드 제거 (PR #7)
+- `WorkoutUI` 기본값 파라미터 추가 (D-M1) — `WorkoutMetricsView`·`WorkoutControlsView` 확장 +
+  `WorkoutModeSelection` 신설 (PR #8)
 
 > `WorkoutCore` 세그먼트 확장은 목록에서 빠졌다 — 폴백 확정으로 불필요해졌다 (2절).
+
+**남은 작업의 순서와 진행 상태는 여기 두지 않는다.**
+[로드맵](2026-09-07-haruchi-fit-roadmap.md)이 단일 출처다 — 이 절과 두 군데로 나뉘어 있던 탓에
+한쪽이 낡는 일이 실제로 있었다. 이 문서는 *어떻게 만드는가*(설계)만 담는다.
 
 ### 검증이 남은 항목
 

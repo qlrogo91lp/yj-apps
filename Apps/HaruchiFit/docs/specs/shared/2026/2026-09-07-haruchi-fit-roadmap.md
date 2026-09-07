@@ -2,7 +2,7 @@
 
 작성일: 2026-09-07
 상태: **살아있는 문서** — 작업이 끝날 때마다 갱신한다
-선행 문서: `specs/2026-09-02-haruchi-fit-product-spec.md` · `specs/2026-09-02-haruchi-fit-architecture.md`
+선행 문서: [제품 스펙](2026-09-02-haruchi-fit-product-spec.md) · [아키텍처](2026-09-02-haruchi-fit-architecture.md)
 
 ---
 
@@ -53,7 +53,7 @@
 
 | # | 작업 | 스펙 | 비고 |
 |---|---|---|---|
-| 1 | **W2 요약** | W2절 | **플랜 완료** — `2026-09-07-haruchi-fit-w2-summary.md`. 자동 저장이라는 임시 상태를 닫는다 |
+| 1 | **W2 요약** | W2절 | **플랜 완료** — [플랜](../../../plans/watch/2026/2026-09-07-haruchi-fit-w2-summary.md). 자동 저장이라는 임시 상태를 닫는다 |
 | 2 | W0 홈 토글 | W0절 | 시작 유형(근력/유산소) 토글. 마지막 선택 기억. 세그먼트 초기값을 정하므로 W2 뒤 |
 | 3 | WC 컴플리케이션 | WC절 · D-M4 | 세션 상태만. 집계 값 없음. **로컬 스냅샷 스토어** 필요 (골프 `RoundSnapshotStore` 대응) |
 

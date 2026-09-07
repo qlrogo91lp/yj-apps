@@ -9,9 +9,6 @@
 `feat/ralli` 은 PR #11 로 머지되어 더 쓰지 않는다. 새 작업은 항목별 브랜치를 판다.
 트랙 A·B 를 동시에 굴리려면 워크트리 2개가 필요하다 — 순차로 가면 메인 체크아웃 하나로 충분하다.
 
-> `feature/tennis-counter` · `feature/golf-counter` · `feature/haruchi-fit` 워크트리 3개가
-> `~/orca/workspaces/yj-apps/` 에 남아 있다. 셋 다 원격에 반영 끝났으므로 정리해도 된다.
-
 ## Ralli — 다음 출시 (현재 1.1.7 (26))
 
 2026-09-07 상태 점검 기준. 파일 충돌을 실제로 따져 **2 트랙 병렬**로 재편했다.
@@ -73,7 +70,7 @@ Localizable(2·5·6) / 워치 `WorkoutSessionViewModel`(3·7)
 **아무 때나**
 
 - [ ] Xcode Organizer › Crashes 에서 Ralli 1.1.7 한 번 열어보기 (분석 공유 켠 사용자 표본만 보임)
-- [ ] `~/orca/workspaces/yj-apps/` 워크트리 3개 정리 (전부 원격 반영 끝남)
+- [x] `~/orca/workspaces/yj-apps/` 워크트리 3개 정리 — 워크트리·브랜치 모두 제거 완료
 
 ### 남은 논의 — #8 설정 페이지 (2026-09-07 시점)
 
@@ -93,7 +90,7 @@ Localizable(2·5·6) / 워치 `WorkoutSessionViewModel`(3·7)
 
 ## GolfCounter · HaruchiFit
 
-아직 없음. 하루치 로드맵은 [여기](Apps/HaruchiFit/docs/plans/shared/2026/2026-09-07-haruchi-fit-roadmap.md).
+아직 없음. 하루치 로드맵은 [여기](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-07-haruchi-fit-roadmap.md).
 
 ## 규약 참고
 
