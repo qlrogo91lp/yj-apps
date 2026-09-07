@@ -114,6 +114,58 @@ override 붙였다 떼는 절차도 필요 없다.
 (공유 안 된 스킴, rename이 갱신하지 않는 `TEST_HOST`·`INFOPLIST_FILE`, 배열 키를 넣을 수 없는
 `INFOPLIST_KEY_*`, 없으면 크래시하는 HealthKit 권한 문구)의 확인 방법이 거기 있다.
 
+## 앱 코드 컨벤션
+
+3개 앱이 같은 규칙을 쓴다. 앱별 예외가 생기면 그 앱의 `CLAUDE.md` 에 적는다.
+
+### 폴더별 배치 기준
+
+| 폴더 | 무엇을 두는가 | 두지 않는 것 |
+|------|-------------|-------------|
+| `Features/` | 탭 또는 도메인 단위 기능. View + ViewModel 한 쌍이 기본. 하위에 화면 단위 서브폴더 허용. | 여러 Feature에서 공유되는 UI → `Components/` (앱 전역) |
+| `Features/X/Components/` | 해당 Feature 전용 재사용 UI 컴포넌트. 다른 Feature에서 import하면 안 됨. | 비즈니스 로직, ViewModel |
+| `Features/X/ScreenName/Components/` | 특정 View 전용 순수 컴포넌트. 같은 폴더의 View에서만 import. | 다른 View에서 공유 컴포넌트 |
+| `Shared/Models/` | 플랫폼 독립 데이터 모델. SwiftData `@Model` 클래스, 순수 struct/enum. iOS·Watch 양쪽에서 쓰는 것만. | UI 코드, 프레임워크 의존 코드 |
+| `Shared/Services/` | 시스템 프레임워크(HealthKit, WatchConnectivity, CloudKit, Firebase 등) 래퍼. 호출부가 프레임워크 API를 직접 참조하지 않도록 추상화. | View, ViewModel, 데이터 모델 |
+
+### 계층화된 컴포넌트 구조
+
+각 계층은 하위 계층으로만 의존하고, 상위 계층은 import하지 않는다.
+
+```
+앱 루트 Components/  ← 두 Feature 이상이 공유하는 컴포넌트 (가장 재사용 가능)
+    ↑
+Features/X/Components/  ← Feature 내 여러 View가 공유 (Feature 독립적)
+    ↑
+ScreenName/Components/  ← 특정 View 전용 (가장 낮은 계층)
+```
+
+- 특정 View 전용 순수 컴포넌트 → `ScreenName/Components/`
+- Feature 내 여러 View에서 공유 → `Features/X/Components/`
+- 두 Feature 이상에서 필요 → 앱 루트 `Components/` 로 승격
+- 시스템 API 호출 → `Shared/Services/` 로 분리 (ViewModel은 순수 로직만)
+- Model이 특정 Feature 전용이어도 → 그래도 `Shared/Models/` 에 둔다 (플랫폼 공유 가능성)
+
+**Import 규칙 (순환 의존성 금지)**
+
+- `ScreenName/Components/` → 상위 폴더의 View/ViewModel import 금지
+- `Features/X/Components/` → 다른 Feature import 금지
+- Feature → Shared만 import 가능
+- ViewModel → UI 프레임워크 import 금지 (순수 비즈니스 로직)
+
+### 역할 분리
+
+- **ViewModel** — 비즈니스 로직만. SwiftUI import 금지, `@Published` 속성만 노출
+- **View** — 표현만. 비즈니스 로직은 ViewModel으로 위임
+- **Component** — 단일 책임. 한 파일은 한 UI 단위만. Props drilling 최소화
+- **Service** — 시스템/외부 API 호출을 캡슐화. 호출부는 Service 인터페이스만 안다
+
+### 파일 네이밍
+
+- View suffix: 독립적인 화면/페이지만 (e.g., `ModeView.swift`)
+- `Components/` 안의 순수 컴포넌트: suffix 없음 (e.g., `UndoButton.swift`)
+- 한 파일 = 한 타입: 같은 파일에 여러 View/ViewModel 정의 금지 (단, private helper component는 예외)
+
 ## Git Workflow
 
 - `main` 직접 push 금지 — 브랜치 + PR, 머지는 항상 일반 merge commit (`gh pr merge <n> --merge --delete-branch`)

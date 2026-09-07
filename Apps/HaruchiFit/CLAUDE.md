@@ -68,8 +68,7 @@ watchosTests/     Swift Testing
 - **`Shared/` 가 있는 이유** — 위젯 타깃에는 테스트 타깃을 붙일 수 없다. 컴플리케이션의 표시
   로직을 `Shared/` 에 두고 워치 테스트 타깃에서 검증한다 (GolfCounter 와 같은 구조).
 - pbxproj는 Xcode 16 `PBXFileSystemSynchronizedRootGroup` — 파일 생성/삭제는 파일시스템 조작만으로 반영된다.
-- 폴더 계층·컴포넌트 배치·네이밍(`Features/` · `Components/` 3계층 · 한 파일 한 타입)은
-  **Golf·Tennis 와 동일한 규칙**을 따른다. 상세 표는 `Apps/GolfCounter/CLAUDE.md` 를 본다.
+- 폴더·컴포넌트 계층·Import·네이밍 컨벤션은 루트 `CLAUDE.md` 의 **앱 코드 컨벤션**을 따른다
 - 테스트: Swift Testing, ViewModel 우선, View는 테스트하지 않는다.
 
 ### 데이터 — HealthKit 과 SwiftData 의 역할 분리
