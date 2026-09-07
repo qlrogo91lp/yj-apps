@@ -10,7 +10,7 @@ yj-apps/
 ├─ Apps/GolfCounter/        GolfCounter — iOS + Watch + Complication
 ├─ Apps/TennisCounter/      TennisCounter(Ralli) — iOS + Watch + Complication + LiveActivity
 ├─ .github/workflows/       CI — 변경된 앱만 빌드·테스트
-└─ docs/superpowers/specs/  설계 문서
+└─ docs/                   모노레포 공통 문서 (specs/ideas/plans/logs)
 ```
 
 ---
@@ -83,6 +83,6 @@ PR을 열면 **변경된 앱만** 빌드·테스트한다. `Packages/YJKit`이 �
 
 ## 문서
 
-- [모노레포 전환 설계](docs/superpowers/specs/2026-08-27-monorepo-migration-design.md) — 실행 스펙, 단계별 완료 조건
-- [CI 파이프라인 설계](docs/superpowers/specs/2026-08-27-ci-pipeline-design.md) — 워크플로 구성, 러너·도구 버전 고정 근거
-- [코드 스타일 툴링](docs/superpowers/specs/2026-08-27-code-style-tooling-design.md) — 개념 정리 + 미결 논의
+- [모노레포 전환 설계](docs/specs/2026/2026-08-27-monorepo-migration-design.md) — 실행 스펙, 단계별 완료 조건
+- [CI 파이프라인 설계](docs/specs/2026/2026-08-27-ci-pipeline-design.md) — 워크플로 구성, 러너·도구 버전 고정 근거
+- [코드 스타일 툴링](docs/specs/2026/2026-08-27-code-style-tooling-design.md) — 개념 정리 + 미결 논의

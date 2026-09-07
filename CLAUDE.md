@@ -13,7 +13,7 @@ yj-apps/
 ├─ YJApps.xcworkspace    이것 하나만 연다. 앱별 .xcodeproj 를 따로 열지 않는다
 ├─ Makefile              앱 순회 lint / format / fix
 ├─ .swiftlint.yml        공통 규칙 (앱별 설정이 parent_config 로 상속)
-└─ docs/superpowers/specs/
+└─ docs/               모노레포 공통 문서 (specs/ideas/plans/logs)
 ```
 
 ## 작업 방식
@@ -33,7 +33,7 @@ yj-apps/
 물어보지 않고 바로 해도 되는 것 — 읽기·검색, 빌드·테스트·lint 실행, 한 곳짜리
 오타나 컴파일 에러 수정, 직전 턴에 승인받은 플랜의 실행.
 
-플랜은 **바꿀 파일 단위로** 적는다. 규모가 크면 `docs/superpowers/plans/`에 문서로
+플랜은 **바꿀 파일 단위로** 적는다. 규모가 크면 `docs/plans/`에 문서로
 남기고, 작으면 대화 안에서 제시해도 된다.
 
 ## 공통 명령
@@ -109,7 +109,7 @@ override 붙였다 떼는 절차도 필요 없다.
 - 파일 이동/생성/삭제는 파일시스템 조작만으로 충분하다.
 - **폴더 rename은 Xcode 네비게이터에서 한다.** Finder에서 바꾸면 pbxproj의 `path` 가 남는다.
 
-**타깃을 새로 만들거나 이름을 바꿀 때는 `docs/superpowers/specs/2026-09-03-xcode-target-conventions.md`
+**타깃을 새로 만들거나 이름을 바꿀 때는 `docs/specs/2026/2026-09-03-xcode-target-conventions.md`
 를 먼저 본다.** 이름·번들 ID 규약, 프로덕트 링크 표, 그리고 **빌드가 통과해도 틀려 있는 항목들**
 (공유 안 된 스킴, rename이 갱신하지 않는 `TEST_HOST`·`INFOPLIST_FILE`, 배열 키를 넣을 수 없는
 `INFOPLIST_KEY_*`, 없으면 크래시하는 HealthKit 권한 문구)의 확인 방법이 거기 있다.
@@ -169,16 +169,32 @@ ScreenName/Components/  ← 특정 View 전용 (가장 낮은 계층)
 ## Git Workflow
 
 - `main` 직접 push 금지 — 브랜치 + PR, 머지는 항상 일반 merge commit (`gh pr merge <n> --merge --delete-branch`)
-- 예외: `docs/superpowers/specs/`·`plans/`의 스펙/플랜 문서는 코드 변경이 없으므로 브랜치+PR 없이 `main`에 직접 커밋·push 가능
+- 예외: `docs/specs/`·`plans/`의 스펙/플랜 문서는 코드 변경이 없으므로 브랜치+PR 없이 `main`에 직접 커밋·push 가능
 - 커밋 메시지는 gitmoji prefix: ✨ feat / 🐛 fix / ♻️ refactor / 🎨 style / 📝 docs / ✅ test / 🔧 chore / 🔥 remove / ⏪ revert
 
 ## Docs 공통 규약
 
-- `docs/superpowers/` 아래 `ideas/`(탐색) · `specs/`(확정 설계) · `plans/`(구현 계획) · `logs/`(작업 기록)
+저장소 루트와 모든 앱·패키지가 **같은 구조**를 쓴다.
+
+```
+docs/
+├─ ideas/                  탐색·타당성 검토 (구현 결정 전)
+├─ logs/<연도>/            버그 수정·리팩터링 작업 기록
+├─ plans/<플랫폼>/<연도>/   구현 계획
+└─ specs/<플랫폼>/<연도>/   확정 설계
+```
+
+- `<플랫폼>` = `ios` / `watch` / `shared`. **플랫폼은 폴더가 소유한다** — 파일명에 중복 표기하지
+  않는다. 양쪽 타깃에 걸치거나 YJKit 패키지 작업이면 `shared/`.
+- `<연도>` = `2026`, `2027` … 해가 바뀌면 새 폴더를 만들 뿐 **기존 문서는 옮기지 않는다.**
+  월 구분은 파일명이 담당한다 — `YYYY-MM-DD-{설명}.md`.
+- `logs/` 는 한 작업이 여러 타깃에 걸치는 경우가 많아 플랫폼으로 나누지 않는다.
+- `ideas/` 는 날짜 prefix 없는 탐색 문서(`{설명}.md`)라 폴더로 나누지 않는다.
+- **루트 `docs/` 는 플랫폼 분할을 쓰지 않는다** (`docs/specs/<연도>/`). CI·코드 스타일·Xcode 타깃
+  규약처럼 모노레포 전체에 걸리는 문서라 ios/watch 구분이 의미 없다.
+- 빈 폴더는 미리 만들지 않는다. 첫 문서를 쓸 때 만든다.
 - **사용자 검토 전에는 커밋하지 않는다.** 스킬이 커밋을 지시하더라도 마찬가지다.
 - 완료된 문서만 커밋한다. 작성 중인 스펙·계획은 커밋하지 않는다.
-- 폴더 세부 배치는 앱마다 다르다 — 각 앱의 `CLAUDE.md` 를 본다.
-- 모노레포 전환 관련 문서는 루트 `docs/superpowers/specs/` 에 있다.
 
 ## 코드 스타일 도구
 
@@ -186,4 +202,4 @@ ScreenName/Components/  ← 특정 View 전용 (가장 낮은 계층)
 앱별 `.swiftlint.yml` 이 `parent_config` 로 상속한 뒤 고유 규칙만 더한다. 리스트는 병합된다.
 
 `.swiftformat` 은 앱별로만 둔다. 두 앱의 `--swiftversion` 이 다른 상태이며(golf 5.0 / tennis 6.0),
-통일 여부는 `docs/superpowers/specs/2026-08-27-code-style-tooling-design.md` 의 미결 논의 항목이다.
+통일 여부는 `docs/specs/2026/2026-08-27-code-style-tooling-design.md` 의 미결 논의 항목이다.

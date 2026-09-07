@@ -8,9 +8,9 @@
 하루치 핏(Haruchi Fit) — 워치에서 근력/유산소 **세그먼트**를 기록하고, iOS는 잔디·기록·통계를
 보여주는 운동 기록 앱. 폰을 한 번도 안 열어도 기록이 완결되는 것이 해피패스다.
 
-- 무엇을 만들지 — `docs/superpowers/specs/2026-09-02-haruchi-fit-product-spec.md`
-- 어떻게 만들지 — `docs/superpowers/specs/2026-09-02-haruchi-fit-architecture.md` (결정 사항 D-M1~D-M8은 6절)
-- 지금 어디까지 왔나 — `docs/superpowers/plans/2026-09-07-haruchi-fit-roadmap.md` (**살아있는 문서**)
+- 무엇을 만들지 — `docs/specs/shared/2026/2026-09-02-haruchi-fit-product-spec.md`
+- 어떻게 만들지 — `docs/specs/shared/2026/2026-09-02-haruchi-fit-architecture.md` (결정 사항 D-M1~D-M8은 6절)
+- 지금 어디까지 왔나 — `docs/plans/shared/2026/2026-09-07-haruchi-fit-roadmap.md` (**살아있는 문서**)
 
 **구현 초기 단계다.** 워치 세션 기반과 세그먼트 저장까지 되어 있고, iOS는 화면이 없다.
 
@@ -97,8 +97,8 @@ watchosTests/     Swift Testing
 
 커밋 시점 등 공통 규약은 루트 `CLAUDE.md` 를 따른다. 이 앱의 배치 규칙만 여기 적는다.
 
-- `docs/superpowers/specs/` — 확정 설계
-- `docs/superpowers/plans/` — 구현 계획
+- `docs/specs/` — 확정 설계
+- `docs/plans/` — 구현 계획
 - **상세 플랜은 각 작업 착수 직전에 쓴다.** 미리 쓴 플랜은 앞의 두어 개만 살아남는다는 것을
   두 번 겪었다 (로드맵 문서 서두에 근거). 로드맵은 작업이 끝날 때마다 갱신한다.
-- 모노레포 공통 문서(CI·코드 스타일·Xcode 타깃 규약)는 **루트 `docs/superpowers/`** 에 있다
+- 모노레포 공통 문서(CI·코드 스타일·Xcode 타깃 규약)는 **루트 `docs/`** 에 있다
