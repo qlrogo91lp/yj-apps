@@ -95,18 +95,18 @@ Localizable(2·5·6) / 워치 `WorkoutSessionViewModel`(3·7)
 
 | # | 항목 | 상태 | 문서 |
 |---|---|---|---|
-| W2 | 종료 후 요약 화면 (저장 / 버리기) | 플랜 승인 · **구현 대기** — 브랜치 `feat/w2-summary` 생성됨 | [플랜](Apps/HaruchiFit/docs/plans/watch/2026/2026-09-07-haruchi-fit-w2-summary.md) |
-| W0 | 홈 시작 유형 토글 (근력 / 유산소) | 로드맵만 · 플랜 대기 (선행: W2) | 로드맵 Phase 1 ② |
-| WC | 컴플리케이션 — 세션 상태만 | 로드맵만 · 플랜 대기 (선행: W0) | 로드맵 Phase 1 ③ · 로컬 스냅샷 스토어 필요 |
+| W2 | 종료 후 요약 화면 (저장 / 버리기) | [PR #12](https://github.com/qlrogo91lp/yj-apps/pull/12) 열림 · **실기기 검증 대기** | [플랜](Apps/HaruchiFit/docs/plans/watch/2026/2026-09-07-haruchi-fit-w2-summary.md) |
+| W0 | 홈 시작 유형 토글 (근력 / 유산소) | **다음** · 플랜 대기 | 로드맵 Phase 1 ① |
+| WC | 컴플리케이션 — 세션 상태만 | 로드맵만 · 플랜 대기 (선행: W0) | 로드맵 Phase 1 ② · 로컬 스냅샷 스토어 필요 |
 
 **Phase 1 이 끝나면 폰을 한 번도 안 열어도 흐름 A(해피패스)가 완결된다.**
 그 뒤 Phase 2(잔디 집계 · HealthKit import) → Phase 3~5(iOS 화면 12개)로 간다.
 
 ### 집 맥북에서 할 것
 
-- [ ] W2 구현 — ViewModel 테스트 포함(승인됨). 새 폴더가 없어 Xcode 수작업은 불필요
+- [x] W2 구현 — ViewModel 테스트 7개 통과. `BUNDLE_LOADER` 누락도 함께 고침
 - [ ] W2 실기기 검증 4항목 — 햅틱 5종, **버리기 후 건강 앱에서도 사라지는지** (플랜 "실기기" 절)
-- [ ] W2 PR → 머지 후 로드맵 "완료된 것" 표 갱신 + 이 행 취소선
+- [ ] W2 실기기 확인 끝나면 [PR #12](https://github.com/qlrogo91lp/yj-apps/pull/12) 머지 → 이 행 취소선
 
 > 막히면 멈출 지점 — `HKHealthStore.delete` 가 워치에서 거부되면 플랜 1절 B안(`WorkoutCore` 에
 > 보류 API)으로 가야 한다. 3개 앱 공유 패키지라 **그때 다시 승인받는다.**

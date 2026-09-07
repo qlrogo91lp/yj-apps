@@ -87,7 +87,13 @@ Xcode에서는 파일을 고르고 우측 File Inspector의 **Target Membership*
 |---|---|---|
 | `TEST_HOST` | 호스트 앱 실행파일 경로 | General > Host Application 이 **`Custom`으로 회색 처리**되어 드롭다운이 잠긴다. 테스트 실행 실패 |
 | `INFOPLIST_FILE` | Info.plist 경로 | `error: Build input file cannot be found`. 타깃 태스크가 취소되며 **`Command Ld failed` 가 딸려 나온다** — Ld 쪽을 파면 헛수고다 |
+| `BUNDLE_LOADER` | 링크할 호스트 앱 실행파일 | **증상이 없다.** 앱 심볼을 안 쓰는 테스트는 초록으로 통과하고, 쓰는 순간 `Undefined symbol` 이 앱 타입 전부에 쏟아진다 |
 | `productName` / `remoteInfo` | 표시용 | 빌드에 영향 없음. 무시해도 된다 |
+
+**`TEST_HOST` 와 `BUNDLE_LOADER` 는 짝이다.** 앞은 *실행* 시점(어느 앱에 번들을 주입할지),
+뒤는 *링크* 시점(그 실행파일이 심볼을 갖고 있다고 링커에 알려주기)에 쓰인다. 하나만 있으면
+테스트 타깃이 존재하기만 하고 앱 코드를 한 줄도 검증하지 못한다 — 2026-09-08 하루치에서
+실제로 겪었고, `#expect(Bool(true))` 자리표시자뿐이라 CI 도 잡지 못했다. 값은 `$(TEST_HOST)`.
 
 `TEST_HOST` 가 잠겼을 때는 General 탭에서 못 고친다. **Build Settings > `Test Host`** 에서
 값을 지워 초기화하거나 직접 교체한다:
@@ -101,7 +107,7 @@ $(BUILT_PRODUCTS_DIR)/<앱> Watch App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/<앱>
 ```bash
 APP=HaruchiFit
 P=Apps/$APP/$APP.xcodeproj/project.pbxproj
-grep -oE '(TEST_HOST|INFOPLIST_FILE) = [^;]+;' $P | sort -u
+grep -oE '(TEST_HOST|BUNDLE_LOADER|INFOPLIST_FILE) = [^;]+;' $P | sort -u
 sed -n '/Begin PBXFileSystemSynchronizedRootGroup/,/End PBXFileSystemSynchronizedRootGroup/p' $P \
   | grep -oE 'path = [^;]+;'
 ```
@@ -385,7 +391,7 @@ APP=<앱>; P=Apps/$APP/$APP.xcodeproj/project.pbxproj
 xcodebuild -project Apps/$APP/$APP.xcodeproj -list          # 타깃 이름
 grep -oE 'PRODUCT_BUNDLE_IDENTIFIER = [^;]+;' $P | sort -u  # 번들 ID
 grep -oE '(IPHONEOS|WATCHOS)_DEPLOYMENT_TARGET = [^;]+;' $P | sort -u
-grep -oE '(TEST_HOST|INFOPLIST_FILE) = [^;]+;' $P | sort -u # §3
+grep -oE '(TEST_HOST|BUNDLE_LOADER|INFOPLIST_FILE) = [^;]+;' $P | sort -u # §3
 ls Apps/$APP/$APP.xcodeproj/xcshareddata/xcschemes/          # §4
 xcodebuild -workspace YJApps.xcworkspace -list               # 워크스페이스에서 보이는지
 git status --short Apps/$APP                                 # xcuserdata/ 가 빠졌는지

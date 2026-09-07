@@ -120,6 +120,26 @@ watchOS 26.6)에서 실행한 결과다. 세션 설정은 `.traditionalStrengthT
 **`WorkoutCore`는 수정 없이 그대로 쓴다.** 시그니처를 건드리지 않으므로
 GolfCounter·Ralli 회귀 리스크도 함께 사라졌다 (9절).
 
+### 폐기한 세션은 HealthKit 에서 사후 삭제한다 (2026-09-08)
+
+제품 스펙 W2 는 *"폐기하면 HealthKit에도 저장하지 않는다"* 고 못박았는데, **현재 구조로는
+그대로 지킬 수 없다.** `WorkoutSessionService.stopWorkout()` 이 `builder.finishWorkout()` 을
+무조건 부르므로 요약 화면이 뜨는 시점엔 `HKWorkout` 이 **이미 저장돼 있다.**
+
+| 안 | 판단 |
+|---|---|
+| **저장 후 삭제** — 버리기 시 `healthKitUUID` 로 찾아 `HKHealthStore.delete` | ✅ **채택.** 패키지 무수정, 앱 안에서 끝난다 |
+| `WorkoutCore` 에 "종료하되 저장은 보류" API 추가 | 기각 — 3개 앱 공유 API 를 키우고, `HKLiveWorkoutBuilder` 는 보류를 지원하지 않아 세션을 직접 다뤄야 한다 |
+| 스펙을 고쳐 "HealthKit 에는 남는다" 로 | 기각 — 사용자가 버린 기록이 건강 앱에 남는 건 명백한 배신이다 |
+
+구현은 `WatchApp/HealthKitWorkoutRemover.swift`. 뷰모델은 `WorkoutRemoving` 프로토콜만 알고
+HealthKit 을 직접 import 하지 않는다 — 그래야 "버리면 지워달라고 요청한다" 를 테스트로 잡을 수 있다.
+
+**한계를 남긴다.** 삭제까지 짧은 순간 HealthKit 에 존재하므로 그 사이 다른 앱이 읽어갈 수 있다.
+워치에서 요약을 보고 버튼을 누르는 수 초 안의 일이고, `finishWorkout()` 이 무조건 도는 이상
+되돌릴 수단이 그것뿐이다. 삭제가 실패해도(권한 회수 등) 앱 저장소에는 애초에 안 남으므로
+**잔디·기록·통계에는 영향이 없다.**
+
 ---
 
 ## 3. 데이터 모델

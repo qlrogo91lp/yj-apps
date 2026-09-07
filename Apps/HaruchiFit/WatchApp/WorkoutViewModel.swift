@@ -8,7 +8,6 @@ import WorkoutCore
 /// `WorkoutSessionService` 는 싱글톤이 아니므로 앱 루트에서 한 번 만들어 주입한다 (YJKit README).
 @MainActor
 final class WorkoutViewModel: ObservableObject {
-    @Published private(set) var isActive = false
     @Published private(set) var isPaused = false
     @Published private(set) var metrics = WorkoutMetrics()
     /// 현재 구간. **HealthKit 은 이 전환을 모른다** — 근력↔유산소처럼 카테고리가 다른
@@ -16,8 +15,14 @@ final class WorkoutViewModel: ObservableObject {
     /// 세션은 근력 하나로 유지되고, 구간은 앱이 소유한다.
     @Published private(set) var mode: SegmentKind = .strength
 
+    /// 세션 단계. 요약이 낄 자리를 만들려고 `isActive` 불리언을 대체했다.
+    @Published private(set) var phase: SessionPhase = .idle
+    /// 요약 화면이 읽고, 저장이 그대로 보내는 페이로드.
+    @Published private(set) var pendingRecord: WorkoutRecordMessage?
+
     let session: WorkoutSessionService
-    private let connectivity: ConnectivityService
+    private let connectivity: WorkoutRecordSending
+    private let remover: WorkoutRemoving
 
     /// 닫힌 구간들. 열려 있는 마지막 구간은 `openSegmentStart` 로만 들고 있다가 종료 시 닫는다.
     private var closedSegments: [WorkoutRecordMessage.SegmentPayload] = []
@@ -26,10 +31,12 @@ final class WorkoutViewModel: ObservableObject {
     private var startedAt = Date()
 
     init(session: WorkoutSessionService = WorkoutSessionService(configuration: .strength),
-         connectivity: ConnectivityService)
+         connectivity: WorkoutRecordSending,
+         remover: WorkoutRemoving = HealthKitWorkoutRemover())
     {
         self.session = session
         self.connectivity = connectivity
+        self.remover = remover
 
         // 서비스의 개별 @Published 값을 뷰가 쓸 형태로 모아 다시 발행한다.
         // 감싸기만 하면 뷰가 갱신되지 않는다 — 서비스와 이 뷰모델은 서로 다른
@@ -55,7 +62,8 @@ final class WorkoutViewModel: ObservableObject {
 
     func start() {
         session.startWorkout()
-        isActive = true
+        phase = .active
+        WKInterfaceDevice.current().play(.start)
         mode = .strength
         closedSegments = []
         openSegmentStart = 0
@@ -93,6 +101,7 @@ final class WorkoutViewModel: ObservableObject {
         } else {
             session.pauseWorkout()
         }
+        WKInterfaceDevice.current().play(.click)
     }
 
     /// 세션을 끝내고 기록을 폰으로 보낸다.
@@ -105,22 +114,21 @@ final class WorkoutViewModel: ObservableObject {
         closeOpenSegment(at: session.elapsedSeconds)
 
         let result = await session.stopWorkout()
-        isActive = false
+        WKInterfaceDevice.current().play(.stop)
 
-        if let result {
-            connectivity.send(
-                WorkoutRecordMessage(healthKitUUID: result.healthKitUUID,
-                                     startedAt: startedAt,
-                                     endedAt: Date(),
-                                     totalSeconds: result.durationSeconds,
-                                     activeCalories: result.caloriesBurned,
-                                     totalCalories: result.totalCaloriesBurned,
-                                     averageHeartRate: result.averageHeartRate,
-                                     segments: closedSegments),
-                via: .reliable
-            )
-        }
+        enterSummary(with: result.map(record(from:)))
         return result
+    }
+
+    private func record(from result: WorkoutResult) -> WorkoutRecordMessage {
+        WorkoutRecordMessage(healthKitUUID: result.healthKitUUID,
+                             startedAt: startedAt,
+                             endedAt: Date(),
+                             totalSeconds: result.durationSeconds,
+                             activeCalories: result.caloriesBurned,
+                             totalCalories: result.totalCaloriesBurned,
+                             averageHeartRate: result.averageHeartRate,
+                             segments: closedSegments)
     }
 
     /// 총 칼로리는 활동 + 휴식이다 (YJKit README).
@@ -129,5 +137,43 @@ final class WorkoutViewModel: ObservableObject {
                        activeCalories: session.currentCalories,
                        totalCalories: session.currentCalories + session.currentBasalCalories,
                        heartRate: session.currentHeartRate)
+    }
+
+    // MARK: - 종료 후 결정 (W2)
+
+    /// 종료 결과를 요약 화면이 읽을 형태로 보관한다. **아직 보내지 않는다** —
+    /// 저장할지 버릴지는 사용자가 정한다.
+    ///
+    /// 결과가 없으면 세션이 애초에 없었다는 뜻이라 보여줄 것도 저장할 것도 없다.
+    func enterSummary(with record: WorkoutRecordMessage?) {
+        guard let record else {
+            phase = .idle
+            return
+        }
+        pendingRecord = record
+        phase = .summary
+    }
+
+    /// 보관 중인 기록을 폰으로 보낸다.
+    ///
+    /// **저장은 폰이 한다** — 워치 타깃은 `PersistenceCore` 를 링크하지 않는다 (아키텍처 7절).
+    func save() {
+        guard let record = pendingRecord else { return }
+        connectivity.sendReliably(record)
+        pendingRecord = nil
+        phase = .idle
+        WKInterfaceDevice.current().play(.success)
+    }
+
+    /// 기록을 버린다. 폰으로 보내지 않고, **HealthKit 에 이미 저장된 워크아웃도 지운다** —
+    /// 사용자가 버린 기록이 건강 앱에 남으면 명백한 배신이다 (제품 스펙 W2).
+    func discard() {
+        let uuid = pendingRecord?.healthKitUUID
+        pendingRecord = nil
+        phase = .idle
+        WKInterfaceDevice.current().play(.failure)
+
+        guard let uuid else { return }
+        Task { await remover.remove(workoutWith: uuid) }
     }
 }

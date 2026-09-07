@@ -1,23 +1,21 @@
 import SwiftUI
 import WorkoutUI
 
-extension Color {
-    /// #FF9500 — 하루치 핏 브랜드 오렌지.
-    static let brandOrange = Color(red: 1.0, green: 0.58, blue: 0.0)
-}
-
 struct HomeView: View {
     @EnvironmentObject private var viewModel: WorkoutViewModel
 
     var body: some View {
-        if viewModel.isActive {
-            sessionPages
-        } else {
+        switch viewModel.phase {
+        case .idle:
             startScreen
+        case .active:
+            sessionPages
+        case .summary:
+            SummaryView(viewModel: viewModel)
         }
     }
 
-    /// W1 — 지표 / 컨트롤 세로 페이징. 모드 라벨과 전환 행은 후속 플랜(D-M1)이다.
+    /// W1 — 지표 / 컨트롤 세로 페이징. 모드 라벨과 전환 행은 `WorkoutUI` 확장으로 붙는다 (D-M1).
     private var sessionPages: some View {
         TabView {
             WorkoutMetricsView(metrics: viewModel.metrics,
@@ -50,7 +48,7 @@ struct HomeView: View {
         )
     }
 
-    /// W0 — 최소 골격. 잔디와 오늘 요약은 후속 플랜이다.
+    /// W0 — 최소 골격. 시작 유형 토글·잔디·오늘 요약은 후속 플랜이다.
     private var startScreen: some View {
         VStack(spacing: 12) {
             Text("Haruchi Fit")
