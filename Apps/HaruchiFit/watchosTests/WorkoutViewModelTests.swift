@@ -9,6 +9,7 @@ import Testing
 /// 쪽으로 깨지는 부분이 여기다.
 @MainActor
 struct WorkoutViewModelTests {
+
     // MARK: - 요약 진입
 
     @Test("요약 단계에서는 기록을 들고만 있고 아직 보내지 않는다")
