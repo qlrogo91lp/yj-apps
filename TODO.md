@@ -6,36 +6,74 @@
 - 출시 커밋(`📝 x.y.z+n 버전 배포`)에서 취소선 행을 비운다
 - 남은 항목이 없으면 `현재 대기 중인 작업 없음` 한 줄. 파일은 지우지 않는다
 
-작업 브랜치 `feat/ralli` (메인 체크아웃, 워크트리 없음).
+`feat/ralli` 은 PR #11 로 머지되어 더 쓰지 않는다. 새 작업은 항목별 브랜치를 판다.
+트랙 A·B 를 동시에 굴리려면 워크트리 2개가 필요하다 — 순차로 가면 메인 체크아웃 하나로 충분하다.
+
+> `feature/tennis-counter` · `feature/golf-counter` · `feature/haruchi-fit` 워크트리 3개가
+> `~/orca/workspaces/yj-apps/` 에 남아 있다. 셋 다 원격에 반영 끝났으므로 정리해도 된다.
 
 ## Ralli — 다음 출시 (현재 1.1.7 (26))
 
-2026-09-07 상태 점검 기준. 순서 합의: **1 → 5 → 3 → 4 → 7 → 6** (온보딩은 #1·#4 스크린샷이 필요해 맨 뒤). 2·8 은 별도.
+2026-09-07 상태 점검 기준. 파일 충돌을 실제로 따져 **2 트랙 병렬**로 재편했다.
 
-| # | 항목 | 상태 | 문서 |
-|---|---|---|---|
-| 1 | WorkoutShareUI 붙이기 (인스타 스토리 공유) | 플랜 완료 · 구현 대기 | [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-07-workout-share-button.md) · [Kit 사용법](Packages/YJKit/README.md#workoutshareui-사용법) |
-| 5 | String Catalog(xcstrings) 전환 | 플랜 완료 · 구현 대기 | [플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-07-string-catalog-migration.md) |
-| 3 | 햅틱 (워치 전용) | 플랜 완료 · 구현 대기 | [플랜](Apps/TennisCounter/docs/plans/watch/2026/2026-09-07-match-haptics.md) — 설정 연동은 #8 때 `MatchHaptics.play` 첫 줄에서 |
-| 7 | Firebase Crashlytics (iOS + 워치, 익스텐션 제외) | 스펙·플랜 완료 · 구현 대기 | [스펙](Packages/YJKit/docs/specs/shared/2026/2026-09-07-crash-reporting-design.md) → [YJKit 플랜](Packages/YJKit/docs/plans/shared/2026/2026-09-07-monitoring-core.md) (Task 0 스파이크 → PR 머지) → [Ralli 플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-07-crashlytics-integration.md) |
-| 2 | iOS 통계 UI 리디자인 | 스펙 완료 · 플랜 대기 | [스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-08-25-summary-history-redesign-design.md) · [Notion: 통계 페이지 기능 개선 (1.1.6 이후)](https://app.notion.com/p/3bacd15e48f180b3a810e95f63854aa6) |
-| 4 | 크라운 점수 입력 (워치, 위=나 아래=상대) | 플랜 완료 · 구현 대기 (선행: #3 햅틱) | [플랜](Apps/TennisCounter/docs/plans/watch/2026/2026-09-07-crown-scoring.md) — 온보딩(#6) 항목 하나 파생 |
-| 6 | 온보딩 4페이지 (스크린샷 3 + 목록 1, iOS 만) | 스펙·플랜 완료 · 구현 대기 (선행: #1·#4) | [스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-09-07-onboarding-design.md) · [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-07-onboarding.md) — 뼈대(Task 1~3)는 먼저, 스크린샷(Task 4)만 뒤로 |
-| 8 | 설정 페이지 + 다른 앱 노출 | **논의 필요 — 아직 브레인스토밍 전** | 아래 "남은 논의" 참고 |
+```
+트랙 A (iOS)     5 → 2 → 1 → 6 뼈대 ─┐
+트랙 B (워치)     3 → 4 ─────────────┤→ 6 스크린샷 → 7
+트랙 C (YJKit)   MonitoringCore ─────┘
+```
+
+- **A ↔ B ↔ C 는 겹치는 파일이 하나도 없다.** 셋을 동시에 굴려도 된다
+- **트랙 내부는 순차다** — A 는 `MatchDetailSheet`·`iOSApp.swift`·Localizable 을, B 는 `ScoreViewModel` 을 공유한다
+- **#7 은 맨 마지막에 단독으로.** iOS·워치 양쪽 `WorkoutSessionViewModel` + `iOSApp.swift` + pbxproj 를 다 건드려 #1·#2·#3·#6 과 전부 겹친다
+- **#6 Task 4(스크린샷)가 두 트랙의 합류점.** 뼈대(Task 1~3)는 트랙 A 안에서 먼저 끝난다
+- #8 은 별도 (브레인스토밍 전)
+
+같은 파일을 건드리는 항목들 — `project.pbxproj`(1·5·7) / `TennisCounter-Info.plist`(1·2) /
+`iOSApp.swift`(2·6·7) / `MatchDetailSheet.swift`(1·2) / iOS `WorkoutSessionViewModel`(1·7) /
+Localizable(2·5·6) / 워치 `WorkoutSessionViewModel`(3·7)
+
+| # | 항목 | 트랙 | 상태 | 문서 |
+|---|---|---|---|---|
+| 5 | String Catalog(xcstrings) 전환 | A | 플랜 완료 · 구현 대기 | [플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-07-string-catalog-migration.md) |
+| 2 | iOS 통계 UI 리디자인 | A | 스펙·플랜 완료 · 구현 대기 (선행: #5) | [스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-08-25-summary-history-redesign-design.md) · [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-07-summary-history-redesign.md) · [Notion](https://app.notion.com/p/3bacd15e48f180b3a810e95f63854aa6) |
+| 1 | WorkoutShareUI 붙이기 (인스타 스토리 공유) | A | 플랜 완료 · 구현 대기 (선행: #2) | [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-07-workout-share-button.md) · [Kit 사용법](Packages/YJKit/README.md#workoutshareui-사용법) |
+| 3 | 햅틱 (워치 전용) | B | 플랜 완료 · 구현 대기 | [플랜](Apps/TennisCounter/docs/plans/watch/2026/2026-09-07-match-haptics.md) — 설정 연동은 #8 때 `MatchHaptics.play` 첫 줄에서 |
+| 4 | 크라운 점수 입력 (워치, 위=나 아래=상대) | B | 플랜 완료 · 구현 대기 (선행: #3) | [플랜](Apps/TennisCounter/docs/plans/watch/2026/2026-09-07-crown-scoring.md) — 온보딩(#6) 항목 하나 파생 |
+| 6 | 온보딩 4페이지 (스크린샷 3 + 목록 1, iOS 만) | A → 합류 | 스펙·플랜 완료 · 구현 대기 | [스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-09-07-onboarding-design.md) · [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-07-onboarding.md) — 뼈대(Task 1~3)는 트랙 A 안에서, 스크린샷(Task 4)은 #1·#4 뒤 |
+| 7 | Firebase Crashlytics (iOS + 워치, 익스텐션 제외) | 단독 (맨 뒤) | 스펙·플랜 완료 · 구현 대기 | [스펙](Packages/YJKit/docs/specs/shared/2026/2026-09-07-crash-reporting-design.md) → [YJKit 플랜](Packages/YJKit/docs/plans/shared/2026/2026-09-07-monitoring-core.md) (트랙 C, 지금 병렬 가능) → [Ralli 플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-07-crashlytics-integration.md) |
+| 8 | 설정 페이지 + 다른 앱 노출 | — | **논의 필요 — 아직 브레인스토밍 전** | 아래 "남은 논의" 참고 |
 
 ### 집 맥북에서 할 것
 
-- [ ] `git fetch && git checkout feat/ralli`
 - [x] 통계 리디자인 작업물 찾기 — `feature/tennis-counter` 워크트리의 커밋 66a54d8 (스펙 문서 1개). 규약 경로로 이관 완료
-- [ ] 1번 플랜 실행 (Task 1 은 Xcode UI)
+- [x] #2 구현 플랜 작성
+
+**트랙 A (iOS)** — 순서대로
+
 - [ ] 5번 플랜 실행 (전부 Xcode UI + 검증)
+- [ ] 2번 플랜 실행 (Task 8 Step 4 는 시뮬레이터 확인)
+- [ ] 1번 플랜 실행 (Task 1 은 Xcode UI) — 선행: Meta 개발자 대시보드에서 Facebook App ID 발급 → `MatchShareButton.instagramAppID`
+- [ ] 6번 뼈대 (Task 1~3)
+
+**트랙 B (워치)** — A 와 동시 진행 가능
+
 - [ ] 3번 플랜 실행 → 실기기에서 패턴 확인 (Task 4)
 - [ ] 4번 플랜 실행 → 실기기에서 스침·포커스·손목 내림 확인 (Task 2)
-- [ ] 7번 — Firebase 콘솔에 프로젝트 "Ralli" + Apple 앱 2개(iOS·워치 번들 ID) 만들고 `GoogleService-Info.plist` 2개 받기
-- [ ] 7번 — YJKit 플랜(스파이크 → CI 통과) → Ralli 플랜 순서로. PR 은 Kit / Ralli 따로
-- [ ] Meta 개발자 대시보드에서 Facebook App ID 발급 → `MatchShareButton.instagramAppID`
-- [ ] 6번 — 뼈대(Task 1~3) 먼저, #1·#4 끝난 뒤 스크린샷 3장 × ko/en (Task 4)
+
+**트랙 C (YJKit)** — A·B 와 무관, 지금 시작 가능
+
+- [ ] Firebase 콘솔에 프로젝트 "Ralli" + Apple 앱 2개(iOS·워치 번들 ID) 만들고 `GoogleService-Info.plist` 2개 받기
+- [ ] YJKit `MonitoringCore` 플랜 (Task 0 스파이크 → CI 통과 → PR 머지)
+
+**합류 후**
+
+- [ ] 6번 스크린샷 3장 × ko/en (Task 4) — #1·#4 가 끝나야 찍을 수 있다
+- [ ] 7번 Ralli 연동 플랜 — 단독으로. PR 은 Kit / Ralli 따로
+
+**아무 때나**
+
 - [ ] Xcode Organizer › Crashes 에서 Ralli 1.1.7 한 번 열어보기 (분석 공유 켠 사용자 표본만 보임)
+- [ ] `~/orca/workspaces/yj-apps/` 워크트리 3개 정리 (전부 원격 반영 끝남)
 
 ### 남은 논의 — #8 설정 페이지 (2026-09-07 시점)
 
