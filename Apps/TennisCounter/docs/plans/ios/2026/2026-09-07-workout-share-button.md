@@ -106,7 +106,7 @@ Expected: `4` 이상 (PBXBuildFile / Frameworks build phase / packageProductDepe
 </plist>
 ```
 
-`INFOPLIST_KEY_LSApplicationQueriesSchemes` 빌드 설정으로는 **안 된다** — Xcode 가 모르는 배열 키는 경고 없이 버려진다 (`docs/superpowers/specs/2026-09-03-xcode-target-conventions.md` §INFOPLIST_KEY 실측).
+`INFOPLIST_KEY_LSApplicationQueriesSchemes` 빌드 설정으로는 **안 된다** — Xcode 가 모르는 배열 키는 경고 없이 버려진다 (`docs/specs/2026/2026-09-03-xcode-target-conventions.md` §INFOPLIST_KEY 실측).
 
 - [ ] **Step 4: 빌드 + 산출물 plist 확인**
 
