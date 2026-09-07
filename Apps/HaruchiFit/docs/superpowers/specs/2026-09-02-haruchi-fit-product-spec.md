@@ -463,4 +463,4 @@ W0 운동 시작 → W1 세션 → 전환 1탭(햅틱) → W2 저장
 1. `2026-09-02-haruchi-fit-architecture.md` — 데이터 모델, HealthKit 세그먼트 저장, 타깃 구조, YJKit 확장
 2. 아키텍처 미결 항목 결정
 3. `Apps/HaruchiFit/` 타깃 생성 + 워크스페이스 등록
-4. 구현 플랜 작성 (`docs/superpowers/plans/`)
+4. 구현 플랜 작성 (`Apps/HaruchiFit/docs/superpowers/plans/`)

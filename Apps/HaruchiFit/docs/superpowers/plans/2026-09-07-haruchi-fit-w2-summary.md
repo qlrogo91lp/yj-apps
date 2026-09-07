@@ -159,7 +159,7 @@ enum SessionPhase { case idle, active, summary }
 ## Task 4 — 문서 갱신
 
 **Files:**
-- Modify: `docs/superpowers/specs/2026-09-02-haruchi-fit-architecture.md`
+- Modify: `Apps/HaruchiFit/docs/superpowers/specs/2026-09-02-haruchi-fit-architecture.md`
 
 - **10절** — W2 항목 완료 처리, "당분간 자동 저장" 단서 제거
 - **새 절 또는 2절 말미** — 1절에서 정한 **HealthKit 사후 삭제 방식과 그 한계**를 기록한다.

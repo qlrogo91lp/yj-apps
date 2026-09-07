@@ -6,9 +6,10 @@ yj-apps 모노레포 공통 규약. 앱별 아키텍처·명령은 `Apps/<앱>/C
 
 ```
 yj-apps/
-├─ Packages/YJKit/       공용 인프라 패키지 (WorkoutCore / WorkoutUI / ConnectivityCore / PersistenceCore)
+├─ Packages/YJKit/       공용 인프라 패키지 (WorkoutCore / WorkoutUI / WorkoutShareUI / ConnectivityCore / PersistenceCore)
 ├─ Apps/GolfCounter/     GolfCounter — iOS + Watch + Complication
 ├─ Apps/TennisCounter/   Ralli(TennisCounter) — iOS + Watch + Complication + LiveActivity
+├─ Apps/HaruchiFit/      하루치 핏(HaruchiFit) — iOS + Watch + Complication
 ├─ YJApps.xcworkspace    이것 하나만 연다. 앱별 .xcodeproj 를 따로 열지 않는다
 ├─ Makefile              앱 순회 lint / format / fix
 ├─ .swiftlint.yml        공통 규칙 (앱별 설정이 parent_config 로 상속)
@@ -50,8 +51,12 @@ make kit-test  # Packages/YJKit 단독 테스트
 xcodebuild -workspace YJApps.xcworkspace -scheme "<스킴>" -destination "<대상>" build   # 또는 test
 ```
 
-공유 스킴 7개 — `GolfCounter` / `GolfCounter Watch App` / `GolfComplicationExtension` /
-`TennisCounter` / `TennisCounter Watch App` / `RalliComplicationExtension` / `TennisLiveActivityExtension`
+공유 스킴 11개 — `GolfCounter` / `GolfCounter Watch App` / `GolfComplicationExtension` /
+`TennisCounter` / `TennisCounter Watch App` / `RalliComplicationExtension` / `TennisLiveActivityExtension` /
+`HaruchiFit` / `HaruchiFit Watch App` / `HaruchiComplicationExtension` / `HaruchiFitWatchTests`
+
+하루치 핏만 **워치 테스트 전용 스킴**(`HaruchiFitWatchTests`)을 갖는다. 나머지 두 앱은 앱 스킴에
+`-only-testing` 을 걸어 테스트한다 — 그쪽 워치 스킴에는 iOS 테스트 타깃까지 들어 있기 때문이다.
 
 > **시뮬레이터는 이름이 아니라 UDID로 지정한다.** 런타임이 둘 이상 설치되면 같은 이름의 기기가
 > 중복되어 매칭에 실패한다 — `iPhone 17 Pro` 가 iOS 26.4·26.5 에, `Apple Watch Series 11 (46mm)` 이
@@ -84,6 +89,8 @@ override 붙였다 떼는 절차도 필요 없다.
 | GolfCounter | `GolfCounter Watch App` | ConnectivityCore, WorkoutCore, WorkoutUI |
 | TennisCounter | `TennisCounter` | ConnectivityCore, PersistenceCore, WorkoutCore, WorkoutUI |
 | TennisCounter | `TennisCounter Watch App` | ConnectivityCore, WorkoutCore, WorkoutUI |
+| HaruchiFit | `HaruchiFit` | ConnectivityCore, PersistenceCore, WorkoutCore, WorkoutUI, WorkoutShareUI |
+| HaruchiFit | `HaruchiFit Watch App` | ConnectivityCore, WorkoutCore, WorkoutUI |
 
 **코어는 도메인을 모른다.** 종목별 규칙·메시지·저장 정책은 앱 레이어가 소유한다.
 
