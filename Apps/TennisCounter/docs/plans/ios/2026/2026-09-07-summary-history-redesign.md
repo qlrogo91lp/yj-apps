@@ -4,37 +4,62 @@
 
 **Goal:** 요약·기록·기록 상세 세 화면의 정보 구성을 스펙대로 다시 잡는다. 요약은 3칸 통계 + 전적 한 줄 + 최근 추이 차트 + 최근 세션으로, 기록은 경기 나열에서 **세션 단위**로, 기록 상세는 가로 스코어보드로 바뀐다. 삭제 기능이 새로 들어간다.
 
-**Architecture:** 데이터 모델은 건드리지 않는다. 새 축이 하나 생길 뿐이다 — `workoutSessionId` 로 경기를 묶는 `MatchSessionGroup` 이 요약·기록 목록·캘린더 하단 셋의 공용 표현 단위가 되고, 세 화면이 `SessionCard` 하나를 공유한다. 누적 지표는 그룹당 최댓값만 취하는 기존 `sumOfWorkoutMaxima` 규칙을 그대로 따른다. 삭제는 `PersistenceCore.PersistenceService.delete` 에 위임하며 `SetRecord` 는 `deleteRule: .cascade` 로 함께 지워진다.
+**Architecture:** 데이터 모델은 건드리지 않는다. 새 축이 하나 생길 뿐이다 — `workoutSessionId` 로 경기를 묶는 `MatchSessionGroup` 이 요약·기록 목록·캘린더 하단 셋의 공용 표현 단위가 되고, 세 화면이 `SessionHeader`·`MatchRow` 두 조각을 공유한다 (조립은 카드와 `List` 두 가지 — §SessionCard 분해). 누적 지표는 그룹당 최댓값만 취하는 기존 `sumOfWorkoutMaxima` 규칙을 그대로 따른다. 삭제는 `PersistenceCore.PersistenceService.delete` 에 위임하며 `SetRecord` 는 `deleteRule: .cascade` 로 함께 지워진다.
 
 **Tech Stack:** iOS 17+ / SwiftUI `List`+`Section` · Swift Charts · SwiftData / Swift Testing
 
 **Spec:** [2026-08-25-summary-history-redesign-design.md](../../../specs/ios/2026/2026-08-25-summary-history-redesign-design.md) — 열린 질문 없음
 
-**선행:** [String Catalog 전환 플랜](../../shared/2026/2026-09-07-string-catalog-migration.md). 이 플랜이 문자열 키 16개를 새로 넣으므로 카탈로그 전환을 먼저 끝내야 전환 커밋의 "키 개수 동일(iOS 71)" 검증 기준이 깨지지 않는다.
+**선행:** [String Catalog 전환 플랜](../../shared/2026/2026-09-07-string-catalog-migration.md). 이 플랜이 문자열 키 17개를 새로 넣으므로 카탈로그 전환을 먼저 끝내야 전환 커밋의 "키 개수 동일(iOS 71)" 검증 기준이 깨지지 않는다.
 
 **후행:** [공유 버튼 플랜](2026-09-07-workout-share-button.md). 그 플랜은 `MatchDetailSheet` 의 `match_detail_section_info` 섹션 **뒤**에 버튼을 붙이는데, Task 7 이 이 파일의 섹션 구조를 바꾼다. 이 플랜을 먼저 끝내면 공유 버튼 플랜을 고칠 필요가 없다.
 
-## 스펙 보정 (2026-09-07)
+## 스펙 보정 (2026-09-08)
 
-스펙 작성(08-25) 이후 확정된 것들. 스펙 본문보다 아래가 우선한다.
+스펙 작성(08-25) 이후 확정된 것과, 스펙대로 만들면 막히는 것들. 스펙 본문보다 아래가 우선한다.
 
 | 스펙 표기 | 실제 | 이유 |
 |---|---|---|
-| `Info.plist` | **`Apps/TennisCounter/TennisCounter-Info.plist`** | iOS 타깃의 plist 파일명이 이것 하나다 (`ComplicationApp/Info.plist`·`TennisLiveActivity/Info.plist` 는 다른 타깃) |
-| `iOSApp/{en,ko}.lproj/Localizable.strings` 에 키 추가 | **`iOSApp/Localizable.xcstrings`** | String Catalog 전환(#5)을 먼저 하므로 `.lproj` 가 이미 없다 |
-| 변경 파일 목록에 `HistoryView.swift` 없음 | **`HistoryView.swift` 도 수정 대상** | 삭제 확인 다이얼로그와 선택 날짜 바인딩이 여기 붙는다. 스펙의 누락 |
-| 테스트 `DayCellDotsTests` 만 있고 대상 파일 없음 | **점 계산은 `DayCell.swift` 안의 `enum DayCellDots` 순수 함수** | 파일을 새로 만들 만한 분량이 아니다. `@testable import` 로 접근 |
-| "신규 문자열 키" (개수 없음) | **16개** | 스펙 목록을 세면 16개다 |
+| `Info.plist` | **`TennisCounter-Info.plist`** (현재 `<dict/>` 빈 파일) | iOS 타깃의 plist 는 이것 하나. `GENERATE_INFOPLIST_FILE = YES` 와 병행하므로 빈 dict 를 열어 키를 넣는다 |
+| `{en,ko}.lproj/Localizable.strings` 에 키 추가 | **`iOSApp/Localizable.xcstrings`** | String Catalog 전환(#5)을 먼저 하므로 `.lproj` 가 이미 없다 |
+| 변경 파일에 `HistoryView.swift` 없음 | **수정 대상** | 삭제 확인 다이얼로그·선택 날짜·`SessionList` 호출이 여기 붙는다 |
+| `SessionCard.swift` 하나 | **`SessionHeader` + `MatchRow` + `RecentSessionCard` + `SessionList` 넷** | 아래 §SessionCard 분해 |
+| `DaySessionList.swift` 신규 | **만들지 않는다** | `SessionList` 를 `CalendarView` 가 그대로 쓴다. 래퍼가 하는 일이 빈 상태 분기뿐이라 파일을 늘릴 이유가 없다 |
+| `DayCellDotsTests` 대상 파일 없음 | **`DayCell.swift` 안의 `enum DayCellDots`** | 파일을 새로 만들 분량이 아니다 |
+| 죽는 키 3개 | **4개** — `match_detail_section_sets` 추가 | Task 7 이 세트 섹션을 지우면 이 키도 참조가 사라진다 (`MatchDetailSheet.swift:89` 가 유일한 사용처) |
+| 신규 문자열 키 (개수 없음) | **17개** (스펙 16 + `btn_delete`), 최종 iOS 키 **71 + 17 − 4 = 84** | 스와이프 삭제 버튼 문구가 저장소에 없다 |
+
+### SessionCard 분해
+
+스펙은 "요약·기록 목록·캘린더 하단이 `SessionCard` 를 공유한다"고 쓰는데, **세 화면이 쓰는 모양이 다르다.**
+
+- 요약 — 최근 세션 **하나**를 패딩·배경·라운드가 붙은 카드로
+- 기록 목록·캘린더 하단 — `List` 의 `Section`. 헤더와 행을 **따로** 넘겨야 하고 행에 `.swipeActions` 가 붙는다
+
+`Section(header:)` 에 카드 한 덩어리를 넣을 수 없으므로 **조각을 먼저 만들고 두 가지로 조립**한다.
+
+```
+Components/SessionHeader.swift   날짜(요일) + 누적 시간 + 누적 kcal      ← 두 조립 모두 사용
+Components/MatchRow.swift        승/패 + 세트별 게임 스코어              ← 두 조립 모두 사용
+        ↑                                    ↑
+Features/Summary/Components/            Features/History/Components/
+  RecentSessionCard.swift                 SessionList.swift
+  (카드 래퍼, 요약 전용)                    (List+Section+스와이프, 기록·캘린더 공용)
+```
+
+`SessionHeader`·`MatchRow` 는 요약과 기록 **두 Feature 가 공유**하므로 앱 루트 `Components/` (루트 CLAUDE.md §계층화된 컴포넌트 구조). 조립 둘은 각자의 Feature 아래.
+
+`SessionList` 는 `MatchList.swift` 를 rename 해서 만든다 — 기록 목록과 캘린더 하단이 같은 것이므로 파일을 늘리지 않는다. 무한 스크롤은 `onLoadMore: (() -> Void)?` 로 두어 캘린더 쪽은 `nil` 을 넘긴다.
 
 ## Global Constraints
 
 - **모델을 바꾸지 않는다.** `Match`·`SetRecord` 에 필드를 추가하지 않는다 — CloudKit 스키마 마이그레이션이 붙는 순간 이 작업의 성격이 달라진다.
 - **누적값(`workout*`) 은 요약·세션 헤더에서만, 경기 구간값(`durationSeconds`·`caloriesBurned`·`totalCaloriesBurned`) 은 기록 상세에서만** 쓴다. 이 규칙이 이번 작업의 핵심이므로 어느 화면에서든 축을 섞지 않는다.
-- ViewModel 은 SwiftUI 를 import 하지 않는다 (루트 CLAUDE.md §역할 분리). 그룹핑·정렬·페이징 병합은 전부 ViewModel 또는 `Shared/Models/` 의 순수 로직에 둔다.
+- ViewModel 은 SwiftUI 를 import 하지 않는다 (루트 CLAUDE.md §역할 분리). 그룹핑·정렬·페이징은 전부 ViewModel 또는 `Shared/Models/` 의 순수 로직에 둔다.
 - 옛 기록 호환 — `workoutSessionId == nil` 은 단독 세션, 누적값이 `nil` 이면 `–` 로 표기한다. 크래시나 0 표기로 흘리지 않는다.
 - 브랜치 **`feat/summary-history-redesign`** (메인 체크아웃). `feat/ralli` 는 PR #11 로 이미 머지되어 더 쓰지 않는다.
 - 커밋은 **Task 단위로 8개**, PR 하나로 머지 (`gh pr merge --merge --delete-branch`).
-- 새 문자열은 코드에 `String(localized:)` 로 쓰면 빌드 때 카탈로그에 추출된다. 추출되지 않으면 Xcode 에서 카탈로그에 직접 키를 추가한다. **영어(en)는 소스 문자열 그대로, 한국어(ko)만 채운다.**
+- 새 문자열 **17개**는 코드에 `String(localized:)` 로 쓰면 빌드 때 카탈로그에 추출된다. 추출되지 않으면 Xcode 에서 카탈로그에 직접 키를 추가한다. **영어(en)는 소스 문자열 그대로, 한국어(ko)만 채운다.**
 
 **빌드 명령** (루트에서)
 
@@ -53,33 +78,34 @@ make lint && make format
 |---|---|
 | `iOSApp/Extensions/Duration+Cumulative.swift` | 누적 시간 포맷 (`42분` / `18시간 42분` / `470시간`) |
 | `Shared/Models/MatchSessionGroup.swift` | 세션 그룹 struct + 그룹핑·정렬 순수 로직 |
-| `iOSApp/Components/SessionCard.swift` | 세션 헤더 + 경기 행. 요약·기록 목록·캘린더 하단이 공유 |
+| `iOSApp/Components/SessionHeader.swift` | 세션 헤더 (요약·기록 공유) |
+| `iOSApp/Components/MatchRow.swift` | 경기 행 (요약·기록 공유) |
+| `iOSApp/Features/Summary/Components/RecentSessionCard.swift` | 요약의 카드 조립 |
 | `iOSApp/Features/Summary/Components/RecentTrendChart.swift` | 최근 10회 세션 막대 차트 |
-| `iOSApp/Features/History/Components/DaySessionList.swift` | 캘린더 하단 세션 목록 |
 | `iOSApp/Features/History/Components/Scoreboard.swift` | 가로 스코어보드 (기록 상세 전용) |
 | `iosTests/Extensions/DurationFormatTests.swift` | 포맷 4케이스 |
-| `iosTests/Shared/MatchSessionGroupTests.swift` | 그룹핑·정렬 |
+| `iosTests/Shared/MatchSessionGroupTests.swift` | 그룹핑·정렬·누적 최댓값 |
 | `iosTests/History/DayCellDotsTests.swift` | 점 개수·색 |
 
 **수정**
 
 | 파일 | 내용 |
 |---|---|
-| `TennisCounter-Info.plist` | `UIUserInterfaceStyle = Dark` |
+| `TennisCounter-Info.plist` | `UIUserInterfaceStyle = Dark` (빈 `<dict/>` 를 연다) |
 | `iOSApp/iOSApp.swift:59` | `.colorScheme(.dark)` → `.preferredColorScheme(.dark)` |
-| `iOSApp/Components/StatCard.swift` | `color` 파라미터 제거, 값은 흰색 고정 |
+| `iOSApp/Components/StatCard.swift` | `color` 파라미터 제거, 값은 흰색 고정 (호출부 11곳) |
 | `iOSApp/Features/Summary/SummaryViewModel.swift` | `SummaryPeriod` 재정의, `SummaryStats` 축소, 세션·추이 반환 |
 | `iOSApp/Features/Summary/SummaryView.swift` | 3칸 + 전적 줄 + 차트 + 최근 세션 + 빈 상태 |
-| `iOSApp/Features/Summary/Components/MatchStatsGrid.swift` | → `SummaryStatsGrid.swift` 로 개명, 3칸 재구성 |
-| `iOSApp/Features/History/HistoryViewModel.swift` | 세션 그룹핑, 경계 병합 페이징, 선택 날짜, 삭제 |
-| `iOSApp/Features/History/HistoryView.swift` | 삭제 확인 다이얼로그, 선택 날짜 바인딩 |
-| `iOSApp/Features/History/Components/MatchList.swift` | `List` + `Section` + 스와이프 삭제 |
-| `iOSApp/Features/History/Components/MatchDetailSheet.swift` | 스코어보드, "이 경기" 섹션, 시간 범위, 하드코딩 문자열 제거 |
-| `iOSApp/Features/History/Calendar/CalendarView.swift` | 하단 세션 목록 |
-| `iOSApp/Features/History/Calendar/Components/CalendarGrid.swift` | 날짜 선택 바인딩 |
-| `iOSApp/Features/History/Calendar/Components/DayCell.swift` | 다중 점, 선택/오늘 상태, `DayCellDots` |
+| `…/Summary/Components/MatchStatsGrid.swift` → `SummaryStatsGrid.swift` | rename + 3칸 재구성 + `#Preview` 인자 갱신 |
+| `iOSApp/Features/History/HistoryViewModel.swift` | 세션 그룹, **offset 방식 교체**, 선택 날짜, 삭제 |
+| `iOSApp/Features/History/HistoryView.swift` | 삭제 다이얼로그, 선택 날짜, `SessionList` 호출, 캘린더 `ScrollView` 제거 |
+| `…/History/Components/MatchList.swift` → `SessionList.swift` | rename + `List`+`Section`+스와이프 |
+| `…/History/Components/MatchDetailSheet.swift` | 스코어보드, "이 경기" 섹션, 시간 범위, 하드코딩 문자열 제거 |
+| `…/History/Calendar/CalendarView.swift` | 하단에 `SessionList` + 빈 상태 |
+| `…/History/Calendar/Components/CalendarGrid.swift` | `selectedMatch` → `selectedDate` 바인딩 |
+| `…/History/Calendar/Components/DayCell.swift` | 다중 점, 선택/오늘 상태, `DayCellDots` |
 | `iOSApp/Services/MatchPersistenceService.swift` | `delete(_:)` |
-| `iOSApp/Localizable.xcstrings` | 신규 16 / 삭제 3 |
+| `iOSApp/Localizable.xcstrings` | 신규 17 / 삭제 4 |
 | `iosTests/Summary/SummaryViewModelTests.swift` | 기간·통계·추이 |
 | `iosTests/History/HistoryViewModelTests.swift` | 그룹핑·페이징·삭제·날짜 선택 |
 | `iosTests/Services/MatchPersistenceServiceTests.swift` | 삭제 2케이스 |
@@ -88,21 +114,28 @@ make lint && make format
 
 | 파일 | 이유 |
 |---|---|
-| `iOSApp/Components/MatchCard.swift` | `SessionCard` 의 경기 행이 대체 |
+| `iOSApp/Components/MatchCard.swift` | `MatchRow` 가 대체. 사용처는 `MatchList`·`RecentMatchList` 둘뿐 |
 | `iOSApp/Features/Summary/Components/WorkoutStatsGrid.swift` | 3칸에 통합 |
-| `iOSApp/Features/Summary/Components/RecentMatchList.swift` | `SummaryView` 가 `SessionCard` 를 직접 씀 |
+| `iOSApp/Features/Summary/Components/RecentMatchList.swift` | `RecentSessionCard` 가 대체 |
 
-**신규 문자열 키 16개**
+**신규 문자열 키 17개** — 형식이 있는 것만 값을 못박는다.
 
-`duration_minutes` · `duration_hours_minutes` · `duration_hours` ·
-`summary_section_trend` · `summary_trend_insufficient` · `summary_recent_session` · `summary_record_line` ·
-`history_delete_confirm_title` · `history_delete_confirm_message` · `history_day_empty` ·
-`match_detail_section_this_match` · `match_detail_format` · `match_detail_time` · `match_detail_no_sets` ·
-`match_detail_me` · `match_detail_opponent`
+| 키 | ko | en |
+|---|---|---|
+| `duration_minutes` | `%d분` | `%dm` |
+| `duration_hours_minutes` | `%1$d시간 %2$d분` | `%1$dh %2$dm` |
+| `duration_hours` | `%d시간` | `%dh` |
+| `summary_record_line` | `%1$d승 %2$d패 · %3$d%%` | `%1$dW %2$dL · %3$d%%` |
+| `summary_section_trend` · `summary_trend_insufficient` · `summary_recent_session` | 문구 | |
+| `history_delete_confirm_title` · `history_delete_confirm_message` · `history_day_empty` | 문구 | |
+| `match_detail_section_this_match` · `match_detail_format` · `match_detail_time` · `match_detail_no_sets` · `match_detail_me` · `match_detail_opponent` | 문구 | |
+| `btn_delete` | `삭제` | `Delete` |
 
-**죽는 키 3개** — `summary_period_today` · `summary_recent_matches` · `summary_section_workout`
+`%%` 는 리터럴 `%` 다. 위치 지정자(`%1$d`)를 쓰는 건 한국어·영어 어순이 갈릴 때 번역자가 순서를 바꿀 수 있게 하기 위해서다.
 
-전환 후 iOS 키 개수: **71 + 16 − 3 = 84**
+**죽는 키 4개** — `summary_period_today` · `summary_recent_matches` · `summary_section_workout` · `match_detail_section_sets`
+
+전환 후 iOS 키 개수: **71 + 17 − 4 = 84**
 
 ---
 
@@ -238,32 +271,52 @@ struct MatchSessionGroup: Identifiable {
 
 ---
 
-### Task 3: `SessionCard` — 세션 헤더 + 경기 행
+### Task 3: 세션 조각 — `SessionHeader` · `MatchRow`
 
 **Files:**
-- Create: `Apps/TennisCounter/iOSApp/Components/SessionCard.swift`
+- Create: `Apps/TennisCounter/iOSApp/Components/SessionHeader.swift`
+- Create: `Apps/TennisCounter/iOSApp/Components/MatchRow.swift`
 
-- [ ] **Step 1: 카드 구성**
+두 조각이 요약과 기록 양쪽 조립에 쓰인다. **어느 쪽도 패딩·배경·라운드를 스스로 붙이지 않는다** —
+카드가 될지 `List` 행이 될지는 조립하는 쪽이 정한다. 여기서 배경을 칠하면 `List` 안에서 이중 배경이 된다.
 
-세션 헤더는 `날짜(요일)` + 누적 운동시간 + 누적 활동 kcal. 전적·경기 수는 넣지 않는다 (아래 행을 세면 나오는 값).
+- [ ] **Step 1: `SessionHeader` 시그니처**
 
-경기 행은 `승/패` + 세트별 게임 스코어.
+```swift
+struct SessionHeader: View {
+    let session: MatchSessionGroup
+    // 표기: 날짜(요일) · 누적 운동시간 · 누적 활동 kcal
+    // 전적·경기 수는 넣지 않는다 — 아래 행을 세면 나오는 값이다.
+    // 누적값이 nil 인 옛 기록은 "–".
+}
+```
 
-- 승/패 텍스트에만 색 (초록/주황). 게임 스코어는 기본색.
-- **내가 이긴 세트의 숫자만 `.bold`.** 색을 더 쓰면 목록이 시끄러워진다.
-- 세트합계(`2-1`)는 넣지 않는다.
-- 5세트가 한 줄에 들어가야 한다 (`6-4 4-6 6-3 7-5 6-2`).
-- 누적값이 `nil` 인 옛 기록은 헤더에 `–`.
+시간은 `CumulativeDuration.format`, 칼로리는 천단위 콤마.
 
-- [ ] **Step 2: 경기 행 탭 · 스와이프 슬롯**
+> **누적값 폴백을 두지 않는다.** `MatchSessionGroup.elapsedSeconds` 는 `workoutElapsedSeconds` 만 본다
+> (`durationSeconds` 로 대체하지 않는다). 요약 3칸은 기존 `sumOfWorkoutMaxima` 의 폴백을 그대로 쓰므로,
+> **옛 기록만 있는 세션은 헤더가 `–` 인데 요약 숫자에는 잡힌다.** 스펙이 헤더는 `–` 로 정했으므로 그대로 두되,
+> 이 차이를 알고 둔다 — 헤더는 "이 워크아웃의 누적", 요약은 "기간 합계"로 축이 다르다.
 
-`onSelect: (Match) -> Void` 를 받는다. 스와이프 삭제는 `List` 쪽(Task 5)이 소유하므로 카드는 모디파이어를 붙이지 않는다 — 요약과 캘린더 하단에서도 같은 카드를 쓰는데 그중 요약은 삭제를 노출하지 않는다.
+- [ ] **Step 2: `MatchRow` 시그니처**
 
-- [ ] **Step 3: `#Preview`** — 3경기 세션 / 1경기 세션 / 누적값 `nil` 세션 셋을 넣는다.
+```swift
+struct MatchRow: View {
+    let match: Match
+    // 표기: 승/패 + 세트별 게임 스코어 ("6-4 4-6 6-3")
+}
+```
 
-- [ ] **Step 4: 커밋** — `✨ 세션 헤더와 경기 행을 담는 SessionCard 를 추가한다`
+- 승/패 텍스트에만 색 (초록/주황). 게임 스코어는 기본색
+- **내가 이긴 세트의 숫자만 `.bold`** — 색을 더 쓰면 목록이 시끄러워진다
+- 세트합계(`2-1`)는 넣지 않는다
+- 5세트가 한 줄에 들어가야 한다
+- 세트는 `(match.sets ?? []).sorted { $0.setNumber < $1.setNumber }`
+- **탭·스와이프를 스스로 처리하지 않는다.** 조립하는 쪽이 `.onTapGesture` / `.swipeActions` 를 붙인다
 
----
+- [ ] **Step 3: `#Preview`** — 3세트 승 / 1세트 패 / 세트 없음(`sets` 가 `nil`) 셋
+
+- [ ] **Step 4: 커밋** — `✨ 세션 헤더와 경기 행 컴포넌트를 추가한다`
 
 ### Task 4: 요약 화면 재편
 
@@ -271,6 +324,7 @@ struct MatchSessionGroup: Identifiable {
 - Modify: `Apps/TennisCounter/iOSApp/Features/Summary/SummaryViewModel.swift`
 - Modify: `Apps/TennisCounter/iOSApp/Features/Summary/SummaryView.swift`
 - Rename+Modify: `…/Summary/Components/MatchStatsGrid.swift` → `SummaryStatsGrid.swift`
+- Create: `…/Summary/Components/RecentSessionCard.swift`
 - Create: `…/Summary/Components/RecentTrendChart.swift`
 - Delete: `…/Summary/Components/WorkoutStatsGrid.swift`, `…/Summary/Components/RecentMatchList.swift`
 - Modify: `Apps/TennisCounter/iosTests/Summary/SummaryViewModelTests.swift`
@@ -308,25 +362,58 @@ struct MatchSessionGroup: Identifiable {
     }
 ```
 
-- [ ] **Step 4: `SummaryStatsGrid`** — Xcode 네비게이터에서 `MatchStatsGrid.swift` 를 `SummaryStatsGrid.swift` 로 rename 하고 타입명도 바꾼다. 3칸을 `경기 수` / `운동시간` / `활동 kcal` 로 교체한다 (승·승률 카드 제거).
+- [ ] **Step 4: `SummaryStatsGrid`** — Xcode 네비게이터에서 `MatchStatsGrid.swift` 를 `SummaryStatsGrid.swift` 로 rename 하고 타입명도 바꾼다. 3칸을 `경기 수` / `운동시간` / `활동 kcal` 로 교체한다 (승·승률 카드 제거). **`#Preview` 가 `SummaryStats(...)` 를 7개 인자로 만들고 있으므로 Step 2 의 새 이니셜라이저에 맞춰 고친다** — 안 고치면 이 파일에서 컴파일이 깨진다.
 
-- [ ] **Step 5: `RecentTrendChart`**
+- [ ] **Step 5: `RecentSessionCard`**
 
-Swift Charts `BarMark`. x = 세션 회차, y = 누적 운동시간(분), x축 라벨은 세션 날짜(`8/24`), 막대 색은 `Color.brand`. 세션 배열이 비면 `summary_trend_insufficient` 문구를 대신 띄운다.
+```swift
+struct RecentSessionCard: View {
+    let session: MatchSessionGroup
+    let onSelect: (Match) -> Void
+    // VStack { SessionHeader; ForEach(session.matches) { MatchRow.onTapGesture } }
+    // 패딩·배경(Color.white.opacity(0.2))·라운드 16 은 여기서 붙인다 — 조각은 배경을 모른다.
+}
+```
 
-- [ ] **Step 6: `SummaryView` 재구성**
+- [ ] **Step 6: `RecentTrendChart`**
 
-순서 — 기간 Picker → `SummaryStatsGrid` → 전적 한 줄(`summary_record_line`, `8승 4패 · 67%`) → `summary_section_trend`("최근 10회 추이") + 차트 → `summary_recent_session` + `SessionCard`.
+`import Charts` (iOS 배포 타깃 17.0 이라 사용 가능).
 
-**빈 상태** — `filteredMatches` 가 비면 Picker 만 남기고 `summary_no_matches` 를 띄운다 (키는 이미 정의되어 있고 지금 쓰이지 않는다).
+```swift
+struct RecentTrendChart: View {
+    /// 오래된 것부터. 비어 있으면 안내 문구를 대신 띄운다.
+    let sessions: [MatchSessionGroup]
+}
+```
 
-- [ ] **Step 7: `WorkoutStatsGrid.swift`·`RecentMatchList.swift` 삭제**
+- `BarMark(x: .value(라벨, 세션 날짜 문자열), y: .value(라벨, 분))`, y 는 `elapsedSeconds / 60`
+- x축 라벨은 `8/24` — `DateFormatter` 에 `setLocalizedDateFormatFromTemplate("Md")`
+- 막대 색 `Color.brand` (`iOSApp/BrandColor.swift`)
+- `sessions.isEmpty` 면 차트 대신 `summary_trend_insufficient`
+- 누적값이 `nil` 인 세션은 막대 0 이 아니라 **건너뛴다** — 0 막대는 "그날 안 뛰었다"로 읽힌다
 
-- [ ] **Step 8: 테스트**
+- [ ] **Step 7: `SummaryView` 재구성**
+
+순서 — 기간 `Picker` → `SummaryStatsGrid` → 전적 한 줄 → `summary_section_trend`("최근 10회 추이") + `RecentTrendChart` → `summary_recent_session` + `RecentSessionCard`.
+
+전적 줄:
+
+```swift
+Text(String(format: String(localized: "summary_record_line"),
+            stats.wins, stats.totalMatches - stats.wins, Int(stats.winRate * 100)))
+```
+
+**빈 상태** — `viewModel.filteredMatches(from: matches)` 가 비면 `Picker` 만 남기고 `summary_no_matches` 를 띄운다. 키는 이미 정의되어 있고 지금 쓰이지 않아, 경기가 없으면 0 과 `–` 만 남은 화면이 나온다.
+
+**상세 시트** — 최근 세션의 경기 행을 탭하면 `MatchDetailSheet` 를 연다. 지금 시트는 기록 탭에만 있으므로 `SummaryView` 에도 `@State private var selectedMatch: Match?` 와 `.sheet(item: $selectedMatch)` 를 새로 둔다.
+
+- [ ] **Step 8: `WorkoutStatsGrid.swift`·`RecentMatchList.swift` 삭제**
+
+- [ ] **Step 9: 테스트**
 
 `allPeriodIncludesEveryMatch` · `weekPeriodExcludesOlderMatches`(기존 유지) · `statsExcludeRemovedMetrics` · `trendReturnsAtMostTenSessions` · `trendGroupsBySession` · `trendHiddenBelowThreeSessions`.
 
-- [ ] **Step 9: 빌드·테스트·커밋** — `✨ 요약 화면을 3칸 통계·전적 줄·추이 차트·최근 세션으로 재편한다`
+- [ ] **Step 10: 빌드·테스트·커밋** — `✨ 요약 화면을 3칸 통계·전적 줄·추이 차트·최근 세션으로 재편한다`
 
 ---
 
@@ -336,9 +423,9 @@ Swift Charts `BarMark`. x = 세션 회차, y = 누적 운동시간(분), x축 �
 - Modify: `Apps/TennisCounter/iOSApp/Services/MatchPersistenceService.swift`
 - Modify: `Apps/TennisCounter/iOSApp/Features/History/HistoryViewModel.swift`
 - Modify: `Apps/TennisCounter/iOSApp/Features/History/HistoryView.swift`
-- Modify: `Apps/TennisCounter/iOSApp/Features/History/Components/MatchList.swift`
+- Rename+Modify: `…/History/Components/MatchList.swift` → `SessionList.swift`
 - Delete: `Apps/TennisCounter/iOSApp/Components/MatchCard.swift`
-- Modify: `Apps/TennisCounter/iosTests/History/HistoryViewModelTests.swift`, `iosTests/Services/MatchPersistenceServiceTests.swift`
+- Modify: `iosTests/History/HistoryViewModelTests.swift`, `iosTests/Services/MatchPersistenceServiceTests.swift`
 
 - [ ] **Step 1: `delete(_:)`**
 
@@ -355,45 +442,124 @@ Swift Charts `BarMark`. x = 세션 회차, y = 누적 운동시간(분), x축 �
     }
 ```
 
-- [ ] **Step 2: `HistoryViewModel` — 세션 그룹 + 경계 병합**
+- [ ] **Step 2: offset 방식을 바꾼다 — 삭제와 충돌한다**
 
-`listMatches` 는 경기 단위 페칭이라 그대로 두고, 뷰가 쓰는 `listSessions: [MatchSessionGroup]` 을 파생시킨다. **페이지 경계에서 같은 `workoutSessionId` 가 두 그룹으로 갈리지 않게** `loadNextPage` 후 전체 `listMatches` 를 다시 그룹핑한다 (누적 배열이라 병합이 자연히 된다).
+지금은 페이지 번호로 offset 을 만든다.
 
-`delete(_ match:)` 를 추가해 `MatchPersistenceService.delete` 를 부르고 `listMatches`·`calendarMatches` 에서 제거한 뒤 그룹을 다시 만든다. 세션의 마지막 경기가 지워지면 그룹도 사라진다.
+```swift
+descriptor.fetchOffset = currentPage * pageSize   // HistoryViewModel.swift:43
+currentPage += 1
+```
 
-- [ ] **Step 3: `MatchList` 를 `List` + `Section` 으로**
+여기에 삭제가 들어오면 **저장소 레코드가 하나 줄어 다음 페이지가 한 칸 밀린다.** 20번째 경계에 있던
+경기가 영영 안 나온다. `currentPage` 를 버리고 **이미 들고 있는 개수**를 offset 으로 쓴다.
 
-`ScrollView` + `LazyVStack` → `List`. 세션 하나가 `Section`, 헤더는 `SessionCard` 의 헤더, 행은 경기 행. `.swipeActions` 로 경기 행 삭제.
+```swift
+        // 페이지 번호가 아니라 보유 개수로 offset 을 잡는다 — 삭제로 저장소와 배열이 함께 하나 줄면
+        // offset 도 같이 줄어 경계가 어긋나지 않는다. 화면에 없는 레코드는 지울 수 없으므로 항상 일치한다.
+        descriptor.fetchOffset = listMatches.count
+```
 
-다크 배경 유지 — `.listStyle(.plain)` + `.listRowBackground(Color.clear)` + `.scrollContentBackground(.hidden)`.
+`loadInitial()` 의 `currentPage = 0` 도 함께 지운다 (`listMatches = []` 가 그 역할을 한다).
 
-무한 스크롤은 유지한다 (`onAppear` 에서 끝 5개 전 `onLoadMore`).
+- [ ] **Step 3: 세션 그룹 파생**
 
-- [ ] **Step 4: `HistoryView` 삭제 확인 다이얼로그**
+`listMatches`(경기 단위 페칭)는 그대로 두고, 뷰가 쓰는 것을 파생시킨다.
 
-`@State private var pendingDelete: Match?` + `.confirmationDialog`. 문구는 `history_delete_confirm_title` / `history_delete_confirm_message` — 메시지에 **다른 기기로 전파되고 되돌릴 수 없다**는 점을 적는다.
+```swift
+    @Published private(set) var listSessions: [MatchSessionGroup] = []
 
-- [ ] **Step 5: `MatchCard.swift` 삭제** — 이 시점에 참조가 남아 있으면 안 된다.
+    // 누적 배열 전체를 다시 그룹핑한다. 페이지 경계에서 한 세션이 둘로 갈리는 문제가
+    // 여기서 자연히 사라진다 — 경계를 따로 병합할 필요가 없다.
+    private func rebuildSessions() {
+        listSessions = MatchSessionGroup.group(listMatches)
+    }
+```
+
+`loadNextPage()` 끝과 `delete(_:)` 끝에서 부른다.
+
+- [ ] **Step 4: `delete(_:)` on ViewModel**
+
+```swift
+    func delete(_ match: Match) {
+        try? MatchPersistenceService.shared.delete(match)
+        listMatches.removeAll { $0.id == match.id }
+        calendarMatches.removeAll { $0.id == match.id }
+        rebuildSessions()
+    }
+```
+
+> **컨텍스트가 둘이다.** `iOSApp.swift:14` 가 서비스에 `ModelContext(container)` 를 따로 만들어 주고,
+> `HistoryViewModel` 은 `@Environment(\.modelContext)` 를 받는다. 같은 컨테이너라 저장소에는 반영되지만
+> **VM 의 배열은 자동으로 갱신되지 않으므로 위처럼 직접 지운다.**
+
+- [ ] **Step 5: `MatchList` → `SessionList`**
+
+Xcode 네비게이터에서 rename. 시그니처가 바뀐다.
+
+```swift
+struct SessionList: View {
+    let sessions: [MatchSessionGroup]
+    let isLoadingMore: Bool
+    /// 캘린더 하단은 페이징하지 않으므로 nil.
+    let onLoadMore: (() -> Void)?
+    let onSelect: (Match) -> Void
+    let onDelete: (Match) -> Void
+}
+```
+
+`ScrollView`+`LazyVStack` → `List`. 세션 하나가 `Section(header: SessionHeader(session:))`, 행이 `MatchRow`.
+
+**다크 배경은 모디파이어 셋을 다 걸어야 유지된다** — 하나라도 빠지면 흰 배경이 비친다.
+
+```swift
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)     // List 자체 배경
+        // 각 행에:
+        .listRowBackground(Color.clear)
+```
+
+스와이프 삭제는 행에 붙인다.
+
+```swift
+                    .swipeActions(edge: .trailing) {
+                        Button(String(localized: "btn_delete"), role: .destructive) { onDelete(match) }
+                    }
+```
+
+무한 스크롤 — `onLoadMore` 가 `nil` 이 아닐 때만, **세션이 아니라 경기 기준으로** 끝 5개 전에서 부른다.
+
+- [ ] **Step 6: `HistoryView`**
+
+- `MatchList(matches: viewModel.listMatches, …)` → `SessionList(sessions: viewModel.listSessions, …)`
+- 빈 상태 조건 `viewModel.listMatches.isEmpty` → `viewModel.listSessions.isEmpty`
+- `@State private var pendingDelete: Match?` + `.confirmationDialog`. `onDelete:` 는 곧바로 지우지 말고 `pendingDelete` 에 담는다
+- 다이얼로그 문구 `history_delete_confirm_title` / `history_delete_confirm_message` — 메시지에 **다른 기기로 전파되고 되돌릴 수 없다**는 점을 적는다
+
+- [ ] **Step 7: `MatchCard.swift` 삭제**
 
 ```bash
 grep -rn "MatchCard" Apps/TennisCounter/ --include='*.swift'   # 결과가 없어야 한다
 ```
 
-- [ ] **Step 6: 테스트**
+- [ ] **Step 8: 테스트**
 
-`HistoryViewModelTests` — `matchesGroupIntoSessions` · `nilSessionIdBecomesOwnSession` · `sessionsSortedByLatestMatch` · `pageBoundaryMergesSameSession` · `deleteRemovesMatchFromSession` · `deletingLastMatchRemovesSession`.
+`HistoryViewModelTests` — `matchesGroupIntoSessions` · `nilSessionIdBecomesOwnSession` · `sessionsSortedByLatestMatch` · `pageBoundaryMergesSameSession` · **`deleteDoesNotSkipNextPage`**(20개 경계에서 하나 지우고 `loadNextPage` → 건너뛴 경기가 없어야 한다) · `deleteRemovesMatchFromSession` · `deletingLastMatchRemovesSession`.
+
+> 삭제 테스트는 VM 과 서비스가 **같은 컨테이너**를 봐야 한다. 기존 `makeContext()` 는 컨테이너를 안 돌려주므로
+> 컨테이너를 만들어 `vm.configure(modelContext: ModelContext(container))` 와
+> `MatchPersistenceService.shared.configure(with: ModelContext(container))` 에 각각 넘기는 헬퍼를 추가한다.
+> 서비스가 싱글턴이라 **`@Suite(.serialized)` 가 필요하다** — `MatchPersistenceServiceTests` 가 같은 이유로 이미 쓰고 있다.
+
 `MatchPersistenceServiceTests` — `deleteRemovesMatch` · `deleteCascadesSetRecords`.
 
-- [ ] **Step 7: 빌드·테스트·커밋** — `✨ 기록 목록을 세션 단위로 바꾸고 경기 삭제를 넣는다`
-
----
+- [ ] **Step 9: 빌드·테스트·커밋** — `✨ 기록 목록을 세션 단위로 바꾸고 경기 삭제를 넣는다`
 
 ### Task 6: 캘린더 — 다중 점 · 날짜 선택 · 하단 세션 목록
 
 **Files:**
 - Modify: `…/History/Calendar/Components/DayCell.swift`, `CalendarGrid.swift`, `…/Calendar/CalendarView.swift`
-- Create: `…/History/Components/DaySessionList.swift`
-- Modify: `Apps/TennisCounter/iOSApp/Features/History/HistoryViewModel.swift`
+- Modify: `Apps/TennisCounter/iOSApp/Features/History/HistoryViewModel.swift`, `HistoryView.swift`
 - Create: `Apps/TennisCounter/iosTests/History/DayCellDotsTests.swift`
 
 - [ ] **Step 1: `DayCellDots` 순수 함수**
@@ -418,28 +584,73 @@ enum DayCellDots {
 
 - [ ] **Step 2: `DayCell` 상태 셋**
 
-평소 / **오늘 = 테두리 원** / **선택 = 채워진 원**(`Color.brand`). 두 상태가 겹쳐도 읽혀야 한다. 현재의 `hasWin`(`contains { 이김 }`) 단일 점을 위 `dots(for:)` 로 교체한다.
+`isToday ? .blue` 단일 상태를 셋으로 늘린다 — 평소 / **오늘 = 테두리 원** / **선택 = 채워진 원**(`Color.brand`).
+겹칠 수 있으므로 채움과 테두리로 나눈다. `hasWin`(`contains { 이김 }`) 단일 점은 `dots(for:)` 로 교체한다.
 
-- [ ] **Step 3: `CalendarGrid` 선택 바인딩**
+```swift
+struct DayCell: View {
+    let date: Date
+    let matches: [Match]
+    let isSelected: Bool          // 추가
+    let onTap: () -> Void
+}
+```
 
-`@Binding var selectedMatch: Match?` (탭하면 그날 마지막 경기 시트) 를 `@Binding var selectedDate: Date?` 로 바꾼다. 캘린더에서 시트를 직접 열지 않는다 — 상세는 하단 목록의 경기 행에서 연다.
+- [ ] **Step 3: `CalendarGrid` 바인딩 교체**
 
-- [ ] **Step 4: `DaySessionList` + `CalendarView` 하단**
+```swift
+    @Binding var selectedDate: Date?   // was: @Binding var selectedMatch: Match?
+```
 
-선택된 날짜의 경기를 `MatchSessionGroup.group` 으로 묶어 `SessionCard` 로 그린다. 스와이프 삭제도 목록 뷰와 같게 따라온다. 캘린더는 고정하고 하단만 스크롤한다. 그날 경기가 없으면 `history_day_empty`.
+`DayCell` 의 `onTap` 은 `selectedDate = date` 만 한다. **캘린더가 상세 시트를 직접 열지 않는다** —
+지금은 `CalendarGrid.swift:19` 가 그날 마지막 경기 하나만 시트로 띄워 나머지는 접근할 방법이 없다.
+상세는 하단 목록의 경기 행에서 연다.
+
+- [ ] **Step 4: `CalendarView` 하단 목록**
+
+```swift
+struct CalendarView: View {
+    let matches: [Match]
+    let currentMonth: Date
+    let onPrevious: () -> Void
+    let onNext: () -> Void
+    @Binding var selectedDate: Date?
+    let onSelect: (Match) -> Void
+    let onDelete: (Match) -> Void
+}
+```
+
+`VStack` — 위는 `MonthHeader`+`WeekdayLabels`+`CalendarGrid`(고정), 아래는 선택 날짜의 세션.
+
+```
+선택 날짜의 경기 = matches.filter { Calendar.current.isDate($0.startedAt, inSameDayAs: selectedDate) }
+비어 있으면 → Text(history_day_empty)
+아니면      → SessionList(sessions: group(그 경기들), isLoadingMore: false,
+                          onLoadMore: nil, onSelect: onSelect, onDelete: onDelete)
+```
+
+> **`HistoryView` 의 `ScrollView` 를 없앤다.** 지금 `HistoryView:24` 가 `CalendarView` 를 `ScrollView` 로
+> 감싸는데, 안에 `List`(`SessionList`)가 들어오면 스크롤이 중첩돼 높이가 무너진다. 캘린더는 고정,
+> 스크롤은 `SessionList` 가 갖는다.
 
 - [ ] **Step 5: 날짜 자동 선택**
 
-`HistoryViewModel` 에 `selectedDate: Date?`. 진입 시 오늘. `changeMonth(by:)` 에서 **그 달의 경기 있는 가장 최근 날짜**를 고르고, 없으면 `nil`.
+`HistoryViewModel` 에 `@Published var selectedDate: Date?`.
 
-- [ ] **Step 6: 테스트**
+- `loadInitial()` — 오늘
+- `changeMonth(by:)` — **`loadCalendarMatches()` 를 먼저 부른 뒤** 그 달에서 경기가 있는 가장 최근 날짜를 고른다. 없으면 `nil`. 순서를 뒤집으면 이전 달 데이터로 고르게 된다
+
+- [ ] **Step 6: 상세 시트 경로**
+
+`HistoryView` 의 `.sheet(item: $selectedMatch)` 는 그대로 두고, 캘린더 쪽 `onSelect: { selectedMatch = $0 }` 로
+연결한다. 목록 모드와 같은 시트를 공유한다. 삭제도 `onDelete: { pendingDelete = $0 }` 로 같은 다이얼로그를 탄다.
+
+- [ ] **Step 7: 테스트**
 
 `DayCellDotsTests` — `dotsMatchMatchCount` · `dotsCapAtFour` · `dotColorsFollowEachResult`.
-`HistoryViewModelTests` 에 추가 — `selectsMostRecentMatchDayOnMonthChange` · `selectsNothingWhenMonthHasNoMatches`.
+`HistoryViewModelTests` 추가 — `selectsMostRecentMatchDayOnMonthChange` · `selectsNothingWhenMonthHasNoMatches`.
 
-- [ ] **Step 7: 빌드·테스트·커밋** — `✨ 캘린더에 다중 점과 날짜별 세션 목록을 넣는다`
-
----
+- [ ] **Step 8: 빌드·테스트·커밋** — `✨ 캘린더에 다중 점과 날짜별 세션 목록을 넣는다`
 
 ### Task 7: 기록 상세 — 스코어보드 · "이 경기" 섹션
 
@@ -468,6 +679,7 @@ enum DayCellDots {
 - 시간 범위 `14:30 ~ 15:22`. `endedAt` 이 `nil` 이면 시작 시각만.
 - 하드코딩 `"Format"`·`"Date"` → `match_detail_format` · `match_detail_time`.
 - 섹션 제목을 `summary_section_workout`("운동") 에서 `match_detail_section_this_match`("이 경기") 로 바꿔 세션 누적과 구분한다.
+- **이 Step 이 키 2개를 죽인다** — `summary_section_workout`(다른 사용처였던 `WorkoutStatsGrid` 는 Task 4 에서 삭제됨) 과 `match_detail_section_sets`(세트 섹션의 유일한 사용처). Task 8 에서 정리한다.
 
 - [ ] **Step 3: 빌드·커밋** — `✨ 기록 상세를 가로 스코어보드와 '이 경기' 섹션으로 바꾼다`
 
@@ -477,13 +689,13 @@ enum DayCellDots {
 
 - [ ] **Step 1: 죽은 키 3개 삭제**
 
-`summary_period_today` · `summary_recent_matches` · `summary_section_workout` 을 `iOSApp/Localizable.xcstrings` 에서 지운다. 지우기 전에 참조가 없는지 확인한다.
+`summary_period_today` · `summary_recent_matches` · `summary_section_workout` · `match_detail_section_sets` **4개**를 `iOSApp/Localizable.xcstrings` 에서 지운다. 지우기 전에 참조가 없는지 확인한다.
 
 ```bash
-grep -rnE 'summary_period_today|summary_recent_matches|summary_section_workout' Apps/TennisCounter/ --include='*.swift'
+grep -rnE 'summary_period_today|summary_recent_matches|summary_section_workout|match_detail_section_sets' Apps/TennisCounter/ --include='*.swift'
 ```
 
-- [ ] **Step 2: 키 개수 확인** — iOS 카탈로그가 **84개**여야 한다.
+- [ ] **Step 2: 키 개수 확인** — iOS 카탈로그가 **84개**여야 한다 (71 + 17 − 4).
 
 - [ ] **Step 3: 전체 검증**
 
@@ -499,6 +711,9 @@ make lint && make format
 - [ ] 세션 1개(경기 1개)·세션 여러 개(경기 3~4개) 둘 다 카드가 같은 리듬으로 그려진다
 - [ ] 세션이 2개 이하일 때 차트 대신 안내 문구
 - [ ] 경기 20개를 넘겨 스크롤 — **페이지 경계에서 세션 헤더가 두 번 나오지 않는다**
+- [ ] **20번째 경계 부근의 경기를 지운 뒤 계속 스크롤 — 건너뛴 경기가 없다** (Task 5 Step 2 검증)
+- [ ] 캘린더 모드에서 하단 목록이 스크롤되고 캘린더는 고정된다 (중첩 스크롤 아님)
+- [ ] 캘린더 하단에서 경기 행을 탭하면 상세 시트, 스와이프하면 삭제 다이얼로그
 - [ ] 스와이프 삭제 → 확인 다이얼로그 → 삭제. 세션의 마지막 경기를 지우면 헤더도 사라진다
 - [ ] 캘린더에서 4경기 넘는 날 — 점 4개, 마지막이 회색
 - [ ] 월을 넘기면 경기 있는 최근 날짜가 자동 선택된다. 경기 없는 달이면 빈 문구
@@ -520,7 +735,22 @@ make lint && make format
 ## Self-Review
 
 - 스펙의 공통 원칙 4개 → 값의 축(Global Constraints + Task 4·7), 색(Task 1 Step 5 + Task 3), 다크 모드(Task 1 Step 1·2), 누적 포맷(Task 1 Step 3) ✅
-- 스펙의 변경 파일 신규 6 / 수정 17 / 삭제 3 → File Structure 에 전부 반영, 스펙 누락분(`HistoryView.swift`) 추가 ✅
-- 스펙의 테스트 목록 → Task 1·2·4·5·6 에 분배, `DayCellDots` 대상 파일 확정 ✅
-- 선행·후행 관계 — #5 String Catalog(선행), #1 공유 버튼(후행) 명시 ✅
+- 스펙의 변경 파일 → File Structure 에 반영. 스펙과 갈린 곳 8건은 §스펙 보정에 근거와 함께 ✅
+- 스펙의 테스트 목록 22개 → Task 1·2·4·5·6 에 분배, `DayCellDots` 대상 파일 확정 ✅
+- 선행·후행 — #5 String Catalog(선행), #1 공유 버튼(후행) ✅
 - 모델 무변경 · CloudKit 마이그레이션 없음 ✅
+
+**2026-09-08 구현 가능성 점검에서 고친 것**
+
+| 결함 | 고친 곳 |
+|---|---|
+| `SessionCard` 하나로는 `Section(header:)` 를 못 만든다 — Task 3 과 Task 5 가 서로 다른 것을 요구했다 | §SessionCard 분해, Task 3·4·5 |
+| 삭제하면 offset 페이징이 레코드를 건너뛴다 | Task 5 Step 2 |
+| `CalendarGrid` 바인딩을 바꾼 뒤 상세 시트를 여는 경로가 끊긴다 | Task 6 Step 3·6 |
+| `SessionList`(=`List`) 를 `ScrollView` 안에 넣으면 스크롤이 중첩된다 | Task 6 Step 4 |
+| 죽는 키가 3개가 아니라 4개 (`match_detail_section_sets` 누락) | §스펙 보정, Task 7·8 |
+| 스와이프 삭제 버튼 문구 `btn_delete` 가 저장소에 없다 — 신규 키 16 → 17 | §신규 문자열 키 |
+| `SummaryStatsGrid` 의 `#Preview` 가 옛 `SummaryStats` 7인자로 컴파일 실패 | Task 4 Step 4 |
+| 삭제 테스트에서 VM 과 싱글턴 서비스가 다른 컨테이너를 보면 통과하지 않는다 | Task 5 Step 8 |
+| `SessionList` 시그니처·`CalendarView` 시그니처·`DayCell` 시그니처 미지정 | Task 5 Step 5, Task 6 Step 2·4 |
+| 전적 줄·누적 시간 포맷 문자열의 위치 지정자 미지정 | §신규 문자열 키 |
