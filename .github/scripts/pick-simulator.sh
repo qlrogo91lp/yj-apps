@@ -6,7 +6,7 @@
 #   런타임이 둘 이상 설치되면 같은 이름의 기기가 중복되어 매칭이 실패한다.
 #   실제로 iPhone 17 Pro 가 iOS 26.4·26.5 에, Apple Watch Series 11 (46mm) 이
 #   watchOS 26.4·26.5 에 동시에 존재해 빌드가 깨진 적이 있다.
-#   (docs/superpowers/specs/2026-08-27-ci-pipeline-design.md 5.1)
+#   (docs/specs/2026/2026-08-27-ci-pipeline-design.md 5.1)
 #
 # 사용법: pick-simulator.sh <iOS|watchOS> <기기 이름 정규식>
 set -euo pipefail

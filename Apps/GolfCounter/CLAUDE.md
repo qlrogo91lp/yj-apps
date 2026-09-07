@@ -6,7 +6,7 @@
 ## Project overview
 
 GolfCounter — 워치 메인 입력, iOS는 기록·통계 전용인 골프 스트로크 카운터.
-설계는 `docs/superpowers/specs/2026-07-31-golfcounter-rebuild-design.md` 참조 (v1 리빌드 진행 중).
+설계는 `docs/specs/shared/2026/2026-07-31-golfcounter-rebuild-design.md` 참조 (v1 리빌드 진행 중).
 타깃: `GolfCounter`(iOS 17+) / `GolfCounter Watch App`(watchOS 10+) / `ComplicationAppExtension`(watch 위젯).
 의존성: 모노레포 로컬 패키지 `Packages/YJKit` — WorkoutCore / ConnectivityCore / PersistenceCore / WorkoutUI. 그 외 없음.
 스킴 이름은 `GolfComplicationExtension` 이지만 타깃 이름은 `ComplicationAppExtension` 이다 (출시 산출물명 유지 목적).
@@ -49,5 +49,7 @@ xcodebuild -workspace YJApps.xcworkspace -scheme "GolfComplicationExtension" \
 
 커밋 시점 등 공통 규약은 루트 `CLAUDE.md` 를 따른다. 이 앱의 배치 규칙만 여기 적는다.
 
-- `docs/superpowers/specs/` — 설계
-- `docs/superpowers/plans/` — 구현 계획. 파일명에 `common-` / `watch-` / `ios-` prefix를 붙인다
+- `docs/specs/` — 설계
+- `docs/plans/` — 구현 계획
+- 폴더 구조·파일명 규칙은 루트 `CLAUDE.md` 의 "Docs 공통 규약" 을 따른다. **플랫폼은 파일명
+  prefix가 아니라 `ios/`·`watch/`·`shared/` 폴더가 구분한다** (예전 `common-` prefix = `shared/`)
