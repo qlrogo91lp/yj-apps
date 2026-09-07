@@ -160,10 +160,27 @@ enum SessionPhase { case idle, active, summary }
 
 **Files:**
 - Modify: `Apps/HaruchiFit/docs/specs/shared/2026/2026-09-02-haruchi-fit-architecture.md`
+- Modify: `Apps/HaruchiFit/docs/specs/shared/2026/2026-09-07-haruchi-fit-roadmap.md`
+- Modify: `TODO.md` (저장소 루트)
 
-- **10절** — W2 항목 완료 처리, "당분간 자동 저장" 단서 제거
-- **새 절 또는 2절 말미** — 1절에서 정한 **HealthKit 사후 삭제 방식과 그 한계**를 기록한다.
-  스펙이 요구한 "폐기 시 HealthKit 에 남기지 않는다"를 어떻게 지켰는지가 남아야 한다
+### 아키텍처 — 설계 근거
+
+**2절 말미에** 1절에서 정한 **HealthKit 사후 삭제 방식과 그 한계**를 기록한다.
+스펙이 요구한 "폐기 시 HealthKit 에 남기지 않는다"를 어떻게 지켰는지가 남아야 한다.
+
+> 10절은 건드리지 않는다. 진행 상태는 로드맵이 단일 출처다 (`0da4a7a` 에서 분리했다).
+
+### 로드맵 — 진행 상태
+
+- **Phase 1 ①번 W2 요약** 행을 "완료된 것" 표로 옮긴다 (PR 번호와 함께)
+- `## 순서를 이렇게 잡은 이유` 의 *"지금은 자동 저장이라 그 경로가 미완이다"* 를 갱신한다 —
+  W2 가 닫히면 이 문장이 곧바로 거짓이 된다
+- Phase 1 의 다음 항목은 ② W0 홈 토글
+
+### TODO.md — 작업 허브
+
+`## GolfCounter · HaruchiFit` 절이 아직 "아직 없음" 이다. W2 착수 시점에 하루치 행을 만들고,
+완료 커밋에서 `~~취소선~~` + `완료 (PR #n)` 로 닫는다 (루트 `CLAUDE.md` 규약).
 
 ---
 
