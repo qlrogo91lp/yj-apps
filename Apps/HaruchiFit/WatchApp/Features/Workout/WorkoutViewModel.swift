@@ -32,11 +32,10 @@ final class WorkoutViewModel: ObservableObject {
     /// W0 에서 고른 시작 유형. 세션 사이에 남는다.
     private static let startKindKey = "startSegmentKind"
 
-    /// 닫힌 구간들. 열려 있는 마지막 구간은 `openSegmentStart` 로만 들고 있다가 종료 시 닫는다.
-    private var closedSegments: [WorkoutRecordMessage.SegmentPayload] = []
-    /// 현재 구간이 시작된 오프셋(초). 경과시간은 워치가 단일 소스라 여기서도 그 값을 쓴다.
-    private var openSegmentStart = 0
-    private var startedAt = Date()
+    /// 구간 경계를 재는 쪽. **벽시계를 쓴다** — `session.elapsedSeconds` 는 손목을 내리면
+    /// 멈추는 틱 카운터라 실기기에서 구간이 몇 초로 잡혔다 (`SegmentTracker` 주석).
+    /// 세션 시작 시각도 여기가 단일 소스다.
+    private var segments = SegmentTracker()
 
     init(session: WorkoutSessionService = WorkoutSessionService(configuration: .strength),
          connectivity: WorkoutRecordSending,
@@ -96,9 +95,7 @@ final class WorkoutViewModel: ObservableObject {
         WKInterfaceDevice.current().play(.start)
         // mode 는 W0 에서 고른 값 그대로다 — 첫 구간이 그 유형으로 열린다.
         // 세션 자체는 유형과 무관하게 실내 근력이다 (D-M8).
-        closedSegments = []
-        openSegmentStart = 0
-        startedAt = Date()
+        segments.reset()
         publishSnapshot(isPaused: false)
     }
 
@@ -120,7 +117,7 @@ final class WorkoutViewModel: ObservableObject {
     /// 화면을 계속 볼 수 없어 촉각이 유일한 확인 수단이다 (제품 스펙 5절).
     func switchMode(to newMode: SegmentKind) {
         guard newMode != mode else { return }
-        closeOpenSegment(at: session.elapsedSeconds)
+        segments.closeOpenSegment(kind: mode)
         mode = newMode
         // 눈 없이 방향을 구분할 수 있도록 상행·하행을 대칭으로 쓴다.
         WKInterfaceDevice.current().play(newMode == .cardio ? .directionUp : .directionDown)
@@ -132,23 +129,11 @@ final class WorkoutViewModel: ObservableObject {
     /// **경과시간은 세션에서 가져온다** — 워치가 단일 소스라는 계약(루트 `CLAUDE.md`)을 여기서도
     /// 지킨다. `capturedAt` 과 짝으로 실어야 컴플리케이션이 타이머 기준점을 잡을 수 있다.
     private func publishSnapshot(isPaused: Bool) {
-        snapshots.publish(WorkoutSnapshot(startedAt: startedAt,
+        snapshots.publish(WorkoutSnapshot(startedAt: segments.startedAt,
                                           mode: mode,
                                           isPaused: isPaused,
                                           elapsedSeconds: session.elapsedSeconds,
                                           capturedAt: Date()))
-    }
-
-    /// 열린 구간을 닫아 `closedSegments` 에 넣는다. 길이가 0이면 버린다 —
-    /// 전환을 연달아 눌렀을 때 빈 구간이 쌓이는 것을 막는다.
-    private func closeOpenSegment(at elapsed: Int) {
-        let duration = elapsed - openSegmentStart
-        if duration > 0 {
-            closedSegments.append(.init(kind: mode,
-                                        startOffset: openSegmentStart,
-                                        durationSeconds: duration))
-        }
-        openSegmentStart = elapsed
     }
 
     /// pause 는 워치가 소유한다. 폰에서 오는 명령은 후속 플랜에서 붙인다.
@@ -167,8 +152,9 @@ final class WorkoutViewModel: ObservableObject {
     /// `.reliable` 이라 폰이 꺼져 있어도 `transferUserInfo` 가 큐잉하므로 기록이 유실되지 않는다.
     @discardableResult
     func end() async -> WorkoutResult? {
-        // 마지막 구간은 stopWorkout() 이 타이머를 멈추기 전의 경과시간으로 닫는다.
-        closeOpenSegment(at: session.elapsedSeconds)
+        // stopWorkout() 보다 먼저 닫는다. 그쪽이 총 시간을 재는 시점과 가장 가까워야
+        // 구간 합계와 총 시간이 어긋나지 않는다 — HealthKit 마무리에 시간이 걸린다.
+        segments.closeOpenSegment(kind: mode)
 
         let result = await session.stopWorkout()
         WKInterfaceDevice.current().play(.stop)
@@ -181,13 +167,13 @@ final class WorkoutViewModel: ObservableObject {
 
     private func record(from result: WorkoutResult) -> WorkoutRecordMessage {
         WorkoutRecordMessage(healthKitUUID: result.healthKitUUID,
-                             startedAt: startedAt,
+                             startedAt: segments.startedAt,
                              endedAt: Date(),
                              totalSeconds: result.durationSeconds,
                              activeCalories: result.caloriesBurned,
                              totalCalories: result.totalCaloriesBurned,
                              averageHeartRate: result.averageHeartRate,
-                             segments: closedSegments)
+                             segments: segments.closed)
     }
 
     /// 총 칼로리는 활동 + 휴식이다 (YJKit README).

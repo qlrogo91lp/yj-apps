@@ -150,10 +150,29 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
 - [x] WC 구현 — `Shared` 가 아니라 새 `Common/` 폴더를 세 타깃에 붙였다 (`Shared` 는 `ConnectivityCore` 의존으로 불가)
 - [ ] **WC 실기기 검증 6항목** — 앱을 안 열어도 상태 전환, 경과시간, 일시정지 시 멈춤,
       종료 후 복귀, 탭하면 앱 열림, 재부팅 후 유지 (플랜 "실기기" 절)
+      · 경과시간은 `.accessoryRectangular` 패밀리에서만 그린다 — 원형·코너는 아이콘만
+- [x] **구간 시간이 "근력 0분" 으로 나온 문제** — 틱 카운터를 벽시계로 바꿨다 (PR #19).
+      [작업 기록](Apps/HaruchiFit/docs/logs/2026/2026-09-09-segment-duration-tick-counter.md)
+- [ ] **구간 시간 재검증** — 고친 뒤 실기기에서 40분쯤 돌려 종목별 분이 맞는지
 
 > **아직 실기기에서 한 번도 안 돈 경로가 있다** — `HKHealthStore.delete`. 시뮬레이터에서는 실행되지
 > 않고 테스트는 "지워달라고 요청했다"까지만 보장한다. 워치에서 거부되면 W2 플랜 1절 B안
 > (`WorkoutCore` 에 보류 API)으로 가야 하고, 3개 앱 공유 패키지라 **그때 다시 승인받는다.**
+
+## YJKit — 확인 필요
+
+| 항목 | 상태 |
+|---|---|
+| `WorkoutSessionService.elapsedSeconds` 가 벽시계가 아니라 1초 `Timer` 틱 카운터다 | **미확인 · 3개 앱에 걸림** |
+
+하루치 구간 시간이 이것 때문에 실기기에서 몇 초로 잡혔다
+([작업 기록](Apps/HaruchiFit/docs/logs/2026/2026-09-09-segment-duration-tick-counter.md)).
+같은 값을 **화면에 그대로 그리는 곳**이 남아 있다 — 하루치 운동 중 화면의 큰 시간,
+골프·Ralli 워치의 경과시간. 손목을 내렸다 올리면 실제보다 뒤처져 보일 것이다.
+
+먼저 실기기에서 정말 뒤처지는지 확인하고, 고친다면 일시정지를 어떻게 셀지(`elapsedSeconds`
+는 정지 중 멈추는 게 의도다)를 함께 정해야 한다. `Packages/YJKit` 변경이라 CI 가 3개 앱을
+전부 빌드한다.
 
 ## GolfCounter
 
