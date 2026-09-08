@@ -112,9 +112,9 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
 | 스파이크 코드 제거 | [PR #7](https://github.com/qlrogo91lp/yj-apps/pull/7) | — |
 | W1 모드 라벨 · 전환 행 (D-M1) | [PR #8](https://github.com/qlrogo91lp/yj-apps/pull/8) | — |
 | 세그먼트 SwiftData 저장 | [PR #9](https://github.com/qlrogo91lp/yj-apps/pull/9) | — |
-| W2 종료 후 요약 (저장 / 버리기) | [PR #12](https://github.com/qlrogo91lp/yj-apps/pull/12) 머지 · **실기기 검증만 남음** | [플랜](Apps/HaruchiFit/docs/plans/watch/2026/2026-09-07-haruchi-fit-w2-summary.md) |
-| W0 홈 시작 유형 토글 (근력 / 유산소) | `feature/fit` (`7a2c73a`·`d60862e`) · 테스트 12개 통과 · **실기기 검증만 남음** | [플랜](Apps/HaruchiFit/docs/plans/watch/2026/2026-09-08-haruchi-fit-w0-start-kind.md) |
-| WC 컴플리케이션 — 세션 상태만 | `feature/fit` (`a8401e2`~`9836055`) · 테스트 24개 통과 · 시뮬레이터 워치 페이스 확인 | [플랜](Apps/HaruchiFit/docs/plans/watch/2026/2026-09-08-haruchi-fit-wc-complication.md) |
+| W2 종료 후 요약 (저장 / 버리기) | [PR #12](https://github.com/qlrogo91lp/yj-apps/pull/12) 머지 · **실기기 검증 완료** | [플랜](Apps/HaruchiFit/docs/plans/watch/2026/2026-09-07-haruchi-fit-w2-summary.md) |
+| W0 홈 시작 유형 토글 (근력 / 유산소) | [PR #14](https://github.com/qlrogo91lp/yj-apps/pull/14) 머지 · 테스트 12개 통과 · **실기기 검증 완료** | [플랜](Apps/HaruchiFit/docs/plans/watch/2026/2026-09-08-haruchi-fit-w0-start-kind.md) |
+| WC 컴플리케이션 — 세션 상태만 | [PR #14](https://github.com/qlrogo91lp/yj-apps/pull/14) 머지 · 테스트 24개 통과 · **실기기 검증 완료** | [플랜](Apps/HaruchiFit/docs/plans/watch/2026/2026-09-08-haruchi-fit-wc-complication.md) |
 
 ### 예정사항 (남은 12개)
 
@@ -135,7 +135,7 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
 | 언제든 | — | CloudKit 엔타이틀먼트 | 예정 · **프로비저닝 작업(사용자)** · 로컬 폴백 있어 급하지 않음 | 로드맵 "언제든" |
 
 **Phase 1 이 끝나 폰을 한 번도 안 열어도 흐름 A(해피패스)가 완결된다** — W2 · W0 · WC.
-셋 다 실기기 햅틱 검증만 남았다.
+셋 다 실기기 검증까지 끝났다. 남은 건 구간 시간 재검증과 경과시간 뒤처짐 확인(3개 앱 공통) 둘뿐이다.
 다음 Phase 2(잔디 집계 · HealthKit import) 는 화면이 없어 **눈으로 확인할 수단**을 착수 시점에 정한다.
 
 > 플랜 문서는 **착수 직전에 하나씩** 쓴다 (로드맵 "작업 중 지킬 것"). 위 표의 "예정" 은
@@ -144,22 +144,19 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
 ### 집 맥북에서 할 것
 
 - [x] W2 구현 — ViewModel 테스트 7개 통과. `BUNDLE_LOADER` 누락도 함께 고침. PR #12 머지
-- [ ] **W2 실기기 검증 4항목** — 햅틱 5종, **버리기 후 건강 앱에서도 사라지는지** (플랜 "실기기" 절)
+- [x] **W2 실기기 검증 4항목** — 햅틱 5종 확인. **버리기 후 건강 앱에서도 사라진다** —
+      `HKHealthStore.delete` 가 실기기 워치에서 통과했다 (W2 플랜 1절 B안 불필요)
 - [x] W0 플랜 실행 — 테스트 12개 통과. 시뮬레이터에서 토글 히트영역·좌우 여백 두 곳을 더 고쳤다
-- [ ] **W0 실기기 검증 5항목** — 토글 `.click` 햅틱, 재실행 시 유형 유지, W1 라벨, 요약 바 파랑, 건강 앱에 근력으로 기록 (플랜 "실기기" 절)
+- [x] **W0 실기기 검증 5항목** — 토글 `.click` 햅틱, 재실행 시 유형 유지, W1 라벨, 요약 바 파랑, 건강 앱에 근력으로 기록 모두 확인
 - [x] WC 구현 — `Shared` 가 아니라 새 `Common/` 폴더를 세 타깃에 붙였다 (`Shared` 는 `ConnectivityCore` 의존으로 불가)
-- [ ] **WC 실기기 검증 6항목** — 앱을 안 열어도 상태 전환, 경과시간, 일시정지 시 멈춤,
-      종료 후 복귀, 탭하면 앱 열림, 재부팅 후 유지 (플랜 "실기기" 절)
+- [x] **WC 실기기 검증 6항목** — 앱을 안 열어도 상태 전환, 경과시간, 일시정지 시 멈춤,
+      종료 후 복귀, 탭하면 앱 열림, 재부팅 후 유지 모두 확인
       · 경과시간은 `.accessoryRectangular` 패밀리에서만 그린다 — 원형·코너는 아이콘만
 - [x] **구간 시간이 "근력 0분" 으로 나온 문제** — 틱 카운터를 벽시계로 바꿨다 (PR #19).
       [작업 기록](Apps/HaruchiFit/docs/logs/2026/2026-09-09-segment-duration-tick-counter.md)
 - [ ] **구간 시간 재검증** — 고친 뒤 실기기에서 40분쯤 돌려 종목별 분이 맞는지 (PR #19)
 - [ ] **경과시간이 뒤처지는지** — 워크아웃 중 손목을 30초 내렸다 올렸을 때 시간이 건너뛰는지
       멈춰 있었는지. 3개 앱 공통 ([탐색 문서](Packages/YJKit/docs/ideas/elapsed-seconds-tick-counter.md))
-
-> **아직 실기기에서 한 번도 안 돈 경로가 있다** — `HKHealthStore.delete`. 시뮬레이터에서는 실행되지
-> 않고 테스트는 "지워달라고 요청했다"까지만 보장한다. 워치에서 거부되면 W2 플랜 1절 B안
-> (`WorkoutCore` 에 보류 API)으로 가야 하고, 3개 앱 공유 패키지라 **그때 다시 승인받는다.**
 
 ## YJKit — 확인 필요
 
