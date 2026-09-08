@@ -153,7 +153,9 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
       · 경과시간은 `.accessoryRectangular` 패밀리에서만 그린다 — 원형·코너는 아이콘만
 - [x] **구간 시간이 "근력 0분" 으로 나온 문제** — 틱 카운터를 벽시계로 바꿨다 (PR #19).
       [작업 기록](Apps/HaruchiFit/docs/logs/2026/2026-09-09-segment-duration-tick-counter.md)
-- [ ] **구간 시간 재검증** — 고친 뒤 실기기에서 40분쯤 돌려 종목별 분이 맞는지
+- [ ] **구간 시간 재검증** — 고친 뒤 실기기에서 40분쯤 돌려 종목별 분이 맞는지 (PR #19)
+- [ ] **경과시간이 뒤처지는지** — 워크아웃 중 손목을 30초 내렸다 올렸을 때 시간이 건너뛰는지
+      멈춰 있었는지. 3개 앱 공통 ([탐색 문서](Packages/YJKit/docs/ideas/elapsed-seconds-tick-counter.md))
 
 > **아직 실기기에서 한 번도 안 돈 경로가 있다** — `HKHealthStore.delete`. 시뮬레이터에서는 실행되지
 > 않고 테스트는 "지워달라고 요청했다"까지만 보장한다. 워치에서 거부되면 W2 플랜 1절 B안
@@ -161,18 +163,15 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
 
 ## YJKit — 확인 필요
 
-| 항목 | 상태 |
-|---|---|
-| `WorkoutSessionService.elapsedSeconds` 가 벽시계가 아니라 1초 `Timer` 틱 카운터다 | **미확인 · 3개 앱에 걸림** |
+| 항목 | 상태 | 문서 |
+|---|---|---|
+| `WorkoutSessionService.elapsedSeconds` 가 벽시계가 아니라 1초 `Timer` 틱 카운터다 | **실기기 확인 대기 · 3개 앱에 걸림** | [탐색 문서](Packages/YJKit/docs/ideas/elapsed-seconds-tick-counter.md) |
 
-하루치 구간 시간이 이것 때문에 실기기에서 몇 초로 잡혔다
-([작업 기록](Apps/HaruchiFit/docs/logs/2026/2026-09-09-segment-duration-tick-counter.md)).
-같은 값을 **화면에 그대로 그리는 곳**이 남아 있다 — 하루치 운동 중 화면의 큰 시간,
-골프·Ralli 워치의 경과시간. 손목을 내렸다 올리면 실제보다 뒤처져 보일 것이다.
+하루치 구간 시간이 이것 때문에 실기기에서 몇 초로 잡혔다 (PR #19 로 하루치만 벽시계로 고침).
+**Ralli 는 저장되는 값 자체가 틱 기반**이라 요약의 "운동시간" 과 세션 헤더가 실제보다 짧을 수
+있다 — 1.1.7 에도 있는 문제라 **기존 기록만 봐도 판단된다.**
 
-먼저 실기기에서 정말 뒤처지는지 확인하고, 고친다면 일시정지를 어떻게 셀지(`elapsedSeconds`
-는 정지 중 멈추는 게 의도다)를 함께 정해야 한다. `Packages/YJKit` 변경이라 CI 가 3개 앱을
-전부 빌드한다.
+확인할 것 3가지와 고칠 때의 갈림길(일시정지를 어떻게 셀 것인가)은 위 탐색 문서에 정리했다.
 
 ## GolfCounter
 
