@@ -252,4 +252,52 @@ struct HistoryViewModelTests {
         #expect(vm.listSessions.isEmpty)
         #expect(vm.listMatches.isEmpty)
     }
+
+    // MARK: - 날짜 선택
+
+    /// 달을 넘기면 그 달에서 경기가 있는 가장 최근 날짜를 고른다. loadCalendarMatches 를
+    /// 먼저 부르지 않으면 이전 달 데이터로 고르게 된다.
+    @Test func selectsMostRecentMatchDayOnMonthChange() throws {
+        let context = try makeContext()
+        let calendar = Calendar.current
+        let now = Date()
+        let lastMonth = try #require(calendar.date(byAdding: .month, value: -1, to: now))
+        let lastMonthEarlier = try #require(calendar.date(byAdding: .day, value: -3, to: lastMonth))
+
+        _ = insertMatch(session: UUID(), startedAt: now, in: context)
+        _ = insertMatch(session: UUID(), startedAt: lastMonth, in: context)
+        _ = insertMatch(session: UUID(), startedAt: lastMonthEarlier, in: context)
+        try context.save()
+
+        let vm = HistoryViewModel()
+        vm.configure(modelContext: context)
+        vm.loadInitial()
+        vm.changeMonth(by: -1)
+
+        let selected = try #require(vm.selectedDate)
+        #expect(calendar.isDate(selected, inSameDayAs: lastMonth))
+    }
+
+    @Test func selectsNothingWhenMonthHasNoMatches() throws {
+        let context = try makeContext()
+        _ = insertMatch(session: UUID(), startedAt: Date(), in: context)
+        try context.save()
+
+        let vm = HistoryViewModel()
+        vm.configure(modelContext: context)
+        vm.loadInitial()
+        vm.changeMonth(by: -1)
+
+        #expect(vm.selectedDate == nil)
+    }
+
+    @Test func loadInitialSelectsToday() throws {
+        let context = try makeContext()
+        let vm = HistoryViewModel()
+        vm.configure(modelContext: context)
+        vm.loadInitial()
+
+        let selected = try #require(vm.selectedDate)
+        #expect(Calendar.current.isDateInToday(selected))
+    }
 }

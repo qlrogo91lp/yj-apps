@@ -317,6 +317,23 @@
         }
       }
     },
+    "history_day_empty" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No matches on this day"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 날은 경기가 없습니다"
+          }
+        }
+      }
+    },
     "history_delete_confirm_message" : {
       "extractionState" : "manual",
       "localizations" : {

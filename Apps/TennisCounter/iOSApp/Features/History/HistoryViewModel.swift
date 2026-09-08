@@ -15,6 +15,7 @@ final class HistoryViewModel: ObservableObject {
     @Published var hasMore: Bool = true
     @Published var currentMonth: Date = .init()
     @Published private(set) var listSessions: [MatchSessionGroup] = []
+    @Published var selectedDate: Date?
 
     private var modelContext: ModelContext?
     private let pageSize: Int = 20
@@ -29,6 +30,7 @@ final class HistoryViewModel: ObservableObject {
         hasMore = true
         loadNextPage()
         loadCalendarMatches()
+        selectedDate = Date()
     }
 
     func loadNextPage() {
@@ -68,10 +70,11 @@ final class HistoryViewModel: ObservableObject {
     }
 
     func changeMonth(by value: Int) {
-        if let newMonth = Calendar.current.date(byAdding: .month, value: value, to: currentMonth) {
-            currentMonth = newMonth
-            loadCalendarMatches()
-        }
+        guard let newMonth = Calendar.current.date(byAdding: .month, value: value, to: currentMonth) else { return }
+        currentMonth = newMonth
+        // 먼저 그 달을 읽고 나서 고른다. 순서를 뒤집으면 이전 달 데이터로 고르게 된다.
+        loadCalendarMatches()
+        selectedDate = calendarMatches.map(\.startedAt).max()
     }
 
     func toggleViewMode() {

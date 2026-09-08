@@ -23,16 +23,16 @@ struct HistoryView: View {
                         )
                     }
                 } else {
-                    ScrollView {
-                        CalendarView(
-                            matches: viewModel.calendarMatches,
-                            currentMonth: viewModel.currentMonth,
-                            onPrevious: { viewModel.changeMonth(by: -1) },
-                            onNext: { viewModel.changeMonth(by: 1) },
-                            selectedMatch: $selectedMatch
-                        )
-                        .padding()
-                    }
+                    CalendarView(
+                        matches: viewModel.calendarMatches,
+                        currentMonth: viewModel.currentMonth,
+                        onPrevious: { viewModel.changeMonth(by: -1) },
+                        onNext: { viewModel.changeMonth(by: 1) },
+                        selectedDate: $viewModel.selectedDate,
+                        onSelect: { selectedMatch = $0 },
+                        onDelete: { pendingDelete = $0 }
+                    )
+                    .padding(.horizontal)
                 }
             }
             .navigationTitle(String(localized: "history_title"))
