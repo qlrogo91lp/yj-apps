@@ -22,12 +22,16 @@
 
 ## Global Constraints
 
-- **Swift 파일을 수정하지 않는다.** 이 계획은 리소스 파일 전환만 한다.
+- ~~**Swift 파일을 수정하지 않는다.**~~ → **2026-09-08 범위 확대.** 전환이 하드코딩 문자열을
+  드러내서 정리까지 함께 한다. 아래 §추출 문제 참고.
 - 카탈로그 파일(`.xcstrings`)은 **Xcode 가 만든 것만** 커밋한다. 손으로 쓰거나 고치지 않는다.
+  → **예외(2026-09-08)**: 하드코딩을 정리한 뒤 남는 항목 삭제와 신규 키 5개의 ko·en 입력은
+  손으로 한다. `xcodebuild` 는 카탈로그를 갱신하지 않아 Xcode 왕복 없이는 방법이 없다.
 - 브랜치는 **`feature/ralli-string-catalog`**, 메인 체크아웃에서 작업한다 (워크트리 없음).
   `feat/ralli` 은 PR #11 로 머지되어 더 쓰지 않는다 — 새 작업은 항목별 브랜치를 판다 (루트 `TODO.md`).
-- 커밋은 **하나**: `🔧 iOS·워치 로컬라이즈를 String Catalog 으로 전환`.
-- 전환 전후로 **키 개수가 같아야 한다** (iOS 71 · 워치 27 · InfoPlist 각 2). 줄거나 늘면 도구가 뭔가 놓친 것이다.
+- ~~커밋은 **하나**~~ → **커밋 3개** (2026-09-08). 전환 / verbatim 정리 / 누락 번역.
+- ~~전환 전후로 **키 개수가 같아야 한다**~~ → **기존 키가 사라지지 않아야 한다.**
+  전환 직후엔 추출 때문에 늘고(iOS 91 · 워치 37), 정리 후 iOS 76(71+신규 5) · 워치 27 이 된다.
 
 **빌드 명령** (루트에서)
 
@@ -211,7 +215,11 @@ APP="$(xcodebuild -workspace YJApps.xcworkspace -scheme "TennisCounter" -destina
 ls "$APP"/ko.lproj "$APP"/en.lproj
 plutil -p "$APP/ko.lproj/InfoPlist.strings" | head -3
 ```
-Expected: 두 폴더 각각에 `InfoPlist.strings`, `Localizable.strings`. `NSHealthShareUsageDescription => "Ralli가 경기 중 칼로리와 심박수를 측정합니다."`.
+Expected: `ko.lproj` 에 `InfoPlist.strings`·`Localizable.strings`, `en.lproj` 에 `Localizable.strings`.
+`NSHealthShareUsageDescription => "Ralli가 경기 중 칼로리와 심박수를 측정합니다."`.
+
+> `en.lproj/InfoPlist.strings` 는 **안 생기는 게 정상이다.** `en` 이 sourceLanguage 라 카탈로그가
+> 중복 파일을 만들지 않고, 영어 문구는 빌드 설정 `INFOPLIST_KEY_*` 를 통해 앱 `Info.plist` 에 이미 들어 있다.
 
 - [ ] **Step 3: 시뮬레이터에서 한국어·영어 한 바퀴**
 
@@ -246,10 +254,65 @@ git commit -m "🔧 iOS·워치 로컬라이즈를 String Catalog 으로 전환"
 
 ---
 
+## 추출 문제와 하드코딩 정리 (2026-09-08)
+
+### 무슨 일이 있었나
+
+카탈로그를 타깃에 붙이면 Xcode 가 `SWIFT_EMIT_LOC_STRINGS = YES` 를 켠다 (pbxproj 변경 2줄이
+그것). 그때부터 **소스의 하드코딩 문자열이 카탈로그로 자동 추출된다.** 전환 직후 키가
+iOS 71 → 91, 워치 27 → 37, InfoPlist 2 → 4 로 늘었다. 기존 키와 번역은 하나도 안 사라졌다.
+
+빌드마다 추출이 도니 손으로 지워도 다시 생긴다. 그래서 **정리는 소스를 고쳐야 끝난다.**
+
+### 결정 사항
+
+| 논점 | 결정 | 이유 |
+|---|---|---|
+| 늘어난 키를 어떻게 | **소스를 고쳐 정리한다** (B안) | 지워도 빌드마다 되살아난다. `SWIFT_EMIT_LOC_STRINGS = NO` 로 끄면 카탈로그의 이점을 버린다 |
+| 번역 대상이 아닌 것 | `Text(verbatim:)` | 점수·세트 숫자, 구분자(`:` `\|` `·`), 게임 수 선택지(4/5/6), 브랜드명 |
+| 세트 라벨 `Set 1` | **영어 유지** | 사용자 결정. `set_indicator_format`(`%d세트`)은 계속 미사용 키 |
+| `Format` · `Date` · `No set data` | **번역한다** | 같은 시트에서 섹션 헤더·값은 한국어인데 라벨만 영어라 섞여 보였다 |
+| `Picker("Period")` | **번역한다** | segmented 라 화면엔 안 보이고 VoiceOver 만 읽는다 |
+| 점수 영역 접근성 힌트 | **영어 번역 추가** | 한국어가 코드에 박혀 영어 기기에서도 한국어로 읽혔다. 실제 버그 |
+| `CFBundleDisplayName` · `CFBundleName` | 그대로 둔다 | 브랜드명이라 ko·en 이 같다. 원래도 로컬라이즈 안 돼 있었다 |
+| 워치의 `match_format_*` 4개 | `MatchFormat` 번역 프로퍼티를 **`iOSApp/Extensions/` 로 이동** | 호출부가 iOS 뿐인데 `Shared` 에 있어 워치에도 컴파일됐다. `Shared/Models` 는 플랫폼 독립이라는 컨벤션에도 맞다 |
+
+### 신규 키 5개 (iOS 만)
+
+| 키 | ko | en | 자리 |
+|---|---|---|---|
+| `history_no_set_data` | 세트 기록이 없습니다 | No set data | `MatchDetailSheet` 세트 섹션 |
+| `history_field_format` | 경기 방식 | Format | `MatchDetailSheet` 경기 정보 |
+| `history_field_date` | 날짜 | Date | `MatchDetailSheet` 경기 정보 |
+| `summary_period_label` | 기간 | Period | `SummaryView` 기간 Picker (VoiceOver) |
+| `score_point_zone_hint` | 탭으로 포인트 추가, 길게 눌러 점수 수정 | Tap to add a point, long press to edit the score | `PlayerPointZone` (VoiceOver) |
+
+### 카탈로그를 손으로 고칠 때
+
+- **`xcodebuild` 는 카탈로그를 갱신하지 않는다.** 추출 결과 반영은 Xcode.app 빌드에서만 일어난다
+- 파일 전체를 재직렬화하면 안 된다 — Xcode 는 빈 항목을 `{` 개행 `}` 로 쓰고 키 정렬도 자체
+  규칙이라 diff 가 통째로 뒤집힌다. **해당 항목만 텍스트로 잘라내고 끼워 넣는다**
+- 마지막 항목을 지우면 앞 항목에 쉼표가 남는다
+- `extractionState` 는 **Xcode 가 소스에서 못 찾은 키에만 `"manual"`** 로 붙는다. 소스에 있는
+  키엔 없다. 신규 키를 손으로 넣을 때 이 필드를 붙이면 안 된다
+
+### 키 개수 최종
+
+| | 전환 전 | 전환 직후 | 정리 후 |
+|---|---|---|---|
+| iOS Localizable | 71 | 91 | **76** (71 + 신규 5) |
+| 워치 Localizable | 27 | 37 | **27** |
+| InfoPlist (양쪽) | 2 | 4 | **4** (`CFBundle*` 2개는 그대로 둔다) |
+
+---
+
 ## 후속 (이번 커밋에 넣지 않는다)
 
 - **미사용 키 정리** — 카탈로그 에디터에서 Stale 표시된 20개 (iOS: `score_label_me`, `score_label_opp`, `btn_reset`, `btn_end_match`, `btn_end_set`, `btn_new_match`, `set_indicator_format`, `game_score_label`, `workout_in_progress`, `workout_paused`, `summary_period_all`, `summary_streak`, `summary_no_matches`, `history_view_calendar`, `history_view_list`, `btn_save`, `vs_label` / 워치: `watch_quick_match`, `watch_rematch`, `score_deciding_point`). 다음 기능 작업에서 화면을 건드릴 때 같이 지운다.
-- **LiveActivity 하드코딩** — `TennisLiveActivity/Components/LiveActivityView.swift` 의 `Text("Ralli")`, `Text("Tiebreak")`. LiveActivity 타깃엔 로컬라이즈 리소스 자체가 없다.
+- **LiveActivity·컴플리케이션 하드코딩** — `TennisLiveActivity/Components/LiveActivityView.swift` 의
+  `Text("Ralli")`·`Text("Tiebreak")`, `ComplicationApp/ComplicationApp.swift` 의
+  `.configurationDisplayName("Ralli")`·`.description("Tennis Counter")`. 그 타깃엔 카탈로그가 없어
+  추출되지 않았다.
 - **iOS·워치 카탈로그 통합** — 표현이 다른 키 4개를 워치 전용 키로 나누거나 통일한 뒤에.
 
 ## Self-Review

@@ -31,7 +31,7 @@ Localizable(2·5·6) / 워치 `WorkoutSessionViewModel`(3·7)
 
 | # | 항목 | 트랙 | 상태 | 문서 |
 |---|---|---|---|---|
-| 5 | String Catalog(xcstrings) 전환 | A | 플랜 완료 · 구현 대기 | [플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-07-string-catalog-migration.md) |
+| ~~5~~ | ~~String Catalog(xcstrings) 전환~~ | A | **완료** (PR #15) · 실기기 확인만 남음 | [플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-07-string-catalog-migration.md) — 하드코딩 정리까지 범위가 늘었다 (§추출 문제) |
 | 2 | iOS 통계 UI 리디자인 | A | 스펙·플랜 완료 · 구현 대기 (선행: #5) | [스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-08-25-summary-history-redesign-design.md) · [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-07-summary-history-redesign.md) · [Notion](https://app.notion.com/p/3bacd15e48f180b3a810e95f63854aa6) |
 | 1 | WorkoutShareUI 붙이기 (인스타 스토리 공유) | A | 플랜 완료 · 구현 대기 (선행: #2) | [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-07-workout-share-button.md) · [Kit 사용법](Packages/YJKit/README.md#workoutshareui-사용법) |
 | 3 | 햅틱 (워치 전용) | B | 플랜 완료 · 구현 대기 | [플랜](Apps/TennisCounter/docs/plans/watch/2026/2026-09-07-match-haptics.md) — 설정 연동은 #8 때 `MatchHaptics.play` 첫 줄에서 |
@@ -47,7 +47,7 @@ Localizable(2·5·6) / 워치 `WorkoutSessionViewModel`(3·7)
 
 **트랙 A (iOS)** — 순서대로
 
-- [ ] 5번 플랜 실행 (전부 Xcode UI + 검증)
+- [x] 5번 플랜 실행 — 전환 + 하드코딩 정리. iOS 76키(신규 5) · 워치 27키. PR #15
 - [ ] 2번 플랜 실행 (Task 8 Step 4 는 시뮬레이터 확인)
 - [ ] 1번 플랜 실행 (Task 1 은 Xcode UI) — 선행: Meta 개발자 대시보드에서 Facebook App ID 발급 → `MatchShareButton.instagramAppID`
 - [ ] 6번 뼈대 (Task 1~3)
@@ -69,6 +69,11 @@ Localizable(2·5·6) / 워치 `WorkoutSessionViewModel`(3·7)
 
 **아무 때나**
 
+- [ ] **#5 실기기 확인** (한국어 기기) — 경기 상세 시트가 `경기 방식`·`날짜` 로 뜨는지,
+      `Set 1` 은 영어 그대로인지, 워치 조기 종료 다이얼로그가 **"경기 중단"** 인지,
+      워치 HealthKit 권한 문구가 한국어인지
+- [ ] **Xcode.app 에서 한 번 빌드** — `xcodebuild` 는 카탈로그를 갱신하지 않는다. Xcode 가
+      추출을 다시 돌렸을 때 정리한 항목이 되살아나지 않는지 `git status` 로 확인
 - [ ] Xcode Organizer › Crashes 에서 Ralli 1.1.7 한 번 열어보기 (분석 공유 켠 사용자 표본만 보임)
 - [x] `~/orca/workspaces/yj-apps/` 워크트리 3개 정리 — 워크트리·브랜치 모두 제거 완료
 

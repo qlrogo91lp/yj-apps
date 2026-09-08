@@ -1,2 +1,0 @@
-NSHealthShareUsageDescription = "Ralli uses HealthKit to track calories and heart rate during matches.";
-NSHealthUpdateUsageDescription = "Ralli saves your tennis workout to Apple Health.";
