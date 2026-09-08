@@ -26,8 +26,24 @@
 | `SessionCard.swift` 하나 | **`SessionHeader` + `MatchRow` + `RecentSessionCard` + `SessionList` 넷** | 아래 §SessionCard 분해 |
 | `DaySessionList.swift` 신규 | **만들지 않는다** | `SessionList` 를 `CalendarView` 가 그대로 쓴다. 래퍼가 하는 일이 빈 상태 분기뿐이라 파일을 늘릴 이유가 없다 |
 | `DayCellDotsTests` 대상 파일 없음 | **`DayCell.swift` 안의 `enum DayCellDots`** | 파일을 새로 만들 분량이 아니다 |
-| 죽는 키 3개 | **4개** — `match_detail_section_sets` 추가 | Task 7 이 세트 섹션을 지우면 이 키도 참조가 사라진다 (`MatchDetailSheet.swift:89` 가 유일한 사용처) |
-| 신규 문자열 키 (개수 없음) | **17개** (스펙 16 + `btn_delete`), 최종 iOS 키 **71 + 17 − 4 = 84** | 스와이프 삭제 버튼 문구가 저장소에 없다 |
+| 죽는 키 3개 | **7개** — `match_detail_section_sets` + #5 가 넣은 3개 | Task 7 이 세트 섹션을 지우면 `match_detail_section_sets` 의 참조가 사라진다. 나머지 3개는 아래 §#5 와의 겹침 |
+| 신규 문자열 키 (개수 없음) | **17개** (스펙 16 + `btn_delete`), 최종 iOS 키 **76 + 17 − 7 = 86** | 스와이프 삭제 버튼 문구가 저장소에 없다. 기준이 71 이 아니라 76 인 것은 #5 가 키 5개를 더했기 때문 |
+
+### #5(String Catalog 전환)와의 겹침
+
+이 플랜은 2026-09-07 에 쓰였고, 그때 `MatchDetailSheet` 에는 `"Format"`·`"Date"`·`"No set data"`
+가 하드코딩돼 있었다. #5 가 그 셋을 키로 올리면서(`history_field_*` · `history_no_set_data`)
+이 플랜이 만들려던 키와 **자리가 겹친다.**
+
+| #5 가 넣은 키 | 이 플랜 | 처리 |
+|---|---|---|
+| `history_field_format` | `match_detail_format` | 플랜 이름을 쓴다 — 형제 키가 전부 `match_detail_*` |
+| `history_field_date` | `match_detail_time` | 플랜 이름. `Date` 가 **시간 범위**로 의미까지 바뀐다 |
+| `history_no_set_data` | `match_detail_no_sets` | 플랜 이름 |
+| `summary_period_label` | — | 이 플랜이 안 건드린다. 그대로 산다 |
+| `score_point_zone_hint` | — | 점수 화면. 이 플랜 범위 밖 |
+
+ko 번역은 #5 가 정한 값을 그대로 옮긴다 — `경기 방식` · `세트 기록이 없습니다`.
 
 ### SessionCard 분해
 
@@ -133,9 +149,10 @@ make lint && make format
 
 `%%` 는 리터럴 `%` 다. 위치 지정자(`%1$d`)를 쓰는 건 한국어·영어 어순이 갈릴 때 번역자가 순서를 바꿀 수 있게 하기 위해서다.
 
-**죽는 키 4개** — `summary_period_today` · `summary_recent_matches` · `summary_section_workout` · `match_detail_section_sets`
+**죽는 키 7개** — `summary_period_today` · `summary_recent_matches` · `summary_section_workout` ·
+`match_detail_section_sets` · `history_field_format` · `history_field_date` · `history_no_set_data`
 
-전환 후 iOS 키 개수: **71 + 17 − 4 = 84**
+전환 후 iOS 키 개수: **76 + 17 − 7 = 86**
 
 ---
 
@@ -664,7 +681,7 @@ struct CalendarView: View {
 
 `opponentName` 이 `nil` 이면 `match_detail_opponent`("상대"), 값이 있으면 그것을 쓴다. 입력 UI 는 만들지 않지만 코드 경로는 열어 둔다. 내 행 라벨은 `match_detail_me`.
 
-세트가 없으면 `match_detail_no_sets` (지금 하드코딩된 `"No set data"`).
+세트가 없으면 `match_detail_no_sets` (#5 가 넣은 `history_no_set_data` 를 대체한다).
 
 - [ ] **Step 2: `MatchDetailSheet` 섹션 재구성**
 
@@ -677,9 +694,11 @@ struct CalendarView: View {
 - **세트 섹션 삭제** — 스코어보드가 대신한다. 섹션이 넷에서 셋으로 준다.
 - 4칸은 전부 **경기 구간값**(`caloriesBurned`·`totalCaloriesBurned`·`durationSeconds`·`averageHeartRate`). 누적값을 쓰지 않는다. 경기시간은 스톱워치 포맷(`WorkoutMetrics.formatSeconds`)을 그대로 둔다 — 여기는 누적이 아니다.
 - 시간 범위 `14:30 ~ 15:22`. `endedAt` 이 `nil` 이면 시작 시각만.
-- 하드코딩 `"Format"`·`"Date"` → `match_detail_format` · `match_detail_time`.
+- `history_field_format` · `history_field_date` → `match_detail_format` · `match_detail_time`.
+  #5 가 하드코딩 `"Format"`·`"Date"` 를 이미 키로 올렸다. 형제 키가 전부 `match_detail_*` 라
+  이름을 맞추고, `Date` 는 이번에 **시간 범위**로 의미가 바뀌므로 `match_detail_time` 이 맞다.
 - 섹션 제목을 `summary_section_workout`("운동") 에서 `match_detail_section_this_match`("이 경기") 로 바꿔 세션 누적과 구분한다.
-- **이 Step 이 키 2개를 죽인다** — `summary_section_workout`(다른 사용처였던 `WorkoutStatsGrid` 는 Task 4 에서 삭제됨) 과 `match_detail_section_sets`(세트 섹션의 유일한 사용처). Task 8 에서 정리한다.
+- **이 Step 이 키 5개를 죽인다** — `summary_section_workout`(다른 사용처였던 `WorkoutStatsGrid` 는 Task 4 에서 삭제됨), `match_detail_section_sets`(세트 섹션의 유일한 사용처), 그리고 #5 가 넣은 `history_field_format`·`history_field_date`·`history_no_set_data`. Task 8 에서 정리한다.
 
 - [ ] **Step 3: 빌드·커밋** — `✨ 기록 상세를 가로 스코어보드와 '이 경기' 섹션으로 바꾼다`
 
@@ -687,15 +706,17 @@ struct CalendarView: View {
 
 ### Task 8: 마무리 — 죽은 키 정리 · 전체 검증
 
-- [ ] **Step 1: 죽은 키 3개 삭제**
+- [ ] **Step 1: 죽은 키 7개 삭제**
 
-`summary_period_today` · `summary_recent_matches` · `summary_section_workout` · `match_detail_section_sets` **4개**를 `iOSApp/Localizable.xcstrings` 에서 지운다. 지우기 전에 참조가 없는지 확인한다.
+`summary_period_today` · `summary_recent_matches` · `summary_section_workout` ·
+`match_detail_section_sets` · `history_field_format` · `history_field_date` · `history_no_set_data`
+**7개**를 `iOSApp/Localizable.xcstrings` 에서 지운다. 지우기 전에 참조가 없는지 확인한다.
 
 ```bash
-grep -rnE 'summary_period_today|summary_recent_matches|summary_section_workout|match_detail_section_sets' Apps/TennisCounter/ --include='*.swift'
+grep -rnE 'summary_period_today|summary_recent_matches|summary_section_workout|match_detail_section_sets|history_field_format|history_field_date|history_no_set_data' Apps/TennisCounter/ --include='*.swift'
 ```
 
-- [ ] **Step 2: 키 개수 확인** — iOS 카탈로그가 **84개**여야 한다 (71 + 17 − 4).
+- [ ] **Step 2: 키 개수 확인** — iOS 카탈로그가 **86개**여야 한다 (76 + 17 − 7).
 
 - [ ] **Step 3: 전체 검증**
 
