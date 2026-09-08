@@ -971,6 +971,57 @@
         }
       }
     },
+    "summary_recent_session" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recent Session"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "최근 세션"
+          }
+        }
+      }
+    },
+    "summary_record_line" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$dW %2$dL · %3$d%%"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$d승 %2$d패 · %3$d%%"
+          }
+        }
+      }
+    },
+    "summary_section_trend" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last 10 Sessions"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "최근 10회 추이"
+          }
+        }
+      }
+    },
     "summary_section_workout" : {
       "localizations" : {
         "en" : {
@@ -1048,6 +1099,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "경기 수"
+          }
+        }
+      }
+    },
+    "summary_trend_insufficient" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The trend appears once you have at least 3 sessions"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "세션이 3회 이상 쌓이면 추이를 보여줍니다"
           }
         }
       }

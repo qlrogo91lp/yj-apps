@@ -1,25 +1,25 @@
 import Foundation
-import WorkoutCore
 
 enum SummaryPeriod: String, CaseIterable {
-    case today, week, month
+    case week, month, all
 
     var localizedTitle: String {
         switch self {
-        case .today: String(localized: "summary_period_today")
         case .week: String(localized: "summary_period_week")
         case .month: String(localized: "summary_period_month")
+        case .all: String(localized: "summary_period_all")
         }
     }
 
     func startDate(from now: Date = Date()) -> Date? {
         let calendar = Calendar.current
         switch self {
-        case .today: return calendar.startOfDay(for: now)
         case .week: return calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now))
         case .month:
             let components = calendar.dateComponents([.year, .month], from: now)
             return calendar.date(from: components)
+        // 시작점이 없으면 filteredMatches 가 전체를 돌려준다.
+        case .all: return nil
         }
     }
 }
@@ -30,25 +30,15 @@ struct SummaryStats {
     let winRate: Double
     /// 활동 에너지 합계.
     let totalCalories: Double?
-    /// 활동 + 휴식 합계. 총 칼로리 도입 이전 기록만 있으면 nil.
-    let totalEnergy: Double?
     let totalDuration: Int?
-    let avgHeartRate: Double?
 
     var formattedCalories: String {
-        totalCalories.map { String(format: "%.0f", $0) } ?? "–"
+        totalCalories.map { $0.formatted(.number.precision(.fractionLength(0))) } ?? "–"
     }
 
-    var formattedTotalEnergy: String {
-        totalEnergy.map { String(format: "%.0f", $0) } ?? "–"
-    }
-
+    /// 누적이라 스톱워치 포맷(WorkoutMetrics.formatSeconds)을 쓰지 않는다 — 470:00:00 은 카드에서 넘친다.
     var formattedDuration: String {
-        totalDuration.map { WorkoutMetrics.formatSeconds($0) } ?? "–"
-    }
-
-    var formattedHeartRate: String {
-        avgHeartRate.map { String(format: "%.0f", $0) } ?? "–"
+        totalDuration.map(CumulativeDuration.format) ?? "–"
     }
 }
 
@@ -63,7 +53,6 @@ final class SummaryViewModel: ObservableObject {
         let winRate = total > 0 ? Double(wins) / Double(total) : 0.0
 
         let totalCalories = sumOfWorkoutMaxima(filtered) { $0.workoutCaloriesBurned ?? $0.caloriesBurned }
-        let totalEnergy = sumOfWorkoutMaxima(filtered) { $0.workoutTotalCaloriesBurned ?? $0.totalCaloriesBurned }
         let totalDuration = sumOfWorkoutMaxima(filtered) { match in
             if let cumulative = match.workoutElapsedSeconds { return cumulative }
             if let d = match.durationSeconds { return d }
@@ -71,17 +60,12 @@ final class SummaryViewModel: ObservableObject {
             return nil
         }
 
-        let heartRates = filtered.compactMap(\.averageHeartRate)
-        let avgHeartRate: Double? = heartRates.isEmpty ? nil : heartRates.reduce(0, +) / Double(heartRates.count)
-
         return SummaryStats(
             totalMatches: total,
             wins: wins,
             winRate: winRate,
             totalCalories: totalCalories,
-            totalEnergy: totalEnergy,
-            totalDuration: totalDuration,
-            avgHeartRate: avgHeartRate
+            totalDuration: totalDuration
         )
     }
 
@@ -105,8 +89,18 @@ final class SummaryViewModel: ObservableObject {
         return all.isEmpty ? nil : all.reduce(.zero, +)
     }
 
-    func recentMatches(from matches: [Match]) -> [Match] {
-        Array(matches.prefix(2))
+    /// 최근 세션 하나. 기간 필터를 탄다.
+    func recentSession(from matches: [Match]) -> MatchSessionGroup? {
+        MatchSessionGroup.group(filteredMatches(from: matches)).first
+    }
+
+    /// 최근 10회 세션, 오래된 것부터. 기간 필터와 무관하게 항상 전체에서 뽑는다 —
+    /// 차트는 "얼마나 오래 쳤나"만 맡는 독립 블록이다.
+    /// 3개 미만이면 빈 배열을 돌려 뷰가 안내 문구를 띄우게 한다.
+    func trendSessions(from matches: [Match]) -> [MatchSessionGroup] {
+        let groups = MatchSessionGroup.group(matches)
+        guard groups.count >= 3 else { return [] }
+        return Array(groups.prefix(10)).reversed()
     }
 
     func filteredMatches(from matches: [Match]) -> [Match] {
