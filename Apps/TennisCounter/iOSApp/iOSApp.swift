@@ -7,6 +7,8 @@ struct TennisCounterApp: App {
     let container: ModelContainer
     private let watchConnectivity = MatchConnectivity.shared
     @State private var isLaunching = true
+    /// 마지막으로 본 온보딩 버전. 0 = 본 적 없음. 규칙은 OnboardingGate.
+    @AppStorage("onboardingSeenVersion") private var onboardingSeenVersion = 0
 
     init() {
         // CloudKit 동기화 시도 → iCloud 미로그인·시뮬레이터 등 실패 시 로컬 폴백 (팩토리가 처리)
@@ -19,6 +21,10 @@ struct TennisCounterApp: App {
         WindowGroup {
             if isLaunching {
                 LaunchScreenView(onFinished: { isLaunching = false })
+            } else if OnboardingGate.shouldShow(seenVersion: onboardingSeenVersion) {
+                OnboardingView(onFinished: {
+                    withAnimation { onboardingSeenVersion = OnboardingGate.version }
+                })
             } else {
                 MainTabView()
             }
