@@ -1,7 +1,7 @@
 # WC 컴플리케이션 — 구현 플랜
 
 작성일: 2026-09-08
-상태: **검토 대기**
+상태: **진행 중** — Task 0·1 완료 (`a8401e2`)
 선행 문서: [제품 스펙](../../../specs/shared/2026/2026-09-02-haruchi-fit-product-spec.md) WC절 · [아키텍처](../../../specs/shared/2026/2026-09-02-haruchi-fit-architecture.md) D-M4
 선행 작업: W0 (`7a2c73a`·`d60862e`) — 완료
 
@@ -30,7 +30,11 @@ HaruchiComplicationExtension: clang: error: linker command failed with exit code
 
 | 안 | 내용 | 값 |
 |---|---|---|
-| **A (택함)** | 새 폴더 `ComplicationShared/` 를 파고 **워치 앱 + 컴플리케이션** 두 타깃에만 붙인다 | 위젯이 의존 0인 파일만 컴파일한다. `Shared/` 는 지금 성질(iOS↔워치, ConnectivityCore 의존)을 유지한다 |
+| **A (택함)** | 새 폴더 `Common/` 를 파고 **세 타깃 모두**에 붙인다 | 위젯이 의존 0인 파일만 컴파일한다. `Shared/` 는 지금 성질(iOS↔워치, ConnectivityCore 의존)을 유지한다 |
+
+> **구현하며 드러난 것 — 두 타깃이 아니라 세 타깃이다.** `WorkoutSnapshot.mode` 가 `SegmentKind` 인데
+> 그 enum 은 iOS 앱(`Segment`·`WorkoutRecordMessage`)도 쓴다. `Segment.swift` 에서 분리해 `Common/` 으로
+> 옮기고 iOS 앱까지 셋에 붙였다. `SummaryFormat` 도 정지 중 경과시간 표기 때문에 함께 옮겼다.
 | B | `Shared` 를 붙이고 컴플리케이션에도 `ConnectivityCore` 를 링크한다 | 한 줄이면 되지만, **위젯이 절대 쓰지 않는 WatchConnectivity 래퍼를 끌고 들어간다.** 위젯 프로세스는 메모리 상한이 빡빡하다 |
 | C | `WorkoutRecordMessage` 에서 `ConnectivityMessage` 의존을 걷어낸다 | 전송 계약을 손대는 일이라 파장이 WC 범위를 넘는다 |
 
@@ -52,21 +56,26 @@ Apps/HaruchiFit/ (컴플리케이션용 entitlements 없음)
 
 ---
 
-## Task 0 — Xcode 선행 작업 (**사용자**)
+## Task 0 — Xcode 선행 작업 (**사용자**) — 완료
 
 내가 할 수 없는 것들이다. 이게 끝나야 Task 1 이 컴파일된다.
 
-- [ ] **Step 1: 폴더를 만든다** — 내가 먼저 `ComplicationShared/` 에 파일을 넣어 두면
+- [x] **Step 1: 폴더를 만든다** — 내가 먼저 `Common/` 에 파일을 넣어 두면
       Xcode 가 폴더를 인식한다. 순서상 Task 1 의 첫 파일을 만든 뒤에 Step 2 로 간다
 
-- [ ] **Step 2: 두 타깃에 폴더를 붙인다**
+- [x] **Step 2: 세 타깃에 폴더를 붙인다**
 
   1. `YJApps.xcworkspace` 를 연다 (앱 `.xcodeproj` 를 따로 열지 않는다 — 루트 `CLAUDE.md`)
   2. 프로젝트 네비게이터에서 `HaruchiFit` › `ComplicationShared` **폴더**를 선택 (안의 파일 말고)
   3. 오른쪽 File inspector (`⌥⌘1`) › **Target Membership**
-  4. `HaruchiFit Watch App` 과 `HaruchiComplicationExtension` **둘 다** 체크
+  4. `HaruchiFit` · `HaruchiFit Watch App` · `HaruchiComplicationExtension` **셋 다** 체크
+     (`HaruchiFitWatchTests` 는 체크하지 않는다)
 
-- [ ] **Step 3: App Group 을 켠다** — 타깃 › Signing & Capabilities › `+ Capability` › App Groups
+  > **Add Files 의 `Create groups` 는 동기화 폴더를 만들지 않는다** — 파일을 하나씩 나열하는
+  > 일반 그룹으로 들어가서, 이후 `Common/` 에 파일을 더해도 자동으로 안 잡힌다.
+  > 프로젝트의 나머지 폴더와 같은 `PBXFileSystemSynchronizedRootGroup` 로 바꿔 넣었다 (`a8401e2`).
+
+- [x] **Step 3: App Group 을 켠다** — 타깃 › Signing & Capabilities › `+ Capability` › App Groups
 
   | 타깃 | 그룹 |
   |---|---|
@@ -79,7 +88,7 @@ Apps/HaruchiFit/ (컴플리케이션용 entitlements 없음)
   > 시뮬레이터 빌드는 이대로 통과한다. **실기기는 Apple Developer 의 App ID 에 App Group
   > capability 가 등록돼야 한다** — 자동 서명이면 Xcode 가 처리하지만, 실패하면 여기부터 본다.
 
-- [ ] **Step 4: 확인** — 아래를 내가 돌려서 검증한다
+- [x] **Step 4: 확인** — 아래를 내가 돌려서 검증한다
 
 ```bash
 WATCH=$(.github/scripts/pick-simulator.sh watchOS '^Apple Watch')
@@ -92,34 +101,36 @@ xcodebuild -workspace YJApps.xcworkspace -scheme "HaruchiComplicationExtension" 
 
 | 파일 | 할 일 |
 |---|---|
-| `ComplicationShared/WorkoutSnapshot.swift` | **신규** — 진행 중 세션 스냅샷. 의존 없음 |
-| `ComplicationShared/WorkoutSnapshotStore.swift` | **신규** — App Group `UserDefaults` 읽기/쓰기 |
-| `ComplicationShared/ComplicationState.swift` | **신규** — 표시값. 스냅샷 유무로 평상시/진행 중을 가른다 |
+| `Common/SegmentKind.swift` | **신규(분리)** — `Shared/Persistence/Segment.swift` 에서 옮겼다 |
+| `Common/SummaryFormat.swift` | **이동** — `WatchApp/.../Summary/` 에서 옮겼다 |
+| `Common/WorkoutSnapshot.swift` | **신규** — 진행 중 세션 스냅샷. 의존 없음 |
+| `Common/WorkoutSnapshotStore.swift` | **신규** — App Group `UserDefaults` 읽기/쓰기 |
+| `Common/ComplicationState.swift` | **신규** — 표시값. 스냅샷 유무로 평상시/진행 중을 가른다 |
 | `WatchApp/Services/WorkoutSnapshotPublisher.swift` | **신규** — 저장 + `reloadAllTimelines()` 를 한 동작으로. 프로토콜로 주입 |
 | `WatchApp/Features/Workout/WorkoutViewModel.swift` | 수정 — start/switchMode/togglePause/end 에서 publish |
 | `watchosTests/Support/WorkoutSnapshotPublisherSpy.swift` | **신규** |
 | `watchosTests/Workout/WorkoutSnapshotTests.swift` | **신규** — 스토어·상태 |
 | `watchosTests/Workout/WorkoutViewModelSnapshotTests.swift` | **신규** — 발행 시점 |
 | `ComplicationApp/HaruchiComplicationExtension.swift` | 수정 — 템플릿을 걷어내고 3패밀리 |
-| `Apps/HaruchiFit/CLAUDE.md` | 수정 — `ComplicationShared/` 배치 기준 |
+| `Apps/HaruchiFit/CLAUDE.md` | 수정 — `Common/` 배치 기준 |
 | 로드맵 · `TODO.md` | 수정 — WC 완료 |
 
-**표시 로직을 `ComplicationShared/` 에 두는 이유** — 위젯 타깃에는 테스트 타깃이 없다.
+**표시 로직을 `Common/` 에 두는 이유** — 위젯 타깃에는 테스트 타깃이 없다.
 `ComplicationState` 를 내려두면 `watchosTests` 가 `@testable import HaruchiFit_Watch_App` 으로
 닿는다. 골프가 같은 이유로 같은 선택을 했다 (`ComplicationState.swift` 주석).
 
 ---
 
-## Task 1 — 스냅샷과 표시값 (TDD)
+## Task 1 — 스냅샷과 표시값 (TDD) — 완료 (`a8401e2`)
 
-**Files:** `ComplicationShared/` 3개 · `watchosTests/Workout/WorkoutSnapshotTests.swift`
+**Files:** `Common/` 3개 · `watchosTests/Workout/WorkoutSnapshotTests.swift`
 
 **Produces:** `WorkoutSnapshot` · `WorkoutSnapshotStore` · `ComplicationState`
 
-- [ ] **Step 1: 실패하는 테스트를 쓴다** — 저장·로드 왕복, 없을 때 nil, 깨진 데이터는 nil,
+- [x] **Step 1: 실패하는 테스트를 쓴다** — 저장·로드 왕복, 없을 때 nil, 깨진 데이터는 nil,
       `clear()` 후 nil, `ComplicationState(snapshot: nil)` 이 비활성
 
-- [ ] **Step 2: 최소 구현**
+- [x] **Step 2: 최소 구현**
 
 ```swift
 /// 진행 중 세션 스냅샷. 컴플리케이션이 읽는 유일한 데이터원이다 (D-M4 — HealthKit 을 보지 않는다).
@@ -145,9 +156,9 @@ enum WorkoutSnapshotStore {
 }
 ```
 
-- [ ] **Step 3: 이 시점에 Task 0 Step 2~4 (사용자 Xcode 작업)** — 폴더가 생겼으니 붙일 수 있다
-- [ ] **Step 4: 테스트 통과 확인**
-- [ ] **Step 5: 커밋**
+- [x] **Step 3: 이 시점에 Task 0 Step 2~4 (사용자 Xcode 작업)** — 폴더가 생겼으니 붙일 수 있다
+- [x] **Step 4: 테스트 통과 확인**
+- [x] **Step 5: 커밋**
 
 ---
 
@@ -208,7 +219,7 @@ protocol WorkoutSnapshotPublishing {
 
 ## Task 4 — 문서 갱신
 
-- [ ] `Apps/HaruchiFit/CLAUDE.md` 에 `ComplicationShared/` 배치 기준과 **왜 `Shared/` 가 아닌지**
+- [ ] `Apps/HaruchiFit/CLAUDE.md` 에 `Common/` 배치 기준과 **왜 `Shared/` 가 아닌지**
 - [ ] 로드맵 — WC 를 완료로. 남은 13개 → 12개, Phase 번호 당기기.
       **틀렸던 선행 작업 문구를 지운다**
 - [ ] `TODO.md` — 진행사항으로 옮기고 Phase 2 를 다음으로
