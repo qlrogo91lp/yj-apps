@@ -31,15 +31,15 @@ HaruchiComplicationExtension: clang: error: linker command failed with exit code
 | 안 | 내용 | 값 |
 |---|---|---|
 | **A (택함)** | 새 폴더 `Common/` 를 파고 **세 타깃 모두**에 붙인다 | 위젯이 의존 0인 파일만 컴파일한다. `Shared/` 는 지금 성질(iOS↔워치, ConnectivityCore 의존)을 유지한다 |
-
-> **구현하며 드러난 것 — 두 타깃이 아니라 세 타깃이다.** `WorkoutSnapshot.mode` 가 `SegmentKind` 인데
-> 그 enum 은 iOS 앱(`Segment`·`WorkoutRecordMessage`)도 쓴다. `Segment.swift` 에서 분리해 `Common/` 으로
-> 옮기고 iOS 앱까지 셋에 붙였다. `SummaryFormat` 도 정지 중 경과시간 표기 때문에 함께 옮겼다.
 | B | `Shared` 를 붙이고 컴플리케이션에도 `ConnectivityCore` 를 링크한다 | 한 줄이면 되지만, **위젯이 절대 쓰지 않는 WatchConnectivity 래퍼를 끌고 들어간다.** 위젯 프로세스는 메모리 상한이 빡빡하다 |
 | C | `WorkoutRecordMessage` 에서 `ConnectivityMessage` 의존을 걷어낸다 | 전송 계약을 손대는 일이라 파장이 WC 범위를 넘는다 |
 
 A 를 택한다. **폴더가 타깃 부착의 단위**라(Xcode 16 동기화 그룹) `Shared/` 하위 폴더만 골라
 붙일 수 없기 때문에, 의존이 다른 파일 묶음은 폴더가 갈려야 한다.
+
+> **구현하며 드러난 것 — 두 타깃이 아니라 세 타깃이다.** `WorkoutSnapshot.mode` 가 `SegmentKind` 인데
+> 그 enum 은 iOS 앱(`Segment`·`WorkoutRecordMessage`)도 쓴다. `Segment.swift` 에서 분리해 `Common/` 으로
+> 옮기고 iOS 앱까지 셋에 붙였다. `SummaryFormat` 도 정지 중 경과시간 표기 때문에 함께 옮겼다.
 
 ### App Group 도 필요하다
 
@@ -66,7 +66,7 @@ Apps/HaruchiFit/ (컴플리케이션용 entitlements 없음)
 - [x] **Step 2: 세 타깃에 폴더를 붙인다**
 
   1. `YJApps.xcworkspace` 를 연다 (앱 `.xcodeproj` 를 따로 열지 않는다 — 루트 `CLAUDE.md`)
-  2. 프로젝트 네비게이터에서 `HaruchiFit` › `ComplicationShared` **폴더**를 선택 (안의 파일 말고)
+  2. 프로젝트 네비게이터에서 `HaruchiFit` › `Common` **폴더**를 선택 (안의 파일 말고)
   3. 오른쪽 File inspector (`⌥⌘1`) › **Target Membership**
   4. `HaruchiFit` · `HaruchiFit Watch App` · `HaruchiComplicationExtension` **셋 다** 체크
      (`HaruchiFitWatchTests` 는 체크하지 않는다)
@@ -135,12 +135,12 @@ xcodebuild -workspace YJApps.xcworkspace -scheme "HaruchiComplicationExtension" 
 ```swift
 /// 진행 중 세션 스냅샷. 컴플리케이션이 읽는 유일한 데이터원이다 (D-M4 — HealthKit 을 보지 않는다).
 struct WorkoutSnapshot: Codable, Equatable {
-    var startedAt: Date
-    var mode: SegmentKind
-    var isPaused: Bool
+    let startedAt: Date
+    let mode: SegmentKind
+    let isPaused: Bool
     /// 스냅샷을 뜬 시점의 경과시간. `capturedAt` 과 짝이라야 의미가 있다.
-    var elapsedSeconds: Int
-    var capturedAt: Date
+    let elapsedSeconds: Int
+    let capturedAt: Date
 }
 ```
 
