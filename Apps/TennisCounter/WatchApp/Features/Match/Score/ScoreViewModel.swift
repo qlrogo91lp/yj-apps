@@ -27,6 +27,7 @@ class ScoreViewModel: ObservableObject {
     private var snapshots: [Snapshot] = []
     private var tieBreakInProgress: Bool = false
     private var cancellables = Set<AnyCancellable>()
+    private let haptics: MatchHapticsPlaying
 
     var onStateChanged: (() -> Void)?
 
@@ -34,8 +35,9 @@ class ScoreViewModel: ObservableObject {
         !snapshots.isEmpty
     }
 
-    init(options: MatchOptions) {
+    init(options: MatchOptions, haptics: MatchHapticsPlaying = MatchHaptics()) {
         self.options = options
+        self.haptics = haptics
         score.noAdRule = options.noAdRule
 
         score.objectWillChange
@@ -45,14 +47,16 @@ class ScoreViewModel: ObservableObject {
 
     func addPoint(_ side: PlayerSide) {
         snapshots.append(captureSnapshot())
-        let gameWon = score.addPoint(side)
-        if gameWon != nil {
+        var event: MatchHapticEvent = .point
+        if score.addPoint(side) != nil {
             withAnimation(.bouncy) {
                 if side == .me { myGameScore += 1 } else { yourGameScore += 1 }
             }
             score.reset()
-            checkSetUpdate()
+            // 게임 → 세트 → 매치가 한 포인트에 겹칠 수 있다. 가장 상위 이벤트 하나만 울린다.
+            event = checkSetUpdate() ?? .gameWon
         }
+        haptics.play(event)
         onStateChanged?()
     }
 
@@ -60,6 +64,7 @@ class ScoreViewModel: ObservableObject {
     func undo() {
         guard let snapshot = snapshots.popLast() else { return }
         apply(snapshot)
+        haptics.play(.undo)
         onStateChanged?()
     }
 
@@ -122,7 +127,9 @@ class ScoreViewModel: ObservableObject {
         tieBreakInProgress = snapshot.tieBreakInProgress
     }
 
-    private func checkSetUpdate() {
+    /// 세트·매치 판정. 세트나 매치가 끝났으면 그 이벤트를, 아니면 nil 을 돌려준다.
+    /// 타이브레이크 진입은 nil — 게임 획득 햅틱으로 충분하다 (2026-09-07 보류 결정).
+    private func checkSetUpdate() -> MatchHapticEvent? {
         let threshold = options.gameThreshold
         let my = myGameScore, your = yourGameScore
 
@@ -130,28 +137,29 @@ class ScoreViewModel: ObservableObject {
             if (my == threshold + 1 && your == threshold) || (your == threshold + 1 && my == threshold) {
                 tieBreakInProgress = false
                 let winner: PlayerSide = my == threshold + 1 ? .me : .opponent
-                finalizeSet(winner: winner)
+                return finalizeSet(winner: winner)
             }
-            return
+            return nil
         }
 
         if my == threshold, your == threshold {
             if options.noTieRule {
                 completedSets.append(SetScore(my: my, your: your))
                 onMatchFinished?(.draw, completedSets)
+                return .matchFinished(.draw)
             } else {
                 score.setTieBreakMode()
                 tieBreakInProgress = true
             }
-            return
+            return nil
         }
 
         let maxG = max(my, your), minG = min(my, your)
-        guard maxG >= threshold, (maxG - minG) >= 2 else { return }
-        finalizeSet(winner: my > your ? .me : .opponent)
+        guard maxG >= threshold, (maxG - minG) >= 2 else { return nil }
+        return finalizeSet(winner: my > your ? .me : .opponent)
     }
 
-    private func finalizeSet(winner: PlayerSide) {
+    private func finalizeSet(winner: PlayerSide) -> MatchHapticEvent {
         completedSets.append(SetScore(my: myGameScore, your: yourGameScore))
         if winner == .me { mySetScore += 1 } else { yourSetScore += 1 }
         myGameScore = 0
@@ -160,8 +168,11 @@ class ScoreViewModel: ObservableObject {
         let setsToWin = options.mode.setsToWin
         if mySetScore >= setsToWin {
             onMatchFinished?(.win, completedSets)
+            return .matchFinished(.win)
         } else if yourSetScore >= setsToWin {
             onMatchFinished?(.loss, completedSets)
+            return .matchFinished(.loss)
         }
+        return .setWon
     }
 }
