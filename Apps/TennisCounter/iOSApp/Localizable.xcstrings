@@ -384,54 +384,6 @@
         }
       }
     },
-    "history_field_date" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Date"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "날짜"
-          }
-        }
-      }
-    },
-    "history_field_format" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Format"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "경기 방식"
-          }
-        }
-      }
-    },
-    "history_no_set_data" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No set data"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "세트 기록이 없습니다"
-          }
-        }
-      }
-    },
     "history_title" : {
       "comment" : "History",
       "localizations" : {
@@ -579,22 +531,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "정보"
-          }
-        }
-      }
-    },
-    "match_detail_section_sets" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sets"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "세트"
           }
         }
       }
@@ -1092,23 +1028,6 @@
         }
       }
     },
-    "summary_period_today" : {
-      "comment" : "Summary",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Today"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "오늘"
-          }
-        }
-      }
-    },
     "summary_period_week" : {
       "localizations" : {
         "en" : {
@@ -1121,22 +1040,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "이번 주"
-          }
-        }
-      }
-    },
-    "summary_recent_matches" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recent Matches"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "최근 경기"
           }
         }
       }
@@ -1188,22 +1091,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "최근 10회 추이"
-          }
-        }
-      }
-    },
-    "summary_section_workout" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Workout"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "운동"
           }
         }
       }
