@@ -24,6 +24,10 @@ final class WorkoutViewModel: ObservableObject {
     private let connectivity: WorkoutRecordSending
     private let remover: WorkoutRemoving
     private let defaults: UserDefaults
+    private let snapshots: WorkoutSnapshotPublishing
+
+    /// `isPaused` 구독을 붙잡아 둔다. 놓으면 정지/재개가 컴플리케이션에 안 나간다.
+    private var cancellables: Set<AnyCancellable> = []
 
     /// W0 에서 고른 시작 유형. 세션 사이에 남는다.
     private static let startKindKey = "startSegmentKind"
@@ -37,12 +41,14 @@ final class WorkoutViewModel: ObservableObject {
     init(session: WorkoutSessionService = WorkoutSessionService(configuration: .strength),
          connectivity: WorkoutRecordSending,
          remover: WorkoutRemoving = HealthKitWorkoutRemover(),
-         defaults: UserDefaults = .standard)
+         defaults: UserDefaults = .standard,
+         snapshots: WorkoutSnapshotPublishing = WorkoutSnapshotPublisher())
     {
         self.session = session
         self.connectivity = connectivity
         self.remover = remover
         self.defaults = defaults
+        self.snapshots = snapshots
 
         // 저장된 값이 없거나 알아볼 수 없으면 근력으로 연다.
         mode = SegmentKind(rawValue: defaults.string(forKey: Self.startKindKey) ?? "") ?? .strength
@@ -53,6 +59,21 @@ final class WorkoutViewModel: ObservableObject {
         session.$isPaused
             .receive(on: DispatchQueue.main)
             .assign(to: &$isPaused)
+
+        // 정지/재개는 **여기서만** 컴플리케이션으로 나간다. `togglePause()` 에서 보내면
+        // 세션이 실제로 멈췄는지 모르는 채 값을 지어내는 꼴이라(낙관적 토글 — 루트 `CLAUDE.md`
+        // 워크아웃 계약), 서비스가 실제로 바꾼 값만 흘려보낸다.
+        session.$isPaused
+            .dropFirst()
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] paused in
+                MainActor.assumeIsolated {
+                    guard let self, self.phase == .active else { return }
+                    self.publishSnapshot(isPaused: paused)
+                }
+            }
+            .store(in: &cancellables)
 
         Publishers.CombineLatest4(
             session.$elapsedSeconds,
@@ -78,6 +99,7 @@ final class WorkoutViewModel: ObservableObject {
         closedSegments = []
         openSegmentStart = 0
         startedAt = Date()
+        publishSnapshot(isPaused: false)
     }
 
     /// W0 — 시작 유형을 근력↔유산소로 돌린다. 종류가 2개뿐이라 피커도 화살표도 두지 않는다
@@ -102,6 +124,19 @@ final class WorkoutViewModel: ObservableObject {
         mode = newMode
         // 눈 없이 방향을 구분할 수 있도록 상행·하행을 대칭으로 쓴다.
         WKInterfaceDevice.current().play(newMode == .cardio ? .directionUp : .directionDown)
+        publishSnapshot(isPaused: isPaused)
+    }
+
+    /// 컴플리케이션이 읽을 상태를 내보낸다.
+    ///
+    /// **경과시간은 세션에서 가져온다** — 워치가 단일 소스라는 계약(루트 `CLAUDE.md`)을 여기서도
+    /// 지킨다. `capturedAt` 과 짝으로 실어야 컴플리케이션이 타이머 기준점을 잡을 수 있다.
+    private func publishSnapshot(isPaused: Bool) {
+        snapshots.publish(WorkoutSnapshot(startedAt: startedAt,
+                                          mode: mode,
+                                          isPaused: isPaused,
+                                          elapsedSeconds: session.elapsedSeconds,
+                                          capturedAt: Date()))
     }
 
     /// 열린 구간을 닫아 `closedSegments` 에 넣는다. 길이가 0이면 버린다 —
@@ -137,6 +172,8 @@ final class WorkoutViewModel: ObservableObject {
 
         let result = await session.stopWorkout()
         WKInterfaceDevice.current().play(.stop)
+        // 세션이 끝났으니 컴플리케이션은 평상시 표시로 돌아간다. 저장/버리기와 무관하다.
+        snapshots.clear()
 
         enterSummary(with: result.map(record(from:)))
         return result
