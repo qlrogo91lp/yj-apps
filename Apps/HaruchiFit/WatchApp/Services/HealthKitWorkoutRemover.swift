@@ -9,7 +9,7 @@ import HealthKit
 /// 삭제까지 짧은 순간 HealthKit 에 존재한다는 한계가 있다 — 요약을 보고 버튼을 누르는
 /// 수 초 안의 일이고, `stopWorkout()` 이 `finishWorkout()` 을 무조건 부르는 이상
 /// 되돌릴 수단이 사후 삭제뿐이다.
-struct HealthKitWorkoutRemover: WorkoutRemoving {
+nonisolated struct HealthKitWorkoutRemover: WorkoutRemoving {
     private let store = HKHealthStore()
 
     func remove(workoutWith uuid: UUID) async {
