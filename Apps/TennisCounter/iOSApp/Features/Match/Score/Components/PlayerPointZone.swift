@@ -23,7 +23,7 @@ struct PlayerPointZone: View {
         }
         .onTapGesture { onTap() }
         .onLongPressGesture(minimumDuration: 0.5) { onLongPress() }
-        .accessibilityLabel("\(playerLabel): \(displayScore)")
+        .accessibilityLabel(Text(verbatim: "\(playerLabel): \(displayScore)"))
         .accessibilityHint("탭으로 포인트 추가, 길게 눌러 점수 수정")
         .accessibilityAddTraits(.isButton)
     }

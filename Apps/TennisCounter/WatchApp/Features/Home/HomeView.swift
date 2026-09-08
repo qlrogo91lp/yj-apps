@@ -10,11 +10,11 @@ struct HomeView: View {
             VStack(spacing: 16) {
                 Spacer()
                 VStack(spacing: 4) {
-                    Text("Ralli")
+                    Text(verbatim: "Ralli")
                         .font(.system(size: 30, weight: .bold))
                         .foregroundStyle(.green)
                         .italic()
-                    Text("Tennis Counter")
+                    Text(verbatim: "Tennis Counter")
                         .font(.system(size: 14, weight: .semibold))
                 }
                 Button {

@@ -47,7 +47,7 @@ struct MatchDetailSheet: View {
                                 .font(.system(size: 28, weight: .bold))
                                 .foregroundColor(match.myTotalSets > match.yourTotalSets ? .green : .orange)
 
-                            Text("\(match.myTotalSets) – \(match.yourTotalSets)")
+                            Text(verbatim: "\(match.myTotalSets) – \(match.yourTotalSets)")
                                 .font(.system(size: 22, weight: .semibold))
                         }
                         Spacer()
@@ -93,12 +93,12 @@ struct MatchDetailSheet: View {
                     } else {
                         ForEach(sets, id: \.setNumber) { set in
                             HStack {
-                                Text("Set \(set.setNumber)").foregroundColor(.secondary)
+                                Text(verbatim: "Set \(set.setNumber)").foregroundColor(.secondary)
                                 Spacer()
-                                Text("\(set.myGames)")
+                                Text(verbatim: "\(set.myGames)")
                                     .font(.system(size: 18, weight: .bold)).foregroundColor(.green)
-                                Text(":").foregroundColor(.secondary)
-                                Text("\(set.yourGames)")
+                                Text(verbatim: ":").foregroundColor(.secondary)
+                                Text(verbatim: "\(set.yourGames)")
                                     .font(.system(size: 18, weight: .bold)).foregroundColor(.orange)
                             }
                             .padding(.horizontal, 6)

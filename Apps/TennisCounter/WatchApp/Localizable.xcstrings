@@ -1,25 +1,6 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    ":" : {
-
-    },
-    "%lld" : {
-
-    },
-    "%lld : %lld" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld : %2$lld"
-          }
-        }
-      }
-    },
-    "|" : {
-
-    },
     "early_end_confirm_message" : {
       "localizations" : {
         "en" : {
@@ -208,9 +189,6 @@
         }
       }
     },
-    "Ralli" : {
-
-    },
     "result_draw" : {
       "localizations" : {
         "en" : {
@@ -323,9 +301,6 @@
           }
         }
       }
-    },
-    "Tennis Counter" : {
-
     },
     "watch_defeat" : {
       "localizations" : {

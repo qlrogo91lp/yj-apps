@@ -1,70 +1,6 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "" : {
-
-    },
-    ":" : {
-
-    },
-    "·" : {
-
-    },
-    "%@: %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@: %2$@"
-          }
-        }
-      }
-    },
-    "%lld" : {
-
-    },
-    "%lld - %lld" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld - %2$lld"
-          }
-        }
-      }
-    },
-    "%lld – %lld" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld – %2$lld"
-          }
-        }
-      }
-    },
-    "%lld:%lld" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld:%2$lld"
-          }
-        }
-      }
-    },
-    "|" : {
-
-    },
-    "4" : {
-
-    },
-    "5" : {
-
-    },
-    "6" : {
-
-    },
     "btn_cancel" : {
       "comment" : "Common",
       "localizations" : {
@@ -199,9 +135,6 @@
         }
       }
     },
-    "Date" : {
-
-    },
     "early_end_confirm_message" : {
       "localizations" : {
         "en" : {
@@ -298,9 +231,6 @@
           }
         }
       }
-    },
-    "Format" : {
-
     },
     "game_score_label" : {
       "extractionState" : "manual",
@@ -630,15 +560,6 @@
         }
       }
     },
-    "No set data" : {
-
-    },
-    "Period" : {
-
-    },
-    "Ralli" : {
-
-    },
     "result_draw" : {
       "localizations" : {
         "en" : {
@@ -753,9 +674,6 @@
           }
         }
       }
-    },
-    "Set %lld" : {
-
     },
     "set_indicator_format" : {
       "extractionState" : "manual",
@@ -1100,9 +1018,6 @@
         }
       }
     },
-    "Tennis Counter" : {
-
-    },
     "vs_label" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1250,9 +1165,6 @@
           }
         }
       }
-    },
-    "탭으로 포인트 추가, 길게 눌러 점수 수정" : {
-
     }
   },
   "version" : "1.2"

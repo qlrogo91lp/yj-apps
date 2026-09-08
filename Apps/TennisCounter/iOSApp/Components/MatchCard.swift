@@ -20,7 +20,7 @@ struct MatchCard: View {
                 }
                 Spacer()
                 if match.matchFormat != .oneSet {
-                    Text("\(match.myTotalSets) - \(match.yourTotalSets)")
+                    Text(verbatim: "\(match.myTotalSets) - \(match.yourTotalSets)")
                         .font(.system(size: 22, weight: .bold))
                 }
             }
@@ -29,7 +29,7 @@ struct MatchCard: View {
                 Text(formattedDate(match.startedAt))
                     .font(.system(size: 14))
                     .foregroundColor(.secondary)
-                Text("·")
+                Text(verbatim: "·")
                     .foregroundColor(.secondary)
                 Text(formatName(match.matchFormat.rawValue))
                     .font(.system(size: 13))

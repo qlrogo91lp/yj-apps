@@ -23,7 +23,7 @@ struct DayCell: View {
 
     var body: some View {
         VStack(spacing: 2) {
-            Text("\(calendar.component(.day, from: date))")
+            Text(verbatim: "\(calendar.component(.day, from: date))")
                 .font(.system(size: 18, weight: isToday ? .bold : .semibold))
                 .foregroundColor(isToday ? .blue : .primary)
                 .frame(width: 40, height: 40)

@@ -28,7 +28,7 @@ struct ModeView: View {
                         let next = ((options.firstIndex(of: selectionVM.gameThreshold) ?? 0) + 1) % options.count
                         selectionVM.gameThreshold = options[next]
                     } label: {
-                        Text("\(selectionVM.gameThreshold)")
+                        Text(verbatim: "\(selectionVM.gameThreshold)")
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(.white)
                             .frame(width: 60, height: 32)

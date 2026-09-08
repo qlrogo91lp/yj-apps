@@ -7,12 +7,12 @@ struct GameScores: View {
 
     var body: some View {
         HStack(spacing: 20) {
-            Text("\(myGameScore)")
+            Text(verbatim: "\(myGameScore)")
                 .foregroundColor(.green)
                 .contentTransition(.numericText())
             Text(isTieBreak ? String(localized: "set_tiebreak") : ":")
                 .foregroundColor(.white)
-            Text("\(yourGameScore)")
+            Text(verbatim: "\(yourGameScore)")
                 .foregroundColor(.orange)
                 .contentTransition(.numericText())
         }

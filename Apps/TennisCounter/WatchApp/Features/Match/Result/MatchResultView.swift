@@ -12,13 +12,13 @@ struct MatchResultView: View {
                 .multilineTextAlignment(.center)
 
             HStack(spacing: 8) {
-                Text("\(session.mySetScore)")
+                Text(verbatim: "\(session.mySetScore)")
                     .font(.system(size: 25, weight: .bold))
                     .foregroundColor(.green)
-                Text(":")
+                Text(verbatim: ":")
                     .font(.system(size: 20, weight: .bold))
                     .foregroundColor(.white.opacity(0.6))
-                Text("\(session.yourSetScore)")
+                Text(verbatim: "\(session.yourSetScore)")
                     .font(.system(size: 25, weight: .bold))
                     .foregroundColor(.orange)
             }
@@ -27,11 +27,11 @@ struct MatchResultView: View {
                 HStack {
                     ForEach(Array(session.completedSets.enumerated()), id: \.offset) { index, set in
                         HStack {
-                            Text("\(set.my) : \(set.your)")
+                            Text(verbatim: "\(set.my) : \(set.your)")
                                 .font(.system(size: 14, weight: .bold))
                                 .foregroundColor(.white.opacity(0.7))
                             if index < session.completedSets.count - 1 {
-                                Text("|")
+                                Text(verbatim: "|")
                                     .font(.system(size: 14, weight: .bold))
                                     .foregroundColor(.white.opacity(0.7))
                                     .padding(.horizontal, 4)

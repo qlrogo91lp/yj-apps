@@ -18,11 +18,11 @@ struct MatchResultView: View {
                     .foregroundColor(resultColor)
 
                 HStack(spacing: 12) {
-                    Text("\(session.mySetScore)")
+                    Text(verbatim: "\(session.mySetScore)")
                         .foregroundColor(.green)
-                    Text(":")
+                    Text(verbatim: ":")
                         .foregroundColor(.white)
-                    Text("\(session.yourSetScore)")
+                    Text(verbatim: "\(session.yourSetScore)")
                         .foregroundColor(.orange)
                 }
                 .font(.system(size: 40, weight: .bold))
@@ -30,12 +30,12 @@ struct MatchResultView: View {
                 if session.options.mode == .bestOfThree, !session.completedSets.isEmpty {
                     HStack(spacing: 10) {
                         ForEach(Array(session.completedSets.enumerated()), id: \.offset) { index, set in
-                            Text("\(set.my):\(set.your)")
+                            Text(verbatim: "\(set.my):\(set.your)")
                                 .font(.system(size: 24, weight: .bold))
                                 .kerning(5)
                                 .foregroundColor(.white)
                             if index < session.completedSets.count - 1 {
-                                Text("|")
+                                Text(verbatim: "|")
                                     .font(.system(size: 24, weight: .bold))
                                     .foregroundColor(.white.opacity(0.3))
                                     .padding(.horizontal, 4)

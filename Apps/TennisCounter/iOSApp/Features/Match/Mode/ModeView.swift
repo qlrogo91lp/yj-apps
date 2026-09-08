@@ -23,10 +23,12 @@ struct ModeView: View {
                         .font(.system(size: 15))
                         .foregroundColor(.white)
                     Spacer()
-                    Picker("", selection: $selectionVM.gameThreshold) {
-                        Text("4").tag(4)
-                        Text("5").tag(5)
-                        Text("6").tag(6)
+                    Picker(selection: $selectionVM.gameThreshold) {
+                        Text(verbatim: "4").tag(4)
+                        Text(verbatim: "5").tag(5)
+                        Text(verbatim: "6").tag(6)
+                    } label: {
+                        EmptyView()
                     }
                     .pickerStyle(.segmented)
                     .frame(width: 160)
