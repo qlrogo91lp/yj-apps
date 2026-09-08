@@ -765,6 +765,40 @@
         }
       }
     },
+    "onboarding_crown_down" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Their point"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "상대 점수"
+          }
+        }
+      }
+    },
+    "onboarding_crown_up" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "My point"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "내 점수"
+          }
+        }
+      }
+    },
     "result_draw" : {
       "localizations" : {
         "en" : {
