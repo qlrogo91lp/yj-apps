@@ -43,6 +43,25 @@ final class MatchPersistenceService {
         }
     }
 
+    /// SetRecord 는 deleteRule: .cascade 라 함께 지워진다.
+    /// CloudKit 동기화라 다른 기기로 전파되고 되돌릴 수 없다 — 호출부가 확인을 받는다.
+    ///
+    /// 넘어온 인스턴스를 그대로 지우지 않고 **id 로 다시 찾아** 지운다. iOSApp 이 이 서비스에
+    /// 별도 ModelContext 를 주는데 화면은 @Environment(\.modelContext) 를 쓰므로, 다른
+    /// 컨텍스트의 모델을 그대로 넘기면 삭제가 저장소에 반영되지 않는다 (화면에서만 사라졌다가
+    /// 재실행하면 되살아난다).
+    func delete(_ match: Match) throws {
+        guard let store else { throw PersistenceError.notConfigured }
+        let id = match.id
+        do {
+            for owned in try store.fetch(matching: #Predicate<Match> { $0.id == id }, sortBy: []) {
+                try store.delete(owned)
+            }
+        } catch {
+            throw PersistenceError.saveFailed(error)
+        }
+    }
+
     func fetchByWorkoutSession(_ sessionId: UUID) throws -> [Match] {
         guard let store else { return [] }
         let id = sessionId

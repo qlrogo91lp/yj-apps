@@ -34,6 +34,23 @@
         }
       }
     },
+    "btn_delete" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "삭제"
+          }
+        }
+      }
+    },
     "btn_end_match" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -296,6 +313,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "게임"
+          }
+        }
+      }
+    },
+    "history_delete_confirm_message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This also removes it from your other devices and cannot be undone."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다른 기기에서도 함께 삭제되며 되돌릴 수 없습니다."
+          }
+        }
+      }
+    },
+    "history_delete_confirm_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete this match?"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 경기를 삭제할까요?"
           }
         }
       }

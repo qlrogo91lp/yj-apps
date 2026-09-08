@@ -137,4 +137,32 @@ struct MatchPersistenceServiceTests {
         #expect(try service.fetchByWorkoutSession(target).count == 1)
         #expect(try service.fetchByWorkoutSession(UUID()).isEmpty)
     }
+
+    @Test func deleteRemovesMatch() throws {
+        let service = try makeService()
+        let match = Match()
+        match.matchId = UUID()
+        try service.upsert(match)
+        #expect(try service.fetchAll().count == 1)
+
+        try service.delete(match)
+
+        #expect(try service.fetchAll().isEmpty)
+    }
+
+    /// SetRecord 는 deleteRule: .cascade 라 경기와 함께 지워져야 한다. 남으면 고아 레코드가 쌓인다.
+    @Test func deleteCascadesSetRecords() throws {
+        let service = try makeService()
+        let match = Match()
+        match.matchId = UUID()
+        match.sets = [
+            SetRecord(myGames: 6, yourGames: 4, setNumber: 1),
+            SetRecord(myGames: 4, yourGames: 6, setNumber: 2),
+        ]
+        try service.upsert(match)
+
+        try service.delete(match)
+
+        #expect(try service.fetchAll().isEmpty)
+    }
 }
