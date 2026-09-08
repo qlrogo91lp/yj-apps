@@ -89,7 +89,7 @@ struct MatchDetailSheet: View {
                 Section(header: Text(String(localized: "match_detail_section_sets"))) {
                     let sets = (match.sets ?? []).sorted { $0.setNumber < $1.setNumber }
                     if sets.isEmpty {
-                        Text("No set data").foregroundColor(.secondary)
+                        Text(String(localized: "history_no_set_data")).foregroundColor(.secondary)
                     } else {
                         ForEach(sets, id: \.setNumber) { set in
                             HStack {
@@ -107,12 +107,12 @@ struct MatchDetailSheet: View {
                 }
 
                 Section(header: Text(String(localized: "match_detail_section_info"))) {
-                    LabeledContent("Format") {
+                    LabeledContent(String(localized: "history_field_format")) {
                         Text(match.matchFormat == .oneSet
                             ? String(localized: "match_format_one_set")
                             : String(localized: "match_format_best_of_3"))
                     }
-                    LabeledContent("Date") {
+                    LabeledContent(String(localized: "history_field_date")) {
                         Text(match.startedAt.formatted(date: .abbreviated, time: .shortened))
                     }
                 }

@@ -13,7 +13,7 @@ struct SummaryView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
-                    Picker("Period", selection: $viewModel.selectedPeriod) {
+                    Picker(String(localized: "summary_period_label"), selection: $viewModel.selectedPeriod) {
                         ForEach(SummaryPeriod.allCases, id: \.rawValue) { period in
                             Text(period.localizedTitle).tag(period)
                         }

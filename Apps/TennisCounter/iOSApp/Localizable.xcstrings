@@ -265,6 +265,54 @@
         }
       }
     },
+    "history_field_date" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Date"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "날짜"
+          }
+        }
+      }
+    },
+    "history_field_format" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Format"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "경기 방식"
+          }
+        }
+      }
+    },
+    "history_no_set_data" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No set data"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "세트 기록이 없습니다"
+          }
+        }
+      }
+    },
     "history_title" : {
       "comment" : "History",
       "localizations" : {
@@ -675,6 +723,22 @@
         }
       }
     },
+    "score_point_zone_hint" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap to add a point, long press to edit the score"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "탭으로 포인트 추가, 길게 눌러 점수 수정"
+          }
+        }
+      }
+    },
     "set_indicator_format" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -771,6 +835,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "전체"
+          }
+        }
+      }
+    },
+    "summary_period_label" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Period"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기간"
           }
         }
       }
