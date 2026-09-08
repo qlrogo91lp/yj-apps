@@ -62,23 +62,19 @@ struct MatchDetailSheet: View {
                     ) {
                         StatCard(
                             title: String(localized: "summary_total_calories"),
-                            value: match.caloriesBurned.map { String(format: "%.0f", $0) } ?? "–",
-                            color: .green
+                            value: match.caloriesBurned.map { String(format: "%.0f", $0) } ?? "–"
                         )
                         StatCard(
                             title: String(localized: "summary_total_energy"),
-                            value: match.totalCaloriesBurned.map { String(format: "%.0f", $0) } ?? "–",
-                            color: .green
+                            value: match.totalCaloriesBurned.map { String(format: "%.0f", $0) } ?? "–"
                         )
                         StatCard(
                             title: String(localized: "summary_duration"),
-                            value: matchDurationString,
-                            color: .green
+                            value: matchDurationString
                         )
                         StatCard(
                             title: String(localized: "summary_avg_heartrate"),
-                            value: match.averageHeartRate.map { String(format: "%.0f", $0) } ?? "–",
-                            color: .green
+                            value: match.averageHeartRate.map { String(format: "%.0f", $0) } ?? "–"
                         )
                     }
                     .padding(.horizontal, 8)

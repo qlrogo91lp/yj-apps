@@ -28,23 +28,19 @@ struct WorkoutStatsGrid: View {
             ) {
                 StatCard(
                     title: String(localized: "summary_total_calories"),
-                    value: stats.formattedCalories,
-                    color: .green
+                    value: stats.formattedCalories
                 )
                 StatCard(
                     title: String(localized: "summary_total_energy"),
-                    value: stats.formattedTotalEnergy,
-                    color: .green
+                    value: stats.formattedTotalEnergy
                 )
                 StatCard(
                     title: String(localized: "summary_duration"),
-                    value: stats.formattedDuration,
-                    color: .green
+                    value: stats.formattedDuration
                 )
                 StatCard(
                     title: String(localized: "summary_avg_heartrate"),
-                    value: stats.formattedHeartRate,
-                    color: .green
+                    value: stats.formattedHeartRate
                 )
             }
         }

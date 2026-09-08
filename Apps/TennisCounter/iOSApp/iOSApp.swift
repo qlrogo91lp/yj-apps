@@ -56,7 +56,9 @@ struct MainTabView: View {
                     .tabItem { Label(String(localized: "tab_history"), systemImage: "clock.fill") }
                     .tag(2)
             }
-            .colorScheme(.dark)
+            // .colorScheme 은 SwiftUI 하위 트리만 바꾼다 — 시트 그래버·알림창·키보드는
+            // 시스템 스타일을 따라가므로 앱 전체 고정은 .preferredColorScheme 으로 한다
+            .preferredColorScheme(.dark)
 
             if isMatchActive {
                 NavigationStack {

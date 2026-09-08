@@ -21,18 +21,15 @@ struct MatchStatsGrid: View {
         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
             StatCard(
                 title: String(localized: "summary_total_matches"),
-                value: "\(stats.totalMatches)",
-                color: .green
+                value: "\(stats.totalMatches)"
             )
             StatCard(
                 title: String(localized: "summary_win_rate"),
-                value: String(format: "%.0f%%", stats.winRate * 100),
-                color: .green
+                value: String(format: "%.0f%%", stats.winRate * 100)
             )
             StatCard(
                 title: String(localized: "summary_wins"),
-                value: "\(stats.wins)",
-                color: .green
+                value: "\(stats.wins)"
             )
         }
     }
