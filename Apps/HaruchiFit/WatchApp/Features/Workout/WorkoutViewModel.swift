@@ -23,6 +23,10 @@ final class WorkoutViewModel: ObservableObject {
     let session: WorkoutSessionService
     private let connectivity: WorkoutRecordSending
     private let remover: WorkoutRemoving
+    private let defaults: UserDefaults
+
+    /// W0 에서 고른 시작 유형. 세션 사이에 남는다.
+    private static let startKindKey = "startSegmentKind"
 
     /// 닫힌 구간들. 열려 있는 마지막 구간은 `openSegmentStart` 로만 들고 있다가 종료 시 닫는다.
     private var closedSegments: [WorkoutRecordMessage.SegmentPayload] = []
@@ -32,11 +36,16 @@ final class WorkoutViewModel: ObservableObject {
 
     init(session: WorkoutSessionService = WorkoutSessionService(configuration: .strength),
          connectivity: WorkoutRecordSending,
-         remover: WorkoutRemoving = HealthKitWorkoutRemover())
+         remover: WorkoutRemoving = HealthKitWorkoutRemover(),
+         defaults: UserDefaults = .standard)
     {
         self.session = session
         self.connectivity = connectivity
         self.remover = remover
+        self.defaults = defaults
+
+        // 저장된 값이 없거나 알아볼 수 없으면 근력으로 연다.
+        mode = SegmentKind(rawValue: defaults.string(forKey: Self.startKindKey) ?? "") ?? .strength
 
         // 서비스의 개별 @Published 값을 뷰가 쓸 형태로 모아 다시 발행한다.
         // 감싸기만 하면 뷰가 갱신되지 않는다 — 서비스와 이 뷰모델은 서로 다른
@@ -64,10 +73,23 @@ final class WorkoutViewModel: ObservableObject {
         session.startWorkout()
         phase = .active
         WKInterfaceDevice.current().play(.start)
-        mode = .strength
+        // mode 는 W0 에서 고른 값 그대로다 — 첫 구간이 그 유형으로 열린다.
+        // 세션 자체는 유형과 무관하게 실내 근력이다 (D-M8).
         closedSegments = []
         openSegmentStart = 0
         startedAt = Date()
+    }
+
+    /// W0 — 시작 유형을 근력↔유산소로 돌린다. 종류가 2개뿐이라 피커도 화살표도 두지 않는다
+    /// (제품 스펙 W0). 선택은 다음 실행까지 남는다.
+    ///
+    /// **세션이 열린 뒤에는 이 경로를 쓰지 않는다.** 진행 중 전환은 구간을 닫아야 하므로
+    /// `switchMode(to:)` 가 맡는다.
+    func toggleStartKind() {
+        guard phase == .idle else { return }
+        mode = mode == .strength ? .cardio : .strength
+        defaults.set(mode.rawValue, forKey: Self.startKindKey)
+        WKInterfaceDevice.current().play(.click)
     }
 
     /// 구간을 바꾼다. 열려 있던 구간을 닫고 새 구간을 연다.

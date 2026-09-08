@@ -16,7 +16,7 @@ struct WorkoutViewModelTests {
     func enterSummaryHoldsRecordWithoutSending() {
         let (viewModel, spy, _) = makeViewModel()
 
-        viewModel.enterSummary(with: makeRecord())
+        viewModel.enterSummary(with: RecordFixture.make())
 
         #expect(viewModel.phase == .summary)
         #expect(viewModel.pendingRecord != nil)
@@ -40,7 +40,7 @@ struct WorkoutViewModelTests {
     func saveTransmitsPendingRecordOnce() {
         let (viewModel, spy, _) = makeViewModel()
         let uuid = UUID()
-        viewModel.enterSummary(with: makeRecord(healthKitUUID: uuid, totalSeconds: 4344))
+        viewModel.enterSummary(with: RecordFixture.make(healthKitUUID: uuid, totalSeconds: 4344))
 
         viewModel.save()
 
@@ -66,7 +66,7 @@ struct WorkoutViewModelTests {
     @Test("버리면 아무것도 보내지 않는다")
     func discardTransmitsNothing() {
         let (viewModel, spy, _) = makeViewModel()
-        viewModel.enterSummary(with: makeRecord())
+        viewModel.enterSummary(with: RecordFixture.make())
 
         viewModel.discard()
 
@@ -79,7 +79,7 @@ struct WorkoutViewModelTests {
     func discardRemovesStoredWorkout() async {
         let uuid = UUID()
         let (viewModel, _, remover) = makeViewModel()
-        viewModel.enterSummary(with: makeRecord(healthKitUUID: uuid))
+        viewModel.enterSummary(with: RecordFixture.make(healthKitUUID: uuid))
 
         viewModel.discard()
 
@@ -97,7 +97,7 @@ struct WorkoutViewModelTests {
     @Test("버린 뒤 저장을 눌러도 되살아나지 않는다")
     func saveAfterDiscardSendsNothing() {
         let (viewModel, spy, _) = makeViewModel()
-        viewModel.enterSummary(with: makeRecord())
+        viewModel.enterSummary(with: RecordFixture.make())
         viewModel.discard()
 
         viewModel.save()
@@ -111,18 +111,5 @@ struct WorkoutViewModelTests {
         let spy = WorkoutRecordSendingSpy()
         let remover = WorkoutRemovingSpy()
         return (WorkoutViewModel(connectivity: spy, remover: remover), spy, remover)
-    }
-
-    private func makeRecord(healthKitUUID: UUID? = UUID(),
-                            totalSeconds: Int = 600) -> WorkoutRecordMessage
-    {
-        WorkoutRecordMessage(healthKitUUID: healthKitUUID,
-                             startedAt: Date(timeIntervalSince1970: 0),
-                             endedAt: Date(timeIntervalSince1970: TimeInterval(totalSeconds)),
-                             totalSeconds: totalSeconds,
-                             activeCalories: 412,
-                             totalCalories: 520,
-                             averageHeartRate: 128,
-                             segments: [.init(kind: .strength, startOffset: 0, durationSeconds: totalSeconds)])
     }
 }
