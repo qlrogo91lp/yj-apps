@@ -1,7 +1,7 @@
 # WC 컴플리케이션 — 구현 플랜
 
 작성일: 2026-09-08
-상태: **진행 중** — Task 0·1 완료 (`a8401e2`)
+상태: **완료** — Task 0~4 (`a8401e2`~`9836055`). 실기기 검증만 남음
 선행 문서: [제품 스펙](../../../specs/shared/2026/2026-09-02-haruchi-fit-product-spec.md) WC절 · [아키텍처](../../../specs/shared/2026/2026-09-02-haruchi-fit-architecture.md) D-M4
 선행 작업: W0 (`7a2c73a`·`d60862e`) — 완료
 
@@ -162,7 +162,7 @@ enum WorkoutSnapshotStore {
 
 ---
 
-## Task 2 — 세션 상태를 발행한다 (TDD)
+## Task 2 — 세션 상태를 발행한다 (TDD) — 완료 (`4c2445f`)
 
 **Files:** `WorkoutSnapshotPublisher.swift` · `WorkoutViewModel.swift` · 스파이 + 테스트
 
@@ -181,16 +181,21 @@ protocol WorkoutSnapshotPublishing {
 **뷰모델은 프로토콜에만 의존한다** — 테스트에서 WidgetKit 부작용 없이 호출 시점을 검증하려는
 것이고, 골프의 `RoundSnapshotPublishing` 과 같은 이유다.
 
-- [ ] Step 1: 스파이 + 실패 테스트 (네 시점 각각 · 종료 시 clear · 전환 시 mode 가 바뀌어 실림)
-- [ ] Step 2: 구현 — `WKInterfaceDevice` 호출 옆에 한 줄씩
-- [ ] Step 3: 통과 확인 · 커밋
+- [x] Step 1: 스파이 + 실패 테스트 (네 시점 각각 · 종료 시 clear · 전환 시 mode 가 바뀌어 실림)
+- [x] Step 2: 구현 — `WKInterfaceDevice` 호출 옆에 한 줄씩
+- [x] Step 3: 통과 확인 · 커밋
+
+> **정지/재개만 메서드가 아니라 `session.$isPaused` 스트림에서 보냈다.** `togglePause()` 안에서
+> 보내면 세션이 실제로 멈췄는지 모르는 채 값을 지어내게 된다 — 루트 `CLAUDE.md` 가 금지한
+> 낙관적 토글이다. 그래서 서비스가 실제로 바꾼 값만 흘려보낸다. 이 경로는 실제 `HKWorkoutSession`
+> 없이는 흐르지 않아 유닛 테스트 대신 시뮬레이터에서 App Group 저장으로 확인했다.
 
 > **`elapsedSeconds` 의 출처는 `session.elapsedSeconds`** 다. 경과시간은 워치가 단일 소스라는
 > 루트 `CLAUDE.md` 의 워크아웃 계약을 여기서도 지킨다 — 자체 타이머를 두지 않는다.
 
 ---
 
-## Task 3 — 컴플리케이션 뷰
+## Task 3 — 컴플리케이션 뷰 — 완료 (`9836055`)
 
 **Files:** `ComplicationApp/HaruchiComplicationExtension.swift`
 
@@ -217,7 +222,7 @@ protocol WorkoutSnapshotPublishing {
 
 ---
 
-## Task 4 — 문서 갱신
+## Task 4 — 문서 갱신 — 완료
 
 - [ ] `Apps/HaruchiFit/CLAUDE.md` 에 `Common/` 배치 기준과 **왜 `Shared/` 가 아닌지**
 - [ ] 로드맵 — WC 를 완료로. 남은 13개 → 12개, Phase 번호 당기기.

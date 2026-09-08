@@ -88,7 +88,7 @@ Localizable(2·5·6) / 워치 `WorkoutSessionViewModel`(3·7)
 |---|---|---|
 | `MonitoringCore` (CrashReporting 프로토콜 + Crashlytics 구현) | 스펙·플랜 완료 · 구현 대기 | 위 Ralli #7 과 같은 문서. 골프·하루치 연동은 별도 (Firebase 프로젝트 앱마다 새로) |
 
-## HaruchiFit — 첫 출시 전 (Phase 1 진행 중)
+## HaruchiFit — 첫 출시 전 (Phase 1 완료 · Phase 2 대기)
 
 순서와 설계 근거의 단일 출처는 [로드맵](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-07-haruchi-fit-roadmap.md)이다.
 선행 문서 — [제품 스펙](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-02-haruchi-fit-product-spec.md) · [아키텍처](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-02-haruchi-fit-architecture.md).
@@ -105,28 +105,29 @@ Localizable(2·5·6) / 워치 `WorkoutSessionViewModel`(3·7)
 | 세그먼트 SwiftData 저장 | [PR #9](https://github.com/qlrogo91lp/yj-apps/pull/9) | — |
 | W2 종료 후 요약 (저장 / 버리기) | [PR #12](https://github.com/qlrogo91lp/yj-apps/pull/12) 머지 · **실기기 검증만 남음** | [플랜](Apps/HaruchiFit/docs/plans/watch/2026/2026-09-07-haruchi-fit-w2-summary.md) |
 | W0 홈 시작 유형 토글 (근력 / 유산소) | `feature/fit` (`7a2c73a`·`d60862e`) · 테스트 12개 통과 · **실기기 검증만 남음** | [플랜](Apps/HaruchiFit/docs/plans/watch/2026/2026-09-08-haruchi-fit-w0-start-kind.md) |
+| WC 컴플리케이션 — 세션 상태만 | `feature/fit` (`a8401e2`~`9836055`) · 테스트 24개 통과 · 시뮬레이터 워치 페이스 확인 | [플랜](Apps/HaruchiFit/docs/plans/watch/2026/2026-09-08-haruchi-fit-wc-complication.md) |
 
-### 예정사항 (남은 13개)
+### 예정사항 (남은 12개)
 
 | Phase | # | 항목 | 상태 | 문서 |
 |---|---|---|---|---|
-| 1 워치 | 1 | 컴플리케이션 — 세션 상태만 (WC) | **다음** · 플랜 없음 · **착수 전 Xcode 에서 컴플리케이션 타깃에 `Shared` 추가** | 로드맵 Phase 1 |
-| 2 데이터 | 2 | 잔디 집계 (일별 집계 캐시) | 예정 | 로드맵 Phase 2 · 스펙 5절 |
-| 2 데이터 | 3 | HealthKit import (증분) | 예정 · **근력/유산소 매핑 표 확정이 핵심** | 로드맵 Phase 2 · 스펙 4.1·4.2 |
-| 3 iOS | 4 | 탭 셸 + 디자인 토큰 | 예정 | 로드맵 Phase 3 · 스펙 3절·7절 |
-| 3 iOS | 5 | 03b 기록 목록 | 예정 (선행: 4) | 로드맵 Phase 3 · 스펙 03b절 |
-| 3 iOS | 6 | 04 기록 상세 (부위 태깅 · 메모) | 예정 (선행: 5) | 로드맵 Phase 3 · 스펙 04절 |
-| 3 iOS | 7 | 06 공유 (`WorkoutShareUI` 그대로) | 예정 (선행: 6) | 로드맵 Phase 3 · 스펙 06절 |
-| 4 잔디 | 8 | 02 홈 대시보드 | 예정 (선행: 2·4) | 로드맵 Phase 4 · 스펙 02절 |
-| 4 잔디 | 9 | 03a 기록 달력 | 예정 (선행: 2·4) | 로드맵 Phase 4 · 스펙 03a절 |
-| 4 잔디 | 10 | 05 통계 | 예정 (선행: 2·4) | 로드맵 Phase 4 · 스펙 05절 |
-| 5 주변부 | 11 | 07 설정 | 예정 (선행: Phase 2) | 로드맵 Phase 5 · 스펙 07절 |
-| 5 주변부 | 12 | 08 수동 기록 | 예정 | 로드맵 Phase 5 · 스펙 08절·4.3 |
-| 5 주변부 | 13 | 01 온보딩 (HealthKit 권한) | 예정 | 로드맵 Phase 5 · 스펙 01절 |
+| 2 데이터 | 1 | 잔디 집계 (일별 집계 캐시) | **다음** | 로드맵 Phase 2 · 스펙 5절 |
+| 2 데이터 | 2 | HealthKit import (증분) | 예정 · **근력/유산소 매핑 표 확정이 핵심** | 로드맵 Phase 2 · 스펙 4.1·4.2 |
+| 3 iOS | 3 | 탭 셸 + 디자인 토큰 | 예정 | 로드맵 Phase 3 · 스펙 3절·7절 |
+| 3 iOS | 4 | 03b 기록 목록 | 예정 (선행: 3) | 로드맵 Phase 3 · 스펙 03b절 |
+| 3 iOS | 5 | 04 기록 상세 (부위 태깅 · 메모) | 예정 (선행: 4) | 로드맵 Phase 3 · 스펙 04절 |
+| 3 iOS | 6 | 06 공유 (`WorkoutShareUI` 그대로) | 예정 (선행: 5) | 로드맵 Phase 3 · 스펙 06절 |
+| 4 잔디 | 7 | 02 홈 대시보드 | 예정 (선행: 1·3) | 로드맵 Phase 4 · 스펙 02절 |
+| 4 잔디 | 8 | 03a 기록 달력 | 예정 (선행: 1·3) | 로드맵 Phase 4 · 스펙 03a절 |
+| 4 잔디 | 9 | 05 통계 | 예정 (선행: 1·3) | 로드맵 Phase 4 · 스펙 05절 |
+| 5 주변부 | 10 | 07 설정 | 예정 (선행: Phase 2) | 로드맵 Phase 5 · 스펙 07절 |
+| 5 주변부 | 11 | 08 수동 기록 | 예정 | 로드맵 Phase 5 · 스펙 08절·4.3 |
+| 5 주변부 | 12 | 01 온보딩 (HealthKit 권한) | 예정 | 로드맵 Phase 5 · 스펙 01절 |
 | 언제든 | — | CloudKit 엔타이틀먼트 | 예정 · **프로비저닝 작업(사용자)** · 로컬 폴백 있어 급하지 않음 | 로드맵 "언제든" |
 
-**Phase 1 이 끝나면 폰을 한 번도 안 열어도 흐름 A(해피패스)가 완결된다.**
-Phase 2(잔디 집계 · HealthKit import) 는 화면이 없어 **눈으로 확인할 수단**을 착수 시점에 정한다.
+**Phase 1 이 끝나 폰을 한 번도 안 열어도 흐름 A(해피패스)가 완결된다** — W2 · W0 · WC.
+셋 다 실기기 햅틱 검증만 남았다.
+다음 Phase 2(잔디 집계 · HealthKit import) 는 화면이 없어 **눈으로 확인할 수단**을 착수 시점에 정한다.
 
 > 플랜 문서는 **착수 직전에 하나씩** 쓴다 (로드맵 "작업 중 지킬 것"). 위 표의 "예정" 은
 > 플랜이 아직 없다는 뜻이지 설계가 비어 있다는 뜻이 아니다 — 스펙은 14개 화면 전부 확정돼 있다.
@@ -137,8 +138,9 @@ Phase 2(잔디 집계 · HealthKit import) 는 화면이 없어 **눈으로 확�
 - [ ] **W2 실기기 검증 4항목** — 햅틱 5종, **버리기 후 건강 앱에서도 사라지는지** (플랜 "실기기" 절)
 - [x] W0 플랜 실행 — 테스트 12개 통과. 시뮬레이터에서 토글 히트영역·좌우 여백 두 곳을 더 고쳤다
 - [ ] **W0 실기기 검증 5항목** — 토글 `.click` 햅틱, 재실행 시 유형 유지, W1 라벨, 요약 바 파랑, 건강 앱에 근력으로 기록 (플랜 "실기기" 절)
-- [ ] WC 착수 전 — Xcode 에서 `HaruchiComplicationExtension` 타깃에 `Shared` 폴더 추가
-      (지금은 워치 앱·iOS 앱에만 들어 있어 스냅샷 스토어를 `Shared/` 에 두면 컴파일이 안 된다)
+- [x] WC 구현 — `Shared` 가 아니라 새 `Common/` 폴더를 세 타깃에 붙였다 (`Shared` 는 `ConnectivityCore` 의존으로 불가)
+- [ ] **WC 실기기 검증 6항목** — 앱을 안 열어도 상태 전환, 경과시간, 일시정지 시 멈춤,
+      종료 후 복귀, 탭하면 앱 열림, 재부팅 후 유지 (플랜 "실기기" 절)
 
 > **아직 실기기에서 한 번도 안 돈 경로가 있다** — `HKHealthStore.delete`. 시뮬레이터에서는 실행되지
 > 않고 테스트는 "지워달라고 요청했다"까지만 보장한다. 워치에서 거부되면 W2 플랜 1절 B안

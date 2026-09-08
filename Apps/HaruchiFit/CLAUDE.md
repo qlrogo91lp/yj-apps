@@ -71,6 +71,7 @@ iOSApp/
   iOSApp.swift · ContentView.swift  ContentView 는 저장 확인용 임시 화면이다
   Services/
 ComplicationApp/                    컴플리케이션 익스텐션
+Common/                             세 타깃 공유 — 외부 의존 0
 Shared/                             워치 앱 ↔ iOS 앱 공유
   Persistence/                      SwiftData @Model
   Services/                         전송 메시지
@@ -81,10 +82,23 @@ watchosTests/
 - **`Shared/` 에 UI 를 두지 않는다.** 루트 `CLAUDE.md` 규약이고, 골프·테니스의 `Shared/` 에도
   SwiftUI 파일이 하나도 없다. 워치·iOS 가 같은 뷰를 써야 하면 `Packages/YJKit` 의 `WorkoutUI`
   프로덕트로 올리거나(거기 `Shared/`·`Watch/`·`iOS/` 로 갈라 둔 자리가 있다) 복제한다.
-- ⚠️ **`Shared/` 는 컴플리케이션 타깃에 들어 있지 않다** (워치 앱 + iOS 앱만). 골프는 들어 있어
-  `Shared/Models/ComplicationState.swift` 로 표시 로직을 공유하고 워치 테스트로 검증하는데,
-  하루치는 그 구조가 아직 없다. **WC 작업 전에 Xcode 에서 컴플리케이션 타깃에 `Shared` 를
-  추가해야 한다** — 안 그러면 스냅샷 스토어를 `Shared/` 에 둔 순간 컴파일이 안 된다.
+- **공유 폴더가 둘인 이유 — 타깃 조합이 다르다.** 폴더가 타깃 부착의 단위라 하나로는 안 된다.
+
+  | 폴더 | 붙는 타깃 | 의존 |
+  |---|---|---|
+  | `Common/` | iOS 앱 · 워치 앱 · **컴플리케이션** | 없음 (Foundation 만) |
+  | `Shared/` | iOS 앱 · 워치 앱 | `ConnectivityCore` · SwiftData |
+
+  `Shared/Services/WorkoutRecordMessage.swift` 가 `ConnectivityMessage` 를 채택해
+  **`ConnectivityCore` 에 의존**하는데 컴플리케이션 타깃은 어떤 프로덕트도 링크하지 않는다.
+  붙이면 링커가 깨진다 (2026-09-08 실측). 그래서 위젯이 봐야 하는 것만 `Common/` 에 뺐다 —
+  `SegmentKind` · `SummaryFormat` · `WorkoutSnapshot` · `WorkoutSnapshotStore` · `ComplicationState`.
+- **표시 로직은 `Common/` 에 둔다.** 위젯 타깃에는 테스트 타깃을 붙일 수 없어서,
+  `ComplicationState` 를 여기 두어야 `watchosTests` 가 `@testable import` 로 닿는다 (골프와 같은 이유).
+- ⚠️ **App Group `group.com.yj.HaruchiFit`** 로 워치 앱과 컴플리케이션이 스냅샷을 주고받는다.
+  워치 앱·컴플리케이션 두 타깃의 entitlements 에 들어 있다. **컴플리케이션 쪽 설정이 빠져도
+  빌드는 통과하고 실행에서만 조용히 nil 이 된다** — 2026-09-08 에 실제로 겪었다. 의심되면
+  `.../HaruchiComplicationExtension.build/*.xcent` 에 `application-groups` 가 있는지 본다.
 - pbxproj는 Xcode 16 `PBXFileSystemSynchronizedRootGroup` — 파일 생성/삭제는 파일시스템 조작만으로 반영된다.
 - 폴더·컴포넌트 계층·Import·네이밍 컨벤션은 루트 `CLAUDE.md` 의 **앱 코드 컨벤션**을 따른다
 - 테스트: Swift Testing, ViewModel 우선, View는 테스트하지 않는다.
