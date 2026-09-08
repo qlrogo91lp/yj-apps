@@ -15,11 +15,14 @@
 ## Global Constraints
 
 - **iOS 타깃만.** `WatchApp/`·`Shared/` 는 건드리지 않는다.
-- 문자열은 전부 `String(localized:)`. 작업 #5(String Catalog) 이후라면 빌드 시 카탈로그에 자동 추출되니 ko/en 값만 채운다. 이전이라면 `ko.lproj`/`en.lproj` 의 `Localizable.strings` 에 아래 표대로 추가한다.
+- 문자열은 전부 `String(localized:)`. #5 가 끝나 `iOSApp/Localizable.xcstrings` 에 넣는다.
+  **`xcodebuild` 는 카탈로그를 갱신하지 않는다** — 추출 반영은 Xcode.app 빌드에서만 일어나므로
+  키는 직접 넣는다 (#5 플랜 §카탈로그를 손으로 고칠 때).
 - 이미지 에셋은 **로컬라이즈된 이미지셋** (ko/en). 코드는 이미지 이름 하나만 안다.
 - 온보딩은 시트가 아니라 **루트 교체**로 띄운다 — 시트는 당겨서 닫히고 플래그가 안 남는다.
 - SwiftLint: line length 경고 150 / 오류 200. SwiftFormat: 4-space, imports 알파벳순, trailing comma. 한 파일 = 한 타입 (private helper 예외).
-- 브랜치 **`feat/ralli`**, 메인 체크아웃. gitmoji 커밋.
+- 브랜치 **`feat/onboarding`**, 메인 체크아웃. gitmoji 커밋.
+  (`feat/ralli` 은 PR #11 로 머지되어 더 쓰지 않는다 — 루트 `TODO.md`.)
 
 **빌드·테스트 명령** (루트에서)
 
@@ -27,7 +30,7 @@
 IOS=$(.github/scripts/pick-simulator.sh iOS '^iPhone')
 xcodebuild -workspace YJApps.xcworkspace -scheme "TennisCounter" -destination "id=$IOS" build
 xcodebuild -workspace YJApps.xcworkspace -scheme "TennisCounter" -destination "id=$IOS" \
-  -only-testing:iosTests/OnboardingGateTests test
+  -only-testing:RalliTests/OnboardingGateTests test   # 폴더는 iosTests, 타깃은 RalliTests
 make lint && make format
 ```
 
@@ -109,7 +112,7 @@ struct OnboardingGateTests {
 
 - [ ] **Step 2: 실패 확인**
 
-Run: `xcodebuild ... -only-testing:iosTests/OnboardingGateTests test 2>&1 | grep error: | head -2`
+Run: `xcodebuild ... -only-testing:RalliTests/OnboardingGateTests test 2>&1 | grep error: | head -2`
 Expected: `cannot find 'OnboardingGate' in scope`.
 
 - [ ] **Step 3: 구현**
@@ -454,7 +457,7 @@ struct OnboardingView: View {
 
 - [ ] **Step 3: 문자열 추가**
 
-위 §문자열 표의 22개 키를 ko/en 에 넣는다.
+위 §문자열 표의 **20개** 키를 ko/en 에 넣는다.
 - 카탈로그(#5 이후): 한 번 빌드하면 `iOSApp/Localizable.xcstrings` 에 키가 자동 추출된다. Xcode 에디터에서 ko/en 값을 채운다.
 - `.strings`(#5 이전): `iOSApp/ko.lproj/Localizable.strings` 와 `en.lproj` 에 `"키" = "값";` 형식으로 추가.
 
@@ -481,6 +484,20 @@ git add Apps/TennisCounter/iOSApp/Features/Onboarding/OnboardingView.swift \
         Apps/TennisCounter/iOSApp/Localizable.xcstrings   # 또는 iOSApp/*.lproj/Localizable.strings
 git commit -m "✨ 온보딩 4페이지 — 첫 실행과 온보딩 버전 갱신 시 노출"
 ```
+
+---
+
+## 구현하며 고친 것 (2026-09-09)
+
+| 플랜 | 실제 | 이유 |
+|---|---|---|
+| `OnboardingScreenshotPage` 의 본문 파라미터 `body` | **`message`** | `View.body` 와 이름이 겹쳐 컴파일이 안 된다 |
+| `CrownArrowsOverlay` 가 `.position(x: geo.size.width + 4, ...)` | **컨테이너 오른쪽 안쪽에 붙인다** (`.frame(alignment: .trailing)` + `.padding(.trailing, 12)` + `.offset(y: -24)`) | `scaledToFit` 은 뷰가 가용 폭을 다 차지하므로 바깥 좌표를 주면 **화면 밖으로 잘린다.** 시뮬레이터에서 확인했다 |
+| `OnboardingView` 끝의 `.colorScheme(.dark)` | **뺀다** | #2 가 `TennisCounter-Info.plist` 의 `UIUserInterfaceStyle = Dark` 로 앱 전체를 고정했다. 게다가 `.colorScheme` 은 SwiftUI 하위 트리만 바꾼다 |
+
+**시뮬레이터로 확인한 것** — 첫 실행에 온보딩이 뜨고, `onboardingSeenVersion = 1` 을 심어 재실행하면
+메인 탭으로 바로 간다. 4페이지에서 "건너뛰기" 가 사라지고 버튼이 "시작하기" 로 바뀐다.
+이미지 3장이 없어 1~3페이지는 빈 자리다 — Task 4 에서 채운다.
 
 ---
 

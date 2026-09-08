@@ -765,6 +765,23 @@
         }
       }
     },
+    "onboarding_crown_body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On your watch, turn the crown up for your point, down for your opponent's. Tapping works too."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "워치에서 크라운을 위로 돌리면 내 점수, 아래로 돌리면 상대 점수. 탭해도 됩니다."
+          }
+        }
+      }
+    },
     "onboarding_crown_down" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -782,6 +799,23 @@
         }
       }
     },
+    "onboarding_crown_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Score with the Crown"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "크라운으로 점수 입력"
+          }
+        }
+      }
+    },
     "onboarding_crown_up" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -795,6 +829,278 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "내 점수"
+          }
+        }
+      }
+    },
+    "onboarding_health_body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every match is saved as a tennis workout. Calories, heart rate and time build up in Health."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "경기마다 테니스 워크아웃으로 저장됩니다. 칼로리·심박·시간이 건강 앱에 쌓입니다."
+          }
+        }
+      }
+    },
+    "onboarding_health_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saved to Health"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "건강 앱에 기록됩니다"
+          }
+        }
+      }
+    },
+    "onboarding_more_lock_body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Live Activity and a watch complication"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Live Activity 와 워치 컴플리케이션"
+          }
+        }
+      }
+    },
+    "onboarding_more_lock_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Score on the Lock Screen"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "잠금화면에서 점수 확인"
+          }
+        }
+      }
+    },
+    "onboarding_more_mirror_body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Whichever starts first keeps score; the other follows along"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "폰과 워치 중 먼저 시작한 쪽이 심판, 다른 쪽은 따라옵니다"
+          }
+        }
+      }
+    },
+    "onboarding_more_mirror_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start from either device"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "어느 쪽에서 시작해도"
+          }
+        }
+      }
+    },
+    "onboarding_more_pause_body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In the Workout tab — the watch pauses too"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "워크아웃 탭에서. 워치가 함께 멈춥니다"
+          }
+        }
+      }
+    },
+    "onboarding_more_pause_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pause from your phone"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "폰에서 일시정지"
+          }
+        }
+      }
+    },
+    "onboarding_more_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "And a few more"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "그리고 이런 것도"
+          }
+        }
+      }
+    },
+    "onboarding_more_undo_body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Steps back across games and sets, to the first point"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "게임·세트 경계를 넘어 경기 시작까지 되돌립니다"
+          }
+        }
+      }
+    },
+    "onboarding_more_undo_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Undo goes all the way"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "되돌리기는 끝까지"
+          }
+        }
+      }
+    },
+    "onboarding_next" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다음"
+          }
+        }
+      }
+    },
+    "onboarding_share_body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One tap from match details. The card is a sticker — place it anywhere over your photo."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기록 상세에서 한 번에. 카드는 스티커라 사진 위에 자유롭게 놓을 수 있습니다."
+          }
+        }
+      }
+    },
+    "onboarding_share_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Share to Instagram Stories"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "인스타 스토리로 공유"
+          }
+        }
+      }
+    },
+    "onboarding_skip" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skip"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "건너뛰기"
+          }
+        }
+      }
+    },
+    "onboarding_start" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get Started"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "시작하기"
           }
         }
       }
