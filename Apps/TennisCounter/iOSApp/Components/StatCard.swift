@@ -3,7 +3,6 @@ import SwiftUI
 struct StatCard: View {
     let title: String
     let value: String
-    let color: Color
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -12,7 +11,7 @@ struct StatCard: View {
                 .foregroundColor(.secondary)
             Text(value)
                 .font(.system(size: 20, weight: .bold))
-                .foregroundColor(color)
+                .foregroundColor(.white)
                 .minimumScaleFactor(0.6)
                 .lineLimit(1)
         }

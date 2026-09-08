@@ -447,17 +447,26 @@ Text(String(format: String(localized: "summary_record_line"),
 - [ ] **Step 1: `delete(_:)`**
 
 ```swift
-    /// SetRecord 는 deleteRule: .cascade 라 함께 지워진다.
-    /// CloudKit 동기화라 다른 기기로 전파되고 되돌릴 수 없다 — 호출부가 확인을 받는다.
+    /// 넘어온 인스턴스를 그대로 지우지 않고 id 로 다시 찾아 지운다.
     func delete(_ match: Match) throws {
         guard let store else { throw PersistenceError.notConfigured }
+        let id = match.id
         do {
-            try store.delete(match)
+            for owned in try store.fetch(matching: #Predicate<Match> { $0.id == id }, sortBy: []) {
+                try store.delete(owned)
+            }
         } catch {
             throw PersistenceError.saveFailed(error)
         }
     }
 ```
+
+> **2026-09-08 수정.** 처음 계획은 `try store.delete(match)` 였는데 **삭제가 저장소에 반영되지
+> 않았다.** `iOSApp.swift:14` 가 서비스에 별도 `ModelContext` 를 주고 화면은
+> `@Environment(\.modelContext)` 를 쓰므로, 다른 컨텍스트의 모델을 `context.delete()` 에 넘기면
+> 아무 일도 일어나지 않는다. 목록에서만 사라졌다가 재실행하면 되살아난다.
+> `deleteDoesNotSkipNextPage` 테스트가 이걸 잡았다 — VM 배열만 보는 테스트는 통과하므로
+> **저장소를 다시 읽는 단언이 있어야 잡힌다.**
 
 - [ ] **Step 2: offset 방식을 바꾼다 — 삭제와 충돌한다**
 
@@ -752,6 +761,21 @@ make lint && make format
 - 최대 심박·거리·심박 존 — 새 수집이 필요하다
 - 시간축(요일·월별) 차트, 차트 막대 탭 인터랙션
 - 삭제 되돌리기(undo) — CloudKit 전파와 엮이면 복잡해진다. 확인 다이얼로그로 충분하다
+
+## 후속 (이 플랜에 넣지 않는다)
+
+**안 쓰이는 키 17개** — 정리 후에도 카탈로그에 남는다. 이 플랜이 화면을 건드린 자리의 키만
+정리했고, 나머지는 점수 화면 등 손대지 않은 화면의 것이다.
+
+- 이번에 죽은 것 — `summary_win_rate` · `summary_wins` (전적 한 줄이 카드 둘을 대체했다).
+  문구가 다시 필요해질 수 있어 남겨 둔다
+- 사용자 결정으로 남는 것 — `set_indicator_format`(`%d세트`). 세트 라벨은 영어(`Set 1`)로 두기로 했다
+- 그 밖 — `score_label_me` · `score_label_opp` · `btn_reset` · `btn_end_match` · `btn_end_set` ·
+  `btn_new_match` · `btn_save` · `game_score_label` · `workout_in_progress` · `workout_paused` ·
+  `history_view_calendar` · `history_view_list` · `summary_streak` · `vs_label`
+
+`opponentName` **입력 UI** — `Scoreboard` 가 값이 있으면 쓰도록 코드 경로만 열어 뒀다. 어디서
+입력받을지는 정하지 않았다.
 
 ## Self-Review
 

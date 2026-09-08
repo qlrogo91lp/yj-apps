@@ -3,7 +3,7 @@ import SwiftUI
 struct CalendarGrid: View {
     let matches: [Match]
     let displayedMonth: Date
-    @Binding var selectedMatch: Match?
+    @Binding var selectedDate: Date?
 
     private var calendar: Calendar {
         Calendar.current
@@ -14,9 +14,14 @@ struct CalendarGrid: View {
         LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7), spacing: 8) {
             ForEach(Array(days.enumerated()), id: \.offset) { _, date in
                 if let date {
-                    let dayMatches = matchesForDate(date)
-                    DayCell(date: date, matches: dayMatches) {
-                        selectedMatch = dayMatches.max(by: { $0.startedAt < $1.startedAt })
+                    // 캘린더는 날짜만 고른다. 상세는 하단 목록의 경기 행에서 연다 —
+                    // 그날 마지막 경기 하나만 시트로 띄우면 나머지에 닿을 방법이 없다.
+                    DayCell(
+                        date: date,
+                        matches: matchesForDate(date),
+                        isSelected: selectedDate.map { calendar.isDate($0, inSameDayAs: date) } ?? false
+                    ) {
+                        selectedDate = date
                     }
                 } else {
                     Color.clear.frame(height: 36)

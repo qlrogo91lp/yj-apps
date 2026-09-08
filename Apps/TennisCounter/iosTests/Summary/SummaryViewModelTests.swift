@@ -17,7 +17,6 @@ struct SummaryViewModelTests {
 
         #expect(stats.totalCalories == nil)
         #expect(stats.totalDuration == nil)
-        #expect(stats.avgHeartRate == nil)
     }
 
     @Test func statsWithWorkoutData_aggregatesCorrectly() {
@@ -51,7 +50,6 @@ struct SummaryViewModelTests {
 
         #expect(stats.totalCalories == 500)
         #expect(stats.totalDuration == 5400)
-        #expect(stats.avgHeartRate == 150)
     }
 
     @Test func statsWithMixedWorkoutData_onlyAggregatesAvailableData() {
@@ -75,46 +73,7 @@ struct SummaryViewModelTests {
 
         #expect(stats.totalCalories == 400)
         #expect(stats.totalDuration == 2700)
-        #expect(stats.avgHeartRate == 150)
         #expect(stats.totalMatches == 2)
-    }
-
-    @Test func statsAggregatesTotalEnergy() {
-        let vm = SummaryViewModel()
-        vm.selectedPeriod = .week
-
-        let match1 = Match()
-        match1.startedAt = Date()
-        match1.caloriesBurned = 300
-        match1.totalCaloriesBurned = 385
-
-        let match2 = Match()
-        match2.startedAt = Date()
-        match2.caloriesBurned = 200
-        match2.totalCaloriesBurned = 265
-
-        let stats = vm.stats(from: [match1, match2])
-
-        #expect(stats.totalCalories == 500)
-        #expect(stats.totalEnergy == 650)
-        #expect(stats.formattedTotalEnergy == "650")
-    }
-
-    /// 총 칼로리 도입 이전 기록은 totalCaloriesBurned가 nil이다 — 그런 기록만 있으면
-    /// 0이 아니라 "값 없음"이어야 사용자가 오해하지 않는다.
-    @Test func statsTotalEnergyIsNilForLegacyRecords() {
-        let vm = SummaryViewModel()
-        vm.selectedPeriod = .week
-
-        let legacy = Match()
-        legacy.startedAt = Date()
-        legacy.caloriesBurned = 300
-
-        let stats = vm.stats(from: [legacy])
-
-        #expect(stats.totalCalories == 300)
-        #expect(stats.totalEnergy == nil)
-        #expect(stats.formattedTotalEnergy == "–")
     }
 
     private func workoutMatch(
@@ -219,5 +178,119 @@ struct SummaryViewModelTests {
 
         #expect(stats.totalDuration == 1500)
         #expect(stats.totalCalories == 250)
+    }
+
+    // MARK: - 기간
+
+    @Test func allPeriodIncludesEveryMatch() {
+        let vm = SummaryViewModel()
+        vm.selectedPeriod = .all
+
+        let old = Match()
+        old.startedAt = Date().addingTimeInterval(-400 * 24 * 3600)
+        let recent = Match()
+        recent.startedAt = Date()
+
+        #expect(vm.filteredMatches(from: [old, recent]).count == 2)
+    }
+
+    @Test func weekPeriodExcludesOlderMatches() {
+        let vm = SummaryViewModel()
+        vm.selectedPeriod = .week
+
+        let old = Match()
+        old.startedAt = Date().addingTimeInterval(-30 * 24 * 3600)
+        let recent = Match()
+        recent.startedAt = Date()
+
+        let filtered = vm.filteredMatches(from: [old, recent])
+
+        #expect(filtered.count == 1)
+        #expect(filtered.first === recent)
+    }
+
+    /// 심박·총 에너지는 요약에서 빠졌다. 그 값이 들어 있는 기록이라도 남은 지표에는 영향이 없어야 한다.
+    @Test func statsExcludeRemovedMetrics() {
+        let vm = SummaryViewModel()
+        vm.selectedPeriod = .week
+
+        let match = Match()
+        match.startedAt = Date()
+        match.caloriesBurned = 400
+        match.totalCaloriesBurned = 520
+        match.averageHeartRate = 150
+        match.durationSeconds = 2700
+
+        let stats = vm.stats(from: [match])
+
+        #expect(stats.totalCalories == 400)
+        #expect(stats.totalDuration == 2700)
+        #expect(stats.totalMatches == 1)
+    }
+
+    // MARK: - 추이
+
+    private func trendMatch(session: UUID, startedAt: Date, elapsed: Int) -> Match {
+        let match = Match()
+        match.workoutSessionId = session
+        match.startedAt = startedAt
+        match.workoutElapsedSeconds = elapsed
+        return match
+    }
+
+    @Test func trendReturnsAtMostTenSessions() throws {
+        let vm = SummaryViewModel()
+        let base = Date()
+        let matches = (0 ..< 14).map { index in
+            trendMatch(session: UUID(), startedAt: base.addingTimeInterval(Double(index) * 3600), elapsed: 1800)
+        }
+
+        let trend = vm.trendSessions(from: matches)
+
+        #expect(trend.count == 10)
+        // 오래된 것부터 — 차트의 x축 순서다
+        #expect(try #require(trend.first?.date) < trend.last!.date)
+    }
+
+    @Test func trendGroupsBySession() {
+        let vm = SummaryViewModel()
+        let session = UUID()
+        let base = Date()
+        let matches = [
+            trendMatch(session: session, startedAt: base, elapsed: 900),
+            trendMatch(session: session, startedAt: base.addingTimeInterval(900), elapsed: 2400),
+            trendMatch(session: UUID(), startedAt: base.addingTimeInterval(7200), elapsed: 600),
+            trendMatch(session: UUID(), startedAt: base.addingTimeInterval(10800), elapsed: 1200),
+        ]
+
+        let trend = vm.trendSessions(from: matches)
+
+        #expect(trend.count == 3)
+        #expect(trend.first?.elapsedSeconds == 2400)
+    }
+
+    /// 세션이 3개 미만이면 추이를 그리지 않는다 — 막대 둘로는 추세가 안 보인다.
+    @Test func trendHiddenBelowThreeSessions() {
+        let vm = SummaryViewModel()
+        let base = Date()
+        let matches = [
+            trendMatch(session: UUID(), startedAt: base, elapsed: 900),
+            trendMatch(session: UUID(), startedAt: base.addingTimeInterval(3600), elapsed: 1200),
+        ]
+
+        #expect(vm.trendSessions(from: matches).isEmpty)
+    }
+
+    /// 기간 필터를 타지 않는다 — 차트는 "얼마나 오래 쳤나"만 맡는 독립 블록이다.
+    @Test func trendIgnoresSelectedPeriod() {
+        let vm = SummaryViewModel()
+        vm.selectedPeriod = .week
+
+        let old = Date().addingTimeInterval(-90 * 24 * 3600)
+        let matches = (0 ..< 3).map { index in
+            trendMatch(session: UUID(), startedAt: old.addingTimeInterval(Double(index) * 3600), elapsed: 1800)
+        }
+
+        #expect(vm.trendSessions(from: matches).count == 3)
     }
 }

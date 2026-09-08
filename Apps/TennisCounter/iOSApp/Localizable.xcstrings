@@ -34,6 +34,23 @@
         }
       }
     },
+    "btn_delete" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "삭제"
+          }
+        }
+      }
+    },
     "btn_end_match" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -131,6 +148,57 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "취소"
+          }
+        }
+      }
+    },
+    "duration_hours" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%dh"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d시간"
+          }
+        }
+      }
+    },
+    "duration_hours_minutes" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$dh %2$dm"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$d시간 %2$d분"
+          }
+        }
+      }
+    },
+    "duration_minutes" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%dm"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d분"
           }
         }
       }
@@ -249,6 +317,57 @@
         }
       }
     },
+    "history_day_empty" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No matches on this day"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 날은 경기가 없습니다"
+          }
+        }
+      }
+    },
+    "history_delete_confirm_message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This also removes it from your other devices and cannot be undone."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다른 기기에서도 함께 삭제되며 되돌릴 수 없습니다."
+          }
+        }
+      }
+    },
+    "history_delete_confirm_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete this match?"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 경기를 삭제할까요?"
+          }
+        }
+      }
+    },
     "history_empty" : {
       "localizations" : {
         "en" : {
@@ -261,54 +380,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "저장된 경기가 없습니다"
-          }
-        }
-      }
-    },
-    "history_field_date" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Date"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "날짜"
-          }
-        }
-      }
-    },
-    "history_field_format" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Format"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "경기 방식"
-          }
-        }
-      }
-    },
-    "history_no_set_data" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No set data"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "세트 기록이 없습니다"
           }
         }
       }
@@ -380,6 +451,74 @@
         }
       }
     },
+    "match_detail_format" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Format"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "경기 방식"
+          }
+        }
+      }
+    },
+    "match_detail_me" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Me"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "나"
+          }
+        }
+      }
+    },
+    "match_detail_no_sets" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No set data"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "세트 기록이 없습니다"
+          }
+        }
+      }
+    },
+    "match_detail_opponent" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opponent"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "상대"
+          }
+        }
+      }
+    },
     "match_detail_section_info" : {
       "localizations" : {
         "en" : {
@@ -396,18 +535,36 @@
         }
       }
     },
-    "match_detail_section_sets" : {
+    "match_detail_section_this_match" : {
+      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sets"
+            "value" : "This Match"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "세트"
+            "value" : "이 경기"
+          }
+        }
+      }
+    },
+    "match_detail_time" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Time"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "시간"
           }
         }
       }
@@ -871,23 +1028,6 @@
         }
       }
     },
-    "summary_period_today" : {
-      "comment" : "Summary",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Today"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "오늘"
-          }
-        }
-      }
-    },
     "summary_period_week" : {
       "localizations" : {
         "en" : {
@@ -904,34 +1044,53 @@
         }
       }
     },
-    "summary_recent_matches" : {
+    "summary_recent_session" : {
+      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Recent Matches"
+            "value" : "Recent Session"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "최근 경기"
+            "value" : "최근 세션"
           }
         }
       }
     },
-    "summary_section_workout" : {
+    "summary_record_line" : {
+      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Workout"
+            "value" : "%1$dW %2$dL · %3$d%%"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "운동"
+            "value" : "%1$d승 %2$d패 · %3$d%%"
+          }
+        }
+      }
+    },
+    "summary_section_trend" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last 10 Sessions"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "최근 10회 추이"
           }
         }
       }
@@ -997,6 +1156,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "경기 수"
+          }
+        }
+      }
+    },
+    "summary_trend_insufficient" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The trend appears once you have at least 3 sessions"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "세션이 3회 이상 쌓이면 추이를 보여줍니다"
           }
         }
       }
