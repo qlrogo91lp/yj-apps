@@ -19,7 +19,8 @@ class WorkoutSessionViewModel: ObservableObject {
     private let metricsThrottle: TimeInterval
     private var cancellables = Set<AnyCancellable>()
     private var _currentSession: MatchSession?
-    let scoreVM = ScoreViewModel(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+    let scoreVM: ScoreViewModel
+    private let haptics: MatchHapticsPlaying
     private(set) var isDriver = false
     /// 워크아웃 식별자. 상대 기기의 id를 채택하면 그 값으로 바뀌고, 워크아웃이 끝날 때까지 유지된다.
     /// handleIncomingSessionStart의 동시 시작 race 가드는 이 값(workoutSessionId 아님)과 비교한다 —
@@ -36,11 +37,18 @@ class WorkoutSessionViewModel: ObservableObject {
     private let ackTimeoutSeconds: TimeInterval
 
     init(healthKit: WorkoutSessionService = WorkoutSessionService(configuration: .tennis),
-         metricsThrottle: TimeInterval = 5, ackTimeoutSeconds: TimeInterval = 8)
+         metricsThrottle: TimeInterval = 5, ackTimeoutSeconds: TimeInterval = 8,
+         haptics: MatchHapticsPlaying = MatchHaptics())
     {
         self.healthKit = healthKit
         self.metricsThrottle = metricsThrottle
         self.ackTimeoutSeconds = ackTimeoutSeconds
+        self.haptics = haptics
+        // 점수 햅틱도 같은 인스턴스를 타야 테스트 스파이가 한 곳에서 다 본다
+        scoreVM = ScoreViewModel(
+            options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false),
+            haptics: haptics
+        )
         healthKit.$isPaused
             .receive(on: DispatchQueue.main)
             .assign(to: &$isPaused)
@@ -108,6 +116,7 @@ class WorkoutSessionViewModel: ObservableObject {
         guard saveAckState == .pending || saveAckState == .failed else { return }
         connectivity.receivedMatchSaveResult = nil
         saveAckState = result.success ? .succeeded : .failed
+        haptics.play(result.success ? .saveSucceeded : .saveFailed)
     }
 
     private func handleIncomingWorkoutEnd(_ id: UUID) {
@@ -130,27 +139,16 @@ class WorkoutSessionViewModel: ObservableObject {
     private func handleIncomingPauseCommand(_ msg: WorkoutPauseMessage) -> Bool {
         guard msg.sessionId == activeSessionId else { return false }
         connectivity.receivedPauseCommand = nil
+        // 폰에서 눌렀는데 워치가 조용하면 멈춘 줄 모른다. 워치 자체 버튼은 눈으로 보고 누르므로 제외한다.
         if msg.shouldPause {
             healthKit.pauseWorkout()
+            haptics.play(.paused)
         } else {
             healthKit.resumeWorkout()
+            haptics.play(.resumed)
         }
         return true
     }
-
-    #if DEBUG
-        func handleIncomingWorkoutEndForTest(_ id: UUID) {
-            handleIncomingWorkoutEnd(id)
-        }
-
-        var activeSessionIdForTest: UUID {
-            activeSessionId
-        }
-
-        func handleIncomingPauseCommandForTest(_ msg: WorkoutPauseMessage) -> Bool {
-            handleIncomingPauseCommand(msg)
-        }
-    #endif
 
     private func setupScoreSync() {
         scoreVM.onMatchFinished = { [weak self] result, sets in
@@ -263,6 +261,7 @@ class WorkoutSessionViewModel: ObservableObject {
         DispatchQueue.main.asyncAfter(deadline: .now() + ackTimeoutSeconds) { [weak self] in
             guard let self, saveAttemptToken == token, saveAckState == .pending else { return }
             saveAckState = .failed
+            haptics.play(.saveFailed)
         }
     }
 
@@ -337,20 +336,6 @@ class WorkoutSessionViewModel: ObservableObject {
         scoreVM.applyRemoteState(state)
     }
 
-    #if DEBUG
-        func applyIncomingScoreStateForTest(_ state: ScoreState) {
-            handleIncomingScoreState(state)
-        }
-
-        func applyIncomingSessionStartForTest(_ msg: SessionStartMessage) {
-            handleIncomingSessionStart(msg)
-        }
-
-        func handleMatchSaveResultForTest(_ result: MatchSaveResultMessage) {
-            handleMatchSaveResult(result)
-        }
-    #endif
-
     private func sendMatchEndToiOS(session: MatchSession) {
         connectivity.sendMatchEnd(makeMatchEndMessage(session: session))
     }
@@ -377,3 +362,33 @@ class WorkoutSessionViewModel: ObservableObject {
         )
     }
 }
+
+// 테스트 훅. 본체 밖으로 빼 두면 클래스 본문 길이 제한에 걸리지 않고,
+// 프로덕션 코드와 테스트 전용 표면이 눈으로 갈린다. 같은 파일이라 private 멤버에 닿는다.
+#if DEBUG
+    extension WorkoutSessionViewModel {
+        var activeSessionIdForTest: UUID {
+            activeSessionId
+        }
+
+        func handleIncomingWorkoutEndForTest(_ id: UUID) {
+            handleIncomingWorkoutEnd(id)
+        }
+
+        func handleIncomingPauseCommandForTest(_ msg: WorkoutPauseMessage) -> Bool {
+            handleIncomingPauseCommand(msg)
+        }
+
+        func applyIncomingScoreStateForTest(_ state: ScoreState) {
+            handleIncomingScoreState(state)
+        }
+
+        func applyIncomingSessionStartForTest(_ msg: SessionStartMessage) {
+            handleIncomingSessionStart(msg)
+        }
+
+        func handleMatchSaveResultForTest(_ result: MatchSaveResultMessage) {
+            handleMatchSaveResult(result)
+        }
+    }
+#endif

@@ -617,4 +617,80 @@ struct WorkoutSessionViewModelTests {
         #expect(session.kcalAtEnd == 600)
         #expect(session.totalKcalAtEnd == 730)
     }
+
+    // MARK: - Haptics
+
+    private var oneSet: MatchOptions {
+        MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false)
+    }
+
+    @Test @MainActor func saveAckSuccessPlaysSaveSucceeded() {
+        let spy = HapticsSpy()
+        let vm = WorkoutSessionViewModel(haptics: spy)
+        vm.startMatch(options: oneSet)
+        vm.saveCurrentMatch()
+
+        vm.handleMatchSaveResultForTest(MatchSaveResultMessage(sessionId: vm.activeSessionId, success: true))
+
+        #expect(spy.played.last == .saveSucceeded)
+    }
+
+    @Test @MainActor func saveAckFailurePlaysSaveFailed() {
+        let spy = HapticsSpy()
+        let vm = WorkoutSessionViewModel(haptics: spy)
+        vm.startMatch(options: oneSet)
+        vm.saveCurrentMatch()
+
+        vm.handleMatchSaveResultForTest(MatchSaveResultMessage(sessionId: vm.activeSessionId, success: false))
+
+        #expect(spy.played.last == .saveFailed)
+    }
+
+    /// 손목을 내린 뒤 결과가 오므로 타임아웃도 촉각으로 알려야 한다. 놓치면 기록이 날아간다.
+    @Test @MainActor func saveAckTimeoutPlaysSaveFailed() async throws {
+        let spy = HapticsSpy()
+        let vm = WorkoutSessionViewModel(ackTimeoutSeconds: 0.05, haptics: spy)
+        vm.startMatch(options: oneSet)
+        vm.saveCurrentMatch()
+
+        try await Task.sleep(nanoseconds: 150_000_000)
+
+        #expect(spy.played.last == .saveFailed)
+    }
+
+    @Test @MainActor func mismatchedSaveAckStaysSilent() {
+        let spy = HapticsSpy()
+        let vm = WorkoutSessionViewModel(haptics: spy)
+        vm.startMatch(options: oneSet)
+        vm.saveCurrentMatch()
+
+        vm.handleMatchSaveResultForTest(MatchSaveResultMessage(sessionId: UUID(), success: true))
+
+        #expect(!spy.played.contains(.saveSucceeded))
+    }
+
+    @Test @MainActor func remotePauseAndResumeCommandsPlayStopAndStart() {
+        let spy = HapticsSpy()
+        let vm = WorkoutSessionViewModel(haptics: spy)
+        vm.startMatch(options: oneSet)
+
+        _ = vm.handleIncomingPauseCommandForTest(
+            WorkoutPauseMessage(sessionId: vm.activeSessionId, shouldPause: true)
+        )
+        _ = vm.handleIncomingPauseCommandForTest(
+            WorkoutPauseMessage(sessionId: vm.activeSessionId, shouldPause: false)
+        )
+
+        #expect(Array(spy.played.suffix(2)) == [.paused, .resumed])
+    }
+
+    @Test @MainActor func mismatchedPauseCommandStaysSilent() {
+        let spy = HapticsSpy()
+        let vm = WorkoutSessionViewModel(haptics: spy)
+        vm.startMatch(options: oneSet)
+
+        _ = vm.handleIncomingPauseCommandForTest(WorkoutPauseMessage(sessionId: UUID(), shouldPause: true))
+
+        #expect(!spy.played.contains(.paused))
+    }
 }

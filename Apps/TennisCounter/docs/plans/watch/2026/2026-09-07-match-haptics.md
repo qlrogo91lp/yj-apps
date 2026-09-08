@@ -45,7 +45,8 @@
 - 기존 테스트가 전부 그대로 통과해야 한다. 주입 파라미터는 **기본값**을 줘서 기존 호출부·테스트가 안 바뀌게 한다.
 - 테스트 프레임워크는 **Swift Testing**, ViewModel 테스트는 `@MainActor`. 테스트 모듈은 `@testable import TennisCounter_Watch_App`.
 - SwiftLint: line length 경고 150 / 오류 200. SwiftFormat: 4-space indent, imports 알파벳순, trailing comma.
-- 브랜치 **`feat/ralli`**, 메인 체크아웃. 커밋은 gitmoji (`✨` 기능, `✅` 테스트).
+- 브랜치 **`feat/match-haptics`**, 메인 체크아웃. 커밋은 gitmoji (`✨` 기능, `✅` 테스트).
+  (`feat/ralli` 은 PR #11 로 머지되어 더 쓰지 않는다 — 루트 `TODO.md`.)
 - 각 태스크는 **실패하는 테스트 → 실패 확인 → 최소 구현 → 통과 확인 → 커밋**.
 
 **빌드·테스트 명령** (루트에서)
@@ -55,11 +56,11 @@ WATCH=$(.github/scripts/pick-simulator.sh watchOS '^Apple Watch')
 
 # 워치 테스트 전체 (워치 스킴엔 iOS 테스트 타깃도 들어 있어 -only-testing 필수)
 xcodebuild -workspace YJApps.xcworkspace -scheme "TennisCounter Watch App" -destination "id=$WATCH" \
-  -only-testing:watchosTests test
+  -only-testing:RalliWatchTests test   # 폴더는 watchosTests, 타깃은 RalliWatchTests
 
 # 단일 파일
 xcodebuild -workspace YJApps.xcworkspace -scheme "TennisCounter Watch App" -destination "id=$WATCH" \
-  -only-testing:watchosTests/ScoreViewModelHapticsTests test
+  -only-testing:RalliWatchTests/ScoreViewModelHapticsTests test
 
 make lint && make format
 ```
@@ -149,7 +150,7 @@ Run:
 ```bash
 WATCH=$(.github/scripts/pick-simulator.sh watchOS '^Apple Watch')
 xcodebuild -workspace YJApps.xcworkspace -scheme "TennisCounter Watch App" -destination "id=$WATCH" \
-  -only-testing:watchosTests/MatchHapticsTests test 2>&1 | grep -E "error:" | head -3
+  -only-testing:RalliWatchTests/MatchHapticsTests test 2>&1 | grep -E "error:" | head -3
 ```
 Expected: `cannot find 'MatchHaptics' in scope`.
 
@@ -339,7 +340,7 @@ struct ScoreViewModelHapticsTests {
 Run:
 ```bash
 xcodebuild -workspace YJApps.xcworkspace -scheme "TennisCounter Watch App" -destination "id=$WATCH" \
-  -only-testing:watchosTests/ScoreViewModelHapticsTests test 2>&1 | grep -E "error:" | head -3
+  -only-testing:RalliWatchTests/ScoreViewModelHapticsTests test 2>&1 | grep -E "error:" | head -3
 ```
 Expected: `extra argument 'haptics' in call`.
 
@@ -447,8 +448,8 @@ Expected: `extra argument 'haptics' in call`.
 Run:
 ```bash
 xcodebuild -workspace YJApps.xcworkspace -scheme "TennisCounter Watch App" -destination "id=$WATCH" \
-  -only-testing:watchosTests/ScoreViewModelHapticsTests \
-  -only-testing:watchosTests/ScoreViewModelTests test 2>&1 | grep -E "passed|failed"
+  -only-testing:RalliWatchTests/ScoreViewModelHapticsTests \
+  -only-testing:RalliWatchTests/ScoreViewModelTests test 2>&1 | grep -E "passed|failed"
 ```
 Expected: 두 스위트 전부 passed. 기존 `ScoreViewModelTests` 는 기본 `MatchHaptics()` 로 생성되는데 시뮬레이터에서 `WKInterfaceDevice.play` 는 no-op 이라 안전하다.
 
@@ -551,7 +552,7 @@ git commit -m "✨ 워치 점수 이벤트에 햅틱 — 연쇄 시 최상위 �
 Run:
 ```bash
 xcodebuild -workspace YJApps.xcworkspace -scheme "TennisCounter Watch App" -destination "id=$WATCH" \
-  -only-testing:watchosTests/WorkoutSessionViewModelTests test 2>&1 | grep -E "error:" | head -3
+  -only-testing:RalliWatchTests/WorkoutSessionViewModelTests test 2>&1 | grep -E "error:" | head -3
 ```
 Expected: `extra argument 'haptics' in call`.
 
@@ -631,7 +632,7 @@ Expected: `extra argument 'haptics' in call`.
 Run:
 ```bash
 xcodebuild -workspace YJApps.xcworkspace -scheme "TennisCounter Watch App" -destination "id=$WATCH" \
-  -only-testing:watchosTests test 2>&1 | grep -E "Test Suite .* (passed|failed)" | tail -5
+  -only-testing:RalliWatchTests test 2>&1 | grep -E "Test Suite .* (passed|failed)" | tail -5
 ```
 Expected: 전부 passed. 기존 테스트는 기본 `MatchHaptics()` 로 돌고 시뮬레이터에서 no-op.
 
@@ -654,6 +655,16 @@ git add Apps/TennisCounter/WatchApp/Features/WorkoutSession/WorkoutSessionViewMo
         Apps/TennisCounter/watchosTests/WorkoutSession/WorkoutSessionViewModelTests.swift
 git commit -m "✨ 워치 저장 결과·폰 일시정지 명령에 햅틱"
 ```
+
+---
+
+## 구현하며 고친 것 (2026-09-09)
+
+| 플랜 | 실제 | 이유 |
+|---|---|---|
+| `-only-testing:watchosTests` | **`RalliWatchTests`** | `watchosTests` 는 폴더 이름이고 타깃 이름은 `RalliWatchTests` 다 (앱 `CLAUDE.md`) |
+| `MatchHaptics.type(for:)` 한 switch | **경기 결과 갈래를 별도 메서드로** | 11갈래라 SwiftLint 순환 복잡도(10)에 걸렸다 |
+| — | **테스트 훅 `#if DEBUG` 두 블록을 파일 하단 익스텐션으로** | 햅틱 추가로 `WorkoutSessionViewModel` 본문이 310줄이 되어 `type_body_length`(300)에 걸렸다. 같은 파일이라 `private` 접근은 유지된다 |
 
 ---
 
