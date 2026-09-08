@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		393C230A304FEA8D00744D07 /* ComplicationState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 393C2302304FEA8D00744D07 /* ComplicationState.swift */; };
+		393C230B304FEA8D00744D07 /* SegmentKind.swift in Sources */ = {isa = PBXBuildFile; fileRef = 393C2303304FEA8D00744D07 /* SegmentKind.swift */; };
+		393C230C304FEA8D00744D07 /* WorkoutSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 393C2305304FEA8D00744D07 /* WorkoutSnapshot.swift */; };
+		393C230D304FEA8D00744D07 /* SummaryFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 393C2304304FEA8D00744D07 /* SummaryFormat.swift */; };
+		393C230E304FEA8D00744D07 /* WorkoutSnapshotStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 393C2306304FEA8D00744D07 /* WorkoutSnapshotStore.swift */; };
+		393C230F304FEA8D00744D07 /* ComplicationState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 393C2302304FEA8D00744D07 /* ComplicationState.swift */; };
 		3999D2BA3048F8B9005343C7 /* HaruchiFit Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 3999D29A3048F8B8005343C7 /* HaruchiFit Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		3999D2CC3048FA54005343C7 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3999D2CB3048FA54005343C7 /* WidgetKit.framework */; };
 		3999D2CE3048FA54005343C7 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3999D2CD3048FA54005343C7 /* SwiftUI.framework */; };
@@ -164,9 +170,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		393C2307304FEA8D00744D07 /* Common */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Common;
+			sourceTree = "<group>";
+		};
 		3999D27F3048F77F005343C7 = {
 			isa = PBXGroup;
 			children = (
+				393C2307304FEA8D00744D07 /* Common */,
 				396475DE304E10DF008DAFD1 /* Shared */,
 				3999D54130490A87005343C7 /* HaruchiFit.entitlements */,
 				3999D540304909FD005343C7 /* HaruchiFit Watch App.entitlements */,
@@ -217,6 +229,7 @@
 				3999D2B93048F8B9005343C7 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
+				393C2307304FEA8D00744D07 /* Common */,
 				396475DE304E10DF008DAFD1 /* Shared */,
 				3999D28A3048F77F005343C7 /* iOSApp */,
 			);
@@ -247,6 +260,7 @@
 				3999D2D83048FA55005343C7 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
+				393C2307304FEA8D00744D07 /* Common */,
 				396475DE304E10DF008DAFD1 /* Shared */,
 				3999D29B3048F8B8005343C7 /* WatchApp */,
 			);
@@ -296,6 +310,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
+				393C2307304FEA8D00744D07 /* Common */,
 				3999D2CF3048FA54005343C7 /* ComplicationApp */,
 			);
 			name = HaruchiComplicationExtension;
@@ -398,6 +413,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				393C230D304FEA8D00744D07 /* SummaryFormat.swift in Sources */,
+				393C230E304FEA8D00744D07 /* WorkoutSnapshotStore.swift in Sources */,
+				393C230F304FEA8D00744D07 /* ComplicationState.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -412,6 +430,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				393C230A304FEA8D00744D07 /* ComplicationState.swift in Sources */,
+				393C230B304FEA8D00744D07 /* SegmentKind.swift in Sources */,
+				393C230C304FEA8D00744D07 /* WorkoutSnapshot.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -27,16 +27,3 @@ final class Segment {
         self.durationSeconds = durationSeconds
     }
 }
-
-/// 구간의 종류. 외부 워크아웃을 가져올 때도 이 둘 중 하나로 분류한다 (아키텍처 4.2).
-enum SegmentKind: String, Codable, CaseIterable {
-    case strength
-    case cardio
-
-    var title: String {
-        switch self {
-        case .strength: "근력"
-        case .cardio: "유산소"
-        }
-    }
-}
