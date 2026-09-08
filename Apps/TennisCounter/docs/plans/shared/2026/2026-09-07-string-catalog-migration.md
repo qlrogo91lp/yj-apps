@@ -65,7 +65,7 @@ Run (루트에서):
 cd Apps/TennisCounter
 for f in iOSApp/ko.lproj/Localizable.strings WatchApp/ko.lproj/Localizable.strings \
          iOSApp/ko.lproj/InfoPlist.strings WatchApp/ko.lproj/InfoPlist.strings; do
-  echo "$f: $(grep -cE '^"?[A-Za-z_]+"? *=' "$f")"
+  echo "$f: $(grep -cE '^"?[A-Za-z_][A-Za-z0-9_]*"? *=' "$f")"
 done
 grep -oE '^"[^"]+"' iOSApp/ko.lproj/Localizable.strings | sort > /tmp/ios-keys-before.txt
 grep -oE '^"[^"]+"' WatchApp/ko.lproj/Localizable.strings | sort > /tmp/watch-keys-before.txt
