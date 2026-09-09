@@ -120,7 +120,7 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
 
 | Phase | # | 항목 | 상태 | 문서 |
 |---|---|---|---|---|
-| 2 데이터 | 1 | 잔디 집계 (일별 집계 캐시) | **다음** | 로드맵 Phase 2 · 스펙 5절 |
+| 2 데이터 | 1 | 잔디 집계 (일별 집계 캐시) | **다음** · 스펙 완료 · **선행: 정지 제외** | [스펙](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-09-grass-daily-aggregate.md) · 로드맵 Phase 2 |
 | 2 데이터 | 2 | HealthKit import (증분) | 예정 · **근력/유산소 매핑 표 확정이 핵심** | 로드맵 Phase 2 · 스펙 4.1·4.2 |
 | 3 iOS | 3 | 탭 셸 + 디자인 토큰 | 예정 | 로드맵 Phase 3 · 스펙 3절·7절 |
 | 3 iOS | 4 | 03b 기록 목록 | 예정 (선행: 3) | 로드맵 Phase 3 · 스펙 03b절 |
@@ -135,7 +135,7 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
 | 언제든 | — | CloudKit 엔타이틀먼트 | 예정 · **프로비저닝 작업(사용자)** · 로컬 폴백 있어 급하지 않음 | 로드맵 "언제든" |
 
 **Phase 1 이 끝나 폰을 한 번도 안 열어도 흐름 A(해피패스)가 완결된다** — W2 · W0 · WC.
-셋 다 실기기 검증까지 끝났다. 남은 건 구간 시간 재검증과 경과시간 뒤처짐 확인(3개 앱 공통) 둘뿐이다.
+셋 다 실기기 검증까지 끝났다. Phase 2 착수 전에 **워치 시간에서 일시정지를 빼는 선행 작업**이 하나 끼었다 — 잔디 농도의 입력이라서다.
 다음 Phase 2(잔디 집계 · HealthKit import) 는 화면이 없어 **눈으로 확인할 수단**을 착수 시점에 정한다.
 
 > 플랜 문서는 **착수 직전에 하나씩** 쓴다 (로드맵 "작업 중 지킬 것"). 위 표의 "예정" 은
@@ -155,6 +155,9 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
 - [x] **구간 시간이 "근력 0분" 으로 나온 문제** — 틱 카운터를 벽시계로 바꿨다 (PR #19).
       [작업 기록](Apps/HaruchiFit/docs/logs/2026/2026-09-09-segment-duration-tick-counter.md)
 - [ ] **구간 시간 재검증** — 고친 뒤 실기기에서 40분쯤 돌려 종목별 분이 맞는지 (PR #19)
+- [ ] **워치 시간에서 일시정지 제외** — 스펙·플랜 완료 · 구현 대기. 잔디 집계(#1)의 선행이다.
+      [스펙](Apps/HaruchiFit/docs/specs/watch/2026/2026-09-09-workout-elapsed-exclude-pause.md) ·
+      [플랜](Apps/HaruchiFit/docs/plans/watch/2026/2026-09-09-workout-elapsed-exclude-pause.md)
 - [ ] **경과시간이 뒤처지는지** — 워크아웃 중 손목을 30초 내렸다 올렸을 때 시간이 건너뛰는지
       멈춰 있었는지. 3개 앱 공통 ([탐색 문서](Packages/YJKit/docs/ideas/elapsed-seconds-tick-counter.md))
 
@@ -169,6 +172,11 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
 있다 — 1.1.7 에도 있는 문제라 **기존 기록만 봐도 판단된다.**
 
 확인할 것 3가지와 고칠 때의 갈림길(일시정지를 어떻게 셀 것인가)은 위 탐색 문서에 정리했다.
+
+**하루치는 앱 레이어에서 정지 제외로 간다** — HealthKit 이 세그먼트를 모르니 구간에서 정지를
+빼는 일은 앱 몫이고, 그 시계를 두 개 둘 이유가 없다
+([스펙](Apps/HaruchiFit/docs/specs/watch/2026/2026-09-09-workout-elapsed-exclude-pause.md)).
+**YJKit 통합과 Ralli 기존 기록 문제는 그대로 열려 있다** — 위 3가지 확인이 선행이다.
 
 ## GolfCounter
 
