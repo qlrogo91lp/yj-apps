@@ -17,7 +17,7 @@
 - `MonitoringCore` 는 iOS·watchOS 양쪽에서 컴파일돼야 한다. `#if os(iOS)` 로 감싸지 않는다.
 - 다른 타깃(`WorkoutCore` 등)은 `MonitoringCore` 에 의존하지 않는다 — Firebase 가 전 앱 빌드에 끌려 들어가면 안 된다.
 - 기존 규약대로 `swiftSettings: [.swiftLanguageMode(.v5)]`.
-- 브랜치 **`feat/ralli`**, 메인 체크아웃. PR 은 Kit 만 따로 (CI 에서 Firebase 해석이 도는지가 리뷰 포인트).
+- 메인 체크아웃에서 작업한다. PR 은 Kit 만 따로 (CI 에서 Firebase 해석이 도는지가 리뷰 포인트).
 - 각 태스크는 **실패하는 테스트 → 실패 확인 → 최소 구현 → 통과 확인 → 커밋**.
 
 **빌드·테스트 명령** (루트에서)

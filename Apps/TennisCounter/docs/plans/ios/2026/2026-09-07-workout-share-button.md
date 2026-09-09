@@ -28,7 +28,7 @@
 - 테스트 프레임워크는 **Swift Testing** (`@Test`, `#expect`). XCTest 금지. ViewModel 테스트는 `@MainActor`.
 - SwiftLint: line length 경고 150 / 오류 200. SwiftFormat: 4-space indent, **imports 알파벳순**, trailing comma.
 - 한 파일 = 한 타입. Swift 파일 생성은 파일시스템 조작만으로 충분하다 (`PBXFileSystemSynchronizedRootGroup`).
-- 커밋 메시지는 gitmoji prefix (`✨` 기능, `✅` 테스트, `🔧` 설정). 브랜치는 **`feat/ralli`**, 메인 체크아웃에서 작업한다 (워크트리 없음).
+- 커밋 메시지는 gitmoji prefix (`✨` 기능, `✅` 테스트, `🔧` 설정). 메인 체크아웃에서 작업한다 (워크트리 없음).
 - 각 태스크는 **실패하는 테스트 → 실패 확인 → 최소 구현 → 통과 확인 → 커밋** 순서다. 뷰만 바뀌는 태스크는 빌드 + 프리뷰로 확인한다.
 
 **빌드·테스트 명령** (루트에서)

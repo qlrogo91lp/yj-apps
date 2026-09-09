@@ -29,7 +29,7 @@
 - ViewModel 은 `CrashReporting` 프로토콜만 안다. `FirebaseCrashlytics` import 는 앱 진입점에도 없다 — `CrashlyticsReporter` 만.
 - 주입 파라미터는 기본값을 줘서 기존 테스트·프리뷰가 그대로 컴파일된다.
 - `GoogleService-Info.plist` 는 **커밋한다** — 공개 저장소가 아니고, 이 파일엔 비밀 키가 없다 (Firebase 문서 기준 클라이언트 식별자). 단 저장소를 공개로 바꾸면 그때 재검토.
-- 브랜치 **`feat/ralli`**, PR 은 Ralli 연동만 따로.
+- PR 은 Ralli 연동만 따로.
 
 **빌드·테스트 명령** (루트에서)
 
