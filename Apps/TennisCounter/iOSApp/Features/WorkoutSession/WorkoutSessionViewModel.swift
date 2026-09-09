@@ -223,15 +223,17 @@ class WorkoutSessionViewModel: ObservableObject {
         liveActivity.end()
     }
 
+    /// 저장에 성공하면 저장된 `Match` 를 돌려준다. 결과 화면이 이 인스턴스로 공유 버튼을 켠다.
+    /// 세션이 없거나 upsert 가 실패하면 nil.
     @discardableResult
-    func saveCurrentMatch() -> Bool {
-        guard let session = _currentSession else { return false }
+    func saveCurrentMatch() -> Match? {
+        guard let session = _currentSession else { return nil }
         let match = buildMatchFromSession(session)
         do {
             try MatchPersistenceService.shared.upsert(match)
-            return true
+            return match
         } catch {
-            return false
+            return nil
         }
     }
 
