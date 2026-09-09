@@ -104,10 +104,10 @@ struct WorkoutSessionViewModelTests {
 
     @Test @MainActor func matchSessionSaveWithNoSessionIsNoOp() {
         let vm = WorkoutSessionViewModel()
-        #expect(vm.saveCurrentMatch() == false) // _currentSession nil이면 guard에서 false 리턴
+        #expect(vm.saveCurrentMatch() == nil) // _currentSession nil이면 guard에서 nil 리턴
     }
 
-    @Test @MainActor func saveCurrentMatchReturnsTrueOnSuccess() throws {
+    @Test @MainActor func saveCurrentMatchReturnsMatchOnSuccess() throws {
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
         let container = try ModelContainer(for: Match.self, SetRecord.self, configurations: config)
         MatchPersistenceService.shared.configure(with: ModelContext(container))
@@ -117,7 +117,11 @@ struct WorkoutSessionViewModelTests {
         vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
         vm.finishMatch(result: .win, completedSets: [(my: 6, your: 4)])
 
-        #expect(vm.saveCurrentMatch() == true)
+        let saved = try #require(vm.saveCurrentMatch())
+        // 반환값이 방금 세션에서 만들어진 그 인스턴스인지 — 결과 화면이 이걸로 공유 카드를 그린다
+        #expect(saved.workoutSessionId == vm.currentSessionIdForTest)
+        #expect(saved.resultRaw == "win")
+        #expect(saved.sets?.count == 1)
     }
 
     @Test @MainActor func matchSessionFinishMatchStoresSession() {

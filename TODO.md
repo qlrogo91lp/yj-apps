@@ -14,7 +14,7 @@
 2026-09-07 상태 점검 기준. 파일 충돌을 실제로 따져 **2 트랙 병렬**로 재편했다.
 
 ```
-트랙 A (iOS)     5̶ → 2̶ → 1 → 6 뼈대 ─┐   ← 5·2 완료, 다음은 1
+트랙 A (iOS)     5̶ → 2̶ → 1̶ → 6 뼈대 ─┐   ← 5·2·1 완료 (1 은 실기기만 남음)
 트랙 B (워치)     3 → 4 ─────────────┤→ 6 스크린샷 → 7
 트랙 C (YJKit)   MonitoringCore ─────┘
 ```
@@ -33,7 +33,7 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
 |---|---|---|---|---|
 | ~~5~~ | ~~String Catalog(xcstrings) 전환~~ | A | **완료** (PR #15) · 실기기 확인만 남음 | [플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-07-string-catalog-migration.md) — 하드코딩 정리까지 범위가 늘었다 (§추출 문제) |
 | ~~2~~ | ~~iOS 통계 UI 리디자인~~ | A | **완료** (PR #16) · 실기기 확인만 남음 | [스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-08-25-summary-history-redesign-design.md) · [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-07-summary-history-redesign.md) · [Notion](https://app.notion.com/p/3bacd15e48f180b3a810e95f63854aa6) |
-| 1 | WorkoutShareUI 붙이기 (인스타 스토리 공유) | A | 플랜 완료 · **Facebook App ID 발급이 선행 (사용자)** | [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-07-workout-share-button.md) · [Kit 사용법](Packages/YJKit/README.md#workoutshareui-사용법) |
+| 1 | WorkoutShareUI 붙이기 (인스타 스토리 공유) | A | **구현 완료** ([PR #20](https://github.com/qlrogo91lp/yj-apps/pull/20)) · **Facebook App ID 발급(사용자) + 실기기 확인 남음** | [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-07-workout-share-button.md) · [Kit 사용법](Packages/YJKit/README.md#workoutshareui-사용법) |
 | 3 | 햅틱 (워치 전용) | B | **구현 완료** (PR #18) · 실기기 패턴 확인만 남음 | [플랜](Apps/TennisCounter/docs/plans/watch/2026/2026-09-07-match-haptics.md) — 설정 연동은 #8 때 `MatchHaptics.play` 첫 줄에서 |
 | 4 | 크라운 점수 입력 (워치, 위=나 아래=상대) | B | 플랜 완료 · 구현 대기 (선행: #3) | [플랜](Apps/TennisCounter/docs/plans/watch/2026/2026-09-07-crown-scoring.md) — 온보딩(#6) 항목 하나 파생 |
 | 6 | 온보딩 4페이지 (스크린샷 3 + 목록 1, iOS 만) | A → 합류 | **뼈대 완료** (PR #17) · 스크린샷(Task 4)만 남음 | [스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-09-07-onboarding-design.md) · [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-07-onboarding.md) — 뼈대(Task 1~3)는 트랙 A 안에서, 스크린샷(Task 4)은 #1·#4 뒤 |
@@ -49,7 +49,9 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
 
 - [x] 5번 플랜 실행 — 전환 + 하드코딩 정리. iOS 76키(신규 5) · 워치 27키. PR #15
 - [x] 2번 플랜 실행 — Task 8개, 테스트 154개 통과. 삭제가 저장소에 반영되지 않는 버그를 잡았다. PR #16
-- [ ] 1번 플랜 실행 (Task 1 은 Xcode UI) — **지금 다음 차례.** 선행: Meta 개발자 대시보드에서 Facebook App ID 발급 → `MatchShareButton.instagramAppID`
+- [x] 1번 플랜 실행 (Task 1~6) — 두 화면에 버튼, 테스트 162개 통과. PR #20
+- [ ] **Meta App ID 발급(사용자)** → `MatchShareButton.instagramAppID` 에 넣기. 절차는 [YJKit README §Facebook App ID 발급](Packages/YJKit/README.md#facebook-app-id-발급). **앱마다 따로 받는다**
+- [ ] **1번 실기기 확인** (Task 7) — 인스타 스토리 편집기가 열리고 카드 스티커가 올라오는지
 - [x] 6번 뼈대 (Task 1~3) — 게이트·페이지 4장·앱 진입 분기. 시뮬레이터에서 노출/미노출 확인. PR #17
 
 **트랙 B (워치)** — A 와 동시 진행 가능
@@ -96,6 +98,22 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
 | 항목 | 상태 | 문서 |
 |---|---|---|
 | `MonitoringCore` (CrashReporting 프로토콜 + Crashlytics 구현) | 스펙·플랜 완료 · 구현 대기 | 위 Ralli #7 과 같은 문서. 골프·하루치 연동은 별도 (Firebase 프로젝트 앱마다 새로) |
+| `WorkoutShareUI` 공유 카드 배경색을 Kit 이 소유 | **논의 중 — 스펙 전.** 색 결정에 화면 확인이 선행 | 아래 "카드 대비" 참고 |
+
+### 카드 대비 (2026-09-09)
+
+공유 카드는 배경이 `accentColor` 그라디언트고 텍스트가 **전부 흰색**인데, 사이에 대비를 보정하는
+장치가 하나도 없다. 앱이 밝은 색을 주면 그대로 안 읽힌다.
+
+| 앱 | `brand` | 흰 텍스트 대비 |
+|---|---|---|
+| GolfCounter | 짙은 초록 | 13.4 : 1 ✔ |
+| Ralli | 형광 라임 | **1.45 : 1** ✘ (카드 최상단 행) |
+| 하루치 핏 | 주황 | **2.22 : 1** ✘ |
+
+3개 중 2개가 실패한다. 하루치는 로드맵 Phase 3 #6 이 "`WorkoutShareUI` 그대로 사용"이라
+지금 안 고치면 그때 같은 문제를 겪는다. **`accentColor` 를 없애고 Kit 이 배경색을 갖는** 방향으로
+기울었고, 색 값은 실제 화면을 보고 정한다. PR #20 은 `.brand` 그대로 머지한다.
 
 ## HaruchiFit — 첫 출시 전 (Phase 1 완료 · Phase 2 대기)
 

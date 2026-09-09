@@ -71,6 +71,12 @@ struct MatchDetailSheet: View {
                         Text(timeRangeString)
                     }
                 }
+
+                Section {
+                    MatchShareButton(match: match)
+                        .frame(maxWidth: .infinity)
+                        .listRowBackground(Color.clear)
+                }
             }
             .navigationTitle(String(localized: "match_detail_title"))
             .navigationBarTitleDisplayMode(.inline)
@@ -93,6 +99,9 @@ struct MatchDetailSheet: View {
     match.totalCaloriesBurned = 410
     match.durationSeconds = 5400
     match.averageHeartRate = 132
+    match.workoutElapsedSeconds = 5400
+    match.workoutCaloriesBurned = 320
+    match.workoutTotalCaloriesBurned = 410
     match.sets = [
         SetRecord(myGames: 6, yourGames: 4, setNumber: 1),
         SetRecord(myGames: 4, yourGames: 6, setNumber: 2),
