@@ -1,5 +1,6 @@
 import Foundation
 import SwiftData
+import WorkoutCore
 
 @Model
 class Match {
@@ -40,4 +41,21 @@ class Match {
     }
 
     init() {}
+}
+
+extension Match {
+    /// 공유 카드용 워크아웃 결과. **워크아웃 누적값** 기준이다 — 카드는 경기 한 판이 아니라
+    /// 운동 세션을 자랑하는 용도라서, 경기 구간값(`durationSeconds`·`caloriesBurned`)은 쓰지 않는다.
+    /// 누적값 도입(1.1.6) 전 기록은 nil이므로 호출부가 버튼을 숨긴다.
+    var workoutResult: WorkoutResult? {
+        guard let elapsed = workoutElapsedSeconds,
+              let calories = workoutCaloriesBurned
+        else { return nil }
+        return WorkoutResult(
+            durationSeconds: elapsed,
+            caloriesBurned: calories,
+            averageHeartRate: averageHeartRate,
+            totalCaloriesBurned: workoutTotalCaloriesBurned ?? 0
+        )
+    }
 }
