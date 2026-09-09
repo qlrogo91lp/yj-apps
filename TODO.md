@@ -14,9 +14,11 @@
 2026-09-07 상태 점검 기준. 파일 충돌을 실제로 따져 **2 트랙 병렬**로 재편했다.
 
 ```
-트랙 A (iOS)     5̶ → 2̶ → 1̶ → 6 뼈대 ─┐   ← 5·2·1 완료 (1 은 실기기만 남음)
+트랙 A (iOS)     5̶ → 2̶ → 1̶ → 6 뼈대̶ ──┐   ← 전부 완료. 남은 건 실기기 확인뿐
 트랙 B (워치)     3 → 4 ─────────────┤→ 6 스크린샷 → 7
-트랙 C (YJKit)   MonitoringCore ─────┘
+트랙 C (YJKit)   MonitoringCore ─────┘   ← 지금 시작 가능
+
+다음 차례: 트랙 B #4(크라운) 또는 트랙 C(MonitoringCore). 둘은 파일이 안 겹쳐 동시에 가도 된다
 ```
 
 - **A ↔ B ↔ C 는 겹치는 파일이 하나도 없다.** 셋을 동시에 굴려도 된다
@@ -33,7 +35,7 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
 |---|---|---|---|---|
 | ~~5~~ | ~~String Catalog(xcstrings) 전환~~ | A | **완료** (PR #15) · 실기기 확인만 남음 | [플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-07-string-catalog-migration.md) — 하드코딩 정리까지 범위가 늘었다 (§추출 문제) |
 | ~~2~~ | ~~iOS 통계 UI 리디자인~~ | A | **완료** (PR #16) · 실기기 확인만 남음 | [스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-08-25-summary-history-redesign-design.md) · [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-07-summary-history-redesign.md) · [Notion](https://app.notion.com/p/3bacd15e48f180b3a810e95f63854aa6) |
-| 1 | WorkoutShareUI 붙이기 (인스타 스토리 공유) | A | **구현 완료** ([PR #20](https://github.com/qlrogo91lp/yj-apps/pull/20)) · **Facebook App ID 발급(사용자) + 실기기 확인 남음** | [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-07-workout-share-button.md) · [Kit 사용법](Packages/YJKit/README.md#workoutshareui-사용법) |
+| ~~1~~ | ~~WorkoutShareUI 붙이기 (인스타 스토리 공유)~~ | A | **완료** (PR #20) · **Facebook App ID 발급(사용자) + 실기기 확인 남음** | [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-07-workout-share-button.md) · [Kit 사용법](Packages/YJKit/README.md#workoutshareui-사용법) |
 | 3 | 햅틱 (워치 전용) | B | **구현 완료** (PR #18) · 실기기 패턴 확인만 남음 | [플랜](Apps/TennisCounter/docs/plans/watch/2026/2026-09-07-match-haptics.md) — 설정 연동은 #8 때 `MatchHaptics.play` 첫 줄에서 |
 | 4 | 크라운 점수 입력 (워치, 위=나 아래=상대) | B | 플랜 완료 · 구현 대기 (선행: #3) | [플랜](Apps/TennisCounter/docs/plans/watch/2026/2026-09-07-crown-scoring.md) — 온보딩(#6) 항목 하나 파생 |
 | 6 | 온보딩 4페이지 (스크린샷 3 + 목록 1, iOS 만) | A → 합류 | **뼈대 완료** (PR #17) · 스크린샷(Task 4)만 남음 | [스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-09-07-onboarding-design.md) · [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-07-onboarding.md) — 뼈대(Task 1~3)는 트랙 A 안에서, 스크린샷(Task 4)은 #1·#4 뒤 |
@@ -112,8 +114,17 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
 | 하루치 핏 | 주황 | **2.22 : 1** ✘ |
 
 3개 중 2개가 실패한다. 하루치는 로드맵 Phase 3 #6 이 "`WorkoutShareUI` 그대로 사용"이라
-지금 안 고치면 그때 같은 문제를 겪는다. **`accentColor` 를 없애고 Kit 이 배경색을 갖는** 방향으로
-기울었고, 색 값은 실제 화면을 보고 정한다. PR #20 은 `.brand` 그대로 머지한다.
+지금 안 고치면 그때 같은 문제를 겪는다. PR #20 은 `.brand` 그대로 머지했다 — 색은 별건으로 뺐다.
+
+브레인스토밍에서 **`accentColor` 파라미터를 완전히 제거하고 Kit 이 배경색을 소유**하는 쪽을 골랐다
+(`WorkoutShareStyle(logo:)` 만 남음). 앱이 색을 못 주므로 대비 사고가 구조적으로 막히고, 앱별
+정체성은 로고로만 드러난다. **다만 화면을 보고 다시 판단하기로 했다** — 확정 아님.
+
+- [ ] **시뮬레이터에서 카드 실물 확인** — 기록 상세 또는 경기 결과 → `스토리에 공유` →
+      공유 시트 미리보기가 렌더된 1080×1920 카드다 (인스타 없으면 폴백을 탄다)
+- [ ] 배경색 결정 — 흰 텍스트 4.5:1 을 넘길 것. 그라디언트 최상단이 기준이다
+- [ ] 스펙 작성 (`Packages/YJKit/docs/specs/shared/2026/`) — 계약 변경과 **색 값**이 여기 들어간다
+- [ ] 플랜 작성 → 구현. **PR 은 Kit / Ralli 따로** (`MatchShareButton.swift:17` 이 같이 바뀐다)
 
 ## HaruchiFit — 첫 출시 전 (Phase 1 완료 · Phase 2 대기)
 
