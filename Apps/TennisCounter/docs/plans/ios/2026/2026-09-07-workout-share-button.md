@@ -561,7 +561,8 @@ git commit -m "✨ 경기 결과 화면에 저장 후 공유 버튼 노출"
 
 - [ ] **인스타그램이 설치된 실기기**에서 기록 상세 → 공유 탭 → **인스타그램 스토리 편집기**가 열리고 카드 스티커가 올라오는지 확인. 공유 시트가 뜨면 Task 1 Step 3 의 스킴 등록이 산출물에 안 들어간 것이다 (`plutil` 검증 재실행).
 - [ ] 단, `instagramAppID` 가 빈 문자열인 동안은 **의도적으로 공유 시트 폴백**이다. Meta App ID 발급 후 `MatchShareButton.instagramAppID` 를 채우고 다시 확인한다.
-- [ ] Meta App ID 발급: [developers.facebook.com](https://developers.facebook.com) → 앱 만들기 → 앱 ID 복사. Ralli 번들 ID 를 iOS 플랫폼으로 등록한다.
+- [ ] **Ralli 전용 Meta App ID 발급** — 절차는 [YJKit README §Facebook App ID 발급](../../../../../../Packages/YJKit/README.md#facebook-app-id-발급). **Ralli 번들 ID 로 등록한다** — 골프·하루치와 공용하지 않는다 (`source_application` 이 출처 표기라 앱마다 따로 받는다).
+- [ ] 발급한 값을 `MatchShareButton.instagramAppID` 에 채우고 위 실기기 항목을 다시 확인한다. App Review 가 걸리는지 모호하므로 **개발자 본인이 아닌 계정**으로도 한 번 열어본다.
 
 ---
 
