@@ -35,7 +35,7 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
 |---|---|---|---|---|
 | ~~5~~ | ~~String Catalog(xcstrings) 전환~~ | A | **완료** (PR #15) · 실기기 확인만 남음 | [플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-07-string-catalog-migration.md) — 하드코딩 정리까지 범위가 늘었다 (§추출 문제) |
 | ~~2~~ | ~~iOS 통계 UI 리디자인~~ | A | **완료** (PR #16) · 실기기 확인만 남음 | [스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-08-25-summary-history-redesign-design.md) · [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-07-summary-history-redesign.md) · [Notion](https://app.notion.com/p/3bacd15e48f180b3a810e95f63854aa6) |
-| ~~1~~ | ~~WorkoutShareUI 붙이기 (인스타 스토리 공유)~~ | A | **완료** (PR #20) · **Facebook App ID 발급(사용자) + 실기기 확인 남음** | [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-07-workout-share-button.md) · [Kit 사용법](Packages/YJKit/README.md#workoutshareui-사용법) |
+| ~~1~~ | ~~WorkoutShareUI 붙이기 (공유 시트)~~ | A | **완료** (PR #20 → 인스타 경로 제거) · 실기기 확인만 남음 | [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-07-workout-share-button.md) · [제거 플랜](Packages/YJKit/docs/plans/ios/2026/2026-09-13-share-sheet-only.md) · [Kit 사용법](Packages/YJKit/README.md#workoutshareui-사용법) |
 | 3 | 햅틱 (워치 전용) | B | **구현 완료** (PR #18) · 실기기 패턴 확인만 남음 | [플랜](Apps/TennisCounter/docs/plans/watch/2026/2026-09-07-match-haptics.md) — 설정 연동은 #8 때 `MatchHaptics.play` 첫 줄에서 |
 | 4 | 크라운 점수 입력 (워치, 위=나 아래=상대) | B | 플랜 완료 · 구현 대기 (선행: #3) | [플랜](Apps/TennisCounter/docs/plans/watch/2026/2026-09-07-crown-scoring.md) — 온보딩(#6) 항목 하나 파생 |
 | 6 | 온보딩 4페이지 (스크린샷 3 + 목록 1, iOS 만) | A → 합류 | **뼈대 완료** (PR #17) · 스크린샷(Task 4)만 남음 | [스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-09-07-onboarding-design.md) · [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-07-onboarding.md) — 뼈대(Task 1~3)는 트랙 A 안에서, 스크린샷(Task 4)은 #1·#4 뒤 |
@@ -52,8 +52,8 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
 - [x] 5번 플랜 실행 — 전환 + 하드코딩 정리. iOS 76키(신규 5) · 워치 27키. PR #15
 - [x] 2번 플랜 실행 — Task 8개, 테스트 154개 통과. 삭제가 저장소에 반영되지 않는 버그를 잡았다. PR #16
 - [x] 1번 플랜 실행 (Task 1~6) — 두 화면에 버튼, 테스트 162개 통과. PR #20
-- [ ] **Meta App ID 발급(사용자)** → `MatchShareButton.instagramAppID` 에 넣기. 절차는 [YJKit README §Facebook App ID 발급](Packages/YJKit/README.md#facebook-app-id-발급). **앱마다 따로 받는다**
-- [ ] **1번 실기기 확인** (Task 7) — 인스타 스토리 편집기가 열리고 카드 스티커가 올라오는지
+- [x] ~~Meta App ID 발급(사용자)~~ — **개발자 계정 발급 실패로 포기.** 인스타 딥링크 경로를 걷어내고 공유 시트만 남겼다 ([제거 플랜](Packages/YJKit/docs/plans/ios/2026/2026-09-13-share-sheet-only.md))
+- [ ] **1번 실기기 확인** (Task 7) — 공유 시트가 뜨고, 인스타그램을 골랐을 때 **스토리로 올리는 선택지가 있는지**
 - [x] 6번 뼈대 (Task 1~3) — 게이트·페이지 4장·앱 진입 분기. 시뮬레이터에서 노출/미노출 확인. PR #17
 
 **트랙 B (워치)** — A 와 동시 진행 가능
@@ -120,8 +120,8 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
 (`WorkoutShareStyle(logo:)` 만 남음). 앱이 색을 못 주므로 대비 사고가 구조적으로 막히고, 앱별
 정체성은 로고로만 드러난다. **다만 화면을 보고 다시 판단하기로 했다** — 확정 아님.
 
-- [ ] **시뮬레이터에서 카드 실물 확인** — 기록 상세 또는 경기 결과 → `스토리에 공유` →
-      공유 시트 미리보기가 렌더된 1080×1920 카드다 (인스타 없으면 폴백을 탄다)
+- [ ] **시뮬레이터에서 카드 실물 확인** — 기록 상세 또는 경기 결과 → `공유` →
+      공유 시트 미리보기가 렌더된 1080×1920 이미지다. 스티커 모드는 없어져 이 한 장만 보면 된다
 - [ ] 배경색 결정 — 흰 텍스트 4.5:1 을 넘길 것. 그라디언트 최상단이 기준이다
 - [ ] 스펙 작성 (`Packages/YJKit/docs/specs/shared/2026/`) — 계약 변경과 **색 값**이 여기 들어간다
 - [ ] 플랜 작성 → 구현. **PR 은 Kit / Ralli 따로** (`MatchShareButton.swift:17` 이 같이 바뀐다)
