@@ -12,50 +12,22 @@
         }
     }
 
-    /// 스토리에 올릴 지표 카드. 값과 스타일만 받는다 — 서비스나 ViewModel을 모른다.
+    /// 공유 이미지. 그라디언트가 캔버스 전체를 채우고 지표 카드가 세로 중앙에 놓인다.
+    /// 값과 스타일만 받는다 — 서비스나 ViewModel을 모른다.
     struct WorkoutShareCard: View {
-        enum Mode {
-            /// 카드 모서리 바깥이 투명하다. 인스타그램 스티커로 넘긴다.
-            case sticker
-            /// 그라디언트가 캔버스 전체를 채우고 카드가 세로 중앙에 놓인다. 공유 시트 폴백용.
-            case standalone
-        }
-
         let model: WorkoutShareCardModel
         let style: WorkoutShareStyle
-        let mode: Mode
 
         var body: some View {
-            switch mode {
-            case .sticker:
-                card
-                    .frame(width: ShareCanvas.width, height: stickerHeight)
-            case .standalone:
-                card
-                    .frame(width: ShareCanvas.width, height: ShareCanvas.standaloneHeight)
-                    .background(gradient)
-            }
-        }
-
-        private var stickerHeight: CGFloat {
-            ShareCanvas.stickerSize(rowCount: model.rows.count,
-                                    hasLogo: style.logo != nil).height
-        }
-
-        private var card: some View {
             content
-                .frame(width: ShareCanvas.width, height: stickerHeight)
-                .background(cardBackground)
+                .frame(width: ShareCanvas.width, height: cardHeight)
+                .frame(width: ShareCanvas.width, height: ShareCanvas.imageHeight)
+                .background(gradient)
         }
 
-        /// 스티커 모드에서 이 라운드 사각형의 모서리 바깥이 투명해진다 — PNG와 알파 채널이 필요한 이유다.
-        @ViewBuilder private var cardBackground: some View {
-            switch mode {
-            case .sticker:
-                RoundedRectangle(cornerRadius: 20, style: .continuous).fill(gradient)
-            case .standalone:
-                Color.clear
-            }
+        private var cardHeight: CGFloat {
+            ShareCanvas.cardSize(rowCount: model.rows.count,
+                                 hasLogo: style.logo != nil).height
         }
 
         private var gradient: LinearGradient {
@@ -112,34 +84,24 @@
                                               caloriesBurned: 312,
                                               averageHeartRate: 148)
 
-    #Preview("스티커 · 3행 + 로고") {
+    #Preview("3행 + 로고") {
         WorkoutShareCard(model: WorkoutShareCardModel(result: previewResult),
                          style: WorkoutShareStyle(accentColor: .green,
-                                                  logo: Image(systemName: "figure.tennis")),
-                         mode: .sticker)
+                                                  logo: Image(systemName: "figure.tennis")))
     }
 
-    #Preview("스티커 · 로고 없음") {
+    #Preview("로고 없음") {
         WorkoutShareCard(model: WorkoutShareCardModel(result: previewResult),
-                         style: WorkoutShareStyle(accentColor: .green),
-                         mode: .sticker)
+                         style: WorkoutShareStyle(accentColor: .green))
     }
 
-    #Preview("스티커 · 1행") {
+    #Preview("1행") {
         WorkoutShareCard(
             model: WorkoutShareCardModel(result: WorkoutResult(durationSeconds: 5400,
                                                                caloriesBurned: 0,
                                                                averageHeartRate: nil)),
             style: WorkoutShareStyle(accentColor: .indigo,
-                                     logo: Image(systemName: "figure.golf")),
-            mode: .sticker
+                                     logo: Image(systemName: "figure.golf"))
         )
-    }
-
-    #Preview("전체 이미지") {
-        WorkoutShareCard(model: WorkoutShareCardModel(result: previewResult),
-                         style: WorkoutShareStyle(accentColor: .green,
-                                                  logo: Image(systemName: "figure.tennis")),
-                         mode: .standalone)
     }
 #endif

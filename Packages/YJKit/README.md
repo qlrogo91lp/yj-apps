@@ -75,56 +75,35 @@ WorkoutDashboardView(metrics: viewModel.metrics,
 
 ## WorkoutShareUI 사용법
 
-워크아웃 결과를 인스타그램 스토리에 공유하는 버튼. 앱은 한 줄만 쓰면 된다.
+워크아웃 결과 카드를 이미지로 만들어 iOS 공유 시트로 넘기는 버튼. 앱은 한 줄만 쓰면 된다.
 
 ```swift
 import WorkoutShareUI
 
 WorkoutShareButton(
     result: workoutResult,
-    style: WorkoutShareStyle(accentColor: .tennisGreen, logo: Image("AppLogo")),
-    instagramAppID: "1234567890"
+    style: WorkoutShareStyle(accentColor: .tennisGreen, logo: Image("AppLogo"))
 )
 ```
 
-탭하면 인스타그램이 설치된 경우 스토리 편집기가 열린다. 배경은 `accentColor`에서 파생한 그라디언트,
-그 위에 지표 카드가 **스티커**로 올라가므로 사용자가 자기 사진·영상으로 배경을 바꾸고 카드를 끌어
-배치할 수 있다. 인스타그램이 없으면 배경이 합성된 1080×1920 이미지를 iOS 공유 시트로 넘긴다.
+탭하면 `accentColor`에서 파생한 그라디언트 위에 지표 카드를 올린 1080×1920 이미지를 굽고 공유 시트를
+띄운다. 보낼 곳(인스타그램·메시지·사진 저장 등)은 사용자가 시트에서 고른다.
 
-카드에 들어가는 지표는 **시간·활동 kcal·평균 심박 최대 3개**다. 스티커는 사용자가 축소할 수 있어
-적게 넣고 크게 보여주는 쪽이 유리하다. 값이 없는 지표(`averageHeartRate`가 nil, 칼로리가 0)는
+> 인스타그램 스토리 딥링크(`instagram-stories://`)로 스티커를 넘기던 경로는 2026-09-13 에 걷어냈다.
+> Facebook App ID 가 필수인데 발급을 받지 못했다. 되살릴 때는
+> [제거 플랜](docs/plans/ios/2026/2026-09-13-share-sheet-only.md)과 그 이전 커밋을 본다.
+
+카드에 들어가는 지표는 **시간·활동 kcal·평균 심박 최대 3개**다. 적게 넣고 크게 보여주는 쪽이
+유리하다. 값이 없는 지표(`averageHeartRate`가 nil, 칼로리가 0)는
 `--`를 표시하지 않고 **행 자체를 뺀다** — 카드 높이도 그만큼 줄어든다.
 
 버튼 라벨·지표 라벨·레이아웃은 패키지가 소유한다. 앱이 문자열을 관리하지 않는다.
 
 ### 소비자 책임 (패키지가 대신 못 해주는 것)
 
-- [ ] **`Info.plist`에 `LSApplicationQueriesSchemes` → `instagram-stories`를 추가한다.** 빠지면 크래시가 아니라 **항상 공유 시트로 폴백된다** — 조용히 동작이 달라지므로 실기기에서 딥링크가 실제로 열리는지 확인할 것.
-- [ ] **Meta 개발자 대시보드에서 Facebook App ID를 발급해 `instagramAppID`로 주입한다.** 2022년 10월에 예고되어 **2023년 1월부터 필수**다. 빈 문자열을 넘기면 딥링크를 만들지 않고 폴백으로 넘어간다. 발급 절차는 아래 소절에 있다 — **앱마다 따로 받는다.**
 - [ ] **`WorkoutResult`는 워크아웃 누적값으로 넘긴다.** 구간 델타를 넘기면 두 앱의 숫자 의미가 갈린다 — `WorkoutUI`와 같은 규칙이다.
 - [ ] **`accentColor`에서 배경 그라디언트가 파생된다.** 아래쪽 색은 각 RGB 채널에 0.6을 곱한 값이다. 너무 밝은 색을 주면 흰 텍스트와 대비가 떨어진다.
 - [ ] **iOS 전용이다.** 워치 타깃에서 임포트해도 심볼이 없다.
-
-#### Facebook App ID 발급
-
-패키지는 App ID를 소유하지 않는다. `WorkoutShareButton(result:style:instagramAppID:)` 의 **생성자 파라미터**이고,
-앱이 자기 값을 넘긴다. 세 앱이 각각 다른 값을 쓰더라도 패키지는 고치지 않는다.
-
-1. **개발자 계정 등록** — [developers.facebook.com/documentation/development/register](https://developers.facebook.com/documentation/development/register). 개인 페이스북 계정이면 되고 연회비는 없다.
-2. **앱 생성** — [developers.facebook.com/apps/creation](https://developers.facebook.com/apps/creation/). 앱 이름·연락 이메일 → 사용 사례(use case) 선택 → 비즈니스 포트폴리오 → 대시보드.
-   - 사용 사례는 하나 이상 골라야 넘어간다. 스토리 공유는 Graph API 권한을 쓰지 않아 **무엇을 고르든 App ID 값은 같다.**
-   - 비즈니스 포트폴리오는 **"아직 연결하지 않겠다"로 넘어가도 된다.** 남의 데이터에 접근할 때만 필수다.
-3. **iOS 플랫폼 추가** — 앱 설정에서 iOS를 더하고 그 앱의 번들 ID를 넣는다.
-4. **대시보드에서 App ID 복사** — 앱 쪽 래퍼 컴포넌트의 상수에 박는다.
-
-**앱마다 하나씩 받는다.** App ID는 딥링크에 `source_application` 으로 실려 "어느 앱에서 왔는가"를
-알리는 값이다. 세 앱이 같은 값을 쓰면 출처가 갈리지 않는다. App ID 하나에 iOS 번들 ID를 여러 개
-등록할 수 있는지는 [Meta 문서에 없고](https://developers.facebook.com/docs/instagram-platform/sharing-to-stories/),
-인스타가 등록 번들 ID와 호출한 앱의 번들 ID를 대조하는지도 명시가 없다 — 앱별로 받으면 이 불확실성을 전부 우회한다.
-
-**App Review** — Meta 문서는 "앱에 역할이 없는 사람이 쓸 경우 필수"라고만 적었고 스토리 공유가
-면제인지는 명시하지 않는다. 스토리 공유는 API 권한을 요구하지 않는 URL 스킴 + 페이스트보드 흐름이라
-관례적으로 심사 대상이 아니었지만, **실기기에서 개발자 본인이 아닌 계정으로 한 번 확인**하는 편이 확실하다.
 
 ## ConnectivityCore 사용법
 
