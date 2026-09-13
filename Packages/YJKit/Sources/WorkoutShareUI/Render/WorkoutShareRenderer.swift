@@ -8,22 +8,12 @@
     enum WorkoutShareRenderer {
         private static let logger = Logger(subsystem: "com.yj.YJKit", category: "WorkoutShareUI")
 
-        static func stickerImage(model: WorkoutShareCardModel,
-                                 style: WorkoutShareStyle) -> UIImage?
+        static func image(model: WorkoutShareCardModel,
+                          style: WorkoutShareStyle) -> UIImage?
         {
-            render(WorkoutShareCard(model: model, style: style, mode: .sticker), isOpaque: false)
-        }
-
-        static func standaloneImage(model: WorkoutShareCardModel,
-                                    style: WorkoutShareStyle) -> UIImage?
-        {
-            render(WorkoutShareCard(model: model, style: style, mode: .standalone), isOpaque: true)
-        }
-
-        private static func render(_ view: some View, isOpaque: Bool) -> UIImage? {
-            let renderer = ImageRenderer(content: view)
+            let renderer = ImageRenderer(content: WorkoutShareCard(model: model, style: style))
             renderer.scale = ShareCanvas.scale
-            renderer.isOpaque = isOpaque
+            renderer.isOpaque = true
             guard let image = renderer.uiImage else {
                 // 조용히 실패하면 사용자는 버튼이 고장난 줄 안다.
                 logger.error("공유 카드 렌더에 실패했다")
