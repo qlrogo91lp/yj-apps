@@ -18,7 +18,7 @@
 트랙 B (워치)     3 → 4 ─────────────┤→ 6 스크린샷 → 7
 트랙 C (YJKit)   MonitoringCore ─────┘   ← 지금 시작 가능
 
-다음 차례: 트랙 B #4(크라운) 또는 트랙 C(MonitoringCore). 둘은 파일이 안 겹쳐 동시에 가도 된다
+다음 차례: 트랙 B #3·#4 실기기 확인 또는 트랙 C(MonitoringCore). #4 확인 뒤 #6 스크린샷으로 합류한다
 ```
 
 - **A ↔ B ↔ C 는 겹치는 파일이 하나도 없다.** 셋을 동시에 굴려도 된다
@@ -37,7 +37,7 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
 | ~~2~~ | ~~iOS 통계 UI 리디자인~~ | A | **완료** (PR #16) · 실기기 확인만 남음 | [스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-08-25-summary-history-redesign-design.md) · [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-07-summary-history-redesign.md) · [Notion](https://app.notion.com/p/3bacd15e48f180b3a810e95f63854aa6) |
 | ~~1~~ | ~~WorkoutShareUI 붙이기 (공유 시트)~~ | A | **완료** (PR #20 → 인스타 경로 제거) · 실기기 확인만 남음 | [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-07-workout-share-button.md) · [제거 플랜](Packages/YJKit/docs/plans/ios/2026/2026-09-13-share-sheet-only.md) · [Kit 사용법](Packages/YJKit/README.md#workoutshareui-사용법) |
 | 3 | 햅틱 (워치 전용) | B | **구현 완료** (PR #18) · 실기기 패턴 확인만 남음 | [플랜](Apps/TennisCounter/docs/plans/watch/2026/2026-09-07-match-haptics.md) — 설정 연동은 #8 때 `MatchHaptics.play` 첫 줄에서 |
-| 4 | 크라운 점수 입력 (워치, 위=나 아래=상대) | B | 플랜 완료 · 구현 대기 (선행: #3) | [플랜](Apps/TennisCounter/docs/plans/watch/2026/2026-09-07-crown-scoring.md) — 온보딩(#6) 항목 하나 파생 |
+| 4 | 크라운 점수 입력 (워치, 위=나 아래=상대) | B | **구현 완료** (PR #22) · 실기기 확인 대기 | [플랜](Apps/TennisCounter/docs/plans/watch/2026/2026-09-07-crown-scoring.md) — 온보딩(#6) 항목 하나 파생 |
 | 6 | 온보딩 4페이지 (스크린샷 3 + 목록 1, iOS 만) | A → 합류 | **뼈대 완료** (PR #17) · 스크린샷(Task 4)만 남음 | [스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-09-07-onboarding-design.md) · [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-07-onboarding.md) — 뼈대(Task 1~3)는 트랙 A 안에서, 스크린샷(Task 4)은 #1·#4 뒤 |
 | 7 | Firebase Crashlytics (iOS + 워치, 익스텐션 제외) | 단독 (맨 뒤) | 스펙·플랜 완료 · 구현 대기 | [스펙](Packages/YJKit/docs/specs/shared/2026/2026-09-07-crash-reporting-design.md) → [YJKit 플랜](Packages/YJKit/docs/plans/shared/2026/2026-09-07-monitoring-core.md) (트랙 C, 지금 병렬 가능) → [Ralli 플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-07-crashlytics-integration.md) |
 | 8 | 설정 페이지 + 다른 앱 노출 | — | **논의 필요 — 아직 브레인스토밍 전** | 아래 "남은 논의" 참고 |
@@ -60,7 +60,8 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
 
 - [x] 3번 플랜 실행 — 이벤트 9종, 워치 테스트 81개 통과. PR #18
 - [ ] **3번 실기기 패턴 확인** (Task 4) — 포인트·되돌리기·게임·세트·매치 종료가 촉각으로 구분되는지
-- [ ] 4번 플랜 실행 → 실기기에서 스침·포커스·손목 내림 확인 (Task 2)
+- [x] 4번 플랜 실행 — 위=나·아래=상대, 빠른 다중 디텐트 처리, 포커스 복구. PR #22
+- [ ] **4번 실기기 확인** (Task 2) — 디텐트 방향·빠른 3칸·반 칸 스침·탭/다이얼로그 포커스·손목 내림·미러 상태
 
 **트랙 C (YJKit)** — A·B 와 무관, 지금 시작 가능
 
