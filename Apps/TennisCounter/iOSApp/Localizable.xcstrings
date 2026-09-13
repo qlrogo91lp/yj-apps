@@ -1518,6 +1518,7 @@
       }
     },
     "summary_win_rate" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1534,6 +1535,7 @@
       }
     },
     "summary_wins" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
