@@ -1043,13 +1043,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "One tap from match details. The card is a sticker — place it anywhere over your photo."
+            "value" : "One tap from match details. Send it to Instagram, Messages, anywhere."
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "기록 상세에서 한 번에. 카드는 스티커라 사진 위에 자유롭게 놓을 수 있습니다."
+            "value" : "기록 상세에서 한 번에. 인스타·메시지 어디로든 보낼 수 있습니다."
           }
         }
       }
@@ -1060,13 +1060,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Share to Instagram Stories"
+            "value" : "Share your match card"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "인스타 스토리로 공유"
+            "value" : "기록 카드로 공유"
           }
         }
       }
