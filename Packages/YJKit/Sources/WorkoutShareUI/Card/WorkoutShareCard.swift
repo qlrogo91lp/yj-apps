@@ -38,6 +38,7 @@
     struct WorkoutShareCard: View {
         let model: WorkoutShareCardModel
         let style: WorkoutShareStyle
+        var corners: ShareCardCorners = .rounded
 
         var body: some View {
             VStack(alignment: .leading, spacing: 14) {
@@ -48,7 +49,8 @@
             .padding(.top, 16)
             .frame(width: ShareCanvas.cardSize.width, height: ShareCanvas.cardSize.height, alignment: .topLeading)
             .background(ShareCardPalette.background)
-            .clipShape(RoundedRectangle(cornerRadius: ShareCanvas.cornerRadius, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: corners == .rounded ? ShareCanvas.cornerRadius : 0,
+                                        style: .continuous))
         }
 
         private var header: some View {

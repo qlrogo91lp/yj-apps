@@ -48,19 +48,25 @@
         }
 
         @MainActor
-        private func renderCard() -> UIImage? {
-            WorkoutShareRenderer.image(model: WorkoutShareCardModel(result: result, header: header), style: style)
+        private func renderCard(corners: ShareCardCorners) -> UIImage? {
+            WorkoutShareRenderer.image(model: WorkoutShareCardModel(result: result, header: header),
+                                       style: style,
+                                       corners: corners)
         }
 
+        /// 공유 시트로 받은 사진은 인스타가 투명을 검정으로 채운다 — 네모로 굽는다.
         @MainActor
         private func share() {
-            guard let image = renderCard(), let url = WorkoutShareExport.pngFile(from: image) else { return }
+            guard let image = renderCard(corners: .square),
+                  let url = WorkoutShareExport.pngFile(from: image) else { return }
             shared = SharedFile(url: url)
         }
 
+        /// 스티커층은 투명을 그대로 붙인다 — 둥근 모서리로 굽는다.
         @MainActor
         private func copySticker() {
-            guard let image = renderCard(), WorkoutShareExport.copySticker(image) else { return }
+            guard let image = renderCard(corners: .rounded),
+                  WorkoutShareExport.copySticker(image) else { return }
             showCopied = true
         }
     }
