@@ -1,4 +1,9 @@
 "share_button" = "공유";
+"share_menu_share" = "공유…";
+"share_menu_copy_sticker" = "스티커로 복사";
+"share_copied_title" = "스티커를 복사했어요";
+"share_copied_message" = "인스타그램 스토리에서 사진을 고른 뒤, 화면을 길게 눌러 '붙여넣기'를 누르세요.";
+"share_copied_ok" = "확인";
 "share_metric_duration" = "시간";
 "share_metric_calories" = "활동";
 "share_metric_heart_rate" = "심박";
