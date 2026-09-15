@@ -10,10 +10,12 @@
     struct WorkoutShareExportTests {
         private func cardImage() throws -> UIImage {
             try #require(WorkoutShareRenderer.image(
-                model: WorkoutShareCardModel(result: WorkoutResult(durationSeconds: 2538,
-                                                                   caloriesBurned: 312,
-                                                                   averageHeartRate: 148)),
-                style: WorkoutShareStyle(accentColor: .green)
+                model: WorkoutShareCardModel(
+                    result: WorkoutResult(durationSeconds: 2538, caloriesBurned: 312,
+                                          averageHeartRate: 148, totalCaloriesBurned: 400),
+                    header: WorkoutShareHeader(title: "테니스", startedAt: Date(timeIntervalSince1970: 0), endedAt: nil)
+                ),
+                style: WorkoutShareStyle(badgeColor: .green, logo: Image(systemName: "figure.tennis"))
             ))
         }
 

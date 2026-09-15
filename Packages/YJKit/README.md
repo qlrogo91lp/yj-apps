@@ -82,12 +82,26 @@ import WorkoutShareUI
 
 WorkoutShareButton(
     result: workoutResult,
-    style: WorkoutShareStyle(accentColor: .tennisGreen, logo: Image("AppLogo"))
+    header: WorkoutShareHeader(title: String(localized: "share_title_tennis"),
+                               startedAt: workoutStart, endedAt: workoutEnd),
+    style: WorkoutShareStyle(badgeColor: .brand, logo: Image("AppLogo"))
 )
 ```
 
-탭하면 `accentColor`에서 파생한 그라디언트로 칠한 **둥근 지표 카드 한 장**(가로 1080px, 모서리 바깥
-투명)을 굽고 공유 시트를 띄운다. 보낼 곳(인스타그램·메시지·사진 저장 등)은 사용자가 시트에서 고른다.
+카드는 **짙은 회색 둥근 카드 한 장**(1080×800px, 모서리 바깥 투명)이다. 피트니스 앱 운동 세부사항과
+같은 구성이다.
+
+- **머리줄** — 원형 로고(`badgeColor` 배경) · 제목 · "9월 9일 · 오후 7:27–오후 10:03"
+- **2×2** — 운동 시간 · 활동 킬로칼로리 · 총 킬로칼로리 · 평균 심박수. 값 색은 시간 라임 ·
+  칼로리 호박 · 심박 산호로 **패키지가 고정**한다. 앱 색은 원형 로고에만 쓰인다.
+
+| 앱 | `badgeColor` | `logoColor` |
+|---|---|---|
+| Ralli | 라임 | 생략 → 검정 |
+| GolfCounter | 짙은 초록 | 크림색 (`brandForeground`) |
+| 하루치 핏 | 주황 | 생략 → 검정 |
+
+`logoColor`를 생략하면 원 배경과 대비가 큰 쪽(검정/흰색)을 패키지가 고른다.
 
 > 스토리 화면 크기(1080×1920)로 굽지 않는다. 그렇게 넘기면 인스타그램이 이미지를 배경으로 깔아
 > 옮기거나 키울 수 없다.
@@ -105,16 +119,16 @@ WorkoutShareButton(
 > Facebook App ID 가 필수인데 발급을 받지 못했다. 되살릴 때는
 > [제거 플랜](docs/plans/ios/2026/2026-09-13-share-sheet-only.md)과 그 이전 커밋을 본다.
 
-카드에 들어가는 지표는 **시간·활동 kcal·평균 심박 최대 3개**다. 적게 넣고 크게 보여주는 쪽이
-유리하다. 값이 없는 지표(`averageHeartRate`가 nil, 칼로리가 0)는
-`--`를 표시하지 않고 **행 자체를 뺀다** — 카드 높이도 그만큼 줄어든다.
+칸은 **항상 네 개**다. 값이 없는 지표(`averageHeartRate`가 nil, 칼로리가 0)는 칸을 빼지 않고
+**`–`** 로 표시한다 — 기록마다 카드 크기와 배치가 달라지지 않게.
 
-버튼 라벨·지표 라벨·레이아웃은 패키지가 소유한다. 앱이 문자열을 관리하지 않는다.
+버튼 라벨·지표 라벨·레이아웃·카드 색은 패키지가 소유한다. 앱은 제목 문자열만 현지화해서 넘긴다.
 
 ### 소비자 책임 (패키지가 대신 못 해주는 것)
 
 - [ ] **`WorkoutResult`는 워크아웃 누적값으로 넘긴다.** 구간 델타를 넘기면 두 앱의 숫자 의미가 갈린다 — `WorkoutUI`와 같은 규칙이다.
-- [ ] **`accentColor`에서 배경 그라디언트가 파생된다.** 아래쪽 색은 각 RGB 채널에 0.6을 곱한 값이다. 너무 밝은 색을 주면 흰 텍스트와 대비가 떨어진다.
+- [ ] **`WorkoutShareHeader`의 시각은 카드 숫자와 같은 구간이어야 한다.** 누적값을 넘겼으면 워크아웃 시작 ~ 그 누적값을 잰 시점이다.
+- [ ] **제목은 앱이 현지화한다.** 패키지는 종목을 모른다.
 - [ ] **iOS 전용이다.** 워치 타깃에서 임포트해도 심볼이 없다.
 
 ## ConnectivityCore 사용법

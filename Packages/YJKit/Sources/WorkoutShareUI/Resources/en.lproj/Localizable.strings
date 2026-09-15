@@ -4,6 +4,7 @@
 "share_copied_title" = "Sticker Copied";
 "share_copied_message" = "In Instagram Stories, pick a photo, then press and hold the screen and tap Paste.";
 "share_copied_ok" = "OK";
-"share_metric_duration" = "Time";
-"share_metric_calories" = "Active";
-"share_metric_heart_rate" = "Avg HR";
+"share_metric_duration" = "Workout Time";
+"share_metric_calories" = "Active Calories";
+"share_metric_total_calories" = "Total Calories";
+"share_metric_heart_rate" = "Avg. Heart Rate";

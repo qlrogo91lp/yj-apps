@@ -1,16 +1,20 @@
 #if os(iOS)
     import SwiftUI
 
-    /// 공유 카드에서 앱마다 달라지는 부분. 나머지 레이아웃과 문자열은 패키지가 소유한다.
+    /// 공유 카드에서 **앱마다** 달라지는 모습 — 머리줄의 원형 로고. 카드 배경·값 색·라벨·배치는 패키지가 소유한다.
     public struct WorkoutShareStyle {
-        /// 카드 배경 그라디언트가 이 색에서 파생된다. 너무 밝은 색은 흰 텍스트와 대비가 떨어진다.
-        public let accentColor: Color
-        /// nil이면 카드 하단 로고 줄을 통째로 뺀다.
-        public let logo: Image?
+        /// 원형 로고의 배경색. 보통 앱 브랜드 색.
+        public let badgeColor: Color
+        /// 원 안에 그리는 로고. 템플릿 이미지로 칠한다.
+        public let logo: Image
+        /// 원 안 로고 색. nil 이면 원 배경 밝기를 보고 검정/흰색을 고른다.
+        /// 브랜드 규칙이 따로 있는 앱(골프 — 초록 위 크림색)만 넘긴다.
+        public let logoColor: Color?
 
-        public init(accentColor: Color, logo: Image? = nil) {
-            self.accentColor = accentColor
+        public init(badgeColor: Color, logo: Image, logoColor: Color? = nil) {
+            self.badgeColor = badgeColor
             self.logo = logo
+            self.logoColor = logoColor
         }
     }
 #endif

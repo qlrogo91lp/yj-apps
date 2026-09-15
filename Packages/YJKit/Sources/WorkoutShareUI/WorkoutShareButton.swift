@@ -9,13 +9,15 @@
     /// 스토리에서 붙여넣는 경로로만 된다 (딥링크는 Meta App ID 가 필요해 걷어냈다).
     public struct WorkoutShareButton: View {
         private let result: WorkoutResult
+        private let header: WorkoutShareHeader
         private let style: WorkoutShareStyle
 
         @State private var shared: SharedFile?
         @State private var showCopied = false
 
-        public init(result: WorkoutResult, style: WorkoutShareStyle) {
+        public init(result: WorkoutResult, header: WorkoutShareHeader, style: WorkoutShareStyle) {
             self.result = result
+            self.header = header
             self.style = style
         }
 
@@ -47,7 +49,7 @@
 
         @MainActor
         private func renderCard() -> UIImage? {
-            WorkoutShareRenderer.image(model: WorkoutShareCardModel(result: result), style: style)
+            WorkoutShareRenderer.image(model: WorkoutShareCardModel(result: result, header: header), style: style)
         }
 
         @MainActor
@@ -70,11 +72,10 @@
 
     #Preview {
         WorkoutShareButton(
-            result: WorkoutResult(durationSeconds: 2538,
-                                  caloriesBurned: 312,
-                                  averageHeartRate: 148),
-            style: WorkoutShareStyle(accentColor: .green,
-                                     logo: Image(systemName: "figure.tennis"))
+            result: WorkoutResult(durationSeconds: 9351, caloriesBurned: 1343,
+                                  averageHeartRate: 136, totalCaloriesBurned: 1584),
+            header: WorkoutShareHeader(title: "테니스", startedAt: Date().addingTimeInterval(-9351), endedAt: Date()),
+            style: WorkoutShareStyle(badgeColor: .green, logo: Image(systemName: "tennisball"))
         )
     }
 #endif

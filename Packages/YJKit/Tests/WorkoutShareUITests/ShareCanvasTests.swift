@@ -4,24 +4,11 @@
     @testable import WorkoutShareUI
 
     struct ShareCanvasTests {
-        @Test func cardHeightMatchesTheSpecTable() {
-            #expect(ShareCanvas.cardSize(rowCount: 3, hasLogo: true)
-                == CGSize(width: 270, height: 190))
-            #expect(ShareCanvas.cardSize(rowCount: 2, hasLogo: true)
-                == CGSize(width: 270, height: 148))
-            #expect(ShareCanvas.cardSize(rowCount: 1, hasLogo: true)
-                == CGSize(width: 270, height: 106))
-        }
-
-        @Test func droppingLogoRemovesTheStripHeight() {
-            #expect(ShareCanvas.cardSize(rowCount: 3, hasLogo: false).height == 158)
-            #expect(ShareCanvas.cardSize(rowCount: 1, hasLogo: false).height == 74)
-        }
-
-        @Test func scaledCardPixelsAreWholeNumbers() {
-            let size = ShareCanvas.cardSize(rowCount: 3, hasLogo: true)
-            #expect(size.width * ShareCanvas.scale == 1080)
-            #expect(size.height * ShareCanvas.scale == 760)
+        /// 칸이 네 개로 고정이라 카드 크기도 하나다. 픽셀이 정수로 떨어져야 반올림 번짐이 없다.
+        @Test func cardIsFixedAndPixelsAreWholeNumbers() {
+            #expect(ShareCanvas.cardSize == CGSize(width: 270, height: 200))
+            #expect(ShareCanvas.cardSize.width * ShareCanvas.scale == 1080)
+            #expect(ShareCanvas.cardSize.height * ShareCanvas.scale == 800)
         }
     }
 #endif
