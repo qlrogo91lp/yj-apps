@@ -38,6 +38,14 @@
 | `.saveSucceeded` / `.saveFailed` | `.success` / `.failure` | 저장당 1회 |
 | `.paused` / `.resumed` | `.stop` / `.start` | 폰 명령 시 |
 
+### 실기기 확인 결과 (2026-09-15)
+
+되돌리기(`.directionDown`)와 게임·세트 경계 햅틱은 실기기에서 정상 동작·구분 확인.
+포인트(`.click`)는 [크라운 버그](2026-09-07-crown-scoring.md) 때문에 한동안 안 울리는 것으로
+착각했으나, 크라운을 고친 뒤 확인해 보니 원래도 울리고 있었다 — 다만 **체감이 약하다.**
+`.directionUp`으로 올려 봤으나 느낌이 어색해 `.click`으로 되돌렸고, 이대로 유지하기로 결정.
+저장 ACK·폰 일시정지 명령 햅틱은 이번 세션에서 별도로 확인하지 않았다.
+
 ## Global Constraints
 
 - **iOS 타깃·`Shared/` 는 건드리지 않는다.** 모든 변경은 `WatchApp/` 과 `watchosTests/` 안이다.

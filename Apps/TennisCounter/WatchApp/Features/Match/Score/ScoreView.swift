@@ -8,8 +8,6 @@ struct ScoreView: View {
     @State private var crownDetent = 0.0
     /// 한 번 돌리기에 최대 1점 — 여러 칸이 뛰어도 크라운이 멈출 때까지 잠근다.
     @State private var crownGate = CrownPointGate()
-    // DEBUG-CROWN: 감도 확인용 임시 표시. 확정하면 이 줄과 overlay 를 지운다.
-    @State private var crownDebugText = ""
     /// 크라운은 포커스를 가진 뷰만 받는다. 탭을 오가거나 다이얼로그를 닫으면 돌아온다는 보장이 없어
     /// 화면이 보일 때마다 직접 잡는다. 잃으면 크라운이 에러 없이 조용히 죽는다.
     @FocusState private var isCrownFocused: Bool
@@ -81,25 +79,14 @@ struct ScoreView: View {
             onIdle: { crownGate.idle() }
         )
         .onChange(of: crownDetent) { _, value in
-            crownDebugText = "detent \(Int(value))" // DEBUG-CROWN
             // 버튼과 같은 가드 — mirror 는 점수를 넣을 권한이 없다.
             guard flowViewModel.isDriver, case .playing = flowViewModel.phase else { return }
             if let side = crownGate.detentChanged(to: value) {
                 viewModel.addPoint(side)
-                crownDebugText += " ✓" // DEBUG-CROWN
             }
         }
         // 크라운을 돌리면 화면 가장자리에 스크롤 바가 뜬다 — 점수 화면엔 스크롤할 게 없다.
         .digitalCrownAccessory(.hidden)
-        // DEBUG-CROWN: 기준값 보정용 임시 표시
-        .overlay(alignment: .bottomTrailing) {
-            Text(verbatim: crownDebugText)
-                .font(.system(size: 11, design: .monospaced))
-                .foregroundColor(.yellow)
-                .padding(.trailing, 14)
-                .padding(.bottom, 2)
-                .allowsHitTesting(false)
-        }
         .onAppear { isCrownFocused = true }
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
