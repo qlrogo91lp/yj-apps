@@ -71,18 +71,23 @@ struct MatchDetailSheet: View {
                         Text(timeRangeString)
                     }
                 }
-
-                Section {
-                    MatchShareButton(match: match)
-                        .frame(maxWidth: .infinity)
-                        .listRowBackground(Color.clear)
-                }
             }
             .navigationTitle(String(localized: "match_detail_title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .topBarLeading) {
                     Button(String(localized: "btn_cancel")) { dismiss() }
+                }
+                // 피트니스 앱처럼 우상단. 버튼이 자기 원을 그리므로 iOS 26 유리 배경은 끈다 — 원이 두 겹이 된다.
+                if #available(iOS 26.0, *) {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        MatchShareButton(match: match)
+                    }
+                    .sharedBackgroundVisibility(.hidden)
+                } else {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        MatchShareButton(match: match)
+                    }
                 }
             }
         }

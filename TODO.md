@@ -18,7 +18,7 @@
 트랙 B (워치)     3 → 4 ─────────────┤→ 6 스크린샷 → 7
 트랙 C (YJKit)   MonitoringCore ─────┘   ← 지금 시작 가능
 
-다음 차례: 트랙 B(#3·#4) 완료. 남은 건 #1 실기기 확인 → #6 스크린샷으로 합류, 또는 트랙 C(MonitoringCore)
+다음 차례: 트랙 A·B 실기기 확인까지 완료. #6 스크린샷(Task 4)으로 합류 가능, 또는 트랙 C(MonitoringCore), 또는 #9 브레인스토밍
 ```
 
 - **A ↔ B ↔ C 는 겹치는 파일이 하나도 없다.** 셋을 동시에 굴려도 된다
@@ -35,12 +35,13 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
 |---|---|---|---|---|
 | ~~5~~ | ~~String Catalog(xcstrings) 전환~~ | A | **완료** (PR #15) · 실기기 확인만 남음 | [플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-07-string-catalog-migration.md) — 하드코딩 정리까지 범위가 늘었다 (§추출 문제) |
 | ~~2~~ | ~~iOS 통계 UI 리디자인~~ | A | **완료** (PR #16) · 실기기 확인만 남음 | [스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-08-25-summary-history-redesign-design.md) · [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-07-summary-history-redesign.md) · [Notion](https://app.notion.com/p/3bacd15e48f180b3a810e95f63854aa6) |
-| ~~1~~ | ~~WorkoutShareUI 붙이기 (공유 시트)~~ | A | **완료** (PR #20 → 인스타 경로 제거) · 실기기 확인만 남음 | [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-07-workout-share-button.md) · [제거 플랜](Packages/YJKit/docs/plans/ios/2026/2026-09-13-share-sheet-only.md) · [Kit 사용법](Packages/YJKit/README.md#workoutshareui-사용법) |
+| ~~1~~ | ~~WorkoutShareUI 붙이기 (공유 시트)~~ | A | **완료** (PR #20 → 인스타 경로 제거 → `feat/share-card-sticker` 카드 개편) · 실기기 확인 완료 | [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-07-workout-share-button.md) · [제거 플랜](Packages/YJKit/docs/plans/ios/2026/2026-09-13-share-sheet-only.md) · [Kit 사용법](Packages/YJKit/README.md#workoutshareui-사용법) |
 | ~~3~~ | ~~햅틱 (워치 전용)~~ | B | **완료** (PR #18) · 실기기 확인 완료 | [플랜](Apps/TennisCounter/docs/plans/watch/2026/2026-09-07-match-haptics.md) — 설정 연동은 #8 때 `MatchHaptics.play` 첫 줄에서. 포인트 `.click`이 약하게 느껴지나 유지하기로 결정 |
 | ~~4~~ | ~~크라운 점수 입력 (워치, 위=나 아래=상대)~~ | B | **완료** (버그 수정 PR, 실기기 확인 완료) | [플랜](Apps/TennisCounter/docs/plans/watch/2026/2026-09-07-crown-scoring.md) — PR #22 구현이 회전량 기반이라 실기기에서 오작동, 디텐트 방식으로 재구현. 온보딩(#6) 항목 하나 파생 |
 | 6 | 온보딩 4페이지 (스크린샷 3 + 목록 1, iOS 만) | A → 합류 | **뼈대 완료** (PR #17) · 스크린샷(Task 4)만 남음 | [스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-09-07-onboarding-design.md) · [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-07-onboarding.md) — 뼈대(Task 1~3)는 트랙 A 안에서, 스크린샷(Task 4)은 #1·#4 뒤 |
 | 7 | Firebase Crashlytics (iOS + 워치, 익스텐션 제외) | 단독 (맨 뒤) | 스펙·플랜 완료 · 구현 대기 | [스펙](Packages/YJKit/docs/specs/shared/2026/2026-09-07-crash-reporting-design.md) → [YJKit 플랜](Packages/YJKit/docs/plans/shared/2026/2026-09-07-monitoring-core.md) (트랙 C, 지금 병렬 가능) → [Ralli 플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-07-crashlytics-integration.md) |
 | 8 | 설정 페이지 + 다른 앱 노출 | — | **논의 필요 — 아직 브레인스토밍 전** | 아래 "남은 논의" 참고 |
+| 9 | iOS 요약·기록 화면 개선 (2026-09-15 실기기 메모) | A | **논의 필요 — 아직 브레인스토밍 전** | 아래 "남은 논의 — #9" 참고. #2 스펙을 개정하는 작업 |
 
 ### 집 맥북에서 할 것
 
@@ -53,7 +54,9 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
 - [x] 2번 플랜 실행 — Task 8개, 테스트 154개 통과. 삭제가 저장소에 반영되지 않는 버그를 잡았다. PR #16
 - [x] 1번 플랜 실행 (Task 1~6) — 두 화면에 버튼, 테스트 162개 통과. PR #20
 - [x] ~~Meta App ID 발급(사용자)~~ — **개발자 계정 발급 실패로 포기.** 인스타 딥링크 경로를 걷어내고 공유 시트만 남겼다 ([제거 플랜](Packages/YJKit/docs/plans/ios/2026/2026-09-13-share-sheet-only.md))
-- [ ] **1번 실기기 확인** (Task 7) — 공유 시트가 뜨고, 인스타그램을 골랐을 때 **스토리로 올리는 선택지가 있는지**
+- [x] **1번 실기기 확인** (Task 7) — 인스타 스토리 공유 확인. 이어서 카드를 개편했다 (`feat/share-card-sticker`):
+      피트니스 앱 스타일 2×2 + 원형 로고 머리줄, **스티커로 복사**(배경 없는 스티커) 추가,
+      공유 시트는 인스타가 투명을 검게 채워 네모 카드로, 버튼은 원형 아이콘으로 기록 상세 우상단
 - [x] 6번 뼈대 (Task 1~3) — 게이트·페이지 4장·앱 진입 분기. 시뮬레이터에서 노출/미노출 확인. PR #17
 
 **트랙 B (워치)** — A 와 동시 진행 가능
@@ -72,7 +75,7 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
 
 **합류 후**
 
-- [ ] 6번 스크린샷 3장 × ko/en (Task 4) — #1·#4 가 끝나야 찍을 수 있다
+- [ ] 6번 스크린샷 3장 × ko/en (Task 4) — 선행 #1·#4 완료, 지금 찍을 수 있다. 공유 카드는 새 2×2 카드로
 - [ ] 7번 Ralli 연동 플랜 — 단독으로. PR 은 Kit / Ralli 따로
 
 **아무 때나**
@@ -98,12 +101,24 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
 - 다른 앱(골프·하루치) 노출 — 어떤 형태로(App Store 링크 / 배너 / "yj 의 다른 앱" 섹션), 어느 위치에. 완전 미논의
 - 열린 질문: iOS 설정 탭을 4번째 탭으로 둘지 요약 탭 우상단 기어로 둘지 / 워치에도 설정 화면을 둘지 / 모드 옵션(No-Ad 등) 설명을 여기 둘지 모드 화면 ⓘ 로 둘지
 
+### 남은 논의 — #9 iOS 요약·기록 개선 (2026-09-15 실기기 메모)
+
+1.1.8 TestFlight 실기기에서 나온 메모. #2 스펙([요약·기록 리디자인](Apps/TennisCounter/docs/specs/ios/2026/2026-08-25-summary-history-redesign-design.md))을 개정한다.
+
+- **요약 — 콘텐츠 항목**: `전체` 기간에서 총 운동시간·총 활동 kcal 은 의미가 약하다 (`이번 달` 은 괜찮음). 기간마다 보여줄 항목을 다르게 할지
+- **요약 — 최근 세션**: 세션의 경기들이 한 카드에 나열되고 행마다 탭하면 상세가 열리는데, 눌린다는 표시가 없어 어색하다
+- **기록 — 목록**: 애플 피트니스처럼 **카드형**으로
+- **기록 — 상세**: 디자인·항목 재논의. 공유 카드(2×2 · 원형 로고)와 톤을 맞추는 것이 출발점. 공유 버튼은 이미 우상단 원형으로 옮김
+- **굵은 글씨가 일부만** — `MatchRow` 의 "이긴 세트 숫자만 굵게" 규칙이 거슬린다
+- **경기 결과 화면 공유 버튼 위치** — 원형 버튼으로 바뀌어 저장·다시하기 위에 떠 있다
+- 심박수 그래프(HealthKit 샘플 조회)는 별도 작업으로 뺐다 — 권한·동기화 지연·시간 범위 결정이 필요
+
 ## YJKit
 
 | 항목 | 상태 | 문서 |
 |---|---|---|
 | `MonitoringCore` (CrashReporting 프로토콜 + Crashlytics 구현) | 스펙·플랜 완료 · 구현 대기 | 위 Ralli #7 과 같은 문서. 골프·하루치 연동은 별도 (Firebase 프로젝트 앱마다 새로) |
-| `WorkoutShareUI` 공유 카드 배경색을 Kit 이 소유 | **논의 중 — 스펙 전.** 색 결정에 화면 확인이 선행 | 아래 "카드 대비" 참고 |
+| ~~`WorkoutShareUI` 공유 카드 배경색을 Kit 이 소유~~ | **완료** (`feat/share-card-sticker`) — 짙은 회색 카드 + 지표별 고정 색. 앱은 원형 로고 `badgeColor` 만 넘김 | 아래 "카드 대비" · [Kit 사용법](Packages/YJKit/README.md#workoutshareui-사용법) |
 
 ### 카드 대비 (2026-09-09)
 
@@ -123,11 +138,10 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
 (`WorkoutShareStyle(logo:)` 만 남음). 앱이 색을 못 주므로 대비 사고가 구조적으로 막히고, 앱별
 정체성은 로고로만 드러난다. **다만 화면을 보고 다시 판단하기로 했다** — 확정 아님.
 
-- [ ] **시뮬레이터에서 카드 실물 확인** — 기록 상세 또는 경기 결과 → `공유` →
-      공유 시트 미리보기가 렌더된 1080×1920 이미지다. 스티커 모드는 없어져 이 한 장만 보면 된다
-- [ ] 배경색 결정 — 흰 텍스트 4.5:1 을 넘길 것. 그라디언트 최상단이 기준이다
-- [ ] 스펙 작성 (`Packages/YJKit/docs/specs/shared/2026/`) — 계약 변경과 **색 값**이 여기 들어간다
-- [ ] 플랜 작성 → 구현. **PR 은 Kit / Ralli 따로** (`MatchShareButton.swift:17` 이 같이 바뀐다)
+**2026-09-16 해결.** 실기기에서 시안을 고르며 그라디언트를 걷어내고 짙은 회색 카드(`#1C1D1B`)에
+값 색(시간 라임 · 칼로리 호박 · 심박 산호)을 Kit 이 고정했다. 흰 글씨 17 : 1. 앱 정체성은 원형 로고
+배경색(`badgeColor`)으로만 드러난다. 결정은 대화 중 시안 페이지로 확정해 스펙 문서 대신 README 와 PR 에 남겼다.
+로컬 SPM 이라 Kit 만 먼저 머지할 수 없어 PR 은 하나로 묶었다.
 
 ## HaruchiFit — 첫 출시 전 (Phase 1 완료 · Phase 2 대기)
 
