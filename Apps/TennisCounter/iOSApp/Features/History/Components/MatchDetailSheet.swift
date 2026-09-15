@@ -71,18 +71,16 @@ struct MatchDetailSheet: View {
                         Text(timeRangeString)
                     }
                 }
-
-                Section {
-                    MatchShareButton(match: match)
-                        .frame(maxWidth: .infinity)
-                        .listRowBackground(Color.clear)
-                }
             }
             .navigationTitle(String(localized: "match_detail_title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .topBarLeading) {
                     Button(String(localized: "btn_cancel")) { dismiss() }
+                }
+                // 피트니스 앱처럼 우상단. 배경은 툴바가 그린다 — '취소' 와 같은 질감이 되도록.
+                ToolbarItem(placement: .topBarTrailing) {
+                    MatchShareButton(match: match, appearance: .toolbar)
                 }
             }
         }

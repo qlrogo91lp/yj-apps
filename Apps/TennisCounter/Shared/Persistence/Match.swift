@@ -58,4 +58,16 @@ extension Match {
             totalCaloriesBurned: workoutTotalCaloriesBurned ?? 0
         )
     }
+
+    /// 공유 카드 머리줄의 끝 시각. 카드 숫자가 "이 경기가 끝난 시점까지의 누적값"이라 이 경기의 끝이다.
+    var shareEndedAt: Date? {
+        endedAt
+    }
+
+    /// 공유 카드 머리줄의 시작 시각 — 워크아웃 시작. 같은 세션의 다른 경기를 조회하지 않고
+    /// 끝 시각에서 누적 운동 시간을 거꾸로 뺀다. 끝 시각이 없으면 이 경기의 시작으로 대신한다.
+    var shareStartedAt: Date {
+        guard let end = endedAt, let elapsed = workoutElapsedSeconds else { return startedAt }
+        return end.addingTimeInterval(-TimeInterval(elapsed))
+    }
 }

@@ -1270,6 +1270,24 @@
         }
       }
     },
+    "share_title_tennis" : {
+      "comment" : "공유 카드 머리줄의 운동 이름",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tennis"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "테니스"
+          }
+        }
+      }
+    },
     "summary_avg_heartrate" : {
       "localizations" : {
         "en" : {
