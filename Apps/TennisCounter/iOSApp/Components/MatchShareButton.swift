@@ -5,6 +5,8 @@ import WorkoutShareUI
 /// 누적값이 없는 구버전 기록은 버튼 자체를 그리지 않는다 — 카드 네 칸이 모두 워크아웃 누적값이라서.
 struct MatchShareButton: View {
     let match: Match
+    /// 툴바에 둘 때는 `.toolbar` — 배경을 툴바가 그려 옆의 기본 버튼과 질감이 맞는다.
+    var appearance: WorkoutShareButtonAppearance = .standalone
 
     var body: some View {
         if let result = match.workoutResult {
@@ -16,7 +18,8 @@ struct MatchShareButton: View {
                     endedAt: match.shareEndedAt
                 ),
                 // 라임 원에는 Kit 가 검은 로고를 고른다 — 로고 색은 넘기지 않는다.
-                style: WorkoutShareStyle(badgeColor: .brand, logo: Image("RalliIcon"))
+                style: WorkoutShareStyle(badgeColor: .brand, logo: Image("RalliIcon")),
+                appearance: appearance
             )
         }
     }

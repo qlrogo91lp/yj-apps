@@ -78,16 +78,9 @@ struct MatchDetailSheet: View {
                 ToolbarItem(placement: .topBarLeading) {
                     Button(String(localized: "btn_cancel")) { dismiss() }
                 }
-                // 피트니스 앱처럼 우상단. 버튼이 자기 원을 그리므로 iOS 26 유리 배경은 끈다 — 원이 두 겹이 된다.
-                if #available(iOS 26.0, *) {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        MatchShareButton(match: match)
-                    }
-                    .sharedBackgroundVisibility(.hidden)
-                } else {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        MatchShareButton(match: match)
-                    }
+                // 피트니스 앱처럼 우상단. 배경은 툴바가 그린다 — '취소' 와 같은 질감이 되도록.
+                ToolbarItem(placement: .topBarTrailing) {
+                    MatchShareButton(match: match, appearance: .toolbar)
                 }
             }
         }
