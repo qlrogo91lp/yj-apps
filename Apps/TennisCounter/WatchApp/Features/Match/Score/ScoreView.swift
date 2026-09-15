@@ -8,6 +8,10 @@ struct ScoreView: View {
     @State private var crownOffset = 0.0
     /// 한 번 돌리기에 최대 1점 — 회전량이 아무리 커도 크라운이 멈출 때까지 잠근다.
     @State private var crownGate = CrownPointGate()
+    // DEBUG-CROWN: 기준값 보정용 임시 표시. 기준값을 확정하면 이 세 줄과 overlay 를 지운다.
+    @State private var crownPeak = 0.0
+    @State private var crownScored = false
+    @State private var crownDebugText = ""
     /// 크라운은 포커스를 가진 뷰만 받는다. 탭을 오가거나 다이얼로그를 닫으면 돌아온다는 보장이 없어
     /// 화면이 보일 때마다 직접 잡는다. 잃으면 크라운이 에러 없이 조용히 죽는다.
     @FocusState private var isCrownFocused: Bool
@@ -75,17 +79,34 @@ struct ScoreView: View {
             isContinuous: false, // true 면 범위 끝에서 반대편으로 감겨 상대 포인트가 잘못 들어간다
             isHapticFeedbackEnabled: false, // 포인트 햅틱은 MatchHaptics 가 울린다 — 두 번 울리지 않게
             onChange: { event in
+                crownPeak = max(crownPeak, abs(event.offset)) // DEBUG-CROWN
                 // 버튼과 같은 가드 — mirror 는 점수를 넣을 권한이 없다.
                 guard flowViewModel.isDriver, case .playing = flowViewModel.phase else { return }
                 if let side = crownGate.rotate(to: event.offset) {
                     viewModel.addPoint(side)
+                    crownScored = true // DEBUG-CROWN
                 }
             },
             onIdle: {
+                // DEBUG-CROWN: 방금 회전의 최대량과 점수 여부
+                crownDebugText = "crown \(Int(crownPeak))" + (crownScored ? " ✓" : "")
+                crownPeak = 0
+                crownScored = false
                 crownGate.idle()
                 crownOffset = 0
             }
         )
+        // 크라운을 돌리면 화면 가장자리에 스크롤 바가 뜬다 — 점수 화면엔 스크롤할 게 없다.
+        .digitalCrownAccessory(.hidden)
+        // DEBUG-CROWN: 기준값 보정용 임시 표시
+        .overlay(alignment: .bottomTrailing) {
+            Text(verbatim: crownDebugText)
+                .font(.system(size: 11, design: .monospaced))
+                .foregroundColor(.yellow)
+                .padding(.trailing, 14)
+                .padding(.bottom, 2)
+                .allowsHitTesting(false)
+        }
         .onAppear { isCrownFocused = true }
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {

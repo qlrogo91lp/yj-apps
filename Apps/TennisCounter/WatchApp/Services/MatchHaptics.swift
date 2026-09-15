@@ -17,7 +17,8 @@ protocol MatchHapticsPlaying {
     func play(_ event: MatchHapticEvent)
 }
 
-/// 어휘는 골프·하루치와 맞춘다 — `.click` 은 입력, `.directionDown` 은 되돌리기.
+/// 입력은 `.directionUp`, 되돌리기는 `.directionDown` — 짝으로 읽힌다.
+/// 골프처럼 입력에 `.click` 을 썼더니 경기 중엔 거의 느껴지지 않아 올렸다 (1.1.8 실기기).
 /// 자주 오는 이벤트일수록 가볍게, 드문 이벤트일수록 세게.
 ///
 /// 설정 연동(작업 #8)은 `play(_:)` 첫 줄에서 건다 — 이벤트가 여기까지는 그대로 흘러오고
@@ -29,7 +30,7 @@ struct MatchHaptics: MatchHapticsPlaying {
 
     static func type(for event: MatchHapticEvent) -> WKHapticType {
         switch event {
-        case .point: .click
+        case .point: .directionUp
         case .undo: .directionDown
         case .gameWon: .start
         case .setWon: .notification

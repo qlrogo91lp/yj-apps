@@ -3,8 +3,9 @@ import Testing
 import WatchKit
 
 struct MatchHapticsTests {
-    @Test func scoreEventsUseSharedVocabularyWithGolf() {
-        #expect(MatchHaptics.type(for: .point) == .click)
+    @Test func scoreEventsMapToDistinctHaptics() {
+        // .click 은 경기 중 거의 느껴지지 않았다 (실기기). 되돌리기와 짝이 맞는 .directionUp 으로 올린다.
+        #expect(MatchHaptics.type(for: .point) == .directionUp)
         #expect(MatchHaptics.type(for: .undo) == .directionDown)
         #expect(MatchHaptics.type(for: .gameWon) == .start)
         #expect(MatchHaptics.type(for: .setWon) == .notification)

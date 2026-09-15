@@ -6,7 +6,8 @@
 struct CrownPointGate {
     /// 실기기에서 맞춘 값이 아니라 추정치다 — 너무 둔하거나 예민하면 이 값만 바꾼다.
     /// 라켓 쥔 손목이 스쳐도 들어가지 않도록 보수적으로(많이 돌려야 들어가게) 잡는다.
-    static let defaultThreshold = 30.0
+    /// 30 은 `.low` 감도에서 너무 둔했다 (실기기).
+    static let defaultThreshold = 10.0
 
     let threshold: Double
     private var isLocked = false
