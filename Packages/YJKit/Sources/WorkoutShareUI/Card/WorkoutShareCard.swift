@@ -12,7 +12,7 @@
         }
     }
 
-    /// 공유 이미지. 그라디언트가 캔버스 전체를 채우고 지표 카드가 세로 중앙에 놓인다.
+    /// 공유 이미지. 그라디언트로 칠한 둥근 카드 한 장이고, 모서리 바깥은 투명하다.
     /// 값과 스타일만 받는다 — 서비스나 ViewModel을 모른다.
     struct WorkoutShareCard: View {
         let model: WorkoutShareCardModel
@@ -21,8 +21,8 @@
         var body: some View {
             content
                 .frame(width: ShareCanvas.width, height: cardHeight)
-                .frame(width: ShareCanvas.width, height: ShareCanvas.imageHeight)
                 .background(gradient)
+                .clipShape(RoundedRectangle(cornerRadius: ShareCanvas.cornerRadius, style: .continuous))
         }
 
         private var cardHeight: CGFloat {

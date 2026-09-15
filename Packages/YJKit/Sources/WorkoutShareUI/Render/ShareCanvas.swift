@@ -9,17 +9,17 @@
         static let verticalPadding: CGFloat = 16
         static let rowHeight: CGFloat = 42
         static let logoStripHeight: CGFloat = 32
-        static let imageHeight: CGFloat = 480
+        static let cornerRadius: CGFloat = 20
 
-        /// 이미지 가운데 놓이는 지표 카드 — 행 수와 로고 유무에 따라 높이가 변한다.
+        /// 지표 카드 — 공유 이미지 전체 크기이기도 하다. 행 수와 로고 유무에 따라 높이가 변한다.
+        ///
+        /// 스토리 화면(1080×1920)으로 구우면 인스타가 배경으로 깔아버린다. 카드만 넘겨야
+        /// 사진 한 장으로 받아 옮기고 키울 수 있다.
         static func cardSize(rowCount: Int, hasLogo: Bool) -> CGSize {
             let height = verticalPadding * 2
                 + rowHeight * CGFloat(rowCount)
                 + (hasLogo ? logoStripHeight : 0)
             return CGSize(width: width, height: height)
         }
-
-        /// 공유 이미지 전체 — 항상 1080×1920 px에 대응한다.
-        static let imageSize = CGSize(width: width, height: imageHeight)
     }
 #endif

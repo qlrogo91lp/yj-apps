@@ -13,7 +13,8 @@
         {
             let renderer = ImageRenderer(content: WorkoutShareCard(model: model, style: style))
             renderer.scale = ShareCanvas.scale
-            renderer.isOpaque = true
+            // 둥근 모서리 바깥을 투명하게 남긴다. 불투명으로 구우면 모서리가 검게 찬다.
+            renderer.isOpaque = false
             guard let image = renderer.uiImage else {
                 // 조용히 실패하면 사용자는 버튼이 고장난 줄 안다.
                 logger.error("공유 카드 렌더에 실패했다")

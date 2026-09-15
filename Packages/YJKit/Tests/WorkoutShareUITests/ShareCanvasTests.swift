@@ -23,14 +23,5 @@
             #expect(size.width * ShareCanvas.scale == 1080)
             #expect(size.height * ShareCanvas.scale == 760)
         }
-
-        @Test func imageCanvasIsStorySize() {
-            #expect(ShareCanvas.imageSize.width * ShareCanvas.scale == 1080)
-            #expect(ShareCanvas.imageSize.height * ShareCanvas.scale == 1920)
-        }
-
-        @Test func tallestCardFitsInsideTheImage() {
-            #expect(ShareCanvas.cardSize(rowCount: 3, hasLogo: true).height <= ShareCanvas.imageHeight)
-        }
     }
 #endif
