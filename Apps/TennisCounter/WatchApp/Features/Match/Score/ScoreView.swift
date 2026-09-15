@@ -4,13 +4,11 @@ struct ScoreView: View {
     @ObservedObject var flowViewModel: WorkoutSessionViewModel
     @ObservedObject var viewModel: ScoreViewModel
     @State private var showExitConfirm = false
-    /// 이번 회전의 누적량. 크라운이 멈추면(`onIdle`) 0 으로 되돌린다.
-    @State private var crownOffset = 0.0
-    /// 한 번 돌리기에 최대 1점 — 회전량이 아무리 커도 크라운이 멈출 때까지 잠근다.
+    /// 크라운이 딸깍 걸릴 때마다 1 씩 바뀌는 값. 절대값에는 의미가 없다 — 변화량만 본다.
+    @State private var crownDetent = 0.0
+    /// 한 번 돌리기에 최대 1점 — 여러 칸이 뛰어도 크라운이 멈출 때까지 잠근다.
     @State private var crownGate = CrownPointGate()
-    // DEBUG-CROWN: 기준값 보정용 임시 표시. 기준값을 확정하면 이 세 줄과 overlay 를 지운다.
-    @State private var crownPeak = 0.0
-    @State private var crownScored = false
+    // DEBUG-CROWN: 감도 확인용 임시 표시. 확정하면 이 줄과 overlay 를 지운다.
     @State private var crownDebugText = ""
     /// 크라운은 포커스를 가진 뷰만 받는다. 탭을 오가거나 다이얼로그를 닫으면 돌아온다는 보장이 없어
     /// 화면이 보일 때마다 직접 잡는다. 잃으면 크라운이 에러 없이 조용히 죽는다.
@@ -72,30 +70,25 @@ struct ScoreView: View {
         }
         .focusable()
         .focused($isCrownFocused)
+        // 디텐트 방식 — 시스템이 "한 칸"을 정해 주므로 회전량 단위를 추측하지 않는다.
+        // 회전량을 직접 재던 앞선 구현들은 한 번에 4점이 들어가거나 몇 바퀴를 돌려야 1점이었다.
         .digitalCrownRotation(
-            $crownOffset,
-            from: -1000, through: 1000,
-            sensitivity: .low, // 가장 둔하게 — 많이 돌려야 점수가 들어간다
+            detent: $crownDetent,
+            from: -1000, through: 1000, by: 1,
+            sensitivity: .low, // 한 칸에 필요한 회전이 가장 큰 단계 — 손목이 스쳐도 안 걸리게
             isContinuous: false, // true 면 범위 끝에서 반대편으로 감겨 상대 포인트가 잘못 들어간다
             isHapticFeedbackEnabled: false, // 포인트 햅틱은 MatchHaptics 가 울린다 — 두 번 울리지 않게
-            onChange: { event in
-                crownPeak = max(crownPeak, abs(event.offset)) // DEBUG-CROWN
-                // 버튼과 같은 가드 — mirror 는 점수를 넣을 권한이 없다.
-                guard flowViewModel.isDriver, case .playing = flowViewModel.phase else { return }
-                if let side = crownGate.rotate(to: event.offset) {
-                    viewModel.addPoint(side)
-                    crownScored = true // DEBUG-CROWN
-                }
-            },
-            onIdle: {
-                // DEBUG-CROWN: 방금 회전의 최대량과 점수 여부
-                crownDebugText = "crown \(Int(crownPeak))" + (crownScored ? " ✓" : "")
-                crownPeak = 0
-                crownScored = false
-                crownGate.idle()
-                crownOffset = 0
-            }
+            onIdle: { crownGate.idle() }
         )
+        .onChange(of: crownDetent) { _, value in
+            crownDebugText = "detent \(Int(value))" // DEBUG-CROWN
+            // 버튼과 같은 가드 — mirror 는 점수를 넣을 권한이 없다.
+            guard flowViewModel.isDriver, case .playing = flowViewModel.phase else { return }
+            if let side = crownGate.detentChanged(to: value) {
+                viewModel.addPoint(side)
+                crownDebugText += " ✓" // DEBUG-CROWN
+            }
+        }
         // 크라운을 돌리면 화면 가장자리에 스크롤 바가 뜬다 — 점수 화면엔 스크롤할 게 없다.
         .digitalCrownAccessory(.hidden)
         // DEBUG-CROWN: 기준값 보정용 임시 표시

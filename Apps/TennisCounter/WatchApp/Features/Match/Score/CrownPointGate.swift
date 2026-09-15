@@ -1,27 +1,22 @@
-/// 크라운 회전을 점수로 바꾸는 관문. 한 번 돌리기(크라운이 멈출 때까지)에 최대 1점만 통과시킨다.
+/// 크라운 디텐트(딸깍)를 점수로 바꾸는 관문. 한 번 돌리기(크라운이 멈출 때까지)에 최대 1점만 통과시킨다.
 ///
-/// 회전량만큼 점수를 넣던 첫 구현은 크라운을 한 번 돌리면 세트 스코어가 4까지 올라갔다 (1.1.8 실기기).
-/// 회전량 단위가 감도·범위에 따라 달라 "몇 칸 = 몇 점"을 믿을 수 없으므로, 기준값을 넘는 순간
-/// 한 점만 넣고 크라운이 멈출 때까지 잠근다.
+/// 회전량을 직접 재던 앞선 두 구현은 회전량 단위가 감도·범위에 따라 달라 매번 빗나갔다 —
+/// 처음엔 한 번에 4점이 들어갔고(1.1.8), 기준값을 세우자 몇 바퀴를 돌려야 1점이 됐다.
+/// 디텐트는 시스템이 "한 칸"을 정해 주므로 단위를 추측할 필요가 없다.
 struct CrownPointGate {
-    /// 실기기에서 맞춘 값이 아니라 추정치다 — 너무 둔하거나 예민하면 이 값만 바꾼다.
-    /// 라켓 쥔 손목이 스쳐도 들어가지 않도록 보수적으로(많이 돌려야 들어가게) 잡는다.
-    /// 30 은 `.low` 감도에서 너무 둔했다 (실기기).
-    static let defaultThreshold = 10.0
-
-    let threshold: Double
+    /// 직전 디텐트 값. 첫 값은 기준점으로만 삼고 점수를 내지 않는다 —
+    /// 화면에 들어올 때 0 이 아닌 값이 한 번 흘러와도 점수가 되지 않게.
+    private var lastDetent: Double?
     private var isLocked = false
 
-    init(threshold: Double = Self.defaultThreshold) {
-        self.threshold = threshold
-    }
-
-    /// `offset` 은 이번 회전을 시작한 뒤의 누적 회전량. 위(+)는 내 점수, 아래(-)는 상대 점수.
-    /// 기준값을 처음 넘는 순간 한 번만 방향을 돌려주고, 그 뒤로는 `idle()` 전까지 nil.
-    mutating func rotate(to offset: Double) -> PlayerSide? {
-        guard !isLocked, abs(offset) >= threshold else { return nil }
+    /// 디텐트 값이 바뀌면 방향을 돌려준다. 위(증가)는 내 점수, 아래(감소)는 상대 점수.
+    /// 여러 칸이 한꺼번에 뛰어도 1점이다 — 빠르게 돌렸을 때 점수가 쏟아지지 않게.
+    mutating func detentChanged(to value: Double) -> PlayerSide? {
+        let previous = lastDetent
+        lastDetent = value
+        guard let previous, !isLocked, value != previous else { return nil }
         isLocked = true
-        return offset > 0 ? .me : .opponent
+        return value > previous ? .me : .opponent
     }
 
     /// 크라운이 멈췄다. 다음 회전은 새로 센다.
