@@ -4,9 +4,10 @@ struct ScoreView: View {
     @ObservedObject var flowViewModel: WorkoutSessionViewModel
     @ObservedObject var viewModel: ScoreViewModel
     @State private var showExitConfirm = false
-    /// 크라운 회전 누적. ±1 디텐트를 넘으면 포인트 하나로 바꾸고 0 으로 되돌린다 —
-    /// 스침(1 미만)은 점수가 되지 않는다.
-    @State private var crownAccumulator = 0.0
+    /// 크라운이 딸깍 걸릴 때마다 1 씩 바뀌는 값. 절대값에는 의미가 없다 — 변화량만 본다.
+    @State private var crownDetent = 0.0
+    /// 한 번 돌리기에 최대 1점 — 여러 칸이 뛰어도 크라운이 멈출 때까지 잠근다.
+    @State private var crownGate = CrownPointGate()
     /// 크라운은 포커스를 가진 뷰만 받는다. 탭을 오가거나 다이얼로그를 닫으면 돌아온다는 보장이 없어
     /// 화면이 보일 때마다 직접 잡는다. 잃으면 크라운이 에러 없이 조용히 죽는다.
     @FocusState private var isCrownFocused: Bool
@@ -67,30 +68,25 @@ struct ScoreView: View {
         }
         .focusable()
         .focused($isCrownFocused)
+        // 디텐트 방식 — 시스템이 "한 칸"을 정해 주므로 회전량 단위를 추측하지 않는다.
+        // 회전량을 직접 재던 앞선 구현들은 한 번에 4점이 들어가거나 몇 바퀴를 돌려야 1점이었다.
         .digitalCrownRotation(
-            $crownAccumulator,
+            detent: $crownDetent,
             from: -1000, through: 1000, by: 1,
-            sensitivity: .medium,
+            sensitivity: .low, // 한 칸에 필요한 회전이 가장 큰 단계 — 손목이 스쳐도 안 걸리게
             isContinuous: false, // true 면 범위 끝에서 반대편으로 감겨 상대 포인트가 잘못 들어간다
-            isHapticFeedbackEnabled: false // 포인트 햅틱은 MatchHaptics 가 울린다 — 두 번 울리지 않게
+            isHapticFeedbackEnabled: false, // 포인트 햅틱은 MatchHaptics 가 울린다 — 두 번 울리지 않게
+            onIdle: { crownGate.idle() }
         )
-        .onChange(of: crownAccumulator) { _, value in
+        .onChange(of: crownDetent) { _, value in
             // 버튼과 같은 가드 — mirror 는 점수를 넣을 권한이 없다.
-            guard flowViewModel.isDriver else { crownAccumulator = 0; return }
-            if value >= 1 {
-                for _ in 0 ..< Int(value) {
-                    guard case .playing = flowViewModel.phase else { break }
-                    viewModel.addPoint(.me)
-                }
-                crownAccumulator = 0
-            } else if value <= -1 {
-                for _ in 0 ..< Int(abs(value)) {
-                    guard case .playing = flowViewModel.phase else { break }
-                    viewModel.addPoint(.opponent)
-                }
-                crownAccumulator = 0
+            guard flowViewModel.isDriver, case .playing = flowViewModel.phase else { return }
+            if let side = crownGate.detentChanged(to: value) {
+                viewModel.addPoint(side)
             }
         }
+        // 크라운을 돌리면 화면 가장자리에 스크롤 바가 뜬다 — 점수 화면엔 스크롤할 게 없다.
+        .digitalCrownAccessory(.hidden)
         .onAppear { isCrownFocused = true }
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {

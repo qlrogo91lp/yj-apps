@@ -78,7 +78,6 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "399700FB2A1D9BC900D0D486"
             BuildableName = "TennisCounter Watch App.app"
-            BlueprintName = "TennisCounter Watch App"
             ReferencedContainer = "container:TennisCounter.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -112,7 +111,6 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "3974B8F32EBCDFA5002D0EA7"
             BuildableName = "ComplicationAppExtension.appex"
-            BlueprintName = "ComplicationAppExtension"
             ReferencedContainer = "container:TennisCounter.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
