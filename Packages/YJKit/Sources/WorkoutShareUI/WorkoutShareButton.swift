@@ -36,8 +36,15 @@
                           systemImage: "doc.on.doc")
                 }
             } label: {
-                Label(String(localized: "share_button", bundle: .module),
-                      systemImage: "square.and.arrow.up")
+                // 피트니스 앱 우상단 공유 버튼과 같은 모양 — 짙은 원 안의 아이콘만. 글자는 VoiceOver 로만 읽힌다.
+                Image(systemName: "square.and.arrow.up")
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundStyle(.white)
+                    .offset(y: -1) // 화살표 획 때문에 아이콘이 아래로 쏠려 보인다
+                    .frame(width: 44, height: 44)
+                    .background(Circle().fill(Color(white: 0.17)))
+                    .contentShape(Circle())
+                    .accessibilityLabel(String(localized: "share_button", bundle: .module))
             }
             .sheet(item: $shared) { ShareSheet(fileURL: $0.url) }
             .alert(String(localized: "share_copied_title", bundle: .module), isPresented: $showCopied) {
