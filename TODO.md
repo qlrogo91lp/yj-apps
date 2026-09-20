@@ -15,11 +15,11 @@
 
 ```
 트랙 A (iOS)     5̶ → 2̶ → 1̶ ──┐            ← 전부 완료 (실기기 확인 포함)
-트랙 B (워치)     3̶ → 4̶ ──────┤→ 6̶ 코드·이미지 → 6 화살표 → 7   ← 6 은 이미지까지 들어감
+트랙 B (워치)     3̶ → 4̶ ──────┤→ 6̶ 코드·이미지 → 7   ← 6 은 시뮬레이터 확인만 남음
 트랙 C (YJKit)   MonitoringCore ┘            ← 집에서 (Firebase 콘솔 선행)
 트랙 D (iOS)     9 세션 중심 재편            ← 스펙·플랜 완료, 구현 대기
 
-다음 차례: #6 은 크라운 화살표 위치 조정과 시뮬레이터 확인만 남았다. #9 는 설계가 끝나 바로 구현 가능.
+다음 차례: #6 은 시뮬레이터 ko/en 확인만 남았다. #9 는 설계가 끝나 바로 구현 가능.
 트랙 C·#7 은 집에서 몰아서. #8 은 아직 브레인스토밍 전.
 ```
 
@@ -40,7 +40,7 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
 | ~~1~~ | ~~WorkoutShareUI 붙이기 (공유 시트)~~ | A | **완료** (PR #20 → 인스타 경로 제거 → `feat/share-card-sticker` 카드 개편) · 실기기 확인 완료 | [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-07-workout-share-button.md) · [제거 플랜](Packages/YJKit/docs/plans/ios/2026/2026-09-13-share-sheet-only.md) · [Kit 사용법](Packages/YJKit/README.md#workoutshareui-사용법) |
 | ~~3~~ | ~~햅틱 (워치 전용)~~ | B | **완료** (PR #18) · 실기기 확인 완료 | [플랜](Apps/TennisCounter/docs/plans/watch/2026/2026-09-07-match-haptics.md) — 설정 연동은 #8 때 `MatchHaptics.play` 첫 줄에서. 포인트 `.click`이 약하게 느껴지나 유지하기로 결정 |
 | ~~4~~ | ~~크라운 점수 입력 (워치, 위=나 아래=상대)~~ | B | **완료** (버그 수정 PR, 실기기 확인 완료) | [플랜](Apps/TennisCounter/docs/plans/watch/2026/2026-09-07-crown-scoring.md) — PR #22 구현이 회전량 기반이라 실기기에서 오작동, 디텐트 방식으로 재구현. 온보딩(#6) 항목 하나 파생 |
-| 6 | 온보딩 **5페이지** (워치 중심, iOS 만) | A → 합류 | **이미지까지 완료** (PR #25) · 크라운 화살표 위치와 시뮬레이터 ko/en 확인만 남음 | [스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-09-07-onboarding-design.md) (09-18 개정) · [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-17-onboarding-watch-focused.md) — 4페이지에서 5페이지로 재편, 기능 목록 페이지 제거. 워치 3장은 Figma 목업 합성, 공유 그림은 인스타 스티커 화면 |
+| 6 | 온보딩 **5페이지** (워치 중심, iOS 만) | A → 합류 | **이미지까지 완료** (PR #25) · 시뮬레이터 ko/en 확인만 남음 | [스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-09-07-onboarding-design.md) (09-18 개정) · [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-17-onboarding-watch-focused.md) — 4페이지에서 5페이지로 재편, 기능 목록 페이지 제거. 워치 3장은 Figma 목업 합성, 공유 그림은 인스타 스티커 화면 |
 | 7 | Firebase Crashlytics (iOS + 워치, 익스텐션 제외) | 단독 (맨 뒤) | 스펙·플랜 완료 · 구현 대기 | [스펙](Packages/YJKit/docs/specs/shared/2026/2026-09-07-crash-reporting-design.md) → [YJKit 플랜](Packages/YJKit/docs/plans/shared/2026/2026-09-07-monitoring-core.md) (트랙 C, 지금 병렬 가능) → [Ralli 플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-07-crashlytics-integration.md) |
 | 8 | 설정 페이지 + 다른 앱 노출 | — | **논의 필요 — 아직 브레인스토밍 전** | 아래 "남은 논의" 참고 |
 | 9 | iOS 기록·요약 **세션 중심 재편** | D | **스펙·플랜 완료 · 구현 대기** | [스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-09-18-session-centric-history.md) · [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-18-session-centric-history.md) — `WorkoutSessionRecord` 신설이 포함된다. #2 스펙을 개정한다 |
@@ -80,7 +80,7 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
 - [x] **6번 스크린샷 5장** — 워치 3장은 3x 로 재내보내 넣었다. 스와이프는 영어·컴플리케이션은 한국어 한 장,
       공유는 인스타 스티커 화면. 그림 자리는 `OnboardingScreenshotPage` 가 비율 0.80 박스로 고정한다
 - [ ] 6번 시뮬레이터에서 ko/en 5장 넘겨보기 — 크기가 흔들리지 않는지, 워치 3장이 선명한지
-- [ ] 6번 크라운 화살표 위치 조정 (플랜 Task 4) — 고정 비율 박스로 기준 프레임이 바뀌었으니 실제 화면을 보고 `crownRatio` 를 맞춘다
+- [x] ~~6번 크라운 화살표 위치 조정~~ — 화살표를 이미지에 구워 코드 오버레이를 지웠다 (플랜 Task 4 폐기)
 - [ ] 7번 Ralli 연동 플랜 — 단독으로. PR 은 Kit / Ralli 따로
 
 **아무 때나**

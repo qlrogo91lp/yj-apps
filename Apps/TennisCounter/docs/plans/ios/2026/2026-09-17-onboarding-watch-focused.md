@@ -63,7 +63,7 @@ make lint && make format
 | `iOSApp/Localizable.xcstrings` | 수정 | 위 문자열 표대로 9개 제거 · 4개 추가 |
 | `iOSApp/Features/Onboarding/OnboardingView.swift` | 수정 | `TabView` 5장, `lastPage` 3 → 4 |
 | `iOSApp/Features/Onboarding/Components/OnboardingFeatureListPage.swift` | **삭제** | 쓰는 곳이 없어진다 |
-| `iOSApp/Features/Onboarding/Components/CrownArrowsOverlay.swift` | 수정 | 목업 기준으로 화살표 위치 재조정 (비율 기반) |
+| `iOSApp/Features/Onboarding/Components/CrownArrowsOverlay.swift` | ~~수정~~ **삭제** | 화살표를 이미지에 구워 폐기 (Task 4 참고) |
 | `iOSApp/Assets.xcassets/Onboarding{Crown,Swipe,Complication,Health,Share}.imageset` | 생성 | ko/en 로컬라이즈 이미지 5개 |
 | `iOSApp/Features/Onboarding/OnboardingGate.swift` | **변경 없음** | `version = 1` 유지 |
 | `iOSApp/iOSApp.swift` | **변경 없음** | 진입 분기 그대로 |
@@ -373,7 +373,11 @@ git commit -m "✨ 온보딩 이미지 5장 (ko/en)"
 
 ---
 
-### Task 4: 크라운 화살표 위치 재조정
+### ~~Task 4: 크라운 화살표 위치 재조정~~ — 폐기
+
+> **폐기.** 화살표·라벨·Rotate/Tap 그림을 Figma 이미지에 직접 구워 넣었다. 코드 오버레이가 남으면 화살표가
+> 두 벌로 겹치므로 `CrownArrowsOverlay` 와 문자열 키 2개(`onboarding_crown_up`·`onboarding_crown_down`)를 지웠다.
+> 아래 내용은 당시 계획의 기록이다.
 
 **선행:** Task 3 (실제 `OnboardingCrown` 이미지가 있어야 맞출 수 있다)
 
