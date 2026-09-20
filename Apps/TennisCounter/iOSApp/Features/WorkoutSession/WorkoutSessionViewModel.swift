@@ -122,7 +122,7 @@ class WorkoutSessionViewModel: ObservableObject {
         connectivity.$receivedWorkoutEnd
             .compactMap(\.self)
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] id in self?.handleIncomingWorkoutEnd(id) }
+            .sink { [weak self] message in self?.handleIncomingWorkoutEnd(message) }
             .store(in: &cancellables)
 
         connectivity.$receivedMatchReset
@@ -139,12 +139,35 @@ class WorkoutSessionViewModel: ObservableObject {
         startNewMatch(notifyRemote: false)
     }
 
-    private func handleIncomingWorkoutEnd(_ id: UUID) {
+    private func handleIncomingWorkoutEnd(_ message: WorkoutEndMessage) {
         // 매치가 한 번도 시작되지 않았으면 sessionId가 아직 상대와 동기화되지 않았으므로 무조건 수용한다.
-        if hasSyncedSession, id != sessionId { return }
+        if hasSyncedSession, message.sessionId != sessionId { return }
         connectivity.receivedWorkoutEnd = nil
+        saveSessionRecord(from: message)
         endSession(notifyRemote: false)
         remoteWorkoutEnded = true
+    }
+
+    /// 워크아웃 종료 메시지의 최종값을 세션 레코드로 저장한다.
+    /// 최종값이 하나도 없으면(구버전 워치) 저장하지 않는다 — 빈 레코드가 폴백을 가로막는다.
+    @discardableResult
+    func saveSessionRecord(from message: WorkoutEndMessage) -> WorkoutSessionRecord? {
+        guard message.elapsedSeconds != nil
+            || message.activeCalories != nil
+            || message.averageHeartRate != nil
+        else { return nil }
+
+        let record = WorkoutSessionRecord()
+        record.workoutSessionId = message.sessionId
+        record.startedAt = message.startedAt ?? Date()
+        record.endedAt = message.endedAt
+        record.elapsedSeconds = message.elapsedSeconds
+        record.activeCalories = message.activeCalories
+        record.totalCalories = message.totalCalories
+        record.averageHeartRate = message.averageHeartRate
+        record.healthKitUUID = message.healthKitUUID
+        try? SessionPersistenceService.shared.upsert(record)
+        return record
     }
 
     deinit { timer?.invalidate() }
@@ -407,7 +430,7 @@ private extension WorkoutSessionViewModel {
 #if DEBUG
     extension WorkoutSessionViewModel {
         func handleIncomingWorkoutEndForTest(_ id: UUID) {
-            handleIncomingWorkoutEnd(id)
+            handleIncomingWorkoutEnd(WorkoutEndMessage(sessionId: id))
         }
 
         func handleIncomingMatchResetForTest(_ id: UUID) {

@@ -90,7 +90,7 @@ class WorkoutSessionViewModel: ObservableObject {
         connectivity.$receivedWorkoutEnd
             .compactMap(\.self)
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] id in self?.handleIncomingWorkoutEnd(id) }
+            .sink { [weak self] message in self?.handleIncomingWorkoutEnd(message) }
             .store(in: &cancellables)
 
         connectivity.$receivedMatchReset
@@ -120,9 +120,9 @@ class WorkoutSessionViewModel: ObservableObject {
         haptics.play(result.success ? .saveSucceeded : .saveFailed)
     }
 
-    private func handleIncomingWorkoutEnd(_ id: UUID) {
+    private func handleIncomingWorkoutEnd(_ message: WorkoutEndMessage) {
         // 매치가 한 번도 시작되지 않았으면 sessionId가 아직 상대와 동기화되지 않았으므로 무조건 수용한다.
-        if hasSyncedSession, id != activeSessionId { return }
+        if hasSyncedSession, message.sessionId != activeSessionId { return }
         connectivity.receivedWorkoutEnd = nil
         endWorkout(notifyRemote: false)
         remoteWorkoutEnded = true
@@ -382,7 +382,7 @@ class WorkoutSessionViewModel: ObservableObject {
         }
 
         func handleIncomingWorkoutEndForTest(_ id: UUID) {
-            handleIncomingWorkoutEnd(id)
+            handleIncomingWorkoutEnd(WorkoutEndMessage(sessionId: id))
         }
 
         func handleIncomingPauseCommandForTest(_ msg: WorkoutPauseMessage) -> Bool {

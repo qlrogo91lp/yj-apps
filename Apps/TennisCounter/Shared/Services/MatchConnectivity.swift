@@ -16,7 +16,7 @@ final class MatchConnectivity: ObservableObject {
     @Published var receivedMatchSave: MatchEndMessage?
     @Published var receivedMatchSaveResult: MatchSaveResultMessage?
     @Published var receivedMetrics: WorkoutMetricsMessage?
-    @Published var receivedWorkoutEnd: UUID?
+    @Published var receivedWorkoutEnd: WorkoutEndMessage?
     @Published var receivedMatchReset: UUID?
     @Published var receivedPauseCommand: WorkoutPauseMessage?
 
@@ -41,7 +41,7 @@ final class MatchConnectivity: ObservableObject {
         service.onReceive(MatchSaveResultMessage.self) { [weak self] in self?.receivedMatchSaveResult = $0 }
         service.onReceive(WorkoutMetricsMessage.self) { [weak self] in self?.receivedMetrics = $0 }
         service.onReceive(WorkoutEndMessage.self, maxAge: Self.workoutEndStalenessThreshold) { [weak self] in
-            self?.receivedWorkoutEnd = $0.sessionId
+            self?.receivedWorkoutEnd = $0
         }
         service.onReceive(MatchResetMessage.self) { [weak self] in self?.receivedMatchReset = $0.sessionId }
         service.onReceive(WorkoutPauseMessage.self) { [weak self] in self?.receivedPauseCommand = $0 }
