@@ -18,7 +18,7 @@ struct HistoryView: View {
                             sessions: viewModel.listSessions,
                             isLoadingMore: viewModel.isLoadingMore,
                             onLoadMore: { viewModel.loadNextPage() },
-                            onSelect: { selectedSession = $0 },
+                            onSelect: { selectedSession = viewModel.sessionForDetail($0) },
                             onDelete: { pendingDelete = $0 }
                         )
                     }
@@ -30,7 +30,7 @@ struct HistoryView: View {
                         onPrevious: { viewModel.changeMonth(by: -1) },
                         onNext: { viewModel.changeMonth(by: 1) },
                         selectedDate: $viewModel.selectedDate,
-                        onSelect: { selectedSession = $0 },
+                        onSelect: { selectedSession = viewModel.sessionForDetail($0) },
                         onDelete: { pendingDelete = $0 }
                     )
                     .padding(.horizontal)
@@ -69,7 +69,7 @@ struct HistoryView: View {
             }
             .onAppear {
                 viewModel.configure(modelContext: modelContext)
-                viewModel.loadInitial()
+                viewModel.loadInitialIfNeeded()
             }
         }
     }

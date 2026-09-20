@@ -20,19 +20,50 @@ final class HistoryViewModel: ObservableObject {
 
     private var modelContext: ModelContext?
     private let pageSize: Int = 20
+    private var hasLoadedInitial = false
 
     func configure(modelContext: ModelContext) {
         guard self.modelContext == nil else { return }
         self.modelContext = modelContext
     }
 
+    /// 상세 화면에서 돌아오는 onAppear는 현재 페이지·월·날짜를 그대로 유지한다.
+    func loadInitialIfNeeded() {
+        guard !hasLoadedInitial else { return }
+        loadInitial()
+    }
+
+    /// 최초 진입 또는 명시적인 새로고침에서만 탐색 상태를 초기화한다.
     func loadInitial() {
+        guard modelContext != nil else { return }
+        hasLoadedInitial = true
         listMatches = []
         listSessions = []
         hasMore = true
         loadNextPage()
         loadCalendarMatches()
         selectedDate = Date()
+    }
+
+    /// 목록 페이지나 캘린더 날짜의 일부 경기만 상세·공유로 넘기지 않는다.
+    /// nil 워크아웃 ID를 가진 구버전 기록은 경기 ID 하나가 세션의 정체성이다.
+    func sessionForDetail(_ session: MatchSessionGroup) -> MatchSessionGroup? {
+        guard let context = modelContext else { return nil }
+        let predicate: Predicate<Match>
+        if let sessionId = session.record?.workoutSessionId ?? session.matches.first?.workoutSessionId {
+            predicate = #Predicate<Match> { $0.workoutSessionId == sessionId }
+        } else {
+            let matchId = session.id
+            predicate = #Predicate<Match> { $0.id == matchId && $0.workoutSessionId == nil }
+        }
+        let descriptor = FetchDescriptor<Match>(
+            predicate: predicate,
+            sortBy: [SortDescriptor(\.startedAt)]
+        )
+        guard let matches = try? context.fetch(descriptor),
+              !matches.isEmpty || session.record != nil
+        else { return nil }
+        return MatchSessionGroup(id: session.id, matches: matches, record: session.record)
     }
 
     func loadNextPage() {
