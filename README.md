@@ -6,9 +6,10 @@ iOS + watchOS 앱 모노레포. 공용 인프라는 `Packages/YJKit`으로 두�
 
 ```
 yj-apps/
-├─ Packages/YJKit/          공용 라이브러리 (WorkoutCore / WorkoutUI / ConnectivityCore / PersistenceCore)
+├─ Packages/YJKit/          공용 라이브러리 (WorkoutCore / WorkoutUI / WorkoutShareUI / ConnectivityCore / PersistenceCore)
 ├─ Apps/GolfCounter/        GolfCounter — iOS + Watch + Complication
-├─ Apps/TennisCounter/      TennisCounter(Ralli) — iOS + Watch + Complication + LiveActivity
+├─ Apps/TennisCounter/      Ralli(TennisCounter) — iOS + Watch + Complication + LiveActivity
+├─ Apps/HaruchiFit/         하루치 핏(HaruchiFit) — iOS + Watch + Complication
 ├─ .github/workflows/       CI — 변경된 앱만 빌드·테스트
 └─ docs/                   모노레포 공통 문서 (specs/ideas/plans/logs)
 ```
@@ -62,9 +63,13 @@ make dd-prune-apply  # 고아 DerivedData 삭제 (실제로 지움)
 
 **최상위 `YJApps.xcworkspace` 하나만 연다.** 앱별 `.xcodeproj`를 따로 열 필요가 없다.
 
-공유 스킴 7개: `GolfCounter` / `GolfCounter Watch App` / `GolfComplicationExtension` /
-`TennisCounter` / `TennisCounter Watch App` / `RalliComplicationExtension` /
-`TennisLiveActivityExtension`
+공유 스킴 11개:
+
+| 앱 | 스킴 |
+|---|---|
+| GolfCounter | `GolfCounter` / `GolfCounter Watch App` / `GolfComplicationExtension` |
+| Ralli | `TennisCounter` / `TennisCounter Watch App` / `RalliComplicationExtension` / `TennisLiveActivityExtension` |
+| 하루치 핏 | `HaruchiFit` / `HaruchiFit Watch App` / `HaruchiComplicationExtension` / `HaruchiFitWatchTests` |
 
 ```bash
 # iOS
@@ -73,11 +78,20 @@ xcodebuild -workspace YJApps.xcworkspace -scheme "GolfCounter" \
 
 # watchOS — 이름 대신 UDID로 지정할 것 (아래 참고)
 xcodebuild -workspace YJApps.xcworkspace -scheme "GolfCounter Watch App" \
+  -destination "id=$(.github/scripts/pick-simulator.sh watchOS '^Apple Watch')" \
+  -only-testing:GolfCounterWatchTests test
+
+# 하루치 핏 워치만 워치 테스트 전용 스킴을 갖는다 (-only-testing 불필요)
+xcodebuild -workspace YJApps.xcworkspace -scheme "HaruchiFitWatchTests" \
   -destination "id=$(.github/scripts/pick-simulator.sh watchOS '^Apple Watch')" test
 
 # 패키지 단독 (swift build 는 동작하지 않는다 — 아래 참고)
 make kit-test KIT_DESTINATION="id=$(.github/scripts/pick-simulator.sh iOS '^iPhone')"
 ```
+
+> **워치 테스트는 앱마다 거는 방식이 다르다.** GolfCounter·Ralli 의 워치 스킴에는 iOS 테스트 타깃까지
+> 들어 있어 `-only-testing` 으로 워치 테스트만 골라야 한다. 하루치 핏만 워치 전용 스킴
+> (`HaruchiFitWatchTests`)이 따로 있다.
 
 > **워치 시뮬레이터를 이름으로 지정하면 실패한다.** `Apple Watch Series 11 (46mm)` 같은 이름이
 > OS 26.4·26.5 두 기기와 겹쳐 매칭되지 않는다. `-destination "id=<UDID>"`를 쓴다.
