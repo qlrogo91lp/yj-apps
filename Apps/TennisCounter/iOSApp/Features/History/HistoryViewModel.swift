@@ -54,6 +54,7 @@ final class HistoryViewModel: ObservableObject {
             let fetched = (try? context.fetch(descriptor)) ?? []
             guard !fetched.isEmpty else {
                 hasMore = false
+                rebuildSessions()
                 return
             }
 

@@ -38,6 +38,6 @@ struct SessionList: View {
     private func loadMoreIfNeeded(reaching session: MatchSessionGroup) {
         guard let onLoadMore else { return }
         guard let index = sessions.firstIndex(where: { $0.id == session.id }) else { return }
-        if index == max(0, sessions.count - 3) { onLoadMore() }
+        if index >= max(0, sessions.count - 3) { onLoadMore() }
     }
 }

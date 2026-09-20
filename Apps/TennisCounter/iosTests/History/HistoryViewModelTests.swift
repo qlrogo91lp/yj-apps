@@ -214,7 +214,8 @@ struct HistoryViewModelTests {
     @Test func loadNextPage_loadsUntilNewSessionOrSourceExhaustion() throws {
         let context = try makeContext()
         let currentSession = UUID()
-        let olderSession = UUID()
+        let nextSession = UUID()
+        let finalSession = UUID()
         let base = Date()
 
         for index in 0 ..< 50 {
@@ -224,7 +225,14 @@ struct HistoryViewModelTests {
                 in: context
             )
         }
-        _ = insertMatch(session: olderSession, startedAt: base.addingTimeInterval(-3600), in: context)
+        for index in 0 ..< 50 {
+            _ = insertMatch(
+                session: nextSession,
+                startedAt: base.addingTimeInterval(TimeInterval(-3600 - index * 60)),
+                in: context
+            )
+        }
+        _ = insertMatch(session: finalSession, startedAt: base.addingTimeInterval(-7200), in: context)
         try context.save()
 
         let vm = HistoryViewModel()
@@ -232,8 +240,14 @@ struct HistoryViewModelTests {
         vm.loadInitial()
         vm.loadNextPage()
 
-        #expect(vm.listMatches.count == 51)
-        #expect(vm.listSessions.map(\.id) == [currentSession, olderSession])
+        #expect(vm.listMatches.count == 60)
+        #expect(vm.listSessions.map(\.id) == [currentSession, nextSession])
+        #expect(vm.hasMore == true)
+
+        vm.loadNextPage()
+
+        #expect(vm.listMatches.count == 101)
+        #expect(vm.listSessions.map(\.id) == [currentSession, nextSession, finalSession])
         #expect(vm.hasMore == false)
     }
 
@@ -357,6 +371,7 @@ struct HistoryViewModelTests {
         let vm = HistoryViewModel()
         vm.configure(modelContext: context)
         vm.loadInitial()
+        #expect(vm.listSessions.map(\.id) == [sessionId, otherSessionId])
         let group = try #require(vm.listSessions.first { $0.id == sessionId })
 
         vm.delete(group)
