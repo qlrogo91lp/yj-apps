@@ -695,16 +695,17 @@ import SwiftUI
 /// **제품 화면이 아니다** — Phase 3 탭 셸이 대체한다 (스펙 7절). 애니메이션·스와이프·스탯을
 /// 넣지 않는다. 지금까지 이 파일에 달려 있던 "저장 확인용 임시 화면" 이라는 성격을 그대로 잇는다.
 struct ContentView: View {
-    /// **기간을 좁혀 읽는다.** 홈이 실제로 쓰는 건 4개월치뿐이라 전체를 읽을 이유가 없다 (스펙 5절).
+    /// **기간을 좁혀 읽는다.** 홈이 실제로 쓰는 건 6개월치뿐이라 전체를 읽을 이유가 없다 (스펙 5절).
     @Query private var records: [WorkoutRecord]
     @StateObject private var grass = GrassViewModel()
     @State private var selected: Date?
 
+    private static let weeks = 26
+
     private let calendar = Calendar.current
-    private let weeks = 17
 
     init() {
-        let since = Calendar.current.date(byAdding: .weekOfYear, value: -17, to: Date())
+        let since = Calendar.current.date(byAdding: .weekOfYear, value: -Self.weeks, to: Date())
             ?? .distantPast
         _records = Query(filter: #Predicate<WorkoutRecord> { $0.startedAt >= since },
                          sort: \WorkoutRecord.startedAt)
@@ -724,7 +725,7 @@ struct ContentView: View {
         }
     }
 
-    /// 17주 × 7일. 왼쪽 위가 가장 오래된 날이다.
+    /// 26주 × 7일. 왼쪽 위가 가장 오래된 날이다.
     private var grid: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHGrid(rows: Array(repeating: GridItem(.fixed(16), spacing: 3), count: 7),
@@ -744,6 +745,7 @@ struct ContentView: View {
             }
             .padding(.horizontal)
         }
+        .defaultScrollAnchor(.trailing)
     }
 
     @ViewBuilder private var detail: some View {
@@ -769,13 +771,13 @@ struct ContentView: View {
         }
     }
 
-    /// 오늘이 든 주를 오른쪽 끝에 두고 17주를 거슬러 올라간다.
+    /// 오늘이 든 주를 오른쪽 끝에 두고 26주를 거슬러 올라간다.
     private var gridDays: [Date] {
         let today = calendar.startOfDay(for: Date())
         guard let thisWeek = calendar.dateInterval(of: .weekOfYear, for: today)?.start,
-              let start = calendar.date(byAdding: .weekOfYear, value: -(weeks - 1), to: thisWeek)
+              let start = calendar.date(byAdding: .weekOfYear, value: -(Self.weeks - 1), to: thisWeek)
         else { return [] }
-        return (0 ..< weeks * 7).compactMap {
+        return (0 ..< Self.weeks * 7).compactMap {
             calendar.date(byAdding: .day, value: $0, to: start)
         }
     }
@@ -814,11 +816,12 @@ iOS 시뮬레이터에서 `HaruchiFit` 을 실행한다. 기록이 없으면 전
 
 확인할 것:
 
-- 17주 × 7일 격자가 가로 스크롤로 그려진다
+- 26주 × 7일 격자가 가로 스크롤로 그려진다
 - 칸을 탭하면 아래에 그날 값이 뜨고, 기록 없는 날은 "기록 없음"
 - 오늘이 든 주가 오른쪽 끝에 있다
 
-기록을 넣어 보려면 워치 시뮬레이터에서 운동을 짧게 한 번 돌려 저장한다 (폰 시뮬레이터와 페어링된 워치). **폰을 켜 둔 채로 칸이 채워지는지**가 스펙 8절의 "눈으로" 항목이다.
+기록 저장→폰 실시간 갱신과 실기기 농도 대조는 **이번 병합 게이트에서 제외한다** (2026-09-21 사용자 결정).
+Task 4 에서 `TODO.md` 의 후속 실기기 확인으로 옮긴다.
 
 - [ ] **Step 5: lint · format**
 
@@ -841,6 +844,7 @@ git commit -m "✨ 임시 홈을 잔디 그리드로 바꾼다"
 
 **Files:**
 - Modify: `Apps/HaruchiFit/docs/specs/shared/2026/2026-09-02-haruchi-fit-architecture.md:244-251`
+- Modify: `Apps/HaruchiFit/docs/specs/shared/2026/2026-09-07-haruchi-fit-roadmap.md`
 - Modify: `TODO.md`
 
 - [ ] **Step 1: 아키텍처 5절의 캐시 문단을 뒤집는다**
@@ -848,7 +852,7 @@ git commit -m "✨ 임시 홈을 잔디 그리드로 바꾼다"
 스펙 10절이 지시한 정정이다. 아키텍처 문서의 이 두 문단을
 
 ```markdown
-집계는 `WorkoutRecord`에서 파생하되, 홈 잔디(약 4개월 = 119칸)와 통계 잔디(1년 = 371칸)를
+집계는 `WorkoutRecord`에서 파생하되, 홈 잔디(약 6개월 = 182칸)와 통계 잔디(1년 = 371칸)를
 매번 전체 스캔하지 않도록 **일별 집계 캐시**를 두는 편이 낫다. 캐시 무효화 시점은
 레코드 생성·수정·삭제 + 농도 기준 설정 변경이다.
 ```
@@ -867,8 +871,8 @@ git commit -m "✨ 임시 홈을 잔디 그리드로 바꾼다"
 [잔디 집계 스펙](2026-09-09-grass-daily-aggregate.md) 3절에서 뒤집었다. 이 문단은 데이터가
 0건이던 시점의 추정이었다.
 
-- 주 3회 × 3년 = 레코드 약 470건. 홈이 실제로 읽는 건 predicate 로 좁힌 **4개월치 50건
-  남짓**이다. 비싼 쪽은 *칸 수*(119·371)가 아니라 레코드 수고, 그건 훨씬 적다
+- 주 3회 × 3년 = 레코드 약 470건. 홈이 실제로 읽는 건 predicate 로 좁힌 **6개월치 80건
+  남짓**이다. 비싼 쪽은 *칸 수*(182·371)가 아니라 레코드 수고, 그건 훨씬 적다
 - 무효화 시점이 이미 넷이고(생성·수정·삭제·기준 변경) CloudKit 이 붙으면 다섯이다.
   캐시가 진실과 어긋나면 사용자에겐 "잔디가 틀렸다" 로 보이고 복구 수단이 없다
 - `@Model` 캐시는 **CloudKit 스키마에 같이 올라가 기기 간 충돌 대상이 된다.** 파생 데이터를
@@ -886,7 +890,7 @@ git commit -m "✨ 임시 홈을 잔디 그리드로 바꾼다"
 
 기존 `### 통계 연도 아카이브` 헤더는 위 블록이 대체하므로 **중복해서 남기지 않는다.**
 
-- [ ] **Step 2: TODO 를 갱신한다**
+- [ ] **Step 2: 로드맵과 TODO 를 갱신한다**
 
 > **PR 번호가 필요하므로 이 Step 은 Task 5 Step 3(PR 생성) 뒤에 한다.** Step 1(아키텍처
 > 정정)은 번호가 필요 없으니 먼저 커밋해도 된다. 지난번(PR #26)에 같은 순서로 처리했다.
@@ -900,23 +904,35 @@ git commit -m "✨ 임시 홈을 잔디 그리드로 바꾼다"
 아래로 바꾼다. **캐시를 안 만들기로 했으므로 항목 이름에서 "캐시" 를 뺀다.**
 
 ```markdown
-| 2 데이터 | 1 | 잔디 집계 (일별 집계) | **완료** (PR #<번호>) · 영속 캐시는 두지 않기로 확정 | ... |
+| ~~2 데이터~~ | ~~1~~ | ~~잔디 집계 (일별 집계)~~ | ~~**완료** (PR #<번호>) · 영속 캐시는 두지 않기로 확정~~ | ~~...~~ |
 ```
 
 「예정사항 (남은 12개)」 제목을 **「예정사항 (남은 11개)」** 로 고치고, #2 HealthKit import 행의 상태를 **`**다음**`** 으로 바꾼다.
 
-「집 맥북에서 할 것」에 한 줄 더한다.
+「집 맥북에서 할 것」에 두 줄을 더한다.
 
 ```markdown
 - [ ] **잔디 농도 컷 눈으로 확인** — 실기기 기록이 쌓인 뒤 임시 화면에서 농도가 실제 운동
       시간과 맞는지. 컷은 30/60/90분 (D-M6)
+- [ ] **잔디 저장 실시간 갱신 확인** — 폰을 켜 둔 채 워치에서 운동을 저장했을 때
+      `@Query` 전파로 해당 날짜의 칸이 재실행 없이 채워지는지
 ```
+
+로드맵에는 잔디 집계를 완료 항목(PR #27)으로 추가하고 「남은 12개」를 「남은 11개」로
+고친다. Phase 2 의 #1 행은 완료 표시하고, 영속 캐시가 핵심이라는 옛 문장은 제거한다.
+Phase 3 의 `ContentView` 설명도 임시 리스트에서 **잔디 집계 확인용 임시 그리드**로 고친다.
+
+`TODO.md` 의 “Phase 2(잔디 집계 · HealthKit import)는 화면이 없다”는 문단도 현재 상태와
+맞춘다. 잔디 집계는 임시 그리드까지 완료했고, 다음 HealthKit import 결과를 그 화면에서
+확인한다고 적는다.
 
 - [ ] **Step 3: 커밋**
 
 ```bash
-git add Apps/HaruchiFit/docs/specs/shared/2026/2026-09-02-haruchi-fit-architecture.md TODO.md
-git commit -m "📝 집계 캐시를 두지 않기로 한 결론을 아키텍처와 TODO 에 반영한다"
+git add Apps/HaruchiFit/docs/specs/shared/2026/2026-09-02-haruchi-fit-architecture.md \
+        Apps/HaruchiFit/docs/specs/shared/2026/2026-09-07-haruchi-fit-roadmap.md \
+        TODO.md
+git commit -m "📝 잔디 집계 완료를 아키텍처·로드맵·TODO 에 반영한다"
 ```
 
 ---
@@ -949,7 +965,7 @@ git push -u origin feat/haruchi-grass-aggregate
 gh pr create --title "✨ 잔디 일별 집계" --body "$(cat <<'BODY'
 ## 무엇을
 
-`WorkoutRecord` 들을 날짜 한 칸씩으로 접는 순수 집계를 만들고, 임시 `ContentView` 를 17주 잔디 그리드로 바꿨다.
+`WorkoutRecord` 들을 날짜 한 칸씩으로 접는 순수 집계를 만들고, 임시 `ContentView` 를 26주 잔디 그리드로 바꿨다.
 
 ## 왜
 
@@ -963,13 +979,13 @@ gh pr create --title "✨ 잔디 일별 집계" --body "$(cat <<'BODY'
 
 ## 아키텍처 문서를 한 군데 뒤집었다
 
-5절의 *"일별 집계 캐시를 두는 편이 낫다"* 를 **캐시를 두지 않는다**로 고쳤다. 데이터가 0건이던 시점의 추정이었고, 홈이 실제로 읽는 건 4개월치 50건 남짓이다. 무효화 시점이 이미 넷이고, `@Model` 캐시는 CloudKit 스키마에 올라가 기기 간 충돌 대상이 된다.
+5절의 *"일별 집계 캐시를 두는 편이 낫다"* 를 **캐시를 두지 않는다**로 고쳤다. 데이터가 0건이던 시점의 추정이었고, 홈이 실제로 읽는 건 6개월치 80건 남짓이다. 무효화 시점이 이미 넷이고, `@Model` 캐시는 CloudKit 스키마에 올라가 기기 간 충돌 대상이 된다.
 
 ## 검증
 
 - 워치 유닛 테스트 **57개 통과** (신규 18개)
 - iOS BUILD SUCCEEDED · `make lint`·`make format` 0 violations
-- 시뮬레이터에서 격자 렌더·칸 탭·빈 칸 확인
+- 시뮬레이터에서 26주 격자 렌더·빈 칸 탭·오늘 주 오른쪽 정렬 확인
 
 ## 다음에 지켜야 할 것
 
