@@ -91,8 +91,23 @@ final class SummaryViewModel: ObservableObject {
 
     /// 최근 세션 하나. 기간 필터를 탄다.
     func recentSession(from matches: [Match]) -> MatchSessionGroup? {
+        selectedPeriodSessions(from: matches).first
+    }
+
+    /// 기간 안의 경기 세션과 그 기간에 끝난 경기 없는 운동 세션.
+    /// 선택된 경기와 연결된 레코드는 레코드의 시작 시각과 무관하게 함께 남긴다.
+    func selectedPeriodSessions(from matches: [Match]) -> [MatchSessionGroup] {
+        let filtered = filteredMatches(from: matches)
         let records = (try? SessionPersistenceService.shared.fetchAll()) ?? []
-        return MatchSessionGroup.group(filteredMatches(from: matches), records: records).first
+        let groupingRecords = MatchSessionGroup.recordsForGrouping(
+            records,
+            displayedMatches: filtered,
+            sourceMatches: matches
+        ) { [selectedPeriod] record in
+            guard let start = selectedPeriod.startDate() else { return true }
+            return record.startedAt >= start
+        }
+        return MatchSessionGroup.group(filtered, records: groupingRecords)
     }
 
     /// 최근 10회 세션, 오래된 것부터. 기간 필터와 무관하게 항상 전체에서 뽑는다 —
@@ -100,7 +115,12 @@ final class SummaryViewModel: ObservableObject {
     /// 3개 미만이면 빈 배열을 돌려 뷰가 안내 문구를 띄우게 한다.
     func trendSessions(from matches: [Match]) -> [MatchSessionGroup] {
         let records = (try? SessionPersistenceService.shared.fetchAll()) ?? []
-        let groups = MatchSessionGroup.group(matches, records: records)
+        let groupingRecords = MatchSessionGroup.recordsForGrouping(
+            records,
+            displayedMatches: matches,
+            sourceMatches: matches
+        ) { _ in true }
+        let groups = MatchSessionGroup.group(matches, records: groupingRecords)
         guard groups.count >= 3 else { return [] }
         return Array(groups.prefix(10)).reversed()
     }

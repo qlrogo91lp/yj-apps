@@ -51,6 +51,24 @@ struct MatchSessionGroup: Identifiable {
         record?.averageHeartRate
     }
 
+    /// 화면이 보유한 경기와 레코드를 묶을 때, 아직 화면에 로드되지 않은 경기의 레코드를
+    /// 빈 세션으로 오인하지 않도록 필요한 레코드만 고른다.
+    static func recordsForGrouping(
+        _ records: [WorkoutSessionRecord],
+        displayedMatches: [Match],
+        sourceMatches: [Match],
+        includesMatchlessRecord: (WorkoutSessionRecord) -> Bool
+    ) -> [WorkoutSessionRecord] {
+        let displayedSessionIds = Set(displayedMatches.compactMap(\.workoutSessionId))
+        let sourceSessionIds = Set(sourceMatches.compactMap(\.workoutSessionId))
+
+        return records.filter { record in
+            guard let sessionId = record.workoutSessionId else { return false }
+            return displayedSessionIds.contains(sessionId)
+                || (!sourceSessionIds.contains(sessionId) && includesMatchlessRecord(record))
+        }
+    }
+
     static func group(_ matches: [Match],
                       records: [WorkoutSessionRecord] = []) -> [MatchSessionGroup]
     {

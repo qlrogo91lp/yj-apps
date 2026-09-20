@@ -25,6 +25,7 @@ struct HistoryView: View {
                 } else {
                     CalendarView(
                         matches: viewModel.calendarMatches,
+                        sourceMatches: viewModel.calendarSourceMatches,
                         currentMonth: viewModel.currentMonth,
                         onPrevious: { viewModel.changeMonth(by: -1) },
                         onNext: { viewModel.changeMonth(by: 1) },

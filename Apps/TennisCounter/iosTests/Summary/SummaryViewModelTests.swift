@@ -1,9 +1,16 @@
 import Foundation
+import SwiftData
 @testable import TennisCounter
 import Testing
 
 @MainActor
 struct SummaryViewModelTests {
+    private func configureSessionPersistence() throws {
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        let container = try ModelContainer(for: WorkoutSessionRecord.self, configurations: config)
+        SessionPersistenceService.shared.configure(with: ModelContext(container))
+    }
+
     @Test func statsWithNoWorkoutData_returnNilFitnessStats() {
         let vm = SummaryViewModel()
         vm.selectedPeriod = .week
@@ -209,6 +216,51 @@ struct SummaryViewModelTests {
         #expect(filtered.first === recent)
     }
 
+    @Test func selectedPeriodSessionsExcludeOldPopulatedAndMatchlessRecords() throws {
+        try configureSessionPersistence()
+        let vm = SummaryViewModel()
+        vm.selectedPeriod = .week
+        let oldDate = Date().addingTimeInterval(-30 * 24 * 3600)
+        let currentDate = Date()
+        let oldPopulatedSession = UUID()
+        let currentPopulatedSession = UUID()
+        let currentMatchlessSession = UUID()
+        let oldMatchlessSession = UUID()
+
+        let oldMatch = Match()
+        oldMatch.workoutSessionId = oldPopulatedSession
+        oldMatch.startedAt = oldDate
+        let currentMatch = Match()
+        currentMatch.workoutSessionId = currentPopulatedSession
+        currentMatch.startedAt = currentDate
+
+        let oldPopulatedRecord = WorkoutSessionRecord()
+        oldPopulatedRecord.workoutSessionId = oldPopulatedSession
+        oldPopulatedRecord.startedAt = oldDate
+        try SessionPersistenceService.shared.upsert(oldPopulatedRecord)
+
+        let currentPopulatedRecord = WorkoutSessionRecord()
+        currentPopulatedRecord.workoutSessionId = currentPopulatedSession
+        currentPopulatedRecord.startedAt = oldDate // 연결된 현재 경기 때문에 포함돼야 한다
+        currentPopulatedRecord.elapsedSeconds = 1500
+        try SessionPersistenceService.shared.upsert(currentPopulatedRecord)
+
+        let currentMatchlessRecord = WorkoutSessionRecord()
+        currentMatchlessRecord.workoutSessionId = currentMatchlessSession
+        currentMatchlessRecord.startedAt = currentDate
+        try SessionPersistenceService.shared.upsert(currentMatchlessRecord)
+
+        let oldMatchlessRecord = WorkoutSessionRecord()
+        oldMatchlessRecord.workoutSessionId = oldMatchlessSession
+        oldMatchlessRecord.startedAt = oldDate
+        try SessionPersistenceService.shared.upsert(oldMatchlessRecord)
+
+        let sessions = vm.selectedPeriodSessions(from: [oldMatch, currentMatch])
+
+        #expect(Set(sessions.map(\.id)) == [currentPopulatedSession, currentMatchlessSession])
+        #expect(sessions.first(where: { $0.id == currentPopulatedSession })?.elapsedSeconds == 1500)
+    }
+
     /// 심박·총 에너지는 요약에서 빠졌다. 그 값이 들어 있는 기록이라도 남은 지표에는 영향이 없어야 한다.
     @Test func statsExcludeRemovedMetrics() {
         let vm = SummaryViewModel()
@@ -249,7 +301,7 @@ struct SummaryViewModelTests {
 
         #expect(trend.count == 10)
         // 오래된 것부터 — 차트의 x축 순서다
-        #expect(try #require(trend.first?.date) < trend.last!.date)
+        #expect(try #require(trend.first?.date) < #require(trend.last?.date))
     }
 
     @Test func trendGroupsBySession() {

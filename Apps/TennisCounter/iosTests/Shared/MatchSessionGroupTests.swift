@@ -87,17 +87,20 @@ struct MatchSessionGroupTests {
         match.workoutSessionId = sessionId
         match.workoutElapsedSeconds = 1000
         match.workoutCaloriesBurned = 100
+        match.workoutTotalCaloriesBurned = 140
 
         let record = WorkoutSessionRecord()
         record.workoutSessionId = sessionId
         record.elapsedSeconds = 1500 // 마지막 경기 이후 구간까지 포함
         record.activeCalories = 160
+        record.totalCalories = 210
         record.averageHeartRate = 142
 
         let groups = MatchSessionGroup.group([match], records: [record])
         #expect(groups.count == 1)
         #expect(groups[0].elapsedSeconds == 1500)
         #expect(groups[0].activeCalories == 160)
+        #expect(groups[0].totalCalories == 210)
         #expect(groups[0].averageHeartRate == 142)
     }
 
@@ -106,14 +109,90 @@ struct MatchSessionGroupTests {
         let first = Match()
         first.workoutSessionId = sessionId
         first.workoutElapsedSeconds = 600
+        first.workoutTotalCaloriesBurned = 80
+        first.averageHeartRate = 120
         let second = Match()
         second.workoutSessionId = sessionId
         second.workoutElapsedSeconds = 1000
+        second.workoutTotalCaloriesBurned = 140
+        second.averageHeartRate = 155
 
         let groups = MatchSessionGroup.group([first, second], records: [])
         #expect(groups[0].elapsedSeconds == 1000)
+        #expect(groups[0].totalCalories == 140)
         // 경기 평균은 세션 평균이 아니므로 폴백하지 않는다
         #expect(groups[0].averageHeartRate == nil)
+    }
+
+    @Test func nilRecordMetricFallsBackToMatchMaximum() {
+        let sessionId = UUID()
+        let match = Match()
+        match.workoutSessionId = sessionId
+        match.workoutElapsedSeconds = 1000
+        match.workoutCaloriesBurned = 120
+        match.workoutTotalCaloriesBurned = 160
+
+        let record = WorkoutSessionRecord()
+        record.workoutSessionId = sessionId
+
+        let group = MatchSessionGroup.group([match], records: [record])[0]
+        #expect(group.elapsedSeconds == 1000)
+        #expect(group.activeCalories == 120)
+        #expect(group.totalCalories == 160)
+    }
+
+    @Test func recordsForGroupingKeepsOvernightSessionJoinAndOnlyAddsMatchlessInScopeRecords() {
+        let calendar = Calendar(identifier: .gregorian)
+        let firstDay = Date(timeIntervalSince1970: 1_700_000_000)
+        let secondDay = firstDay.addingTimeInterval(24 * 60 * 60)
+        let overnightSession = UUID()
+        let otherSession = UUID()
+
+        let overnightMatch = match(session: overnightSession, startedAt: firstDay)
+        let otherMatch = match(session: otherSession, startedAt: firstDay)
+
+        let overnightRecord = WorkoutSessionRecord()
+        overnightRecord.workoutSessionId = overnightSession
+        overnightRecord.startedAt = secondDay
+        let otherRecord = WorkoutSessionRecord()
+        otherRecord.workoutSessionId = otherSession
+        otherRecord.startedAt = secondDay
+        let matchlessRecord = WorkoutSessionRecord()
+        matchlessRecord.workoutSessionId = UUID()
+        matchlessRecord.startedAt = secondDay
+
+        let records = MatchSessionGroup.recordsForGrouping(
+            [overnightRecord, otherRecord, matchlessRecord],
+            displayedMatches: [overnightMatch],
+            sourceMatches: [overnightMatch, otherMatch]
+        ) { record in
+            calendar.isDate(record.startedAt, inSameDayAs: secondDay)
+        }
+
+        #expect(records.map(\.workoutSessionId) == [overnightSession, matchlessRecord.workoutSessionId])
+    }
+
+    @Test func recordsForGroupingDoesNotShowUnloadedMatchRecordAsFirstPageEmptySession() {
+        let base = Date()
+        let unloadedSession = UUID()
+        let matchlessSession = UUID()
+        let loadedMatches = (0 ..< 20).map { index in
+            match(session: UUID(), startedAt: base.addingTimeInterval(TimeInterval(-index * 3600)))
+        }
+        let unloadedMatch = match(session: unloadedSession, startedAt: base.addingTimeInterval(-20 * 3600))
+
+        let unloadedRecord = WorkoutSessionRecord()
+        unloadedRecord.workoutSessionId = unloadedSession
+        let matchlessRecord = WorkoutSessionRecord()
+        matchlessRecord.workoutSessionId = matchlessSession
+
+        let records = MatchSessionGroup.recordsForGrouping(
+            [unloadedRecord, matchlessRecord],
+            displayedMatches: loadedMatches,
+            sourceMatches: loadedMatches + [unloadedMatch]
+        ) { _ in true }
+
+        #expect(records.map(\.workoutSessionId) == [matchlessSession])
     }
 
     @Test func recordWithoutMatchesBecomesEmptySession() {

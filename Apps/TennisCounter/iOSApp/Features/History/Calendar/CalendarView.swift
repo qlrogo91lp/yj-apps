@@ -2,6 +2,8 @@ import SwiftUI
 
 struct CalendarView: View {
     let matches: [Match]
+    /// 현재 월 밖의 경기까지 포함한 소스. 날짜별 목록에서 거짓 빈 세션을 막는 데만 쓴다.
+    let sourceMatches: [Match]
     let currentMonth: Date
     let onPrevious: () -> Void
     let onNext: () -> Void
@@ -17,7 +19,17 @@ struct CalendarView: View {
     private var dayRecords: [WorkoutSessionRecord] {
         guard let selectedDate else { return [] }
         let records = (try? SessionPersistenceService.shared.fetchAll()) ?? []
-        return records.filter { Calendar.current.isDate($0.startedAt, inSameDayAs: selectedDate) }
+        return MatchSessionGroup.recordsForGrouping(
+            records,
+            displayedMatches: dayMatches,
+            sourceMatches: sourceMatches
+        ) { record in
+            Calendar.current.isDate(record.startedAt, inSameDayAs: selectedDate)
+        }
+    }
+
+    private var daySessions: [MatchSessionGroup] {
+        MatchSessionGroup.group(dayMatches, records: dayRecords)
     }
 
     var body: some View {
@@ -37,7 +49,7 @@ struct CalendarView: View {
             )
             .padding(.bottom, 8)
 
-            if dayMatches.isEmpty {
+            if daySessions.isEmpty {
                 Text(String(localized: "history_day_empty"))
                     .font(.system(size: 14))
                     .foregroundColor(.secondary)
@@ -45,7 +57,7 @@ struct CalendarView: View {
                     .padding(.top, 32)
             } else {
                 SessionList(
-                    sessions: MatchSessionGroup.group(dayMatches, records: dayRecords),
+                    sessions: daySessions,
                     isLoadingMore: false,
                     onLoadMore: nil,
                     onSelect: onSelect,

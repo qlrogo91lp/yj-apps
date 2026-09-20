@@ -11,6 +11,7 @@ final class HistoryViewModel: ObservableObject {
     @Published var viewMode: HistoryViewMode = .list
     @Published var listMatches: [Match] = []
     @Published var calendarMatches: [Match] = []
+    @Published private(set) var calendarSourceMatches: [Match] = []
     @Published var isLoadingMore: Bool = false
     @Published var hasMore: Bool = true
     @Published var currentMonth: Date = .init()
@@ -67,7 +68,15 @@ final class HistoryViewModel: ObservableObject {
     /// 여기서 자연히 사라진다 — 경계를 따로 병합할 필요가 없다.
     private func rebuildSessions() {
         let records = (try? SessionPersistenceService.shared.fetchAll()) ?? []
-        listSessions = MatchSessionGroup.group(listMatches, records: records)
+        let sourceMatches = try? modelContext?.fetch(FetchDescriptor<Match>())
+        let groupingRecords = MatchSessionGroup.recordsForGrouping(
+            records,
+            displayedMatches: listMatches,
+            sourceMatches: sourceMatches ?? listMatches
+        ) { _ in
+            sourceMatches != nil
+        }
+        listSessions = MatchSessionGroup.group(listMatches, records: groupingRecords)
     }
 
     func changeMonth(by value: Int) {
@@ -93,5 +102,6 @@ final class HistoryViewModel: ObservableObject {
             sortBy: [SortDescriptor(\Match.startedAt, order: .reverse)]
         )
         calendarMatches = (try? context.fetch(descriptor)) ?? []
+        calendarSourceMatches = (try? context.fetch(FetchDescriptor<Match>())) ?? calendarMatches
     }
 }
