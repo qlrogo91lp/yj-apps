@@ -75,8 +75,20 @@ final class MatchConnectivity: ObservableObject {
         service.send(WorkoutMetricsMessage(metrics: metrics, isPaused: isPaused), via: .realtimeOnly)
     }
 
-    func sendWorkoutEnd(sessionId: UUID) {
-        service.send(WorkoutEndMessage(sessionId: sessionId), via: .reliable)
+    func sendWorkoutEnd(sessionId: UUID, result: WorkoutResult? = nil, startedAt: Date? = nil) {
+        service.send(
+            WorkoutEndMessage(
+                sessionId: sessionId,
+                startedAt: startedAt,
+                endedAt: result == nil ? nil : Date(),
+                elapsedSeconds: result?.durationSeconds,
+                activeCalories: result?.caloriesBurned,
+                totalCalories: result?.totalCaloriesBurned,
+                averageHeartRate: result?.averageHeartRate,
+                healthKitUUID: result?.healthKitUUID
+            ),
+            via: .reliable
+        )
     }
 
     func sendMatchReset(sessionId: UUID) {

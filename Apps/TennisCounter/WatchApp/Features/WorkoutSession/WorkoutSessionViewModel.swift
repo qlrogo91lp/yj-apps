@@ -27,6 +27,7 @@ class WorkoutSessionViewModel: ObservableObject {
     /// 채택 이후에는 이 값이 실제로 주고받는 id이기 때문이다.
     private(set) lazy var activeSessionId: UUID = workoutSessionId
     private var hasSyncedSession = false
+    private var workoutStartedAt: Date?
 
     enum SaveAckState: Equatable {
         case idle, pending, succeeded, failed
@@ -177,6 +178,7 @@ class WorkoutSessionViewModel: ObservableObject {
     }
 
     func startWorkout() {
+        workoutStartedAt = Date()
         Task {
             await healthKit.requestAuthorization()
             healthKit.startWorkout()
@@ -293,12 +295,20 @@ class WorkoutSessionViewModel: ObservableObject {
     }
 
     func endWorkout(notifyRemote: Bool = true) {
+        let sessionId = activeSessionId
+        let startedAt = workoutStartedAt
         _currentSession = nil
         appGroupDefaults?.set(false, forKey: "isWorkoutActive")
         WidgetCenter.shared.reloadTimelines(ofKind: "ComplicationApp")
         connectivity.clearSessionContext()
-        if notifyRemote { connectivity.sendWorkoutEnd(sessionId: activeSessionId) }
-        Task { _ = await healthKit.stopWorkout() }
+
+        Task {
+            // 워크아웃 전체 평균 심박과 최종 시간·칼로리를 종료 메시지에 함께 보낸다.
+            let result = await healthKit.stopWorkout()
+            if notifyRemote {
+                connectivity.sendWorkoutEnd(sessionId: sessionId, result: result, startedAt: startedAt)
+            }
+        }
     }
 
     func broadcastMetrics() {
