@@ -49,7 +49,7 @@ xcodebuild -workspace YJApps.xcworkspace -scheme "HaruchiFitWatchTests" -destina
 - [ ] **Step 1: main 최신화 후 브랜치 생성**
 
 ```bash
-cd /Users/yj/Workspace/yj-apps
+cd "$(git rev-parse --show-toplevel)"
 git checkout main && git pull
 git checkout -b fix/haruchi-elapsed-exclude-pause
 ```
@@ -189,7 +189,7 @@ git commit -m "📝 경과시간 정지 제외와 잔디 집계 설계를 확정
 - [ ] **Step 2: 실패를 확인한다**
 
 ```bash
-cd /Users/yj/Workspace/yj-apps
+cd "$(git rev-parse --show-toplevel)"
 WATCH=$(.github/scripts/pick-simulator.sh watchOS '^Apple Watch')
 xcodebuild -workspace YJApps.xcworkspace -scheme "HaruchiFitWatchTests" -destination "id=$WATCH" test
 ```
@@ -276,7 +276,7 @@ struct SegmentTracker {
 - [ ] **Step 4: 테스트 통과를 확인한다**
 
 ```bash
-cd /Users/yj/Workspace/yj-apps
+cd "$(git rev-parse --show-toplevel)"
 WATCH=$(.github/scripts/pick-simulator.sh watchOS '^Apple Watch')
 xcodebuild -workspace YJApps.xcworkspace -scheme "HaruchiFitWatchTests" -destination "id=$WATCH" test
 ```
@@ -397,7 +397,7 @@ struct WorkoutViewModelPauseTests {
 - [ ] **Step 2: 실패를 확인한다**
 
 ```bash
-cd /Users/yj/Workspace/yj-apps
+cd "$(git rev-parse --show-toplevel)"
 WATCH=$(.github/scripts/pick-simulator.sh watchOS '^Apple Watch')
 xcodebuild -workspace YJApps.xcworkspace -scheme "HaruchiFitWatchTests" -destination "id=$WATCH" test
 ```
@@ -526,7 +526,7 @@ xcodebuild -workspace YJApps.xcworkspace -scheme "HaruchiFitWatchTests" -destina
 - [ ] **Step 6: 테스트 통과를 확인한다**
 
 ```bash
-cd /Users/yj/Workspace/yj-apps
+cd "$(git rev-parse --show-toplevel)"
 WATCH=$(.github/scripts/pick-simulator.sh watchOS '^Apple Watch')
 xcodebuild -workspace YJApps.xcworkspace -scheme "HaruchiFitWatchTests" -destination "id=$WATCH" test
 ```
@@ -589,7 +589,7 @@ git commit -m "🐛 화면과 컴플리케이션이 틱 대신 세션 시계를 
 - [ ] **Step 2: 실패를 확인한다**
 
 ```bash
-cd /Users/yj/Workspace/yj-apps
+cd "$(git rev-parse --show-toplevel)"
 WATCH=$(.github/scripts/pick-simulator.sh watchOS '^Apple Watch')
 xcodebuild -workspace YJApps.xcworkspace -scheme "HaruchiFitWatchTests" -destination "id=$WATCH" test
 ```
@@ -640,7 +640,7 @@ xcodebuild -workspace YJApps.xcworkspace -scheme "HaruchiFitWatchTests" -destina
 - [ ] **Step 5: 전체 테스트 통과를 확인한다**
 
 ```bash
-cd /Users/yj/Workspace/yj-apps
+cd "$(git rev-parse --show-toplevel)"
 WATCH=$(.github/scripts/pick-simulator.sh watchOS '^Apple Watch')
 xcodebuild -workspace YJApps.xcworkspace -scheme "HaruchiFitWatchTests" -destination "id=$WATCH" test
 ```
@@ -650,7 +650,7 @@ xcodebuild -workspace YJApps.xcworkspace -scheme "HaruchiFitWatchTests" -destina
 - [ ] **Step 6: lint · format**
 
 ```bash
-cd /Users/yj/Workspace/yj-apps
+cd "$(git rev-parse --show-toplevel)"
 make fix
 git diff --stat
 ```
@@ -711,7 +711,9 @@ git commit -m "🐛 저장되는 총 시간에서 일시정지를 뺀다"
       **WC 재검증 2항목**(컴플리케이션 경과시간·일시정지 시 멈춤), 손목 30초 내림
 ```
 
-`## YJKit — 확인 필요` 절의 하루치 관련 문장에서 **"결정 대기"** 를 **"하루치는 앱 레이어에서 정지 제외로 확정 (PR #<번호>). YJKit 통합은 그대로 열려 있다"** 로 바꾼다.
+`## YJKit — 확인 필요` 절은 **이미 "하루치는 앱 레이어에서 정지 제외로 간다" 로 쓰여 있다**
+(플랜 작성 뒤 TODO 가 먼저 갱신됐다). 그 문장에 PR 번호만 붙여 **"…로 간다 (PR #<번호>)"** 로 만들고,
+마지막 문장 *"YJKit 통합과 Ralli 기존 기록 문제는 그대로 열려 있다"* 는 그대로 둔다.
 
 - [ ] **Step 3: 커밋**
 
@@ -727,7 +729,7 @@ git commit -m "📝 정지 제외 선례를 탐색 문서와 TODO 에 반영한�
 - [ ] **Step 1: 푸시**
 
 ```bash
-cd /Users/yj/Workspace/yj-apps
+cd "$(git rev-parse --show-toplevel)"
 git push -u origin fix/haruchi-elapsed-exclude-pause
 ```
 

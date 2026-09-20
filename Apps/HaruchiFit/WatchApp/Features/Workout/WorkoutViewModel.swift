@@ -32,22 +32,24 @@ final class WorkoutViewModel: ObservableObject {
     /// W0 에서 고른 시작 유형. 세션 사이에 남는다.
     private static let startKindKey = "startSegmentKind"
 
-    /// 구간 경계를 재는 쪽. **벽시계를 쓴다** — `session.elapsedSeconds` 는 손목을 내리면
-    /// 멈추는 틱 카운터라 실기기에서 구간이 몇 초로 잡혔다 (`SegmentTracker` 주석).
+    /// 워치의 단일 시계. **`session.elapsedSeconds` 를 쓰지 않는다** — 틱 카운터라 손목을
+    /// 내리면 멈추고 정지 시간도 이 타입만 정확히 뺀다 (`SegmentTracker` 주석).
     /// 세션 시작 시각도 여기가 단일 소스다.
-    private var segments = SegmentTracker()
+    private var segments: SegmentTracker
 
     init(session: WorkoutSessionService = WorkoutSessionService(configuration: .strength),
          connectivity: WorkoutRecordSending,
          remover: WorkoutRemoving = HealthKitWorkoutRemover(),
          defaults: UserDefaults = .standard,
-         snapshots: WorkoutSnapshotPublishing = WorkoutSnapshotPublisher())
+         snapshots: WorkoutSnapshotPublishing = WorkoutSnapshotPublisher(),
+         now: @escaping () -> Date = Date.init)
     {
         self.session = session
         self.connectivity = connectivity
         self.remover = remover
         self.defaults = defaults
         self.snapshots = snapshots
+        segments = SegmentTracker(now: now)
 
         // 저장된 값이 없거나 알아볼 수 없으면 근력으로 연다.
         mode = SegmentKind(rawValue: defaults.string(forKey: Self.startKindKey) ?? "") ?? .strength
@@ -59,7 +61,7 @@ final class WorkoutViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .assign(to: &$isPaused)
 
-        // 정지/재개는 **여기서만** 컴플리케이션으로 나간다. `togglePause()` 에서 보내면
+        // 정지/재개는 **여기서만** 시계와 컴플리케이션에 닿는다. `togglePause()` 에서 부르면
         // 세션이 실제로 멈췄는지 모르는 채 값을 지어내는 꼴이라(낙관적 토글 — 루트 `CLAUDE.md`
         // 워크아웃 계약), 서비스가 실제로 바꾼 값만 흘려보낸다.
         session.$isPaused
@@ -68,12 +70,12 @@ final class WorkoutViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] paused in
                 MainActor.assumeIsolated {
-                    guard let self, self.phase == .active else { return }
-                    self.publishSnapshot(isPaused: paused)
+                    self?.handlePauseChange(paused)
                 }
             }
             .store(in: &cancellables)
 
+        // 값이 바뀌었다는 신호는 세션에서 오지만, **경과시간은 시계에서 읽는다.**
         Publishers.CombineLatest4(
             session.$elapsedSeconds,
             session.$currentCalories,
@@ -81,8 +83,13 @@ final class WorkoutViewModel: ObservableObject {
             session.$currentHeartRate
         )
         .receive(on: DispatchQueue.main)
-        .map { [session] _, _, _, _ in Self.snapshot(of: session) }
-        .assign(to: &$metrics)
+        .sink { [weak self] _, _, _, _ in
+            MainActor.assumeIsolated {
+                guard let self else { return }
+                self.metrics = self.currentMetrics()
+            }
+        }
+        .store(in: &cancellables)
     }
 
     func requestAuthorization() async -> Bool {
@@ -124,15 +131,30 @@ final class WorkoutViewModel: ObservableObject {
         publishSnapshot(isPaused: isPaused)
     }
 
+    /// 정지/재개를 시계와 컴플리케이션에 반영한다.
+    ///
+    /// **`session.$isPaused` 구독만 이걸 부른다.** 시계는 세션이 실제로 멈춘 뒤에만 멈춰야
+    /// 저장값과 화면이 갈리지 않는다. 시계는 단계와 무관하게 갱신하고, 발행만 진행 중일 때 한다.
+    func handlePauseChange(_ paused: Bool) {
+        if paused {
+            segments.pause()
+        } else {
+            segments.resume()
+        }
+        guard phase == .active else { return }
+        publishSnapshot(isPaused: paused)
+    }
+
     /// 컴플리케이션이 읽을 상태를 내보낸다.
     ///
-    /// **경과시간은 세션에서 가져온다** — 워치가 단일 소스라는 계약(루트 `CLAUDE.md`)을 여기서도
-    /// 지킨다. `capturedAt` 과 짝으로 실어야 컴플리케이션이 타이머 기준점을 잡을 수 있다.
+    /// **경과시간은 시계에서 가져온다** — 워치가 단일 소스라는 계약(루트 `CLAUDE.md`)을 지키되,
+    /// 정지를 뺀 정확한 값이어야 `ComplicationState` 가 `capturedAt - elapsedSeconds` 로
+    /// 타이머 기준점을 제대로 잡는다.
     private func publishSnapshot(isPaused: Bool) {
         snapshots.publish(WorkoutSnapshot(startedAt: segments.startedAt,
                                           mode: mode,
                                           isPaused: isPaused,
-                                          elapsedSeconds: session.elapsedSeconds,
+                                          elapsedSeconds: segments.elapsedSeconds,
                                           capturedAt: Date()))
     }
 
@@ -155,21 +177,28 @@ final class WorkoutViewModel: ObservableObject {
         // stopWorkout() 보다 먼저 닫는다. 그쪽이 총 시간을 재는 시점과 가장 가까워야
         // 구간 합계와 총 시간이 어긋나지 않는다 — HealthKit 마무리에 시간이 걸린다.
         segments.closeOpenSegment(kind: mode)
+        // **여기서 붙든다.** stopWorkout() 뒤에 읽으면 마무리에 걸린 시간만큼 구간 합계보다 커진다.
+        let totalSeconds = segments.elapsedSeconds
 
         let result = await session.stopWorkout()
         WKInterfaceDevice.current().play(.stop)
         // 세션이 끝났으니 컴플리케이션은 평상시 표시로 돌아간다. 저장/버리기와 무관하다.
         snapshots.clear()
 
-        enterSummary(with: result.map(record(from:)))
+        enterSummary(with: result.map { record(from: $0, totalSeconds: totalSeconds) })
         return result
     }
 
-    private func record(from result: WorkoutResult) -> WorkoutRecordMessage {
+    /// **총 시간은 `WorkoutResult.durationSeconds` 를 쓰지 않는다.** 그쪽은 정지를 포함한
+    /// 벽시계라 구간 합계와 어긋난다. 호출부가 구간을 닫은 시점에 붙든 값을 넘긴다.
+    ///
+    /// `endedAt - startedAt` 은 정지가 있으면 `totalSeconds` 보다 크다. **둘이 같다고
+    /// 가정하는 코드를 두지 않는다.**
+    private func record(from result: WorkoutResult, totalSeconds: Int) -> WorkoutRecordMessage {
         WorkoutRecordMessage(healthKitUUID: result.healthKitUUID,
                              startedAt: segments.startedAt,
                              endedAt: Date(),
-                             totalSeconds: result.durationSeconds,
+                             totalSeconds: totalSeconds,
                              activeCalories: result.caloriesBurned,
                              totalCalories: result.totalCaloriesBurned,
                              averageHeartRate: result.averageHeartRate,
@@ -177,8 +206,9 @@ final class WorkoutViewModel: ObservableObject {
     }
 
     /// 총 칼로리는 활동 + 휴식이다 (YJKit README).
-    private static func snapshot(of session: WorkoutSessionService) -> WorkoutMetrics {
-        WorkoutMetrics(elapsedSeconds: TimeInterval(session.elapsedSeconds),
+    /// **경과시간만 시계에서 온다** — 나머지는 세션이 낸 값 그대로다.
+    private func currentMetrics() -> WorkoutMetrics {
+        WorkoutMetrics(elapsedSeconds: TimeInterval(segments.elapsedSeconds),
                        activeCalories: session.currentCalories,
                        totalCalories: session.currentCalories + session.currentBasalCalories,
                        heartRate: session.currentHeartRate)

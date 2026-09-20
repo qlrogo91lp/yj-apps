@@ -98,4 +98,125 @@ struct SegmentTrackerTests {
         #expect(tracker.closed.isEmpty)
         #expect(tracker.elapsedSeconds == 120)
     }
+
+    // MARK: - 일시정지
+
+    @Test("정지한 동안은 경과시간이 늘지 않는다")
+    func pauseFreezesElapsed() {
+        var (tracker, clock) = makeTracker()
+        tracker.reset()
+
+        clock.advance(600) // 10분 운동
+        tracker.pause()
+        clock.advance(300) // 5분 정지 — 이 시간은 세지 않는다
+
+        #expect(tracker.elapsedSeconds == 600)
+    }
+
+    @Test("재개하면 정지한 만큼을 뺀 채로 다시 흐른다")
+    func resumeExcludesPausedSpan() {
+        var (tracker, clock) = makeTracker()
+        tracker.reset()
+
+        clock.advance(1200) // 20분
+        tracker.pause()
+        clock.advance(600) // 10분 정지
+        tracker.resume()
+        clock.advance(1200) // 20분
+
+        #expect(tracker.elapsedSeconds == 2400) // 40분. 정지 10분 제외
+    }
+
+    @Test("정지를 사이에 낀 구간에도 정지 시간이 빠진다")
+    func pausedTimeIsExcludedFromSegments() {
+        var (tracker, clock) = makeTracker()
+        tracker.reset()
+
+        clock.advance(600) // 근력 10분
+        tracker.pause()
+        clock.advance(300) // 5분 정지
+        tracker.resume()
+        clock.advance(600) // 근력 10분 더
+        tracker.closeOpenSegment(kind: .strength)
+        clock.advance(300) // 유산소 5분
+        tracker.closeOpenSegment(kind: .cardio)
+
+        #expect(tracker.closed.map(\.durationSeconds) == [1200, 300])
+        #expect(tracker.closed.map(\.startOffset) == [0, 1200])
+
+        let total = tracker.closed.reduce(0) { $0 + $1.durationSeconds }
+        #expect(total == tracker.elapsedSeconds)
+    }
+
+    @Test("정지·재개를 중복으로 불러도 값이 어긋나지 않는다")
+    func repeatedPauseResumeIsIdempotent() {
+        var (tracker, clock) = makeTracker()
+        tracker.reset()
+
+        tracker.resume() // 정지 중이 아닌데 재개 — 무시
+        clock.advance(600)
+        tracker.pause()
+        tracker.pause() // 두 번째는 무시
+        clock.advance(300)
+        tracker.resume()
+        tracker.resume() // 두 번째는 무시
+        clock.advance(600)
+
+        #expect(tracker.elapsedSeconds == 1200)
+    }
+
+    @Test("정지 중에 세션을 끝내도 구간 합계와 총 시간이 어긋나지 않는다")
+    func closingWhilePausedKeepsSumConsistent() {
+        var (tracker, clock) = makeTracker()
+        tracker.reset()
+
+        clock.advance(1200) // 20분 운동
+        tracker.pause()
+        clock.advance(900) // 15분 정지 — 이 상태로 종료 버튼을 누른다
+        tracker.closeOpenSegment(kind: .strength)
+
+        let sum = tracker.closed.reduce(0) { $0 + $1.durationSeconds }
+        #expect(sum == 1200)
+        #expect(tracker.elapsedSeconds == 1200)
+        #expect(sum == tracker.elapsedSeconds)
+    }
+
+    @Test("새 세션을 열면 정지 누적도 지운다")
+    func resetClearsPausedAccumulation() {
+        var (tracker, clock) = makeTracker()
+        tracker.reset()
+        clock.advance(600)
+        tracker.pause()
+        clock.advance(600)
+
+        tracker.reset() // 정지 중에 새 세션을 연다
+        clock.advance(300)
+
+        #expect(tracker.elapsedSeconds == 300)
+    }
+
+    @Test("구간을 닫은 직후의 경과시간은 구간 합계와 정확히 같다 — 저장 총시간이 이 값이다")
+    func elapsedEqualsSegmentSumRightAfterClosing() {
+        var (tracker, clock) = makeTracker()
+        tracker.reset()
+
+        clock.advance(900) // 근력 15분
+        tracker.pause()
+        clock.advance(600) // 10분 정지
+        tracker.resume()
+        clock.advance(300) // 근력 5분 더
+        tracker.closeOpenSegment(kind: .strength)
+        clock.advance(600) // 유산소 10분
+        tracker.closeOpenSegment(kind: .cardio)
+
+        let totalSeconds = tracker.elapsedSeconds // end() 가 붙드는 그 시점
+        let sum = tracker.closed.reduce(0) { $0 + $1.durationSeconds }
+
+        #expect(totalSeconds == sum)
+        #expect(totalSeconds == 1800) // 30분. 정지 10분 제외
+
+        // 종료 처리(HealthKit 마무리)에 시간이 걸려도 붙든 값은 변하지 않는다
+        clock.advance(12)
+        #expect(totalSeconds == sum)
+    }
 }
