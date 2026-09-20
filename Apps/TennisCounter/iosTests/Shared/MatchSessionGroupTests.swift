@@ -124,21 +124,24 @@ struct MatchSessionGroupTests {
         #expect(groups[0].averageHeartRate == nil)
     }
 
-    @Test func nilRecordMetricFallsBackToMatchMaximum() {
+    @Test func presentRecordKeepsMissingMetricsUnknown() {
         let sessionId = UUID()
         let match = Match()
         match.workoutSessionId = sessionId
         match.workoutElapsedSeconds = 1000
         match.workoutCaloriesBurned = 120
         match.workoutTotalCaloriesBurned = 160
+        match.averageHeartRate = 150
 
         let record = WorkoutSessionRecord()
         record.workoutSessionId = sessionId
+        record.endedAt = Date()
 
         let group = MatchSessionGroup.group([match], records: [record])[0]
-        #expect(group.elapsedSeconds == 1000)
-        #expect(group.activeCalories == 120)
-        #expect(group.totalCalories == 160)
+        #expect(group.elapsedSeconds == nil)
+        #expect(group.activeCalories == nil)
+        #expect(group.totalCalories == nil)
+        #expect(group.averageHeartRate == nil)
     }
 
     @Test func recordsForGroupingKeepsOvernightSessionJoinAndOnlyAddsMatchlessInScopeRecords() {

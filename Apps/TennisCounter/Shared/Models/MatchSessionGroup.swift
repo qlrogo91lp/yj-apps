@@ -31,18 +31,21 @@ struct MatchSessionGroup: Identifiable {
         record?.startedAt ?? matches.first?.startedAt ?? .distantPast
     }
 
-    /// 누적 지표는 레코드가 우선. 폴백은 그룹당 최댓값 하나다 — 같은 워크아웃의 경기들이
-    /// 하나의 누적 축을 공유하므로 합산하면 같은 값을 여러 번 세게 된다.
+    /// 레코드가 있으면 누락된 지표도 그대로 unknown이다. 레코드 자체가 없는 구버전 세션만
+    /// 경기 누적 최댓값으로 폴백한다 — 같은 워크아웃의 누적값을 여러 번 합산하지 않는다.
     var elapsedSeconds: Int? {
-        record?.elapsedSeconds ?? matches.compactMap(\.workoutElapsedSeconds).max()
+        if let record { return record.elapsedSeconds }
+        return matches.compactMap(\.workoutElapsedSeconds).max()
     }
 
     var activeCalories: Double? {
-        record?.activeCalories ?? matches.compactMap(\.workoutCaloriesBurned).max()
+        if let record { return record.activeCalories }
+        return matches.compactMap(\.workoutCaloriesBurned).max()
     }
 
     var totalCalories: Double? {
-        record?.totalCalories ?? matches.compactMap(\.workoutTotalCaloriesBurned).max()
+        if let record { return record.totalCalories }
+        return matches.compactMap(\.workoutTotalCaloriesBurned).max()
     }
 
     /// **폴백하지 않는다.** `Match.averageHeartRate` 는 그 경기 구간의 평균이라

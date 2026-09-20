@@ -12,7 +12,7 @@ struct SummaryStatsGrid: View {
             )
             StatCard(
                 title: String(localized: "summary_win_rate"),
-                value: stats.winRate.formatted(.percent.precision(.fractionLength(0)))
+                value: stats.formattedWinRate
             )
             if period == .all {
                 StatCard(title: String(localized: "summary_session_count"), value: stats.sessionCount.formatted())

@@ -52,7 +52,7 @@ struct SummaryView: View {
             format: String(localized: "summary_record_line"),
             stats.wins,
             stats.totalMatches - stats.wins,
-            Int(stats.winRate * 100)
+            stats.roundedWinRatePercentage
         ))
         .font(.system(size: 15))
         .foregroundColor(.secondary)

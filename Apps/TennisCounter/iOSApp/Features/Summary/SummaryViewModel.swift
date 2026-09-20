@@ -34,6 +34,15 @@ struct SummaryStats {
     let sessionCount: Int
     let averageSessionSeconds: Int?
 
+    /// 카드와 전적 문구가 같은 정수 퍼센트를 사용한다.
+    var roundedWinRatePercentage: Int {
+        Int((winRate * 100).rounded())
+    }
+
+    var formattedWinRate: String {
+        (Double(roundedWinRatePercentage) / 100).formatted(.percent.precision(.fractionLength(0)))
+    }
+
     var formattedCalories: String {
         totalCalories.map { $0.formatted(.number.precision(.fractionLength(0))) } ?? "–"
     }

@@ -4,6 +4,56 @@ import Testing
 
 @MainActor
 struct SummaryViewModelTests {
+    @Test func winRatePercentageRoundsTwoWinsInThreeMatchesUp() {
+        let vm = SummaryViewModel()
+        vm.selectedPeriod = .all
+        let matches = [true, true, false].map { won in
+            let match = Match()
+            match.myTotalSets = won ? 2 : 0
+            match.yourTotalSets = won ? 0 : 2
+            return match
+        }
+
+        let stats = vm.stats(from: matches, records: [])
+
+        #expect(stats.roundedWinRatePercentage == 67)
+    }
+
+    @Test func partialRecordMetricsAgreeAcrossStatsRecentCardAndTrend() throws {
+        let vm = SummaryViewModel()
+        vm.selectedPeriod = .all
+        let base = Date(timeIntervalSince1970: 1_700_000_000)
+        let partialId = UUID()
+        let partialMatch = trendMatch(session: partialId, startedAt: base.addingTimeInterval(7200), elapsed: 3600)
+        partialMatch.workoutCaloriesBurned = 500
+        partialMatch.workoutTotalCaloriesBurned = 600
+        let partial = sessionRecord(id: partialId, elapsed: nil, calories: nil)
+        partial.startedAt = partialMatch.startedAt
+        partial.averageHeartRate = 142
+        let complete = sessionRecord(elapsed: 1800, calories: 200)
+        complete.startedAt = base.addingTimeInterval(3600)
+        let legacy = trendMatch(session: UUID(), startedAt: base, elapsed: 600)
+        legacy.workoutCaloriesBurned = 100
+        let matches = [partialMatch, legacy]
+        let records = [partial, complete]
+
+        let stats = vm.stats(from: matches, records: records)
+        let recent = try #require(vm.recentSession(from: matches, records: records))
+        let trend = vm.trendSessions(from: matches, records: records)
+
+        #expect(stats.sessionCount == 3)
+        #expect(stats.totalDuration == 2400)
+        #expect(stats.totalCalories == 300)
+        #expect(stats.averageSessionSeconds == 1200)
+        #expect(recent.id == partialId)
+        #expect(recent.elapsedSeconds == nil)
+        #expect(recent.activeCalories == nil)
+        #expect(recent.totalCalories == nil)
+        #expect(recent.averageHeartRate == 142)
+        #expect(trend.map(\.elapsedSeconds) == [600, 1800, nil])
+        #expect(trend.map(\.activeCalories) == [100, 200, nil])
+    }
+
     @Test func allPeriodCountsSessionsAndAverageUsingFinalRecords() {
         let vm = SummaryViewModel()
         vm.selectedPeriod = .all
