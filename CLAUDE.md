@@ -173,6 +173,28 @@ ScreenName/Components/  ← 특정 View 전용 (가장 낮은 계층)
 - 예외: `docs/specs/`·`plans/`의 스펙/플랜 문서는 코드 변경이 없으므로 브랜치+PR 없이 `main`에 직접 커밋·push 가능
 - 커밋 메시지는 gitmoji prefix: ✨ feat / 🐛 fix / ♻️ refactor / 🎨 style / 📝 docs / ✅ test / 🔧 chore / 🔥 remove / ⏪ revert
 
+### 워크트리
+
+네이티브 도구(`EnterWorktree` 등)가 있으면 그걸 쓴다. 없을 때만 `git worktree add` 로 만든다.
+
+- 경로는 **형제 폴더** `../yj-apps-worktrees/<브랜치 leaf>`. 저장소 안(`.worktrees/`)이나 에이전트
+  워크스페이스(`~/orca/workspaces/`)에 두지 않는다 — 전자는 `PBXFileSystemSynchronizedRootGroup` 의
+  자동 스캔 대상이 될 수 있고, 후자는 세션이 끝나면 회수되어 **실기기·Xcode 확인이 남은 체크아웃이
+  밑에서 사라진다.** 이 저장소는 `xcodebuild` 로 안 끝나는 수동 확인 항목이 계속 남는다
+- **트랙당 하나만** 파고 트랙이 끝날 때까지 유지한다. DerivedData 는 워크스페이스 **경로 해시**라
+  워크트리를 새로 팔 때마다 통째로 새로 생기고 풀 빌드를 한 번 한다
+- 워크트리를 제거하면 **그 DerivedData 도 같이 지운다.** 안 지우면 수백 MB 짜리 고아만 남는다
+
+```bash
+make dd-prune        # 고아 목록만 본다 (검사만)
+make dd-prune-apply  # 실제로 지운다
+```
+
+고아 판정은 `info.plist` 의 `WorkspacePath` 가 실제로 존재하는지 **하나만** 본다. `YJApps-*` 접두사로
+거르면 `YJKit-*` 처럼 다른 이름으로 생긴 것을 놓치므로 스크립트는 DerivedData 전체를 훑는다.
+
+`.gitignore` 의 `.worktrees/` 는 네이티브 도구가 없어 폴백으로 떨어질 때를 대비한 안전망이라 남겨 둔다.
+
 ## Docs 공통 규약
 
 저장소 루트와 모든 앱·패키지가 **같은 구조**를 쓴다.

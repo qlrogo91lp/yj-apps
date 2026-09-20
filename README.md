@@ -43,6 +43,21 @@ CI는 서명 없이 시뮬레이터에서만 돌기 때문에 이 항목을 대�
 
 ---
 
+## 명령
+
+```bash
+make lint            # 앱별 swiftlint (검사만)
+make format          # 앱별 swiftformat --lint (검사만)
+make fix             # 앱별 swiftformat + swiftlint --fix (실제로 고침)
+make kit-test        # Packages/YJKit 단독 테스트 (iOS 시뮬레이터)
+make dd-prune        # 고아 DerivedData 목록 (검사만)
+make dd-prune-apply  # 고아 DerivedData 삭제 (실제로 지움)
+```
+
+> `make dd-prune` 은 **가리키던 워크트리가 사라진 DerivedData** 를 찾는다. DerivedData 폴더 이름은
+> 워크스페이스 **경로 해시**라 워크트리를 지워도 산출물은 남아 수백 MB 를 차지한다. 워크트리를
+> 제거할 때 같이 돌린다. 실제 삭제는 `dd-prune-apply` 에서만 일어난다.
+
 ## 빌드
 
 **최상위 `YJApps.xcworkspace` 하나만 연다.** 앱별 `.xcodeproj`를 따로 열 필요가 없다.
