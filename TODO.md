@@ -170,7 +170,7 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
 
 | Phase | # | 항목 | 상태 | 문서 |
 |---|---|---|---|---|
-| 2 데이터 | 1 | 잔디 집계 (일별 집계 캐시) | **다음** · 스펙 완료 · **선행: 정지 제외** | [스펙](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-09-grass-daily-aggregate.md) · 로드맵 Phase 2 |
+| 2 데이터 | 1 | 잔디 집계 (일별 집계 캐시) | **다음** · 스펙 완료 · 선행(정지 제외) 구현 완료, 실기기 확인만 남음 | [스펙](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-09-grass-daily-aggregate.md) · 로드맵 Phase 2 |
 | 2 데이터 | 2 | HealthKit import (증분) | 예정 · **근력/유산소 매핑 표 확정이 핵심** | 로드맵 Phase 2 · 스펙 4.1·4.2 |
 | 3 iOS | 3 | 탭 셸 + 디자인 토큰 | 예정 | 로드맵 Phase 3 · 스펙 3절·7절 |
 | 3 iOS | 4 | 03b 기록 목록 | 예정 (선행: 3) | 로드맵 Phase 3 · 스펙 03b절 |
@@ -205,9 +205,10 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
 - [x] **구간 시간이 "근력 0분" 으로 나온 문제** — 틱 카운터를 벽시계로 바꿨다 (PR #19).
       [작업 기록](Apps/HaruchiFit/docs/logs/2026/2026-09-09-segment-duration-tick-counter.md)
 - [ ] **구간 시간 재검증** — 고친 뒤 실기기에서 40분쯤 돌려 종목별 분이 맞는지 (PR #19)
-- [ ] **워치 시간에서 일시정지 제외** — 스펙·플랜 완료 · 구현 대기. 잔디 집계(#1)의 선행이다.
-      [스펙](Apps/HaruchiFit/docs/specs/watch/2026/2026-09-09-workout-elapsed-exclude-pause.md) ·
-      [플랜](Apps/HaruchiFit/docs/plans/watch/2026/2026-09-09-workout-elapsed-exclude-pause.md)
+- [x] **워치 시간에서 일시정지 제외** — `SegmentTracker` 가 워치 단일 시계가 됐다. 테스트 39개 통과 (PR #26).
+      곁다리로 테스트 스파이의 Xcode 27 컴파일 에러도 고쳤다 (`actor` → `@MainActor final class`)
+- [ ] **정지 제외 실기기 검증** — 5분 정지 후 총 시간, 구간 합계 일치,
+      **WC 재검증 2항목**(컴플리케이션 경과시간·일시정지 시 멈춤), 손목 30초 내림
 - [ ] **경과시간이 뒤처지는지** — 워크아웃 중 손목을 30초 내렸다 올렸을 때 시간이 건너뛰는지
       멈춰 있었는지. 3개 앱 공통 ([탐색 문서](Packages/YJKit/docs/ideas/elapsed-seconds-tick-counter.md))
 
@@ -223,8 +224,8 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
 
 확인할 것 3가지와 고칠 때의 갈림길(일시정지를 어떻게 셀 것인가)은 위 탐색 문서에 정리했다.
 
-**하루치는 앱 레이어에서 정지 제외로 간다** — HealthKit 이 세그먼트를 모르니 구간에서 정지를
-빼는 일은 앱 몫이고, 그 시계를 두 개 둘 이유가 없다
+**하루치는 앱 레이어에서 정지 제외로 갔다 (PR #26)** — HealthKit 이 세그먼트를 모르니 구간에서
+정지를 빼는 일은 앱 몫이고, 그 시계를 두 개 둘 이유가 없다
 ([스펙](Apps/HaruchiFit/docs/specs/watch/2026/2026-09-09-workout-elapsed-exclude-pause.md)).
 **YJKit 통합과 Ralli 기존 기록 문제는 그대로 열려 있다** — 위 3가지 확인이 선행이다.
 
