@@ -84,11 +84,11 @@ struct WorkoutViewModelTests {
         viewModel.discard()
 
         // 삭제는 떼어낸 Task 로 돈다 — 도착할 때까지 짧게 기다린다.
-        var removed = await remover.removed
+        var removed = remover.removed
         var attempts = 0
         while removed.isEmpty, attempts < 100 {
             await Task.yield()
-            removed = await remover.removed
+            removed = remover.removed
             attempts += 1
         }
         #expect(removed == [uuid])
