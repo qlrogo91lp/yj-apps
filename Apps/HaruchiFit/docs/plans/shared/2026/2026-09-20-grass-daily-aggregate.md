@@ -844,6 +844,7 @@ git commit -m "✨ 임시 홈을 잔디 그리드로 바꾼다"
 
 **Files:**
 - Modify: `Apps/HaruchiFit/docs/specs/shared/2026/2026-09-02-haruchi-fit-architecture.md:244-251`
+- Modify: `Apps/HaruchiFit/docs/specs/shared/2026/2026-09-07-haruchi-fit-roadmap.md`
 - Modify: `TODO.md`
 
 - [ ] **Step 1: 아키텍처 5절의 캐시 문단을 뒤집는다**
@@ -889,7 +890,7 @@ git commit -m "✨ 임시 홈을 잔디 그리드로 바꾼다"
 
 기존 `### 통계 연도 아카이브` 헤더는 위 블록이 대체하므로 **중복해서 남기지 않는다.**
 
-- [ ] **Step 2: TODO 를 갱신한다**
+- [ ] **Step 2: 로드맵과 TODO 를 갱신한다**
 
 > **PR 번호가 필요하므로 이 Step 은 Task 5 Step 3(PR 생성) 뒤에 한다.** Step 1(아키텍처
 > 정정)은 번호가 필요 없으니 먼저 커밋해도 된다. 지난번(PR #26)에 같은 순서로 처리했다.
@@ -903,7 +904,7 @@ git commit -m "✨ 임시 홈을 잔디 그리드로 바꾼다"
 아래로 바꾼다. **캐시를 안 만들기로 했으므로 항목 이름에서 "캐시" 를 뺀다.**
 
 ```markdown
-| 2 데이터 | 1 | 잔디 집계 (일별 집계) | **완료** (PR #<번호>) · 영속 캐시는 두지 않기로 확정 | ... |
+| ~~2 데이터~~ | ~~1~~ | ~~잔디 집계 (일별 집계)~~ | ~~**완료** (PR #<번호>) · 영속 캐시는 두지 않기로 확정~~ | ~~...~~ |
 ```
 
 「예정사항 (남은 12개)」 제목을 **「예정사항 (남은 11개)」** 로 고치고, #2 HealthKit import 행의 상태를 **`**다음**`** 으로 바꾼다.
@@ -917,11 +918,21 @@ git commit -m "✨ 임시 홈을 잔디 그리드로 바꾼다"
       `@Query` 전파로 해당 날짜의 칸이 재실행 없이 채워지는지
 ```
 
+로드맵에는 잔디 집계를 완료 항목(PR #27)으로 추가하고 「남은 12개」를 「남은 11개」로
+고친다. Phase 2 의 #1 행은 완료 표시하고, 영속 캐시가 핵심이라는 옛 문장은 제거한다.
+Phase 3 의 `ContentView` 설명도 임시 리스트에서 **잔디 집계 확인용 임시 그리드**로 고친다.
+
+`TODO.md` 의 “Phase 2(잔디 집계 · HealthKit import)는 화면이 없다”는 문단도 현재 상태와
+맞춘다. 잔디 집계는 임시 그리드까지 완료했고, 다음 HealthKit import 결과를 그 화면에서
+확인한다고 적는다.
+
 - [ ] **Step 3: 커밋**
 
 ```bash
-git add Apps/HaruchiFit/docs/specs/shared/2026/2026-09-02-haruchi-fit-architecture.md TODO.md
-git commit -m "📝 집계 캐시를 두지 않기로 한 결론을 아키텍처와 TODO 에 반영한다"
+git add Apps/HaruchiFit/docs/specs/shared/2026/2026-09-02-haruchi-fit-architecture.md \
+        Apps/HaruchiFit/docs/specs/shared/2026/2026-09-07-haruchi-fit-roadmap.md \
+        TODO.md
+git commit -m "📝 잔디 집계 완료를 아키텍처·로드맵·TODO 에 반영한다"
 ```
 
 ---

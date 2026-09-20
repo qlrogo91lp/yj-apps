@@ -147,7 +147,7 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
 배경색(`badgeColor`)으로만 드러난다. 결정은 대화 중 시안 페이지로 확정해 스펙 문서 대신 README 와 PR 에 남겼다.
 로컬 SPM 이라 Kit 만 먼저 머지할 수 없어 PR 은 하나로 묶었다.
 
-## HaruchiFit — 첫 출시 전 (Phase 1 완료 · Phase 2 대기)
+## HaruchiFit — 첫 출시 전 (Phase 1 완료 · Phase 2 진행 중)
 
 순서와 설계 근거의 단일 출처는 [로드맵](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-07-haruchi-fit-roadmap.md)이다.
 선행 문서 — [제품 스펙](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-02-haruchi-fit-product-spec.md) · [아키텍처](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-02-haruchi-fit-architecture.md).
@@ -166,12 +166,12 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
 | W0 홈 시작 유형 토글 (근력 / 유산소) | [PR #14](https://github.com/qlrogo91lp/yj-apps/pull/14) 머지 · 테스트 12개 통과 · **실기기 검증 완료** | [플랜](Apps/HaruchiFit/docs/plans/watch/2026/2026-09-08-haruchi-fit-w0-start-kind.md) |
 | WC 컴플리케이션 — 세션 상태만 | [PR #14](https://github.com/qlrogo91lp/yj-apps/pull/14) 머지 · 테스트 24개 통과 · **실기기 검증 완료** | [플랜](Apps/HaruchiFit/docs/plans/watch/2026/2026-09-08-haruchi-fit-wc-complication.md) |
 
-### 예정사항 (남은 12개)
+### 예정사항 (남은 11개)
 
 | Phase | # | 항목 | 상태 | 문서 |
 |---|---|---|---|---|
-| 2 데이터 | 1 | 잔디 집계 (일별 집계 캐시) | **다음** · 스펙 완료 · 선행(정지 제외) 구현 완료, 실기기 확인만 남음 | [스펙](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-09-grass-daily-aggregate.md) · 로드맵 Phase 2 |
-| 2 데이터 | 2 | HealthKit import (증분) | 예정 · **근력/유산소 매핑 표 확정이 핵심** | 로드맵 Phase 2 · 스펙 4.1·4.2 |
+| ~~2 데이터~~ | ~~1~~ | ~~잔디 집계 (일별 집계)~~ | ~~**완료** ([PR #27](https://github.com/qlrogo91lp/yj-apps/pull/27)) · 영속 캐시는 두지 않기로 확정~~ | ~~[스펙](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-09-grass-daily-aggregate.md) · 로드맵 Phase 2~~ |
+| 2 데이터 | 2 | HealthKit import (증분) | **다음** · **근력/유산소 매핑 표 확정이 핵심** | 로드맵 Phase 2 · 스펙 4.1·4.2 |
 | 3 iOS | 3 | 탭 셸 + 디자인 토큰 | 예정 | 로드맵 Phase 3 · 스펙 3절·7절 |
 | 3 iOS | 4 | 03b 기록 목록 | 예정 (선행: 3) | 로드맵 Phase 3 · 스펙 03b절 |
 | 3 iOS | 5 | 04 기록 상세 (부위 태깅 · 메모) | 예정 (선행: 4) | 로드맵 Phase 3 · 스펙 04절 |
@@ -186,7 +186,8 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
 
 **Phase 1 이 끝나 폰을 한 번도 안 열어도 흐름 A(해피패스)가 완결된다** — W2 · W0 · WC.
 셋 다 실기기 검증까지 끝났다. Phase 2 착수 전에 **워치 시간에서 일시정지를 빼는 선행 작업**이 하나 끼었다 — 잔디 농도의 입력이라서다.
-다음 Phase 2(잔디 집계 · HealthKit import) 는 화면이 없어 **눈으로 확인할 수단**을 착수 시점에 정한다.
+Phase 2 는 진행 중이다. 잔디 집계는 26주 임시 그리드까지 끝났고, **다음은 HealthKit import**다.
+가져온 기록은 이 임시 그리드에서 날짜·농도를 확인한다.
 
 > 플랜 문서는 **착수 직전에 하나씩** 쓴다 (로드맵 "작업 중 지킬 것"). 위 표의 "예정" 은
 > 플랜이 아직 없다는 뜻이지 설계가 비어 있다는 뜻이 아니다 — 스펙은 14개 화면 전부 확정돼 있다.
@@ -211,6 +212,10 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
       **WC 재검증 2항목**(컴플리케이션 경과시간·일시정지 시 멈춤), 손목 30초 내림
 - [ ] **경과시간이 뒤처지는지** — 워크아웃 중 손목을 30초 내렸다 올렸을 때 시간이 건너뛰는지
       멈춰 있었는지. 3개 앱 공통 ([탐색 문서](Packages/YJKit/docs/ideas/elapsed-seconds-tick-counter.md))
+- [ ] **잔디 농도 컷 눈으로 확인** — 실기기 기록이 쌓인 뒤 임시 화면에서 농도가 실제 운동
+      시간과 맞는지. 컷은 30/60/90분 (D-M6)
+- [ ] **잔디 저장 실시간 갱신 확인** — 폰을 켜 둔 채 워치에서 운동을 저장했을 때
+      `@Query` 전파로 해당 날짜의 칸이 재실행 없이 채워지는지
 
 ## YJKit — 확인 필요
 
