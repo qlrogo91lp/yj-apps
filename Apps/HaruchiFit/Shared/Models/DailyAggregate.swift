@@ -18,5 +18,7 @@ struct DailyAggregate: Equatable, Identifiable {
     /// 달력 월 요약과 통계 세션 카운트 (D2).
     let sessionCount: Int
 
-    var id: Date { day }
+    var id: Date {
+        day
+    }
 }

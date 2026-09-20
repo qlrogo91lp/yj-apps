@@ -1,6 +1,6 @@
 import Foundation
-import SwiftData
 @testable import HaruchiFit_Watch_App
+import SwiftData
 
 /// 잔디 테스트가 쓰는 레코드 생성기.
 ///

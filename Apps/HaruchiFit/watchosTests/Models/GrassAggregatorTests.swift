@@ -1,6 +1,6 @@
 import Foundation
-import SwiftData
 @testable import HaruchiFit_Watch_App
+import SwiftData
 import Testing
 
 /// 레코드를 하루 한 칸으로 접는 규칙.
@@ -15,14 +15,14 @@ struct GrassAggregatorTests {
         GrassFixture.record(in: context, startedAt: GrassFixture.date(2026, 9, 14, 7), totalSeconds: 1800)
         GrassFixture.record(in: context, startedAt: GrassFixture.date(2026, 9, 14, 19), totalSeconds: 2400)
 
-        let days = GrassAggregator.fold(try context.fetch(FetchDescriptor<WorkoutRecord>()),
-                                        calendar: GrassFixture.seoul)
+        let days = try GrassAggregator.fold(context.fetch(FetchDescriptor<WorkoutRecord>()),
+                                            calendar: GrassFixture.seoul)
 
         #expect(days.count == 1)
         #expect(days.first?.totalSeconds == 4200) // 70분
         #expect(days.first?.sessionCount == 2)
         // 스펙 8절이 이 케이스에 농도까지 못박았다 — 70분은 60 컷을 넘고 90 컷에 못 닿는다
-        #expect(GrassIntensity.byTime.level(for: try #require(days.first)) == .heavy)
+        #expect(try GrassIntensity.byTime.level(for: #require(days.first)) == .heavy)
     }
 
     @Test("자정을 넘긴 세션은 전부 시작한 날 칸에 들어간다")
@@ -33,8 +33,8 @@ struct GrassAggregatorTests {
                             startedAt: GrassFixture.date(2026, 9, 14, 23, 40),
                             totalSeconds: 3000)
 
-        let days = GrassAggregator.fold(try context.fetch(FetchDescriptor<WorkoutRecord>()),
-                                        calendar: GrassFixture.seoul)
+        let days = try GrassAggregator.fold(context.fetch(FetchDescriptor<WorkoutRecord>()),
+                                            calendar: GrassFixture.seoul)
 
         #expect(days.count == 1)
         #expect(days.first?.day == GrassFixture.seoul.startOfDay(for: GrassFixture.date(2026, 9, 14)))
@@ -49,8 +49,8 @@ struct GrassAggregatorTests {
                             totalSeconds: 1800,
                             segments: [(.strength, 0, 1200), (.cardio, 1200, 600)])
 
-        let days = GrassAggregator.fold(try context.fetch(FetchDescriptor<WorkoutRecord>()),
-                                        calendar: GrassFixture.seoul)
+        let days = try GrassAggregator.fold(context.fetch(FetchDescriptor<WorkoutRecord>()),
+                                            calendar: GrassFixture.seoul)
 
         #expect(days.first?.strengthSeconds == 1200)
         #expect(days.first?.cardioSeconds == 600)
@@ -61,8 +61,8 @@ struct GrassAggregatorTests {
         let context = try GrassFixture.makeContext()
         GrassFixture.record(in: context, startedAt: GrassFixture.date(2026, 9, 14), totalSeconds: 2700)
 
-        let days = GrassAggregator.fold(try context.fetch(FetchDescriptor<WorkoutRecord>()),
-                                        calendar: GrassFixture.seoul)
+        let days = try GrassAggregator.fold(context.fetch(FetchDescriptor<WorkoutRecord>()),
+                                            calendar: GrassFixture.seoul)
 
         #expect(days.first?.totalSeconds == 2700)
         #expect(days.first?.strengthSeconds == 0)
@@ -79,8 +79,8 @@ struct GrassAggregatorTests {
         GrassFixture.record(in: context, startedAt: GrassFixture.date(2026, 9, 15),
                             totalSeconds: 1800, totalCalories: nil)
 
-        let days = GrassAggregator.fold(try context.fetch(FetchDescriptor<WorkoutRecord>()),
-                                        calendar: GrassFixture.seoul)
+        let days = try GrassAggregator.fold(context.fetch(FetchDescriptor<WorkoutRecord>()),
+                                            calendar: GrassFixture.seoul)
 
         #expect(days.first?.totalCalories == 120)
         #expect(days.last?.totalCalories == nil)
@@ -92,8 +92,8 @@ struct GrassAggregatorTests {
         GrassFixture.record(in: context, startedAt: GrassFixture.date(2026, 9, 14), totalSeconds: 1800)
         GrassFixture.record(in: context, startedAt: GrassFixture.date(2026, 9, 17), totalSeconds: 1800)
 
-        let days = GrassAggregator.fold(try context.fetch(FetchDescriptor<WorkoutRecord>()),
-                                        calendar: GrassFixture.seoul)
+        let days = try GrassAggregator.fold(context.fetch(FetchDescriptor<WorkoutRecord>()),
+                                            calendar: GrassFixture.seoul)
 
         #expect(days.count == 2) // 15·16일 칸은 없다
     }
@@ -105,8 +105,8 @@ struct GrassAggregatorTests {
         GrassFixture.record(in: context, startedAt: GrassFixture.date(2026, 9, 14), totalSeconds: 600)
         GrassFixture.record(in: context, startedAt: GrassFixture.date(2026, 9, 15), totalSeconds: 600)
 
-        let days = GrassAggregator.fold(try context.fetch(FetchDescriptor<WorkoutRecord>()),
-                                        calendar: GrassFixture.seoul)
+        let days = try GrassAggregator.fold(context.fetch(FetchDescriptor<WorkoutRecord>()),
+                                            calendar: GrassFixture.seoul)
 
         #expect(days.map(\.day) == days.map(\.day).sorted())
     }
