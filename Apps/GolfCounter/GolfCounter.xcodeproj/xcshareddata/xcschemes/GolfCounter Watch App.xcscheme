@@ -85,7 +85,6 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "399700FB2A1D9BC900D0D486"
             BuildableName = "GolfCounter Watch App.app"
-            BlueprintName = "GolfCounter Watch App"
             ReferencedContainer = "container:GolfCounter.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -102,7 +101,6 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "399700FB2A1D9BC900D0D486"
             BuildableName = "GolfCounter Watch App.app"
-            BlueprintName = "GolfCounter Watch App"
             ReferencedContainer = "container:GolfCounter.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

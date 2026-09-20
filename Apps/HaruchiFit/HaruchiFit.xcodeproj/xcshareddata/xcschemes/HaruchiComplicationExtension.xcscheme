@@ -94,7 +94,6 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "3999D2C83048FA54005343C7"
             BuildableName = "HaruchiComplicationExtension.appex"
-            BlueprintName = "HaruchiComplicationExtension"
             ReferencedContainer = "container:HaruchiFit.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
