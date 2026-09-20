@@ -194,4 +194,29 @@ struct SegmentTrackerTests {
 
         #expect(tracker.elapsedSeconds == 300)
     }
+
+    @Test("구간을 닫은 직후의 경과시간은 구간 합계와 정확히 같다 — 저장 총시간이 이 값이다")
+    func elapsedEqualsSegmentSumRightAfterClosing() {
+        var (tracker, clock) = makeTracker()
+        tracker.reset()
+
+        clock.advance(900) // 근력 15분
+        tracker.pause()
+        clock.advance(600) // 10분 정지
+        tracker.resume()
+        clock.advance(300) // 근력 5분 더
+        tracker.closeOpenSegment(kind: .strength)
+        clock.advance(600) // 유산소 10분
+        tracker.closeOpenSegment(kind: .cardio)
+
+        let totalSeconds = tracker.elapsedSeconds // end() 가 붙드는 그 시점
+        let sum = tracker.closed.reduce(0) { $0 + $1.durationSeconds }
+
+        #expect(totalSeconds == sum)
+        #expect(totalSeconds == 1800) // 30분. 정지 10분 제외
+
+        // 종료 처리(HealthKit 마무리)에 시간이 걸려도 붙든 값은 변하지 않는다
+        clock.advance(12)
+        #expect(totalSeconds == sum)
+    }
 }

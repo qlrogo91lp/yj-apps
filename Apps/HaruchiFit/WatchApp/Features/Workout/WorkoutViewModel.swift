@@ -177,21 +177,28 @@ final class WorkoutViewModel: ObservableObject {
         // stopWorkout() 보다 먼저 닫는다. 그쪽이 총 시간을 재는 시점과 가장 가까워야
         // 구간 합계와 총 시간이 어긋나지 않는다 — HealthKit 마무리에 시간이 걸린다.
         segments.closeOpenSegment(kind: mode)
+        // **여기서 붙든다.** stopWorkout() 뒤에 읽으면 마무리에 걸린 시간만큼 구간 합계보다 커진다.
+        let totalSeconds = segments.elapsedSeconds
 
         let result = await session.stopWorkout()
         WKInterfaceDevice.current().play(.stop)
         // 세션이 끝났으니 컴플리케이션은 평상시 표시로 돌아간다. 저장/버리기와 무관하다.
         snapshots.clear()
 
-        enterSummary(with: result.map(record(from:)))
+        enterSummary(with: result.map { record(from: $0, totalSeconds: totalSeconds) })
         return result
     }
 
-    private func record(from result: WorkoutResult) -> WorkoutRecordMessage {
+    /// **총 시간은 `WorkoutResult.durationSeconds` 를 쓰지 않는다.** 그쪽은 정지를 포함한
+    /// 벽시계라 구간 합계와 어긋난다. 호출부가 구간을 닫은 시점에 붙든 값을 넘긴다.
+    ///
+    /// `endedAt - startedAt` 은 정지가 있으면 `totalSeconds` 보다 크다. **둘이 같다고
+    /// 가정하는 코드를 두지 않는다.**
+    private func record(from result: WorkoutResult, totalSeconds: Int) -> WorkoutRecordMessage {
         WorkoutRecordMessage(healthKitUUID: result.healthKitUUID,
                              startedAt: segments.startedAt,
                              endedAt: Date(),
-                             totalSeconds: result.durationSeconds,
+                             totalSeconds: totalSeconds,
                              activeCalories: result.caloriesBurned,
                              totalCalories: result.totalCaloriesBurned,
                              averageHeartRate: result.averageHeartRate,
