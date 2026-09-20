@@ -5,16 +5,16 @@ import Testing
 
 @MainActor
 struct SessionPersistenceServiceTests {
-    private func makeService() -> SessionPersistenceService {
+    private func makeService() throws -> SessionPersistenceService {
         let config = ModelConfiguration(isStoredInMemoryOnly: true)
-        let container = try! ModelContainer(for: WorkoutSessionRecord.self, configurations: config)
+        let container = try ModelContainer(for: WorkoutSessionRecord.self, configurations: config)
         let service = SessionPersistenceService()
         service.configure(with: ModelContext(container))
         return service
     }
 
     @Test func upsertThenFetch() throws {
-        let service = makeService()
+        let service = try makeService()
         let id = UUID()
         let record = WorkoutSessionRecord()
         record.workoutSessionId = id
@@ -29,7 +29,7 @@ struct SessionPersistenceServiceTests {
     }
 
     @Test func upsertSameSessionIdReplaces() throws {
-        let service = makeService()
+        let service = try makeService()
         let id = UUID()
 
         let first = WorkoutSessionRecord()
@@ -48,7 +48,7 @@ struct SessionPersistenceServiceTests {
     }
 
     @Test func deleteBySessionId() throws {
-        let service = makeService()
+        let service = try makeService()
         let id = UUID()
         let record = WorkoutSessionRecord()
         record.workoutSessionId = id

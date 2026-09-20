@@ -7,7 +7,7 @@ Base: `9c7ccd8`. 검증 대상 구현 범위: 시작 커밋 `af4e406..HEAD`.
 - iOS 앱 빌드와 test bundle 빌드는 성공했다. XCTest는 실행하지 않았다.
 - 삭제된 `MatchRow`, `SessionHeader`, `MatchDetailSheet`, `RecentSessionCard`의 Swift 참조는 없다.
 - 문자열 카탈로그 JSON과 새 세션/요약 키의 ko/en 수동 추출 상태는 유효하다.
-- 변경 파일 정적 포맷/린트에는 기존 테스트 소스 세 파일의 위반이 남아 있다. 프로덕션 동작을 바꾸지 않는 Task 8 범위에 따라 수정하지 않았다.
+- 최초 변경 파일 정적 포맷/린트에서 발견한 테스트 소스 세 파일의 위반은 Cleanup round 1에서 수정했고, 현재 범위·전체 포맷/린트는 통과한다.
 - 앱을 기존 iPhone 18 Pro 시뮬레이터에 직접 설치·실행했다. 시뮬레이터에 저장된 Ralli 세션 데이터가 없어 카드·상세·공유·삭제·전체 요약 흐름은 확인할 수 없었다.
 
 ## 실행한 검증
@@ -42,6 +42,29 @@ swiftlint lint --config Apps/TennisCounter/.swiftlint.yml <changed-swift-files>
 린트 결과: 실패. `SessionPersistenceServiceTests.swift:10:25`에 `force_try` 위반 1건.
 이 세 건은 이전 Task 1–3/5 보고서에도 남아 있던 테스트 소스 품질 이슈이며, 이번 검증은
 프로덕션 동작을 변경하지 않도록 문서만 갱신했다.
+
+## Cleanup round 1 — 정적 위반 해소
+
+검증 보고 후 테스트 소스만 최소 수정했다. `WorkoutEndMessageTests.swift`와
+`SessionRecordSavingTests.swift`의 import를 저장소 정렬 순서로 바꿨고,
+`SessionPersistenceServiceTests.makeService()`를 `throws`로 만들어 세 기존 `throws` 테스트가
+컨테이너 생성 실패를 `try`로 전파하게 했다. 프로덕션 소스와 테스트 시나리오는 바꾸지 않았다.
+
+```sh
+# 시작 커밋부터의 현존 Swift 변경 파일 30개
+swiftformat --lint --config Apps/TennisCounter/.swiftformat <changed-swift-files>
+swiftlint lint --config Apps/TennisCounter/.swiftlint.yml <changed-swift-files>
+make lint
+make format
+xcodebuild -workspace YJApps.xcworkspace -scheme TennisCounter \
+  -destination "id=$IOS" build-for-testing
+git diff --check
+```
+
+성공: 범위 포맷은 `0/30 files require formatting`, 범위 SwiftLint는 `0 violations, 0 serious`.
+전체 `make lint`와 `make format`도 모두 성공했다. iOS test bundle 빌드도
+`** TEST BUILD SUCCEEDED **`였고, `git diff --check`는 출력 없이 통과했다. XCTest와
+시뮬레이터 테스트 런치는 수행하지 않았다.
 
 ```sh
 git diff --check af4e406..HEAD

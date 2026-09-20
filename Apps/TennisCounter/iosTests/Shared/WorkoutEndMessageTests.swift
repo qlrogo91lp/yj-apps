@@ -1,6 +1,6 @@
 import Foundation
-import Testing
 @testable import TennisCounter
+import Testing
 
 struct WorkoutEndMessageTests {
     @Test func roundTripWithFinalValues() throws {

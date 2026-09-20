@@ -1,6 +1,6 @@
 import Foundation
-import Testing
 @testable import TennisCounter
+import Testing
 
 @MainActor
 struct SessionRecordSavingTests {
