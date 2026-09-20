@@ -12,8 +12,11 @@ struct TennisCounterApp: App {
 
     init() {
         // CloudKit 동기화 시도 → iCloud 미로그인·시뮬레이터 등 실패 시 로컬 폴백 (팩토리가 처리)
-        container = PersistenceContainerFactory.make(for: [Match.self, SetRecord.self])
+        container = PersistenceContainerFactory.make(
+            for: [Match.self, SetRecord.self, WorkoutSessionRecord.self]
+        )
         MatchPersistenceService.shared.configure(with: ModelContext(container))
+        SessionPersistenceService.shared.configure(with: ModelContext(container))
         Task { @MainActor in LiveActivityService.shared.endAll() }
     }
 
