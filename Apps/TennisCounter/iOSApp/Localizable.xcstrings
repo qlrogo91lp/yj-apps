@@ -1151,6 +1151,40 @@
         }
       }
     },
+    "session_match_duration" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d min"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d분"
+          }
+        }
+      }
+    },
+    "session_match_order" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Match %d"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d경기"
+          }
+        }
+      }
+    },
     "session_metric_calories" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1266,6 +1300,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "TIE"
+          }
+        }
+      }
+    },
+    "share_metric_active" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Active Calories"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "활동 킬로칼로리"
+          }
+        }
+      }
+    },
+    "share_metric_total" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Total Calories"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "총 킬로칼로리"
           }
         }
       }

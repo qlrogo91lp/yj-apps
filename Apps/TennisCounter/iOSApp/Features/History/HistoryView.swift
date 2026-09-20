@@ -44,13 +44,15 @@ struct HistoryView: View {
                     })
                 }
             }
-            .sheet(
-                item: Binding(
-                    get: { selectedSession?.matches.last },
-                    set: { if $0 == nil { selectedSession = nil } }
+            .navigationDestination(
+                isPresented: Binding(
+                    get: { selectedSession != nil },
+                    set: { if !$0 { selectedSession = nil } }
                 )
-            ) { match in
-                MatchDetailSheet(match: match)
+            ) {
+                if let selectedSession {
+                    SessionDetailView(session: selectedSession)
+                }
             }
             .confirmationDialog(
                 String(localized: "history_delete_confirm_title"),

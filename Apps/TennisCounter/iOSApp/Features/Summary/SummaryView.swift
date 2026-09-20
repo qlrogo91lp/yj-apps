@@ -2,9 +2,9 @@ import SwiftData
 import SwiftUI
 
 struct SummaryView: View {
+    var onShowHistory: () -> Void = {}
     @StateObject private var viewModel = SummaryViewModel()
     @Query(sort: \Match.startedAt, order: .reverse) private var matches: [Match]
-    @State private var selectedMatch: Match?
 
     private var filtered: [Match] {
         viewModel.filteredMatches(from: matches)
@@ -32,9 +32,6 @@ struct SummaryView: View {
                 .padding()
             }
             .navigationTitle(String(localized: "tab_summary"))
-            .sheet(item: $selectedMatch) { match in
-                MatchDetailSheet(match: match)
-            }
         }
     }
 
@@ -70,7 +67,7 @@ struct SummaryView: View {
     private var recentSessionSection: some View {
         if let session = viewModel.recentSession(from: matches) {
             section(title: String(localized: "summary_recent_session")) {
-                RecentSessionCard(session: session) { selectedMatch = $0 }
+                RecentSessionCard(session: session) { _ in onShowHistory() }
             }
         }
     }

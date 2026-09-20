@@ -47,7 +47,7 @@ struct MainTabView: View {
             Color.black.ignoresSafeArea()
 
             TabView(selection: $selectedTab) {
-                SummaryView()
+                SummaryView(onShowHistory: { selectedTab = 2 })
                     .tabItem { Label(String(localized: "tab_summary"), systemImage: "chart.bar.fill") }
                     .tag(0)
 
