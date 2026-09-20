@@ -782,23 +782,6 @@
         }
       }
     },
-    "onboarding_crown_down" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Their point"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "상대 점수"
-          }
-        }
-      }
-    },
     "onboarding_crown_title" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -816,19 +799,36 @@
         }
       }
     },
-    "onboarding_crown_up" : {
+    "onboarding_complication_body" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "My point"
+            "value" : "Put the Ralli complication on your watch face and it opens right up. During a match the icon spins to show it's running."
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "내 점수"
+            "value" : "문자판에 Ralli 컴플리케이션을 올려두면 앱을 찾지 않고 바로 열립니다. 경기 중엔 아이콘이 돌아 진행 중임을 알려줍니다."
+          }
+        }
+      }
+    },
+    "onboarding_complication_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start in One Tap"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "한 번 탭으로 빠르게"
           }
         }
       }
@@ -863,159 +863,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "건강 앱에 기록됩니다"
-          }
-        }
-      }
-    },
-    "onboarding_more_lock_body" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Live Activity and a watch complication"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Live Activity 와 워치 컴플리케이션"
-          }
-        }
-      }
-    },
-    "onboarding_more_lock_title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Score on the Lock Screen"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "잠금화면에서 점수 확인"
-          }
-        }
-      }
-    },
-    "onboarding_more_mirror_body" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Whichever starts first keeps score; the other follows along"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "폰과 워치 중 먼저 시작한 쪽이 심판, 다른 쪽은 따라옵니다"
-          }
-        }
-      }
-    },
-    "onboarding_more_mirror_title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Start from either device"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "어느 쪽에서 시작해도"
-          }
-        }
-      }
-    },
-    "onboarding_more_pause_body" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "In the Workout tab — the watch pauses too"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "워크아웃 탭에서. 워치가 함께 멈춥니다"
-          }
-        }
-      }
-    },
-    "onboarding_more_pause_title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pause from your phone"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "폰에서 일시정지"
-          }
-        }
-      }
-    },
-    "onboarding_more_title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "And a few more"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "그리고 이런 것도"
-          }
-        }
-      }
-    },
-    "onboarding_more_undo_body" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Steps back across games and sets, to the first point"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "게임·세트 경계를 넘어 경기 시작까지 되돌립니다"
-          }
-        }
-      }
-    },
-    "onboarding_more_undo_title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Undo goes all the way"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "되돌리기는 끝까지"
           }
         }
       }
@@ -1067,6 +914,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "기록 카드로 공유"
+          }
+        }
+      }
+    },
+    "onboarding_swipe_body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pause and end on the left. Calories, heart rate and time on the right. Your score sits in the middle."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "왼쪽은 일시정지와 종료, 오른쪽은 칼로리·심박·시간. 가운데가 점수입니다."
+          }
+        }
+      }
+    },
+    "onboarding_swipe_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Swipe Left and Right"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "좌우로 넘겨보세요"
           }
         }
       }
