@@ -21,28 +21,40 @@ final class HistoryViewModel: ObservableObject {
     private var modelContext: ModelContext?
     private let pageSize: Int = 20
     private var hasLoadedInitial = false
+    private var lastActivationID: Int?
 
     func configure(modelContext: ModelContext) {
         guard self.modelContext == nil else { return }
         self.modelContext = modelContext
     }
 
-    /// 상세 화면에서 돌아오는 onAppear는 현재 페이지·월·날짜를 그대로 유지한다.
-    func loadInitialIfNeeded() {
-        guard !hasLoadedInitial else { return }
-        loadInitial()
+    /// 새 탭 진입만 저장소를 다시 읽는다. 같은 신호의 onAppear/onChange와 상세 pop은 무시한다.
+    /// 0은 아직 기록 탭을 선택하지 않은 상태다.
+    func activate(_ activationID: Int) {
+        guard activationID > 0, modelContext != nil, lastActivationID != activationID else { return }
+        lastActivationID = activationID
+        if hasLoadedInitial {
+            refreshData()
+        } else {
+            loadInitial()
+        }
     }
 
     /// 최초 진입 또는 명시적인 새로고침에서만 탐색 상태를 초기화한다.
     func loadInitial() {
         guard modelContext != nil else { return }
         hasLoadedInitial = true
+        refreshData()
+        selectedDate = Date()
+    }
+
+    /// 목록은 첫 페이지부터 일관되게 다시 읽되, 캘린더 탐색 위치와 표시 모드는 유지한다.
+    private func refreshData() {
         listMatches = []
         listSessions = []
         hasMore = true
         loadNextPage()
         loadCalendarMatches()
-        selectedDate = Date()
     }
 
     /// 목록 페이지나 캘린더 날짜의 일부 경기만 상세·공유로 넘기지 않는다.

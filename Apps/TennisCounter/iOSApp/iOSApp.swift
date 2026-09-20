@@ -39,6 +39,7 @@ struct TennisCounterApp: App {
 struct MainTabView: View {
     @State private var isMatchActive = false
     @State private var selectedTab: Int = 0
+    @State private var historyActivationID = 0
     @State private var remoteSession: SessionStartMessage?
     private let connectivity = MatchConnectivity.shared
 
@@ -46,8 +47,8 @@ struct MainTabView: View {
         ZStack {
             Color.black.ignoresSafeArea()
 
-            TabView(selection: $selectedTab) {
-                SummaryView(onShowHistory: { selectedTab = 2 })
+            TabView(selection: Binding(get: { selectedTab }, set: { selectTab($0) })) {
+                SummaryView(onShowHistory: { selectTab(2) })
                     .tabItem { Label(String(localized: "tab_summary"), systemImage: "chart.bar.fill") }
                     .tag(0)
 
@@ -61,7 +62,7 @@ struct MainTabView: View {
                 .tabItem { Label(String(localized: "tab_match"), systemImage: "sportscourt.fill") }
                 .tag(1)
 
-                HistoryView()
+                HistoryView(activationID: historyActivationID)
                     .tabItem { Label(String(localized: "tab_history"), systemImage: "clock.fill") }
                     .tag(2)
             }
@@ -74,7 +75,7 @@ struct MainTabView: View {
                     WorkoutSessionView(
                         remoteSession: remoteSession,
                         onExit: {
-                            selectedTab = 1
+                            selectTab(1)
                             remoteSession = nil
                             withAnimation { isMatchActive = false }
                         }
@@ -93,5 +94,12 @@ struct MainTabView: View {
             connectivity.receivedMatchSaveResult = nil
             withAnimation { isMatchActive = true }
         }
+    }
+
+    private func selectTab(_ tab: Int) {
+        if tab == 2, selectedTab != tab {
+            historyActivationID += 1
+        }
+        selectedTab = tab
     }
 }

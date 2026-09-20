@@ -130,7 +130,7 @@ struct HistorySelectionTests {
         try context.save()
         let viewModel = HistoryViewModel()
         viewModel.configure(modelContext: context)
-        viewModel.loadInitialIfNeeded()
+        viewModel.activate(1)
         #expect(viewModel.listMatches.count == 20)
         viewModel.loadNextPage()
         viewModel.toggleViewMode()
@@ -141,7 +141,7 @@ struct HistorySelectionTests {
         let loadedIds = viewModel.listMatches.map(\.id)
         #expect(loadedIds.count == 40)
 
-        viewModel.loadInitialIfNeeded()
+        viewModel.activate(1)
 
         #expect(viewModel.viewMode == .calendar)
         #expect(viewModel.currentMonth == month)
@@ -152,15 +152,89 @@ struct HistorySelectionTests {
 
     @Test func appearanceBeforeConfigurationDoesNotConsumeInitialization() throws {
         let viewModel = HistoryViewModel()
-        viewModel.loadInitialIfNeeded()
+        viewModel.activate(1)
         let context = try makeContext()
         let match = insertMatch(sessionId: UUID(), start: Date(), in: context)
         try context.save()
         viewModel.configure(modelContext: context)
 
-        viewModel.loadInitialIfNeeded()
+        viewModel.activate(0) // 아직 기록 탭을 선택하지 않은 초기 마운트.
+        #expect(viewModel.listMatches.isEmpty)
+
+        viewModel.activate(1)
 
         #expect(viewModel.listMatches.map(\.id) == [match.id])
         #expect(viewModel.selectedDate != nil)
+    }
+
+    @Test func tabReactivationLoadsWorkoutSavedAfterEmptyInitialVisit() throws {
+        let context = try makeContext()
+        let viewModel = HistoryViewModel()
+        viewModel.configure(modelContext: context)
+        viewModel.activate(1)
+        #expect(viewModel.listSessions.isEmpty)
+        #expect(!viewModel.hasMore)
+        let sessionId = UUID()
+        let match = insertMatch(sessionId: sessionId, start: Date(), in: context)
+        let record = WorkoutSessionRecord()
+        record.workoutSessionId = sessionId
+        record.startedAt = match.startedAt
+        record.elapsedSeconds = 2400
+        record.activeCalories = 300
+        context.insert(record)
+        try context.save()
+
+        viewModel.activate(2)
+
+        let session = try #require(viewModel.listSessions.first)
+        #expect(viewModel.listSessions.count == 1)
+        #expect(session.id == sessionId)
+        #expect(session.matches.map(\.id) == [match.id])
+        #expect(session.elapsedSeconds == 2400)
+        #expect(viewModel.calendarMatches.map(\.id) == [match.id])
+    }
+
+    @Test func tabReactivationRefreshesPagesAndCalendarWithoutResettingSelection() throws {
+        let context = try makeContext()
+        let base = Calendar.current.startOfDay(for: Date()).addingTimeInterval(12 * 3600)
+        for index in 0 ..< 45 {
+            _ = insertMatch(sessionId: UUID(), start: base.addingTimeInterval(Double(-index * 60)), in: context)
+        }
+        try context.save()
+        let viewModel = HistoryViewModel()
+        viewModel.configure(modelContext: context)
+        viewModel.activate(1)
+        viewModel.loadNextPage()
+        #expect(viewModel.listMatches.count == 40)
+        viewModel.toggleViewMode()
+        viewModel.changeMonth(by: -1)
+        let selectedDay = try #require(Calendar.current.date(byAdding: .day, value: 3, to: viewModel.currentMonth.startOfMonth))
+        viewModel.selectedDate = selectedDay
+        let month = viewModel.currentMonth
+        let newest = insertMatch(sessionId: UUID(), start: base.addingTimeInterval(60), in: context)
+        let calendarMatch = insertMatch(sessionId: UUID(), start: selectedDay, in: context)
+        try context.save()
+
+        // onChange와 onAppear가 같은 활성화 신호를 전달해도 한 번만 읽는다.
+        viewModel.activate(1)
+        #expect(viewModel.listMatches.count == 40)
+        #expect(!viewModel.listMatches.contains { $0.id == newest.id })
+
+        viewModel.activate(2)
+
+        #expect(viewModel.listMatches.count == 20)
+        #expect(viewModel.listMatches.first?.id == newest.id)
+        #expect(Set(viewModel.listMatches.map(\.id)).count == 20)
+        #expect(viewModel.hasMore)
+        #expect(viewModel.calendarMatches.map(\.id) == [calendarMatch.id])
+        #expect(viewModel.calendarSourceMatches?.count == 47)
+        #expect(viewModel.viewMode == .calendar)
+        #expect(viewModel.currentMonth == month)
+        #expect(viewModel.selectedDate == selectedDay)
+
+        viewModel.loadNextPage()
+        viewModel.activate(2)
+        #expect(viewModel.listMatches.count == 40)
+        #expect(Set(viewModel.listMatches.map(\.id)).count == 40)
     }
 }
