@@ -14,6 +14,12 @@ struct CalendarView: View {
         return matches.filter { Calendar.current.isDate($0.startedAt, inSameDayAs: selectedDate) }
     }
 
+    private var dayRecords: [WorkoutSessionRecord] {
+        guard let selectedDate else { return [] }
+        let records = (try? SessionPersistenceService.shared.fetchAll()) ?? []
+        return records.filter { Calendar.current.isDate($0.startedAt, inSameDayAs: selectedDate) }
+    }
+
     var body: some View {
         // 캘린더는 고정, 스크롤은 아래 SessionList 가 갖는다 — 바깥을 ScrollView 로
         // 감싸면 List 와 중첩돼 높이가 무너진다.
@@ -39,7 +45,7 @@ struct CalendarView: View {
                     .padding(.top, 32)
             } else {
                 SessionList(
-                    sessions: MatchSessionGroup.group(dayMatches),
+                    sessions: MatchSessionGroup.group(dayMatches, records: dayRecords),
                     isLoadingMore: false,
                     onLoadMore: nil,
                     onSelect: onSelect,

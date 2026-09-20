@@ -80,4 +80,69 @@ struct MatchSessionGroupTests {
         #expect(groups.first?.elapsedSeconds == nil)
         #expect(groups.first?.activeCalories == nil)
     }
+
+    @Test func recordWinsOverMatchMaximum() {
+        let sessionId = UUID()
+        let match = Match()
+        match.workoutSessionId = sessionId
+        match.workoutElapsedSeconds = 1000
+        match.workoutCaloriesBurned = 100
+
+        let record = WorkoutSessionRecord()
+        record.workoutSessionId = sessionId
+        record.elapsedSeconds = 1500 // 마지막 경기 이후 구간까지 포함
+        record.activeCalories = 160
+        record.averageHeartRate = 142
+
+        let groups = MatchSessionGroup.group([match], records: [record])
+        #expect(groups.count == 1)
+        #expect(groups[0].elapsedSeconds == 1500)
+        #expect(groups[0].activeCalories == 160)
+        #expect(groups[0].averageHeartRate == 142)
+    }
+
+    @Test func fallsBackToMatchMaximumWhenNoRecord() {
+        let sessionId = UUID()
+        let first = Match()
+        first.workoutSessionId = sessionId
+        first.workoutElapsedSeconds = 600
+        let second = Match()
+        second.workoutSessionId = sessionId
+        second.workoutElapsedSeconds = 1000
+
+        let groups = MatchSessionGroup.group([first, second], records: [])
+        #expect(groups[0].elapsedSeconds == 1000)
+        // 경기 평균은 세션 평균이 아니므로 폴백하지 않는다
+        #expect(groups[0].averageHeartRate == nil)
+    }
+
+    @Test func recordWithoutMatchesBecomesEmptySession() {
+        let record = WorkoutSessionRecord()
+        record.workoutSessionId = UUID()
+        record.startedAt = Date(timeIntervalSince1970: 1_700_000_000)
+        record.elapsedSeconds = 2890
+
+        let groups = MatchSessionGroup.group([], records: [record])
+        #expect(groups.count == 1)
+        #expect(groups[0].matches.isEmpty)
+        #expect(groups[0].matchCount == 0)
+        #expect(groups[0].elapsedSeconds == 2890)
+    }
+
+    @Test func countsWinsAndLosses() {
+        let sessionId = UUID()
+        let win = Match()
+        win.workoutSessionId = sessionId
+        win.myTotalSets = 2
+        win.yourTotalSets = 0
+        let loss = Match()
+        loss.workoutSessionId = sessionId
+        loss.myTotalSets = 0
+        loss.yourTotalSets = 2
+
+        let groups = MatchSessionGroup.group([win, loss], records: [])
+        #expect(groups[0].wins == 1)
+        #expect(groups[0].losses == 1)
+        #expect(groups[0].matchCount == 2)
+    }
 }

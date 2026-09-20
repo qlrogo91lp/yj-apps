@@ -66,7 +66,8 @@ final class HistoryViewModel: ObservableObject {
     /// 누적 배열 전체를 다시 그룹핑한다. 페이지 경계에서 한 세션이 둘로 갈리는 문제가
     /// 여기서 자연히 사라진다 — 경계를 따로 병합할 필요가 없다.
     private func rebuildSessions() {
-        listSessions = MatchSessionGroup.group(listMatches)
+        let records = (try? SessionPersistenceService.shared.fetchAll()) ?? []
+        listSessions = MatchSessionGroup.group(listMatches, records: records)
     }
 
     func changeMonth(by value: Int) {

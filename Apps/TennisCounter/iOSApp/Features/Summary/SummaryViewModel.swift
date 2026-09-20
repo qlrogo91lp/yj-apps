@@ -91,14 +91,16 @@ final class SummaryViewModel: ObservableObject {
 
     /// 최근 세션 하나. 기간 필터를 탄다.
     func recentSession(from matches: [Match]) -> MatchSessionGroup? {
-        MatchSessionGroup.group(filteredMatches(from: matches)).first
+        let records = (try? SessionPersistenceService.shared.fetchAll()) ?? []
+        return MatchSessionGroup.group(filteredMatches(from: matches), records: records).first
     }
 
     /// 최근 10회 세션, 오래된 것부터. 기간 필터와 무관하게 항상 전체에서 뽑는다 —
     /// 차트는 "얼마나 오래 쳤나"만 맡는 독립 블록이다.
     /// 3개 미만이면 빈 배열을 돌려 뷰가 안내 문구를 띄우게 한다.
     func trendSessions(from matches: [Match]) -> [MatchSessionGroup] {
-        let groups = MatchSessionGroup.group(matches)
+        let records = (try? SessionPersistenceService.shared.fetchAll()) ?? []
+        let groups = MatchSessionGroup.group(matches, records: records)
         guard groups.count >= 3 else { return [] }
         return Array(groups.prefix(10)).reversed()
     }
