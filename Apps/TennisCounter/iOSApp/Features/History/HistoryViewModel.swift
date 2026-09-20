@@ -28,6 +28,7 @@ final class HistoryViewModel: ObservableObject {
 
     func loadInitial() {
         listMatches = []
+        listSessions = []
         hasMore = true
         loadNextPage()
         loadCalendarMatches()
@@ -37,20 +38,31 @@ final class HistoryViewModel: ObservableObject {
     func loadNextPage() {
         guard !isLoadingMore, hasMore, let context = modelContext else { return }
         isLoadingMore = true
+        defer { isLoadingMore = false }
 
-        var descriptor = FetchDescriptor<Match>(
-            sortBy: [SortDescriptor(\Match.startedAt, order: .reverse)]
-        )
-        descriptor.fetchLimit = pageSize
-        // 페이지 번호가 아니라 보유 개수로 offset 을 잡는다 — 삭제로 저장소와 배열이 함께 하나 줄면
-        // offset 도 같이 줄어 경계가 어긋나지 않는다. 화면에 없는 레코드는 지울 수 없으므로 항상 일치한다.
-        descriptor.fetchOffset = listMatches.count
+        let previousSessionIds = Set(listSessions.map(\.id))
 
-        let fetched = (try? context.fetch(descriptor)) ?? []
-        listMatches.append(contentsOf: fetched)
-        hasMore = fetched.count == pageSize
-        rebuildSessions()
-        isLoadingMore = false
+        while hasMore {
+            var descriptor = FetchDescriptor<Match>(
+                sortBy: [SortDescriptor(\Match.startedAt, order: .reverse)]
+            )
+            descriptor.fetchLimit = pageSize
+            // 페이지 번호가 아니라 보유 개수로 offset 을 잡는다 — 삭제로 저장소와 배열이 함께 줄면
+            // 다음 페이지 경계도 함께 당겨져 건너뛰는 기록이 없다.
+            descriptor.fetchOffset = listMatches.count
+
+            let fetched = (try? context.fetch(descriptor)) ?? []
+            guard !fetched.isEmpty else {
+                hasMore = false
+                return
+            }
+
+            listMatches.append(contentsOf: fetched)
+            hasMore = fetched.count == pageSize
+            rebuildSessions()
+
+            if Set(listSessions.map(\.id)) != previousSessionIds || !hasMore { return }
+        }
     }
 
     /// CloudKit 동기화라 다른 기기로 전파되고 되돌릴 수 없다. 호출부가 확인 다이얼로그를 받는다.

@@ -4,7 +4,7 @@ import SwiftUI
 struct HistoryView: View {
     @Environment(\.modelContext) private var modelContext
     @StateObject private var viewModel = HistoryViewModel()
-    @State private var selectedMatch: Match?
+    @State private var selectedSession: MatchSessionGroup?
     @State private var pendingDelete: MatchSessionGroup?
 
     var body: some View {
@@ -18,7 +18,7 @@ struct HistoryView: View {
                             sessions: viewModel.listSessions,
                             isLoadingMore: viewModel.isLoadingMore,
                             onLoadMore: { viewModel.loadNextPage() },
-                            onSelect: { selectedMatch = $0.matches.last },
+                            onSelect: { selectedSession = $0 },
                             onDelete: { pendingDelete = $0 }
                         )
                     }
@@ -30,7 +30,7 @@ struct HistoryView: View {
                         onPrevious: { viewModel.changeMonth(by: -1) },
                         onNext: { viewModel.changeMonth(by: 1) },
                         selectedDate: $viewModel.selectedDate,
-                        onSelect: { selectedMatch = $0.matches.last },
+                        onSelect: { selectedSession = $0 },
                         onDelete: { pendingDelete = $0 }
                     )
                     .padding(.horizontal)
@@ -44,7 +44,12 @@ struct HistoryView: View {
                     })
                 }
             }
-            .sheet(item: $selectedMatch) { match in
+            .sheet(
+                item: Binding(
+                    get: { selectedSession?.matches.last },
+                    set: { if $0 == nil { selectedSession = nil } }
+                )
+            ) { match in
                 MatchDetailSheet(match: match)
             }
             .confirmationDialog(

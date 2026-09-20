@@ -340,13 +340,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "This also removes it from your other devices and cannot be undone."
+            "value" : "This deletes this session and all its matches from your other devices too, and cannot be undone."
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "다른 기기에서도 함께 삭제되며 되돌릴 수 없습니다."
+            "value" : "이 세션과 포함된 모든 경기가 다른 기기에서도 함께 삭제되며 되돌릴 수 없습니다."
           }
         }
       }
@@ -357,13 +357,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Delete this match?"
+            "value" : "Delete this session?"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "이 경기를 삭제할까요?"
+            "value" : "이 세션을 삭제할까요?"
           }
         }
       }
