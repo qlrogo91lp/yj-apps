@@ -1,0 +1,21 @@
+{
+  "images" : [
+    {
+      "filename" : "health-ko.png",
+      "idiom" : "universal",
+      "locale" : "ko"
+    },
+    {
+      "filename" : "health-en.png",
+      "idiom" : "universal",
+      "locale" : "en"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  },
+  "properties" : {
+    "localizable" : true
+  }
+}

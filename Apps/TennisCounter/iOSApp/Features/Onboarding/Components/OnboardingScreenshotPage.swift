@@ -23,11 +23,17 @@ struct OnboardingScreenshotPage<Overlay: View>: View {
 
     var body: some View {
         VStack(spacing: 24) {
-            Image(imageName)
-                .resizable()
-                .scaledToFit()
-                .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-                .overlay { overlay() }
+            // 그림마다 비율이 달라(워치 0.82~1.0, 폰 0.46) 자리를 고정하지 않으면 페이지를 넘길 때 크기가 흔들린다.
+            // 배경이 검정이라 남는 여백은 보이지 않는다.
+            Color.clear
+                .aspectRatio(0.8, contentMode: .fit)
+                .overlay {
+                    Image(imageName)
+                        .resizable()
+                        .scaledToFit()
+                        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                        .overlay { overlay() }
+                }
                 .frame(maxHeight: 420)
                 .padding(.horizontal, 32)
 
