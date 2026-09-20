@@ -5,7 +5,7 @@ struct HistoryView: View {
     @Environment(\.modelContext) private var modelContext
     @StateObject private var viewModel = HistoryViewModel()
     @State private var selectedMatch: Match?
-    @State private var pendingDelete: Match?
+    @State private var pendingDelete: MatchSessionGroup?
 
     var body: some View {
         NavigationStack {
@@ -18,7 +18,7 @@ struct HistoryView: View {
                             sessions: viewModel.listSessions,
                             isLoadingMore: viewModel.isLoadingMore,
                             onLoadMore: { viewModel.loadNextPage() },
-                            onSelect: { selectedMatch = $0 },
+                            onSelect: { selectedMatch = $0.matches.last },
                             onDelete: { pendingDelete = $0 }
                         )
                     }
@@ -30,7 +30,7 @@ struct HistoryView: View {
                         onPrevious: { viewModel.changeMonth(by: -1) },
                         onNext: { viewModel.changeMonth(by: 1) },
                         selectedDate: $viewModel.selectedDate,
-                        onSelect: { selectedMatch = $0 },
+                        onSelect: { selectedMatch = $0.matches.last },
                         onDelete: { pendingDelete = $0 }
                     )
                     .padding(.horizontal)
@@ -53,7 +53,7 @@ struct HistoryView: View {
                 titleVisibility: .visible
             ) {
                 Button(String(localized: "btn_delete"), role: .destructive) {
-                    if let match = pendingDelete { viewModel.delete(match) }
+                    if let session = pendingDelete { viewModel.delete(session) }
                     pendingDelete = nil
                 }
                 Button(String(localized: "btn_cancel"), role: .cancel) { pendingDelete = nil }

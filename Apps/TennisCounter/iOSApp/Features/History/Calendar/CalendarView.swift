@@ -8,8 +8,8 @@ struct CalendarView: View {
     let onPrevious: () -> Void
     let onNext: () -> Void
     @Binding var selectedDate: Date?
-    let onSelect: (Match) -> Void
-    let onDelete: (Match) -> Void
+    let onSelect: (MatchSessionGroup) -> Void
+    let onDelete: (MatchSessionGroup) -> Void
 
     private var dayMatches: [Match] {
         guard let selectedDate else { return [] }

@@ -57,12 +57,28 @@ final class HistoryViewModel: ObservableObject {
     ///
     /// 서비스와 이 VM 이 서로 다른 ModelContext 를 들고 있다 — 같은 컨테이너라 저장소에는
     /// 반영되지만 배열은 자동으로 갱신되지 않으므로 직접 지운다.
-    func delete(_ match: Match) {
-        try? MatchPersistenceService.shared.delete(match)
-        listMatches.removeAll { $0.id == match.id }
-        calendarMatches.removeAll { $0.id == match.id }
-        calendarSourceMatches?.removeAll { $0.id == match.id }
+    func delete(_ session: MatchSessionGroup) {
+        let matches = matchesToDelete(for: session)
+        let matchIds = Set(matches.map(\.id))
+
+        for match in matches {
+            try? MatchPersistenceService.shared.delete(match)
+        }
+        try? SessionPersistenceService.shared.delete(sessionId: session.id)
+
+        listMatches.removeAll { matchIds.contains($0.id) }
+        calendarMatches.removeAll { matchIds.contains($0.id) }
+        calendarSourceMatches?.removeAll { matchIds.contains($0.id) }
         rebuildSessions()
+    }
+
+    /// 페이지에 아직 실리지 않은 같은 워크아웃의 경기도 함께 지운다. 구버전의 nil 세션 ID는
+    /// 화면 그룹에 포함된 경기만 지운다.
+    private func matchesToDelete(for session: MatchSessionGroup) -> [Match] {
+        guard session.matches.contains(where: { $0.workoutSessionId != nil }) else {
+            return session.matches
+        }
+        return (try? MatchPersistenceService.shared.fetchByWorkoutSession(session.id)) ?? session.matches
     }
 
     /// 누적 배열 전체를 다시 그룹핑한다. 페이지 경계에서 한 세션이 둘로 갈리는 문제가

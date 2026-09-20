@@ -19,9 +19,21 @@ struct HistoryViewModelTests {
 
     /// 프로덕션과 같은 모양 — iOSApp 이 서비스에 별도 ModelContext 를 주고 VM 은
     /// @Environment(\.modelContext) 를 받는다. 같은 컨테이너, 다른 컨텍스트.
-    private func makeSharedContainerContext() throws -> ModelContext {
-        let container = try makeContainer()
+    private func makeSharedContainer() throws -> ModelContainer {
+        let config = ModelConfiguration(isStoredInMemoryOnly: true)
+        let container = try ModelContainer(
+            for: Match.self,
+            SetRecord.self,
+            WorkoutSessionRecord.self,
+            configurations: config
+        )
         MatchPersistenceService.shared.configure(with: ModelContext(container))
+        SessionPersistenceService.shared.configure(with: ModelContext(container))
+        return container
+    }
+
+    private func makeSharedContainerContext() throws -> ModelContext {
+        let container = try makeSharedContainer()
         return ModelContext(container)
     }
 
@@ -198,6 +210,39 @@ struct HistoryViewModelTests {
 
     // MARK: - 삭제
 
+    /// 세션 카드 삭제는 경기 하나가 아니라 그 세션의 모든 경기와 운동 최종값을 지운다.
+    /// 서로 다른 컨텍스트를 새로 만들어 읽어도 남아 있지 않아야 한다.
+    @Test func delete_removesSessionMatchesAndRecordAfterReload() throws {
+        let container = try makeSharedContainer()
+        let context = ModelContext(container)
+        let sessionId = UUID()
+        let otherSessionId = UUID()
+        let base = Date()
+        _ = insertMatch(session: sessionId, startedAt: base, in: context)
+        _ = insertMatch(session: sessionId, startedAt: base.addingTimeInterval(600), in: context)
+        _ = insertMatch(session: otherSessionId, startedAt: base.addingTimeInterval(-600), in: context)
+        try context.save()
+
+        let record = WorkoutSessionRecord()
+        record.workoutSessionId = sessionId
+        try SessionPersistenceService.shared.upsert(record)
+
+        let vm = HistoryViewModel()
+        vm.configure(modelContext: context)
+        vm.loadInitial()
+        let session = try #require(vm.listSessions.first { $0.id == sessionId })
+
+        vm.delete(session)
+
+        let relaunchedContext = ModelContext(container)
+        MatchPersistenceService.shared.configure(with: ModelContext(container))
+        SessionPersistenceService.shared.configure(with: ModelContext(container))
+
+        let remainingMatches = try relaunchedContext.fetch(FetchDescriptor<Match>())
+        #expect(remainingMatches.map(\.workoutSessionId) == [otherSessionId])
+        #expect(try SessionPersistenceService.shared.fetchAll().isEmpty)
+    }
+
     /// 페이지 번호로 offset 을 잡으면 삭제 후 다음 페이지가 한 칸 밀려 경계의 경기가
     /// 영영 안 나온다. 보유 개수를 offset 으로 쓰면 어긋나지 않는다.
     @Test func deleteDoesNotSkipNextPage() throws {
@@ -211,7 +256,7 @@ struct HistoryViewModelTests {
         let vm = HistoryViewModel()
         vm.configure(modelContext: context)
         vm.loadInitial()
-        let removed = try #require(vm.listMatches.first)
+        let removed = try #require(vm.listSessions.first)
         let removedId = removed.id
         vm.delete(removed)
         vm.loadNextPage()
@@ -219,24 +264,25 @@ struct HistoryViewModelTests {
         // 25개에서 하나 지웠으니 24개가 모두 나와야 하고 중복도 없어야 한다
         #expect(vm.listMatches.count == 24)
         #expect(Set(vm.listMatches.map(\.id)).count == 24)
-        #expect(!vm.listMatches.contains { $0.id == removedId })
+        #expect(!vm.listMatches.contains { $0.workoutSessionId == removedId })
     }
 
-    @Test func deleteRemovesMatchFromSession() throws {
+    @Test func deleteRemovesSessionFromList() throws {
         let context = try makeSharedContainerContext()
         let session = UUID()
         let base = Date()
-        let first = insertMatch(session: session, startedAt: base, in: context)
+        _ = insertMatch(session: session, startedAt: base, in: context)
         _ = insertMatch(session: session, startedAt: base.addingTimeInterval(600), in: context)
         try context.save()
 
         let vm = HistoryViewModel()
         vm.configure(modelContext: context)
         vm.loadInitial()
-        vm.delete(first)
+        let group = try #require(vm.listSessions.first { $0.id == session })
+        vm.delete(group)
 
-        #expect(vm.listSessions.count == 1)
-        #expect(vm.listSessions.first?.matches.count == 1)
+        #expect(vm.listSessions.isEmpty)
+        #expect(vm.listMatches.isEmpty)
     }
 
     @Test func deletingLastMatchRemovesSession() throws {
@@ -247,7 +293,8 @@ struct HistoryViewModelTests {
         let vm = HistoryViewModel()
         vm.configure(modelContext: context)
         vm.loadInitial()
-        vm.delete(only)
+        let group = try #require(vm.listSessions.first { $0.id == only.workoutSessionId })
+        vm.delete(group)
 
         #expect(vm.listSessions.isEmpty)
         #expect(vm.listMatches.isEmpty)
