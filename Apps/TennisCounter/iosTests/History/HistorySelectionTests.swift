@@ -167,6 +167,27 @@ struct HistorySelectionTests {
         #expect(viewModel.selectedDate != nil)
     }
 
+    @Test func summaryActivationForcesListOnlyOnceThenNormalReentryPreservesMode() throws {
+        let context = try makeContext()
+        let viewModel = HistoryViewModel()
+        viewModel.configure(modelContext: context)
+        viewModel.activate(1)
+        viewModel.viewMode = .calendar
+        let month = viewModel.currentMonth
+        let day = viewModel.selectedDate
+
+        viewModel.activate(2, showList: true)
+        #expect(viewModel.viewMode == .list)
+        #expect(viewModel.currentMonth == month)
+        #expect(viewModel.selectedDate == day)
+
+        viewModel.viewMode = .calendar
+        viewModel.activate(2, showList: true) // 상세 pop의 같은 신호는 다시 모드를 바꾸지 않는다.
+        #expect(viewModel.viewMode == .calendar)
+        viewModel.activate(3)
+        #expect(viewModel.viewMode == .calendar)
+    }
+
     @Test func tabReactivationLoadsWorkoutSavedAfterEmptyInitialVisit() throws {
         let context = try makeContext()
         let viewModel = HistoryViewModel()

@@ -3,6 +3,7 @@ import SwiftUI
 
 struct HistoryView: View {
     let activationID: Int
+    let showListOnActivation: Bool
     @Environment(\.modelContext) private var modelContext
     @StateObject private var viewModel = HistoryViewModel()
     @State private var selectedSession: MatchSessionGroup?
@@ -70,11 +71,17 @@ struct HistoryView: View {
             }
             .onAppear {
                 viewModel.configure(modelContext: modelContext)
-                viewModel.activate(activationID)
+                activate(activationID)
             }
             .onChange(of: activationID) { _, value in
-                viewModel.activate(value)
+                activate(value)
             }
+        }
+    }
+
+    private func activate(_ id: Int) {
+        if viewModel.activate(id, showList: showListOnActivation), showListOnActivation {
+            selectedSession = nil
         }
     }
 }

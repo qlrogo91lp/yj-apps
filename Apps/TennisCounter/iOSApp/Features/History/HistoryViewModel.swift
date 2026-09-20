@@ -30,14 +30,17 @@ final class HistoryViewModel: ObservableObject {
 
     /// 새 탭 진입만 저장소를 다시 읽는다. 같은 신호의 onAppear/onChange와 상세 pop은 무시한다.
     /// 0은 아직 기록 탭을 선택하지 않은 상태다.
-    func activate(_ activationID: Int) {
-        guard activationID > 0, modelContext != nil, lastActivationID != activationID else { return }
+    @discardableResult
+    func activate(_ activationID: Int, showList: Bool = false) -> Bool {
+        guard activationID > 0, modelContext != nil, lastActivationID != activationID else { return false }
         lastActivationID = activationID
+        if showList { viewMode = .list }
         if hasLoadedInitial {
             refreshData()
         } else {
             loadInitial()
         }
+        return true
     }
 
     /// 최초 진입 또는 명시적인 새로고침에서만 탐색 상태를 초기화한다.

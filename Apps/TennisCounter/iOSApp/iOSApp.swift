@@ -40,6 +40,7 @@ struct MainTabView: View {
     @State private var isMatchActive = false
     @State private var selectedTab: Int = 0
     @State private var historyActivationID = 0
+    @State private var showHistoryList = false
     @State private var remoteSession: SessionStartMessage?
     private let connectivity = MatchConnectivity.shared
 
@@ -48,7 +49,7 @@ struct MainTabView: View {
             Color.black.ignoresSafeArea()
 
             TabView(selection: Binding(get: { selectedTab }, set: { selectTab($0) })) {
-                SummaryView(onShowHistory: { selectTab(2) })
+                SummaryView(onShowHistory: { selectTab(2, showList: true) })
                     .tabItem { Label(String(localized: "tab_summary"), systemImage: "chart.bar.fill") }
                     .tag(0)
 
@@ -62,7 +63,7 @@ struct MainTabView: View {
                 .tabItem { Label(String(localized: "tab_match"), systemImage: "sportscourt.fill") }
                 .tag(1)
 
-                HistoryView(activationID: historyActivationID)
+                HistoryView(activationID: historyActivationID, showListOnActivation: showHistoryList)
                     .tabItem { Label(String(localized: "tab_history"), systemImage: "clock.fill") }
                     .tag(2)
             }
@@ -96,8 +97,9 @@ struct MainTabView: View {
         }
     }
 
-    private func selectTab(_ tab: Int) {
+    private func selectTab(_ tab: Int, showList: Bool = false) {
         if tab == 2, selectedTab != tab {
+            showHistoryList = showList
             historyActivationID += 1
         }
         selectedTab = tab

@@ -1,16 +1,107 @@
 import Foundation
-import SwiftData
 @testable import TennisCounter
 import Testing
 
 @MainActor
 struct SummaryViewModelTests {
-    private func configureSessionPersistence() throws {
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
-        let container = try ModelContainer(for: WorkoutSessionRecord.self, configurations: config)
-        SessionPersistenceService.shared.configure(with: ModelContext(container))
+    @Test func allPeriodCountsSessionsAndAverageUsingFinalRecords() {
+        let vm = SummaryViewModel()
+        vm.selectedPeriod = .all
+        let sessionId = UUID()
+        let first = trendMatch(session: sessionId, startedAt: Date(), elapsed: 600)
+        let second = trendMatch(session: sessionId, startedAt: Date(), elapsed: 1000)
+        let final = sessionRecord(id: sessionId, elapsed: 1800, calories: 300)
+        let matchless = sessionRecord(elapsed: 3600, calories: 500)
+        let unknown = sessionRecord(elapsed: nil, calories: nil)
+
+        let stats = vm.stats(from: [first, second], records: [final, matchless, unknown])
+
+        #expect(stats.totalMatches == 2)
+        #expect(stats.sessionCount == 3)
+        #expect(stats.averageSessionSeconds == 2700)
+        #expect(stats.totalDuration == 5400)
+        #expect(stats.totalCalories == 800)
     }
 
+    @Test func matchlessCurrentPeriodRemainsVisibleWithFinalMetrics() {
+        let vm = SummaryViewModel()
+        vm.selectedPeriod = .month
+        let record = sessionRecord(elapsed: 2400, calories: 250)
+
+        let stats = vm.stats(from: [], records: [record])
+
+        #expect(stats.totalMatches == 0)
+        #expect(stats.winRate == 0)
+        #expect(stats.sessionCount == 1)
+        #expect(stats.totalDuration == 2400)
+        #expect(stats.totalCalories == 250)
+        #expect(!vm.selectedPeriodSessions(from: [], records: [record]).isEmpty)
+        #expect(vm.recentSession(from: [], records: [record])?.id == record.workoutSessionId)
+    }
+
+    @Test func monthlySessionCountsUseWholeSessionsAndIncludeMatchlessRecords() throws {
+        let vm = SummaryViewModel()
+        let calendar = Calendar.current
+        let august = try #require(calendar.date(from: DateComponents(year: 2026, month: 8, day: 31, hour: 23)))
+        let september = try #require(calendar.date(from: DateComponents(year: 2026, month: 9, day: 1, hour: 1)))
+        let sessionId = UUID()
+        let matches = [
+            trendMatch(session: sessionId, startedAt: august, elapsed: 600),
+            trendMatch(session: sessionId, startedAt: september, elapsed: 1200),
+            trendMatch(session: UUID(), startedAt: september, elapsed: 900),
+        ]
+        let final = sessionRecord(id: sessionId, elapsed: 1500, calories: 100)
+        final.startedAt = august
+        let matchless = sessionRecord(elapsed: 1800, calories: 200)
+        matchless.startedAt = september
+
+        let counts = vm.monthlySessionCounts(from: matches, records: [final, matchless])
+
+        #expect(counts.map(\.count) == [1, 2])
+        #expect(counts.map { calendar.component(.month, from: $0.month) } == [8, 9])
+    }
+
+    @Test func selectedPeriodIncludesWholeCrossBoundarySessionOnlyOnce() throws {
+        let vm = SummaryViewModel()
+        vm.selectedPeriod = .month
+        let boundary = try #require(SummaryPeriod.month.startDate())
+        let sessionId = UUID()
+        let before = trendMatch(session: sessionId, startedAt: boundary.addingTimeInterval(-60), elapsed: 900)
+        let after = trendMatch(session: sessionId, startedAt: boundary.addingTimeInterval(60), elapsed: 1200)
+        let record = sessionRecord(id: sessionId, elapsed: 1800, calories: 300)
+        record.startedAt = before.startedAt
+
+        let sessions = vm.selectedPeriodSessions(from: [before, after], records: [record])
+        let stats = vm.stats(from: [before, after], records: [record])
+
+        #expect(sessions.count == 1)
+        #expect(sessions.first?.matches.count == 2)
+        #expect(stats.totalMatches == 1)
+        #expect(stats.sessionCount == 1)
+        #expect(stats.totalDuration == 1800)
+    }
+
+    @Test func trendUsesExplicitRecordsIncludingMatchlessFinalValues() {
+        let vm = SummaryViewModel()
+        let records = [600, 1200, 2400].enumerated().map { index, elapsed in
+            let record = sessionRecord(elapsed: elapsed, calories: nil)
+            record.startedAt = Date(timeIntervalSince1970: Double(index * 3600))
+            return record
+        }
+
+        #expect(vm.trendSessions(from: [], records: records).map(\.elapsedSeconds) == [600, 1200, 2400])
+    }
+
+    private func sessionRecord(id: UUID = UUID(), elapsed: Int?, calories: Double?) -> WorkoutSessionRecord {
+        let record = WorkoutSessionRecord()
+        record.workoutSessionId = id
+        record.elapsedSeconds = elapsed
+        record.activeCalories = calories
+        return record
+    }
+}
+
+extension SummaryViewModelTests {
     @Test func statsWithNoWorkoutData_returnNilFitnessStats() {
         let vm = SummaryViewModel()
         vm.selectedPeriod = .week
@@ -20,7 +111,7 @@ struct SummaryViewModelTests {
         match.yourTotalSets = 1
         match.startedAt = Date()
 
-        let stats = vm.stats(from: [match])
+        let stats = vm.stats(from: [match], records: [])
 
         #expect(stats.totalCalories == nil)
         #expect(stats.totalDuration == nil)
@@ -53,7 +144,7 @@ struct SummaryViewModelTests {
         match2.durationSeconds = 1800
         match2.workoutElapsedSeconds = 1800
 
-        let stats = vm.stats(from: [match1, match2])
+        let stats = vm.stats(from: [match1, match2], records: [])
 
         #expect(stats.totalCalories == 500)
         #expect(stats.totalDuration == 5400)
@@ -76,7 +167,7 @@ struct SummaryViewModelTests {
         matchWithoutData.yourTotalSets = 2
         matchWithoutData.startedAt = Date()
 
-        let stats = vm.stats(from: [matchWithData, matchWithoutData])
+        let stats = vm.stats(from: [matchWithData, matchWithoutData], records: [])
 
         #expect(stats.totalCalories == 400)
         #expect(stats.totalDuration == 2700)
@@ -119,7 +210,7 @@ struct SummaryViewModelTests {
                          matchCalories: 130, workoutCalories: 780),
         ]
 
-        let stats = vm.stats(from: matches)
+        let stats = vm.stats(from: matches, records: [])
 
         #expect(stats.totalMatches == 3)
         #expect(stats.totalDuration == 3600)
@@ -141,7 +232,7 @@ struct SummaryViewModelTests {
                          matchCalories: 150, workoutCalories: 150),
         ]
 
-        let stats = vm.stats(from: matches)
+        let stats = vm.stats(from: matches, records: [])
 
         #expect(stats.totalDuration == 2400) // 1800 + 600
         #expect(stats.totalCalories == 530) // 380 + 150
@@ -160,7 +251,7 @@ struct SummaryViewModelTests {
         legacy.durationSeconds = 3600
         legacy.caloriesBurned = 500
 
-        let stats = vm.stats(from: [legacy])
+        let stats = vm.stats(from: [legacy], records: [])
 
         #expect(stats.totalDuration == 3600)
         #expect(stats.totalCalories == 500)
@@ -181,7 +272,7 @@ struct SummaryViewModelTests {
         second.durationSeconds = 900
         second.caloriesBurned = 150
 
-        let stats = vm.stats(from: [first, second])
+        let stats = vm.stats(from: [first, second], records: [])
 
         #expect(stats.totalDuration == 1500)
         #expect(stats.totalCalories == 250)
@@ -216,8 +307,7 @@ struct SummaryViewModelTests {
         #expect(filtered.first === recent)
     }
 
-    @Test func selectedPeriodSessionsExcludeOldPopulatedAndMatchlessRecords() throws {
-        try configureSessionPersistence()
+    @Test func selectedPeriodSessionsExcludeOldPopulatedAndMatchlessRecords() {
         let vm = SummaryViewModel()
         vm.selectedPeriod = .week
         let oldDate = Date().addingTimeInterval(-30 * 24 * 3600)
@@ -237,25 +327,24 @@ struct SummaryViewModelTests {
         let oldPopulatedRecord = WorkoutSessionRecord()
         oldPopulatedRecord.workoutSessionId = oldPopulatedSession
         oldPopulatedRecord.startedAt = oldDate
-        try SessionPersistenceService.shared.upsert(oldPopulatedRecord)
 
         let currentPopulatedRecord = WorkoutSessionRecord()
         currentPopulatedRecord.workoutSessionId = currentPopulatedSession
         currentPopulatedRecord.startedAt = oldDate // 연결된 현재 경기 때문에 포함돼야 한다
         currentPopulatedRecord.elapsedSeconds = 1500
-        try SessionPersistenceService.shared.upsert(currentPopulatedRecord)
 
         let currentMatchlessRecord = WorkoutSessionRecord()
         currentMatchlessRecord.workoutSessionId = currentMatchlessSession
         currentMatchlessRecord.startedAt = currentDate
-        try SessionPersistenceService.shared.upsert(currentMatchlessRecord)
 
         let oldMatchlessRecord = WorkoutSessionRecord()
         oldMatchlessRecord.workoutSessionId = oldMatchlessSession
         oldMatchlessRecord.startedAt = oldDate
-        try SessionPersistenceService.shared.upsert(oldMatchlessRecord)
 
-        let sessions = vm.selectedPeriodSessions(from: [oldMatch, currentMatch])
+        let sessions = vm.selectedPeriodSessions(
+            from: [oldMatch, currentMatch],
+            records: [oldPopulatedRecord, currentPopulatedRecord, currentMatchlessRecord, oldMatchlessRecord]
+        )
 
         #expect(Set(sessions.map(\.id)) == [currentPopulatedSession, currentMatchlessSession])
         #expect(sessions.first(where: { $0.id == currentPopulatedSession })?.elapsedSeconds == 1500)
@@ -273,7 +362,7 @@ struct SummaryViewModelTests {
         match.averageHeartRate = 150
         match.durationSeconds = 2700
 
-        let stats = vm.stats(from: [match])
+        let stats = vm.stats(from: [match], records: [])
 
         #expect(stats.totalCalories == 400)
         #expect(stats.totalDuration == 2700)
@@ -297,7 +386,7 @@ struct SummaryViewModelTests {
             trendMatch(session: UUID(), startedAt: base.addingTimeInterval(Double(index) * 3600), elapsed: 1800)
         }
 
-        let trend = vm.trendSessions(from: matches)
+        let trend = vm.trendSessions(from: matches, records: [])
 
         #expect(trend.count == 10)
         // 오래된 것부터 — 차트의 x축 순서다
@@ -315,7 +404,7 @@ struct SummaryViewModelTests {
             trendMatch(session: UUID(), startedAt: base.addingTimeInterval(10800), elapsed: 1200),
         ]
 
-        let trend = vm.trendSessions(from: matches)
+        let trend = vm.trendSessions(from: matches, records: [])
 
         #expect(trend.count == 3)
         #expect(trend.first?.elapsedSeconds == 2400)
@@ -330,7 +419,7 @@ struct SummaryViewModelTests {
             trendMatch(session: UUID(), startedAt: base.addingTimeInterval(3600), elapsed: 1200),
         ]
 
-        #expect(vm.trendSessions(from: matches).isEmpty)
+        #expect(vm.trendSessions(from: matches, records: []).isEmpty)
     }
 
     /// 기간 필터를 타지 않는다 — 차트는 "얼마나 오래 쳤나"만 맡는 독립 블록이다.
@@ -343,6 +432,6 @@ struct SummaryViewModelTests {
             trendMatch(session: UUID(), startedAt: old.addingTimeInterval(Double(index) * 3600), elapsed: 1800)
         }
 
-        #expect(vm.trendSessions(from: matches).count == 3)
+        #expect(vm.trendSessions(from: matches, records: []).count == 3)
     }
 }

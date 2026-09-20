@@ -1356,6 +1356,17 @@
         }
       }
     },
+    "summary_average_session_duration" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : { "state" : "translated", "value" : "Avg. Session Time" }
+        },
+        "ko" : {
+          "stringUnit" : { "state" : "translated", "value" : "세션당 평균 시간" }
+        }
+      }
+    },
     "summary_avg_heartrate" : {
       "localizations" : {
         "en" : {
@@ -1385,6 +1396,17 @@
             "state" : "translated",
             "value" : "운동시간"
           }
+        }
+      }
+    },
+    "summary_monthly_sessions" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : { "state" : "translated", "value" : "Monthly Sessions" }
+        },
+        "ko" : {
+          "stringUnit" : { "state" : "translated", "value" : "월별 세션 수" }
         }
       }
     },
@@ -1518,6 +1540,17 @@
             "state" : "translated",
             "value" : "최근 10회 추이"
           }
+        }
+      }
+    },
+    "summary_session_count" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : { "state" : "translated", "value" : "Sessions" }
+        },
+        "ko" : {
+          "stringUnit" : { "state" : "translated", "value" : "운동한 세션 수" }
         }
       }
     },
