@@ -30,8 +30,8 @@ struct OnboardingView: View {
                         imageName: "OnboardingCrown",
                         title: String(localized: "onboarding_crown_title"),
                         message: String(localized: "onboarding_crown_body")
-                    ) { CrownArrowsOverlay() }
-                        .tag(0)
+                    )
+                    .tag(0)
 
                     OnboardingScreenshotPage(
                         imageName: "OnboardingSwipe",
