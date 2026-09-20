@@ -251,6 +251,8 @@ struct HistoryViewModelTests {
 
         #expect(vm.listSessions.isEmpty)
         #expect(vm.listMatches.isEmpty)
+        let calendarSourceMatches = try #require(vm.calendarSourceMatches)
+        #expect(!calendarSourceMatches.contains { $0.id == only.id })
     }
 
     // MARK: - 날짜 선택

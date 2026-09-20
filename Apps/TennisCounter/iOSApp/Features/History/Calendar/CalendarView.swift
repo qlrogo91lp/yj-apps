@@ -3,7 +3,7 @@ import SwiftUI
 struct CalendarView: View {
     let matches: [Match]
     /// 현재 월 밖의 경기까지 포함한 소스. 날짜별 목록에서 거짓 빈 세션을 막는 데만 쓴다.
-    let sourceMatches: [Match]
+    let sourceMatches: [Match]?
     let currentMonth: Date
     let onPrevious: () -> Void
     let onNext: () -> Void

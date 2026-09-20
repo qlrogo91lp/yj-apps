@@ -195,6 +195,24 @@ struct MatchSessionGroupTests {
         #expect(records.map(\.workoutSessionId) == [matchlessSession])
     }
 
+    @Test func recordsForGroupingSuppressesUnjoinedRecordsWhenCompleteSourceIsUnavailable() {
+        let joinedSession = UUID()
+        let unjoinedSession = UUID()
+        let joinedMatch = match(session: joinedSession, startedAt: Date())
+        let joinedRecord = WorkoutSessionRecord()
+        joinedRecord.workoutSessionId = joinedSession
+        let unjoinedRecord = WorkoutSessionRecord()
+        unjoinedRecord.workoutSessionId = unjoinedSession
+
+        let records = MatchSessionGroup.recordsForGrouping(
+            [joinedRecord, unjoinedRecord],
+            displayedMatches: [joinedMatch],
+            sourceMatches: nil
+        ) { _ in true }
+
+        #expect(records.map(\.workoutSessionId) == [joinedSession])
+    }
+
     @Test func recordWithoutMatchesBecomesEmptySession() {
         let record = WorkoutSessionRecord()
         record.workoutSessionId = UUID()

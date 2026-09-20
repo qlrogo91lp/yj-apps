@@ -11,7 +11,7 @@ final class HistoryViewModel: ObservableObject {
     @Published var viewMode: HistoryViewMode = .list
     @Published var listMatches: [Match] = []
     @Published var calendarMatches: [Match] = []
-    @Published private(set) var calendarSourceMatches: [Match] = []
+    @Published private(set) var calendarSourceMatches: [Match]?
     @Published var isLoadingMore: Bool = false
     @Published var hasMore: Bool = true
     @Published var currentMonth: Date = .init()
@@ -61,6 +61,7 @@ final class HistoryViewModel: ObservableObject {
         try? MatchPersistenceService.shared.delete(match)
         listMatches.removeAll { $0.id == match.id }
         calendarMatches.removeAll { $0.id == match.id }
+        calendarSourceMatches?.removeAll { $0.id == match.id }
         rebuildSessions()
     }
 
@@ -72,10 +73,8 @@ final class HistoryViewModel: ObservableObject {
         let groupingRecords = MatchSessionGroup.recordsForGrouping(
             records,
             displayedMatches: listMatches,
-            sourceMatches: sourceMatches ?? listMatches
-        ) { _ in
-            sourceMatches != nil
-        }
+            sourceMatches: sourceMatches
+        ) { _ in true }
         listSessions = MatchSessionGroup.group(listMatches, records: groupingRecords)
     }
 
@@ -102,6 +101,6 @@ final class HistoryViewModel: ObservableObject {
             sortBy: [SortDescriptor(\Match.startedAt, order: .reverse)]
         )
         calendarMatches = (try? context.fetch(descriptor)) ?? []
-        calendarSourceMatches = (try? context.fetch(FetchDescriptor<Match>())) ?? calendarMatches
+        calendarSourceMatches = try? context.fetch(FetchDescriptor<Match>())
     }
 }

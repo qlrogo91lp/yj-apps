@@ -56,10 +56,17 @@ struct MatchSessionGroup: Identifiable {
     static func recordsForGrouping(
         _ records: [WorkoutSessionRecord],
         displayedMatches: [Match],
-        sourceMatches: [Match],
+        sourceMatches: [Match]?,
         includesMatchlessRecord: (WorkoutSessionRecord) -> Bool
     ) -> [WorkoutSessionRecord] {
         let displayedSessionIds = Set(displayedMatches.compactMap(\.workoutSessionId))
+        guard let sourceMatches else {
+            return records.filter { record in
+                guard let sessionId = record.workoutSessionId else { return false }
+                return displayedSessionIds.contains(sessionId)
+            }
+        }
+
         let sourceSessionIds = Set(sourceMatches.compactMap(\.workoutSessionId))
 
         return records.filter { record in
