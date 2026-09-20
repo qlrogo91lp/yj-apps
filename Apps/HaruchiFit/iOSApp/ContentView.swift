@@ -6,16 +6,17 @@ import SwiftUI
 /// **제품 화면이 아니다** — Phase 3 탭 셸이 대체한다 (스펙 7절). 애니메이션·스와이프·스탯을
 /// 넣지 않는다. 지금까지 이 파일에 달려 있던 "저장 확인용 임시 화면" 이라는 성격을 그대로 잇는다.
 struct ContentView: View {
-    /// **기간을 좁혀 읽는다.** 홈이 실제로 쓰는 건 4개월치뿐이라 전체를 읽을 이유가 없다 (스펙 5절).
+    /// **기간을 좁혀 읽는다.** 홈이 실제로 쓰는 건 6개월치뿐이라 전체를 읽을 이유가 없다 (스펙 5절).
     @Query private var records: [WorkoutRecord]
     @StateObject private var grass = GrassViewModel()
     @State private var selected: Date?
 
+    private static let weeks = 26
+
     private let calendar = Calendar.current
-    private let weeks = 17
 
     init() {
-        let since = Calendar.current.date(byAdding: .weekOfYear, value: -17, to: Date())
+        let since = Calendar.current.date(byAdding: .weekOfYear, value: -Self.weeks, to: Date())
             ?? .distantPast
         _records = Query(filter: #Predicate<WorkoutRecord> { $0.startedAt >= since },
                          sort: \WorkoutRecord.startedAt)
@@ -35,7 +36,7 @@ struct ContentView: View {
         }
     }
 
-    /// 17주 × 7일. 왼쪽 위가 가장 오래된 날이다.
+    /// 26주 × 7일. 왼쪽 위가 가장 오래된 날이다.
     private var grid: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHGrid(rows: Array(repeating: GridItem(.fixed(16), spacing: 3), count: 7),
@@ -55,6 +56,7 @@ struct ContentView: View {
             }
             .padding(.horizontal)
         }
+        .defaultScrollAnchor(.trailing)
     }
 
     @ViewBuilder private var detail: some View {
@@ -80,13 +82,13 @@ struct ContentView: View {
         }
     }
 
-    /// 오늘이 든 주를 오른쪽 끝에 두고 17주를 거슬러 올라간다.
+    /// 오늘이 든 주를 오른쪽 끝에 두고 26주를 거슬러 올라간다.
     private var gridDays: [Date] {
         let today = calendar.startOfDay(for: Date())
         guard let thisWeek = calendar.dateInterval(of: .weekOfYear, for: today)?.start,
-              let start = calendar.date(byAdding: .weekOfYear, value: -(weeks - 1), to: thisWeek)
+              let start = calendar.date(byAdding: .weekOfYear, value: -(Self.weeks - 1), to: thisWeek)
         else { return [] }
-        return (0 ..< weeks * 7).compactMap {
+        return (0 ..< Self.weeks * 7).compactMap {
             calendar.date(byAdding: .day, value: $0, to: start)
         }
     }
