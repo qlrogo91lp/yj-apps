@@ -11,14 +11,16 @@
 
 ## Ralli — 다음 출시 (현재 1.1.7 (26))
 
-2026-09-07 상태 점검 기준. 파일 충돌을 실제로 따져 **2 트랙 병렬**로 재편했다.
+2026-09-18 갱신. 파일 충돌을 실제로 따져 트랙으로 나눴다.
 
 ```
 트랙 A (iOS)     5̶ → 2̶ → 1̶ ──┐            ← 전부 완료 (실기기 확인 포함)
-트랙 B (워치)     3̶ → 4̶ ──────┤→ 6 스크린샷 → 7   ← 3·4 도 완료
-트랙 C (YJKit)   MonitoringCore ┘            ← 지금 시작 가능
+트랙 B (워치)     3̶ → 4̶ ──────┤→ 6̶ 코드·이미지 → 6 화살표 → 7   ← 6 은 이미지까지 들어감
+트랙 C (YJKit)   MonitoringCore ┘            ← 집에서 (Firebase 콘솔 선행)
+트랙 D (iOS)     9 세션 중심 재편            ← 스펙·플랜 완료, 구현 대기
 
-다음 차례: 트랙 A·B 실기기 확인까지 완료. #6 스크린샷(Task 4)으로 합류 가능, 또는 트랙 C(MonitoringCore), 또는 #9 브레인스토밍
+다음 차례: #6 은 크라운 화살표 위치 조정과 시뮬레이터 확인만 남았다. #9 는 설계가 끝나 바로 구현 가능.
+트랙 C·#7 은 집에서 몰아서. #8 은 아직 브레인스토밍 전.
 ```
 
 - **A ↔ B ↔ C 는 겹치는 파일이 하나도 없다.** 셋을 동시에 굴려도 된다
@@ -38,10 +40,10 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
 | ~~1~~ | ~~WorkoutShareUI 붙이기 (공유 시트)~~ | A | **완료** (PR #20 → 인스타 경로 제거 → `feat/share-card-sticker` 카드 개편) · 실기기 확인 완료 | [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-07-workout-share-button.md) · [제거 플랜](Packages/YJKit/docs/plans/ios/2026/2026-09-13-share-sheet-only.md) · [Kit 사용법](Packages/YJKit/README.md#workoutshareui-사용법) |
 | ~~3~~ | ~~햅틱 (워치 전용)~~ | B | **완료** (PR #18) · 실기기 확인 완료 | [플랜](Apps/TennisCounter/docs/plans/watch/2026/2026-09-07-match-haptics.md) — 설정 연동은 #8 때 `MatchHaptics.play` 첫 줄에서. 포인트 `.click`이 약하게 느껴지나 유지하기로 결정 |
 | ~~4~~ | ~~크라운 점수 입력 (워치, 위=나 아래=상대)~~ | B | **완료** (버그 수정 PR, 실기기 확인 완료) | [플랜](Apps/TennisCounter/docs/plans/watch/2026/2026-09-07-crown-scoring.md) — PR #22 구현이 회전량 기반이라 실기기에서 오작동, 디텐트 방식으로 재구현. 온보딩(#6) 항목 하나 파생 |
-| 6 | 온보딩 4페이지 (스크린샷 3 + 목록 1, iOS 만) | A → 합류 | **뼈대 완료** (PR #17) · 선행 #1·#4 완료 · 스크린샷(Task 4)만 남음 | [스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-09-07-onboarding-design.md) · [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-07-onboarding.md) — 공유 카드가 PR #24 로 새로 디자인됐으니 스크린샷은 그 카드로 찍는다 |
+| 6 | 온보딩 **5페이지** (워치 중심, iOS 만) | A → 합류 | **이미지까지 완료** (PR #25) · 크라운 화살표 위치와 시뮬레이터 ko/en 확인만 남음 | [스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-09-07-onboarding-design.md) (09-18 개정) · [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-17-onboarding-watch-focused.md) — 4페이지에서 5페이지로 재편, 기능 목록 페이지 제거. 워치 3장은 Figma 목업 합성, 공유 그림은 인스타 스티커 화면 |
 | 7 | Firebase Crashlytics (iOS + 워치, 익스텐션 제외) | 단독 (맨 뒤) | 스펙·플랜 완료 · 구현 대기 | [스펙](Packages/YJKit/docs/specs/shared/2026/2026-09-07-crash-reporting-design.md) → [YJKit 플랜](Packages/YJKit/docs/plans/shared/2026/2026-09-07-monitoring-core.md) (트랙 C, 지금 병렬 가능) → [Ralli 플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-07-crashlytics-integration.md) |
 | 8 | 설정 페이지 + 다른 앱 노출 | — | **논의 필요 — 아직 브레인스토밍 전** | 아래 "남은 논의" 참고 |
-| 9 | iOS 요약·기록 화면 개선 (2026-09-15 실기기 메모) | A | **논의 필요 — 아직 브레인스토밍 전** | 아래 "남은 논의 — #9" 참고. #2 스펙을 개정하는 작업 |
+| 9 | iOS 기록·요약 **세션 중심 재편** | D | **스펙·플랜 완료 · 구현 대기** | [스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-09-18-session-centric-history.md) · [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-18-session-centric-history.md) — `WorkoutSessionRecord` 신설이 포함된다. #2 스펙을 개정한다 |
 
 ### 집 맥북에서 할 것
 
@@ -75,7 +77,10 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
 
 **합류 후**
 
-- [ ] 6번 스크린샷 3장 × ko/en (Task 4) — 선행 #1·#4 완료, 지금 찍을 수 있다. 공유 카드는 새 2×2 카드로
+- [x] **6번 스크린샷 5장** — 워치 3장은 3x 로 재내보내 넣었다. 스와이프는 영어·컴플리케이션은 한국어 한 장,
+      공유는 인스타 스티커 화면. 그림 자리는 `OnboardingScreenshotPage` 가 비율 0.80 박스로 고정한다
+- [ ] 6번 시뮬레이터에서 ko/en 5장 넘겨보기 — 크기가 흔들리지 않는지, 워치 3장이 선명한지
+- [ ] 6번 크라운 화살표 위치 조정 (플랜 Task 4) — 고정 비율 박스로 기준 프레임이 바뀌었으니 실제 화면을 보고 `crownRatio` 를 맞춘다
 - [ ] 7번 Ralli 연동 플랜 — 단독으로. PR 은 Kit / Ralli 따로
 
 **아무 때나**
@@ -101,17 +106,16 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
 - 다른 앱(골프·하루치) 노출 — 어떤 형태로(App Store 링크 / 배너 / "yj 의 다른 앱" 섹션), 어느 위치에. 완전 미논의
 - 열린 질문: iOS 설정 탭을 4번째 탭으로 둘지 요약 탭 우상단 기어로 둘지 / 워치에도 설정 화면을 둘지 / 모드 옵션(No-Ad 등) 설명을 여기 둘지 모드 화면 ⓘ 로 둘지
 
-### 남은 논의 — #9 iOS 요약·기록 개선 (2026-09-15 실기기 메모)
+### ~~남은 논의 — #9~~ → 스펙으로 옮겼다 (2026-09-18)
 
-1.1.8 TestFlight 실기기에서 나온 메모. #2 스펙([요약·기록 리디자인](Apps/TennisCounter/docs/specs/ios/2026/2026-08-25-summary-history-redesign-design.md))을 개정한다.
+2026-09-15 실기기 메모에서 출발한 논의가 끝났다. 목록·상세·공유·삭제를 **전부 세션 단위로 모으고**
+`WorkoutSessionRecord` 를 신설하기로 했다. 결정과 근거는
+[세션 중심 재편 스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-09-18-session-centric-history.md) 에 있다.
 
-- **요약 — 콘텐츠 항목**: `전체` 기간에서 총 운동시간·총 활동 kcal 은 의미가 약하다 (`이번 달` 은 괜찮음). 기간마다 보여줄 항목을 다르게 할지
-- **요약 — 최근 세션**: 세션의 경기들이 한 카드에 나열되고 행마다 탭하면 상세가 열리는데, 눌린다는 표시가 없어 어색하다
-- **기록 — 목록**: 애플 피트니스처럼 **카드형**으로
-- **기록 — 상세**: 디자인·항목 재논의. 공유 카드(2×2 · 원형 로고)와 톤을 맞추는 것이 출발점. 공유 버튼은 이미 우상단 원형으로 옮김
-- **굵은 글씨가 일부만** — `MatchRow` 의 "이긴 세트 숫자만 굵게" 규칙이 거슬린다
-- **경기 결과 화면 공유 버튼 위치** — 원형 버튼으로 바뀌어 저장·다시하기 위에 떠 있다
-- 심박수 그래프(HealthKit 샘플 조회)는 별도 작업으로 뺐다 — 권한·동기화 지연·시간 범위 결정이 필요
+논의 중 드러난 것 — 공유 카드는 이미 **세션 누적값**인데 진입점만 경기였고, 운동을 끝낼 때
+`stopWorkout()` 이 돌려주는 최종값(워크아웃 전체 평균 심박 포함)을 **버리고 있었다.**
+
+**심박수 그래프**(HealthKit 샘플 조회)만 별도 작업으로 남았다 — 권한·동기화 지연·시간 범위 결정이 필요하다.
 
 ## YJKit
 
