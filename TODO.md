@@ -94,6 +94,12 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
       기록 상세 스코어보드와 `경기 방식`·`시간` 라벨, 앱 전체가 다크로 고정되는지.
       **삭제한 경기가 앱을 다시 켜도 안 돌아오는지** — 이번에 고친 버그다
 - [ ] Xcode Organizer › Crashes 에서 Ralli 1.1.7 한 번 열어보기 (분석 공유 켠 사용자 표본만 보임)
+- [ ] **`saveFromWatchPersistsMatch` 테스트 오염 수정** — 싱글턴 `MatchPersistenceService.shared` 에
+      인메모리 컨테이너를 꽂았던 테스트가 끝난 뒤 다른 테스트가 그 컨텍스트를 조회해
+      `NSInternalInconsistencyException: "No eligible connection available"` 로 죽는다. 단독 실행은 통과.
+      싱글턴 대신 주입으로 바꾸는 쪽이 근본적이다 (`@Suite(.serialized)` 는 증상만 덮는다).
+      **iOS 테스트는 `-parallel-testing-enabled NO` 로 돌린다** — 기본값은 테스트 호스트가 반복 크래시해
+      허수 실패 34개가 섞인다. 경위는 [작업 기록](Apps/TennisCounter/docs/logs/2026/2026-09-21-session-record-integration-gaps.md)
 - [x] `~/orca/workspaces/yj-apps/` 워크트리 3개 정리 — 워크트리·브랜치 모두 제거 완료
 
 ### 남은 논의 — #8 설정 페이지 (2026-09-07 시점)
