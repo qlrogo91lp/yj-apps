@@ -275,19 +275,56 @@ struct WorkoutEndMessage: ConnectivityMessage {
     static let messageType = "workoutEnd"
 
     let sessionId: UUID
+    let startedAt: Date?
+    let endedAt: Date?
+    let elapsedSeconds: Int?
+    let activeCalories: Double?
+    let totalCalories: Double?
+    let averageHeartRate: Double?
+    let healthKitUUID: UUID?
 
-    init(sessionId: UUID) {
+    init(sessionId: UUID,
+         startedAt: Date? = nil,
+         endedAt: Date? = nil,
+         elapsedSeconds: Int? = nil,
+         activeCalories: Double? = nil,
+         totalCalories: Double? = nil,
+         averageHeartRate: Double? = nil,
+         healthKitUUID: UUID? = nil)
+    {
         self.sessionId = sessionId
+        self.startedAt = startedAt
+        self.endedAt = endedAt
+        self.elapsedSeconds = elapsedSeconds
+        self.activeCalories = activeCalories
+        self.totalCalories = totalCalories
+        self.averageHeartRate = averageHeartRate
+        self.healthKitUUID = healthKitUUID
     }
 
     init?(from dictionary: [String: Any]) {
         guard let idStr = dictionary["sessionId"] as? String,
               let id = UUID(uuidString: idStr) else { return nil }
         sessionId = id
+        startedAt = (dictionary["startedAt"] as? TimeInterval).map(Date.init(timeIntervalSince1970:))
+        endedAt = (dictionary["endedAt"] as? TimeInterval).map(Date.init(timeIntervalSince1970:))
+        elapsedSeconds = dictionary["elapsedSeconds"] as? Int
+        activeCalories = dictionary["activeCalories"] as? Double
+        totalCalories = dictionary["totalCalories"] as? Double
+        averageHeartRate = dictionary["averageHeartRate"] as? Double
+        healthKitUUID = (dictionary["healthKitUUID"] as? String).flatMap(UUID.init(uuidString:))
     }
 
     func toDictionary() -> [String: Any] {
-        ["sessionId": sessionId.uuidString]
+        var dictionary: [String: Any] = ["sessionId": sessionId.uuidString]
+        if let startedAt { dictionary["startedAt"] = startedAt.timeIntervalSince1970 }
+        if let endedAt { dictionary["endedAt"] = endedAt.timeIntervalSince1970 }
+        if let elapsedSeconds { dictionary["elapsedSeconds"] = elapsedSeconds }
+        if let activeCalories { dictionary["activeCalories"] = activeCalories }
+        if let totalCalories { dictionary["totalCalories"] = totalCalories }
+        if let averageHeartRate { dictionary["averageHeartRate"] = averageHeartRate }
+        if let healthKitUUID { dictionary["healthKitUUID"] = healthKitUUID.uuidString }
+        return dictionary
     }
 }
 

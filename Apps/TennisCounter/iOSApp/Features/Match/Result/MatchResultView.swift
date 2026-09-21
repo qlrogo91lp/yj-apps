@@ -5,8 +5,6 @@ struct MatchResultView: View {
     @ObservedObject var viewModel: WorkoutSessionViewModel
 
     @State private var saveState: SaveButtonState = .idle
-    /// 저장에 성공한 인스턴스. 공유 버튼은 이 값이 생긴 뒤에만 나타난다 — 카드 숫자가 기록 탭과 같아야 한다.
-    @State private var savedMatch: Match?
 
     var body: some View {
         ZStack {
@@ -48,12 +46,6 @@ struct MatchResultView: View {
 
                 Spacer()
 
-                if let savedMatch {
-                    MatchShareButton(match: savedMatch)
-                        .padding(.horizontal, 32)
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
-                }
-
                 HStack(spacing: 16) {
                     SaveButton(state: saveState) { saveMatch() }
                     RematchButton { viewModel.restartMatch() }
@@ -86,7 +78,6 @@ struct MatchResultView: View {
     private func saveMatch() {
         let match = viewModel.saveCurrentMatch()
         withAnimation {
-            savedMatch = match
             saveState = match == nil ? .failed : .saved
         }
     }

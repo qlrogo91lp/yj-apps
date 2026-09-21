@@ -2,10 +2,12 @@ import SwiftData
 import SwiftUI
 
 struct HistoryView: View {
+    let activationID: Int
+    let showListOnActivation: Bool
     @Environment(\.modelContext) private var modelContext
     @StateObject private var viewModel = HistoryViewModel()
-    @State private var selectedMatch: Match?
-    @State private var pendingDelete: Match?
+    @State private var selectedSession: MatchSessionGroup?
+    @State private var pendingDelete: MatchSessionGroup?
 
     var body: some View {
         NavigationStack {
@@ -18,18 +20,19 @@ struct HistoryView: View {
                             sessions: viewModel.listSessions,
                             isLoadingMore: viewModel.isLoadingMore,
                             onLoadMore: { viewModel.loadNextPage() },
-                            onSelect: { selectedMatch = $0 },
+                            onSelect: { selectedSession = viewModel.sessionForDetail($0) },
                             onDelete: { pendingDelete = $0 }
                         )
                     }
                 } else {
                     CalendarView(
                         matches: viewModel.calendarMatches,
+                        sourceMatches: viewModel.calendarSourceMatches,
                         currentMonth: viewModel.currentMonth,
                         onPrevious: { viewModel.changeMonth(by: -1) },
                         onNext: { viewModel.changeMonth(by: 1) },
                         selectedDate: $viewModel.selectedDate,
-                        onSelect: { selectedMatch = $0 },
+                        onSelect: { selectedSession = viewModel.sessionForDetail($0) },
                         onDelete: { pendingDelete = $0 }
                     )
                     .padding(.horizontal)
@@ -43,8 +46,15 @@ struct HistoryView: View {
                     })
                 }
             }
-            .sheet(item: $selectedMatch) { match in
-                MatchDetailSheet(match: match)
+            .navigationDestination(
+                isPresented: Binding(
+                    get: { selectedSession != nil },
+                    set: { if !$0 { selectedSession = nil } }
+                )
+            ) {
+                if let selectedSession {
+                    SessionDetailView(session: selectedSession)
+                }
             }
             .confirmationDialog(
                 String(localized: "history_delete_confirm_title"),
@@ -52,7 +62,7 @@ struct HistoryView: View {
                 titleVisibility: .visible
             ) {
                 Button(String(localized: "btn_delete"), role: .destructive) {
-                    if let match = pendingDelete { viewModel.delete(match) }
+                    if let session = pendingDelete { viewModel.delete(session) }
                     pendingDelete = nil
                 }
                 Button(String(localized: "btn_cancel"), role: .cancel) { pendingDelete = nil }
@@ -61,8 +71,17 @@ struct HistoryView: View {
             }
             .onAppear {
                 viewModel.configure(modelContext: modelContext)
-                viewModel.loadInitial()
+                activate(activationID)
             }
+            .onChange(of: activationID) { _, value in
+                activate(value)
+            }
+        }
+    }
+
+    private func activate(_ id: Int) {
+        if viewModel.activate(id, showList: showListOnActivation), showListOnActivation {
+            selectedSession = nil
         }
     }
 }

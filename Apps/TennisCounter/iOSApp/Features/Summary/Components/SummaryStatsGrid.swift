@@ -2,21 +2,25 @@ import SwiftUI
 
 struct SummaryStatsGrid: View {
     let stats: SummaryStats
+    let period: SummaryPeriod
 
     var body: some View {
-        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
+        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
             StatCard(
                 title: String(localized: "summary_total_matches"),
-                value: "\(stats.totalMatches)"
+                value: stats.totalMatches.formatted()
             )
             StatCard(
-                title: String(localized: "summary_duration"),
-                value: stats.formattedDuration
+                title: String(localized: "summary_win_rate"),
+                value: stats.formattedWinRate
             )
-            StatCard(
-                title: String(localized: "summary_total_calories"),
-                value: stats.formattedCalories
-            )
+            if period == .all {
+                StatCard(title: String(localized: "summary_session_count"), value: stats.sessionCount.formatted())
+                StatCard(title: String(localized: "summary_average_session_duration"), value: stats.formattedAverageSessionDuration)
+            } else {
+                StatCard(title: String(localized: "summary_duration"), value: stats.formattedDuration)
+                StatCard(title: String(localized: "summary_total_calories"), value: stats.formattedCalories)
+            }
         }
     }
 }
@@ -27,8 +31,10 @@ struct SummaryStatsGrid: View {
         wins: 8,
         winRate: 0.67,
         totalCalories: 3840,
-        totalDuration: 67320
-    ))
-    .padding()
-    .background(.black)
+        totalDuration: 67320,
+        sessionCount: 8,
+        averageSessionSeconds: 8415
+    ), period: .all)
+        .padding()
+        .background(.black)
 }

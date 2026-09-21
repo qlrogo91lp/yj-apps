@@ -122,7 +122,7 @@ class WorkoutSessionViewModel: ObservableObject {
         connectivity.$receivedWorkoutEnd
             .compactMap(\.self)
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] id in self?.handleIncomingWorkoutEnd(id) }
+            .sink { [weak self] message in self?.handleIncomingWorkoutEnd(message) }
             .store(in: &cancellables)
 
         connectivity.$receivedMatchReset
@@ -139,10 +139,12 @@ class WorkoutSessionViewModel: ObservableObject {
         startNewMatch(notifyRemote: false)
     }
 
-    private func handleIncomingWorkoutEnd(_ id: UUID) {
+    private func handleIncomingWorkoutEnd(_ message: WorkoutEndMessage) {
         // 매치가 한 번도 시작되지 않았으면 sessionId가 아직 상대와 동기화되지 않았으므로 무조건 수용한다.
-        if hasSyncedSession, id != sessionId { return }
+        if hasSyncedSession, message.sessionId != sessionId { return }
         connectivity.receivedWorkoutEnd = nil
+        // 레코드 저장은 WorkoutSessionRecorder 가 별도 채널로 맡는다 — 이 화면이 떠 있지 않은
+        // 워크아웃(경기 없이 운동만 한 경우)도 기록이 남아야 하기 때문이다.
         endSession(notifyRemote: false)
         remoteWorkoutEnded = true
     }
@@ -407,7 +409,7 @@ private extension WorkoutSessionViewModel {
 #if DEBUG
     extension WorkoutSessionViewModel {
         func handleIncomingWorkoutEndForTest(_ id: UUID) {
-            handleIncomingWorkoutEnd(id)
+            handleIncomingWorkoutEnd(WorkoutEndMessage(sessionId: id))
         }
 
         func handleIncomingMatchResetForTest(_ id: UUID) {

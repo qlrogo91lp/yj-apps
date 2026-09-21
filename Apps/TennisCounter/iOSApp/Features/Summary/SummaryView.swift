@@ -2,12 +2,13 @@ import SwiftData
 import SwiftUI
 
 struct SummaryView: View {
+    var onShowHistory: () -> Void = {}
     @StateObject private var viewModel = SummaryViewModel()
     @Query(sort: \Match.startedAt, order: .reverse) private var matches: [Match]
-    @State private var selectedMatch: Match?
+    @Query private var records: [WorkoutSessionRecord]
 
-    private var filtered: [Match] {
-        viewModel.filteredMatches(from: matches)
+    private var sessions: [MatchSessionGroup] {
+        viewModel.selectedPeriodSessions(from: matches, records: records)
     }
 
     var body: some View {
@@ -21,7 +22,7 @@ struct SummaryView: View {
                     }
                     .pickerStyle(.segmented)
 
-                    if filtered.isEmpty {
+                    if sessions.isEmpty {
                         emptyState
                     } else {
                         statsSection
@@ -32,9 +33,6 @@ struct SummaryView: View {
                 .padding()
             }
             .navigationTitle(String(localized: "tab_summary"))
-            .sheet(item: $selectedMatch) { match in
-                MatchDetailSheet(match: match)
-            }
         }
     }
 
@@ -48,29 +46,38 @@ struct SummaryView: View {
 
     @ViewBuilder
     private var statsSection: some View {
-        let stats = viewModel.stats(from: matches)
-        SummaryStatsGrid(stats: stats)
+        let stats = viewModel.stats(from: matches, records: records)
+        SummaryStatsGrid(stats: stats, period: viewModel.selectedPeriod)
         Text(String(
             format: String(localized: "summary_record_line"),
             stats.wins,
             stats.totalMatches - stats.wins,
-            Int(stats.winRate * 100)
+            stats.roundedWinRatePercentage
         ))
         .font(.system(size: 15))
         .foregroundColor(.secondary)
     }
 
     private var trendSection: some View {
-        section(title: String(localized: "summary_section_trend")) {
-            RecentTrendChart(sessions: viewModel.trendSessions(from: matches))
+        section(title: viewModel.selectedPeriod == .all
+            ? String(localized: "summary_monthly_sessions") : String(localized: "summary_section_trend"))
+        {
+            if viewModel.selectedPeriod == .all {
+                RecentTrendChart(monthlyCounts: viewModel.monthlySessionCounts(from: matches, records: records))
+            } else {
+                RecentTrendChart(sessions: viewModel.trendSessions(from: matches, records: records))
+            }
         }
     }
 
     @ViewBuilder
     private var recentSessionSection: some View {
-        if let session = viewModel.recentSession(from: matches) {
+        if let session = sessions.first {
             section(title: String(localized: "summary_recent_session")) {
-                RecentSessionCard(session: session) { selectedMatch = $0 }
+                Button(action: onShowHistory) {
+                    SessionCard(session: session)
+                }
+                .buttonStyle(.plain)
             }
         }
     }

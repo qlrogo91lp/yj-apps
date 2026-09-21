@@ -11,6 +11,7 @@ final class HistoryViewModel: ObservableObject {
     @Published var viewMode: HistoryViewMode = .list
     @Published var listMatches: [Match] = []
     @Published var calendarMatches: [Match] = []
+    @Published private(set) var calendarSourceMatches: [Match]?
     @Published var isLoadingMore: Bool = false
     @Published var hasMore: Bool = true
     @Published var currentMonth: Date = .init()
@@ -19,54 +20,137 @@ final class HistoryViewModel: ObservableObject {
 
     private var modelContext: ModelContext?
     private let pageSize: Int = 20
+    private var hasLoadedInitial = false
+    private var lastActivationID: Int?
 
     func configure(modelContext: ModelContext) {
         guard self.modelContext == nil else { return }
         self.modelContext = modelContext
     }
 
+    /// 새 탭 진입만 저장소를 다시 읽는다. 같은 신호의 onAppear/onChange와 상세 pop은 무시한다.
+    /// 0은 아직 기록 탭을 선택하지 않은 상태다.
+    @discardableResult
+    func activate(_ activationID: Int, showList: Bool = false) -> Bool {
+        guard activationID > 0, modelContext != nil, lastActivationID != activationID else { return false }
+        lastActivationID = activationID
+        if showList { viewMode = .list }
+        if hasLoadedInitial {
+            refreshData()
+        } else {
+            loadInitial()
+        }
+        return true
+    }
+
+    /// 최초 진입 또는 명시적인 새로고침에서만 탐색 상태를 초기화한다.
     func loadInitial() {
+        guard modelContext != nil else { return }
+        hasLoadedInitial = true
+        refreshData()
+        selectedDate = Date()
+    }
+
+    /// 목록은 첫 페이지부터 일관되게 다시 읽되, 캘린더 탐색 위치와 표시 모드는 유지한다.
+    private func refreshData() {
         listMatches = []
+        listSessions = []
         hasMore = true
         loadNextPage()
         loadCalendarMatches()
-        selectedDate = Date()
+    }
+
+    /// 목록 페이지나 캘린더 날짜의 일부 경기만 상세·공유로 넘기지 않는다.
+    /// nil 워크아웃 ID를 가진 구버전 기록은 경기 ID 하나가 세션의 정체성이다.
+    func sessionForDetail(_ session: MatchSessionGroup) -> MatchSessionGroup? {
+        guard let context = modelContext else { return nil }
+        let predicate: Predicate<Match>
+        if let sessionId = session.record?.workoutSessionId ?? session.matches.first?.workoutSessionId {
+            predicate = #Predicate<Match> { $0.workoutSessionId == sessionId }
+        } else {
+            let matchId = session.id
+            predicate = #Predicate<Match> { $0.id == matchId && $0.workoutSessionId == nil }
+        }
+        let descriptor = FetchDescriptor<Match>(
+            predicate: predicate,
+            sortBy: [SortDescriptor(\.startedAt)]
+        )
+        guard let matches = try? context.fetch(descriptor),
+              !matches.isEmpty || session.record != nil
+        else { return nil }
+        return MatchSessionGroup(id: session.id, matches: matches, record: session.record)
     }
 
     func loadNextPage() {
         guard !isLoadingMore, hasMore, let context = modelContext else { return }
         isLoadingMore = true
+        defer { isLoadingMore = false }
 
-        var descriptor = FetchDescriptor<Match>(
-            sortBy: [SortDescriptor(\Match.startedAt, order: .reverse)]
-        )
-        descriptor.fetchLimit = pageSize
-        // 페이지 번호가 아니라 보유 개수로 offset 을 잡는다 — 삭제로 저장소와 배열이 함께 하나 줄면
-        // offset 도 같이 줄어 경계가 어긋나지 않는다. 화면에 없는 레코드는 지울 수 없으므로 항상 일치한다.
-        descriptor.fetchOffset = listMatches.count
+        let previousSessionIds = Set(listSessions.map(\.id))
 
-        let fetched = (try? context.fetch(descriptor)) ?? []
-        listMatches.append(contentsOf: fetched)
-        hasMore = fetched.count == pageSize
-        rebuildSessions()
-        isLoadingMore = false
+        while hasMore {
+            var descriptor = FetchDescriptor<Match>(
+                sortBy: [SortDescriptor(\Match.startedAt, order: .reverse)]
+            )
+            descriptor.fetchLimit = pageSize
+            // 페이지 번호가 아니라 보유 개수로 offset 을 잡는다 — 삭제로 저장소와 배열이 함께 줄면
+            // 다음 페이지 경계도 함께 당겨져 건너뛰는 기록이 없다.
+            descriptor.fetchOffset = listMatches.count
+
+            let fetched = (try? context.fetch(descriptor)) ?? []
+            guard !fetched.isEmpty else {
+                hasMore = false
+                rebuildSessions()
+                return
+            }
+
+            listMatches.append(contentsOf: fetched)
+            hasMore = fetched.count == pageSize
+            rebuildSessions()
+
+            if Set(listSessions.map(\.id)) != previousSessionIds || !hasMore { return }
+        }
     }
 
     /// CloudKit 동기화라 다른 기기로 전파되고 되돌릴 수 없다. 호출부가 확인 다이얼로그를 받는다.
     ///
     /// 서비스와 이 VM 이 서로 다른 ModelContext 를 들고 있다 — 같은 컨테이너라 저장소에는
     /// 반영되지만 배열은 자동으로 갱신되지 않으므로 직접 지운다.
-    func delete(_ match: Match) {
-        try? MatchPersistenceService.shared.delete(match)
-        listMatches.removeAll { $0.id == match.id }
-        calendarMatches.removeAll { $0.id == match.id }
+    func delete(_ session: MatchSessionGroup) {
+        let matches = matchesToDelete(for: session)
+        let matchIds = Set(matches.map(\.id))
+
+        for match in matches {
+            try? MatchPersistenceService.shared.delete(match)
+        }
+        try? SessionPersistenceService.shared.delete(sessionId: session.id)
+
+        listMatches.removeAll { matchIds.contains($0.id) }
+        calendarMatches.removeAll { matchIds.contains($0.id) }
+        calendarSourceMatches?.removeAll { matchIds.contains($0.id) }
         rebuildSessions()
+    }
+
+    /// 페이지에 아직 실리지 않은 같은 워크아웃의 경기도 함께 지운다. 구버전의 nil 세션 ID는
+    /// 화면 그룹에 포함된 경기만 지운다.
+    private func matchesToDelete(for session: MatchSessionGroup) -> [Match] {
+        guard session.matches.contains(where: { $0.workoutSessionId != nil }) else {
+            return session.matches
+        }
+        return (try? MatchPersistenceService.shared.fetchByWorkoutSession(session.id)) ?? session.matches
     }
 
     /// 누적 배열 전체를 다시 그룹핑한다. 페이지 경계에서 한 세션이 둘로 갈리는 문제가
     /// 여기서 자연히 사라진다 — 경계를 따로 병합할 필요가 없다.
     private func rebuildSessions() {
-        listSessions = MatchSessionGroup.group(listMatches)
+        let records = (try? SessionPersistenceService.shared.fetchAll()) ?? []
+        let sourceMatches = try? modelContext?.fetch(FetchDescriptor<Match>())
+        let groupingRecords = MatchSessionGroup.recordsForGrouping(
+            records,
+            displayedMatches: listMatches,
+            sourceMatches: sourceMatches
+        ) { _ in true }
+        listSessions = MatchSessionGroup.group(listMatches, records: groupingRecords)
     }
 
     func changeMonth(by value: Int) {
@@ -92,5 +176,6 @@ final class HistoryViewModel: ObservableObject {
             sortBy: [SortDescriptor(\Match.startedAt, order: .reverse)]
         )
         calendarMatches = (try? context.fetch(descriptor)) ?? []
+        calendarSourceMatches = try? context.fetch(FetchDescriptor<Match>())
     }
 }

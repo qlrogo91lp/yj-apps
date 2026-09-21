@@ -292,6 +292,20 @@ struct WorkoutSessionViewModelTests {
         #expect(vm.remoteWorkoutEnded == true)
     }
 
+    /// 폰이 지시한 종료도 로컬 종료와 **같은** endWorkout() 을 탄다. 예전에는 수신 경로만
+    /// notifyRemote: false 로 최종값 전송을 건너뛰어, 폰에서 끝낸 워크아웃의 세션 레코드가
+    /// 비어 있었다 (워크아웃 전체 평균 심박을 아는 쪽은 워치뿐이다).
+    @Test @MainActor func remoteWorkoutEndTakesSameEndPathAsLocal() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        #expect(vm.currentSession() != nil)
+
+        vm.handleIncomingWorkoutEndForTest(vm.activeSessionIdForTest)
+
+        #expect(vm.currentSession() == nil)
+        #expect(vm.remoteWorkoutEnded == true)
+    }
+
     @Test @MainActor func workoutEndAppliedBeforeAnyMatchStarted() {
         // 매치를 한 번도 시작하지 않으면 sessionId가 상대와 동기화되지 않으므로, 어떤 id가 와도 종료를 수용해야 한다.
         let vm = WorkoutSessionViewModel()

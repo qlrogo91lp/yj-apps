@@ -11,15 +11,15 @@
 
 ## Ralli — 다음 출시 (현재 1.1.7 (26))
 
-2026-09-18 갱신. 파일 충돌을 실제로 따져 트랙으로 나눴다.
+2026-09-21 갱신. 파일 충돌을 실제로 따져 트랙으로 나눴다.
 
 ```
 트랙 A (iOS)     5̶ → 2̶ → 1̶ ──┐            ← 전부 완료 (실기기 확인 포함)
 트랙 B (워치)     3̶ → 4̶ ──────┤→ 6̶ 코드·이미지 → 7   ← 6 은 시뮬레이터 확인만 남음
 트랙 C (YJKit)   MonitoringCore ┘            ← 집에서 (Firebase 콘솔 선행)
-트랙 D (iOS)     9 세션 중심 재편            ← 스펙·플랜 완료, 구현 대기
+트랙 D (iOS)     9 세션 중심 재편            ← 구현 완료, 실기기 확인 대기
 
-다음 차례: #6 은 시뮬레이터 ko/en 확인만 남았다. #9 는 설계가 끝나 바로 구현 가능.
+다음 차례: #6 은 시뮬레이터 ko/en 확인만 남았다. #9 는 실기기·워치 확인이 남았다.
 트랙 C·#7 은 집에서 몰아서. #8 은 아직 브레인스토밍 전.
 ```
 
@@ -43,7 +43,7 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
 | 6 | 온보딩 **5페이지** (워치 중심, iOS 만) | A → 합류 | **이미지까지 완료** (PR #25) · 시뮬레이터 ko/en 확인만 남음 | [스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-09-07-onboarding-design.md) (09-18 개정) · [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-17-onboarding-watch-focused.md) — 4페이지에서 5페이지로 재편, 기능 목록 페이지 제거. 워치 3장은 Figma 목업 합성, 공유 그림은 인스타 스티커 화면 |
 | 7 | Firebase Crashlytics (iOS + 워치, 익스텐션 제외) | 단독 (맨 뒤) | 스펙·플랜 완료 · 구현 대기 | [스펙](Packages/YJKit/docs/specs/shared/2026/2026-09-07-crash-reporting-design.md) → [YJKit 플랜](Packages/YJKit/docs/plans/shared/2026/2026-09-07-monitoring-core.md) (트랙 C, 지금 병렬 가능) → [Ralli 플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-07-crashlytics-integration.md) |
 | 8 | 설정 페이지 + 다른 앱 노출 | — | **논의 필요 — 아직 브레인스토밍 전** | 아래 "남은 논의" 참고 |
-| 9 | iOS 기록·요약 **세션 중심 재편** | D | **스펙·플랜 완료 · 구현 대기** | [스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-09-18-session-centric-history.md) · [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-18-session-centric-history.md) — `WorkoutSessionRecord` 신설이 포함된다. #2 스펙을 개정한다 |
+| 9 | iOS 기록·요약 **세션 중심 재편** | D | **구현 완료 · 실기기 확인 대기** | [스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-09-18-session-centric-history.md) · [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-18-session-centric-history.md) — `WorkoutSessionRecord` 신설이 포함된다. #2 스펙을 개정한다 |
 
 ### 집 맥북에서 할 것
 
@@ -85,6 +85,9 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
 
 **아무 때나**
 
+- [ ] **#9 실기기·워치 확인** — 2경기 저장 뒤 5분 후 종료해 카드 시간이 종료 시각까지인지, 평균 심박이 채워지는지,
+      경기 없는 운동이 `경기 없음`으로 보이는지, 구 기록이 시간·칼로리와 `–` 심박으로 보이는지,
+      배포 뒤 구/신 레코드 혼합 CloudKit 동기화가 정상인지 확인
 - [ ] **#5 실기기 확인 — 워치만 남음.** 조기 종료 다이얼로그가 **"경기 중단"**(워치용 짧은 표현)
       인지, HealthKit 권한 문구가 한국어인지. iOS 쪽은 #2 가 그 화면을 다시 만들어 아래 항목이 흡수했다
 - [ ] **Xcode.app 에서 한 번 빌드** — `xcodebuild` 는 카탈로그를 갱신하지 않는다. Xcode 가
@@ -112,16 +115,7 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
 - 다른 앱(골프·하루치) 노출 — 어떤 형태로(App Store 링크 / 배너 / "yj 의 다른 앱" 섹션), 어느 위치에. 완전 미논의
 - 열린 질문: iOS 설정 탭을 4번째 탭으로 둘지 요약 탭 우상단 기어로 둘지 / 워치에도 설정 화면을 둘지 / 모드 옵션(No-Ad 등) 설명을 여기 둘지 모드 화면 ⓘ 로 둘지
 
-### ~~남은 논의 — #9~~ → 스펙으로 옮겼다 (2026-09-18)
-
-2026-09-15 실기기 메모에서 출발한 논의가 끝났다. 목록·상세·공유·삭제를 **전부 세션 단위로 모으고**
-`WorkoutSessionRecord` 를 신설하기로 했다. 결정과 근거는
-[세션 중심 재편 스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-09-18-session-centric-history.md) 에 있다.
-
-논의 중 드러난 것 — 공유 카드는 이미 **세션 누적값**인데 진입점만 경기였고, 운동을 끝낼 때
-`stopWorkout()` 이 돌려주는 최종값(워크아웃 전체 평균 심박 포함)을 **버리고 있었다.**
-
-**심박수 그래프**(HealthKit 샘플 조회)만 별도 작업으로 남았다 — 권한·동기화 지연·시간 범위 결정이 필요하다.
+### ~~남은 논의 — #9~~ → 결정은 [세션 중심 재편 스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-09-18-session-centric-history.md)으로 옮겼다
 
 ## YJKit
 
