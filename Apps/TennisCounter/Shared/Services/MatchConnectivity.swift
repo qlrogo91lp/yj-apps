@@ -17,6 +17,9 @@ final class MatchConnectivity: ObservableObject {
     @Published var receivedMatchSaveResult: MatchSaveResultMessage?
     @Published var receivedMetrics: WorkoutMetricsMessage?
     @Published var receivedWorkoutEnd: WorkoutEndMessage?
+    /// 세션 레코드 저장 전용 채널. `receivedWorkoutEnd` 와 같은 메시지를 받지만 staleness 정책이
+    /// 반대다 — init 의 두 번째 등록 주석을 본다.
+    @Published var receivedSessionResult: WorkoutEndMessage?
     @Published var receivedMatchReset: UUID?
     @Published var receivedPauseCommand: WorkoutPauseMessage?
 
@@ -40,8 +43,18 @@ final class MatchConnectivity: ObservableObject {
         service.onReceive(MatchSaveMessage.self) { [weak self] in self?.receivedMatchSave = $0.base }
         service.onReceive(MatchSaveResultMessage.self) { [weak self] in self?.receivedMatchSaveResult = $0 }
         service.onReceive(WorkoutMetricsMessage.self) { [weak self] in self?.receivedMetrics = $0 }
+        // 같은 메시지를 두 채널로 나눠 받는다. 라우터는 타입 하나에 등록을 여러 개 허용하고
+        // 등록마다 maxAge 를 따로 갖는다.
+        //
+        // 종료 "명령"은 늦게 도착하면 이미 끝난 세션의 화면을 되살리므로 버려야 하고,
+        // 세션 "기록"은 이 메시지가 유일한 운반체라 늦게라도 살려야 한다 — 버리면 영구 손실이다.
+        // 페이로드가 startedAt·endedAt 을 자체적으로 들고 있어 늦은 도착이 값을 틀어뜨리지
+        // 않으므로 기록 채널에는 상한을 두지 않는다.
         service.onReceive(WorkoutEndMessage.self, maxAge: Self.workoutEndStalenessThreshold) { [weak self] in
             self?.receivedWorkoutEnd = $0
+        }
+        service.onReceive(WorkoutEndMessage.self) { [weak self] in
+            self?.receivedSessionResult = $0
         }
         service.onReceive(MatchResetMessage.self) { [weak self] in self?.receivedMatchReset = $0.sessionId }
         service.onReceive(WorkoutPauseMessage.self) { [weak self] in self?.receivedPauseCommand = $0 }

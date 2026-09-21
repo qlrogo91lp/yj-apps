@@ -6,6 +6,9 @@ import SwiftUI
 struct TennisCounterApp: App {
     let container: ModelContainer
     private let watchConnectivity = MatchConnectivity.shared
+    /// 경기 화면과 무관하게 세션 레코드를 저장한다. 앱 수명 내내 잡고 있어야 경기 없는
+    /// 워크아웃의 기록을 놓치지 않는다 — WorkoutSessionRecorder 주석을 본다.
+    private let sessionRecorder: WorkoutSessionRecorder
     @State private var isLaunching = true
     /// 마지막으로 본 온보딩 버전. 0 = 본 적 없음. 규칙은 OnboardingGate.
     @AppStorage("onboardingSeenVersion") private var onboardingSeenVersion = 0
@@ -17,6 +20,7 @@ struct TennisCounterApp: App {
         )
         MatchPersistenceService.shared.configure(with: ModelContext(container))
         SessionPersistenceService.shared.configure(with: ModelContext(container))
+        sessionRecorder = WorkoutSessionRecorder()
         Task { @MainActor in LiveActivityService.shared.endAll() }
     }
 

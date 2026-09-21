@@ -124,7 +124,7 @@ class WorkoutSessionViewModel: ObservableObject {
         // 매치가 한 번도 시작되지 않았으면 sessionId가 아직 상대와 동기화되지 않았으므로 무조건 수용한다.
         if hasSyncedSession, message.sessionId != activeSessionId { return }
         connectivity.receivedWorkoutEnd = nil
-        endWorkout(notifyRemote: false)
+        endWorkout()
         remoteWorkoutEnded = true
     }
 
@@ -294,7 +294,12 @@ class WorkoutSessionViewModel: ObservableObject {
         healthKit.resumeWorkout()
     }
 
-    func endWorkout(notifyRemote: Bool = true) {
+    /// 워크아웃을 끝내고 최종값을 폰에 보낸다.
+    ///
+    /// **종료를 누가 지시했든 항상 보낸다.** 폰이 끝낸 경우에도 최종값(워크아웃 전체 평균 심박
+    /// 포함)을 아는 쪽은 워치뿐이라, 예전처럼 수신 경로에서 전송을 생략하면 그 워크아웃의
+    /// 세션 레코드가 통째로 비게 된다. 폰의 수신 경로는 되돌려 보내지 않으므로 핑퐁은 없다.
+    func endWorkout() {
         let sessionId = activeSessionId
         let startedAt = workoutStartedAt
         _currentSession = nil
@@ -305,9 +310,7 @@ class WorkoutSessionViewModel: ObservableObject {
         Task {
             // 워크아웃 전체 평균 심박과 최종 시간·칼로리를 종료 메시지에 함께 보낸다.
             let result = await healthKit.stopWorkout()
-            if notifyRemote {
-                connectivity.sendWorkoutEnd(sessionId: sessionId, result: result, startedAt: startedAt)
-            }
+            connectivity.sendWorkoutEnd(sessionId: sessionId, result: result, startedAt: startedAt)
         }
     }
 
