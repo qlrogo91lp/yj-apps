@@ -20,6 +20,7 @@
 트랙 D (iOS)     9 세션 중심 재편            ← 구현 완료, 실기기 확인 대기
 
 다음 차례: #6 은 시뮬레이터 ko/en 확인만 남았다. #9 는 실기기·워치 확인이 남았다.
+#10 은 플랜만 있다 — #9 와 `History/` 를 공유하므로 #9 확인이 끝난 뒤에 붙인다.
 트랙 C·#7 은 집에서 몰아서. #8 은 아직 브레인스토밍 전.
 ```
 
@@ -31,7 +32,7 @@
 
 같은 파일을 건드리는 항목들 (끝난 5·2 는 뺐다) — `project.pbxproj`(1·7) /
 `TennisCounter-Info.plist`(1) / `iOSApp.swift`(6·7) / iOS `WorkoutSessionViewModel`(1·7) /
-Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
+Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·10)
 
 | # | 항목 | 트랙 | 상태 | 문서 |
 |---|---|---|---|---|
@@ -44,6 +45,7 @@ Localizable(6) / 워치 `WorkoutSessionViewModel`(3·7)
 | 7 | Firebase Crashlytics (iOS + 워치, 익스텐션 제외) | 단독 (맨 뒤) | 스펙·플랜 완료 · 구현 대기 | [스펙](Packages/YJKit/docs/specs/shared/2026/2026-09-07-crash-reporting-design.md) → [YJKit 플랜](Packages/YJKit/docs/plans/shared/2026/2026-09-07-monitoring-core.md) (트랙 C, 지금 병렬 가능) → [Ralli 플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-07-crashlytics-integration.md) |
 | 8 | 설정 페이지 + 다른 앱 노출 | — | **논의 필요 — 아직 브레인스토밍 전** | 아래 "남은 논의" 참고 |
 | 9 | iOS 기록·요약 **세션 중심 재편** | D | **구현 완료 · 실기기 확인 대기** | [스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-09-18-session-centric-history.md) · [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-18-session-centric-history.md) — `WorkoutSessionRecord` 신설이 포함된다. #2 스펙을 개정한다 |
+| 10 | 기록 삭제 시 **건강 앱 워크아웃도 삭제** | E (YJKit+iOS) | 플랜 완료 · 구현 대기 · **#9 뒤에** | [플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-21-healthkit-workout-deletion.md) — YJKit `WorkoutDeletionService` 신설. 폰이 워치 저장분을 지울 수 있는지는 미검증 가정 |
 
 ### 집 맥북에서 할 것
 
