@@ -520,6 +520,7 @@
       }
     },
     "match_detail_section_info" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -571,6 +572,7 @@
     },
     "match_detail_title" : {
       "comment" : "Match Detail",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -652,6 +654,7 @@
       }
     },
     "match_over_lose" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -668,6 +671,7 @@
       }
     },
     "match_over_win" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -765,40 +769,6 @@
         }
       }
     },
-    "onboarding_crown_body" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "On your watch, turn the crown up for your point, down for your opponent's. Tapping works too."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "워치에서 크라운을 위로 돌리면 내 점수, 아래로 돌리면 상대 점수. 탭해도 됩니다."
-          }
-        }
-      }
-    },
-    "onboarding_crown_title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Score with the Crown"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "크라운으로 점수 입력"
-          }
-        }
-      }
-    },
     "onboarding_complication_body" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -829,6 +799,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "한 번 탭으로 빠르게"
+          }
+        }
+      }
+    },
+    "onboarding_crown_body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On your watch, turn the crown up for your point, down for your opponent's. Tapping works too."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "워치에서 크라운을 위로 돌리면 내 점수, 아래로 돌리면 상대 점수. 탭해도 됩니다."
+          }
+        }
+      }
+    },
+    "onboarding_crown_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Score with the Crown"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "크라운으로 점수 입력"
           }
         }
       }
@@ -918,40 +922,6 @@
         }
       }
     },
-    "onboarding_swipe_body" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pause and end on the left. Calories, heart rate and time on the right. Your score sits in the middle."
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "왼쪽은 일시정지와 종료, 오른쪽은 칼로리·심박·시간. 가운데가 점수입니다."
-          }
-        }
-      }
-    },
-    "onboarding_swipe_title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Swipe Left and Right"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "좌우로 넘겨보세요"
-          }
-        }
-      }
-    },
     "onboarding_skip" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -982,6 +952,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "시작하기"
+          }
+        }
+      }
+    },
+    "onboarding_swipe_body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pause and end on the left. Calories, heart rate and time on the right. Your score sits in the middle."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "왼쪽은 일시정지와 종료, 오른쪽은 칼로리·심박·시간. 가운데가 점수입니다."
+          }
+        }
+      }
+    },
+    "onboarding_swipe_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Swipe Left and Right"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "좌우로 넘겨보세요"
           }
         }
       }
@@ -1360,14 +1364,21 @@
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Avg. Session Time" }
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avg. Session Time"
+          }
         },
         "ko" : {
-          "stringUnit" : { "state" : "translated", "value" : "세션당 평균 시간" }
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "세션당 평균 시간"
+          }
         }
       }
     },
     "summary_avg_heartrate" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1403,10 +1414,16 @@
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Monthly Sessions" }
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Monthly Sessions"
+          }
         },
         "ko" : {
-          "stringUnit" : { "state" : "translated", "value" : "월별 세션 수" }
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "월별 세션 수"
+          }
         }
       }
     },
@@ -1547,10 +1564,16 @@
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Sessions" }
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sessions"
+          }
         },
         "ko" : {
-          "stringUnit" : { "state" : "translated", "value" : "운동한 세션 수" }
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "운동한 세션 수"
+          }
         }
       }
     },
@@ -1588,6 +1611,7 @@
       }
     },
     "summary_total_energy" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1637,7 +1661,6 @@
       }
     },
     "summary_win_rate" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
