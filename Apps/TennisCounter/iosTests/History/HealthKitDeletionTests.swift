@@ -22,11 +22,11 @@ private actor WorkoutDeleterSpy: WorkoutDeleting {
     }
 }
 
-@Suite(.serialized)
-@MainActor
-struct HealthKitDeletionTests {
-    private static var retainedContainers: [ModelContainer] = []
+private enum HealthKitDeletionTestStorage {
+    @MainActor static var retainedContainers: [ModelContainer] = []
+}
 
+extension HistoryViewModelTests {
     private struct Fixture {
         let container: ModelContainer
         let viewModel: HistoryViewModel
@@ -49,7 +49,7 @@ struct HealthKitDeletionTests {
             WorkoutSessionRecord.self,
             configurations: configuration
         )
-        Self.retainedContainers.append(container)
+        HealthKitDeletionTestStorage.retainedContainers.append(container)
         MatchPersistenceService.shared.configure(with: ModelContext(container))
         SessionPersistenceService.shared.configure(with: ModelContext(container))
 
