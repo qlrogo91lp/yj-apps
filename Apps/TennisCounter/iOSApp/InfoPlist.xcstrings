@@ -50,13 +50,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Ralli saves your tennis workout to Apple Health."
+            "value" : "Ralli removes deleted matches from your Apple Health workouts."
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ralli가 테니스 운동을 건강 앱에 저장합니다."
+            "value" : "Ralli가 삭제한 경기의 운동 기록을 건강 앱에서 함께 지웁니다."
           }
         }
       }

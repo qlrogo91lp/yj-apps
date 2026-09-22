@@ -1,5 +1,6 @@
 import Foundation
 import SwiftData
+import WorkoutCore
 
 enum HistoryViewMode {
     case list
@@ -17,11 +18,17 @@ final class HistoryViewModel: ObservableObject {
     @Published var currentMonth: Date = .init()
     @Published private(set) var listSessions: [MatchSessionGroup] = []
     @Published var selectedDate: Date?
+    @Published var deletionFailure: WorkoutDeletionOutcome?
 
     private var modelContext: ModelContext?
+    private let workoutDeleter: any WorkoutDeleting
     private let pageSize: Int = 20
     private var hasLoadedInitial = false
     private var lastActivationID: Int?
+
+    init(workoutDeleter: any WorkoutDeleting = WorkoutDeletionService()) {
+        self.workoutDeleter = workoutDeleter
+    }
 
     func configure(modelContext: ModelContext) {
         guard self.modelContext == nil else { return }
@@ -112,11 +119,14 @@ final class HistoryViewModel: ObservableObject {
         }
     }
 
-    /// CloudKit 동기화라 다른 기기로 전파되고 되돌릴 수 없다. 호출부가 확인 다이얼로그를 받는다.
+    /// CloudKit 동기화라 다른 기기로 전파되고 되돌릴 수 없다. 연결된 건강 앱 워크아웃도 함께 지운다.
+    /// 호출부가 확인 다이얼로그를 받는다.
     ///
     /// 서비스와 이 VM 이 서로 다른 ModelContext 를 들고 있다 — 같은 컨테이너라 저장소에는
     /// 반영되지만 배열은 자동으로 갱신되지 않으므로 직접 지운다.
-    func delete(_ session: MatchSessionGroup) {
+    @discardableResult
+    func delete(_ session: MatchSessionGroup) -> Task<Void, Never>? {
+        let healthKitUUID = session.record?.healthKitUUID
         let matches = matchesToDelete(for: session)
         let matchIds = Set(matches.map(\.id))
 
@@ -129,6 +139,17 @@ final class HistoryViewModel: ObservableObject {
         calendarMatches.removeAll { matchIds.contains($0.id) }
         calendarSourceMatches?.removeAll { matchIds.contains($0.id) }
         rebuildSessions()
+
+        guard let healthKitUUID else { return nil }
+        return Task { @MainActor in
+            let outcome = await workoutDeleter.deleteWorkouts(uuids: [healthKitUUID])
+            switch outcome {
+            case .notAuthorized, .failed:
+                deletionFailure = outcome
+            case .nothingToDelete, .deleted:
+                break
+            }
+        }
     }
 
     /// 페이지에 아직 실리지 않은 같은 워크아웃의 경기도 함께 지운다. 구버전의 nil 세션 ID는

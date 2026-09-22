@@ -20,7 +20,7 @@
 트랙 D (iOS)     9 세션 중심 재편            ← 구현 완료, 실기기 확인 대기
 
 다음 차례: #6 은 시뮬레이터 ko/en 확인만 남았다. #9 는 실기기·워치 확인이 남았다.
-#10 은 플랜만 있다 — #9 와 `History/` 를 공유하므로 #9 확인이 끝난 뒤에 붙인다.
+#10 은 구현을 마쳤고 실기기에서 워치 저장분 삭제와 HealthKit 권한 흐름 확인이 남았다.
 트랙 C·#7 은 집에서 몰아서. #8 은 아직 브레인스토밍 전.
 ```
 
@@ -45,7 +45,7 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
 | 7 | Firebase Crashlytics (iOS + 워치, 익스텐션 제외) | 단독 (맨 뒤) | 스펙·플랜 완료 · 구현 대기 | [스펙](Packages/YJKit/docs/specs/shared/2026/2026-09-07-crash-reporting-design.md) → [YJKit 플랜](Packages/YJKit/docs/plans/shared/2026/2026-09-07-monitoring-core.md) (트랙 C, 지금 병렬 가능) → [Ralli 플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-07-crashlytics-integration.md) |
 | 8 | 설정 페이지 + 다른 앱 노출 | — | **논의 필요 — 아직 브레인스토밍 전** | 아래 "남은 논의" 참고 |
 | 9 | iOS 기록·요약 **세션 중심 재편** | D | **구현 완료 · 실기기 확인 대기** | [스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-09-18-session-centric-history.md) · [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-18-session-centric-history.md) — `WorkoutSessionRecord` 신설이 포함된다. #2 스펙을 개정한다 |
-| 10 | 기록 삭제 시 **건강 앱 워크아웃도 삭제** | E (YJKit+iOS) | 플랜 완료 · 구현 대기 · **#9 뒤에** | [플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-21-healthkit-workout-deletion.md) — YJKit `WorkoutDeletionService` 신설. 폰이 워치 저장분을 지울 수 있는지는 미검증 가정 |
+| 10 | 기록 삭제 시 **건강 앱 워크아웃도 삭제** | E (YJKit+iOS) | **구현 완료 · 실기기 확인 대기** | [플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-21-healthkit-workout-deletion.md) — YJKit `WorkoutDeletionService` 신설. 건강 앱에서 먼저 지운 경우 Ralli 기록은 유지한다 |
 
 ### 집 맥북에서 할 것
 
@@ -90,6 +90,8 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
 - [ ] **#9 실기기·워치 확인** — 2경기 저장 뒤 5분 후 종료해 카드 시간이 종료 시각까지인지, 평균 심박이 채워지는지,
       경기 없는 운동이 `경기 없음`으로 보이는지, 구 기록이 시간·칼로리와 `–` 심박으로 보이는지,
       배포 뒤 구/신 레코드 혼합 CloudKit 동기화가 정상인지 확인
+- [ ] **#10 실기기 확인** — 워치에서 만든 운동을 Ralli 기록에서 삭제했을 때 건강 앱 워크아웃도 지워지는지,
+      HealthKit 쓰기 권한 허용·거부와 이미 건강 앱에서 지운 경우에도 Ralli 기록 삭제가 정상 완료되는지 확인
 - [ ] **#5 실기기 확인 — 워치만 남음.** 조기 종료 다이얼로그가 **"경기 중단"**(워치용 짧은 표현)
       인지, HealthKit 권한 문구가 한국어인지. iOS 쪽은 #2 가 그 화면을 다시 만들어 아래 항목이 흡수했다
 - [ ] **Xcode.app 에서 한 번 빌드** — `xcodebuild` 는 카탈로그를 갱신하지 않는다. Xcode 가
