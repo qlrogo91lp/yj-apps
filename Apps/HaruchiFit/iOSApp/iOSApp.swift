@@ -8,7 +8,9 @@ import SwiftUI
 struct HaruchiFitApp: App {
     /// CloudKit 엔타이틀먼트가 아직 없다 — 팩토리가 조용히 로컬로 폴백한다 (PersistenceCore README).
     private let container = PersistenceContainerFactory.make(for: [WorkoutRecord.self, Segment.self])
+    @Environment(\.scenePhase) private var scenePhase
     @StateObject private var connectivity: HaruchiFitConnectivity
+    @StateObject private var sync: WorkoutSyncCoordinator
     private let store: PersistenceService<WorkoutRecord>
 
     init() {
@@ -16,14 +18,24 @@ struct HaruchiFitApp: App {
         // 콜드런치 때 먼저 도착한 배달을 놓치지 않는다 (YJKit README).
         let wrapper = HaruchiFitConnectivity(service: ConnectivityService())
         _connectivity = StateObject(wrappedValue: wrapper)
-        store = PersistenceService<WorkoutRecord>(context: ModelContext(container))
+        // 워치 기록 저장과 import 삽입이 같은 컨텍스트를 본다. 둘로 나누면
+        // 서로의 변경을 못 보고 rollback 이 간섭할 수 있다 (PersistenceService — 단일 컨텍스트).
+        let context = ModelContext(container)
+        store = PersistenceService<WorkoutRecord>(context: context)
+        _sync = StateObject(wrappedValue: WorkoutSyncCoordinator(context: context))
     }
 
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .modelContainer(container)
+                .environmentObject(sync)
                 .onReceive(connectivity.$receivedRecord.compactMap(\.self)) { save($0) }
+                .onChange(of: scenePhase, initial: true) { _, phase in
+                    // onChange 는 기본으로 초기값을 넘기지 않는다. 콜드 런치도 포그라운드 진입이다.
+                    guard phase == .active else { return }
+                    Task { await sync.sync() }
+                }
         }
     }
 

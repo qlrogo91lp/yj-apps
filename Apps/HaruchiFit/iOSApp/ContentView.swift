@@ -8,6 +8,7 @@ import SwiftUI
 struct ContentView: View {
     /// **기간을 좁혀 읽는다.** 홈이 실제로 쓰는 건 6개월치뿐이라 전체를 읽을 이유가 없다 (스펙 5절).
     @Query private var records: [WorkoutRecord]
+    @EnvironmentObject private var sync: WorkoutSyncCoordinator
     @StateObject private var grass = GrassViewModel()
     @State private var selected: Date?
 
@@ -24,12 +25,17 @@ struct ContentView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(alignment: .leading, spacing: 20) {
-                grid
-                detail
-                Spacer()
+            // 가로는 그리드용이다. 세로 당김은 바깥 ScrollView 만 받는다 —
+            // 이 화면은 Phase 3 #3 이 통째로 대체할 임시 화면이라 그리드 구조는 그대로 둔다.
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    grid
+                    detail
+                    Spacer()
+                }
+                .padding(.top)
             }
-            .padding(.top)
+            .refreshable { await sync.sync() }
             .navigationTitle("하루치 핏")
             .onAppear { grass.rebuild(from: records) }
             .onChange(of: records) { _, updated in grass.rebuild(from: updated) }
@@ -106,6 +112,19 @@ struct ContentView: View {
 }
 
 #Preview {
+    let container = ContentPreview.container
     ContentView()
-        .modelContainer(for: [WorkoutRecord.self, Segment.self], inMemory: true)
+        .modelContainer(container)
+        .environmentObject(WorkoutSyncCoordinator(context: ModelContext(container)))
+}
+
+private enum ContentPreview {
+    static let container: ModelContainer = {
+        do {
+            return try ModelContainer(for: WorkoutRecord.self, Segment.self,
+                                      configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+        } catch {
+            fatalError("미리보기 컨테이너를 만들지 못했다 — \(error)")
+        }
+    }()
 }

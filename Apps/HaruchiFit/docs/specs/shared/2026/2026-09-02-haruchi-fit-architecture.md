@@ -196,23 +196,19 @@ Segment
 워치에서 저장한 워크아웃과, **기본 운동 앱 등 다른 앱이 저장한 워크아웃**을 모두 가져와야 한다
 (제품 스펙 흐름 C). 앵커드 쿼리(`HKAnchoredObjectQuery`)로 증분 동기화하고 앵커를 로컬에 보존한다.
 
-- **앱 포그라운드 진입 시에만 동기화한다.** 백그라운드 배달(`enableBackgroundDelivery`)은 쓰지 않는다 (D-M4)
+- **앱 포그라운드 진입 시에만 동기화한다.** 백그라운드 배달(`enableBackgroundDelivery`)은 쓰지 않는다 (D-M4). 당겨서 새로고침은 사용자가 부르는 두 번째 시점이다
+- 앵커(`HKQueryAnchor`)는 `UserDefaults` 에 둔다
+- 앵커가 없으면 기간을 자르지 않고 **전체 히스토리**를 읽는다
 
 ### 4.2 외부 워크아웃의 근력/유산소 분류
 
 다른 앱이 저장한 워크아웃에는 하루치 핏의 세그먼트가 없다. `HKWorkoutActivityType` 하나만 있다.
-이걸 근력/유산소 중 하나로 **분류하는 매핑 표가 필요**하다.
-
-```
-근력    .traditionalStrengthTraining, .functionalStrengthTraining, .coreTraining …
-유산소  .running, .walking, .cycling, .elliptical, .rowing, .highIntensityIntervalTraining …
-그 외   → 가져오지 않는다 (D-M5)
-```
-
-**매핑에 없는 타입은 아예 import하지 않는다.** 요가·수영·구기 종목 등이 여기 해당하며,
+이걸 근력/유산소 중 하나로 **분류하는 매핑 표**가 있고, **표에 없는 타입은 아예 import하지 않는다** (D-M5).
 Ralli(테니스)·GolfCounter(골프)가 저장한 워크아웃도 잔디에 반영되지 않는다.
 
-매핑 표의 최종 목록은 구현 시점에 `HKWorkoutActivityType` 전체를 훑어 확정한다 —
+확정 목록은 [import 스펙 2절](2026-09-21-healthkit-workout-import.md) 이다.
+표를 두 곳에 두면 갈리므로 예시는 여기 두지 않는다.
+
 **한번 정하면 사용자의 과거 잔디가 달라지므로 이후 변경에 주의해야 한다.**
 
 ### 4.3 권한 거부
