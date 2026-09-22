@@ -10,6 +10,10 @@
 
 **Spec:** 별도 스펙 없음 — 2026-09-21 대화에서 확정. 아래 §결정 사항.
 
+**Scope:** 문서는 Ralli가 소유한다 (`Apps/TennisCounter/docs/plans/shared/`). 구현은 공용
+YJKit `WorkoutCore`의 삭제 실행체와 Ralli iOS 기록 화면·저장소 배선을 함께 건드리므로
+플랫폼 분류가 `shared`다. YJKit 단독 로드맵이 아니다.
+
 ## 현재 동작 (확인 완료)
 
 - 기록 탭은 SwiftData 만 읽는다. HealthKit 을 조회하는 코드가 앱 전체에 없다.
@@ -30,8 +34,34 @@
 | 토글 여부 | **없음. 항상 함께 삭제** | 토글은 상태·문구·테스트를 늘리면서 "지웠는데 남음"을 고치려는 목적과 어긋난다 |
 | 삭제 순서 | **SwiftData 먼저, HealthKit 은 best-effort** | HK 를 먼저 하면 권한 시트 동안 UI 가 멈추고, 실패 시 앱 기록까지 안 지워져 더 나쁘다. 앱 기록 삭제는 사용자가 확실히 원한 것 |
 | CloudKit 전파 | 별도 처리 없음 | 전파된 삭제는 `delete(_:)` 를 안 거치고, 건강 데이터도 iCloud 동기화라 그 기기에선 이미 지워져 있다 |
+| 건강 앱 → Ralli 역방향 | **감지·동기화하지 않음.** Ralli 기록·운동 수치·`healthKitUUID` 를 모두 유지 | Ralli가 경기 기록의 원본이고 건강 앱 워크아웃은 부가 기록이다. 건강 앱에서 운동만 정리한 행위로 점수·세트·CloudKit 기록까지 지우지 않는다. 읽기 권한·옵저버·백그라운드 전달도 불필요 |
 | 사용 권한 문구 | **iOS 타깃 것만 수정** | 현재 "Ralli saves your tennis workout to Apple Health." 인데 폰은 저장이 아니라 삭제를 한다. 타깃별 빌드 세팅이라 워치 문구는 그대로 둘 수 있다 |
 | GolfCounter | **범위 밖** | `healthKitUUID` 자체가 없고 iOS 타깃이 `WorkoutCore` 를 링크하지 않는다. UUID 배관부터 깔아야 하는 별도 작업 |
+
+## 역방향 정책 — 건강 앱에서 먼저 지운 경우 (2026-09-22 확정)
+
+건강 앱에서 워크아웃을 먼저 지워도 Ralli 쪽은 **아무것도 변경하지 않는다.**
+
+- `HKObserverQuery`·`HKAnchoredObjectQuery`·`HKDeletedObject` 기반 삭제 감지를 구현하지 않는다.
+- 워크아웃 읽기 권한과 HealthKit 백그라운드 전달을 추가하지 않는다.
+- Ralli의 경기·세션 기록, 시간·칼로리·심박 스냅샷, `healthKitUUID` 를 모두 유지한다.
+  `healthKitUUID` 는 실시간 연결이 아니라 HealthKit 객체를 찾는 식별자이므로, 대상이 먼저
+  삭제되어도 Ralli에 저장된 수치에 영향을 주지 않는다.
+- 나중에 사용자가 Ralli에서 같은 세션을 삭제하면 #10의 UUID predicate 삭제를 그대로
+  호출한다. API가 오류 없이 `deletedObjectCount == 0`을 돌려준 경우는 "이미 없음"으로 보고
+  성공 처리한다.
+- 나중에 건강 앱 존재 여부를 UI에 보여줄 필요가 생기면 UUID를 비우지 말고 별도
+  상태를 추가하는 독립 플랜으로 다룬다.
+
+**Apple 공식 참조**
+
+- [`HKHealthStore.deleteObjects(of:predicate:withCompletion:)`](https://developer.apple.com/documentation/healthkit/hkhealthstore/deleteobjects%28of%3Apredicate%3Awithcompletion%3A%29)
+  — 자신이 저장한 객체만 삭제할 수 있고, async API는 삭제된 객체 개수를 돌려준다.
+- [`HKQuery.predicateForObject(with:)`](https://developer.apple.com/documentation/healthkit/hkquery/predicateforobject%28with%3A%29)
+  — HealthKit 객체의 UUID로 한 개를 지정하는 predicate를 만든다.
+- [`HKObserverQuery`](https://developer.apple.com/documentation/healthkit/hkobserverquery) ·
+  [`HKDeletedObject`](https://developer.apple.com/documentation/healthkit/hkdeletedobject) — 외부 삭제를 감지할 때
+  필요한 API이지만, 이 플랜의 역방향 정책에서는 사용하지 않는다.
 
 ## 미검증 가정 — 실패 시 트랙이 갈린다
 
@@ -109,7 +139,9 @@ public protocol WorkoutDeleting: Sendable {
 5. UUID 마다 `deleteObjects(of: .workoutType(), predicate: HKQuery.predicateForObject(with: uuid))`
 6. 전부 성공하면 `.deleted`, 하나라도 던지면 `.failed`
 
-**주의:** 이미 지워진 워크아웃에 `deleteObjects` 를 부르면 "삭제된 객체 0개" 에러가 날 수 있다. 이건 실패로 취급하지 않는다 — CloudKit 전파나 재시도에서 정상적으로 발생한다.
+**주의:** 이미 지워진 워크아웃에 `deleteObjects` 를 부르면 삭제 개수가 0일 수 있다.
+호출이 throw 하지 않았다면 `deletedObjectCount == 0`도 실패로 취급하지 않는다 — 건강 앱에서
+먼저 지웠거나 CloudKit 전파·재시도에서 정상적으로 발생할 수 있다.
 
 - [ ] **Step 3: 빌드**
 
@@ -258,7 +290,7 @@ HealthKit 권한이 얽힌 경로는 유닛 테스트로 못 간다. 실제 검�
 
 ## Self-Review
 
-- 결정 11건 → 배치(Architecture), 삭제 API·권한(Task 1 Step 2), 요청 시점(Task 3), 실패 처리(Task 3 Step 2 + Task 4 Step 2), nil UUID(Task 6), 토글 없음(Task 4 Step 1), 순서(Task 3 Step 3 + Task 6), CloudKit(실기기 경계), 문구(Task 5), Golf 제외(후속) ✅
+- 결정 12건 → 배치(Architecture), 삭제 API·권한(Task 1 Step 2), 요청 시점(Task 3), 실패 처리(Task 3 Step 2 + Task 4 Step 2), nil UUID(Task 6), 토글 없음(Task 4 Step 1), 순서(Task 3 Step 3 + Task 6), CloudKit(실기기 경계), 역방향 미감지(§역방향 정책), 문구(Task 5), Golf 제외(후속) ✅
 - 미검증 가정 명시 + 실패 시 전환 트랙 + 확인 항목 연결 ✅
 - `SessionPersistenceService` 불필요 판단 근거 기재 ✅
 - 미확정 항목(ReadMe)을 File Structure 와 후속 양쪽에 표시 ✅
