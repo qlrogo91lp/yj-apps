@@ -241,6 +241,19 @@ Phase 2 는 진행 중이다. 잔디 집계는 26주 임시 그리드까지 끝�
 
 아직 없음.
 
+## 모노레포 공통
+
+| 항목 | 상태 | 문서 |
+|---|---|---|
+| **App Store 메타데이터 깃 관리** (`fastlane deliver` 의 메타데이터만) | **논의 필요 — 브레인스토밍 전** · 1.1.8 은 수동으로 가고 **다음 출시부터 적용** | [CI 스펙](docs/specs/2026/2026-08-27-ci-pipeline-design.md) §비범위 · §후속 과제 |
+
+배포 자동화(빌드 업로드 · 인증서 · API 키)와 **범위가 다르다.** 메타데이터만 떼면 `deliver download_metadata`
+로 현재 스토어 실값을 파일로 내려받아 시작할 수 있어 인증서 관리가 붙지 않는다.
+
+지금 카피의 출처는 [Ralli 리스팅 스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-05-20-app-store-listing-design.md)
+하나뿐인데 이건 설계 초안이지 스토어 실값의 사본이 아니다 — **어긋나 있어도 알 방법이 없다.**
+3개 앱에 같이 걸리는 문제라 규약을 한 번 정한다.
+
 ## 규약 참고
 
 - [루트 CLAUDE.md](CLAUDE.md) · [TennisCounter CLAUDE.md](Apps/TennisCounter/CLAUDE.md) · [YJKit README](Packages/YJKit/README.md)
