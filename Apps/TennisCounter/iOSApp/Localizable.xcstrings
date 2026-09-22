@@ -340,13 +340,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "This deletes this session and all its matches from your other devices too, and cannot be undone."
+            "value" : "This deletes this session, all its matches from your other devices, and its workout from Apple Health. This cannot be undone."
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "이 세션과 포함된 모든 경기가 다른 기기에서도 함께 삭제되며 되돌릴 수 없습니다."
+            "value" : "이 세션과 포함된 모든 경기가 다른 기기에서도 함께 삭제되고, 건강 앱의 운동 기록도 삭제됩니다. 이 작업은 되돌릴 수 없습니다."
           }
         }
       }
@@ -364,6 +364,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "이 세션을 삭제할까요?"
+          }
+        }
+      }
+    },
+    "history_delete_health_denied" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ralli couldn't delete the workout because it doesn't have access to Apple Health. You can allow access in Settings > Privacy & Security > Health."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "건강 앱 접근 권한이 없어 운동 기록은 삭제하지 못했습니다. 설정 > 개인정보 보호 > 건강에서 허용할 수 있습니다."
+          }
+        }
+      }
+    },
+    "history_delete_health_failed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ralli couldn't delete the workout from Apple Health. Delete it directly in the Health app."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "건강 앱의 운동 기록은 삭제하지 못했습니다. 건강 앱에서 직접 삭제해 주세요."
           }
         }
       }

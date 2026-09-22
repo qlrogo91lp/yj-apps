@@ -1,5 +1,6 @@
 import SwiftData
 import SwiftUI
+import WorkoutCore
 
 struct HistoryView: View {
     let activationID: Int
@@ -69,6 +70,17 @@ struct HistoryView: View {
             } message: {
                 Text(String(localized: "history_delete_confirm_message"))
             }
+            .alert(
+                healthDeletionFailureMessage,
+                isPresented: .init(
+                    get: { viewModel.deletionFailure != nil },
+                    set: { if !$0 { viewModel.deletionFailure = nil } }
+                )
+            ) {
+                Button(String(localized: "btn_confirm")) {
+                    viewModel.deletionFailure = nil
+                }
+            }
             .onAppear {
                 viewModel.configure(modelContext: modelContext)
                 activate(activationID)
@@ -82,6 +94,15 @@ struct HistoryView: View {
     private func activate(_ id: Int) {
         if viewModel.activate(id, showList: showListOnActivation), showListOnActivation {
             selectedSession = nil
+        }
+    }
+
+    private var healthDeletionFailureMessage: String {
+        switch viewModel.deletionFailure {
+        case .notAuthorized:
+            String(localized: "history_delete_health_denied")
+        case .failed, .none, .nothingToDelete, .deleted:
+            String(localized: "history_delete_health_failed")
         }
     }
 }
