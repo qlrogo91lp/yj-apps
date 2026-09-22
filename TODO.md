@@ -176,7 +176,7 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
 | Phase | # | 항목 | 상태 | 문서 |
 |---|---|---|---|---|
 | ~~2 데이터~~ | ~~1~~ | ~~잔디 집계 (일별 집계)~~ | ~~**완료** ([PR #27](https://github.com/qlrogo91lp/yj-apps/pull/27)) · 영속 캐시는 두지 않기로 확정~~ | ~~[스펙](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-09-grass-daily-aggregate.md) · 로드맵 Phase 2~~ |
-| 2 데이터 | 2 | HealthKit import (증분) | **스펙·플랜 완료 · 구현 대기** · 매핑 표 확정 | [스펙](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-21-healthkit-workout-import.md) · [플랜](Apps/HaruchiFit/docs/plans/shared/2026/2026-09-21-healthkit-workout-import.md) — 근력 3·유산소 8, 나머지는 안 가져온다. **삭제 반영은 뺐다** (아래 YJKit) |
+| 2 데이터 | 2 | HealthKit import (증분) | **구현 완료 · 실기기 확인 대기** · 매핑 표 확정 | [스펙](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-21-healthkit-workout-import.md) · [플랜](Apps/HaruchiFit/docs/plans/shared/2026/2026-09-21-healthkit-workout-import.md) — 근력 3·유산소 8, 나머지는 안 가져온다. **삭제 반영은 뺐다** (아래 YJKit) |
 | 3 iOS | 3 | 탭 셸 + 디자인 토큰 | 예정 | 로드맵 Phase 3 · 스펙 3절·7절 |
 | 3 iOS | 4 | 03b 기록 목록 | 예정 (선행: 3) | 로드맵 Phase 3 · 스펙 03b절 |
 | 3 iOS | 5 | 04 기록 상세 (부위 태깅 · 메모) | 예정 (선행: 4) | 로드맵 Phase 3 · 스펙 04절 |
@@ -191,8 +191,8 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
 
 **Phase 1 이 끝나 폰을 한 번도 안 열어도 흐름 A(해피패스)가 완결된다** — W2 · W0 · WC.
 셋 다 실기기 검증까지 끝났다. Phase 2 착수 전에 **워치 시간에서 일시정지를 빼는 선행 작업**이 하나 끼었다 — 잔디 농도의 입력이라서다.
-Phase 2 는 진행 중이다. 잔디 집계는 26주 임시 그리드까지 끝났고, **다음은 HealthKit import 구현**이다 — 매핑 표를 확정한 스펙·플랜이 섰다.
-가져온 기록은 이 임시 그리드에서 날짜·농도를 확인한다.
+Phase 2 코드 구현은 끝났고 HealthKit import 실기기 확인이 남았다. 확인을 마치면 **다음 개발은 Phase 3 #3 탭 셸 + 디자인 토큰**이다.
+가져온 기록은 26주 임시 그리드에서 날짜·농도를 확인한다.
 
 > 플랜 문서는 **착수 직전에 하나씩** 쓴다 (로드맵 "작업 중 지킬 것"). 위 표의 "예정" 은
 > 플랜이 아직 없다는 뜻이지 설계가 비어 있다는 뜻이 아니다 — 스펙은 14개 화면 전부 확정돼 있다.
@@ -221,6 +221,8 @@ Phase 2 는 진행 중이다. 잔디 집계는 26주 임시 그리드까지 끝�
       시간과 맞는지. 컷은 30/60/90분 (D-M6)
 - [ ] **잔디 저장 실시간 갱신 확인** — 폰을 켜 둔 채 워치에서 운동을 저장했을 때
       `@Query` 전파로 해당 날짜의 칸이 재실행 없이 채워지는지
+- [ ] **HealthKit import 실기기 확인** — 최초 권한 허용·거부, 앱 재활성화와 당겨서 새로고침,
+      달리기·걷기 import, 요가·수영 제외, 재동기화 중복 없음, 하루치 워치 기록 보존 확인
 
 ## YJKit — 확인 필요
 
