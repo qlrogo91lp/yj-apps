@@ -28,6 +28,7 @@ struct HaruchiFitApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .preferredColorScheme(.dark)
                 .modelContainer(container)
                 .environmentObject(sync)
                 .onReceive(connectivity.$receivedRecord.compactMap(\.self)) { save($0) }

@@ -171,14 +171,14 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
 | W0 홈 시작 유형 토글 (근력 / 유산소) | [PR #14](https://github.com/qlrogo91lp/yj-apps/pull/14) 머지 · 테스트 12개 통과 · **실기기 검증 완료** | [플랜](Apps/HaruchiFit/docs/plans/watch/2026/2026-09-08-haruchi-fit-w0-start-kind.md) |
 | WC 컴플리케이션 — 세션 상태만 | [PR #14](https://github.com/qlrogo91lp/yj-apps/pull/14) 머지 · 테스트 24개 통과 · **실기기 검증 완료** | [플랜](Apps/HaruchiFit/docs/plans/watch/2026/2026-09-08-haruchi-fit-wc-complication.md) |
 
-### 예정사항 (남은 11개)
+### 예정사항 (남은 10개)
 
 | Phase | # | 항목 | 상태 | 문서 |
 |---|---|---|---|---|
 | ~~2 데이터~~ | ~~1~~ | ~~잔디 집계 (일별 집계)~~ | ~~**완료** ([PR #27](https://github.com/qlrogo91lp/yj-apps/pull/27)) · 영속 캐시는 두지 않기로 확정~~ | ~~[스펙](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-09-grass-daily-aggregate.md) · 로드맵 Phase 2~~ |
 | 2 데이터 | 2 | HealthKit import (증분) | **구현 완료** ([PR #30](https://github.com/qlrogo91lp/yj-apps/pull/30)) · 실기기 확인 대기 · 매핑 표 확정 | [스펙](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-21-healthkit-workout-import.md) · [플랜](Apps/HaruchiFit/docs/plans/shared/2026/2026-09-21-healthkit-workout-import.md) — 근력 3·유산소 8, 나머지는 안 가져온다. **삭제 반영은 뺐다** (아래 YJKit) |
-| 3 iOS | 3 | 탭 셸 + 디자인 토큰 | 예정 | 로드맵 Phase 3 · 스펙 3절·7절 |
-| 3 iOS | 4 | 03b 기록 목록 | 예정 (선행: 3) | 로드맵 Phase 3 · 스펙 03b절 |
+| ~~3 iOS~~ | ~~3~~ | ~~탭 셸 + 디자인 토큰~~ | ~~**구현 완료 · PR 준비 중**~~ | ~~[플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-09-23-tab-shell-design-tokens.md) · 로드맵 Phase 3 · 스펙 3절·7절~~ |
+| 3 iOS | 4 | 03b 기록 목록 | **다음 코드 작업** (선행: 3 완료) | 로드맵 Phase 3 · 스펙 03b절 |
 | 3 iOS | 5 | 04 기록 상세 (부위 태깅 · 메모) | 예정 (선행: 4) | 로드맵 Phase 3 · 스펙 04절 |
 | 3 iOS | 6 | 06 공유 (`WorkoutShareUI` 그대로) | 예정 (선행: 5) | 로드맵 Phase 3 · 스펙 06절 |
 | 4 잔디 | 7 | 02 홈 대시보드 | 예정 (선행: 1·3) | 로드맵 Phase 4 · 스펙 02절 |
@@ -191,8 +191,8 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
 
 **Phase 1 이 끝나 폰을 한 번도 안 열어도 흐름 A(해피패스)가 완결된다** — W2 · W0 · WC.
 셋 다 실기기 검증까지 끝났다. Phase 2 착수 전에 **워치 시간에서 일시정지를 빼는 선행 작업**이 하나 끼었다 — 잔디 농도의 입력이라서다.
-Phase 2 코드 구현은 끝났고 HealthKit import 실기기 확인이 남았다. 확인을 마치면 **다음 개발은 Phase 3 #3 탭 셸 + 디자인 토큰**이다.
-가져온 기록은 26주 임시 그리드에서 날짜·농도를 확인한다.
+Phase 2 코드 구현은 끝났고 HealthKit import 실기기 확인이 남았다. Phase 3 #3 탭 셸·디자인 토큰도 구현했다.
+**다음 코드는 Phase 3 #4 기록 목록**이다. 가져온 기록은 홈 탭에 보존한 26주 임시 그리드에서 날짜·농도를 확인한다.
 
 > 플랜 문서는 **착수 직전에 하나씩** 쓴다 (로드맵 "작업 중 지킬 것"). 위 표의 "예정" 은
 > 플랜이 아직 없다는 뜻이지 설계가 비어 있다는 뜻이 아니다 — 스펙은 14개 화면 전부 확정돼 있다.
