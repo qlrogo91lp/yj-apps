@@ -12,7 +12,9 @@
 - 어떻게 만들지 — `docs/specs/shared/2026/2026-09-02-haruchi-fit-architecture.md` (결정 사항 D-M1~D-M8은 6절)
 - 무엇을 어떤 순서로 — `docs/specs/shared/2026/2026-09-07-haruchi-fit-roadmap.md` (**살아있는 문서**. 진행 상태도 여기가 단일 출처)
 
-**구현 초기 단계다.** 워치 세션 기반과 세그먼트 저장까지 되어 있고, iOS는 화면이 없다.
+**구현 초기 단계다.** 워치 세션 기반과 세그먼트 저장까지 되어 있다. iOS는 홈·기록·통계
+3탭 셸이 있으며, 홈에는 실데이터 확인용 임시 잔디 그리드가 있다. 제품 화면은 로드맵의
+후속 작업에서 채운다.
 
 | 타깃 | 번들 ID | 최소 버전 |
 |---|---|---|
@@ -68,7 +70,10 @@ WatchApp/
     Summary/Components/             그 화면 전용 순수 컴포넌트
   Services/                         시스템 프레임워크 래퍼와 그 프로토콜
 iOSApp/
-  iOSApp.swift · ContentView.swift  ContentView 는 저장 확인용 임시 화면이다
+  iOSApp.swift · ContentView.swift  ContentView 는 홈·기록·통계 3탭 셸이다
+  HaruchiPalette.swift               iOS 다크 색 토큰
+  Features/Home/                     제품 홈 전까지 잔디 확인 화면 + 집계 배선
+  Features/Records/ · Statistics/    후속 작업이 채울 탭 화면
   Services/
 ComplicationApp/                    컴플리케이션 익스텐션
 Common/                             세 타깃 공유 — 외부 의존 0
