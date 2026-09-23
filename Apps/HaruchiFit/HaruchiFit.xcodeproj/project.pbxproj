@@ -7,12 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		393C230A304FEA8D00744D07 /* ComplicationState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 393C2302304FEA8D00744D07 /* ComplicationState.swift */; };
-		393C230B304FEA8D00744D07 /* SegmentKind.swift in Sources */ = {isa = PBXBuildFile; fileRef = 393C2303304FEA8D00744D07 /* SegmentKind.swift */; };
-		393C230C304FEA8D00744D07 /* WorkoutSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 393C2305304FEA8D00744D07 /* WorkoutSnapshot.swift */; };
-		393C230D304FEA8D00744D07 /* SummaryFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 393C2304304FEA8D00744D07 /* SummaryFormat.swift */; };
-		393C230E304FEA8D00744D07 /* WorkoutSnapshotStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 393C2306304FEA8D00744D07 /* WorkoutSnapshotStore.swift */; };
-		393C230F304FEA8D00744D07 /* ComplicationState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 393C2302304FEA8D00744D07 /* ComplicationState.swift */; };
+		393C230A304FEA8D00744D07 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		393C230B304FEA8D00744D07 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		393C230C304FEA8D00744D07 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		393C230D304FEA8D00744D07 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		393C230E304FEA8D00744D07 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		393C230F304FEA8D00744D07 /* (null) in Sources */ = {isa = PBXBuildFile; };
+		3970C56A306399A800107C65 /* HaruchiFit.icon in Resources */ = {isa = PBXBuildFile; fileRef = 3970C569306399A800107C65 /* HaruchiFit.icon */; };
+		3970C56B306399A800107C65 /* HaruchiFit.icon in Resources */ = {isa = PBXBuildFile; fileRef = 3970C569306399A800107C65 /* HaruchiFit.icon */; };
+		3970C56C306399A800107C65 /* HaruchiFit.icon in Resources */ = {isa = PBXBuildFile; fileRef = 3970C569306399A800107C65 /* HaruchiFit.icon */; };
 		3999D2BA3048F8B9005343C7 /* HaruchiFit Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 3999D29A3048F8B8005343C7 /* HaruchiFit Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		3999D2CC3048FA54005343C7 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3999D2CB3048FA54005343C7 /* WidgetKit.framework */; };
 		3999D2CE3048FA54005343C7 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3999D2CD3048FA54005343C7 /* SwiftUI.framework */; };
@@ -77,6 +80,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		3970C569306399A800107C65 /* HaruchiFit.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = HaruchiFit.icon; sourceTree = "<group>"; };
 		3999D2883048F77F005343C7 /* HaruchiFit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HaruchiFit.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3999D29A3048F8B8005343C7 /* HaruchiFit Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "HaruchiFit Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3999D2A63048F8B9005343C7 /* HaruchiFitWatchTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HaruchiFitWatchTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -98,6 +102,11 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		393C2307304FEA8D00744D07 /* Common */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Common;
+			sourceTree = "<group>";
+		};
 		396475DE304E10DF008DAFD1 /* Shared */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Shared;
@@ -170,11 +179,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		393C2307304FEA8D00744D07 /* Common */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Common;
-			sourceTree = "<group>";
-		};
 		3999D27F3048F77F005343C7 = {
 			isa = PBXGroup;
 			children = (
@@ -187,6 +191,7 @@
 				3999D2A93048F8B9005343C7 /* watchosTests */,
 				3999D2CF3048FA54005343C7 /* ComplicationApp */,
 				3999D2CA3048FA54005343C7 /* Frameworks */,
+				3970C569306399A800107C65 /* HaruchiFit.icon */,
 				3999D2893048F77F005343C7 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -375,6 +380,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3970C56B306399A800107C65 /* HaruchiFit.icon in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -382,6 +388,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3970C56C306399A800107C65 /* HaruchiFit.icon in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -396,6 +403,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3970C56A306399A800107C65 /* HaruchiFit.icon in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -413,9 +421,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				393C230D304FEA8D00744D07 /* SummaryFormat.swift in Sources */,
-				393C230E304FEA8D00744D07 /* WorkoutSnapshotStore.swift in Sources */,
-				393C230F304FEA8D00744D07 /* ComplicationState.swift in Sources */,
+				393C230D304FEA8D00744D07 /* (null) in Sources */,
+				393C230E304FEA8D00744D07 /* (null) in Sources */,
+				393C230F304FEA8D00744D07 /* (null) in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -430,9 +438,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				393C230A304FEA8D00744D07 /* ComplicationState.swift in Sources */,
-				393C230B304FEA8D00744D07 /* SegmentKind.swift in Sources */,
-				393C230C304FEA8D00744D07 /* WorkoutSnapshot.swift in Sources */,
+				393C230A304FEA8D00744D07 /* (null) in Sources */,
+				393C230B304FEA8D00744D07 /* (null) in Sources */,
+				393C230C304FEA8D00744D07 /* (null) in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -581,8 +589,9 @@
 		3999D2943048F780005343C7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = HaruchiFit;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = HaruchiFit.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -622,8 +631,9 @@
 		3999D2953048F780005343C7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = HaruchiFit;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = HaruchiFit.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -663,8 +673,9 @@
 		3999D2BC3048F8B9005343C7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = HaruchiFit;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = "HaruchiFit Watch App.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -699,8 +710,9 @@
 		3999D2BD3048F8B9005343C7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = HaruchiFit;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = "HaruchiFit Watch App.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
