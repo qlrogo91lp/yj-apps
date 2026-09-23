@@ -46,6 +46,7 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
 | 8 | 설정 페이지 + 다른 앱 노출 | — | **논의 필요 — 아직 브레인스토밍 전** | 아래 "남은 논의" 참고 |
 | 9 | iOS 기록·요약 **세션 중심 재편** | D | **구현 완료 · 실기기 확인 대기** | [스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-09-18-session-centric-history.md) · [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-18-session-centric-history.md) — `WorkoutSessionRecord` 신설이 포함된다. #2 스펙을 개정한다 |
 | 10 | 기록 삭제 시 **건강 앱 워크아웃도 삭제** | E (YJKit+iOS) | **구현 완료** ([PR #29](https://github.com/qlrogo91lp/yj-apps/pull/29)) · 실기기 확인 대기 | [플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-21-healthkit-workout-deletion.md) — YJKit `WorkoutDeletionService` 신설. 건강 앱에서 먼저 지운 경우 Ralli 기록은 유지한다 |
+| 11 | 클럽 대진표 · 실시간 중계 (Firebase) | — | **탐색 중** — 다음 출시 범위 아님 | [탐색 문서](Apps/TennisCounter/docs/ideas/club-live-scoring.md) — CourtMate 분석에서 출발. 백엔드·단위·기록자·게스트까지 결정, 안드로이드·매칭·ELO 는 열림 |
 
 ### 집 맥북에서 할 것
 
