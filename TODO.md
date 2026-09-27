@@ -74,7 +74,9 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
 
 **트랙 C (YJKit)** — A·B 와 무관, 지금 시작 가능
 
-- [ ] Firebase 콘솔에 프로젝트 "Ralli" + Apple 앱 2개(iOS·워치 번들 ID) 만들고 `GoogleService-Info.plist` 2개 받기
+- [x] Firebase 콘솔에 프로젝트 "Ralli" + Apple 앱 2개(iOS·워치 번들 ID) 만들고 `GoogleService-Info.plist` 2개 받기 —
+      지난주 시도에서 삭제 대기로 남은 iOS 앱이 번들 ID 를 붙잡고 있어 복원해서 썼다. plist 는 Ralli 연동 PR 에서 커밋
+- [ ] YJKit `MonitoringCore` Task 0 스파이크 — 로컬·앱 두 스킴·`kit-test` 통과 (`feat/monitoring-core`). CI 확인 남음
 - [ ] YJKit `MonitoringCore` 플랜 (Task 0 스파이크 → CI 통과 → PR 머지)
 
 **합류 후**
