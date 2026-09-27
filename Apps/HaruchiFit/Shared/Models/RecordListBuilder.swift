@@ -1,4 +1,5 @@
 import Foundation
+import SwiftData
 
 /// 레코드를 **주 단위 섹션**으로 나누고 행 표기를 만든다 (제품 스펙 03b).
 ///
@@ -14,6 +15,8 @@ enum RecordListBuilder {
         let lastWeek = calendar.date(byAdding: .weekOfYear, value: -1, to: thisWeek)
         let currentYear = calendar.component(.year, from: now)
         let rowFormatter = formatter("M월 d일 (E)", calendar: calendar, locale: locale)
+        let sameYearFormatter = formatter("M월 d일", calendar: calendar, locale: locale)
+        let otherYearFormatter = formatter("yyyy년 M월 d일", calendar: calendar, locale: locale)
 
         var buckets: [Date: [WorkoutRecord]] = [:]
         for record in records {
@@ -27,7 +30,8 @@ enum RecordListBuilder {
             } else if week == lastWeek {
                 "지난 주"
             } else {
-                rangeTitle(week: week, currentYear: currentYear, calendar: calendar, locale: locale)
+                rangeTitle(week: week, currentYear: currentYear, calendar: calendar,
+                           sameYearFormatter: sameYearFormatter, otherYearFormatter: otherYearFormatter)
             }
             let rows = (buckets[week] ?? [])
                 .sorted { $0.startedAt > $1.startedAt }
@@ -37,16 +41,14 @@ enum RecordListBuilder {
     }
 
     /// `9월 13일 – 9월 19일`. 시작일이 올해가 아니면 연도를 붙이고, 해를 넘는 주는 끝에도 붙인다.
-    private static func rangeTitle(week: Date, currentYear: Int,
-                                   calendar: Calendar, locale: Locale) -> String
+    private static func rangeTitle(week: Date, currentYear: Int, calendar: Calendar,
+                                   sameYearFormatter: DateFormatter, otherYearFormatter: DateFormatter) -> String
     {
         let end = calendar.date(byAdding: .day, value: 6, to: week) ?? week
         let startYear = calendar.component(.year, from: week)
         let endYear = calendar.component(.year, from: end)
-        let start = formatter(startYear == currentYear ? "M월 d일" : "yyyy년 M월 d일",
-                              calendar: calendar, locale: locale).string(from: week)
-        let finish = formatter(endYear == startYear ? "M월 d일" : "yyyy년 M월 d일",
-                               calendar: calendar, locale: locale).string(from: end)
+        let start = (startYear == currentYear ? sameYearFormatter : otherYearFormatter).string(from: week)
+        let finish = (endYear == startYear ? sameYearFormatter : otherYearFormatter).string(from: end)
         return "\(start) – \(finish)"
     }
 
@@ -64,7 +66,8 @@ enum RecordListBuilder {
         }
         // 잔디 칼로리 기준(GrassAggregator)과 같은 값을 쓴다
         let calories = record.totalCalories.map { "\(Int($0.rounded())) kcal" }
-        return RecordListRow(record: record,
+        return RecordListRow(id: record.persistentModelID,
+                             record: record,
                              dateTitle: formatter.string(from: record.startedAt),
                              chips: chips,
                              caloriesText: calories)

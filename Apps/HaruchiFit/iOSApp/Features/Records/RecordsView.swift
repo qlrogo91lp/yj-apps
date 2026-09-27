@@ -6,6 +6,7 @@ import SwiftUI
 struct RecordsView: View {
     @Query(sort: \WorkoutRecord.startedAt, order: .reverse) private var records: [WorkoutRecord]
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.scenePhase) private var scenePhase
     @EnvironmentObject private var sync: WorkoutSyncCoordinator
     @EnvironmentObject private var alerts: AppAlertCenter
     @StateObject private var viewModel = RecordsViewModel()
@@ -30,6 +31,7 @@ struct RecordsView: View {
                 }
                 .onAppear { viewModel.rebuild(from: records) }
                 .onChange(of: records) { _, updated in viewModel.rebuild(from: updated) }
+                .onChange(of: scenePhase) { _, phase in if phase == .active { viewModel.rebuild(from: records) } }
         }
     }
 
@@ -53,7 +55,7 @@ struct RecordsView: View {
                                 .swipeActions(edge: .trailing) {
                                     // role: .destructive 를 쓰지 않는다 — 확인 전에 행이 먼저 사라지는 애니메이션이 돈다
                                     Button("삭제") { pendingDelete = row.record }
-                                        .tint(.red)
+                                        .tint(HaruchiPalette.hr)
                                 }
                         }
                     } header: {
