@@ -143,10 +143,10 @@ public final class WorkoutSessionService: NSObject, ObservableObject {
             startDate = nil
 
             session.end()
+            let endDate = Date()
             stopTimer()
 
-            let elapsed = Int(Date().timeIntervalSince(start))
-            let endDate = Date()
+            let elapsed = Int(endDate.timeIntervalSince(start))
 
             await withCheckedContinuation { continuation in
                 builder.endCollection(withEnd: endDate) { _, _ in continuation.resume() }
@@ -169,7 +169,8 @@ public final class WorkoutSessionService: NSObject, ObservableObject {
                                  totalCaloriesBurned: calories + basal,
                                  distanceMeters: distance,
                                  steps: steps,
-                                 healthKitUUID: saved?.uuid)
+                                 healthKitUUID: saved?.uuid,
+                                 endedAt: endDate)
         }
 
         private func collectCalories(builder: HKLiveWorkoutBuilder) async -> Double {

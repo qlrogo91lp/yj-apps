@@ -89,18 +89,19 @@ final class MatchConnectivity: ObservableObject {
     }
 
     func sendWorkoutEnd(sessionId: UUID, result: WorkoutResult? = nil, startedAt: Date? = nil) {
-        service.send(
-            WorkoutEndMessage(
-                sessionId: sessionId,
-                startedAt: startedAt,
-                endedAt: result == nil ? nil : Date(),
-                elapsedSeconds: result?.durationSeconds,
-                activeCalories: result?.caloriesBurned,
-                totalCalories: result?.totalCaloriesBurned,
-                averageHeartRate: result?.averageHeartRate,
-                healthKitUUID: result?.healthKitUUID
-            ),
-            via: .reliable
+        service.send(Self.workoutEndMessage(sessionId: sessionId, result: result, startedAt: startedAt), via: .reliable)
+    }
+
+    static func workoutEndMessage(sessionId: UUID, result: WorkoutResult?, startedAt: Date?) -> WorkoutEndMessage {
+        WorkoutEndMessage(
+            sessionId: sessionId,
+            startedAt: startedAt,
+            endedAt: result?.endedAt,
+            elapsedSeconds: result?.durationSeconds,
+            activeCalories: result?.caloriesBurned,
+            totalCalories: result?.totalCaloriesBurned,
+            averageHeartRate: result?.averageHeartRate,
+            healthKitUUID: result?.healthKitUUID
         )
     }
 
