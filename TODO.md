@@ -15,13 +15,11 @@
 
 ```
 트랙 A (iOS)     5̶ → 2̶ → 1̶ ──┐            ← 전부 완료 (실기기 확인 포함)
-트랙 B (워치)     3̶ → 4̶ ──────┤→ 6̶ 코드·이미지 → 7   ← 6 은 시뮬레이터 확인만 남음
+트랙 B (워치)     3̶ → 4̶ ──────┤→ 6̶ 코드·이미지 → 7   ← 6 은 실기기 확인까지 완료
 트랙 C (YJKit)   MonitoringCore ┘            ← 집에서 (Firebase 콘솔 선행)
-트랙 D (iOS)     9 세션 중심 재편            ← 구현 완료, 실기기 확인 대기
+트랙 D (iOS)     9̶ 세션 중심 재편            ← 실기기 확인까지 완료
 
-다음 차례: #6 은 시뮬레이터 ko/en 확인만 남았다. #9 는 실기기·워치 확인이 남았다.
-#10 은 구현을 마쳤고 실기기에서 워치 저장분 삭제와 HealthKit 권한 흐름 확인이 남았다.
-트랙 C·#7 은 집에서 몰아서. #8 은 아직 브레인스토밍 전.
+다음 차례: 트랙 C·#7 은 집에서 몰아서. #8 은 아직 브레인스토밍 전.
 ```
 
 - **A ↔ B ↔ C 는 겹치는 파일이 하나도 없다.** 셋을 동시에 굴려도 된다
@@ -41,11 +39,11 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
 | ~~1~~ | ~~WorkoutShareUI 붙이기 (공유 시트)~~ | A | **완료** (PR #20 → 인스타 경로 제거 → `feat/share-card-sticker` 카드 개편) · 실기기 확인 완료 | [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-07-workout-share-button.md) · [제거 플랜](Packages/YJKit/docs/plans/ios/2026/2026-09-13-share-sheet-only.md) · [Kit 사용법](Packages/YJKit/README.md#workoutshareui-사용법) |
 | ~~3~~ | ~~햅틱 (워치 전용)~~ | B | **완료** (PR #18) · 실기기 확인 완료 | [플랜](Apps/TennisCounter/docs/plans/watch/2026/2026-09-07-match-haptics.md) — 설정 연동은 #8 때 `MatchHaptics.play` 첫 줄에서. 포인트 `.click`이 약하게 느껴지나 유지하기로 결정 |
 | ~~4~~ | ~~크라운 점수 입력 (워치, 위=나 아래=상대)~~ | B | **완료** (버그 수정 PR, 실기기 확인 완료) | [플랜](Apps/TennisCounter/docs/plans/watch/2026/2026-09-07-crown-scoring.md) — PR #22 구현이 회전량 기반이라 실기기에서 오작동, 디텐트 방식으로 재구현. 온보딩(#6) 항목 하나 파생 |
-| 6 | 온보딩 **5페이지** (워치 중심, iOS 만) | A → 합류 | **이미지까지 완료** (PR #25) · 시뮬레이터 ko/en 확인만 남음 | [스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-09-07-onboarding-design.md) (09-18 개정) · [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-17-onboarding-watch-focused.md) — 4페이지에서 5페이지로 재편, 기능 목록 페이지 제거. 워치 3장은 Figma 목업 합성, 공유 그림은 인스타 스티커 화면 |
+| ~~6~~ | ~~온보딩 **5페이지** (워치 중심, iOS 만)~~ | A → 합류 | **완료** (PR #25) · 실기기 확인 완료 | [스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-09-07-onboarding-design.md) (09-18 개정) · [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-17-onboarding-watch-focused.md) — 4페이지에서 5페이지로 재편, 기능 목록 페이지 제거. 워치 3장은 Figma 목업 합성, 공유 그림은 인스타 스티커 화면 |
 | 7 | Firebase Crashlytics (iOS + 워치, 익스텐션 제외) | 단독 (맨 뒤) | 스펙·플랜 완료 · 구현 대기 | [스펙](Packages/YJKit/docs/specs/shared/2026/2026-09-07-crash-reporting-design.md) → [YJKit 플랜](Packages/YJKit/docs/plans/shared/2026/2026-09-07-monitoring-core.md) (트랙 C, 지금 병렬 가능) → [Ralli 플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-07-crashlytics-integration.md) |
 | 8 | 설정 페이지 + 다른 앱 노출 | — | **논의 필요 — 아직 브레인스토밍 전** | 아래 "남은 논의" 참고 |
-| 9 | iOS 기록·요약 **세션 중심 재편** | D | **구현 완료 · 실기기 확인 대기** | [스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-09-18-session-centric-history.md) · [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-18-session-centric-history.md) — `WorkoutSessionRecord` 신설이 포함된다. #2 스펙을 개정한다 |
-| 10 | 기록 삭제 시 **건강 앱 워크아웃도 삭제** | E (YJKit+iOS) | **구현 완료** ([PR #29](https://github.com/qlrogo91lp/yj-apps/pull/29)) · 실기기 확인 대기 | [플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-21-healthkit-workout-deletion.md) — YJKit `WorkoutDeletionService` 신설. 건강 앱에서 먼저 지운 경우 Ralli 기록은 유지한다 |
+| ~~9~~ | ~~iOS 기록·요약 **세션 중심 재편**~~ | D | **완료** · 실기기 확인 완료 | [스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-09-18-session-centric-history.md) · [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-18-session-centric-history.md) — `WorkoutSessionRecord` 신설이 포함된다. #2 스펙을 개정한다 |
+| ~~10~~ | ~~기록 삭제 시 **건강 앱 워크아웃도 삭제**~~ | E (YJKit+iOS) | **완료** ([PR #29](https://github.com/qlrogo91lp/yj-apps/pull/29)) · 실기기 확인 완료 | [플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-21-healthkit-workout-deletion.md) — YJKit `WorkoutDeletionService` 신설. 건강 앱에서 먼저 지운 경우 Ralli 기록은 유지한다 |
 | 11 | 클럽 대진표 · 실시간 중계 (Firebase) | — | **탐색 중** — 다음 출시 범위 아님 | [탐색 문서](Apps/TennisCounter/docs/ideas/club-live-scoring.md) — CourtMate 분석에서 출발. 백엔드·단위·기록자·게스트까지 결정, 안드로이드·매칭·ELO 는 열림 |
 
 ### 집 맥북에서 할 것
@@ -82,16 +80,16 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
 
 - [x] **6번 스크린샷 5장** — 워치 3장은 3x 로 재내보내 넣었다. 스와이프는 영어·컴플리케이션은 한국어 한 장,
       공유는 인스타 스티커 화면. 그림 자리는 `OnboardingScreenshotPage` 가 비율 0.80 박스로 고정한다
-- [ ] 6번 시뮬레이터에서 ko/en 5장 넘겨보기 — 크기가 흔들리지 않는지, 워치 3장이 선명한지
+- [x] 6번 시뮬레이터에서 ko/en 5장 넘겨보기 — 크기가 흔들리지 않는지, 워치 3장이 선명한지
 - [x] ~~6번 크라운 화살표 위치 조정~~ — 화살표를 이미지에 구워 코드 오버레이를 지웠다 (플랜 Task 4 폐기)
 - [ ] 7번 Ralli 연동 플랜 — 단독으로. PR 은 Kit / Ralli 따로
 
 **아무 때나**
 
-- [ ] **#9 실기기·워치 확인** — 2경기 저장 뒤 5분 후 종료해 카드 시간이 종료 시각까지인지, 평균 심박이 채워지는지,
+- [x] **#9 실기기·워치 확인** — 2경기 저장 뒤 5분 후 종료해 카드 시간이 종료 시각까지인지, 평균 심박이 채워지는지,
       경기 없는 운동이 `경기 없음`으로 보이는지, 구 기록이 시간·칼로리와 `–` 심박으로 보이는지,
       배포 뒤 구/신 레코드 혼합 CloudKit 동기화가 정상인지 확인
-- [ ] **#10 실기기 확인** — 워치에서 만든 운동을 Ralli 기록에서 삭제했을 때 건강 앱 워크아웃도 지워지는지,
+- [x] **#10 실기기 확인** — 워치에서 만든 운동을 Ralli 기록에서 삭제했을 때 건강 앱 워크아웃도 지워지는지,
       HealthKit 쓰기 권한 허용·거부와 이미 건강 앱에서 지운 경우에도 Ralli 기록 삭제가 정상 완료되는지 확인
 - [ ] **#5 실기기 확인 — 워치만 남음.** 조기 종료 다이얼로그가 **"경기 중단"**(워치용 짧은 표현)
       인지, HealthKit 권한 문구가 한국어인지. iOS 쪽은 #2 가 그 화면을 다시 만들어 아래 항목이 흡수했다
