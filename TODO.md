@@ -45,6 +45,7 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
 | ~~9~~ | ~~iOS 기록·요약 **세션 중심 재편**~~ | D | **완료** · 실기기 확인 완료 | [스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-09-18-session-centric-history.md) · [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-18-session-centric-history.md) — `WorkoutSessionRecord` 신설이 포함된다. #2 스펙을 개정한다 |
 | ~~10~~ | ~~기록 삭제 시 **건강 앱 워크아웃도 삭제**~~ | E (YJKit+iOS) | **완료** ([PR #29](https://github.com/qlrogo91lp/yj-apps/pull/29)) · 실기기 확인 완료 | [플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-21-healthkit-workout-deletion.md) — YJKit `WorkoutDeletionService` 신설. 건강 앱에서 먼저 지운 경우 Ralli 기록은 유지한다 |
 | 11 | 클럽 대진표 · 실시간 중계 (Firebase) | — | **탐색 중** — 다음 출시 범위 아님 | [탐색 문서](Apps/TennisCounter/docs/ideas/club-live-scoring.md) — CourtMate 분석에서 출발. 백엔드·단위·기록자·게스트까지 결정, 안드로이드·매칭·ELO 는 열림 |
+| 12 | 워치 크라운 포커스 복구 · 워크아웃 종료 시각 보존 | B + YJKit | **코드 수정 완료 · 실기기 확인 대기** | [작업 기록](Apps/TennisCounter/docs/logs/2026/2026-09-28-crown-focus-and-session-end-time.md) — 알림·저휘도 복귀 뒤 크라운과 종료 버튼 시각 전달 확인 필요 |
 
 ### 집 맥북에서 할 것
 
@@ -222,6 +223,8 @@ Phase 2 코드 구현은 끝났고 HealthKit import 실기기 확인이 남았�
       `@Query` 전파로 해당 날짜의 칸이 재실행 없이 채워지는지
 - [ ] **HealthKit import 실기기 확인** — 최초 권한 허용·거부, 앱 재활성화와 당겨서 새로고침,
       달리기·걷기 import, 요가·수영 제외, 재동기화 중복 없음, 하루치 워치 기록 보존 확인
+- [ ] **03b 기록 목록 다음 — 종료 시각 지연 수정** — `WatchApp/Features/Workout/WorkoutViewModel.swift`의
+      `endedAt: Date()`를 `result.endedAt`으로 바꾼다. YJKit 필드는 Ralli #12에서 추가됐다
 
 ## YJKit — 확인 필요
 

@@ -34,6 +34,16 @@ struct WorkoutSessionServiceTests {
         #expect(result.averageHeartRate == nil)
     }
 
+    @Test func workoutResultCarriesEndDate() {
+        let endedAt = Date(timeIntervalSince1970: 1_000_900)
+        let result = WorkoutResult(durationSeconds: 900,
+                                   caloriesBurned: 120,
+                                   averageHeartRate: 135,
+                                   endedAt: endedAt)
+
+        #expect(result.endedAt == endedAt)
+    }
+
     @Test @MainActor func basalCaloriesStartAtZero() {
         let service = WorkoutSessionService(configuration: WorkoutConfiguration(activityType: .tennis))
         #expect(service.currentBasalCalories == 0)
