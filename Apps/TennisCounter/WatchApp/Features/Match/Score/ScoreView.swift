@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct ScoreView: View {
+    @Environment(\.isLuminanceReduced) private var isLuminanceReduced
+    @Environment(\.scenePhase) private var scenePhase
     @ObservedObject var flowViewModel: WorkoutSessionViewModel
     @ObservedObject var viewModel: ScoreViewModel
     @State private var showExitConfirm = false
@@ -88,6 +90,12 @@ struct ScoreView: View {
         // 크라운을 돌리면 화면 가장자리에 스크롤 바가 뜬다 — 점수 화면엔 스크롤할 게 없다.
         .digitalCrownAccessory(.hidden)
         .onAppear { isCrownFocused = true }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { isCrownFocused = true }
+        }
+        .onChange(of: isLuminanceReduced) { _, reduced in
+            if !reduced { isCrownFocused = true }
+        }
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 // 진행 중인 매치를 끝낼 권한은 driver에게만 있다 (점수 입력·undo와 같은 규칙).
