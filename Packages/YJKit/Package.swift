@@ -70,5 +70,10 @@ let package = Package(
             dependencies: ["WorkoutShareUI"],
             swiftSettings: [.swiftLanguageMode(.v5)]
         ),
+        .testTarget(
+            name: "MonitoringCoreTests",
+            dependencies: ["MonitoringCore"],
+            swiftSettings: [.swiftLanguageMode(.v5)]
+        ),
     ]
 )
