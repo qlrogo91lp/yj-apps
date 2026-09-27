@@ -868,7 +868,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = Ralli;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.sports";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Ralli uses HealthKit to track calories and heart rate during matches.";
-				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Ralli saves your tennis workout to Apple Health.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Ralli removes deleted matches from your Apple Health workouts.";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -913,7 +913,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = Ralli;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.sports";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Ralli uses HealthKit to track calories and heart rate during matches.";
-				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Ralli saves your tennis workout to Apple Health.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Ralli removes deleted matches from your Apple Health workouts.";
 				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
