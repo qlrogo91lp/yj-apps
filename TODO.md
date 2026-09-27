@@ -178,8 +178,8 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
 | ~~2 데이터~~ | ~~1~~ | ~~잔디 집계 (일별 집계)~~ | ~~**완료** ([PR #27](https://github.com/qlrogo91lp/yj-apps/pull/27)) · 영속 캐시는 두지 않기로 확정~~ | ~~[스펙](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-09-grass-daily-aggregate.md) · 로드맵 Phase 2~~ |
 | 2 데이터 | 2 | HealthKit import (증분) | **구현 완료** ([PR #30](https://github.com/qlrogo91lp/yj-apps/pull/30)) · 실기기 확인 대기 · 매핑 표 확정 | [스펙](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-21-healthkit-workout-import.md) · [플랜](Apps/HaruchiFit/docs/plans/shared/2026/2026-09-21-healthkit-workout-import.md) — 근력 3·유산소 8, 나머지는 안 가져온다. **삭제 반영은 뺐다** (아래 YJKit) |
 | ~~3 iOS~~ | ~~3~~ | ~~탭 셸 + 디자인 토큰~~ | ~~**구현 완료 · PR 준비 중**~~ | ~~[플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-09-23-tab-shell-design-tokens.md) · 로드맵 Phase 3 · 스펙 3절·7절~~ |
-| 3 iOS | 4 | 03b 기록 목록 | **다음 코드 작업** (선행: 3 완료) | 로드맵 Phase 3 · 스펙 03b절 |
-| 3 iOS | 5 | 04 기록 상세 (부위 태깅 · 메모) | 예정 (선행: 4) | 로드맵 Phase 3 · 스펙 04절 |
+| 3 iOS | 4 | 03b 기록 목록 | **구현 완료** ([PR #33](https://github.com/qlrogo91lp/yj-apps/pull/33)) · 시뮬레이터 확인 대기 | [플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-09-28-records-list.md) · 로드맵 Phase 3 · 스펙 03b절 |
+| 3 iOS | 5 | 04 기록 상세 (부위 태깅 · 메모) | **다음 코드 작업** (선행: 4 완료) | 로드맵 Phase 3 · 스펙 04절 |
 | 3 iOS | 6 | 06 공유 (`WorkoutShareUI` 그대로) | 예정 (선행: 5) | 로드맵 Phase 3 · 스펙 06절 |
 | 4 잔디 | 7 | 02 홈 대시보드 | 예정 (선행: 1·3) | 로드맵 Phase 4 · 스펙 02절 |
 | 4 잔디 | 8 | 03a 기록 달력 | 예정 (선행: 1·3) | 로드맵 Phase 4 · 스펙 03a절 |
@@ -191,8 +191,8 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
 
 **Phase 1 이 끝나 폰을 한 번도 안 열어도 흐름 A(해피패스)가 완결된다** — W2 · W0 · WC.
 셋 다 실기기 검증까지 끝났다. Phase 2 착수 전에 **워치 시간에서 일시정지를 빼는 선행 작업**이 하나 끼었다 — 잔디 농도의 입력이라서다.
-Phase 2 코드 구현은 끝났고 HealthKit import 실기기 확인이 남았다. Phase 3 #3 탭 셸·디자인 토큰도 구현했다.
-**다음 코드는 Phase 3 #4 기록 목록**이다. 가져온 기록은 홈 탭에 보존한 26주 임시 그리드에서 날짜·농도를 확인한다.
+Phase 2 코드 구현은 끝났고 HealthKit import 실기기 확인이 남았다. Phase 3 #3 탭 셸·디자인 토큰, #4 기록 목록도 구현했다.
+**다음 코드는 Phase 3 #5 기록 상세**다. 가져온 기록은 홈 탭에 보존한 26주 임시 그리드에서 날짜·농도를 확인한다.
 
 > 플랜 문서는 **착수 직전에 하나씩** 쓴다 (로드맵 "작업 중 지킬 것"). 위 표의 "예정" 은
 > 플랜이 아직 없다는 뜻이지 설계가 비어 있다는 뜻이 아니다 — 스펙은 14개 화면 전부 확정돼 있다.
@@ -220,11 +220,14 @@ Phase 2 코드 구현은 끝났고 HealthKit import 실기기 확인이 남았�
 - [ ] **잔디 농도 컷 눈으로 확인** — 실기기 기록이 쌓인 뒤 임시 화면에서 농도가 실제 운동
       시간과 맞는지. 컷은 30/60/90분 (D-M6)
 - [ ] **잔디 저장 실시간 갱신 확인** — 폰을 켜 둔 채 워치에서 운동을 저장했을 때
-      `@Query` 전파로 해당 날짜의 칸이 재실행 없이 채워지는지
+      `@Query` 전파로 해당 날짜의 칸이 재실행 없이 채워지는지. 기록 탭 목록도 같은 경로
 - [ ] **HealthKit import 실기기 확인** — 최초 권한 허용·거부, 앱 재활성화와 당겨서 새로고침,
       달리기·걷기 import, 요가·수영 제외, 재동기화 중복 없음, 하루치 워치 기록 보존 확인
 - [ ] **03b 기록 목록 다음 — 종료 시각 지연 수정** — `WatchApp/Features/Workout/WorkoutViewModel.swift`의
       `endedAt: Date()`를 `result.endedAt`으로 바꾼다. YJKit 필드는 Ralli #12에서 추가됐다
+- [ ] **기록 탭 목록 시뮬레이터·실기기 확인** — 섹션 제목(`이번 주`·날짜 범위), 행 요일·칩
+      색·kcal, 스와이프 → 삭제 → 취소 시 행 유지, 삭제 확정 시 행·빈 섹션 사라짐과 홈
+      잔디 칸 비움, 재실행 후에도 안 돌아옴
 
 ## YJKit — 확인 필요
 

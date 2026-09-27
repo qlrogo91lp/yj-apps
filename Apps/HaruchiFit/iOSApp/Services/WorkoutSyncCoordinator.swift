@@ -13,14 +13,17 @@ final class WorkoutSyncCoordinator: ObservableObject {
     private let importer: HealthKitWorkoutImporter
     private let anchors: WorkoutQueryAnchorStore
     private let context: ModelContext
+    private let alerts: AppAlertCenter
 
     init(importer: HealthKitWorkoutImporter = HealthKitWorkoutImporter(),
          anchors: WorkoutQueryAnchorStore = WorkoutQueryAnchorStore(),
-         context: ModelContext)
+         context: ModelContext,
+         alerts: AppAlertCenter)
     {
         self.importer = importer
         self.anchors = anchors
         self.context = context
+        self.alerts = alerts
     }
 
     /// **동시에 두 번 돌지 않는다.** 앵커가 경합하면 같은 워크아웃이 두 배치에 나뉘어 들어온다.
@@ -39,8 +42,8 @@ final class WorkoutSyncCoordinator: ObservableObject {
             // **적용이 끝난 뒤에 앵커를 옮긴다.** 먼저 저장하면 실패한 배치를 영영 다시 못 읽는다.
             if let anchor = batch.anchor { anchors.save(anchor) }
         } catch {
-            // 사용자에게 알리는 경로는 03b 기록 목록에서 붙인다 — iOSApp.save(_:) 와 같은 자리다.
             print("[HaruchiFit] HealthKit 동기화 실패 — \(error)")
+            alerts.report(.syncFailed)
         }
     }
 

@@ -11,6 +11,7 @@ struct HaruchiFitApp: App {
     @Environment(\.scenePhase) private var scenePhase
     @StateObject private var connectivity: HaruchiFitConnectivity
     @StateObject private var sync: WorkoutSyncCoordinator
+    @StateObject private var alerts: AppAlertCenter
     private let store: PersistenceService<WorkoutRecord>
 
     init() {
@@ -22,7 +23,9 @@ struct HaruchiFitApp: App {
         // 서로의 변경을 못 보고 rollback 이 간섭할 수 있다 (PersistenceService — 단일 컨텍스트).
         let context = ModelContext(container)
         store = PersistenceService<WorkoutRecord>(context: context)
-        _sync = StateObject(wrappedValue: WorkoutSyncCoordinator(context: context))
+        let alerts = AppAlertCenter()
+        _alerts = StateObject(wrappedValue: alerts)
+        _sync = StateObject(wrappedValue: WorkoutSyncCoordinator(context: context, alerts: alerts))
     }
 
     var body: some Scene {
@@ -31,6 +34,7 @@ struct HaruchiFitApp: App {
                 .preferredColorScheme(.dark)
                 .modelContainer(container)
                 .environmentObject(sync)
+                .environmentObject(alerts)
                 .onReceive(connectivity.$receivedRecord.compactMap(\.self)) { save($0) }
                 .onChange(of: scenePhase, initial: true) { _, phase in
                     // onChange 는 기본으로 초기값을 넘기지 않는다. 콜드 런치도 포그라운드 진입이다.
@@ -65,8 +69,8 @@ struct HaruchiFitApp: App {
                 try store.upsert(record)
             }
         } catch {
-            // 저장 실패를 사용자에게 알리는 경로는 기록 탭 플랜에서 붙인다.
             print("[HaruchiFit] 워크아웃 저장 실패 — \(error)")
+            alerts.report(.saveFailed)
         }
     }
 }
