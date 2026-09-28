@@ -14,6 +14,7 @@ struct TennisCounterApp: App {
     @AppStorage("onboardingSeenVersion") private var onboardingSeenVersion = 0
 
     init() {
+        AppCrashReporter.start()
         // CloudKit 동기화 시도 → iCloud 미로그인·시뮬레이터 등 실패 시 로컬 폴백 (팩토리가 처리)
         container = PersistenceContainerFactory.make(
             for: [Match.self, SetRecord.self, WorkoutSessionRecord.self]

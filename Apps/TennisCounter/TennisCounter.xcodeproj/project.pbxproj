@@ -25,6 +25,8 @@
 		39FF853230410CDE006D41AA /* ConnectivityCore in Frameworks */ = {isa = PBXBuildFile; productRef = 39FF853130410CDE006D41AA /* ConnectivityCore */; };
 		39FF853430410CDE006D41AA /* WorkoutCore in Frameworks */ = {isa = PBXBuildFile; productRef = 39FF853330410CDE006D41AA /* WorkoutCore */; };
 		39FF853630410CDE006D41AA /* WorkoutUI in Frameworks */ = {isa = PBXBuildFile; productRef = 39FF853530410CDE006D41AA /* WorkoutUI */; };
+		3A1B00022FC0A001006D41AA /* MonitoringCore in Frameworks */ = {isa = PBXBuildFile; productRef = 3A1B00012FC0A001006D41AA /* MonitoringCore */; };
+		3A1B00052FC0A001006D41AA /* MonitoringCore in Frameworks */ = {isa = PBXBuildFile; productRef = 3A1B00042FC0A001006D41AA /* MonitoringCore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -170,6 +172,7 @@
 				39FF852C30410CD0006D41AA /* PersistenceCore in Frameworks */,
 				39FF853030410CD0006D41AA /* WorkoutUI in Frameworks */,
 				39FF852E30410CD0006D41AA /* WorkoutCore in Frameworks */,
+				3A1B00022FC0A001006D41AA /* MonitoringCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -180,6 +183,7 @@
 				39FF853230410CDE006D41AA /* ConnectivityCore in Frameworks */,
 				39FF853430410CDE006D41AA /* WorkoutCore in Frameworks */,
 				39FF853630410CDE006D41AA /* WorkoutUI in Frameworks */,
+				3A1B00052FC0A001006D41AA /* MonitoringCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -284,6 +288,7 @@
 				3997010F2A1D9BCA00D0D486 /* Embed Watch Content */,
 				390E3BDD2F3B62B9003599BF /* ShellScript */,
 				39D471FC2FBC32F1005FBA12 /* Embed Foundation Extensions */,
+				3A1B00032FC0A001006D41AA /* Upload dSYMs to Crashlytics */,
 			);
 			buildRules = (
 			);
@@ -308,6 +313,7 @@
 				399700F92A1D9BC900D0D486 /* Frameworks */,
 				399700FA2A1D9BC900D0D486 /* Resources */,
 				39BF17602EBA37F70026184E /* Embed Foundation Extensions */,
+				3A1B00062FC0A001006D41AA /* Upload dSYMs to Crashlytics */,
 			);
 			buildRules = (
 			);
@@ -511,6 +517,46 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nexport PATH=\"$PATH:/opt/homebrew/bin\"\nif which swiftlint > /dev/null; then\n  swiftlint\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
+		};
+		3A1B00032FC0A001006D41AA /* Upload dSYMs to Crashlytics */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}",
+			);
+			name = "Upload dSYMs to Crashlytics";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Release(Archive) 에서만 돈다. Debug 는 디버거가 붙어 리포트가 올라가지 않는다.\nif [ \"${CONFIGURATION}\" != \"Release\" ]; then exit 0; fi\n\n# plist 는 git 밖이라 빠진 채 아카이브될 수 있다. 그러면 앱은 Noop 으로 돌아 수집이 조용히 꺼진다 — 여기서 막는다.\nPLIST=\"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GoogleService-Info.plist\"\nif [ ! -f \"${PLIST}\" ]; then\n  echo \"error: GoogleService-Info.plist 가 번들에 없다 — Firebase 콘솔에서 받아 ${TARGET_NAME} 의 소스 폴더에 넣는다\"\n  exit 1\nfi\n\n\"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\" -gsp \"${PLIST}\"\n";
+		};
+		3A1B00062FC0A001006D41AA /* Upload dSYMs to Crashlytics */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}",
+			);
+			name = "Upload dSYMs to Crashlytics";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Release(Archive) 에서만 돈다. Debug 는 디버거가 붙어 리포트가 올라가지 않는다.\nif [ \"${CONFIGURATION}\" != \"Release\" ]; then exit 0; fi\n\n# plist 는 git 밖이라 빠진 채 아카이브될 수 있다. 그러면 앱은 Noop 으로 돌아 수집이 조용히 꺼진다 — 여기서 막는다.\nPLIST=\"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GoogleService-Info.plist\"\nif [ ! -f \"${PLIST}\" ]; then\n  echo \"error: GoogleService-Info.plist 가 번들에 없다 — Firebase 콘솔에서 받아 ${TARGET_NAME} 의 소스 폴더에 넣는다\"\n  exit 1\nfi\n\n\"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\" -gsp \"${PLIST}\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -1250,6 +1296,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 39FF851D30410BA1006D41AA /* XCLocalSwiftPackageReference "../../Packages/YJKit" */;
 			productName = WorkoutUI;
+		};
+		3A1B00012FC0A001006D41AA /* MonitoringCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 39FF851D30410BA1006D41AA /* XCLocalSwiftPackageReference "../../Packages/YJKit" */;
+			productName = MonitoringCore;
+		};
+		3A1B00042FC0A001006D41AA /* MonitoringCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 39FF851D30410BA1006D41AA /* XCLocalSwiftPackageReference "../../Packages/YJKit" */;
+			productName = MonitoringCore;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
