@@ -74,7 +74,7 @@ make lint && make format
 synchronized group 이라 파일을 폴더에 두면 타깃에 자동 포함된다. `iOSApp/` 은 `TennisCounter` 에만, `WatchApp/` 은 워치 타깃에만 붙어 있어 섞이지 않는다 (2026-09-28 빌드 산출물에서 확인).
 
 - [ ] **plist 는 커밋하지 않는다.** 새 체크아웃·워크트리에서는 콘솔 → 프로젝트 설정 → 내 앱에서 다시 받아 같은 자리에 넣는다
-- [ ] GCP 에서 API 키 제한 — iOS 앱(번들 ID 두 개) + API 목록에서 `Firebase AI Logic API` 제외
+- [x] GCP 에서 API 키 제한 — iOS 앱(번들 ID 두 개) + API 목록에서 `Firebase AI Logic API` 제외 (09-28 완료. GitHub secret scanning 경고 #1 은 Revoked 로 닫음)
 
 ---
 
