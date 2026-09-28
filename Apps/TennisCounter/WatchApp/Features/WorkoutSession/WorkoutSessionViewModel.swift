@@ -1,5 +1,6 @@
 import Combine
 import Foundation
+import MonitoringCore
 import WidgetKit
 import WorkoutCore
 
@@ -21,6 +22,7 @@ class WorkoutSessionViewModel: ObservableObject {
     private var _currentSession: MatchSession?
     let scoreVM: ScoreViewModel
     private let haptics: MatchHapticsPlaying
+    private let crashReporter: CrashReporting
     private(set) var isDriver = false
     /// 워크아웃 식별자. 상대 기기의 id를 채택하면 그 값으로 바뀌고, 워크아웃이 끝날 때까지 유지된다.
     /// handleIncomingSessionStart의 동시 시작 race 가드는 이 값(workoutSessionId 아님)과 비교한다 —
@@ -39,12 +41,14 @@ class WorkoutSessionViewModel: ObservableObject {
 
     init(healthKit: WorkoutSessionService = WorkoutSessionService(configuration: .tennis),
          metricsThrottle: TimeInterval = 5, ackTimeoutSeconds: TimeInterval = 8,
-         haptics: MatchHapticsPlaying = MatchHaptics())
+         haptics: MatchHapticsPlaying = MatchHaptics(),
+         crashReporter: CrashReporting = AppCrashReporter.current)
     {
         self.healthKit = healthKit
         self.metricsThrottle = metricsThrottle
         self.ackTimeoutSeconds = ackTimeoutSeconds
         self.haptics = haptics
+        self.crashReporter = crashReporter
         // 점수 햅틱도 같은 인스턴스를 타야 테스트 스파이가 한 곳에서 다 본다
         scoreVM = ScoreViewModel(
             options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false),
@@ -188,6 +192,7 @@ class WorkoutSessionViewModel: ObservableObject {
     }
 
     func startMatch(options: MatchOptions, sessionId: UUID? = nil, matchId: UUID? = nil, isRemote: Bool = false) {
+        crashReporter.log("match started")
         isDriver = !isRemote
         hasSyncedSession = true
         saveAckState = .idle
@@ -240,6 +245,7 @@ class WorkoutSessionViewModel: ObservableObject {
         session.yourSetScore = completedSets.count(where: { $0.your > $0.my })
 
         phase = .finished(session)
+        crashReporter.log("match finished")
 
         Task {
             session.averageHeartRate = await healthKit.averageHeartRate(
@@ -258,11 +264,13 @@ class WorkoutSessionViewModel: ObservableObject {
         guard let session = _currentSession else { return }
         saveAttemptToken += 1
         let token = saveAttemptToken
+        crashReporter.log("save attempted")
         saveAckState = .pending
         connectivity.sendMatchSave(makeMatchEndMessage(session: session))
         DispatchQueue.main.asyncAfter(deadline: .now() + ackTimeoutSeconds) { [weak self] in
             guard let self, saveAttemptToken == token, saveAckState == .pending else { return }
             saveAckState = .failed
+            recordSaveAckTimeout()
             haptics.play(.saveFailed)
         }
     }
@@ -352,8 +360,20 @@ class WorkoutSessionViewModel: ObservableObject {
     private func sendMatchEndToiOS(session: MatchSession) {
         connectivity.sendMatchEnd(makeMatchEndMessage(session: session))
     }
+}
 
-    private func makeMatchEndMessage(session: MatchSession) -> MatchEndMessage {
+/// 본체 밖으로 뺀 helper 들. 클래스 본문 길이 제한(type_body_length)에 걸리지 않게 하려는 것이고,
+/// 같은 파일이라 private 멤버에 닿는다.
+private extension WorkoutSessionViewModel {
+    /// 저장 ACK 가 제한 시간 안에 오지 않았다 — 워치가 본 저장 실패의 유일한 신호다.
+    func recordSaveAckTimeout() {
+        crashReporter.record(
+            MonitoringError(domain: "Ralli.Save", code: 3, message: "ack timeout after \(ackTimeoutSeconds)s"),
+            context: ["sessionId": activeSessionId.uuidString]
+        )
+    }
+
+    func makeMatchEndMessage(session: MatchSession) -> MatchEndMessage {
         MatchEndMessage(
             sessionId: session.workoutSessionId,
             result: session.result?.rawValue ?? "win",
