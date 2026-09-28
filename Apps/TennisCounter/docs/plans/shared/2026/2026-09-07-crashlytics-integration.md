@@ -4,7 +4,12 @@
 
 **Goal:** Ralli iOS·워치 앱에 YJKit `MonitoringCore` 를 붙여 크래시가 Firebase 콘솔에 심볼 붙은 스택으로 올라오고, 경기 저장 실패가 non-fatal 로 기록되게 한다.
 
-**Architecture:** 두 앱 진입점에서 `CrashlyticsReporter.configureFirebase()` 를 부르고 `CrashlyticsReporter()` 를 `WorkoutSessionViewModel` 에 주입한다(기본값 → 기존 호출부·테스트 무변경). 저장 실패 3곳이 `MonitoringError(domain: "Ralli.Save", …)` 를 `record` 하고, 경기 시작·종료·저장 시도 3곳이 `log` 브레드크럼을 남긴다. plist·dSYM 스크립트는 타깃별.
+**Architecture:** 두 앱 진입점이 `CrashlyticsReporter.start()` 의 결과를 앱 레이어의 `AppCrashReporter.current` 에 담고, `WorkoutSessionViewModel` 은 그 값을 기본 인자로 받는다(→ 기존 호출부 무변경). plist 가 없으면(CI·새 체크아웃) `start()` 가 Noop 을 돌려주고, 테스트 실행 중에는 `start()` 자체를 건너뛴다. 저장 실패 3곳이 `MonitoringError(domain: "Ralli.Save", …)` 를 `record` 하고, 경기 시작·종료·저장 시도 3곳이 `log` 브레드크럼을 남긴다. plist·dSYM 스크립트는 타깃별.
+
+> **2026-09-28 개정** — 저장소가 공개라 plist 를 git 에서 뺐다(`.gitignore`). 그에 맞춰 Kit 의
+> `configureFirebase()` 가 `start() -> CrashReporting` 으로 바뀌었고(PR #35), CI 는 plist 없이 Noop 으로 돈다.
+> 원안의 ViewModel 기본값 `CrashlyticsReporter()` 는 초기화 없이 리포터를 만들어 프리뷰·테스트를 죽일 수
+> 있었다 — 이제 `CrashlyticsReporter` 는 `start()` 로만 얻는다.
 
 **Tech Stack:** MonitoringCore / FirebaseCrashlytics / Swift Testing
 
@@ -25,10 +30,11 @@
 ## Global Constraints
 
 - **YJKit 은 수정하지 않는다.**
-- 익스텐션 2개(`ComplicationApp`, `TennisLiveActivity`)에는 `MonitoringCore` 를 링크하지도, `configureFirebase()` 를 부르지도 않는다.
+- 익스텐션 2개(`ComplicationApp`, `TennisLiveActivity`)에는 `MonitoringCore` 를 링크하지도, `start()` 를 부르지도 않는다.
 - ViewModel 은 `CrashReporting` 프로토콜만 안다. `FirebaseCrashlytics` import 는 앱 진입점에도 없다 — `CrashlyticsReporter` 만.
-- 주입 파라미터는 기본값을 줘서 기존 테스트·프리뷰가 그대로 컴파일된다.
-- `GoogleService-Info.plist` 는 **커밋한다** — 공개 저장소가 아니고, 이 파일엔 비밀 키가 없다 (Firebase 문서 기준 클라이언트 식별자). 단 저장소를 공개로 바꾸면 그때 재검토.
+- 주입 파라미터 기본값은 `AppCrashReporter.current` — 기존 테스트·프리뷰가 그대로 컴파일되고, 채워지기 전엔 Noop 이다.
+- `GoogleService-Info.plist` 는 **커밋하지 않는다** — 저장소가 공개다. 루트 `.gitignore` 가 막는다. 로컬에만 두고, 새 체크아웃·워크트리에는 콘솔에서 다시 받는다.
+- **CI 는 바꾸지 않는다.** plist 가 없으니 앱이 Noop 으로 돈다. GitHub Secret 도 쓰지 않는다.
 - PR 은 Ralli 연동만 따로.
 
 **빌드·테스트 명령** (루트에서)
@@ -45,25 +51,30 @@ make lint && make format
 
 | 파일 | 상태 | 책임 |
 |---|---|---|
-| `iOSApp/GoogleService-Info.plist`, `WatchApp/GoogleService-Info.plist` | 생성 (콘솔에서 받음) | Firebase 앱 식별 |
-| `TennisCounter.xcodeproj/project.pbxproj` | 수정 (Xcode UI) | 두 타깃에 `MonitoringCore` 링크, dSYM Build Phase, `ENABLE_USER_SCRIPT_SANDBOXING = NO` |
-| `iOSApp/iOSApp.swift`, `WatchApp/WatchApp.swift` | 수정 | `configureFirebase()` |
-| `iOSApp/Features/WorkoutSession/WorkoutSessionViewModel.swift` | 수정 | `crashReporter` 주입, 저장 실패 2곳 `record`, 브레드크럼 |
+| `iOSApp/GoogleService-Info.plist`, `WatchApp/GoogleService-Info.plist` | 로컬에만 (git 밖) | Firebase 앱 식별 |
+| `TennisCounter.xcodeproj/project.pbxproj` | 수정 | 두 타깃에 `MonitoringCore` 링크, dSYM Build Phase(Release plist 검사 포함), `ENABLE_USER_SCRIPT_SANDBOXING = NO` |
+| `Shared/Services/AppCrashReporter.swift` | 생성 | 앱이 쓰는 리포터 한 곳. 기본 Noop, 진입점이 `start()` 결과로 채운다 |
+| `iOSApp/iOSApp.swift`, `WatchApp/WatchApp.swift` | 수정 | `AppCrashReporter.start()` |
+| `CLAUDE.md` (TennisCounter) | 수정 | plist 가 git 밖에 있다는 것과 받는 곳 한 줄 |
+| `iOSApp/Features/WorkoutSession/WorkoutSessionViewModel.swift` | 수정 | `crashReporter` 주입(기본값 `AppCrashReporter.current`), 저장 실패 2곳 `record`, 브레드크럼 |
 | `WatchApp/Features/WorkoutSession/WorkoutSessionViewModel.swift` | 수정 | `crashReporter` 주입, ACK 타임아웃 `record`, 브레드크럼 |
 | `iosTests/Support/CrashReportingSpy.swift`, `watchosTests/Support/CrashReportingSpy.swift` | 생성 | YJKit 테스트의 스파이 복사 |
 | `iosTests/WorkoutSession/WorkoutSessionViewModelTests.swift`, `watchosTests/…` | 수정 | non-fatal 테스트 |
 
 ---
 
-### Task 0: Firebase 콘솔 + plist (사람이 한다)
+### Task 0: Firebase 콘솔 + plist (사람이 한다) — 2026-09-28 콘솔·plist 완료
 
-- [ ] [console.firebase.google.com](https://console.firebase.google.com) → 프로젝트 추가 **Ralli** (Google Analytics 는 끈다 — Crashlytics 만 쓴다)
-- [ ] 앱 추가 → Apple → 번들 ID `com.yj.TennisCounter` → `GoogleService-Info.plist` 다운로드 → `Apps/TennisCounter/iOSApp/` 에 저장
-- [ ] 앱 추가 → Apple → 번들 ID `com.yj.TennisCounter.watchkitapp` → plist 다운로드 → `Apps/TennisCounter/WatchApp/` 에 저장
-- [ ] 두 앱 모두 왼쪽 메뉴 **Crashlytics → 시작하기** 눌러 활성화
-- [ ] `plutil -p Apps/TennisCounter/iOSApp/GoogleService-Info.plist | grep BUNDLE_ID` → `com.yj.TennisCounter` 인지, 워치 것은 `.watchkitapp` 인지 확인. **바뀌면 크래시가 엉뚱한 앱으로 간다**
+- [x] [console.firebase.google.com](https://console.firebase.google.com) → 프로젝트 추가 **Ralli** (Google Analytics 는 끈다 — Crashlytics 만 쓴다)
+- [x] 앱 추가 → Apple → 번들 ID `com.yj.TennisCounter` → `GoogleService-Info.plist` 다운로드 → `Apps/TennisCounter/iOSApp/` 에 저장
+- [x] 앱 추가 → Apple → 번들 ID `com.yj.TennisCounter.watchkitapp` → plist 다운로드 → `Apps/TennisCounter/WatchApp/` 에 저장
+- [x] ~~두 앱 모두 왼쪽 메뉴 **Crashlytics → 시작하기** 눌러 활성화~~ — 지금 콘솔엔 버튼이 없다. SDK 가 첫 보고를 보내면 대시보드가 자동으로 켜진다 (Task 4 에서 확인)
+- [x] `plutil -p Apps/TennisCounter/iOSApp/GoogleService-Info.plist | grep BUNDLE_ID` → `com.yj.TennisCounter` 인지, 워치 것은 `.watchkitapp` 인지 확인. **바뀌면 크래시가 엉뚱한 앱으로 간다**
 
-synchronized group 이라 파일을 폴더에 두면 타깃에 자동 포함된다. 단 `iOSApp/` 의 plist 가 워치 타깃에 들어가면 안 되니, Xcode 에서 두 파일의 Target Membership 을 눈으로 확인한다.
+synchronized group 이라 파일을 폴더에 두면 타깃에 자동 포함된다. `iOSApp/` 은 `TennisCounter` 에만, `WatchApp/` 은 워치 타깃에만 붙어 있어 섞이지 않는다 (2026-09-28 빌드 산출물에서 확인).
+
+- [ ] **plist 는 커밋하지 않는다.** 새 체크아웃·워크트리에서는 콘솔 → 프로젝트 설정 → 내 앱에서 다시 받아 같은 자리에 넣는다
+- [ ] GCP 에서 API 키 제한 — iOS 앱(번들 ID 두 개) + API 목록에서 `Firebase AI Logic API` 제외
 
 ---
 
@@ -77,21 +88,29 @@ synchronized group 이라 파일을 폴더에 두면 타깃에 자동 포함된�
 
 Xcode → `TennisCounter` 타깃 → Frameworks, Libraries → `+` → YJKit `MonitoringCore`. `TennisCounter Watch App` 타깃도 동일. 익스텐션 2개는 **하지 않는다.**
 
-- [ ] **Step 2: 진입점에서 초기화**
+- [ ] **Step 2: 앱 리포터 자리 + 진입점에서 초기화**
 
-`iOSApp/iOSApp.swift` — import 에 `MonitoringCore` 추가(알파벳순), `init()` 첫 줄:
+`Shared/Services/AppCrashReporter.swift` (iOS·워치 두 타깃이 공유하는 폴더):
 ```swift
-    init() {
-        CrashlyticsReporter.configureFirebase()
-        // CloudKit 동기화 시도 → ...
-```
+import Foundation
+import MonitoringCore
 
-`WatchApp/WatchApp.swift` — `@main` 구조체에 `init()` 이 없으면 만든다:
-```swift
-    init() {
-        CrashlyticsReporter.configureFirebase()
+/// 앱이 쓰는 크래시 리포터 한 곳. 코어는 싱글톤을 두지 않으므로 어디에 들고 있을지는 앱이 정한다.
+/// 진입점이 `start()` 를 부르기 전과 테스트 실행 중에는 Noop 이다.
+enum AppCrashReporter {
+    private(set) static var current: CrashReporting = NoopCrashReporter()
+
+    /// 테스트 실행 중이면 건너뛴다 — 로컬엔 plist 가 있어 테스트가 실제 Firebase 로 브레드크럼을 보내게 된다.
+    static func start() {
+        guard ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil else { return }
+        current = CrashlyticsReporter.start()
     }
+}
 ```
+
+`iOSApp/iOSApp.swift` — `init()` 첫 줄에 `AppCrashReporter.start()`.
+`WatchApp/WatchApp.swift` — `@main` 구조체에 `init()` 이 없으면 만들어 `AppCrashReporter.start()`.
+진입점은 `MonitoringCore` 를 import 하지 않아도 된다.
 
 - [ ] **Step 3: dSYM 업로드 Build Phase — 두 타깃 각각**
 
@@ -100,14 +119,20 @@ Xcode → `TennisCounter` 타깃 → Frameworks, Libraries → `+` → YJKit `Mo
 ```bash
 # Release(Archive) 에서만. Debug 는 디버거가 붙어 리포트가 안 올라가니 의미 없다.
 if [ "${CONFIGURATION}" != "Release" ]; then exit 0; fi
+# plist 가 git 밖이라 빠진 채 아카이브될 수 있다. 그러면 앱은 Noop 으로 돌아 수집이 조용히 꺼진다 — 여기서 막는다.
+PLIST="${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GoogleService-Info.plist"
+if [ ! -f "$PLIST" ]; then
+  echo "error: GoogleService-Info.plist 가 번들에 없다 — Firebase 콘솔에서 받아 타깃 폴더에 넣는다"
+  exit 1
+fi
 "${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run"
 ```
 
-Input Files 에 두 줄:
+Input Files 에는 dSYM 한 줄만 둔다. **plist 는 넣지 않는다** — 넣으면 plist 가 없는 CI(Debug)에서 입력 파일 누락으로 빌드가 깨질 수 있다. 검사는 위 스크립트가 Release 에서만 한다.
 ```
 ${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}
-$(SRCROOT)/$(TARGET_NAME)/GoogleService-Info.plist   # iOS: iOSApp/, 워치: WatchApp/ 로 실제 경로 맞춘다
 ```
+`Crashlytics/run` 이 plist 를 입력 파일 없이 번들에서 찾는지는 Task 4 의 심볼 확인으로 검증한다. 못 찾으면 `-gsp` 인자로 위 `$PLIST` 를 넘긴다.
 
 - [ ] **Step 4: 스크립트 샌드박스 끄기**
 
@@ -121,13 +146,15 @@ xcodebuild -workspace YJApps.xcworkspace -scheme "TennisCounter" -destination "i
 xcodebuild -workspace YJApps.xcworkspace -scheme "TennisCounter Watch App" -destination "id=$WATCH" build 2>&1 | tail -2
 ```
 Expected: `BUILD SUCCEEDED` × 2. 실행하면 콘솔에 `[FirebaseCore][I-COR000001] ... Configuring the default app` 이 뜬다 — 뜨지 않으면 plist 가 타깃에 안 들어간 것.
+plist 를 잠시 옮겨 두고 한 번 더 빌드·실행해 **죽지 않고 로그만 없는지**(Noop) 확인한다. CI 가 이 상태다.
 
 - [ ] **Step 6: 커밋**
 
 ```bash
 git add Apps/TennisCounter/TennisCounter.xcodeproj/project.pbxproj \
-        Apps/TennisCounter/iOSApp/GoogleService-Info.plist Apps/TennisCounter/WatchApp/GoogleService-Info.plist \
-        Apps/TennisCounter/iOSApp/iOSApp.swift Apps/TennisCounter/WatchApp/WatchApp.swift
+        Apps/TennisCounter/Shared/Services/AppCrashReporter.swift \
+        Apps/TennisCounter/iOSApp/iOSApp.swift Apps/TennisCounter/WatchApp/WatchApp.swift \
+        Apps/TennisCounter/CLAUDE.md   # plist 가 git 밖이라는 한 줄
 git commit -m "🔧 iOS·워치에 MonitoringCore 링크 + Firebase 초기화 + dSYM 업로드"
 ```
 
@@ -141,7 +168,7 @@ git commit -m "🔧 iOS·워치에 MonitoringCore 링크 + Firebase 초기화 + 
 - Modify: `iosTests/WorkoutSession/WorkoutSessionViewModelTests.swift`
 
 **Interfaces:**
-- Produces: `WorkoutSessionViewModel.init(liveActivity:crashReporter: CrashReporting = CrashlyticsReporter())`
+- Produces: `WorkoutSessionViewModel.init(liveActivity:crashReporter: CrashReporting = AppCrashReporter.current)`
 
 - [ ] **Step 1: 스파이**
 
@@ -215,7 +242,7 @@ final class CrashReportingSpy: CrashReporting, @unchecked Sendable {
     private let crashReporter: CrashReporting
 
     init(liveActivity: LiveActivityControlling = LiveActivityService.shared,
-         crashReporter: CrashReporting = CrashlyticsReporter())
+         crashReporter: CrashReporting = AppCrashReporter.current)
     {
         self.liveActivity = liveActivity
         self.crashReporter = crashReporter
@@ -274,7 +301,7 @@ git commit -m "✨ iOS 경기 저장 실패를 non-fatal 로 기록 + 브레드�
 - Modify: `watchosTests/WorkoutSession/WorkoutSessionViewModelTests.swift`
 
 **Interfaces:**
-- Produces: `init(healthKit:metricsThrottle:ackTimeoutSeconds:haptics:crashReporter: CrashReporting = CrashlyticsReporter())` — `haptics` 는 작업 #3 에서 생긴 파라미터. #3 이 아직이면 그 자리 없이 추가한다.
+- Produces: `init(healthKit:metricsThrottle:ackTimeoutSeconds:haptics:crashReporter: CrashReporting = AppCrashReporter.current)` — `haptics` 는 작업 #3 에서 생긴 파라미터. #3 이 아직이면 그 자리 없이 추가한다.
 
 - [ ] **Step 1: 실패하는 테스트**
 
@@ -347,8 +374,12 @@ Button("Crash") { fatalError("crashlytics test") }
 #endif
 ```
 - [ ] iOS: 디버거 **없이** 실행(Xcode 에서 Run 후 Stop, 홈에서 앱 아이콘으로 실행) → Crash 탭 → 앱 재실행 → 1~5분 뒤 콘솔 Crashlytics 에 `fatalError("crashlytics test")` 가 **심볼 붙은 파일:줄** 로 보이는지. 심볼이 `<redacted>` 면 dSYM 업로드 실패 → Task 1 Step 3·4 재확인
-- [ ] 워치: 같은 절차. 워치는 폰이 옆에 있어야 올라간다 — 재실행 후 폰 옆에서 몇 분 둔다
+- [ ] 워치: 같은 절차. 워치는 폰이 옆에 있어야 올라간다 — 재실행 후 폰 옆에서 몇 분 둔다.
+      **안 올라오면 GCP 키의 iOS 번들 ID 제한부터 의심한다** — 워치 SDK 가 번들 ID 헤더를 보내는지는 여기서 처음 확인된다
 - [ ] 임시 버튼 제거 확인: `git diff --stat` 에 Crash 버튼 없음
+
+**plist 누락 방어**
+- [ ] plist 를 잠시 옮기고 Release 아카이브 → dSYM 스크립트의 `error:` 로 **실패하는지**. 확인 후 되돌린다
 
 **non-fatal**
 - [ ] 폰 앱을 완전히 종료 → 워치에서 경기 저장 → 8초 뒤 "실패" → 콘솔 non-fatal 탭에 `Ralli.Save` code 3, 커스텀 키 `sessionId`
@@ -369,6 +400,6 @@ Button("Crash") { fatalError("crashlytics test") }
 ## Self-Review
 
 - 스펙 커버리지 — 범위(iOS+워치, 익스텐션 제외: 제약·Task 1), non-fatal 저장 실패 3곳(코드 표·Task 2·3), 앱 소유 항목(Task 0·1·4), dSYM 함정(Task 1 Step 3·4), 실기기 검증(Task 4), 수집 정책(후속) ✅
-- 타입 일관성 — `CrashReporting.record(_:context:)`/`log(_:)`, `MonitoringError(domain:code:message:)`, `CrashlyticsReporter.configureFirebase()` 가 Kit 플랜과 일치 ✅. 스파이 `Call` 케이스가 iOS·워치 테스트에서 같은 모양 ✅
+- 타입 일관성 — `CrashReporting.record(_:context:)`/`log(_:)`, `MonitoringError(domain:code:message:)`, `CrashlyticsReporter.start()` 가 Kit 구현(PR #35, 09-28 개정)과 일치 ✅. 스파이 `Call` 케이스가 iOS·워치 테스트에서 같은 모양 ✅
 - 작업 #1(`saveCurrentMatch -> Match?`)·#3(`haptics`)과의 교차점을 각 스텝에 명시 ✅
 - Task 2 Step 2 의 "저장 실패를 만드는 방법" 만 기존 테스트 파일을 보고 정하도록 열어 뒀다 — `MatchPersistenceService` 가 싱글톤이라 실패 주입 경로가 파일마다 다를 수 있다.

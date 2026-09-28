@@ -148,11 +148,12 @@ WorkoutShareButton(
 ```swift
 import MonitoringCore
 
-// 앱 진입점 — 초기화 시점은 앱이 정한다. 앱은 FirebaseCore 를 직접 링크하지 않는다
-CrashlyticsReporter.configureFirebase()
+// 앱 진입점 — 초기화 시점은 앱이 정한다. 앱은 FirebaseCore 를 직접 링크하지 않는다.
+// 번들에 GoogleService-Info.plist 가 있으면 Firebase 를 켜고 Crashlytics 리포터를,
+// 없으면(CI·새 체크아웃) 아무것도 안 건드리고 NoopCrashReporter 를 돌려준다
+let reporter: CrashReporting = CrashlyticsReporter.start()
 
-// 리포터를 만들어 주입. 싱글톤 없음
-let reporter: CrashReporting = CrashlyticsReporter()
+// 주입. 코어는 싱글톤을 두지 않는다 — 앱이 어디에 들고 있을지 정한다
 let vm = SomeViewModel(crashReporter: reporter)
 
 // non-fatal — 같은 종류는 같은 domain+code 로. 메시지는 자유
@@ -165,14 +166,17 @@ reporter.record(
 reporter.log("match started")
 ```
 
+`CrashlyticsReporter` 는 `start()` 로만 얻는다. 초기화 없이 만들어지면 첫 호출에서 죽기 때문이다.
 테스트·프리뷰는 `NoopCrashReporter()`. 호출을 검사하는 스파이의 형태는
 `Tests/MonitoringCoreTests/CrashReportingSpy.swift` 에 있다 — 테스트 타깃은 export 되지 않으니 복사해 쓴다.
 
 ### 소비자 책임 (패키지가 대신 못 해주는 것)
 
-- [ ] Firebase 콘솔에서 프로젝트를 만들고 **앱(번들 ID)마다** `GoogleService-Info.plist` 를 받아 타깃에 넣는다. iOS·워치는 별개 앱이다.
-- [ ] 각 앱 진입점 `init` 에서 `CrashlyticsReporter.configureFirebase()`. 익스텐션에서는 부르지 않는다.
+- [ ] Firebase 콘솔에서 프로젝트를 만들고 **앱(번들 ID)마다** `GoogleService-Info.plist` 를 받아 타깃 폴더에 넣는다. iOS·워치는 별개 앱이다.
+- [ ] **plist 는 git 에 넣지 않는다** (저장소가 공개 — 루트 `.gitignore` 가 막는다). 새 체크아웃·워크트리에는 콘솔에서 다시 받아 넣는다. 없으면 Noop 으로 돌 뿐 빌드·테스트는 깨지지 않는다.
+- [ ] 각 앱 진입점 `init` 에서 `CrashlyticsReporter.start()`. 익스텐션에서는 부르지 않는다.
 - [ ] 타깃마다 dSYM 업로드 Build Phase (`upload-symbols`). `ENABLE_USER_SCRIPT_SANDBOXING = YES` 면 **조용히 실패**한다.
+- [ ] **그 스크립트가 Release 에서 plist 존재를 검사해 없으면 아카이브를 실패시킨다.** plist 없이 출시하면 수집이 조용히 꺼진다 — Noop 폴백의 대가다.
 - [ ] App Privacy 라벨에 Crash Data · Other Diagnostic Data.
 - [ ] 수집 끄기 UI 를 둔다면 `Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(false)`.
 
