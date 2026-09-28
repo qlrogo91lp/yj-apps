@@ -19,6 +19,8 @@
 | non-fatal 초기 범위 | **경기 저장 실패만** | 사용자 기록이 날아가는 유일한 경로. 연결 실패·권한 거부는 노이즈 가능성이 커 실제 크래시 데이터를 본 뒤 결정 |
 | 수집 정책 | **기본 켜짐**, 앱 내 끄기는 설정 페이지(Ralli 작업 #8)에서 | `Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(false)` 한 줄이 진입점 |
 | Debug 빌드 | 별도 분기 없음 | 디버거가 붙어 있으면 Crashlytics 가 업로드하지 않는다. 테스트·프리뷰는 `NoopCrashReporter` |
+| `GoogleService-Info.plist` 관리 | **git 에 넣지 않는다** (2026-09-28 개정) | 저장소가 공개다. 앱 번들에 들어가는 공개 식별자라 비밀은 아니지만, 포크가 우리 프로젝트로 보고하는 것을 막는다. 키 자체는 GCP 에서 번들 ID·API 로 제한한다 |
+| plist 가 없을 때 | **`start()` 가 Noop 을 돌려준다** (2026-09-28 개정) | CI 가 GitHub Secret 없이 돈다. 대가는 plist 없이 출시하면 수집이 조용히 꺼지는 것 — dSYM 스크립트가 Release 에서 plist 를 검사해 막는다 |
 
 ## 구조
 
@@ -45,11 +47,12 @@ public protocol CrashReporting: Sendable {
 
 ### 앱이 소유하는 것 (코어가 대신 못 하는 것)
 
-- `FirebaseApp.configure()` 호출 — 앱 진입점 `init` 에서. iOS·워치 각각
-- `GoogleService-Info.plist` — Firebase 콘솔에서 앱(번들 ID)마다 받는다. 타깃별로 다르다
+- `CrashlyticsReporter.start()` 호출 — 앱 진입점 `init` 에서. iOS·워치 각각. 내부에서 `FirebaseApp.configure(options:)` 를 부른다
+- `GoogleService-Info.plist` — Firebase 콘솔에서 앱(번들 ID)마다 받는다. 타깃별로 다르다. git 밖에 둔다
 - dSYM 업로드 Build Phase — 타깃별
 - App Privacy 라벨 (Crash Data · Other Diagnostic Data)
-- 리포터 주입 — `CrashlyticsReporter()` 를 만들어 ViewModel 에 넘긴다. 코어는 싱글톤을 두지 않는다
+- 리포터 주입 — `start()` 가 돌려준 리포터를 ViewModel 에 넘긴다. 코어는 싱글톤을 두지 않는다 — 앱이 어디에 들고 있을지 정한다.
+  `CrashlyticsReporter` 는 `start()` 로만 얻는다(`init` 이 `internal`) — 초기화 없이 만들어지면 첫 호출에서 죽는다
 
 "코어는 도메인을 모른다" — Firebase 프로젝트가 뭔지, 어느 번들인지는 코어가 알 수 없다.
 

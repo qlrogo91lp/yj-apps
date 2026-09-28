@@ -56,3 +56,7 @@ fastlane/test_output
 
 # Superpowers SDD scratch workspace
 .superpowers/
+
+# Firebase — 저장소가 공개라 커밋하지 않는다. CI 는 GitHub Secrets 에서 복원한다.
+# 앱 번들에 들어가는 공개 식별자라 비밀은 아니지만, 포크가 우리 Firebase 프로젝트로 보고하는 것을 막는다.
+GoogleService-Info.plist

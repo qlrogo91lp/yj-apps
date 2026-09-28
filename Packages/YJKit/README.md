@@ -10,6 +10,7 @@ yj-apps 모노레포의 공용 iOS+watchOS 앱 인프라. 독립 라이브러리
 | `ConnectivityCore` | 폰↔워치 전송 (실시간/큐잉/컨텍스트) | ✅ |
 | `PersistenceCore` | SwiftData + CloudKit 컨테이너/서비스 | ✅ |
 | `WorkoutShareUI` | 워크아웃 결과 카드를 인스타그램 스토리로 공유 (iOS 전용) | ✅ |
+| `MonitoringCore` | 크래시 리포팅 — `CrashReporting` 프로토콜 + Firebase Crashlytics 구현 | ✅ |
 
 ## WorkoutCore 사용법
 
@@ -139,6 +140,45 @@ WorkoutShareButton(
 - [ ] **`WorkoutShareHeader`의 시각은 카드 숫자와 같은 구간이어야 한다.** 누적값을 넘겼으면 워크아웃 시작 ~ 그 누적값을 잰 시점이다.
 - [ ] **제목은 앱이 현지화한다.** 패키지는 종목을 모른다.
 - [ ] **iOS 전용이다.** 워치 타깃에서 임포트해도 심볼이 없다.
+
+## MonitoringCore 사용법
+
+크래시는 SDK 가 알아서 잡는다. 이 프로덕트는 **non-fatal 과 브레드크럼** 을 앱이 프로토콜로 보내게 한다.
+
+```swift
+import MonitoringCore
+
+// 앱 진입점 — 초기화 시점은 앱이 정한다. 앱은 FirebaseCore 를 직접 링크하지 않는다.
+// 번들에 GoogleService-Info.plist 가 있으면 Firebase 를 켜고 Crashlytics 리포터를,
+// 없으면(CI·새 체크아웃) 아무것도 안 건드리고 NoopCrashReporter 를 돌려준다
+let reporter: CrashReporting = CrashlyticsReporter.start()
+
+// 주입. 코어는 싱글톤을 두지 않는다 — 앱이 어디에 들고 있을지 정한다
+let vm = SomeViewModel(crashReporter: reporter)
+
+// non-fatal — 같은 종류는 같은 domain+code 로. 메시지는 자유
+reporter.record(
+    MonitoringError(domain: "Ralli.Save", code: 1, message: "ack timeout"),
+    context: ["sessionId": id.uuidString]
+)
+
+// 브레드크럼 — 크래시 직전 맥락. 자주 부르지 않는다
+reporter.log("match started")
+```
+
+`CrashlyticsReporter` 는 `start()` 로만 얻는다. 초기화 없이 만들어지면 첫 호출에서 죽기 때문이다.
+테스트·프리뷰는 `NoopCrashReporter()`. 호출을 검사하는 스파이의 형태는
+`Tests/MonitoringCoreTests/CrashReportingSpy.swift` 에 있다 — 테스트 타깃은 export 되지 않으니 복사해 쓴다.
+
+### 소비자 책임 (패키지가 대신 못 해주는 것)
+
+- [ ] Firebase 콘솔에서 프로젝트를 만들고 **앱(번들 ID)마다** `GoogleService-Info.plist` 를 받아 타깃 폴더에 넣는다. iOS·워치는 별개 앱이다.
+- [ ] **plist 는 git 에 넣지 않는다** (저장소가 공개 — 루트 `.gitignore` 가 막는다). 새 체크아웃·워크트리에는 콘솔에서 다시 받아 넣는다. 없으면 Noop 으로 돌 뿐 빌드·테스트는 깨지지 않는다.
+- [ ] 각 앱 진입점 `init` 에서 `CrashlyticsReporter.start()`. 익스텐션에서는 부르지 않는다.
+- [ ] 타깃마다 dSYM 업로드 Build Phase (`upload-symbols`). `ENABLE_USER_SCRIPT_SANDBOXING = YES` 면 **조용히 실패**한다.
+- [ ] **그 스크립트가 Release 에서 plist 존재를 검사해 없으면 아카이브를 실패시킨다.** plist 없이 출시하면 수집이 조용히 꺼진다 — Noop 폴백의 대가다.
+- [ ] App Privacy 라벨에 Crash Data · Other Diagnostic Data.
+- [ ] 수집 끄기 UI 를 둔다면 `Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(false)`.
 
 ## ConnectivityCore 사용법
 

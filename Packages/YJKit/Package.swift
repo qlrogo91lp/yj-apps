@@ -11,6 +11,11 @@ let package = Package(
         .library(name: "ConnectivityCore", targets: ["ConnectivityCore"]),
         .library(name: "PersistenceCore", targets: ["PersistenceCore"]),
         .library(name: "WorkoutShareUI", targets: ["WorkoutShareUI"]),
+        .library(name: "MonitoringCore", targets: ["MonitoringCore"]),
+    ],
+    dependencies: [
+        // Crashlytics 만 쓴다. 다른 Firebase 프로덕트는 Phase 2.
+        .package(url: "https://github.com/firebase/firebase-ios-sdk.git", from: "12.0.0"),
     ],
     targets: [
         .target(
@@ -38,6 +43,13 @@ let package = Package(
             name: "PersistenceCore",
             swiftSettings: [.swiftLanguageMode(.v5)]
         ),
+        .target(
+            name: "MonitoringCore",
+            dependencies: [
+                .product(name: "FirebaseCrashlytics", package: "firebase-ios-sdk"),
+            ],
+            swiftSettings: [.swiftLanguageMode(.v5)]
+        ),
         .testTarget(
             name: "WorkoutCoreTests",
             dependencies: ["WorkoutCore"],
@@ -56,6 +68,11 @@ let package = Package(
         .testTarget(
             name: "WorkoutShareUITests",
             dependencies: ["WorkoutShareUI"],
+            swiftSettings: [.swiftLanguageMode(.v5)]
+        ),
+        .testTarget(
+            name: "MonitoringCoreTests",
+            dependencies: ["MonitoringCore"],
             swiftSettings: [.swiftLanguageMode(.v5)]
         ),
     ]

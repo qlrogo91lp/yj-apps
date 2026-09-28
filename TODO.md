@@ -40,7 +40,7 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
 | ~~3~~ | ~~햅틱 (워치 전용)~~ | B | **완료** (PR #18) · 실기기 확인 완료 | [플랜](Apps/TennisCounter/docs/plans/watch/2026/2026-09-07-match-haptics.md) — 설정 연동은 #8 때 `MatchHaptics.play` 첫 줄에서. 포인트 `.click`이 약하게 느껴지나 유지하기로 결정 |
 | ~~4~~ | ~~크라운 점수 입력 (워치, 위=나 아래=상대)~~ | B | **완료** (버그 수정 PR, 실기기 확인 완료) | [플랜](Apps/TennisCounter/docs/plans/watch/2026/2026-09-07-crown-scoring.md) — PR #22 구현이 회전량 기반이라 실기기에서 오작동, 디텐트 방식으로 재구현. 온보딩(#6) 항목 하나 파생 |
 | ~~6~~ | ~~온보딩 **5페이지** (워치 중심, iOS 만)~~ | A → 합류 | **완료** (PR #25) · 실기기 확인 완료 | [스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-09-07-onboarding-design.md) (09-18 개정) · [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-17-onboarding-watch-focused.md) — 4페이지에서 5페이지로 재편, 기능 목록 페이지 제거. 워치 3장은 Figma 목업 합성, 공유 그림은 인스타 스티커 화면 |
-| 7 | Firebase Crashlytics (iOS + 워치, 익스텐션 제외) | 단독 (맨 뒤) | 스펙·플랜 완료 · 구현 대기 | [스펙](Packages/YJKit/docs/specs/shared/2026/2026-09-07-crash-reporting-design.md) → [YJKit 플랜](Packages/YJKit/docs/plans/shared/2026/2026-09-07-monitoring-core.md) (트랙 C, 지금 병렬 가능) → [Ralli 플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-07-crashlytics-integration.md) |
+| 7 | Firebase Crashlytics (iOS + 워치, 익스텐션 제외) | 단독 (맨 뒤) | Kit 완료 (PR #35, 출시 뒤 머지) · Ralli 연동 대기 — plist 는 git 밖, CI 는 Noop 으로 돈다 (09-28 플랜 개정) | [스펙](Packages/YJKit/docs/specs/shared/2026/2026-09-07-crash-reporting-design.md) → [YJKit 플랜](Packages/YJKit/docs/plans/shared/2026/2026-09-07-monitoring-core.md) (트랙 C, 지금 병렬 가능) → [Ralli 플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-07-crashlytics-integration.md) |
 | 8 | 설정 페이지 + 다른 앱 노출 | — | **논의 필요 — 아직 브레인스토밍 전** | 아래 "남은 논의" 참고 |
 | ~~9~~ | ~~iOS 기록·요약 **세션 중심 재편**~~ | D | **완료** · 실기기 확인 완료 | [스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-09-18-session-centric-history.md) · [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-18-session-centric-history.md) — `WorkoutSessionRecord` 신설이 포함된다. #2 스펙을 개정한다 |
 | ~~10~~ | ~~기록 삭제 시 **건강 앱 워크아웃도 삭제**~~ | E (YJKit+iOS) | **완료** ([PR #29](https://github.com/qlrogo91lp/yj-apps/pull/29)) · 실기기 확인 완료 | [플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-21-healthkit-workout-deletion.md) — YJKit `WorkoutDeletionService` 신설. 건강 앱에서 먼저 지운 경우 Ralli 기록은 유지한다 |
@@ -74,7 +74,11 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
 
 **트랙 C (YJKit)** — A·B 와 무관, 지금 시작 가능
 
-- [ ] Firebase 콘솔에 프로젝트 "Ralli" + Apple 앱 2개(iOS·워치 번들 ID) 만들고 `GoogleService-Info.plist` 2개 받기
+- [x] Firebase 콘솔에 프로젝트 "Ralli" + Apple 앱 2개(iOS·워치 번들 ID) 만들고 `GoogleService-Info.plist` 2개 받기 —
+      지난주 시도에서 삭제 대기로 남은 iOS 앱이 번들 ID 를 붙잡고 있어 복원해서 썼다. plist 는 Ralli 연동 PR 에서 커밋
+- [x] YJKit `MonitoringCore` 플랜 Task 0~3 — [PR #35](https://github.com/qlrogo91lp/yj-apps/pull/35) CI 통과 (전체 약 10분 30초, Firebase 해석 +1분 20초).
+      저장소가 공개라 plist 를 git 에서 빼고 `configureFirebase()` → `start()`(plist 없으면 Noop)로 바꿨다.
+      **머지는 버그픽스 출시 뒤에**
 - [ ] YJKit `MonitoringCore` 플랜 (Task 0 스파이크 → CI 통과 → PR 머지)
 
 **합류 후**
