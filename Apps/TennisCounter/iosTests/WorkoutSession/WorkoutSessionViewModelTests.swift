@@ -1,4 +1,5 @@
 import Foundation
+import MonitoringCore
 import SwiftData
 @testable import TennisCounter
 import Testing
@@ -16,6 +17,10 @@ final class LiveActivitySpy: LiveActivityControlling {
     func end() {
         endCount += 1
     }
+}
+
+private enum CrashReportingTestStorage {
+    @MainActor static var retainedContainers: [ModelContainer] = []
 }
 
 @Suite(.serialized)
@@ -713,5 +718,93 @@ struct WorkoutSessionViewModelTests {
         #expect(match.workoutCaloriesBurned == 600) // 누적
         #expect(match.totalCaloriesBurned == 310) // 경기 구간
         #expect(match.workoutTotalCaloriesBurned == 730) // 누적
+    }
+
+    // MARK: - Crash reporting
+
+    /// 브레드크럼을 뺀 non-fatal 기록만.
+    private func nonFatals(_ spy: CrashReportingSpy) -> [(domain: String, code: Int, context: [String: String])] {
+        spy.calls.compactMap { call in
+            if case let .record(domain, code, context) = call { return (domain, code, context) }
+            return nil
+        }
+    }
+
+    @Test @MainActor func localSaveFailureIsRecordedAsNonFatal() {
+        MatchPersistenceService.shared.resetForTesting() // 저장소 없음 → upsert 가 notConfigured 로 실패
+        let spy = CrashReportingSpy()
+        let vm = WorkoutSessionViewModel(liveActivity: LiveActivitySpy(), crashReporter: spy)
+        vm.startSession()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.finishMatch(result: .win, completedSets: [(my: 6, your: 4)])
+
+        #expect(vm.saveCurrentMatch() == nil)
+
+        let recorded = nonFatals(spy)
+        #expect(recorded.count == 1)
+        #expect(recorded.first?.domain == "Ralli.Save")
+        #expect(recorded.first?.code == 1)
+        #expect(recorded.first?.context["source"] == "local")
+        #expect(recorded.first?.context["matchId"] != nil)
+        #expect(spy.calls.contains(.log("save attempted (local)")))
+    }
+
+    @Test @MainActor func watchSaveFailureIsRecordedAsNonFatal() {
+        MatchPersistenceService.shared.resetForTesting()
+        let spy = CrashReportingSpy()
+        let vm = WorkoutSessionViewModel(liveActivity: LiveActivitySpy(), crashReporter: spy)
+        let sid = UUID()
+
+        vm.saveFromWatchForTest(MatchEndMessage(
+            sessionId: sid,
+            result: "win",
+            completedSets: [[6, 4]],
+            startedAt: Date(timeIntervalSince1970: 1_000_000),
+            endedAt: Date(timeIntervalSince1970: 1_001_800),
+            durationSeconds: 1800,
+            calories: 200,
+            averageHeartRate: 130,
+            mode: "oneSet",
+            noAdRule: true
+        ))
+
+        let recorded = nonFatals(spy)
+        #expect(recorded.count == 1)
+        #expect(recorded.first?.domain == "Ralli.Save")
+        #expect(recorded.first?.code == 2)
+        #expect(recorded.first?.context["source"] == "watch")
+        #expect(recorded.first?.context["sessionId"] == sid.uuidString)
+        #expect(spy.calls.contains(.log("save attempted (watch)")))
+    }
+
+    @Test @MainActor func successfulSaveIsNotRecordedAsNonFatal() throws {
+        // 이름 없는 기본 설정은 테스트끼리 저장소 이름을 공유하고, iCloud 권한이 있는 앱에선 CloudKit 미러링이 켜져
+        // 저장 도중 "No eligible connection available" 로 죽는다. HealthKitDeletionTests 의 픽스처와 같은 방식으로
+        // 격리한다 — 고유한 이름 + CloudKit 끄기 + 컨테이너 보관 (ModelContext 는 컨테이너를 붙들지 않는다).
+        let config = ModelConfiguration(UUID().uuidString, isStoredInMemoryOnly: true, cloudKitDatabase: .none)
+        let container = try ModelContainer(for: Match.self, SetRecord.self, configurations: config)
+        CrashReportingTestStorage.retainedContainers.append(container)
+        MatchPersistenceService.shared.configure(with: ModelContext(container))
+        let spy = CrashReportingSpy()
+        let vm = WorkoutSessionViewModel(liveActivity: LiveActivitySpy(), crashReporter: spy)
+        vm.startSession()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.finishMatch(result: .win, completedSets: [(my: 6, your: 4)])
+
+        let saved = try #require(vm.saveCurrentMatch())
+
+        #expect(saved.resultRaw == "win")
+        #expect(nonFatals(spy).isEmpty)
+        #expect(spy.calls.contains(.log("save attempted (local)"))) // 시도는 성공해도 남는다
+    }
+
+    @Test @MainActor func matchLifecycleLeavesBreadcrumbs() {
+        let spy = CrashReportingSpy()
+        let vm = WorkoutSessionViewModel(liveActivity: LiveActivitySpy(), crashReporter: spy)
+        vm.startSession()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.finishMatch(result: .win, completedSets: [(my: 6, your: 4)])
+
+        #expect(spy.calls == [.log("match started"), .log("match finished")])
     }
 }

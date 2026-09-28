@@ -71,3 +71,13 @@ final class MatchPersistenceService {
         )
     }
 }
+
+#if DEBUG
+    extension MatchPersistenceService {
+        /// 테스트 전용: 저장소를 비워 `upsert` 가 `notConfigured` 로 실패하게 한다.
+        /// 싱글톤이라 앞선 테스트가 `configure` 해 둔 값이 남아 있어서, 실패 경로를 순서와 무관하게 만든다.
+        func resetForTesting() {
+            store = nil
+        }
+    }
+#endif

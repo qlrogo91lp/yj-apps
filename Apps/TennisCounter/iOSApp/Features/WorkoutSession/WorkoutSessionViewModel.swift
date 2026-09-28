@@ -1,5 +1,6 @@
 import Combine
 import Foundation
+import MonitoringCore
 import WorkoutCore
 
 @MainActor
@@ -21,6 +22,7 @@ class WorkoutSessionViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     private let connectivity = MatchConnectivity.shared
     private let liveActivity: LiveActivityControlling
+    private let crashReporter: CrashReporting
     private(set) var isDriver = false
 
     /// 워치가 reachable하다는 것만으로는 pause 명령을 받아줄 워크아웃이 있다는 보장이 없다 —
@@ -29,8 +31,11 @@ class WorkoutSessionViewModel: ObservableObject {
         watchConnected && anchor != nil
     }
 
-    init(liveActivity: LiveActivityControlling = LiveActivityService.shared) {
+    init(liveActivity: LiveActivityControlling = LiveActivityService.shared,
+         crashReporter: CrashReporting = AppCrashReporter.current)
+    {
         self.liveActivity = liveActivity
+        self.crashReporter = crashReporter
         setupScoreSync()
         setupConnectivityBindings()
     }
@@ -168,6 +173,7 @@ class WorkoutSessionViewModel: ObservableObject {
     }
 
     func startMatch(options: MatchOptions, sessionId: UUID? = nil, matchId: UUID? = nil, isRemote: Bool = false) {
+        crashReporter.log("match started")
         isDriver = !isRemote
         hasSyncedSession = true
         // 원격 채택 시 자기 sessionId를 상대 것으로 맞춘다. 안 그러면 workoutEnd·matchReset
@@ -222,6 +228,7 @@ class WorkoutSessionViewModel: ObservableObject {
         session.totalKcalAtEnd = metrics.totalCalories
         session.elapsedAtEnd = elapsedSeconds
         phase = .finished(session)
+        crashReporter.log("match finished")
         liveActivity.end()
     }
 
@@ -231,10 +238,15 @@ class WorkoutSessionViewModel: ObservableObject {
     func saveCurrentMatch() -> Match? {
         guard let session = _currentSession else { return nil }
         let match = buildMatchFromSession(session)
+        crashReporter.log("save attempted (local)")
         do {
             try MatchPersistenceService.shared.upsert(match)
             return match
         } catch {
+            crashReporter.record(
+                MonitoringError(domain: "Ralli.Save", code: 1, message: "\(error)"),
+                context: ["source": "local", "matchId": match.matchId?.uuidString ?? "nil"]
+            )
             return nil
         }
     }
@@ -297,7 +309,14 @@ class WorkoutSessionViewModel: ObservableObject {
     private func saveFromWatch(_ msg: MatchEndMessage) {
         let match = buildMatchFromMessage(msg)
         var success = true
-        do { try MatchPersistenceService.shared.upsert(match) } catch { success = false }
+        crashReporter.log("save attempted (watch)")
+        do { try MatchPersistenceService.shared.upsert(match) } catch {
+            success = false
+            crashReporter.record(
+                MonitoringError(domain: "Ralli.Save", code: 2, message: "\(error)"),
+                context: ["source": "watch", "sessionId": msg.sessionId.uuidString]
+            )
+        }
         connectivity.sendMatchSaveResult(MatchSaveResultMessage(sessionId: msg.sessionId, success: success))
     }
 
