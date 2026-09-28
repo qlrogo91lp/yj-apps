@@ -19,8 +19,18 @@ final class LiveActivitySpy: LiveActivityControlling {
     }
 }
 
-private enum CrashReportingTestStorage {
-    @MainActor static var retainedContainers: [ModelContainer] = []
+/// 저장 성공·실패를 주입하는 스텁. SwiftData 도, 싱글톤도 건드리지 않는다.
+@MainActor
+final class MatchStoreStub: MatchUpserting {
+    struct Failure: Error {}
+
+    var shouldFail = false
+    private(set) var upserted: [Match] = []
+
+    func upsert(_ match: Match) throws {
+        if shouldFail { throw Failure() }
+        upserted.append(match)
+    }
 }
 
 @Suite(.serialized)
@@ -731,9 +741,10 @@ struct WorkoutSessionViewModelTests {
     }
 
     @Test @MainActor func localSaveFailureIsRecordedAsNonFatal() {
-        MatchPersistenceService.shared.resetForTesting() // 저장소 없음 → upsert 가 notConfigured 로 실패
+        let store = MatchStoreStub()
+        store.shouldFail = true
         let spy = CrashReportingSpy()
-        let vm = WorkoutSessionViewModel(liveActivity: LiveActivitySpy(), crashReporter: spy)
+        let vm = WorkoutSessionViewModel(liveActivity: LiveActivitySpy(), crashReporter: spy, matchStore: store)
         vm.startSession()
         vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
         vm.finishMatch(result: .win, completedSets: [(my: 6, your: 4)])
@@ -750,9 +761,10 @@ struct WorkoutSessionViewModelTests {
     }
 
     @Test @MainActor func watchSaveFailureIsRecordedAsNonFatal() {
-        MatchPersistenceService.shared.resetForTesting()
+        let store = MatchStoreStub()
+        store.shouldFail = true
         let spy = CrashReportingSpy()
-        let vm = WorkoutSessionViewModel(liveActivity: LiveActivitySpy(), crashReporter: spy)
+        let vm = WorkoutSessionViewModel(liveActivity: LiveActivitySpy(), crashReporter: spy, matchStore: store)
         let sid = UUID()
 
         vm.saveFromWatchForTest(MatchEndMessage(
@@ -778,21 +790,16 @@ struct WorkoutSessionViewModelTests {
     }
 
     @Test @MainActor func successfulSaveIsNotRecordedAsNonFatal() throws {
-        // 이름 없는 기본 설정은 테스트끼리 저장소 이름을 공유하고, iCloud 권한이 있는 앱에선 CloudKit 미러링이 켜져
-        // 저장 도중 "No eligible connection available" 로 죽는다. HealthKitDeletionTests 의 픽스처와 같은 방식으로
-        // 격리한다 — 고유한 이름 + CloudKit 끄기 + 컨테이너 보관 (ModelContext 는 컨테이너를 붙들지 않는다).
-        let config = ModelConfiguration(UUID().uuidString, isStoredInMemoryOnly: true, cloudKitDatabase: .none)
-        let container = try ModelContainer(for: Match.self, SetRecord.self, configurations: config)
-        CrashReportingTestStorage.retainedContainers.append(container)
-        MatchPersistenceService.shared.configure(with: ModelContext(container))
+        let store = MatchStoreStub()
         let spy = CrashReportingSpy()
-        let vm = WorkoutSessionViewModel(liveActivity: LiveActivitySpy(), crashReporter: spy)
+        let vm = WorkoutSessionViewModel(liveActivity: LiveActivitySpy(), crashReporter: spy, matchStore: store)
         vm.startSession()
         vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
         vm.finishMatch(result: .win, completedSets: [(my: 6, your: 4)])
 
         let saved = try #require(vm.saveCurrentMatch())
 
+        #expect(store.upserted.count == 1)
         #expect(saved.resultRaw == "win")
         #expect(nonFatals(spy).isEmpty)
         #expect(spy.calls.contains(.log("save attempted (local)"))) // 시도는 성공해도 남는다

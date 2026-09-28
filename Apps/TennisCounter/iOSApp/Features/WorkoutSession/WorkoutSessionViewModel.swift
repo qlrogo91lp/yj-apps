@@ -23,6 +23,7 @@ class WorkoutSessionViewModel: ObservableObject {
     private let connectivity = MatchConnectivity.shared
     private let liveActivity: LiveActivityControlling
     private let crashReporter: CrashReporting
+    private let matchStore: MatchUpserting
     private(set) var isDriver = false
 
     /// 워치가 reachable하다는 것만으로는 pause 명령을 받아줄 워크아웃이 있다는 보장이 없다 —
@@ -32,10 +33,12 @@ class WorkoutSessionViewModel: ObservableObject {
     }
 
     init(liveActivity: LiveActivityControlling = LiveActivityService.shared,
-         crashReporter: CrashReporting = AppCrashReporter.current)
+         crashReporter: CrashReporting = AppCrashReporter.current,
+         matchStore: MatchUpserting = MatchPersistenceService.shared)
     {
         self.liveActivity = liveActivity
         self.crashReporter = crashReporter
+        self.matchStore = matchStore
         setupScoreSync()
         setupConnectivityBindings()
     }
@@ -240,7 +243,7 @@ class WorkoutSessionViewModel: ObservableObject {
         let match = buildMatchFromSession(session)
         crashReporter.log("save attempted (local)")
         do {
-            try MatchPersistenceService.shared.upsert(match)
+            try matchStore.upsert(match)
             return match
         } catch {
             crashReporter.record(
@@ -310,7 +313,7 @@ class WorkoutSessionViewModel: ObservableObject {
         let match = buildMatchFromMessage(msg)
         var success = true
         crashReporter.log("save attempted (watch)")
-        do { try MatchPersistenceService.shared.upsert(match) } catch {
+        do { try matchStore.upsert(match) } catch {
             success = false
             crashReporter.record(
                 MonitoringError(domain: "Ralli.Save", code: 2, message: "\(error)"),
