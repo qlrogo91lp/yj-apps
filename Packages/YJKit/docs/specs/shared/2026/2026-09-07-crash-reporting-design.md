@@ -15,6 +15,7 @@
 | 도구 | **Firebase Crashlytics** | 무료 구간 사실상 표준. Ralli 로드맵 Phase 2 에 Firebase 가 이미 잡혀 있어 SDK 를 하나로 통일. 대안 Sentry 는 Google 의존을 피하고 싶을 때 — 셋업 구조가 같아 갈아타기 비용은 작다 |
 | 위치 | **YJKit `MonitoringCore` 프로덕트** | 3앱이 전부 필요로 하게 되고, 이 저장소 관례가 "시스템/외부 SDK 래퍼는 코어" (`ConnectivityCore`=WCSession, `WorkoutCore`=HealthKit). 앱에만 두면 그게 예외가 된다 |
 | 범위 | **iOS 앱 + 워치 앱**. 익스텐션(컴플리케이션·LiveActivity) 제외 | Firebase 가 익스텐션에서 `configure()` 를 권장하지 않고, 익스텐션은 렌더링 코드만이라 크래시 표면이 작다 |
+| 워치 크래시 | **수집하지 않는다 — 워치는 non-fatal·브레드크럼만** (2026-10-02 개정) | watchOS 는 시그널·Mach 예외 핸들러 등록을 허용하지 않는다(watchOS 3 부터). SDK 도 `FIRCLSFeatures.h` 에서 `CLS_SIGNAL_SUPPORTED`·`CLS_MACH_EXCEPTION_SUPPORTED` 를 워치에서 끈다. Swift 크래시(`fatalError`·nil 언래핑·범위 초과)는 전부 이 경로라 잡히지 않는다. MetricKit 도 watchOS SDK 에 없다. 워치 크래시는 **Xcode Organizer**(분석 공유 켠 사용자 표본)로 본다. 실기기에서 확인: 콘솔이 "앱이 감지되었으며 비정상 종료를 기다리는 중" 에 머문다 |
 | Firebase 프로덕트 | **`FirebaseCrashlytics` 만** | Analytics·Performance·Remote Config 는 Phase 2. watchOS 는 Crashlytics 만 지원한다 |
 | non-fatal 초기 범위 | **경기 저장 실패만** | 사용자 기록이 날아가는 유일한 경로. 연결 실패·권한 거부는 노이즈 가능성이 커 실제 크래시 데이터를 본 뒤 결정 |
 | 수집 정책 | **기본 켜짐**, 앱 내 끄기는 설정 페이지(Ralli 작업 #8)에서 | `Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(false)` 한 줄이 진입점 |
@@ -72,7 +73,7 @@ public protocol CrashReporting: Sendable {
 
 1. **스파이크** — 빈 `MonitoringCore` 에 `FirebaseCrashlytics` 의존만 걸고 `make kit-test` + Ralli iOS·워치 스킴 빌드 + **CI 통과**. 로컬 SPM 패키지가 원격 바이너리(xcframework) 의존을 끄는 첫 사례라 여기서 막히면 구조를 다시 본다
 2. 프로토콜·구현 + 테스트
-3. Ralli 연동 — 실기기에서 강제 크래시(iOS·워치 각각) → 재실행 → 콘솔에 심볼 붙은 스택. non-fatal 은 폰 앱 종료 후 워치 저장 → 8초 타임아웃 → 콘솔 non-fatal 탭
+3. Ralli 연동 — 실기기에서 강제 크래시(**iOS 만** — 워치는 위 "워치 크래시" 행) → 재실행 → 콘솔에 심볼 붙은 스택. non-fatal 은 폰 앱 종료 후 워치 저장 → 8초 타임아웃 → 콘솔 non-fatal 탭
 
 ## 하지 않는 것
 
