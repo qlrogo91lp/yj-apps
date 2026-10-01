@@ -3,6 +3,7 @@
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Ralli iOS·워치 앱에 YJKit `MonitoringCore` 를 붙여 크래시가 Firebase 콘솔에 심볼 붙은 스택으로 올라오고, 경기 저장 실패가 non-fatal 로 기록되게 한다.
+**워치는 크래시를 수집할 수 없다** (2026-10-02 실기기에서 확인 — 스펙 "워치 크래시" 행). 워치에서 Crashlytics 의 역할은 non-fatal·브레드크럼이다.
 
 **Architecture:** 두 앱 진입점이 `CrashlyticsReporter.start()` 의 결과를 앱 레이어의 `AppCrashReporter.current` 에 담고, `WorkoutSessionViewModel` 은 그 값을 기본 인자로 받는다(→ 기존 호출부 무변경). plist 가 없으면(CI·새 체크아웃) `start()` 가 Noop 을 돌려주고, 테스트 실행 중에는 `start()` 자체를 건너뛴다. 저장 실패 3곳이 `MonitoringError(domain: "Ralli.Save", …)` 를 `record` 하고, 경기 시작·종료·저장 시도 3곳이 `log` 브레드크럼을 남긴다. plist·dSYM 스크립트는 타깃별.
 
@@ -125,18 +126,20 @@ if [ ! -f "$PLIST" ]; then
   echo "error: GoogleService-Info.plist 가 번들에 없다 — Firebase 콘솔에서 받아 타깃 폴더에 넣는다"
   exit 1
 fi
-"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run"
+"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run" -gsp "${PLIST}"
 ```
+
+`-gsp` 로 plist 경로를 **명시해서 넘긴다** — `run` 이 번들에서 plist 를 스스로 찾는지 확인할 필요가 없어진다.
+`alwaysOutOfDate = 1` (Xcode 의 "Based on dependency analysis" 해제) — 출력 파일이 없는 스크립트라 켜 두면 매 빌드마다 경고가 난다.
 
 Input Files 에는 dSYM 한 줄만 둔다. **plist 는 넣지 않는다** — 넣으면 plist 가 없는 CI(Debug)에서 입력 파일 누락으로 빌드가 깨질 수 있다. 검사는 위 스크립트가 Release 에서만 한다.
 ```
 ${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}
 ```
-`Crashlytics/run` 이 plist 를 입력 파일 없이 번들에서 찾는지는 Task 4 의 심볼 확인으로 검증한다. 못 찾으면 `-gsp` 인자로 위 `$PLIST` 를 넘긴다.
+**검증 (2026-09-29)** — plist 를 치운 채 Release 빌드하면 두 스킴 모두 `BUILD FAILED` + 위 `error:` 메시지가 난다. plist 가 있을 때(업로드까지 도는 경로)는 시뮬레이터 빌드로 실제 업로드가 나가서 돌리지 않았다 — Task 4 의 아카이브에서 처음 확인된다.
 
-- [ ] **Step 4: 스크립트 샌드박스 끄기**
-
-두 타깃 Build Settings → `User Script Sandboxing` → **No**. 지금 프로젝트에 `ENABLE_USER_SCRIPT_SANDBOXING = YES` 가 8곳 있다 — 앱 타깃 2개(Debug/Release = 4곳)만 바꾼다. `YES` 면 스크립트가 dSYM·plist 를 못 읽고 **로그 없이 실패**한다.
+- [x] **Step 4: 스크립트 샌드박스 끄기 — 바꿀 것이 없다.** 두 앱 타깃은 이미 `ENABLE_USER_SCRIPT_SANDBOXING = NO` 다 (`-showBuildSettings` 로 확인).
+  원안의 "`YES` 가 8곳 — 앱 타깃 4곳을 바꾼다" 는 틀렸다. 그 8곳은 컴플리케이션·LiveActivity 확장과 테스트 타깃 2개의 설정이다. 건드리지 않았다.
 
 - [ ] **Step 5: 빌드 두 스킴**
 
@@ -168,7 +171,7 @@ git commit -m "🔧 iOS·워치에 MonitoringCore 링크 + Firebase 초기화 + 
 - Modify: `iosTests/WorkoutSession/WorkoutSessionViewModelTests.swift`
 
 **Interfaces:**
-- Produces: `WorkoutSessionViewModel.init(liveActivity:crashReporter: CrashReporting = AppCrashReporter.current)`
+- Produces: `WorkoutSessionViewModel.init(liveActivity:crashReporter: CrashReporting = AppCrashReporter.current, matchStore: MatchUpserting = MatchPersistenceService.shared)`
 
 - [ ] **Step 1: 스파이**
 
@@ -367,16 +370,20 @@ git commit -m "✨ 워치 저장 ACK 타임아웃을 non-fatal 로 기록 + 브�
 
 ### Task 4: 실기기 검증 + App Store Connect (사람이 한다)
 
-**강제 크래시** — 두 앱 각각. DEBUG 전용 임시 코드, 확인 후 **커밋 전에 제거**:
-```swift
-#if DEBUG
-Button("Crash") { fatalError("crashlytics test") }
-#endif
+**테스트 버튼** — **`#if DEBUG` 로 만들면 심볼을 확인할 수 없다** (원안의 오류) — dSYM 업로드는 Release 에서만 돌고, DEBUG 전용 버튼은 Release 빌드에 없다.
+그래서 버튼은 조건 없이 넣고, **로컬 전용 임시 브랜치 `tmp/crashlytics-verify`** 에 둔다 (`🔧 [임시·머지 금지]` 커밋 하나, 푸시하지 않는다). 확인이 끝나면 브랜치를 지운다.
+- iOS: 메인 화면 우상단 **CRASH** — `fatalError`
+- 워치: 홈 하단 **NON-FATAL** — `Ralli.Test` code 0 non-fatal + 브레드크럼을 기록하고 1.5초 뒤 앱을 닫는다 (non-fatal 은 다음 실행 때 올라간다). 워치는 크래시를 못 잡으므로 강제 크래시 대신 이걸로 워치 → Firebase 경로를 본다
+```bash
+git switch tmp/crashlytics-verify     # PR 브랜치 위에 테스트 버튼만 얹은 브랜치
 ```
-- [ ] iOS: 디버거 **없이** 실행(Xcode 에서 Run 후 Stop, 홈에서 앱 아이콘으로 실행) → Crash 탭 → 앱 재실행 → 1~5분 뒤 콘솔 Crashlytics 에 `fatalError("crashlytics test")` 가 **심볼 붙은 파일:줄** 로 보이는지. 심볼이 `<redacted>` 면 dSYM 업로드 실패 → Task 1 Step 3·4 재확인
-- [ ] 워치: 같은 절차. 워치는 폰이 옆에 있어야 올라간다 — 재실행 후 폰 옆에서 몇 분 둔다.
-      **안 올라오면 GCP 키의 iOS 번들 ID 제한부터 의심한다** — 워치 SDK 가 번들 ID 헤더를 보내는지는 여기서 처음 확인된다
-- [ ] 임시 버튼 제거 확인: `git diff --stat` 에 Crash 버튼 없음
+- **Xcode ▶ 는 기본이 Debug 다.** 스킴 편집 → **Run** 탭(Archive·Profile 아님) → **Build Configuration 을 Release**, **Debug executable 해제** → 실기기에 설치. 끝나면 Debug 로 되돌린다
+- [x] iOS (2026-10-01): Run 후 Stop(디버거 분리), 홈에서 앱 아이콘으로 실행 → CRASH → 앱 재실행 → 수 분 뒤 콘솔 "문제" 에 `iOSApp.swift:105` (심볼 붙음). dSYM 탭에 Release 빌드 UUID 가 "업로드됨"
+  - Debug 로 돌린 첫 시도는 크래시는 올라갔지만 dSYM "누락(필수)" — Debug 는 `DEBUG_INFORMATION_FORMAT = dwarf` 라 dSYM 자체가 없다. 그 항목은 영영 해석되지 않으니 숨기면 된다
+- [x] ~~워치 강제 크래시~~ — **잡히지 않는다** (2026-10-02). 콘솔 `ralli-watch` 가 "앱이 감지되었으며 비정상 종료를 기다리는 중" 에 머문다 = SDK 초기화·통신은 됐고 크래시만 안 온다. 원인은 스펙 "워치 크래시" 행
+- [ ] 워치 non-fatal: 폰을 옆에 두고 NON-FATAL → 앱이 닫힘 → 워치에서 앱 다시 열기 → 30초쯤 열어 둔다 → 콘솔 `ralli-watch` "문제" 에 `Ralli.Test` code 0, 커스텀 키 `source`, Logs 탭에 `test button tapped`.
+      **안 올라오면 GCP 키의 iOS 번들 ID 제한부터 의심한다** — 워치 SDK 가 번들 ID 헤더를 보내는지는 여기서 처음 확인된다. 워치는 백그라운드 전송이 미뤄질 수 있어 충전기 + Wi-Fi 에서 더 빨리 올라간다
+- [ ] 확인이 끝나면 `git switch feat/ralli-crashlytics && git branch -D tmp/crashlytics-verify`. PR 브랜치에는 처음부터 버튼이 없다
 
 **plist 누락 방어**
 - [ ] plist 를 잠시 옮기고 Release 아카이브 → dSYM 스크립트의 `error:` 로 **실패하는지**. 확인 후 되돌린다
@@ -391,11 +398,31 @@ Button("Crash") { fatalError("crashlytics test") }
 
 ---
 
+## 실행 기록 (2026-09-29) — 플랜과 달라진 점
+
+| 플랜 | 실제 | 이유 |
+|---|---|---|
+| Kit 은 수정하지 않는다 | `CrashlyticsReporter.start()` 의 중복 호출 방지를 자체 플래그로 바꿨다 (`🐛` 커밋) | `FirebaseApp.app()`·`allApps` 가 초기화 전에 부르면 에러 로그 I-COR000003·5 를 매 실행 남긴다. 시뮬레이터 로그로 확인 |
+| Step 3 스크립트 | `-gsp "${PLIST}"` 를 넘기고 `alwaysOutOfDate = 1` | 위 Step 3 |
+| Step 4 샌드박스 끄기 | 바꿀 것 없음 | 위 Step 4 |
+| Task 2 저장 실패를 "설정 안 한 상태"로 만든다 | **저장소를 주입한다** — `MatchUpserting` 프로토콜 + `matchStore:` 파라미터(기본 `MatchPersistenceService.shared`), 테스트는 스텁 | 싱글톤을 고치면 병렬로 도는 다른 테스트와 간섭한다. 처음엔 `resetForTesting()` 훅을 뒀다가 CI 에서 `HistoryViewModelTests` 하나가 깨져 바꿨다 (`await` 구간에 다른 스위트가 저장소를 비움) |
+| Task 2 테스트 2개 | 4개 (워치 저장 code 2, 성공 시 미보고 추가) | 코드 표의 세 경로를 모두 덮는다 |
+| Task 3 타임아웃 클로저에 `record` 인라인 | 같은 파일의 `private extension` 으로 뺐다 (`makeMatchEndMessage` 도 함께) | 클래스 본문이 300줄 제한(`type_body_length`)을 넘는다. 테스트 훅을 본체 밖에 둔 기존 관행과 같다 |
+| Task 4 `#if DEBUG` 크래시 버튼 | 조건 없는 버튼을 로컬 전용 `tmp/crashlytics-verify` 브랜치에 | 위 Task 4 |
+| Task 4 워치 강제 크래시 | **워치는 NON-FATAL 버튼으로 대체** | watchOS 가 크래시 핸들러를 허용하지 않는다 — 스펙 "워치 크래시" 행 |
+
+**로컬 iOS 테스트 전체는 원래도 호스트가 죽는다** (Xcode 27 시뮬레이터, iCloud 계정 없음). `saveFromWatchPersistsMatch`·`saveCurrentMatchReturnsMatchOnSuccess`·`HistoryViewModelTests` 가
+`No eligible connection available` 로 크래시한다. 이 변경을 치운 기준선에서도 같은 두 테스트가 죽는 것을 확인했다. CI(Xcode 26)가 기준이다.
+새 iOS 테스트는 스텁을 주입해서 SwiftData·CloudKit 컨테이너도, 싱글톤도 쓰지 않는다 — 이 크래시와 무관하다.
+
+---
+
 ## 후속 (이번 커밋에 넣지 않는다)
 
 - **수집 끄기 토글 (작업 #8)** — `Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(false)`. `CrashlyticsReporter` 에 `static func setCollectionEnabled(_:)` 래퍼를 Kit 에 추가하고 설정 페이지가 부른다
 - **non-fatal 확장** — WatchConnectivity 전송 실패, HealthKit 권한 거부. 첫 크래시 데이터를 본 뒤
 - **골프·하루치 연동** — 이 플랜을 그대로 따라간다. Firebase 프로젝트는 앱마다 새로
+- **워치 비정상 종료 감지** — 실행 시 "실행 중" 표시를 남기고 정상 종료·백그라운드 진입 때 지운다. 다음 실행에 표시가 남아 있으면 non-fatal 한 건(직전 브레드크럼 포함). 스택은 없고, 시스템이 메모리 등으로 앱을 죽인 경우와 구분이 어려워 잡음이 섞인다. Organizer 에서 워치 크래시가 실제로 문제가 되면 그때
 
 ## Self-Review
 

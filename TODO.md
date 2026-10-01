@@ -40,7 +40,7 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
 | ~~3~~ | ~~햅틱 (워치 전용)~~ | B | **완료** (PR #18) · 실기기 확인 완료 | [플랜](Apps/TennisCounter/docs/plans/watch/2026/2026-09-07-match-haptics.md) — 설정 연동은 #8 때 `MatchHaptics.play` 첫 줄에서. 포인트 `.click`이 약하게 느껴지나 유지하기로 결정 |
 | ~~4~~ | ~~크라운 점수 입력 (워치, 위=나 아래=상대)~~ | B | **완료** (버그 수정 PR, 실기기 확인 완료) | [플랜](Apps/TennisCounter/docs/plans/watch/2026/2026-09-07-crown-scoring.md) — PR #22 구현이 회전량 기반이라 실기기에서 오작동, 디텐트 방식으로 재구현. 온보딩(#6) 항목 하나 파생 |
 | ~~6~~ | ~~온보딩 **5페이지** (워치 중심, iOS 만)~~ | A → 합류 | **완료** (PR #25) · 실기기 확인 완료 | [스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-09-07-onboarding-design.md) (09-18 개정) · [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-17-onboarding-watch-focused.md) — 4페이지에서 5페이지로 재편, 기능 목록 페이지 제거. 워치 3장은 Figma 목업 합성, 공유 그림은 인스타 스티커 화면 |
-| 7 | Firebase Crashlytics (iOS + 워치, 익스텐션 제외) | 단독 (맨 뒤) | Kit 완료 (PR #35, 출시 뒤 머지) · Ralli 연동 대기 — plist 는 git 밖, CI 는 Noop 으로 돈다 (09-28 플랜 개정) | [스펙](Packages/YJKit/docs/specs/shared/2026/2026-09-07-crash-reporting-design.md) → [YJKit 플랜](Packages/YJKit/docs/plans/shared/2026/2026-09-07-monitoring-core.md) (트랙 C, 지금 병렬 가능) → [Ralli 플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-07-crashlytics-integration.md) |
+| ~~7~~ | ~~Firebase Crashlytics (iOS + 워치, 익스텐션 제외)~~ | 단독 (맨 뒤) | **완료** (Kit [PR #35](https://github.com/qlrogo91lp/yj-apps/pull/35) · Ralli [PR #36](https://github.com/qlrogo91lp/yj-apps/pull/36)) · 실기기 확인 완료. **출시 전 App Store Connect 개인정보 라벨은 "아무 때나" 에 남음.** plist 는 git 밖, CI 는 Noop 으로 돈다. 워치는 크래시를 못 잡아 non-fatal 만 | [스펙](Packages/YJKit/docs/specs/shared/2026/2026-09-07-crash-reporting-design.md) → [YJKit 플랜](Packages/YJKit/docs/plans/shared/2026/2026-09-07-monitoring-core.md) (트랙 C, 지금 병렬 가능) → [Ralli 플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-07-crashlytics-integration.md) |
 | 8 | 설정 페이지 + 다른 앱 노출 | — | **논의 필요 — 아직 브레인스토밍 전** | 아래 "남은 논의" 참고 |
 | ~~9~~ | ~~iOS 기록·요약 **세션 중심 재편**~~ | D | **완료** · 실기기 확인 완료 | [스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-09-18-session-centric-history.md) · [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-18-session-centric-history.md) — `WorkoutSessionRecord` 신설이 포함된다. #2 스펙을 개정한다 |
 | ~~10~~ | ~~기록 삭제 시 **건강 앱 워크아웃도 삭제**~~ | E (YJKit+iOS) | **완료** ([PR #29](https://github.com/qlrogo91lp/yj-apps/pull/29)) · 실기기 확인 완료 | [플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-21-healthkit-workout-deletion.md) — YJKit `WorkoutDeletionService` 신설. 건강 앱에서 먼저 지운 경우 Ralli 기록은 유지한다 |
@@ -87,10 +87,14 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
       공유는 인스타 스티커 화면. 그림 자리는 `OnboardingScreenshotPage` 가 비율 0.80 박스로 고정한다
 - [x] 6번 시뮬레이터에서 ko/en 5장 넘겨보기 — 크기가 흔들리지 않는지, 워치 3장이 선명한지
 - [x] ~~6번 크라운 화살표 위치 조정~~ — 화살표를 이미지에 구워 코드 오버레이를 지웠다 (플랜 Task 4 폐기)
-- [ ] 7번 Ralli 연동 플랜 — 단독으로. PR 은 Kit / Ralli 따로
+- [x] 7번 Ralli 연동 — [PR #36](https://github.com/qlrogo91lp/yj-apps/pull/36). 실기기 확인: ✅ iOS 크래시가 `iOSApp.swift:105` 로 심볼 붙어 올라옴 (10-01) /
+      ✅ 워치 → Firebase non-fatal 경로 (임시 버튼). **워치는 크래시를 못 잡는다** — watchOS 가 크래시 핸들러를 허용하지 않는다
+      (스펙 "워치 크래시" 행), 워치 크래시는 Xcode Organizer. 경위는 [플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-07-crashlytics-integration.md) Task 4·실행 기록
 
 **아무 때나**
 
+- [ ] **출시 전: App Store Connect 앱 개인정보에 Crash Data · Other Diagnostic Data 추가** — 사용 목적 앱 기능, 사용자 연결 아니요, 추적 아니요.
+      웹에서 입력하고 **게시**까지 해야 반영된다. Crashlytics 가 들어간 첫 출시(1.1.9 이후) 전에
 - [x] **#9 실기기·워치 확인** — 2경기 저장 뒤 5분 후 종료해 카드 시간이 종료 시각까지인지, 평균 심박이 채워지는지,
       경기 없는 운동이 `경기 없음`으로 보이는지, 구 기록이 시간·칼로리와 `–` 심박으로 보이는지,
       배포 뒤 구/신 레코드 혼합 CloudKit 동기화가 정상인지 확인
@@ -109,6 +113,9 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
       인메모리 컨테이너를 꽂았던 테스트가 끝난 뒤 다른 테스트가 그 컨텍스트를 조회해
       `NSInternalInconsistencyException: "No eligible connection available"` 로 죽는다. 단독 실행은 통과.
       싱글턴 대신 주입으로 바꾸는 쪽이 근본적이다 (`@Suite(.serialized)` 는 증상만 덮는다).
+      **원인은 이름 없는 기본 인메모리 설정이다** — 저장소 이름을 `default` 로 공유하고 iCloud 권한이 있으면 CloudKit 미러링이 켜진다.
+      `saveCurrentMatchReturnsMatchOnSuccess`·`HistoryViewModelTests` 도 같은 이유로 죽는다 (2026-09-29 확인).
+      `HealthKitDeletionTests` 픽스처가 처방이다 — 고유 이름 + `cloudKitDatabase: .none` + 컨테이너 보관. 같은 설정으로 바꾸면 대부분 풀린다
       **iOS 테스트는 `-parallel-testing-enabled NO` 로 돌린다** — 기본값은 테스트 호스트가 반복 크래시해
       허수 실패 34개가 섞인다. 경위는 [작업 기록](Apps/TennisCounter/docs/logs/2026/2026-09-21-session-record-integration-gaps.md)
 - [x] `~/orca/workspaces/yj-apps/` 워크트리 3개 정리 — 워크트리·브랜치 모두 제거 완료

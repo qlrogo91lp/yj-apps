@@ -6,6 +6,8 @@ import Foundation
 /// Firebase 를 초기화하지 않은 채 만들어지면 첫 호출에서 앱이 죽기 때문이다.
 /// 자동 생성 `init` 이 `internal` 이라 패키지 밖에서는 만들 수 없다 — `public init` 을 추가하지 않는다.
 public struct CrashlyticsReporter: CrashReporting {
+    private static var isConfigured = false
+
     /// 번들에 `GoogleService-Info.plist` 가 있으면 Firebase 를 초기화하고 Crashlytics 리포터를,
     /// 없으면 아무것도 건드리지 않고 `NoopCrashReporter` 를 돌려준다.
     ///
@@ -17,8 +19,11 @@ public struct CrashlyticsReporter: CrashReporting {
               let options = FirebaseOptions(contentsOfFile: path)
         else { return NoopCrashReporter() }
 
-        if FirebaseApp.app() == nil { // 중복 호출 방지
+        // 중복 호출 방지. `FirebaseApp.app()`·`allApps` 는 초기화 전에 부르면 에러 로그(I-COR000003·5)를
+        // 남기므로 Firebase 에 묻지 않고 자체 플래그로 본다.
+        if !isConfigured {
             FirebaseApp.configure(options: options)
+            isConfigured = true
         }
         return CrashlyticsReporter()
     }

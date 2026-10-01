@@ -7,11 +7,18 @@ enum PersistenceError: Error {
     case saveFailed(Error)
 }
 
+/// 경기 저장 한 가지만 아는 좁은 인터페이스. ViewModel 이 싱글톤을 직접 붙잡지 않게 해서
+/// 테스트가 저장 성공·실패를 주입한다 — 싱글톤을 고치면 병렬로 도는 다른 테스트와 간섭한다.
+@MainActor
+protocol MatchUpserting {
+    func upsert(_ match: Match) throws
+}
+
 /// PersistenceCore 위의 앱 레이어. 코어는 도메인을 모르므로(제너릭 CRUD),
 /// 테니스 규칙 — matchId 기준 중복 제거, startedAt 정렬 — 은 여기가 소유한다.
 /// iOS 전용: Watch·Complication 타겟은 저장소를 쓰지 않는다.
 @MainActor
-final class MatchPersistenceService {
+final class MatchPersistenceService: MatchUpserting {
     static let shared = MatchPersistenceService()
 
     private var store: PersistenceService<Match>?

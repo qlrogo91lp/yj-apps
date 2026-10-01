@@ -1,4 +1,5 @@
 import Foundation
+import MonitoringCore
 @testable import TennisCounter_Watch_App
 import Testing
 import WorkoutCore
@@ -706,5 +707,64 @@ struct WorkoutSessionViewModelTests {
         _ = vm.handleIncomingPauseCommandForTest(WorkoutPauseMessage(sessionId: UUID(), shouldPause: true))
 
         #expect(!spy.played.contains(.paused))
+    }
+
+    // MARK: - Crash reporting
+
+    /// 브레드크럼을 뺀 non-fatal 기록만.
+    private func nonFatals(_ spy: CrashReportingSpy) -> [(domain: String, code: Int, context: [String: String])] {
+        spy.calls.compactMap { call in
+            if case let .record(domain, code, context) = call { return (domain, code, context) }
+            return nil
+        }
+    }
+
+    @Test @MainActor func saveAckTimeoutIsRecordedAsNonFatal() async throws {
+        let spy = CrashReportingSpy()
+        let vm = WorkoutSessionViewModel(ackTimeoutSeconds: 0.05, crashReporter: spy)
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.saveCurrentMatch()
+
+        try await Task.sleep(nanoseconds: 150_000_000) // 0.15s > 0.05s 타임아웃
+
+        let recorded = nonFatals(spy)
+        #expect(recorded.count == 1)
+        #expect(recorded.first?.domain == "Ralli.Save")
+        #expect(recorded.first?.code == 3)
+        #expect(recorded.first?.context["sessionId"] == vm.activeSessionId.uuidString)
+    }
+
+    @Test @MainActor func successfulAckIsNotRecordedAsNonFatal() async throws {
+        let spy = CrashReportingSpy()
+        let vm = WorkoutSessionViewModel(ackTimeoutSeconds: 0.05, crashReporter: spy)
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.saveCurrentMatch()
+        vm.handleMatchSaveResultForTest(MatchSaveResultMessage(sessionId: vm.activeSessionId, success: true))
+
+        try await Task.sleep(nanoseconds: 150_000_000) // 낡은 타임아웃이 뒤늦게 돌아도
+
+        #expect(nonFatals(spy).isEmpty)
+    }
+
+    @Test @MainActor func staleTimeoutIsNotRecordedAfterStartNewMatch() async throws {
+        let spy = CrashReportingSpy()
+        let vm = WorkoutSessionViewModel(ackTimeoutSeconds: 0.05, crashReporter: spy)
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.saveCurrentMatch()
+        vm.startNewMatch() // 토큰이 무효화된다 — 저장 실패가 아니라 사용자가 넘어간 것
+
+        try await Task.sleep(nanoseconds: 150_000_000)
+
+        #expect(nonFatals(spy).isEmpty)
+    }
+
+    @Test @MainActor func matchLifecycleLeavesBreadcrumbs() {
+        let spy = CrashReportingSpy()
+        let vm = WorkoutSessionViewModel(crashReporter: spy)
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.finishMatch(result: .win, completedSets: [SetScore(my: 6, your: 4)])
+        vm.saveCurrentMatch()
+
+        #expect(spy.calls == [.log("match started"), .log("match finished"), .log("save attempted")])
     }
 }

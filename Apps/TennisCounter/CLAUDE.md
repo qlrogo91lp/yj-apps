@@ -192,6 +192,10 @@ TennisLiveActivity/
 - `Shared/Services/ConnectivityMessages.swift` — 테니스 도메인 메시지 (`ConnectivityMessage` 채택)
 - `iOSApp/Services/MatchPersistenceService.swift` — 중복 제거·정렬 규칙. CRUD는 `PersistenceCore`에 위임 (Watch는 저장소를 쓰지 않아 `Shared/`가 아닌 `iOSApp/`에 둔다)
 - `WatchApp/Features/WorkoutSession/WorkoutConfiguration+Tennis.swift` — 종목 설정 주입값
+- `Shared/Services/AppCrashReporter.swift` — 앱이 쓰는 크래시 리포터 한 곳 (`MonitoringCore`). 진입점이 `start()` 로 채우고, 기본값은 Noop
+- **`GoogleService-Info.plist` 는 git 에 없다** — 저장소가 공개라 `.gitignore` 가 막는다. `iOSApp/`·`WatchApp/` 폴더에 로컬로만 둔다.
+  새 체크아웃·워크트리에는 Firebase 콘솔(프로젝트 `Ralli` → 프로젝트 설정 → 내 앱)에서 다시 받아 같은 자리에 넣는다.
+  없어도 빌드·테스트는 통과하고 앱은 Noop 리포터로 돈다. **Release 빌드는 plist 가 없으면 dSYM 스크립트가 실패시킨다**
 
 ## Folder Conventions
 

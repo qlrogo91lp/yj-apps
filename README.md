@@ -6,7 +6,7 @@ iOS + watchOS 앱 모노레포. 공용 인프라는 `Packages/YJKit`으로 두�
 
 ```
 yj-apps/
-├─ Packages/YJKit/          공용 라이브러리 (WorkoutCore / WorkoutUI / WorkoutShareUI / ConnectivityCore / PersistenceCore)
+├─ Packages/YJKit/          공용 라이브러리 (WorkoutCore / WorkoutUI / WorkoutShareUI / ConnectivityCore / PersistenceCore / MonitoringCore)
 ├─ Apps/GolfCounter/        GolfCounter — iOS + Watch + Complication
 ├─ Apps/TennisCounter/      Ralli(TennisCounter) — iOS + Watch + Complication + LiveActivity
 ├─ Apps/HaruchiFit/         하루치 핏(HaruchiFit) — iOS + Watch + Complication
