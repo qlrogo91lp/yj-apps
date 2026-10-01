@@ -2,7 +2,7 @@
 
 iOS 워크아웃 세션 컨테이너 Feature. Watch에서 보내는 메시지를 수신해 화면을 전환하고, Watch가 보낸 앵커로 경과 시간을 보간하며, SwiftData에 경기를 저장한다.
 
-Watch 버전과 대칭 구조이지만 HealthKit을 직접 제어하지 않는다는 점이 핵심 차이다. 워크아웃 탭 화면은 RalliKit `WorkoutUI`의 `WorkoutDashboardView`가 소유한다 — 앱에는 워크아웃 UI가 없다.
+Watch 버전과 대칭 구조이지만 HealthKit을 직접 제어하지 않는다는 점이 핵심 차이다. 워크아웃 탭 화면은 YJKit `WorkoutUI`의 `WorkoutDashboardView`가 소유한다 — 앱에는 워크아웃 UI가 없다.
 
 ## 파일 구조
 
@@ -21,7 +21,7 @@ TabView로 2개 탭을 전환한다.
 ```
 [Workout 탭]                  [Match 탭 (기본)]
   WorkoutDashboardView          phase에 따라
-  (RalliKit WorkoutUI)          ModeView / ScoreView / MatchResultView
+  (YJKit WorkoutUI)             ModeView / ScoreView / MatchResultView
   링 + 지표 3칸 + 컨트롤
 ```
 
@@ -250,11 +250,11 @@ iOS 저장 버튼 탭
 
 | 메서드 | 역할 |
 |-------|------|
-| `addPoint(_ side:)` | 포인트 추가. 게임이 끝나면 승리 측(`PlayerSide?`) 반환. 호출 시 SnapShot 저장 |
-| `undo()` | 마지막 `addPoint` 직전 상태로 복원. SnapShot은 1단계만 보관 |
+| `addPoint(_ side:)` | 포인트 추가. 게임이 끝나면 승리 측(`PlayerSide?`) 반환 |
 | `reset()` | 0-0으로 초기화 (게임 승리 후 다음 게임 시작) |
 | `setTieBreakMode()` | 타이브레이크 모드 전환 + 카운터 0-0 초기화 |
-| `applyRemote(myScore:yourScore:isTieBreak:)` | 원격 상태를 직접 덮어쓰기. SnapShot 파기 |
+| `makeSnapshot()` / `restore(_:)` | `ScoreViewModel`이 undo 스택에 보관할 불투명 `Snapshot`을 생성·복원 |
+| `applyRemote(myScore:yourScore:isTieBreak:)` | 원격 점수 상태를 직접 덮어쓰기 |
 
 표시값 (`myDisplayScore` / `yourDisplayScore`): 일반 모드는 "0"/"15"/"30"/"40"/"AD", 타이브레이크는 정수 그대로.
 
@@ -262,7 +262,7 @@ iOS 저장 버튼 탭
 
 ### ScoreViewModel (iOSApp/Features/Match/Score/ScoreViewModel.swift)
 
-게임·세트 레벨 로직. `Score` 인스턴스를 소유한다. `WorkoutSessionViewModel`이 단일 인스턴스(`let scoreVM = ScoreViewModel()`)를 생성·관리한다.
+게임·세트 레벨 로직과 경기 전체 undo 스택을 소유한다. `WorkoutSessionViewModel`이 단일 인스턴스(`let scoreVM = ScoreViewModel()`)를 생성·관리한다.
 
 ```
 addPoint(_ side:)
@@ -288,6 +288,7 @@ finalizeSet(winner:)
 
 | 메서드 | 역할 |
 |-------|------|
+| `undo()` | 마지막 포인트 직전의 점수·게임·세트·경기 상태를 복원 |
 | `resetAll(options:)` | 새 경기 시작 시 모든 상태 명시적 초기화. options(noAdRule, gameThreshold)도 갱신 |
 | `makeScoreState()` | 현재 상태를 `ScoreState`로 직렬화. 타이브레이크이면 `myTieBreak`/`yourTieBreak` 사용 |
 | `applyRemoteState(_ state:)` | Watch(driver)에서 받은 `ScoreState`를 덮어씀. mirror(iOS)만 호출 |
@@ -314,7 +315,7 @@ driver가 보내고 mirror가 받는 단방향 구조라 echo(받은 상태를 �
 
 ### MatchConnectivity (Shared/Services/MatchConnectivity.swift)
 
-iOS·Watch 공유 싱글턴. RalliKit `ConnectivityCore` 기반으로 메시지를 타입별로 `@Published` 프로퍼티에 파싱·발행한다. ViewModel은 Combine으로 이 프로퍼티를 구독한다.
+iOS·Watch 공유 싱글턴. YJKit `ConnectivityCore` 기반으로 메시지를 타입별로 `@Published` 프로퍼티에 파싱·발행한다. ViewModel은 Combine으로 이 프로퍼티를 구독한다.
 
 ### 메시지 타입
 
@@ -435,5 +436,5 @@ WorkoutDashboardView(
     onEnd: { ... }                  // 또는 클로저만 전달
 )
 // 이 프로젝트는 ViewModel 직접 주입 대신 값/클로저를 분리해서 넘기는 방식을 선택함
-// (RalliKit WorkoutUI 화면은 애초에 ViewModel을 받을 수 없다 — 값·콜백만 받는다)
+// (YJKit WorkoutUI 화면은 애초에 ViewModel을 받을 수 없다 — 값·콜백만 받는다)
 ```

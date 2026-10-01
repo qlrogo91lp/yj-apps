@@ -15,26 +15,40 @@
 
 - **언어**: Swift 6 (language mode v5)
 - **UI 프레임워크**: SwiftUI
-- **빌드 시스템**: Xcode (`.xcodeproj`, `PBXFileSystemSynchronizedRootGroup`)
+- **빌드 시스템**: Xcode (`YJApps.xcworkspace`, `PBXFileSystemSynchronizedRootGroup`)
 - **패턴**: 기능(Feature) 단위 폴더 구조 + MVVM
 - **린트/포맷**: SwiftLint + SwiftFormat
 
 ### 빌드 & 테스트
 
+저장소 루트에서 실행합니다. 시뮬레이터는 이름이 중복될 수 있으므로 공용 스크립트가 선택한 UDID를 사용합니다.
+
 ```bash
+IOS=$(.github/scripts/pick-simulator.sh iOS '^iPhone')
+WATCH=$(.github/scripts/pick-simulator.sh watchOS '^Apple Watch')
+
 # iOS 앱
-xcodebuild -project TennisCounter.xcodeproj -scheme "TennisCounter" -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build
+xcodebuild -workspace YJApps.xcworkspace -scheme "TennisCounter" \
+  -destination "id=$IOS" build
 
 # Watch 앱
-xcodebuild -project TennisCounter.xcodeproj -scheme "TennisCounter Watch App" -destination 'platform=watchOS Simulator,name=Apple Watch Series 11 (46mm)' build
+xcodebuild -workspace YJApps.xcworkspace -scheme "TennisCounter Watch App" \
+  -destination "id=$WATCH" build
 
-# 테스트
-xcodebuild test -project TennisCounter.xcodeproj -scheme "TennisCounter" -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
+# iOS 테스트
+xcodebuild -workspace YJApps.xcworkspace -scheme "TennisCounter" \
+  -destination "id=$IOS" test
+
+# Watch 테스트 전용 실행
+xcodebuild -workspace YJApps.xcworkspace -scheme "TennisCounter Watch App" \
+  -destination "id=$WATCH" -only-testing:RalliWatchTests test
 ```
 
 전체 빌드/테스트 명령어는 [CLAUDE.md의 Build Commands](CLAUDE.md#build-commands)를 참고하세요.
 
 ### Makefile 명령어
+
+이 명령도 저장소 루트에서 실행합니다.
 
 ```bash
 make lint      # SwiftLint 실행

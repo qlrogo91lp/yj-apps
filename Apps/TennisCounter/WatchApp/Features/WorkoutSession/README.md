@@ -2,7 +2,7 @@
 
 워크아웃 세션 컨테이너 Feature. HealthKit 세션 생명주기를 관리하고, 경기 흐름(Mode → Score → Result)을 조율하며, iOS 앱과 실시간으로 동기화한다.
 
-HealthKit 제어는 RalliKit `WorkoutCore`의 `WorkoutSessionService`가, 좌우 두 탭 화면은 `WorkoutUI`가 소유한다 — 앱에는 워크아웃 UI가 없다.
+HealthKit 제어는 YJKit `WorkoutCore`의 `WorkoutSessionService`가, 좌우 두 탭 화면은 `WorkoutUI`가 소유한다 — 앱에는 워크아웃 UI가 없다.
 
 ## 파일 구조
 
@@ -16,12 +16,12 @@ HealthKit 제어는 RalliKit `WorkoutCore`의 `WorkoutSessionService`가, 좌우
 
 ## WorkoutSessionView
 
-TabView로 3개의 화면을 좌우 스와이프로 전환한다. 좌우 두 화면은 RalliKit `WorkoutUI` 제공 — 값과 콜백만 넘긴다.
+TabView로 3개의 화면을 좌우 스와이프로 전환한다. 좌우 두 화면은 YJKit `WorkoutUI` 제공 — 값과 콜백만 넘긴다.
 
 ```
 [← WorkoutControlsView] [Match 화면 (기본)] [WorkoutMetricsView →]
      일시정지/종료           phase에 따라        칼로리/BPM/경과
-     (RalliKit WorkoutUI)                      (RalliKit WorkoutUI)
+     (YJKit WorkoutUI)                         (YJKit WorkoutUI)
 ```
 
 `centerView`에서 `viewModel.phase`를 switch해 경기 흐름을 전환한다.
@@ -57,7 +57,7 @@ phase = .finished       →  MatchResultView
 
 | 프로퍼티 | 역할 |
 |---------|------|
-| `healthKit` | RalliKit `WorkoutSessionService` — 워크아웃 세션, 칼로리/BPM. `.tennis` 설정 주입 |
+| `healthKit` | YJKit `WorkoutSessionService` — 워크아웃 세션, 칼로리/BPM. `.tennis` 설정 주입 |
 | `connectivity` | MatchConnectivity — iOS 통신 |
 | `scoreVM` | ScoreViewModel — 점수 상태 (게임/세트 로직) |
 
@@ -115,14 +115,16 @@ startNewMatch(notifyRemote:)
   phase = .modeSelection
   saveAckState = .idle
 
-endWorkout(notifyRemote:)
+endWorkout()
   _currentSession = nil
   AppGroup defaults: isWorkoutActive = false
   WidgetCenter 갱신
   connectivity.clearSessionContext()  ←  상대 콜드 런치 시 stale 세션 채택 방지
-  (notifyRemote=true인 경우) connectivity.sendWorkoutEnd(sessionId: activeSessionId)
-  healthKit.stopWorkout()
+  healthKit.stopWorkout() → 최종 워크아웃 결과 계산
+  connectivity.sendWorkoutEnd(sessionId: activeSessionId, result:, startedAt:)
 ```
+
+종료를 누가 지시했는지와 관계없이 Watch는 폰으로 최종 결과를 보낸다. 폰은 수신한 종료 결과를 다시 Watch로 보내지 않으므로 핑퐁이 생기지 않는다.
 
 ### init에서 구성하는 Combine 바인딩
 
@@ -158,9 +160,9 @@ handleIncomingMatchReset(id: UUID)
   if hasSyncedSession, id != activeSessionId { return }  ←  다른 세션 신호 무시
   startNewMatch(notifyRemote: false)
 
-handleIncomingWorkoutEnd(id: UUID)
-  if hasSyncedSession, id != activeSessionId { return }  ←  다른 세션의 workoutEnd 무시
-  endWorkout(notifyRemote: false)
+handleIncomingWorkoutEnd(message: WorkoutEndMessage)
+  if hasSyncedSession, message.sessionId != activeSessionId { return }  ←  다른 세션의 workoutEnd 무시
+  endWorkout()
   remoteWorkoutEnded = true  ←  View가 dismiss 트리거로 사용
 ```
 
@@ -206,7 +208,9 @@ handleMatchSaveResult(result:)
 
 ```swift
 // handleIncomingSessionStart
-guard isDriver, msg.sessionId.uuidString < workoutSessionId.uuidString else { return }
+if case .playing = phase, msg.sessionId != activeSessionId {
+    guard isDriver, msg.sessionId.uuidString < activeSessionId.uuidString else { return }
+}
 // → 더 작은 UUID를 가진 쪽이 driver를 유지. 나머지는 mirror로 전환.
 ```
 
@@ -232,17 +236,17 @@ guard isDriver, msg.sessionId.uuidString < workoutSessionId.uuidString else { re
 
 | 메서드 | 역할 |
 |-------|------|
-| `addPoint(_ side:)` | 포인트 추가. 게임이 끝나면 승리 측(`PlayerSide?`) 반환. 호출 시 SnapShot 저장 |
-| `undo()` | 마지막 `addPoint` 직전 상태로 복원. SnapShot은 1단계만 보관 |
+| `addPoint(_ side:)` | 포인트 추가. 게임이 끝나면 승리 측(`PlayerSide?`) 반환 |
 | `reset()` | 0-0으로 초기화 (게임 승리 후 다음 게임 시작) |
 | `setTieBreakMode()` | 타이브레이크 모드 전환 + 카운터 0-0 초기화 |
-| `applyRemote(myScore:yourScore:isTieBreak:)` | 원격 상태를 직접 덮어쓰기. SnapShot 파기 |
+| `makeSnapshot()` / `restore(_:)` | `ScoreViewModel`이 undo 스택에 보관할 불투명 `Snapshot`을 생성·복원 |
+| `applyRemote(myScore:yourScore:isTieBreak:)` | 원격 점수 상태를 직접 덮어쓰기 |
 
 표시값 (`myDisplayScore` / `yourDisplayScore`): 일반 모드는 "0"/"15"/"30"/"40"/"AD", 타이브레이크는 정수 그대로.
 
 ### ScoreViewModel (WatchApp/Features/Match/Score/ScoreViewModel.swift)
 
-게임·세트 레벨 로직. `Score` 인스턴스를 소유한다. `WorkoutSessionViewModel.init()`에서 `onMatchFinished` 콜백을 연결하고, 단일 인스턴스(`let scoreVM = ScoreViewModel(...)`)로 유지한다.
+게임·세트 레벨 로직과 경기 전체 undo 스택을 소유한다. `WorkoutSessionViewModel.init()`에서 `onMatchFinished` 콜백을 연결하고, 단일 인스턴스(`let scoreVM = ScoreViewModel(...)`)로 유지한다.
 
 ```
 addPoint(_ side:)
@@ -267,6 +271,7 @@ finalizeSet(winner:)
 
 | 메서드 | 역할 |
 |-------|------|
+| `undo()` | 마지막 포인트 직전의 점수·게임·세트·경기 상태를 복원 |
 | `resetAll(options:)` | 새 경기 시작 시 모든 상태 명시적 초기화. options(noAdRule, gameThreshold)도 갱신 |
 | `makeScoreState()` | 현재 상태를 `ScoreState`로 직렬화. 타이브레이크이면 `myTieBreak`/`yourTieBreak` 사용 |
 | `applyRemoteState(_ state:)` | iOS(driver)에서 받은 `ScoreState`를 덮어씀. mirror(Watch)만 호출 |
@@ -295,7 +300,7 @@ driver가 보내고 mirror가 받는 단방향 구조라 echo(받은 상태를 �
 
 ### MatchConnectivity (Shared/Services/MatchConnectivity.swift)
 
-iOS·Watch 공유 싱글턴. RalliKit `ConnectivityCore` 기반으로 메시지를 타입별로 `@Published` 프로퍼티에 파싱·발행한다. ViewModel은 Combine으로 이 프로퍼티를 구독한다.
+iOS·Watch 공유 싱글턴. YJKit `ConnectivityCore` 기반으로 메시지를 타입별로 `@Published` 프로퍼티에 파싱·발행한다. ViewModel은 Combine으로 이 프로퍼티를 구독한다.
 
 ### 메시지 타입
 

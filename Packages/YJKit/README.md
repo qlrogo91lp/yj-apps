@@ -241,6 +241,10 @@ let history = try store.fetchAll(sortBy: [SortDescriptor(\.endedAt, order: .reve
 
 ## 개발 워크플로
 
-- 로컬 개발: 소비자 앱 Xcode 프로젝트에 **Add Local…** 로 이 폴더를 추가하면 원격 참조를 오버라이드한다.
-  ⚠️ 로컬 오버라이드를 남겨두면 원격 태그가 조용히 무시된다 — 검증 후 제거할 것.
-- 배포: 초기에는 `branch: "main"` 참조, 앱 스토어 릴리즈 시점에 semver 태그.
+- 이 모노레포의 앱은 `../../Packages/YJKit` 로컬 SPM 패키지를 직접 참조한다.
+- 패키지 소스를 수정하면 앱 재빌드 시 즉시 반영된다. 원격 태그, 별도 체크아웃, local override 설정은 필요하지 않다.
+- 패키지 단독 검증은 저장소 루트에서 아래처럼 공용 스크립트가 선택한 iOS 시뮬레이터 UDID를 사용한다.
+
+  ```bash
+  make kit-test KIT_DESTINATION="id=$(.github/scripts/pick-simulator.sh iOS '^iPhone')"
+  ```
