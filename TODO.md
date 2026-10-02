@@ -9,9 +9,9 @@
 `feat/ralli` 은 PR #11 로 머지되어 더 쓰지 않는다. 새 작업은 항목별 브랜치를 판다.
 트랙 A·B 를 동시에 굴리려면 워크트리 2개가 필요하다 — 순차로 가면 메인 체크아웃 하나로 충분하다.
 
-## Ralli — 다음 출시 (현재 1.1.7 (26))
+## Ralli — 현재 1.1.9 (출시됨) · 다음 출시 대기 항목
 
-2026-09-21 갱신. 파일 충돌을 실제로 따져 트랙으로 나눴다.
+2026-10-02 갱신. 파일 충돌을 실제로 따져 트랙으로 나눴다.
 
 ```
 트랙 A (iOS)     5̶ → 2̶ → 1̶ ──┐            ← 전부 완료 (실기기 확인 포함)
@@ -45,7 +45,8 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
 | ~~9~~ | ~~iOS 기록·요약 **세션 중심 재편**~~ | D | **완료** · 실기기 확인 완료 | [스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-09-18-session-centric-history.md) · [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-18-session-centric-history.md) — `WorkoutSessionRecord` 신설이 포함된다. #2 스펙을 개정한다 |
 | ~~10~~ | ~~기록 삭제 시 **건강 앱 워크아웃도 삭제**~~ | E (YJKit+iOS) | **완료** ([PR #29](https://github.com/qlrogo91lp/yj-apps/pull/29)) · 실기기 확인 완료 | [플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-21-healthkit-workout-deletion.md) — YJKit `WorkoutDeletionService` 신설. 건강 앱에서 먼저 지운 경우 Ralli 기록은 유지한다 |
 | 11 | 클럽 대진표 · 실시간 중계 (Firebase) | — | **탐색 중** — 다음 출시 범위 아님 | [탐색 문서](Apps/TennisCounter/docs/ideas/club-live-scoring.md) — CourtMate 분석에서 출발. 백엔드·단위·기록자·게스트까지 결정, 안드로이드·매칭·ELO 는 열림 |
-| 12 | 워치 크라운 포커스 복구 · 워크아웃 종료 시각 보존 | B + YJKit | **코드 수정 완료 · 실기기 확인 대기** | [작업 기록](Apps/TennisCounter/docs/logs/2026/2026-09-28-crown-focus-and-session-end-time.md) — 알림·저휘도 복귀 뒤 크라운과 종료 버튼 시각 전달 확인 필요 |
+| 12 | 워치 크라운 포커스 복구 · 워크아웃 종료 시각 보존 | B + YJKit | **코드 수정 완료** ([PR #32](https://github.com/qlrogo91lp/yj-apps/pull/32)) **· 실기기 확인 대기** | [작업 기록](Apps/TennisCounter/docs/logs/2026/2026-09-28-crown-focus-and-session-end-time.md) — 알림·저휘도 복귀 뒤 크라운과 종료 버튼 시각 전달 확인 필요 |
+| ~~13~~ | ~~iOS 건강 쓰기 권한 문구를 삭제 연동 문구로 맞춤~~ | E | **완료** ([PR #34](https://github.com/qlrogo91lp/yj-apps/pull/34)) | — |
 
 ### 집 맥북에서 할 것
 
@@ -78,8 +79,8 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
       지난주 시도에서 삭제 대기로 남은 iOS 앱이 번들 ID 를 붙잡고 있어 복원해서 썼다. plist 는 Ralli 연동 PR 에서 커밋
 - [x] YJKit `MonitoringCore` 플랜 Task 0~3 — [PR #35](https://github.com/qlrogo91lp/yj-apps/pull/35) CI 통과 (전체 약 10분 30초, Firebase 해석 +1분 20초).
       저장소가 공개라 plist 를 git 에서 빼고 `configureFirebase()` → `start()`(plist 없으면 Noop)로 바꿨다.
-      **머지는 버그픽스 출시 뒤에**
-- [ ] YJKit `MonitoringCore` 플랜 (Task 0 스파이크 → CI 통과 → PR 머지)
+      **머지 완료** (09-28)
+- [x] YJKit `MonitoringCore` 플랜 (Task 0 스파이크 → CI 통과 → PR 머지) — PR #35
 
 **합류 후**
 
@@ -107,7 +108,7 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
       기록 목록의 세션 묶음과 스와이프 삭제, 캘린더 다중 점·날짜 선택,
       기록 상세 스코어보드와 `경기 방식`·`시간` 라벨, 앱 전체가 다크로 고정되는지.
       **삭제한 경기가 앱을 다시 켜도 안 돌아오는지** — 이번에 고친 버그다
-- [ ] Xcode Organizer › Crashes 에서 Ralli 1.1.7 한 번 열어보기 (분석 공유 켠 사용자 표본만 보임)
+- [ ] Xcode Organizer › Crashes 에서 Ralli 1.1.9 한 번 열어보기 (분석 공유 켠 사용자 표본만 보임)
 - [ ] **`saveFromWatchPersistsMatch` 테스트 오염 수정** — 싱글턴 `MatchPersistenceService.shared` 에
       인메모리 컨테이너를 꽂았던 테스트가 끝난 뒤 다른 테스트가 그 컨텍스트를 조회해
       `NSInternalInconsistencyException: "No eligible connection available"` 로 죽는다. 단독 실행은 통과.
@@ -135,7 +136,7 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
 
 | 항목 | 상태 | 문서 |
 |---|---|---|
-| `MonitoringCore` (CrashReporting 프로토콜 + Crashlytics 구현) | 스펙·플랜 완료 · 구현 대기 | 위 Ralli #7 과 같은 문서. 골프·하루치 연동은 별도 (Firebase 프로젝트 앱마다 새로) |
+| `MonitoringCore` (CrashReporting 프로토콜 + Crashlytics 구현) | **구현 완료** ([PR #35](https://github.com/qlrogo91lp/yj-apps/pull/35) · Ralli 연동 [PR #36](https://github.com/qlrogo91lp/yj-apps/pull/36)) | 위 Ralli #7 과 같은 문서. 골프·하루치 연동은 별도 (Firebase 프로젝트 앱마다 새로) |
 | **건강 앱에서 지운 것을 앱이 따라 지운다** (`HKDeletedObject`) | **미착수** — 브레인스토밍 전. 3개 앱이 같은 구조라 Kit 이 한 번 정한다 | 하루치 [import 스펙](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-21-healthkit-workout-import.md) 4절에 정할 것이 적혀 있다. **Ralli #10 과 방향이 반대다** — 그쪽은 앱에서 지우면 건강 앱을 지운다 |
 | ~~`WorkoutShareUI` 공유 카드 배경색을 Kit 이 소유~~ | **완료** (`feat/share-card-sticker`) — 짙은 회색 카드 + 지표별 고정 색. 앱은 원형 로고 `badgeColor` 만 넘김 | 아래 "카드 대비" · [Kit 사용법](Packages/YJKit/README.md#workoutshareui-사용법) |
 
@@ -264,7 +265,7 @@ Phase 2 코드 구현은 끝났고 HealthKit import 실기기 확인이 남았�
 
 | 항목 | 상태 | 문서 |
 |---|---|---|
-| **App Store 메타데이터 깃 관리** (`fastlane deliver` 의 메타데이터만) | **논의 필요 — 브레인스토밍 전** · 1.1.8 은 수동으로 가고 **다음 출시부터 적용** | [CI 스펙](docs/specs/2026/2026-08-27-ci-pipeline-design.md) §비범위 · §후속 과제 |
+| **App Store 메타데이터 깃 관리** (`fastlane deliver` 의 메타데이터만) | **논의 필요 — 브레인스토밍 전** · 1.1.9 까지 수동으로 나갔고 **다음 출시부터 적용** | [CI 스펙](docs/specs/2026/2026-08-27-ci-pipeline-design.md) §비범위 · §후속 과제 |
 
 배포 자동화(빌드 업로드 · 인증서 · API 키)와 **범위가 다르다.** 메타데이터만 떼면 `deliver download_metadata`
 로 현재 스토어 실값을 파일로 내려받아 시작할 수 있어 인증서 관리가 붙지 않는다.
