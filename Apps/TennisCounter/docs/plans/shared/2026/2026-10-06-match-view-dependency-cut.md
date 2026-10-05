@@ -264,4 +264,10 @@ xcodebuild -workspace YJApps.xcworkspace -scheme "TennisCounter Watch App" -dest
 
 ## 2단계 실행 기록
 
-(실행하며 채운다 — rename 건수, pbxproj diff 여부, 테스트 수)
+- **브랜치:** `refactor/ralli-match-folder-move` (`origin/main` `9a3133e` 에서 분기)
+- **이동:** `git mv` 4번, rename 32건 (소스 iOS 14 + Watch 14, 테스트 iOS 1 + Watch 3). 파일 내용 변경 0줄, `project.pbxproj` diff 없음
+- **빌드:** `TennisCounter`·`TennisCounter Watch App` 모두 성공
+- **테스트:** `RalliTests` 224개, `RalliWatchTests` 93개 통과 (1단계 재검증과 같은 수)
+- **lint·format:** 위반 0건
+- **문서:** 앱 `CLAUDE.md` 트리·ScoreViewModel 위치·테스트 미러링 트리, 두 README 의 ScoreViewModel 경로, 루트 `CLAUDE.md` 규칙 예시
+- **남은 확인:** Xcode 에서 워크스페이스를 열어 네비게이터에 `WorkoutSession/Match/` 가 정상으로 보이는지 (Task 6 Step 3)
