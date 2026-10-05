@@ -48,6 +48,7 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
 | 12 | 워치 크라운 포커스 복구 · 워크아웃 종료 시각 보존 | B + YJKit | **코드 수정 완료** ([PR #32](https://github.com/qlrogo91lp/yj-apps/pull/32)) **· 실기기 확인 대기** | [작업 기록](Apps/TennisCounter/docs/logs/2026/2026-09-28-crown-focus-and-session-end-time.md) — 알림·저휘도 복귀 뒤 크라운과 종료 버튼 시각 전달 확인 필요 |
 | ~~13~~ | ~~iOS 건강 쓰기 권한 문구를 삭제 연동 문구로 맞춤~~ | E | **완료** ([PR #34](https://github.com/qlrogo91lp/yj-apps/pull/34)) | — |
 | ~~14~~ | ~~매치 화면의 `WorkoutSessionViewModel` 의존 끊기 (iOS + 워치)~~ | — | **완료** ([PR #37](https://github.com/qlrogo91lp/yj-apps/pull/37)) · 수동 확인 대기 | [플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-10-06-match-view-dependency-cut.md) — Notion 폴더 재정비 논의의 B안. 폴더 이동(A안)·`MatchFlowView` 분리는 별도 판단 |
+| 15 | 매치 폴더를 `WorkoutSession/` 하위로 이동 (iOS + 워치, A안) | — | **플랜 작성 · 실행 대기** | [플랜 2단계](Apps/TennisCounter/docs/plans/shared/2026/2026-10-06-match-view-dependency-cut.md) — 코드 변경 없음, 폴더 rename 32건 + 구조 문서·규칙 예시 갱신 |
 
 ### 집 맥북에서 할 것
 
