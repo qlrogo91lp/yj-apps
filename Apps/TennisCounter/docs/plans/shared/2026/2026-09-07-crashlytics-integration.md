@@ -381,20 +381,28 @@ git switch tmp/crashlytics-verify     # PR 브랜치 위에 테스트 버튼만 
 - [x] iOS (2026-10-01): Run 후 Stop(디버거 분리), 홈에서 앱 아이콘으로 실행 → CRASH → 앱 재실행 → 수 분 뒤 콘솔 "문제" 에 `iOSApp.swift:105` (심볼 붙음). dSYM 탭에 Release 빌드 UUID 가 "업로드됨"
   - Debug 로 돌린 첫 시도는 크래시는 올라갔지만 dSYM "누락(필수)" — Debug 는 `DEBUG_INFORMATION_FORMAT = dwarf` 라 dSYM 자체가 없다. 그 항목은 영영 해석되지 않으니 숨기면 된다
 - [x] ~~워치 강제 크래시~~ — **잡히지 않는다** (2026-10-02). 콘솔 `ralli-watch` 가 "앱이 감지되었으며 비정상 종료를 기다리는 중" 에 머문다 = SDK 초기화·통신은 됐고 크래시만 안 온다. 원인은 스펙 "워치 크래시" 행
-- [ ] 워치 non-fatal: 폰을 옆에 두고 NON-FATAL → 앱이 닫힘 → 워치에서 앱 다시 열기 → 30초쯤 열어 둔다 → 콘솔 `ralli-watch` "문제" 에 `Ralli.Test` code 0, 커스텀 키 `source`, Logs 탭에 `test button tapped`.
+- [x] 워치 non-fatal: 폰을 옆에 두고 NON-FATAL → 앱이 닫힘 → 워치에서 앱 다시 열기 → 30초쯤 열어 둔다 → 콘솔 `ralli-watch` "문제" 에 `Ralli.Test` code 0, 커스텀 키 `source`, Logs 탭에 `test button tapped`.
       **안 올라오면 GCP 키의 iOS 번들 ID 제한부터 의심한다** — 워치 SDK 가 번들 ID 헤더를 보내는지는 여기서 처음 확인된다. 워치는 백그라운드 전송이 미뤄질 수 있어 충전기 + Wi-Fi 에서 더 빨리 올라간다
-- [ ] 확인이 끝나면 `git switch feat/ralli-crashlytics && git branch -D tmp/crashlytics-verify`. PR 브랜치에는 처음부터 버튼이 없다
+  - 이벤트 1건이 올라왔다 (2026-10-02). 다만 dSYM 탭에서 그 빌드 UUID `62AD67DD-8C87-38F0-8FB6-123B74E72457` (1.1.9 (1)) 가 **"누락(필수)"** 이고,
+    같은 날 로컬 Release 워치 빌드 `EE1FD9D5…` 는 "업로드됨"·이벤트 0 이다. 워치 dSYM 업로드 자체는 동작한다(업로드된 워치 UUID 3개).
+    Debug 빌드였다면 iOS 첫 시도와 같은 패턴이지만, 스킴이 Release·디버거 없음으로 바뀌어 있어 확정하지 못했다. 다음 Release 이벤트의 UUID 로 판정한다
+- [x] 확인이 끝나면 `git switch feat/ralli-crashlytics && git branch -D tmp/crashlytics-verify`. PR 브랜치에는 처음부터 버튼이 없다 — 로컬에 `tmp/*` 브랜치 없음 확인 (10-06)
 
 **plist 누락 방어**
-- [ ] plist 를 잠시 옮기고 Release 아카이브 → dSYM 스크립트의 `error:` 로 **실패하는지**. 확인 후 되돌린다
+- [ ] plist 를 잠시 옮기고 Release 아카이브 → dSYM 스크립트의 `error:` 로 **실패하는지**. 확인 후 되돌린다 — 다음 출시 아카이브 때
 
 **non-fatal**
-- [ ] 폰 앱을 완전히 종료 → 워치에서 경기 저장 → 8초 뒤 "실패" → 콘솔 non-fatal 탭에 `Ralli.Save` code 3, 커스텀 키 `sessionId`
+- [ ] **아이폰 전원을 끈다** → 워치 제어 센터에 연결 끊김 아이콘(사선 그은 아이폰)이 보이는지 **먼저 확인** → 워치에서 경기 저장 → 8초 뒤 주황 "저장 실패"
+      → 아이폰을 켜고 워치에서 Ralli 강제 종료 후 다시 열기 → 콘솔 non-fatal 탭에 `Ralli.Save` code 3, 커스텀 키 `sessionId`.
+      연결이 정말 끊겼는지가 핵심이다 — **폰 앱 종료로는 안 된다**(워치의 `sendMessage` 가 꺼진 폰 앱을 백그라운드로 깨워 저장·ACK 한다).
+      **아이폰·워치 비행기 모드도 안 된다**(둘 다 블루투스를 남겨 연결이 유지된다). 다시 연결되면 대기 중이던 `transferUserInfo` 가 전달돼 그 경기가 기록에 저장된다
+  - 2026-10-02: 워치 "저장 실패" 까지 확인. **며칠이 지나도 콘솔에 안 올라왔다** — 코드 경로(초기화 → 주입 → `record`)·plist·수집 키는 정상.
+    다음은 Debug + 스킴 인자 `-FIRDebugEnabled` 로 같은 절차를 밟고, 앱을 다시 실행할 때 Xcode 콘솔의 Crashlytics 업로드 로그(보고서 발견/업로드/실패)로 판정한다
 - [ ] 브레드크럼: 위 리포트의 Logs 탭에 `match started` → `match finished` → `save attempted` 순서
 
 **App Store Connect**
-- [ ] 앱 개인정보 → 데이터 유형 → **Crash Data** · **Other Diagnostic Data** 추가, "사용자에게 연결됨: 아니오", "추적: 아니오"
-- [ ] Privacy Manifest 는 Firebase 가 자체 포함 — 아카이브 후 Xcode 의 Privacy Report 에 Crashlytics 항목이 보이면 됨
+- [x] 앱 개인정보 → 데이터 유형 → **Crash Data** · **Other Diagnostic Data** 추가, "사용자에게 연결됨: 아니오", "추적: 아니오" — 완료 (10-02)
+- [ ] Privacy Manifest 는 Firebase 가 자체 포함 — 아카이브 후 Xcode 의 Privacy Report 에 Crashlytics 항목이 보이면 됨 — 다음 출시 아카이브 때 (1.1.9 에는 Crashlytics 가 없다)
 
 ---
 

@@ -108,7 +108,13 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
       기록 목록의 세션 묶음과 스와이프 삭제, 캘린더 다중 점·날짜 선택,
       기록 상세 스코어보드와 `경기 방식`·`시간` 라벨, 앱 전체가 다크로 고정되는지.
       **삭제한 경기가 앱을 다시 켜도 안 돌아오는지** — 이번에 고친 버그다
-- [ ] Xcode Organizer › Crashes 에서 Ralli 1.1.9 한 번 열어보기 (분석 공유 켠 사용자 표본만 보임)
+- [ ] **다음 출시 = Crashlytics 첫 탑재 버전** (1.1.9 는 `🔖 1.1.9+1` 이 PR #35·#36 머지보다 먼저라 빠졌다). 아카이브 때:
+      ① 아카이브하는 맥의 `iOSApp/`·`WatchApp/` 에 `GoogleService-Info.plist` — 없으면 dSYM 스크립트가 아카이브를 실패시킨다
+      ② Organizer Privacy Report 에 Firebase 항목 ③ 출시 뒤 Firebase dSYM 탭에 그 버전 UUID "업로드됨" ④ Organizer › Crashes 한 번 열어보기
+- [ ] **워치 저장 실패 non-fatal 콘솔 확인** — 워치에 "저장 실패" 는 떴는데(10-02) 며칠이 지나도 콘솔 `ralli-watch` 에 `Ralli.Save` code 3 이 안 올라왔다.
+      다음은 `-FIRDebugEnabled` 로 업로드 로그를 본다. 절차·dSYM `62AD67DD` 누락 메모는 [플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-07-crashlytics-integration.md) Task 4
+- [ ] **iOS 가 워치 저장 뒤에도 "경기 진행 중" 에 남는다** (10-02, 원인 미확인) — 워치는 "저장됨" 까지 갔다. 같은 경기 점수였는지,
+      기록 탭에 저장됐는지부터 본다. 의심 경로: 경기 시작이 `applicationContext` 에 남아 콜드 런치 때 다시 읽힘 / `sendMessage` 실패 시 `errorHandler: nil` 이라 경기 종료가 유실
 - [ ] **`saveFromWatchPersistsMatch` 테스트 오염 수정** — 싱글턴 `MatchPersistenceService.shared` 에
       인메모리 컨테이너를 꽂았던 테스트가 끝난 뒤 다른 테스트가 그 컨텍스트를 조회해
       `NSInternalInconsistencyException: "No eligible connection available"` 로 죽는다. 단독 실행은 통과.
