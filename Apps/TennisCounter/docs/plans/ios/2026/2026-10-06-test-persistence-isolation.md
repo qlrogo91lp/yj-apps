@@ -68,7 +68,7 @@ NSInternalInconsistencyException: "No eligible connection available"
 - Produces: `@MainActor struct TestPersistence` — `static func make() throws -> TestPersistence`, `let container: ModelContainer`, `let matches: MatchPersistenceService`, `let sessions: SessionPersistenceService`, `func newContext() -> ModelContext`, `func relaunched() -> TestPersistence`
 - Produces: `MatchPersistenceService.init()` 가 `internal`
 
-- [ ] **Step 1: 워크트리 생성 + 기준선 측정**
+- [x] **Step 1: 워크트리 생성 + 기준선 측정**
 
 ```bash
 cd /Users/yj/Workspace/Projects/yj-apps
@@ -82,7 +82,7 @@ xcodebuild -workspace YJApps.xcworkspace -scheme "TennisCounter" -destination "i
 
 plist 는 git 밖이라 워크트리에 없다(없어도 테스트는 통과한다 — Noop). 결과(통과/실패 수, `No eligible` 등장 여부)를 이 문서 끝 "실행 기록" 에 적는다.
 
-- [ ] **Step 2: 실패하는 테스트 작성** — `MatchPersistenceServiceTests` 에 추가
+- [x] **Step 2: 실패하는 테스트 작성** — `MatchPersistenceServiceTests` 에 추가
 
 ```swift
     /// 인스턴스마다 자기 컨테이너를 쓴다 — 테스트가 싱글턴을 갈아끼울 필요가 없다.
@@ -99,12 +99,12 @@ plist 는 git 밖이라 워크트리에 없다(없어도 테스트는 통과한�
     }
 ```
 
-- [ ] **Step 3: 실패 확인**
+- [x] **Step 3: 실패 확인**
 
 Run: `xcodebuild -workspace YJApps.xcworkspace -scheme "TennisCounter" -destination "id=$IOS" test -only-testing:RalliTests/MatchPersistenceServiceTests`
 Expected: 컴파일 실패 — `cannot find 'TestPersistence' in scope`
 
-- [ ] **Step 4: `MatchPersistenceService.init` 열기**
+- [x] **Step 4: `MatchPersistenceService.init` 열기**
 
 `iOSApp/Services/MatchPersistenceService.swift`:
 
@@ -118,7 +118,7 @@ Expected: 컴파일 실패 — `cannot find 'TestPersistence' in scope`
     init() {}
 ```
 
-- [ ] **Step 5: `TestPersistence` 작성** — `iosTests/Support/TestPersistence.swift`
+- [x] **Step 5: `TestPersistence` 작성** — `iosTests/Support/TestPersistence.swift`
 
 ```swift
 import Foundation
@@ -175,7 +175,7 @@ struct TestPersistence {
 }
 ```
 
-- [ ] **Step 6: 서비스 테스트 픽스처 교체**
+- [x] **Step 6: 서비스 테스트 픽스처 교체**
 
 `MatchPersistenceServiceTests.swift` — 6~7행 주석을 지우고 `makeService()` 를 바꾼다. `@Suite(.serialized)` 는 남긴다(이번 범위 밖).
 
@@ -204,7 +204,7 @@ struct MatchPersistenceServiceTests {
     }
 ```
 
-- [ ] **Step 7: `WorkoutSessionViewModelTests` 의 싱글턴 사용 2곳 교체**
+- [x] **Step 7: `WorkoutSessionViewModelTests` 의 싱글턴 사용 2곳 교체**
 
 125~130행 `saveCurrentMatchReturnsMatchOnSuccess`:
 
@@ -235,7 +235,7 @@ struct MatchPersistenceServiceTests {
     }
 ```
 
-- [ ] **Step 8: 대상 스위트 통과 확인**
+- [x] **Step 8: 대상 스위트 통과 확인**
 
 ```bash
 xcodebuild -workspace YJApps.xcworkspace -scheme "TennisCounter" -destination "id=$IOS" test \
@@ -247,12 +247,12 @@ xcodebuild -workspace YJApps.xcworkspace -scheme "TennisCounter" -destination "i
 
 Expected: 전부 PASS (`instancesDoNotShareStore` 포함)
 
-- [ ] **Step 9: 남은 싱글턴 사용 확인**
+- [x] **Step 9: 남은 싱글턴 사용 확인**
 
 Run: `grep -rn "MatchPersistenceService.shared\|SessionPersistenceService.shared" Apps/TennisCounter/iosTests/Services Apps/TennisCounter/iosTests/WorkoutSession`
 Expected: 출력 없음
 
-- [ ] **Step 10: 커밋**
+- [x] **Step 10: 커밋**
 
 ```bash
 git add Apps/TennisCounter/iosTests/Support/TestPersistence.swift \
@@ -278,7 +278,7 @@ git commit -m "✅ 서비스·워크아웃 테스트가 저장소 싱글턴 대�
 - Produces: `HistoryViewModel.init(workoutDeleter:matchStore:sessionStore:)` — 뒤 두 인자는 기본값 `.shared`
 - Produces: 테스트 전용 `HistoryViewModel.init(persistence: TestPersistence, workoutDeleter: any WorkoutDeleting = WorkoutDeletionService())`
 
-- [ ] **Step 1: 실패하는 테스트 작성** — `HistoryViewModelTests` 에 추가
+- [x] **Step 1: 실패하는 테스트 작성** — `HistoryViewModelTests` 에 추가
 
 ```swift
     /// 주입한 저장소의 레코드로 세션을 묶는다 — 앱 싱글턴이 무엇을 가리키든 상관없다.
@@ -302,12 +302,12 @@ git commit -m "✅ 서비스·워크아웃 테스트가 저장소 싱글턴 대�
     }
 ```
 
-- [ ] **Step 2: 실패 확인**
+- [x] **Step 2: 실패 확인**
 
 Run: `xcodebuild -workspace YJApps.xcworkspace -scheme "TennisCounter" -destination "id=$IOS" test -only-testing:RalliTests/HistoryViewModelTests`
 Expected: 컴파일 실패 — `extra argument 'persistence' in call`
 
-- [ ] **Step 3: `HistoryViewModel` 에 저장소 주입**
+- [x] **Step 3: `HistoryViewModel` 에 저장소 주입**
 
 ```swift
     private var modelContext: ModelContext?
@@ -337,7 +337,7 @@ Expected: 컴파일 실패 — `extra argument 'persistence' in call`
 | 161 | `try? MatchPersistenceService.shared.fetchByWorkoutSession(session.id)` | `try? matchStore.fetchByWorkoutSession(session.id)` |
 | 167 | `try? SessionPersistenceService.shared.fetchAll()` | `try? sessionStore.fetchAll()` |
 
-- [ ] **Step 4: 테스트 전용 이니셜라이저** — `iosTests/Support/HistoryViewModel+TestPersistence.swift`
+- [x] **Step 4: 테스트 전용 이니셜라이저** — `iosTests/Support/HistoryViewModel+TestPersistence.swift`
 
 ```swift
 @testable import TennisCounter
@@ -360,7 +360,7 @@ extension HistoryViewModel {
 
 `HistoryViewModel` 은 `final class` 이고 지정 이니셜라이저가 하나라 확장의 `convenience init` 이 가능하다.
 
-- [ ] **Step 5: 기록 테스트 3개 픽스처 교체**
+- [x] **Step 5: 기록 테스트 3개 픽스처 교체**
 
 **`HistoryViewModelTests.swift`**
 
@@ -433,7 +433,7 @@ extension HistoryViewModel {
         #expect(try reloaded.sessions.fetchAll().isEmpty)
 ```
 
-- [ ] **Step 6: 남은 싱글턴·기본 VM 확인**
+- [x] **Step 6: 남은 싱글턴·기본 VM 확인**
 
 ```bash
 grep -rn "PersistenceService.shared\|HistoryViewModel()\|ModelConfiguration(isStoredInMemoryOnly" Apps/TennisCounter/iosTests
@@ -441,7 +441,7 @@ grep -rn "PersistenceService.shared\|HistoryViewModel()\|ModelConfiguration(isSt
 
 Expected: 출력 없음
 
-- [ ] **Step 7: 기록 스위트 통과 확인**
+- [x] **Step 7: 기록 스위트 통과 확인**
 
 ```bash
 xcodebuild -workspace YJApps.xcworkspace -scheme "TennisCounter" -destination "id=$IOS" test \
@@ -451,7 +451,7 @@ xcodebuild -workspace YJApps.xcworkspace -scheme "TennisCounter" -destination "i
 
 Expected: 전부 PASS (`groupsSessionsWithInjectedSessionStore` 와 HealthKit 삭제 테스트 포함 — 후자는 `HistoryViewModelTests` 확장이다)
 
-- [ ] **Step 8: 커밋**
+- [x] **Step 8: 커밋**
 
 ```bash
 git add Apps/TennisCounter/iOSApp/Features/History/HistoryViewModel.swift \
@@ -469,7 +469,7 @@ git commit -m "♻️ HistoryViewModel 이 저장소를 주입받아 기록 테�
 - Modify: `Apps/TennisCounter/docs/logs/2026/2026-09-21-session-record-integration-gaps.md:149` (체크)
 - Modify: `TODO.md` ("아무 때나" 의 `saveFromWatchPersistsMatch` 항목 취소선)
 
-- [ ] **Step 1: 기본 병렬로 전체 두 번**
+- [x] **Step 1: 기본 병렬로 전체 두 번**
 
 ```bash
 for i in 1 2; do
@@ -480,7 +480,7 @@ done
 
 Expected: 두 번 모두 실패 0, `No eligible` 0건. 실패가 남으면 **여기서 멈추고** 로그를 기록한 뒤 보고한다 — 추가 수정을 얹지 않는다
 
-- [ ] **Step 2: Review Focus 1 확인 (기록만)**
+- [x] **Step 2: Review Focus 1 확인 (기록만)**
 
 ```bash
 grep -rn "receivedMatchSave\|MatchSaveMessage" Apps/TennisCounter/iosTests
@@ -488,7 +488,7 @@ grep -rn "receivedMatchSave\|MatchSaveMessage" Apps/TennisCounter/iosTests
 
 테스트가 공유 연결에 저장 메시지를 흘리는 곳이 있으면, 그 시점에 살아 있는 기본 `matchStore` VM 이 앱 싱글턴에 쓸 수 있다. 결과를 실행 기록에 적는다
 
-- [ ] **Step 3: 워치 테스트·린트**
+- [x] **Step 3: 워치 테스트·린트**
 
 ```bash
 WATCH=$(.github/scripts/pick-simulator.sh watchOS '^Apple Watch')
@@ -498,9 +498,9 @@ make lint
 
 Expected: PASS, 새 경고 없음
 
-- [ ] **Step 4: 문서 갱신** — 실행 기록(기준선 vs 수정 후 숫자), 작업 기록 149행 체크, `TODO.md` 항목 취소선 + `완료 (PR #n)`. TODO 의 "`-parallel-testing-enabled NO` 로 돌린다" 문구는 Step 1 이 통과했을 때만 지운다
+- [x] **Step 4: 문서 갱신** — 실행 기록(기준선 vs 수정 후 숫자), 작업 기록 149행 체크, `TODO.md` 항목 취소선 + `완료 (PR #n)`. TODO 의 "`-parallel-testing-enabled NO` 로 돌린다" 문구는 Step 1 이 통과했을 때만 지운다
 
-- [ ] **Step 5: 커밋·푸시·PR**
+- [x] **Step 5: 커밋·푸시·PR**
 
 ```bash
 git add Apps/TennisCounter/docs TODO.md
@@ -515,4 +515,8 @@ gh pr create --title "♻️ iOS 테스트가 저장소 싱글턴을 건드리�
 
 ## 실행 기록
 
-(실행하며 채운다 — 기준선 / 수정 후 1회차 / 2회차의 통과·실패 수, `No eligible` 등장 여부, Review Focus 1 grep 결과)
+- 기준선: 122개 통과, 98개 실패. `No eligible connection available`은 로그·결과 번들 모두 0건이었다. 실패는 테스트 호스트 `TennisCounter` 크래시로 집중됐다.
+- 수정 후 1회차(기본 병렬): 224개 통과, 0개 실패, `No eligible` 0건.
+- 수정 후 2회차(기본 병렬): 224개 통과, 0개 실패, `No eligible` 0건.
+- Review Focus 1 grep: `ConnectivityMessagesTests.swift`의 `MatchSaveMessage` 역직렬화 테스트 2건만 발견됐다. `receivedMatchSave` 수신 경로는 없어, 기본 `matchStore`가 공유 연결의 저장 메시지로 앱 싱글턴에 쓰는 테스트 경로는 확인되지 않았다.
+- 워치: `RalliWatchTests` 통과. `make lint` 통과(0 violations).
