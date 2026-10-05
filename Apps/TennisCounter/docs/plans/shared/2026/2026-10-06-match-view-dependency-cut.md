@@ -17,7 +17,7 @@ iOS `ScoreView`(`isDriver` + `onMatchFinished`)와 `SaveButton`(`state` + `actio
 | 단계 | 내용 | 상태 |
 |---|---|---|
 | 1단계 | 의존 끊기 (B안) — 화면 시그니처를 값과 콜백으로 | **완료** ([PR #37](https://github.com/qlrogo91lp/yj-apps/pull/37)) · 수동 확인 대기 |
-| 2단계 | 폴더 이동 (A안) — `Match/` → `WorkoutSession/Match/` | 실행 대기 |
+| 2단계 | 폴더 이동 (A안) — `Match/` → `WorkoutSession/Match/` | **완료** ([PR #39](https://github.com/qlrogo91lp/yj-apps/pull/39)) |
 
 ---
 
@@ -257,7 +257,7 @@ xcodebuild -workspace YJApps.xcworkspace -scheme "TennisCounter Watch App" -dest
 - [ ] **Step 1:** lint·format·테스트. 기대값은 1단계 재검증과 같다 — `RalliTests` 224개, `RalliWatchTests` 93개 (테스트는 경로만 바뀐다)
 - [ ] **Step 2:** PR 생성. 본문에 "코드 변경 없음 — rename 32건 + 문서" 를 밝힌다
 - [ ] **Step 3:** 수동 확인 — 동작 변경이 없어 앱 확인은 필요 없다. Xcode 에서 워크스페이스를 열어 네비게이터에 `WorkoutSession/Match/` 가 정상으로 보이는지만 본다
-- [ ] **Step 4:** 머지(확인 후) `gh pr merge <n> --merge --delete-branch`, 루트 `TODO.md` 행 취소선 + 이 문서 상단 표 갱신
+- [x] **Step 4:** 머지(확인 후) `gh pr merge <n> --merge --delete-branch`, 루트 `TODO.md` 행 취소선 + 이 문서 상단 표 갱신
 - [ ] **Step 5:** Notion 갱신 (확인 후)
   - 이 논의 페이지 — "결정해야 할 것" 을 결론(A·B 둘 다 진행, `MatchFlowView` 보류)과 PR 링크로 정리
   - 상위 "Ralli - Tennis Counter" 페이지 "구조" 섹션의 폴더 트리
