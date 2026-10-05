@@ -139,7 +139,7 @@ struct WorkoutSessionView: View {
     private var scoreTabContent: some View {
         switch viewModel.phase {
         case .modeSelection:
-            ModeView(viewModel: viewModel)
+            ModeView(onStart: { viewModel.startMatch(options: $0) })
 
         case .playing:
             ScoreView(
@@ -152,8 +152,12 @@ struct WorkoutSessionView: View {
             )
 
         case let .finished(session):
-            MatchResultView(session: session, viewModel: viewModel)
-                .id(session.workoutSessionId)
+            MatchResultView(
+                session: session,
+                onSave: { viewModel.saveCurrentMatch() != nil },
+                onRematch: { viewModel.restartMatch() }
+            )
+            .id(session.workoutSessionId)
         }
     }
 }
