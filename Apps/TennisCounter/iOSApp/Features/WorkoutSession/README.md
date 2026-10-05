@@ -260,7 +260,7 @@ iOS 저장 버튼 탭
 
 `myScore` / `yourScore`: WatchConnectivity 직렬화 호환용 정수 (`[0, 15, 30, 40, 50]` 매핑). 50은 게임 승리 직전 Advantage 상태가 아닌 구형 인덱스 호환용이며 실제로는 addPoint 반환값으로 게임 종료를 감지한다.
 
-### ScoreViewModel (iOSApp/Features/Match/Score/ScoreViewModel.swift)
+### ScoreViewModel (iOSApp/Features/WorkoutSession/Match/Score/ScoreViewModel.swift)
 
 게임·세트 레벨 로직과 경기 전체 undo 스택을 소유한다. `WorkoutSessionViewModel`이 단일 인스턴스(`let scoreVM = ScoreViewModel()`)를 생성·관리한다.
 
