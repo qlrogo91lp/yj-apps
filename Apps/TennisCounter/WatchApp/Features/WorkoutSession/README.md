@@ -244,7 +244,7 @@ if case .playing = phase, msg.sessionId != activeSessionId {
 
 표시값 (`myDisplayScore` / `yourDisplayScore`): 일반 모드는 "0"/"15"/"30"/"40"/"AD", 타이브레이크는 정수 그대로.
 
-### ScoreViewModel (WatchApp/Features/Match/Score/ScoreViewModel.swift)
+### ScoreViewModel (WatchApp/Features/WorkoutSession/Match/Score/ScoreViewModel.swift)
 
 게임·세트 레벨 로직과 경기 전체 undo 스택을 소유한다. `WorkoutSessionViewModel.init()`에서 `onMatchFinished` 콜백을 연결하고, 단일 인스턴스(`let scoreVM = ScoreViewModel(...)`)로 유지한다.
 

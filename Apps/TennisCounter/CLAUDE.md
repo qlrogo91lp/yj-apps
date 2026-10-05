@@ -82,33 +82,32 @@ iOSApp/
     │       ├── MatchStatsGrid.swift   # 경기 통계 그리드
     │       ├── RecentMatchList.swift  # 최근 경기 목록
     │       └── WorkoutStatsGrid.swift # 워크아웃 통계 그리드
-    ├── Match/
-    │   │  # Watch 앱과 대칭 구조: Mode / Score / Result
-    │   ├── Mode/                        # 포맷 선택 화면
-    │   │   ├── ModeView.swift
-    │   │   ├── ModeViewModel.swift
-    │   │   └── Components/
-    │   │       └── ModeOptionItem.swift
-    │   ├── Score/                       # 점수 입력 화면
-    │   │   ├── ScoreView.swift
-    │   │   ├── ScoreViewModel.swift
-    │   │   └── Components/
-    │   │       ├── PlayerPointZone.swift
-    │   │       ├── GameScores.swift
-    │   │       ├── SetScores.swift
-    │   │       ├── UndoButton.swift
-    │   │       └── ScoreEditSheet.swift
-    │   └── Result/                      # 경기 결과 화면
-    │       ├── MatchResultView.swift
-    │       └── Components/
-    │           ├── RematchButton.swift
-    │           └── SaveButton.swift
     ├── WorkoutSession/                  # iOS 워크아웃 세션 컨테이너
     │   │  # 2-탭 TabView [Workout | Match]. 워크아웃 탭 화면은 YJKit WorkoutUI(WorkoutDashboardView)가 소유
     │   ├── WorkoutSessionView.swift
     │   ├── WorkoutSessionViewModel.swift  # 경과시간은 워치 앵커 기반 보간(WorkoutAnchor). pause는 왕복 요청만 보내고 ack 전엔 낙관적으로 토글하지 않음
-    │   └── Components/
-    │       └── WorkoutIndicator.swift   # 경기 중 툴바에 표시되는 운동 경과시간
+    │   ├── Components/
+    │   │   └── WorkoutIndicator.swift   # 경기 중 툴바에 표시되는 운동 경과시간
+    │   └── Match/                       # 경기 흐름 — Watch 앱과 대칭 구조: Mode / Score / Result
+    │       ├── Mode/                        # 포맷 선택 화면
+    │       │   ├── ModeView.swift
+    │       │   ├── ModeViewModel.swift
+    │       │   └── Components/
+    │       │       └── ModeOptionItem.swift
+    │       ├── Score/                       # 점수 입력 화면
+    │       │   ├── ScoreView.swift
+    │       │   ├── ScoreViewModel.swift
+    │       │   └── Components/
+    │       │       ├── PlayerPointZone.swift
+    │       │       ├── GameScores.swift
+    │       │       ├── SetScores.swift
+    │       │       ├── UndoButton.swift
+    │       │       └── ScoreEditSheet.swift
+    │       └── Result/                      # 경기 결과 화면
+    │           ├── MatchResultView.swift
+    │           └── Components/
+    │               ├── RematchButton.swift
+    │               └── SaveButton.swift
     └── History/
         ├── HistoryView.swift
         ├── HistoryViewModel.swift
@@ -132,33 +131,32 @@ WatchApp/
 └── Features/
     ├── Home/
     │   └── HomeView.swift           # 워치 홈 화면 — Workout 진입 버튼
-    ├── Match/
-    │   │  # 경기 도메인 (Workout과 독립적). 모드 선택 → 점수 입력 → 결과
-    │   ├── Mode/                        # 포맷 선택 화면
-    │   │   ├── ModeView.swift
-    │   │   ├── ModeViewModel.swift
-    │   │   └── Components/
-    │   │       └── ModeOptionItem.swift
-    │   ├── Score/                       # 점수 입력 화면
-    │   │   ├── ScoreView.swift
-    │   │   ├── ScoreViewModel.swift
-    │   │   └── Components/
-    │   │       ├── GameScores.swift
-    │   │       ├── SetScores.swift
-    │   │       ├── PlayerPointButton.swift
-    │   │       └── UndoButton.swift
-    │   └── Result/                      # 경기 결과 화면
-    │       ├── MatchResultView.swift
-    │       └── Components/
-    │           ├── RematchButton.swift
-    │           └── SaveButton.swift
     └── WorkoutSession/
         │  # 컨테이너 Feature: 3-탭 TabView [WorkoutControlsView | Match | WorkoutMetricsView]
         │  # 좌우 두 탭 화면은 YJKit WorkoutUI가 소유 — 앱에 워크아웃 UI를 두지 않는다
         │  # HealthKit 세션 생명주기 관리, Match 흐름 조정
         ├── WorkoutSessionView.swift      # 좌우 스와이프로 3개 탭 전환
         ├── WorkoutSessionViewModel.swift # MatchPhase 상태 + HealthKit 연동. 폰의 pause 명령 수신 → HKWorkoutSession 제어, 워크아웃 누적 메트릭을 앵커로 브로드캐스트
-        └── WorkoutConfiguration+Tennis.swift # 테니스 종목 설정 (YJKit WorkoutConfiguration 주입값)
+        ├── WorkoutConfiguration+Tennis.swift # 테니스 종목 설정 (YJKit WorkoutConfiguration 주입값)
+        └── Match/                       # 경기 흐름 — 모드 선택 → 점수 입력 → 결과
+            ├── Mode/                        # 포맷 선택 화면
+            │   ├── ModeView.swift
+            │   ├── ModeViewModel.swift
+            │   └── Components/
+            │       └── ModeOptionItem.swift
+            ├── Score/                       # 점수 입력 화면
+            │   ├── ScoreView.swift
+            │   ├── ScoreViewModel.swift
+            │   └── Components/
+            │       ├── GameScores.swift
+            │       ├── SetScores.swift
+            │       ├── PlayerPointButton.swift
+            │       └── UndoButton.swift
+            └── Result/                      # 경기 결과 화면
+                ├── MatchResultView.swift
+                └── Components/
+                    ├── RematchButton.swift
+                    └── SaveButton.swift
 
 ComplicationApp/
 │  # watchOS WidgetKit complication + AppIntents. 잠금화면/항상켜기 화면에 현재 점수 표시.
@@ -176,7 +174,7 @@ TennisLiveActivity/
 ```
 
 - **Score** (`ObservableObject`): point state (`scoreArr = [0, 15, 30, 40, 50]`), 복원용 `Score.Snapshot` 왕복 API 제공. undo 스택은 `ScoreViewModel`이 소유한다 (경기 전체 되돌리기). iOS/Watch 타겟 공유.
-- **ScoreViewModel**: `Score` 인스턴스를 소유, 게임/세트 레벨 로직 담당. iOS·Watch 모두 `Match/Score/ScoreViewModel.swift`에 위치.
+- **ScoreViewModel**: `Score` 인스턴스를 소유, 게임/세트 레벨 로직 담당. iOS·Watch 모두 `WorkoutSession/Match/Score/ScoreViewModel.swift`에 위치.
 - **ScoreView**: `ScoreViewModel`을 바인딩. 경기 종료 시 `MatchResultView`로 전환.
 - **Shared/Persistence/**: SwiftData `@Model` 클래스. `MatchPersistenceService`를 통해서만 접근.
 - **Roadmap**: Phase 1-A (SwiftData + WatchConnectivity) 구현 완료. Phase 1-B에서 HealthKit + Live Activity. Phase 2에서 Firebase 멀티 모드 + StoreKit 2.
@@ -228,14 +226,14 @@ TennisLiveActivity/
 
 ```
 iosTests/
-├── Match/
-│   └── ScoreViewModelTests.swift        # iOSApp/Features/Match/Score/ 대응
 ├── History/
 │   └── HistoryViewModelTests.swift      # iOSApp/Features/History/ 대응
 ├── Summary/
 │   └── SummaryViewModelTests.swift      # iOSApp/Features/Summary/ 대응
 ├── WorkoutSession/
-│   └── WorkoutSessionViewModelTests.swift  # iOSApp/Features/WorkoutSession/ 대응
+│   ├── WorkoutSessionViewModelTests.swift  # iOSApp/Features/WorkoutSession/ 대응
+│   └── Match/
+│       └── ScoreViewModelTests.swift    # iOSApp/Features/WorkoutSession/Match/Score/ 대응
 ├── Services/
 │   └── MatchPersistenceServiceTests.swift  # iOSApp/Services/ 대응
 └── Shared/                              # Shared/Models·Services 대응
@@ -246,10 +244,12 @@ iosTests/
     └── MatchSaveResultMessageTests.swift
 
 watchosTests/
-├── Match/
-│   └── ScoreViewModelTests.swift        # WatchApp/Features/Match/Score/ 대응
 └── WorkoutSession/
-    └── WorkoutSessionViewModelTests.swift  # WatchApp/Features/WorkoutSession/ 대응
+    ├── WorkoutSessionViewModelTests.swift  # WatchApp/Features/WorkoutSession/ 대응
+    └── Match/
+        ├── ScoreViewModelTests.swift    # WatchApp/Features/WorkoutSession/Match/Score/ 대응
+        ├── ScoreViewModelHapticsTests.swift
+        └── CrownPointGateTests.swift
 ```
 
 - 파일명: `{테스트대상}Tests.swift` (e.g., `ScoreViewModelTests.swift`)

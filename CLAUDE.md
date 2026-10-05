@@ -179,7 +179,7 @@ ViewModel 은 **자기 Feature 안에서만** 쓴다. Feature 경계를 넘거�
 - 권한·불변식은 ViewModel 안에 둔다. 화면이 ViewModel 을 몰라도 규칙이 지켜져야 한다
 
 ```swift
-// ViewModel 을 가진 쪽 — 다른 Feature 의 화면에는 값과 콜백만 넘긴다
+// ViewModel 을 가진 쪽 — 자식 화면에는 값과 콜백만 넘긴다
 MatchResultView(
     session: session,
     saveState: saveButtonState,
@@ -187,7 +187,7 @@ MatchResultView(
     onRematch: { viewModel.restartMatch() }
 )
 
-// 다른 Feature 의 화면 — ViewModel 이름을 모른다
+// 자식 화면 — ViewModel 이름을 모른다
 struct MatchResultView: View {
     let session: MatchSession
     let saveState: SaveButtonState
@@ -197,8 +197,8 @@ struct MatchResultView: View {
 ```
 
 기준 구현
-- 다른 Feature: Ralli `WorkoutSession/` 이 `Match/` 화면을 값과 콜백으로 조합한다 (iOS·워치)
-- 같은 Feature: GolfCounter 워치 `Round/` 하위 화면들이 `RoundViewModel` 을 받는다
+- 같은 Feature 지만 쓰는 멤버가 적어 값과 콜백을 쓴 예: Ralli `WorkoutSession/` → `Match/` 화면 (iOS·워치)
+- 같은 Feature 의 VM 을 그대로 받는 예: GolfCounter 워치 `Round/` 하위 화면들이 `RoundViewModel` 을 받는다
 
 ### 파일 네이밍
 
