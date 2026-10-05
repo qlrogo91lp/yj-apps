@@ -106,7 +106,7 @@ xcodebuild -workspace YJApps.xcworkspace -scheme "TennisCounter" -destination "i
   - 모드 선택 → 경기 → 결과 → 저장 / 재경기 / 뒤로가기 (Watch·iOS)
   - Watch 저장 버튼의 대기 → 완료/실패 표시
   - mirror 기기에서 점수 입력(버튼·크라운), undo, 뒤로가기가 막히는지
-- [ ] **Step 4:** `gh pr merge 37 --merge --delete-branch`, 루트 `TODO.md` 행 취소선
+- [x] **Step 4:** `gh pr merge 37 --merge --delete-branch`, 루트 `TODO.md` 행 취소선
 
 ## 실행 기록
 
@@ -118,4 +118,7 @@ xcodebuild -workspace YJApps.xcworkspace -scheme "TennisCounter" -destination "i
 - **iOS:** 빌드 성공. `RalliTests` 는 테스트 호스트가 `NSInternalInconsistencyException: No eligible connection available` 로 크래시한다.
   변경을 stash 한 main 코드에서도 같은 조건으로 재현됐다 (전체 실행 1회, `WorkoutSessionViewModelTests` 단독 2회) — 이 플랜과 무관한 기존 문제다.
   루트 `TODO.md` 의 "`saveFromWatchPersistsMatch` 테스트 오염 수정" 항목이 다룬다
+- **PR #38(테스트 저장소 격리) 머지 후 재검증:** 브랜치를 main(`7b7d7de`) 위로 rebase 하고 기본 병렬로 `RalliTests` 전체를 두 번 —
+  두 번 모두 224개 통과, 실패 0, `No eligible` 0건. `RalliWatchTests` 93개 통과, lint·format 위반 0건
+- **수동 확인(Task 3 Step 3)은 머지 시점까지 하지 않았다** — 머지 후 별도로 확인한다
 - **플랜 대비 변경:** Watch `ScoreView` 의 입력을 `canScore` 에서 `isDriver` 로 바꿨다 (위 결정 사항)
