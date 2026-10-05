@@ -3,17 +3,24 @@ import SwiftData
 @testable import TennisCounter
 import Testing
 
-/// MatchPersistenceService는 싱글턴이라 테스트마다 컨텍스트를 갈아끼운다. 병렬 실행 시
-/// 서로의 컨텍스트를 덮어쓰므로 직렬 실행이 필요하다.
 @Suite(.serialized)
 @MainActor
 struct MatchPersistenceServiceTests {
     private func makeService() throws -> MatchPersistenceService {
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
-        let container = try ModelContainer(for: Match.self, SetRecord.self, configurations: config)
-        let service = MatchPersistenceService.shared
-        service.configure(with: ModelContext(container))
-        return service
+        try TestPersistence.make().matches
+    }
+
+    /// 인스턴스마다 자기 컨테이너를 쓴다 — 테스트가 싱글턴을 갈아끼울 필요가 없다.
+    @Test func instancesDoNotShareStore() throws {
+        let first = try TestPersistence.make()
+        let second = try TestPersistence.make()
+        let match = Match()
+        match.matchId = UUID()
+
+        try first.matches.upsert(match)
+
+        #expect(try first.matches.fetchAll().count == 1)
+        #expect(try second.matches.fetchAll().isEmpty)
     }
 
     /// 스펙 1-1 재현: 중복 제거 키가 워크아웃 단위라 같은 워크아웃의 두 번째 경기를

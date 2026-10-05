@@ -23,7 +23,9 @@ final class MatchPersistenceService: MatchUpserting {
 
     private var store: PersistenceService<Match>?
 
-    private init() {}
+    /// 앱 코드는 `.shared`만 쓴다. 테스트는 자기 컨테이너에 묶인 인스턴스를 만든다 —
+    /// 싱글턴을 갈아끼우면 병렬로 도는 다른 테스트가 해제된 컨텍스트를 건드린다.
+    init() {}
 
     func configure(with context: ModelContext) {
         store = PersistenceService(context: context)

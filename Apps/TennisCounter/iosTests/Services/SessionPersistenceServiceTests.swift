@@ -6,11 +6,7 @@ import Testing
 @MainActor
 struct SessionPersistenceServiceTests {
     private func makeService() throws -> SessionPersistenceService {
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
-        let container = try ModelContainer(for: WorkoutSessionRecord.self, configurations: config)
-        let service = SessionPersistenceService()
-        service.configure(with: ModelContext(container))
-        return service
+        try TestPersistence.make().sessions
     }
 
     @Test func upsertThenFetch() throws {

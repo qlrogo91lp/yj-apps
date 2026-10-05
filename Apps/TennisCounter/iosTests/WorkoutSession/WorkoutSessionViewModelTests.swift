@@ -123,11 +123,9 @@ struct WorkoutSessionViewModelTests {
     }
 
     @Test @MainActor func saveCurrentMatchReturnsMatchOnSuccess() throws {
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
-        let container = try ModelContainer(for: Match.self, SetRecord.self, configurations: config)
-        MatchPersistenceService.shared.configure(with: ModelContext(container))
+        let persistence = try TestPersistence.make()
 
-        let vm = WorkoutSessionViewModel()
+        let vm = WorkoutSessionViewModel(matchStore: persistence.matches)
         vm.startSession()
         vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
         vm.finishMatch(result: .win, completedSets: [(my: 6, your: 4)])
@@ -422,9 +420,7 @@ struct WorkoutSessionViewModelTests {
     }
 
     @Test @MainActor func saveFromWatchPersistsMatch() throws {
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
-        let container = try ModelContainer(for: Match.self, SetRecord.self, configurations: config)
-        MatchPersistenceService.shared.configure(with: ModelContext(container))
+        let persistence = try TestPersistence.make()
 
         let sid = UUID()
         let msg = MatchEndMessage(
@@ -440,10 +436,10 @@ struct WorkoutSessionViewModelTests {
             noAdRule: true
         )
 
-        let vm = WorkoutSessionViewModel()
+        let vm = WorkoutSessionViewModel(matchStore: persistence.matches)
         vm.saveFromWatchForTest(msg)
 
-        let saved = try MatchPersistenceService.shared.fetchByWorkoutSession(sid)
+        let saved = try persistence.matches.fetchByWorkoutSession(sid)
         #expect(saved.count == 1)
     }
 
