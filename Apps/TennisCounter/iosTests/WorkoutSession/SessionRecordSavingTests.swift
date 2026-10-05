@@ -12,11 +12,7 @@ struct SessionRecordSavingTests {
     }
 
     private func makePersistence() throws -> SessionPersistenceService {
-        let config = ModelConfiguration(isStoredInMemoryOnly: true)
-        let container = try ModelContainer(for: WorkoutSessionRecord.self, configurations: config)
-        let service = SessionPersistenceService()
-        service.configure(with: ModelContext(container))
-        return service
+        try TestPersistence.make().sessions
     }
 
     private func makeMessage(

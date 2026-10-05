@@ -22,13 +22,9 @@ private actor WorkoutDeleterSpy: WorkoutDeleting {
     }
 }
 
-private enum HealthKitDeletionTestStorage {
-    @MainActor static var retainedContainers: [ModelContainer] = []
-}
-
 extension HistoryViewModelTests {
     private struct Fixture {
-        let container: ModelContainer
+        let persistence: TestPersistence
         let viewModel: HistoryViewModel
         let session: MatchSessionGroup
     }
@@ -38,22 +34,8 @@ extension HistoryViewModelTests {
         matchCount: Int = 1,
         workoutDeleter: any WorkoutDeleting
     ) throws -> Fixture {
-        let configuration = ModelConfiguration(
-            UUID().uuidString,
-            isStoredInMemoryOnly: true,
-            cloudKitDatabase: .none
-        )
-        let container = try ModelContainer(
-            for: Match.self,
-            SetRecord.self,
-            WorkoutSessionRecord.self,
-            configurations: configuration
-        )
-        HealthKitDeletionTestStorage.retainedContainers.append(container)
-        MatchPersistenceService.shared.configure(with: ModelContext(container))
-        SessionPersistenceService.shared.configure(with: ModelContext(container))
-
-        let context = ModelContext(container)
+        let persistence = try TestPersistence.make()
+        let context = persistence.newContext()
         let sessionID = UUID()
         for index in 0 ..< matchCount {
             let match = Match()
@@ -66,13 +48,13 @@ extension HistoryViewModelTests {
         let record = WorkoutSessionRecord()
         record.workoutSessionId = sessionID
         record.healthKitUUID = healthKitUUID
-        try SessionPersistenceService.shared.upsert(record)
+        try persistence.sessions.upsert(record)
 
-        let viewModel = HistoryViewModel(workoutDeleter: workoutDeleter)
+        let viewModel = HistoryViewModel(persistence: persistence, workoutDeleter: workoutDeleter)
         viewModel.configure(modelContext: context)
         viewModel.loadInitial()
         let session = try #require(viewModel.listSessions.first { $0.id == sessionID })
-        return Fixture(container: container, viewModel: viewModel, session: session)
+        return Fixture(persistence: persistence, viewModel: viewModel, session: session)
     }
 
     @Test func deleteWithHealthKitUUIDPassesUUIDToDeleter() async throws {
@@ -115,9 +97,9 @@ extension HistoryViewModelTests {
         let task = try #require(fixture.viewModel.delete(fixture.session))
         await task.value
 
-        let reloadedContext = ModelContext(fixture.container)
-        #expect(try reloadedContext.fetch(FetchDescriptor<Match>()).isEmpty)
-        #expect(try SessionPersistenceService.shared.fetchAll().isEmpty)
+        let reloaded = fixture.persistence.relaunched()
+        #expect(try reloaded.newContext().fetch(FetchDescriptor<Match>()).isEmpty)
+        #expect(try reloaded.sessions.fetchAll().isEmpty)
     }
 
     @Test(arguments: [WorkoutDeletionOutcome.failed, .notAuthorized])

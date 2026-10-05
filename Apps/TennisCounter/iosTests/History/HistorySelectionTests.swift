@@ -7,14 +7,9 @@ import WorkoutCore
 @Suite(.serialized)
 @MainActor
 struct HistorySelectionTests {
-    private func makeContext() throws -> ModelContext {
-        let configuration = ModelConfiguration(isStoredInMemoryOnly: true)
-        let container = try ModelContainer(
-            for: Match.self, SetRecord.self, WorkoutSessionRecord.self,
-            configurations: configuration
-        )
-        SessionPersistenceService.shared.configure(with: ModelContext(container))
-        return ModelContext(container)
+    private func makeFixture() throws -> (persistence: TestPersistence, context: ModelContext) {
+        let persistence = try TestPersistence.make()
+        return (persistence, persistence.newContext())
     }
 
     private func insertMatch(sessionId: UUID?, start: Date, in context: ModelContext) -> Match {
@@ -26,7 +21,7 @@ struct HistorySelectionTests {
     }
 
     @Test func detailResolvesCrossMidnightSessionBeforeSharing() throws {
-        let context = try makeContext()
+        let (persistence, context) = try makeFixture()
         let sessionId = UUID()
         let calendar = Calendar.current
         let start = try #require(calendar.date(from: DateComponents(year: 2026, month: 8, day: 31, hour: 23)))
@@ -40,7 +35,7 @@ struct HistorySelectionTests {
         second.workoutCaloriesBurned = 300
         try context.save()
         let daySlice = MatchSessionGroup(id: sessionId, matches: [first], record: nil)
-        let viewModel = HistoryViewModel()
+        let viewModel = HistoryViewModel(persistence: persistence)
         viewModel.configure(modelContext: context)
 
         let detail = try #require(viewModel.sessionForDetail(daySlice))
@@ -54,7 +49,7 @@ struct HistorySelectionTests {
     }
 
     @Test func detailResolvesUnloadedMatchesWithoutChangingListPages() throws {
-        let context = try makeContext()
+        let (persistence, context) = try makeFixture()
         let sessionId = UUID()
         let base = Date(timeIntervalSince1970: 100_000)
         var expected: [UUID] = []
@@ -66,7 +61,7 @@ struct HistorySelectionTests {
         }
         _ = insertMatch(sessionId: UUID(), start: base.addingTimeInterval(-3600), in: context)
         try context.save()
-        let viewModel = HistoryViewModel()
+        let viewModel = HistoryViewModel(persistence: persistence)
         viewModel.configure(modelContext: context)
         viewModel.loadInitial()
         let partial = try #require(viewModel.listSessions.first)
@@ -83,7 +78,7 @@ struct HistorySelectionTests {
     }
 
     @Test func detailKeepsRecordOnlySessionIdentityAndMetrics() throws {
-        let context = try makeContext()
+        let (persistence, context) = try makeFixture()
         let record = WorkoutSessionRecord()
         let sessionId = UUID()
         record.workoutSessionId = sessionId
@@ -93,7 +88,7 @@ struct HistorySelectionTests {
         _ = insertMatch(sessionId: nil, start: Date(), in: context)
         try context.save()
         let selected = MatchSessionGroup(id: sessionId, matches: [], record: record)
-        let viewModel = HistoryViewModel()
+        let viewModel = HistoryViewModel(persistence: persistence)
         viewModel.configure(modelContext: context)
 
         let detail = try #require(viewModel.sessionForDetail(selected))
@@ -105,13 +100,13 @@ struct HistorySelectionTests {
     }
 
     @Test func detailKeepsLegacyNilSessionAsOneMatch() throws {
-        let context = try makeContext()
+        let (persistence, context) = try makeFixture()
         let selectedMatch = insertMatch(sessionId: nil, start: Date(), in: context)
         _ = insertMatch(sessionId: nil, start: Date().addingTimeInterval(60), in: context)
         _ = insertMatch(sessionId: UUID(), start: Date().addingTimeInterval(120), in: context)
         try context.save()
         let selected = MatchSessionGroup(id: selectedMatch.id, matches: [selectedMatch], record: nil)
-        let viewModel = HistoryViewModel()
+        let viewModel = HistoryViewModel(persistence: persistence)
         viewModel.configure(modelContext: context)
 
         let detail = try #require(viewModel.sessionForDetail(selected))
@@ -122,13 +117,13 @@ struct HistorySelectionTests {
     }
 
     @Test func repeatedAppearancePreservesBrowsingStateAndLoadedPages() throws {
-        let context = try makeContext()
+        let (persistence, context) = try makeFixture()
         let base = Date()
         for index in 0 ..< 45 {
             _ = insertMatch(sessionId: UUID(), start: base.addingTimeInterval(Double(-index * 60)), in: context)
         }
         try context.save()
-        let viewModel = HistoryViewModel()
+        let viewModel = HistoryViewModel(persistence: persistence)
         viewModel.configure(modelContext: context)
         viewModel.activate(1)
         #expect(viewModel.listMatches.count == 20)
@@ -151,9 +146,9 @@ struct HistorySelectionTests {
     }
 
     @Test func appearanceBeforeConfigurationDoesNotConsumeInitialization() throws {
-        let viewModel = HistoryViewModel()
+        let (persistence, context) = try makeFixture()
+        let viewModel = HistoryViewModel(persistence: persistence)
         viewModel.activate(1)
-        let context = try makeContext()
         let match = insertMatch(sessionId: UUID(), start: Date(), in: context)
         try context.save()
         viewModel.configure(modelContext: context)
@@ -168,8 +163,8 @@ struct HistorySelectionTests {
     }
 
     @Test func summaryActivationForcesListOnlyOnceThenNormalReentryPreservesMode() throws {
-        let context = try makeContext()
-        let viewModel = HistoryViewModel()
+        let (persistence, context) = try makeFixture()
+        let viewModel = HistoryViewModel(persistence: persistence)
         viewModel.configure(modelContext: context)
         viewModel.activate(1)
         viewModel.viewMode = .calendar
@@ -189,8 +184,8 @@ struct HistorySelectionTests {
     }
 
     @Test func tabReactivationLoadsWorkoutSavedAfterEmptyInitialVisit() throws {
-        let context = try makeContext()
-        let viewModel = HistoryViewModel()
+        let (persistence, context) = try makeFixture()
+        let viewModel = HistoryViewModel(persistence: persistence)
         viewModel.configure(modelContext: context)
         viewModel.activate(1)
         #expect(viewModel.listSessions.isEmpty)
@@ -216,13 +211,13 @@ struct HistorySelectionTests {
     }
 
     @Test func tabReactivationRefreshesPagesAndCalendarWithoutResettingSelection() throws {
-        let context = try makeContext()
+        let (persistence, context) = try makeFixture()
         let base = Calendar.current.startOfDay(for: Date()).addingTimeInterval(12 * 3600)
         for index in 0 ..< 45 {
             _ = insertMatch(sessionId: UUID(), start: base.addingTimeInterval(Double(-index * 60)), in: context)
         }
         try context.save()
-        let viewModel = HistoryViewModel()
+        let viewModel = HistoryViewModel(persistence: persistence)
         viewModel.configure(modelContext: context)
         viewModel.activate(1)
         viewModel.loadNextPage()

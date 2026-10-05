@@ -115,15 +115,13 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
       다음은 `-FIRDebugEnabled` 로 업로드 로그를 본다. 절차·dSYM `62AD67DD` 누락 메모는 [플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-07-crashlytics-integration.md) Task 4
 - [ ] **iOS 가 워치 저장 뒤에도 "경기 진행 중" 에 남는다** (10-02, 원인 미확인) — 워치는 "저장됨" 까지 갔다. 같은 경기 점수였는지,
       기록 탭에 저장됐는지부터 본다. 의심 경로: 경기 시작이 `applicationContext` 에 남아 콜드 런치 때 다시 읽힘 / `sendMessage` 실패 시 `errorHandler: nil` 이라 경기 종료가 유실
-- [ ] **`saveFromWatchPersistsMatch` 테스트 오염 수정** — 싱글턴 `MatchPersistenceService.shared` 에
+- [x] ~~**`saveFromWatchPersistsMatch` 테스트 오염 수정** — 싱글턴 `MatchPersistenceService.shared` 에
       인메모리 컨테이너를 꽂았던 테스트가 끝난 뒤 다른 테스트가 그 컨텍스트를 조회해
       `NSInternalInconsistencyException: "No eligible connection available"` 로 죽는다. 단독 실행은 통과.
       싱글턴 대신 주입으로 바꾸는 쪽이 근본적이다 (`@Suite(.serialized)` 는 증상만 덮는다).
       **원인은 이름 없는 기본 인메모리 설정이다** — 저장소 이름을 `default` 로 공유하고 iCloud 권한이 있으면 CloudKit 미러링이 켜진다.
       `saveCurrentMatchReturnsMatchOnSuccess`·`HistoryViewModelTests` 도 같은 이유로 죽는다 (2026-09-29 확인).
-      `HealthKitDeletionTests` 픽스처가 처방이다 — 고유 이름 + `cloudKitDatabase: .none` + 컨테이너 보관. 같은 설정으로 바꾸면 대부분 풀린다
-      **iOS 테스트는 `-parallel-testing-enabled NO` 로 돌린다** — 기본값은 테스트 호스트가 반복 크래시해
-      허수 실패 34개가 섞인다. 경위는 [작업 기록](Apps/TennisCounter/docs/logs/2026/2026-09-21-session-record-integration-gaps.md)
+      `HealthKitDeletionTests` 픽스처가 처방이다 — 고유 이름 + `cloudKitDatabase: .none` + 컨테이너 보관. 같은 설정으로 바꾸면 대부분 풀린다~~ 완료 (PR #38)
 - [x] `~/orca/workspaces/yj-apps/` 워크트리 3개 정리 — 워크트리·브랜치 모두 제거 완료
 
 ### 남은 논의 — #8 설정 페이지 (2026-09-07 시점)

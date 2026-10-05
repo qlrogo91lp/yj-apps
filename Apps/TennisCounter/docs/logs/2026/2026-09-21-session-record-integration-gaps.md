@@ -146,7 +146,7 @@ NSInternalInconsistencyException: "No eligible connection available"
 `main` 리베이스(충돌 없음) → 푸시 → [PR #28](https://github.com/qlrogo91lp/yj-apps/pull/28) 까지는 끝났다.
 같은 정리에서 `.gitignore` 에 있는데도 추적되고 있던 `.superpowers/sdd/` 산출물 2개의 추적을 끊었다.
 
-- [ ] `saveFromWatchPersistsMatch` 테스트 오염 수정 — 별건 작업
+- [x] `saveFromWatchPersistsMatch` 테스트 오염 수정 — PR #38에서 테스트별 저장소 주입으로 해결
 - [ ] 실기기 확인
   - 워치에서 두 경기를 저장하고 약 5분 뒤 종료해, 카드 시간이 마지막 경기 종료가 아니라
     워크아웃 종료까지 포함하는지
