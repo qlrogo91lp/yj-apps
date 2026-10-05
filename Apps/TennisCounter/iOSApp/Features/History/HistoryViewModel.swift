@@ -22,12 +22,22 @@ final class HistoryViewModel: ObservableObject {
 
     private var modelContext: ModelContext?
     private let workoutDeleter: any WorkoutDeleting
+    private let matchStore: MatchPersistenceService
+    private let sessionStore: SessionPersistenceService
     private let pageSize: Int = 20
     private var hasLoadedInitial = false
     private var lastActivationID: Int?
 
-    init(workoutDeleter: any WorkoutDeleting = WorkoutDeletionService()) {
+    /// 저장소 기본값은 앱 싱글턴이다. 테스트는 자기 컨테이너에 묶인 인스턴스를 넣는다 —
+    /// 싱글턴을 갈아끼우면 병렬로 도는 다른 테스트가 해제된 컨텍스트를 건드린다.
+    init(
+        workoutDeleter: any WorkoutDeleting = WorkoutDeletionService(),
+        matchStore: MatchPersistenceService = .shared,
+        sessionStore: SessionPersistenceService = .shared
+    ) {
         self.workoutDeleter = workoutDeleter
+        self.matchStore = matchStore
+        self.sessionStore = sessionStore
     }
 
     func configure(modelContext: ModelContext) {
@@ -131,9 +141,9 @@ final class HistoryViewModel: ObservableObject {
         let matchIds = Set(matches.map(\.id))
 
         for match in matches {
-            try? MatchPersistenceService.shared.delete(match)
+            try? matchStore.delete(match)
         }
-        try? SessionPersistenceService.shared.delete(sessionId: session.id)
+        try? sessionStore.delete(sessionId: session.id)
 
         listMatches.removeAll { matchIds.contains($0.id) }
         calendarMatches.removeAll { matchIds.contains($0.id) }
@@ -158,13 +168,13 @@ final class HistoryViewModel: ObservableObject {
         guard session.matches.contains(where: { $0.workoutSessionId != nil }) else {
             return session.matches
         }
-        return (try? MatchPersistenceService.shared.fetchByWorkoutSession(session.id)) ?? session.matches
+        return (try? matchStore.fetchByWorkoutSession(session.id)) ?? session.matches
     }
 
     /// 누적 배열 전체를 다시 그룹핑한다. 페이지 경계에서 한 세션이 둘로 갈리는 문제가
     /// 여기서 자연히 사라진다 — 경계를 따로 병합할 필요가 없다.
     private func rebuildSessions() {
-        let records = (try? SessionPersistenceService.shared.fetchAll()) ?? []
+        let records = (try? sessionStore.fetchAll()) ?? []
         let sourceMatches = try? modelContext?.fetch(FetchDescriptor<Match>())
         let groupingRecords = MatchSessionGroup.recordsForGrouping(
             records,

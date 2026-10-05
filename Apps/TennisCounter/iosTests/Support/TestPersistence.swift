@@ -2,7 +2,7 @@ import Foundation
 import SwiftData
 @testable import TennisCounter
 
-/// 테스트 하나가 쓰는 저장소 묶음. 앱 싱글턴(`MatchPersistenceService.shared` 등)은 건드리지 않는다.
+/// 테스트 하나가 쓰는 저장소 묶음. 앱 싱글턴은 건드리지 않는다.
 ///
 /// - 이름을 매번 새로 준다 — 이름 없는 설정은 모두 `default` 저장소를 가리켜 테스트끼리 섞인다
 /// - `cloudKitDatabase: .none` — 앱에 iCloud 권한이 있어 기본값이면 인메모리 저장소에도 미러링이 붙는다
