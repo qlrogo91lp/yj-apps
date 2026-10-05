@@ -161,6 +161,45 @@ ScreenName/Components/  ← 특정 View 전용 (가장 낮은 계층)
 - **Component** — 단일 책임. 한 파일은 한 UI 단위만. Props drilling 최소화
 - **Service** — 시스템/외부 API 호출을 캡슐화. 호출부는 Service 인터페이스만 안다
 
+### ViewModel 전달 (단방향)
+
+ViewModel 은 **자기 Feature 안에서만** 쓴다. Feature 경계를 넘거나 컴포넌트로 내려갈 때는 ViewModel 대신
+**값은 아래로, 이벤트는 위로** 보낸다.
+
+| 받는 쪽 | 같은 Feature 의 ViewModel | 다른 Feature 의 ViewModel |
+|---|---|---|
+| 화면 (`Features/X/`, `Features/X/ScreenName/`) | 받아도 된다 | 받지 않는다 — 값과 콜백 |
+| 컴포넌트 (`Components/` 전 계층) | 받지 않는다 — 값과 콜백 | 받지 않는다 — 값과 콜백 |
+
+- **다른 Feature 의 화면을 조합할 때** 그 화면에는 보여줄 **값**과 사용자 행동을 알릴 **콜백**만 넘긴다. 콜백을 ViewModel 메서드에
+  잇는 일은 ViewModel 을 가진 쪽 화면이 한다. 이걸 어기면 두 Feature 가 서로를 알게 되어 순환이 생긴다
+- **같은 Feature 의 하위 화면**은 그 Feature 의 ViewModel 을 받아도 된다. 다만 쓰는 멤버가 몇 개뿐이면 값과 콜백을 우선한다 —
+  화면이 하는 일이 시그니처에 드러나고 프리뷰가 가벼워진다
+- `@ObservedObject` 로 받든 `@EnvironmentObject` 로 꺼내든 같은 기준을 적용한다
+- 권한·불변식은 ViewModel 안에 둔다. 화면이 ViewModel 을 몰라도 규칙이 지켜져야 한다
+
+```swift
+// ViewModel 을 가진 쪽 — 다른 Feature 의 화면에는 값과 콜백만 넘긴다
+MatchResultView(
+    session: session,
+    saveState: saveButtonState,
+    onSave: { viewModel.saveCurrentMatch() },
+    onRematch: { viewModel.restartMatch() }
+)
+
+// 다른 Feature 의 화면 — ViewModel 이름을 모른다
+struct MatchResultView: View {
+    let session: MatchSession
+    let saveState: SaveButtonState
+    let onSave: () -> Void
+    let onRematch: () -> Void
+}
+```
+
+기준 구현
+- 다른 Feature: Ralli `WorkoutSession/` 이 `Match/` 화면을 값과 콜백으로 조합한다 (iOS·워치)
+- 같은 Feature: GolfCounter 워치 `Round/` 하위 화면들이 `RoundViewModel` 을 받는다
+
 ### 파일 네이밍
 
 - View suffix: 독립적인 화면/페이지만 (e.g., `ModeView.swift`)

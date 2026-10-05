@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ModeView: View {
-    @ObservedObject var viewModel: WorkoutSessionViewModel
+    let onStart: (MatchOptions) -> Void
     @StateObject private var selectionVM = ModeViewModel()
 
     var body: some View {
@@ -12,7 +12,7 @@ struct ModeView: View {
                 ForEach(MatchFormat.allCases, id: \.rawValue) { format in
                     ModeOptionItem(format: format) {
                         selectionVM.selectedMode = format
-                        viewModel.startMatch(options: selectionVM.options)
+                        onStart(selectionVM.options)
                     }
                 }
 
@@ -50,5 +50,5 @@ struct ModeView: View {
 }
 
 #Preview {
-    ModeView(viewModel: WorkoutSessionViewModel())
+    ModeView(onStart: { _ in })
 }

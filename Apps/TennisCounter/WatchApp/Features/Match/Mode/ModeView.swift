@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ModeView: View {
-    @ObservedObject var viewModel: WorkoutSessionViewModel
+    let onStart: (MatchOptions) -> Void
     @StateObject private var selectionVM = ModeViewModel()
 
     var body: some View {
@@ -9,12 +9,12 @@ struct ModeView: View {
             VStack(spacing: 10) {
                 ModeOptionItem(mode: .oneSet) {
                     selectionVM.selectedMode = .oneSet
-                    viewModel.startMatch(options: selectionVM.options)
+                    onStart(selectionVM.options)
                 }
 
                 ModeOptionItem(mode: .bestOfThree) {
                     selectionVM.selectedMode = .bestOfThree
-                    viewModel.startMatch(options: selectionVM.options)
+                    onStart(selectionVM.options)
                 }
 
                 Divider().background(Color.white.opacity(0.2))

@@ -2,7 +2,10 @@ import SwiftUI
 
 struct MatchResultView: View {
     let session: MatchSession
-    @ObservedObject var flowViewModel: WorkoutSessionViewModel
+    let saveState: SaveButtonState
+    let onSave: () -> Void
+    let onRematch: () -> Void
+    let onBack: () -> Void
 
     var body: some View {
         VStack(spacing: 2) {
@@ -44,14 +47,14 @@ struct MatchResultView: View {
             Spacer()
 
             HStack(spacing: 6) {
-                SaveButton(state: buttonState) { flowViewModel.saveCurrentMatch() }
-                RematchButton { flowViewModel.restartMatch() }
+                SaveButton(state: saveState, action: onSave)
+                RematchButton { onRematch() }
             }
         }
         .padding(.horizontal, 8)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
-                BackButton { flowViewModel.startNewMatch() }
+                BackButton { onBack() }
             }
         }
     }
@@ -73,15 +76,6 @@ struct MatchResultView: View {
         case nil: .white
         }
     }
-
-    private var buttonState: SaveButtonState {
-        switch flowViewModel.saveAckState {
-        case .idle: .idle
-        case .pending: .pending
-        case .succeeded: .saved
-        case .failed: .failed
-        }
-    }
 }
 
 #Preview {
@@ -100,6 +94,9 @@ struct MatchResultView: View {
 
     return MatchResultView(
         session: session,
-        flowViewModel: WorkoutSessionViewModel()
+        saveState: .idle,
+        onSave: {},
+        onRematch: {},
+        onBack: {}
     )
 }

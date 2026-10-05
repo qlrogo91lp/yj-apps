@@ -71,11 +71,30 @@ struct WorkoutSessionView: View {
     private var centerView: some View {
         switch viewModel.phase {
         case .modeSelection:
-            ModeView(viewModel: viewModel)
+            ModeView(onStart: { viewModel.startMatch(options: $0) })
         case .playing:
-            ScoreView(viewModel: viewModel.scoreVM, flowViewModel: viewModel)
+            ScoreView(
+                viewModel: viewModel.scoreVM,
+                isDriver: viewModel.isDriver,
+                onExit: { viewModel.startNewMatch() }
+            )
         case let .finished(session):
-            MatchResultView(session: session, flowViewModel: viewModel)
+            MatchResultView(
+                session: session,
+                saveState: saveButtonState,
+                onSave: { viewModel.saveCurrentMatch() },
+                onRematch: { viewModel.restartMatch() },
+                onBack: { viewModel.startNewMatch() }
+            )
+        }
+    }
+
+    private var saveButtonState: SaveButtonState {
+        switch viewModel.saveAckState {
+        case .idle: .idle
+        case .pending: .pending
+        case .succeeded: .saved
+        case .failed: .failed
         }
     }
 }

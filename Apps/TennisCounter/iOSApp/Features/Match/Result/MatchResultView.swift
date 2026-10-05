@@ -2,7 +2,9 @@ import SwiftUI
 
 struct MatchResultView: View {
     let session: MatchSession
-    @ObservedObject var viewModel: WorkoutSessionViewModel
+    /// 저장을 시도하고 성공 여부를 돌려준다.
+    let onSave: () -> Bool
+    let onRematch: () -> Void
 
     @State private var saveState: SaveButtonState = .idle
 
@@ -48,7 +50,7 @@ struct MatchResultView: View {
 
                 HStack(spacing: 16) {
                     SaveButton(state: saveState) { saveMatch() }
-                    RematchButton { viewModel.restartMatch() }
+                    RematchButton { onRematch() }
                 }
                 .padding(.horizontal, 32)
                 .padding(.bottom, 32)
@@ -76,9 +78,9 @@ struct MatchResultView: View {
     }
 
     private func saveMatch() {
-        let match = viewModel.saveCurrentMatch()
+        let saved = onSave()
         withAnimation {
-            saveState = match == nil ? .failed : .saved
+            saveState = saved ? .saved : .failed
         }
     }
 }
@@ -95,6 +97,6 @@ struct MatchResultView: View {
     session.result = .win
 
     return NavigationStack {
-        MatchResultView(session: session, viewModel: WorkoutSessionViewModel())
+        MatchResultView(session: session, onSave: { true }, onRematch: {})
     }
 }
