@@ -10,12 +10,16 @@ final class RecordDetailViewModel: ObservableObject {
     private let record: WorkoutRecord
     private let context: ModelContext
 
-    init(record: WorkoutRecord, context: ModelContext, calendar: Calendar = .current) {
+    init(record: WorkoutRecord,
+         context: ModelContext,
+         initialMemoDraft: String? = nil,
+         calendar: Calendar = .current)
+    {
         self.record = record
         self.context = context
         summary = RecordDetailBuilder.summary(for: record, now: Date(), calendar: calendar)
         bodyParts = record.bodyParts
-        memoDraft = record.memo ?? ""
+        memoDraft = initialMemoDraft ?? record.memo ?? ""
     }
 
     func toggle(_ part: BodyPart) -> Bool {

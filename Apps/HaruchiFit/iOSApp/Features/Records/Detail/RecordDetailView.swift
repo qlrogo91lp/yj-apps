@@ -7,10 +7,21 @@ struct RecordDetailView: View {
     @State private var detent: PresentationDetent = .medium
     @State private var confirmingDelete = false
     @State private var failure: AppAlert?
+    private let onDismissCommit: (String?) -> Void
     private let onDelete: () -> Void
 
-    init(record: WorkoutRecord, context: ModelContext, onDelete: @escaping () -> Void) {
-        _viewModel = StateObject(wrappedValue: RecordDetailViewModel(record: record, context: context))
+    /// 시트가 닫힐 때 메모 저장이 실패하면 `onDismissCommit`으로 초안을 돌려준다.
+    /// 표시하는 쪽은 초안을 보관했다가 같은 기록을 다시 열 때 `initialMemoDraft`로 넘겨준다.
+    init(record: WorkoutRecord,
+         context: ModelContext,
+         initialMemoDraft: String?,
+         onDismissCommit: @escaping (String?) -> Void,
+         onDelete: @escaping () -> Void)
+    {
+        _viewModel = StateObject(wrappedValue: RecordDetailViewModel(record: record,
+                                                                     context: context,
+                                                                     initialMemoDraft: initialMemoDraft))
+        self.onDismissCommit = onDismissCommit
         self.onDelete = onDelete
     }
 
@@ -46,7 +57,10 @@ struct RecordDetailView: View {
             }.padding(20)
         }
         .presentationDetents([.medium, .large], selection: $detent).presentationDragIndicator(.visible).presentationBackground(HaruchiPalette.bg)
-        .onChange(of: memoFocused) { _, focused in if focused { detent = .large } else { commitMemo() } }.onDisappear { _ = viewModel.commitMemo() }
+        .onChange(of: memoFocused) { _, focused in if focused { detent = .large } else { commitMemo() } }
+        .onDisappear {
+            onDismissCommit(viewModel.commitMemo() ? nil : viewModel.memoDraft)
+        }
         .confirmationDialog("이 기록을 삭제할까요?", isPresented: $confirmingDelete) { Button("삭제", role: .destructive) { onDelete() }; Button(
             "취소",
             role: .cancel

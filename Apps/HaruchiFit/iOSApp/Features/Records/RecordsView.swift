@@ -13,6 +13,8 @@ struct RecordsView: View {
     @State private var pendingDelete: WorkoutRecord?
     @State private var selected: WorkoutRecord?
     @State private var deleteAfterDismiss: WorkoutRecord?
+    /// 닫히는 순간 저장이 실패한 메모. 같은 기록을 다시 열면 사용자의 입력을 복구한다.
+    @State private var memoDrafts: [PersistentIdentifier: String] = [:]
 
     var body: some View {
         NavigationStack {
@@ -35,10 +37,23 @@ struct RecordsView: View {
                 .onChange(of: records) { _, updated in viewModel.rebuild(from: updated) }
                 .onChange(of: scenePhase) { _, phase in if phase == .active { viewModel.rebuild(from: records) } }
                 .sheet(item: $selected, onDismiss: finishDetail) { record in
-                    RecordDetailView(record: record, context: modelContext) {
-                        deleteAfterDismiss = record
-                        selected = nil
-                    }
+                    RecordDetailView(
+                        record: record,
+                        context: modelContext,
+                        initialMemoDraft: memoDrafts[record.persistentModelID],
+                        onDismissCommit: { draft in
+                            if let draft {
+                                memoDrafts[record.persistentModelID] = draft
+                                alerts.report(.editFailed)
+                            } else {
+                                memoDrafts[record.persistentModelID] = nil
+                            }
+                        },
+                        onDelete: {
+                            deleteAfterDismiss = record
+                            selected = nil
+                        }
+                    )
                 }
         }
     }
@@ -88,6 +103,7 @@ struct RecordsView: View {
     private func finishDetail() {
         if let record = deleteAfterDismiss {
             deleteAfterDismiss = nil
+            memoDrafts[record.persistentModelID] = nil
             if !viewModel.delete(record, in: modelContext) { alerts.report(.deleteFailed) }
         } else {
             viewModel.rebuild(from: records)

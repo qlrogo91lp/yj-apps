@@ -58,25 +58,44 @@ struct WorkoutRecordAnnotationTests {
         #expect(record.memo == nil)
     }
 
-    @Test("워치가 같은 기록을 다시 보내도 부위와 메모를 이어받는다")
-    func adoptAnnotationsSurvivesReplacement() throws {
+    @Test("워치 재전송은 열린 편집 대상을 교체하지 않고 운동 데이터만 갱신한다")
+    func retransmissionUpdatesRecordInPlace() throws {
         let context = try GrassFixture.makeContext()
-        let old = makeRecord(in: context)
-        old.toggle(.back)
-        old.setMemo("데드리프트")
+        let uuid = UUID()
+        let record = WorkoutRecord(healthKitUUID: uuid,
+                                   startedAt: GrassFixture.date(2026, 10, 6),
+                                   totalSeconds: 600)
+        record.segments = [Segment(kind: .strength, startOffset: 0, durationSeconds: 600)]
+        record.toggle(.back)
+        record.setMemo("데드리프트")
+        context.insert(record)
+        try context.save()
+        let originalID = record.persistentModelID
+
+        let message = WorkoutRecordMessage(
+            healthKitUUID: uuid,
+            startedAt: GrassFixture.date(2026, 10, 6, 7),
+            endedAt: GrassFixture.date(2026, 10, 6, 7, 20),
+            totalSeconds: 1200,
+            activeCalories: 180,
+            totalCalories: 240,
+            averageHeartRate: 132,
+            segments: [
+                .init(kind: .strength, startOffset: 0, durationSeconds: 900),
+                .init(kind: .cardio, startOffset: 900, durationSeconds: 300),
+            ]
+        )
+
+        record.updateWorkoutData(from: message, in: context)
         try context.save()
 
-        // iOSApp.save(_:) 의 upsert(replacing:) 와 같은 순서 — 지우고 새로 넣는다
-        let fresh = WorkoutRecord(startedAt: old.startedAt, totalSeconds: 700)
-        fresh.adoptAnnotations(from: old)
-        context.delete(old)
-        context.insert(fresh)
-        try context.save()
-
-        let stored = try context.fetch(FetchDescriptor<WorkoutRecord>())
-        #expect(stored.count == 1)
-        #expect(stored.first?.totalSeconds == 700)
-        #expect(stored.first?.bodyParts == [.back])
-        #expect(stored.first?.memo == "데드리프트")
+        let stored = try #require(try context.fetch(FetchDescriptor<WorkoutRecord>()).first)
+        #expect(stored === record)
+        #expect(stored.persistentModelID == originalID)
+        #expect(stored.totalSeconds == 1200)
+        #expect(stored.bodyParts == [.back])
+        #expect(stored.memo == "데드리프트")
+        #expect(stored.orderedSegments.map(\.kind) == [.strength, .cardio])
+        #expect(try context.fetchCount(FetchDescriptor<Segment>()) == 2)
     }
 }

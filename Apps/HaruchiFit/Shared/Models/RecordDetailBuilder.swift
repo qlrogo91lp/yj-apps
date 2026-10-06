@@ -26,6 +26,7 @@ enum RecordDetailBuilder {
         let withPeriod = RecordListBuilder.formatter("B h:mm", calendar: calendar, locale: locale)
         let withoutPeriod = RecordListBuilder.formatter("h:mm", calendar: calendar, locale: locale)
         let period = RecordListBuilder.formatter("B", calendar: calendar, locale: locale)
-        return "\(withPeriod.string(from: start)) – \((period.string(from: start) == period.string(from: end) ? withoutPeriod : withPeriod).string(from: end))"
+        let endFormatter = period.string(from: start) == period.string(from: end) ? withoutPeriod : withPeriod
+        return "\(withPeriod.string(from: start)) – \(endFormatter.string(from: end))"
     }
 }

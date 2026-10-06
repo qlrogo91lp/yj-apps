@@ -1,10 +1,10 @@
 # 하루치 핏 Phase 3 #5 — 04 기록 상세 구현 플랜
 
 작성일: 2026-10-06
-상태: **작성 완료 — 사용자 검토 전** · 2026-10-06 main 갱신(PR #37·#38·#39) 반영 — ViewModel 전달 규칙, 테스트 저장소 격리, `origin/main` 기준 출발
+상태: **구현·자동 검증 완료 — 사용자 검토 및 실기기 확인 대기** · 2026-10-06 main 갱신(PR #37·#38·#39) 반영 · push/PR/merge 전
 
 현재 위치: `/Users/yj/Workspace/Projects/yj-apps-worktrees/haruchi-record-detail` · 브랜치 `feat/haruchi-record-detail`.
-플랜은 이 워크트리의 미커밋 파일이다. 메인 체크아웃에는 아직 없으며, Task 0의 워크트리 생성·문서 이동은 이미 끝났다.
+플랜과 1차 구현은 이 워크트리의 5개 커밋(`7779556`…`f24d00f`)에 있다. 최종 리뷰 수정은 사용자 검토 전이므로 미커밋 상태로 두고, push/PR/merge는 하지 않는다.
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -43,8 +43,9 @@
 
 스펙이 말하지 않지만 사용자가 실제로 만날 입력·상황. 위에서부터 터질 가능성이 높은 순이다.
 
-1. **태깅한 기록을 워치가 다시 보낸다** (`transferUserInfo` 재배달) — `iOSApp.save(_:)` 의 `upsert(replacing:)` 는 **지우고 새로 넣으므로**
-   부위·메모가 사라진다. 사용자는 붙인 태그가 남아 있기를 기대한다 → Task 1 `adoptAnnotationsSurvivesReplacement` 테스트 + `save(_:)` 수정
+1. **태깅한 기록을 워치가 다시 보낸다** (`transferUserInfo` 재배달) — 레코드를 지우고 새로 넣으면 부위·메모뿐 아니라
+   열린 상세 시트의 편집 대상도 무효화된다. 같은 영속 ID의 운동 데이터만 제자리에서 갱신한다
+   → 최종 리뷰 `retransmissionUpdatesRecordInPlace` RED→GREEN + `save(_:)` 수정
 2. **시트에서 부위를 바꾸고 닫는다** — `RecordsView` 의 `onChange(of: records)` 는 모델 **동일성**으로 비교해 속성 변경에 안 걸린다.
    목록 행의 부위 줄이 그대로면 저장이 안 된 것처럼 보인다 → Task 4 `finishDetail()` 이 시트가 닫힐 때 다시 만든다 (View 라 Task 4 Step 8 시뮬레이터 항목으로 확인)
 3. **시트에서 삭제한다** — 떠 있는 시트가 지워진 모델을 읽으면 크래시한다 → Task 4 는 시트가 **완전히 내려간 뒤**(`onDismiss`) 지운다 (시뮬레이터 항목)
@@ -214,7 +215,7 @@ mv Apps/HaruchiFit/docs/plans/ios/2026/2026-10-06-record-detail.md \
 
 이후 모든 명령은 `../yj-apps-worktrees/haruchi-record-detail` 루트에서 실행한다.
 
-- [ ] **Step 3: 기준 상태를 확인한다**
+- [x] **Step 3: 기준 상태를 확인한다**
 
 ```bash
 WATCH=$(.github/scripts/pick-simulator.sh watchOS '^Apple Watch')
@@ -226,6 +227,10 @@ Expected: `** TEST SUCCEEDED **`. 실패하면 이번 변경 전의 문제이므
 ---
 
 ## Task 1: 부위 필드와 편집 규칙 (TDD) · 재전송 시 이어받기
+
+> **최종 리뷰 변경:** 아래 `adoptAnnotations(from:)` 삭제·재삽입 원안은 열린 상세 시트의 모델 식별성을 깨뜨린다.
+> 실제 완성본은 `retransmissionUpdatesRecordInPlace` 테스와 `updateWorkoutData(from:in:)` 제자리 갱신을 쓴다.
+> 승인 원안과 달라진 근거·비용은 문서 끝 `실행 결과`에 남겼다.
 
 **Files:**
 - Create: `Apps/HaruchiFit/Shared/Models/BodyPart.swift`
@@ -245,7 +250,7 @@ Expected: `** TEST SUCCEEDED **`. 실패하면 이번 변경 전의 문제이므
   - `WorkoutRecord.setMemo(_ text: String)`
   - `WorkoutRecord.adoptAnnotations(from old: WorkoutRecord)`
 
-- [ ] **Step 0: 테스트 저장소를 격리한다** (Ralli PR #38 처방)
+- [x] **Step 0: 테스트 저장소를 격리한다** (Ralli PR #38 처방)
 
 지금 `GrassFixture.makeContext()` 는 **이름 없는 인메모리 설정**이고 컨테이너를 붙들지 않는다. Ralli 에서는 이름 없는 설정이
 모두 `default` 저장소를 가리켜 테스트끼리 섞였다. 하루치 워치 테스트 호스트엔 iCloud 권한이 없어 지금은 통과하지만,
@@ -286,7 +291,7 @@ xcodebuild -workspace YJApps.xcworkspace -scheme HaruchiFitWatchTests -destinati
 
 Expected: `** TEST SUCCEEDED **`, Task 0 Step 3 과 같은 테스트 수. 실패하면 픽스처 변경 탓이므로 멈추고 보고한다.
 
-- [ ] **Step 1: 실패하는 테스트를 쓴다**
+- [x] **Step 1: 실패하는 테스트를 쓴다**
 
 `Apps/HaruchiFit/watchosTests/Models/WorkoutRecordAnnotationTests.swift`:
 
@@ -375,7 +380,7 @@ struct WorkoutRecordAnnotationTests {
 }
 ```
 
-- [ ] **Step 2: 테스트가 실패하는지 확인한다**
+- [x] **Step 2: 테스트가 실패하는지 확인한다**
 
 ```bash
 WATCH=$(.github/scripts/pick-simulator.sh watchOS '^Apple Watch')
@@ -385,7 +390,7 @@ xcodebuild -workspace YJApps.xcworkspace -scheme HaruchiFitWatchTests -destinati
 
 Expected: 컴파일 실패 — `value of type 'WorkoutRecord' has no member 'toggle'`
 
-- [ ] **Step 3: 부위 enum 을 만든다**
+- [x] **Step 3: 부위 enum 을 만든다**
 
 `Apps/HaruchiFit/Shared/Models/BodyPart.swift`:
 
@@ -417,7 +422,7 @@ enum BodyPart: String, Codable, CaseIterable {
 }
 ```
 
-- [ ] **Step 4: 레코드에 부위 필드를 더한다**
+- [x] **Step 4: 레코드에 부위 필드를 더한다**
 
 `WorkoutRecord.swift` — `var memo: String?` 아래에 추가:
 
@@ -438,7 +443,7 @@ enum BodyPart: String, Codable, CaseIterable {
 
 `init` 은 바꾸지 않는다 — 새 기록은 언제나 태그 없이 생긴다.
 
-- [ ] **Step 5: 편집 규칙을 만든다**
+- [x] **Step 5: 편집 규칙을 만든다**
 
 `Apps/HaruchiFit/Shared/Persistence/WorkoutRecord+Annotations.swift`:
 
@@ -476,11 +481,11 @@ extension WorkoutRecord {
 }
 ```
 
-- [ ] **Step 6: 테스트가 통과하는지 확인한다**
+- [x] **Step 6: 테스트가 통과하는지 확인한다**
 
 Step 2 명령을 다시 실행한다. Expected: `WorkoutRecordAnnotationTests` 5개 통과, `** TEST SUCCEEDED **`
 
-- [ ] **Step 7: 워치 저장이 부위·메모를 이어받게 한다**
+- [x] **Step 7: 워치 저장이 부위·메모를 이어받게 한다**
 
 `iOSApp.swift` — `save(_:)` 의 `do` 블록을 바꾼다:
 
@@ -501,7 +506,7 @@ Step 2 명령을 다시 실행한다. Expected: `WorkoutRecordAnnotationTests` 5
 
 `catch` 이하는 그대로다. 메서드 doc 주석의 *"그 키로 기존 기록을 갈아끼우고"* 뒤에 *"부위·메모는 넘겨받는다"* 를 덧붙인다.
 
-- [ ] **Step 8: 전체 워치 테스트 · iOS 빌드**
+- [x] **Step 8: 전체 워치 테스트 · iOS 빌드**
 
 ```bash
 xcodebuild -workspace YJApps.xcworkspace -scheme HaruchiFitWatchTests -destination "id=$WATCH" test
@@ -511,7 +516,7 @@ xcodebuild -workspace YJApps.xcworkspace -scheme HaruchiFit -destination "id=$IO
 
 Expected: `** TEST SUCCEEDED **` · `** BUILD SUCCEEDED **`
 
-- [ ] **Step 9: 커밋**
+- [x] **Step 9: 커밋**
 
 ```bash
 git add Apps/HaruchiFit/Shared/Models/BodyPart.swift \
@@ -542,7 +547,7 @@ git commit -m "✨ 하루치 기록에 부위 태그를 더하고 워치 재전�
   - `static func RecordListBuilder.segmentChips(for: WorkoutRecord) -> [RecordListRow.Chip]` (기존 private 로직을 내부 공개)
   - `static func RecordListBuilder.formatter(_ format: String, calendar: Calendar, locale: Locale) -> DateFormatter` (private → internal)
 
-- [ ] **Step 1: 실패하는 테스트를 쓴다**
+- [x] **Step 1: 실패하는 테스트를 쓴다**
 
 `Apps/HaruchiFit/watchosTests/Models/RecordDetailBuilderTests.swift`:
 
@@ -666,7 +671,7 @@ struct RecordDetailBuilderTests {
 }
 ```
 
-- [ ] **Step 2: 테스트가 실패하는지 확인한다**
+- [x] **Step 2: 테스트가 실패하는지 확인한다**
 
 ```bash
 xcodebuild -workspace YJApps.xcworkspace -scheme HaruchiFitWatchTests -destination "id=$WATCH" \
@@ -675,7 +680,7 @@ xcodebuild -workspace YJApps.xcworkspace -scheme HaruchiFitWatchTests -destinati
 
 Expected: 컴파일 실패 — `cannot find 'RecordDetailBuilder' in scope`
 
-- [ ] **Step 3: 목록 빌더의 칩 계산과 포매터를 꺼낸다**
+- [x] **Step 3: 목록 빌더의 칩 계산과 포매터를 꺼낸다**
 
 `RecordListBuilder.swift` — `row(for:formatter:)` 의 칩 계산 부분을 새 메서드로 옮기고 `row` 가 그걸 부르게 한다:
 
@@ -708,7 +713,7 @@ Expected: 컴파일 실패 — `cannot find 'RecordDetailBuilder' in scope`
 
 맨 아래 `private static func formatter(...)` 의 `private` 를 지운다 (상세 빌더가 같은 설정을 쓴다).
 
-- [ ] **Step 4: 요약 모델을 만든다**
+- [x] **Step 4: 요약 모델을 만든다**
 
 `Apps/HaruchiFit/Shared/Models/RecordDetailSummary.swift`:
 
@@ -740,7 +745,7 @@ struct RecordDetailSummary {
 }
 ```
 
-- [ ] **Step 5: 빌더를 만든다**
+- [x] **Step 5: 빌더를 만든다**
 
 `Apps/HaruchiFit/Shared/Models/RecordDetailBuilder.swift`:
 
@@ -797,13 +802,13 @@ enum RecordDetailBuilder {
 }
 ```
 
-- [ ] **Step 6: 테스트가 통과하는지 확인한다**
+- [x] **Step 6: 테스트가 통과하는지 확인한다**
 
 Step 2 명령을 다시 실행한다. Expected: `RecordDetailBuilderTests` 9개 통과.
 시간대 이름 테스트가 실패하면 시뮬레이터 ICU 의 `B` 출력이 다른 것이다 — 기대값을 바꾸지 말고 실제 출력을 보고하고 멈춘다
 (스펙 문구 `저녁 7:12` 를 지킬 다른 방법을 정해야 한다).
 
-- [ ] **Step 7: 전체 워치 테스트로 회귀를 확인한다** (`RecordListBuilderTests` 가 칩 추출 뒤에도 그대로 통과해야 한다)
+- [x] **Step 7: 전체 워치 테스트로 회귀를 확인한다** (`RecordListBuilderTests` 가 칩 추출 뒤에도 그대로 통과해야 한다)
 
 ```bash
 xcodebuild -workspace YJApps.xcworkspace -scheme HaruchiFitWatchTests -destination "id=$WATCH" test
@@ -811,7 +816,7 @@ xcodebuild -workspace YJApps.xcworkspace -scheme HaruchiFitWatchTests -destinati
 
 Expected: `** TEST SUCCEEDED **`
 
-- [ ] **Step 8: 커밋**
+- [x] **Step 8: 커밋**
 
 ```bash
 git add Apps/HaruchiFit/Shared/Models/RecordDetailSummary.swift \
@@ -835,7 +840,7 @@ git commit -m "✨ 하루치 기록 상세의 헤더·요약·운동 구성 표�
 - Consumes: Task 1 의 `WorkoutRecord.bodyParts` · `.toggle(_:)`, `BodyPart.title`
 - Produces: `RecordListRow.bodyPartsText: String?` — `가슴 · 팔`, 태그가 없으면 nil
 
-- [ ] **Step 1: 실패하는 테스트를 쓴다**
+- [x] **Step 1: 실패하는 테스트를 쓴다**
 
 `RecordListBuilderTests.swift` 맨 끝(`caloriesText` 테스트 아래)에 추가:
 
@@ -853,7 +858,7 @@ git commit -m "✨ 하루치 기록 상세의 헤더·요약·운동 구성 표�
     }
 ```
 
-- [ ] **Step 2: 테스트가 실패하는지 확인한다**
+- [x] **Step 2: 테스트가 실패하는지 확인한다**
 
 ```bash
 xcodebuild -workspace YJApps.xcworkspace -scheme HaruchiFitWatchTests -destination "id=$WATCH" \
@@ -862,7 +867,7 @@ xcodebuild -workspace YJApps.xcworkspace -scheme HaruchiFitWatchTests -destinati
 
 Expected: 컴파일 실패 — `value of type 'RecordListRow' has no member 'bodyPartsText'`
 
-- [ ] **Step 3: 행 모델과 빌더에 부위를 더한다**
+- [x] **Step 3: 행 모델과 빌더에 부위를 더한다**
 
 `RecordListRow.swift` — `caloriesText` 아래에 추가:
 
@@ -884,11 +889,11 @@ Expected: 컴파일 실패 — `value of type 'RecordListRow' has no member 'bod
                              bodyPartsText: parts.isEmpty ? nil : parts.map(\.title).joined(separator: " · "))
 ```
 
-- [ ] **Step 4: 테스트가 통과하는지 확인한다**
+- [x] **Step 4: 테스트가 통과하는지 확인한다**
 
 Step 2 명령을 다시 실행한다. Expected: `RecordListBuilderTests` 9개 통과.
 
-- [ ] **Step 5: 행 컴포넌트에 부위 줄을 그린다**
+- [x] **Step 5: 행 컴포넌트에 부위 줄을 그린다**
 
 `RecordRow.swift` — 칩 `HStack` 의 `if` 블록 바로 아래(같은 `VStack` 안)에 추가하고, 파일 doc 주석의 *"날짜와 구간 칩"* 을 *"날짜와 구간 칩, 부위"* 로 고친다:
 
@@ -901,7 +906,7 @@ Step 2 명령을 다시 실행한다. Expected: `RecordListBuilderTests` 9개 �
                 }
 ```
 
-- [ ] **Step 6: iOS 빌드**
+- [x] **Step 6: iOS 빌드**
 
 ```bash
 xcodebuild -workspace YJApps.xcworkspace -scheme HaruchiFit -destination "id=$IOS" build
@@ -909,7 +914,7 @@ xcodebuild -workspace YJApps.xcworkspace -scheme HaruchiFit -destination "id=$IO
 
 Expected: `** BUILD SUCCEEDED **`
 
-- [ ] **Step 7: 커밋**
+- [x] **Step 7: 커밋**
 
 ```bash
 git add Apps/HaruchiFit/Shared/Models/RecordListRow.swift \
@@ -922,6 +927,9 @@ git commit -m "✨ 하루치 기록 목록 행에 태그한 부위를 보여준�
 ---
 
 ## Task 4: 기록 상세 하프 시트와 목록 탭 진입
+
+> **최종 리뷰 변경:** 아래 원안의 `.onDisappear { _ = viewModel.commitMemo() }`는 저장 실패 시 초안을 잃는다.
+> 완성본은 부모 `RecordsView`가 기록 ID별 실패 초안을 보관하고 전역 알림을 보인 뒤, 같은 기록을 다시 열면 초안을 복구한다.
 
 **Files:**
 - Modify: `Apps/HaruchiFit/iOSApp/AppAlert.swift`
@@ -942,7 +950,7 @@ git commit -m "✨ 하루치 기록 목록 행에 태그한 부위를 보여준�
 UI 배선이라 단위 테스트가 없다 (iOS 테스트 타깃 없음). 규칙은 Task 1·2 가 검증했고, 여기는 빌드와 Step 8 시뮬레이터 확인이 검증이다.
 부위 저장과 메모 초안 갱신은 분리한다. 메모에 포커스가 남은 채 부위 칩을 눌러도 입력 중인 초안이 덮어써지면 안 된다.
 
-- [ ] **Step 1: 편집 실패 알림을 더한다**
+- [x] **Step 1: 편집 실패 알림을 더한다**
 
 `AppAlert.swift` — 케이스와 두 `switch` 에 하나씩 더한다:
 
@@ -960,7 +968,7 @@ UI 배선이라 단위 테스트가 없다 (iOS 테스트 타깃 없음). 규칙
 
 타입 doc 주석에 한 줄 덧붙인다: *"`editFailed` 는 기록 상세 시트가 직접 띄운다 — 시트가 떠 있는 동안 앱 루트 알림은 표시되지 않는다."*
 
-- [ ] **Step 2: 뷰모델을 만든다**
+- [x] **Step 2: 뷰모델을 만든다**
 
 `Apps/HaruchiFit/iOSApp/Features/Records/Detail/RecordDetailViewModel.swift`:
 
@@ -1027,7 +1035,7 @@ final class RecordDetailViewModel: ObservableObject {
 }
 ```
 
-- [ ] **Step 3: 운동 구성 바를 만든다**
+- [x] **Step 3: 운동 구성 바를 만든다**
 
 `Apps/HaruchiFit/iOSApp/Features/Records/Detail/Components/SegmentTimelineBar.swift`:
 
@@ -1076,7 +1084,7 @@ struct SegmentTimelineBar: View {
 }
 ```
 
-- [ ] **Step 4: 부위 칩을 만든다**
+- [x] **Step 4: 부위 칩을 만든다**
 
 `Apps/HaruchiFit/iOSApp/Features/Records/Detail/Components/BodyPartChips.swift`:
 
@@ -1111,7 +1119,7 @@ struct BodyPartChips: View {
 }
 ```
 
-- [ ] **Step 5: 시트를 만든다**
+- [x] **Step 5: 시트를 만든다**
 
 `Apps/HaruchiFit/iOSApp/Features/Records/Detail/RecordDetailView.swift`:
 
@@ -1269,7 +1277,7 @@ struct RecordDetailView: View {
 }
 ```
 
-- [ ] **Step 6: 기록 탭에 행 탭과 시트를 붙인다**
+- [x] **Step 6: 기록 탭에 행 탭과 시트를 붙인다**
 
 `RecordsView.swift`
 
@@ -1323,7 +1331,7 @@ doc 주석 둘째 줄 *"행 탭 → 기록 상세는 Phase 3 #5 가 붙인다."*
     }
 ```
 
-- [ ] **Step 7: iOS 빌드 · 전체 워치 테스트 · lint · format**
+- [x] **Step 7: iOS 빌드 · 전체 워치 테스트 · lint · format**
 
 ```bash
 xcodebuild -workspace YJApps.xcworkspace -scheme HaruchiFit -destination "id=$IOS" build
@@ -1335,7 +1343,7 @@ git diff --check
 
 Expected: `** BUILD SUCCEEDED **` · `** TEST SUCCEEDED **` · 새 경고·위반 0. `make format` 이 걸리면 `make fix` 로 고치고 diff 를 다시 본다.
 
-- [ ] **Step 8: 시뮬레이터 확인**
+- [ ] **Step 8: 시뮬레이터 상세 UI·마이그레이션 확인** (앱 첫 실행·HealthKit 권한 화면까지만 확인)
 
 **먼저 마이그레이션.** 기존 데이터가 있는 시뮬레이터(#4 확인 때 쓴 기기)에 **지우지 않고** 덮어 설치해 첫 실행이
 크래시 없이 목록을 띄우는지 본다. 데이터가 없으면 `main` 빌드를 먼저 설치하고 건강 앱에 근력 운동 1건을 넣어 import 시킨 뒤 덮어 설치한다.
@@ -1357,7 +1365,7 @@ Expected: `** BUILD SUCCEEDED **` · `** TEST SUCCEEDED **` · 새 경고·위�
 `editFailed` 는 시뮬레이터에서 실패를 재현할 수단이 없다 — 코드 리뷰로 확인한다 (목록 플랜의 알림들과 같다).
 워치 재전송 시 이어받기(Review Focus 1)는 Task 1 테스트가 검증하고, 실기기 항목으로 TODO 에 남긴다.
 
-- [ ] **Step 9: 커밋**
+- [x] **Step 9: 커밋**
 
 ```bash
 git add Apps/HaruchiFit/iOSApp/AppAlert.swift \
@@ -1374,25 +1382,25 @@ git commit -m "✨ 하루치 기록 상세 하프 시트에서 부위·메모를
 - Modify: `Apps/HaruchiFit/docs/specs/shared/2026/2026-09-07-haruchi-fit-roadmap.md`
 - Modify: `TODO.md`
 
-- [ ] **Step 1: 앱 `CLAUDE.md`**
+- [x] **Step 1: 앱 `CLAUDE.md`**
   - Project overview 의 *"기록 탭은 주 단위 목록이다"* 에 *"행을 탭하면 부위·메모를 고치는 상세 시트가 열린다"* 를 더한다
   - Architecture 트리의 `Features/Records/` 줄 아래에 `Features/Records/Detail/  기록 상세 하프 시트 · 부위 태깅 · 메모` 를 더한다
   - "데이터" 절 매칭 키 항목에 *"워치 재전송은 레코드를 갈아끼우므로 `adoptAnnotations(from:)` 로 부위·메모를 넘겨받는다"* 를 더한다
 
-- [ ] **Step 2: 로드맵**
+- [x] **Step 2: 로드맵**
   - Phase 3 표의 #5 행을 취소선 + `**완료 — PR #N.**` 으로. 비고에 *"`편집` 은 #11 수동 기록 폼과 함께 정한다, 공유 `↑` 는 #6"* 을 적는다
   - #6 행 비고에 *"시트 헤더 우측과 액션 줄에 자리를 비워 뒀다"* 를 더한다
   - 의존 관계 그림의 `04 상세` 에 취소선
   - #11 행 비고에 *"기록 상세 `편집` 의 범위를 이 폼으로 정한다 (#5 플랜 D1)"* 를 더한다
 
-- [ ] **Step 3: `TODO.md`** (루트 규약 — 같은 커밋에서)
+- [x] **Step 3: `TODO.md`** (루트 규약 — 같은 커밋에서)
   - 하루치 예정사항 표 #5 행을 취소선 + `**완료** ([PR #N](…))`
   - #6 행을 `**다음 코드 작업**` 으로
   - 본문 *"다음 코드는 Phase 3 #5 기록 상세다"* 를 #6 공유로 고친다
   - 하루치 "집 맥북에서 할 것" 에 항목을 더한다:
     `- [ ] **기록 상세 실기기 확인** — 워치에서 저장한 기록에 부위·메모를 붙인 뒤 워치가 같은 기록을 다시 보내도 남는지(재배달은 드물다 — 확인 수단이 없으면 코드 리뷰로 갈음), 한국어 기기에서 시간대 이름(`저녁`·`밤`)이 스펙대로 찍히는지`
 
-- [ ] **Step 4: 사용자 검토 후 커밋 · PR**
+- [ ] **Step 4: 사용자 검토 후 최종 커밋 · PR**
 
 ```bash
 git add Apps/HaruchiFit/CLAUDE.md \
@@ -1409,6 +1417,18 @@ PR 번호가 나오면 Step 2·3 의 `#N` 을 실제 번호로 채워 한 번 �
 머지와 워크트리 정리는 이 플랜의 구현 완료 후 사용자 검토·승인을 받은 다음 진행한다.
 실기기·Xcode 확인이 남으면 워크트리를 유지한다 (루트 `CLAUDE.md`).
 최종 승인 뒤 일반 merge commit으로 머지하고, 워크트리 제거 시 해당 DerivedData도 공통 규약대로 정리한다.
+
+## 실행 결과 (2026-10-06)
+
+- 구현·문서 1차 커밋 5개: `7779556`, `501acac`, `4d2de10`, `e0288d4`, `f24d00f`
+- 최종 리뷰 수정(미커밋): 워치 재전송을 삭제·재삽입에서 **동일 영속 ID 제자리 갱신**으로 바꿔 열린 상세 시트가
+  삭제된 모델을 잡지 않게 했다. 기존 세그먼트는 직접 삭제해 orphan을 남기지 않는다.
+- `Ruling`: Task 1의 `adoptAnnotations(from:)` 교체 방식은 정상 재전송 직후에는 값을 보존하지만, 재전송 중 열려 있는 편집 객체를 무효화한다.
+  스펙의 자동 저장 계약을 지키기 위해 `updateWorkoutData(from:in:)`로 대체했다 — 잘못 판단했다면 재전송 시 운동 수치·세그먼트가 낡게 남는다.
+- 시트 닫힘 중 메모 저장 실패를 무시하지 않고, 목록 화면이 기록 ID별 초안을 보관해 다시 열 때 복구한다.
+- 시뮬레이터에 앱을 덮어 설치하고 첫 실행이 크래시 없이 HealthKit 권한 화면까지 진입함을 확인했다.
+  현재 환경에는 Simulator GUI 앱이 없고 `simctl privacy`가 HealthKit 권한을 지원하지 않아, 기록 상세 화면의 수동 UI·마이그레이션 확인은 완료하지 못했다.
+- push/PR/merge는 사용자 검토 전이므로 수행하지 않았다.
 
 ## 완료 기준
 

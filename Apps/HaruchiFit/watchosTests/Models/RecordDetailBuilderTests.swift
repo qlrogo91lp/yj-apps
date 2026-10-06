@@ -53,20 +53,31 @@ struct RecordDetailBuilderTests {
         #expect(result.heartRateText == "128")
     }
 
-    @Test("없는 지표와 1분 미만 시간도 읽을 수 있게 표시한다")
-    func missingMetricsAndSubMinuteDuration() throws {
+    @Test("값이 없는 지표는 대시로 자리를 지킨다")
+    func missingMetricsKeepTheirPlace() throws {
         let context = try GrassFixture.makeContext()
-        let record = GrassFixture.record(in: context, startedAt: GrassFixture.date(2026, 9, 28), totalSeconds: 40)
+        let record = GrassFixture.record(in: context, startedAt: GrassFixture.date(2026, 9, 28), totalSeconds: 600)
         let result = summary(record)
-        #expect(result.durationText == "1분 미만")
         #expect(result.caloriesText == "–")
         #expect(result.heartRateText == "–")
+    }
+
+    @Test("1분이 안 되는 기록은 0분이 아니라 1분 미만이다")
+    func subMinuteRecordSaysUnderOneMinute() throws {
+        let context = try GrassFixture.makeContext()
+        let record = GrassFixture.record(in: context, startedAt: GrassFixture.date(2026, 9, 28), totalSeconds: 40)
+        #expect(summary(record).durationText == "1분 미만")
     }
 
     @Test("운동 구성은 구간 순서와 종류별 합계를 유지한다")
     func compositionFollowsSegmentOrder() throws {
         let context = try GrassFixture.makeContext()
-        let record = GrassFixture.record(in: context, startedAt: GrassFixture.date(2026, 9, 28), totalSeconds: 4320, segments: [(.strength, 0, 1800), (.cardio, 1800, 1080), (.strength, 2880, 1440)])
+        let record = GrassFixture.record(
+            in: context,
+            startedAt: GrassFixture.date(2026, 9, 28),
+            totalSeconds: 4320,
+            segments: [(.strength, 0, 1800), (.cardio, 1800, 1080), (.strength, 2880, 1440)]
+        )
         let result = summary(record)
         #expect(result.spans.map(\.kind) == [.strength, .cardio, .strength])
         #expect(result.spans.map(\.seconds) == [1800, 1080, 1440])
