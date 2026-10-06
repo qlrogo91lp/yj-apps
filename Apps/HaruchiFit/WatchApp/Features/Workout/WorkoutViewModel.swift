@@ -197,7 +197,8 @@ final class WorkoutViewModel: ObservableObject {
     private func record(from result: WorkoutResult, totalSeconds: Int) -> WorkoutRecordMessage {
         WorkoutRecordMessage(healthKitUUID: result.healthKitUUID,
                              startedAt: segments.startedAt,
-                             endedAt: Date(),
+                             // 종료를 요청한 시각. `Date()` 는 stopWorkout() 마무리가 끝난 뒤라 수 초 늦다
+                             endedAt: result.endedAt ?? Date(),
                              totalSeconds: totalSeconds,
                              activeCalories: result.caloriesBurned,
                              totalCalories: result.totalCaloriesBurned,
