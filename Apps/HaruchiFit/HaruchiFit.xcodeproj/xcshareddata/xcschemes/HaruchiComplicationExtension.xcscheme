@@ -16,8 +16,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "3999D2C83048FA54005343C7"
-               BuildableName = "HaruchiComplicationExtension.appex"
-               BlueprintName = "HaruchiComplicationExtension"
+               BuildableName = "ComplicationAppExtension.appex"
+               BlueprintName = "ComplicationAppExtension"
                ReferencedContainer = "container:HaruchiFit.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -93,7 +93,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "3999D2C83048FA54005343C7"
-            BuildableName = "HaruchiComplicationExtension.appex"
+            BuildableName = "ComplicationAppExtension.appex"
+            BlueprintName = "ComplicationAppExtension"
             ReferencedContainer = "container:HaruchiFit.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
