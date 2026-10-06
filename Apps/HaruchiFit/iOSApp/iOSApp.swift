@@ -47,7 +47,7 @@ struct HaruchiFitApp: App {
     /// 워치가 보낸 기록을 저장한다.
     ///
     /// CloudKit 이 `.unique` 를 막으므로 **중복 방지는 여기 책임이다** (아키텍처 3절).
-    /// `healthKitUUID` 가 있으면 그 키로 기존 기록을 갈아끼우고, 없으면 그냥 추가한다 —
+    /// `healthKitUUID` 가 있으면 그 키로 기존 기록을 갈아끼우되 부위·메모는 넘겨받고, 없으면 그냥 추가한다 —
     /// 키가 없는 기록끼리는 구분할 방법이 없어 중복 검사를 걸 수 없다.
     private func save(_ message: WorkoutRecordMessage) {
         let record = WorkoutRecord(healthKitUUID: message.healthKitUUID,
@@ -64,7 +64,12 @@ struct HaruchiFitApp: App {
 
         do {
             if let uuid = message.healthKitUUID {
-                try store.upsert(record, replacing: #Predicate { $0.healthKitUUID == uuid })
+                let replacing = #Predicate<WorkoutRecord> { $0.healthKitUUID == uuid }
+                // 재전송이면 사용자가 붙인 부위·메모를 넘겨받는다 — upsert 는 지우고 새로 넣는다 (아키텍처 3절)
+                if let existing = try store.fetch(matching: replacing).first {
+                    record.adoptAnnotations(from: existing)
+                }
+                try store.upsert(record, replacing: replacing)
             } else {
                 try store.upsert(record)
             }
