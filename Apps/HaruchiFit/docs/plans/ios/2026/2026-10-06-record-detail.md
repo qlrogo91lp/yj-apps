@@ -1,10 +1,10 @@
 # 하루치 핏 Phase 3 #5 — 04 기록 상세 구현 플랜
 
 작성일: 2026-10-06
-상태: **구현·자동 검증 완료 — 사용자 검토 및 실기기 확인 대기** · 2026-10-06 main 갱신(PR #37·#38·#39) 반영 · push/PR/merge 전
+상태: **구현·자동 검증 완료 — PR #40 · 실기기 확인 대기** · 2026-10-06 main 갱신(PR #37·#38·#39) 반영
 
-현재 위치: `/Users/yj/Workspace/Projects/yj-apps-worktrees/haruchi-record-detail` · 브랜치 `feat/haruchi-record-detail`.
-플랜과 1차 구현은 이 워크트리의 5개 커밋(`7779556`…`f24d00f`)에 있다. 최종 리뷰 수정은 사용자 검토 전이므로 미커밋 상태로 두고, push/PR/merge는 하지 않는다.
+작업 브랜치: `feat/haruchi-record-detail` · [PR #40](https://github.com/qlrogo91lp/yj-apps/pull/40).
+1차 구현 5개 커밋(`7779556`…`f24d00f`) 뒤 최종 리뷰 수정 커밋 `098d4d3`을 추가했다.
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -1400,7 +1400,7 @@ git commit -m "✨ 하루치 기록 상세 하프 시트에서 부위·메모를
   - 하루치 "집 맥북에서 할 것" 에 항목을 더한다:
     `- [ ] **기록 상세 실기기 확인** — 워치에서 저장한 기록에 부위·메모를 붙인 뒤 워치가 같은 기록을 다시 보내도 남는지(재배달은 드물다 — 확인 수단이 없으면 코드 리뷰로 갈음), 한국어 기기에서 시간대 이름(`저녁`·`밤`)이 스펙대로 찍히는지`
 
-- [ ] **Step 4: 사용자 검토 후 최종 커밋 · PR**
+- [x] **Step 4: 사용자 검토 후 최종 커밋 · PR**
 
 ```bash
 git add Apps/HaruchiFit/CLAUDE.md \
@@ -1421,14 +1421,14 @@ PR 번호가 나오면 Step 2·3 의 `#N` 을 실제 번호로 채워 한 번 �
 ## 실행 결과 (2026-10-06)
 
 - 구현·문서 1차 커밋 5개: `7779556`, `501acac`, `4d2de10`, `e0288d4`, `f24d00f`
-- 최종 리뷰 수정(미커밋): 워치 재전송을 삭제·재삽입에서 **동일 영속 ID 제자리 갱신**으로 바꿔 열린 상세 시트가
+- 최종 리뷰 수정 커밋 `098d4d3`: 워치 재전송을 삭제·재삽입에서 **동일 영속 ID 제자리 갱신**으로 바꿔 열린 상세 시트가
   삭제된 모델을 잡지 않게 했다. 기존 세그먼트는 직접 삭제해 orphan을 남기지 않는다.
 - `Ruling`: Task 1의 `adoptAnnotations(from:)` 교체 방식은 정상 재전송 직후에는 값을 보존하지만, 재전송 중 열려 있는 편집 객체를 무효화한다.
   스펙의 자동 저장 계약을 지키기 위해 `updateWorkoutData(from:in:)`로 대체했다 — 잘못 판단했다면 재전송 시 운동 수치·세그먼트가 낡게 남는다.
 - 시트 닫힘 중 메모 저장 실패를 무시하지 않고, 목록 화면이 기록 ID별 초안을 보관해 다시 열 때 복구한다.
 - 시뮬레이터에 앱을 덮어 설치하고 첫 실행이 크래시 없이 HealthKit 권한 화면까지 진입함을 확인했다.
   현재 환경에는 Simulator GUI 앱이 없고 `simctl privacy`가 HealthKit 권한을 지원하지 않아, 기록 상세 화면의 수동 UI·마이그레이션 확인은 완료하지 못했다.
-- push/PR/merge는 사용자 검토 전이므로 수행하지 않았다.
+- 사용자 검토 후 [PR #40](https://github.com/qlrogo91lp/yj-apps/pull/40)을 만들었고 일반 merge commit 병합을 승인받았다.
 
 ## 완료 기준
 

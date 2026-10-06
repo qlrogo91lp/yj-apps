@@ -196,7 +196,7 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
 | 2 데이터 | 2 | HealthKit import (증분) | **구현 완료** ([PR #30](https://github.com/qlrogo91lp/yj-apps/pull/30)) · 실기기 확인 대기 · 매핑 표 확정 | [스펙](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-21-healthkit-workout-import.md) · [플랜](Apps/HaruchiFit/docs/plans/shared/2026/2026-09-21-healthkit-workout-import.md) — 근력 3·유산소 8, 나머지는 안 가져온다. **삭제 반영은 뺐다** (아래 YJKit) |
 | ~~3 iOS~~ | ~~3~~ | ~~탭 셸 + 디자인 토큰~~ | ~~**구현 완료 · PR 준비 중**~~ | ~~[플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-09-23-tab-shell-design-tokens.md) · 로드맵 Phase 3 · 스펙 3절·7절~~ |
 | 3 iOS | 4 | 03b 기록 목록 | **구현 완료** ([PR #33](https://github.com/qlrogo91lp/yj-apps/pull/33)) · 시뮬레이터 확인 대기 | [플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-09-28-records-list.md) · 로드맵 Phase 3 · 스펙 03b절 |
-| ~~3 iOS~~ | ~~5~~ | ~~04 기록 상세 (부위 태깅 · 메모)~~ | ~~**구현 완료**~~ | ~~[플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-10-06-record-detail.md) · 로드맵 Phase 3 · 스펙 04절~~ |
+| ~~3 iOS~~ | ~~5~~ | ~~04 기록 상세 (부위 태깅 · 메모)~~ | ~~**완료** ([PR #40](https://github.com/qlrogo91lp/yj-apps/pull/40))~~ | ~~[플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-10-06-record-detail.md) · 로드맵 Phase 3 · 스펙 04절~~ |
 | 3 iOS | 6 | 06 공유 (`WorkoutShareUI` 그대로) | **다음 코드 작업** | 로드맵 Phase 3 · 스펙 06절 |
 | 4 잔디 | 7 | 02 홈 대시보드 | 예정 (선행: 1·3) | 로드맵 Phase 4 · 스펙 02절 |
 | 4 잔디 | 8 | 03a 기록 달력 | 예정 (선행: 1·3) | 로드맵 Phase 4 · 스펙 03a절 |
