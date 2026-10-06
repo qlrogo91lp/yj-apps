@@ -2,7 +2,7 @@ import SwiftData
 import SwiftUI
 
 /// 기록 탭 — 주 단위 섹션의 최신순 목록 (제품 스펙 03b). 집계도 차트도 두지 않는다.
-/// 행 탭 → 기록 상세는 Phase 3 #5 가 붙인다.
+/// 행을 탭하면 기록 상세 시트가 열린다.
 struct RecordsView: View {
     @Query(sort: \WorkoutRecord.startedAt, order: .reverse) private var records: [WorkoutRecord]
     @Environment(\.modelContext) private var modelContext
@@ -12,9 +12,6 @@ struct RecordsView: View {
     @StateObject private var viewModel = RecordsViewModel()
     @State private var pendingDelete: WorkoutRecord?
     @State private var selected: WorkoutRecord?
-    @State private var deleteAfterDismiss: WorkoutRecord?
-    /// 닫히는 순간 저장이 실패한 메모. 같은 기록을 다시 열면 사용자의 입력을 복구한다.
-    @State private var memoDrafts: [PersistentIdentifier: String] = [:]
 
     var body: some View {
         NavigationStack {
@@ -36,25 +33,7 @@ struct RecordsView: View {
                 .onAppear { viewModel.rebuild(from: records) }
                 .onChange(of: records) { _, updated in viewModel.rebuild(from: updated) }
                 .onChange(of: scenePhase) { _, phase in if phase == .active { viewModel.rebuild(from: records) } }
-                .sheet(item: $selected, onDismiss: finishDetail) { record in
-                    RecordDetailView(
-                        record: record,
-                        context: modelContext,
-                        initialMemoDraft: memoDrafts[record.persistentModelID],
-                        onDismissCommit: { draft in
-                            if let draft {
-                                memoDrafts[record.persistentModelID] = draft
-                                alerts.report(.editFailed)
-                            } else {
-                                memoDrafts[record.persistentModelID] = nil
-                            }
-                        },
-                        onDelete: {
-                            deleteAfterDismiss = record
-                            selected = nil
-                        }
-                    )
-                }
+                .recordDetailSheet(item: $selected) { viewModel.rebuild(from: records) }
         }
     }
 
@@ -95,18 +74,8 @@ struct RecordsView: View {
     private func confirmDelete() {
         guard let record = pendingDelete else { return }
         pendingDelete = nil
-        if !viewModel.delete(record, in: modelContext) {
+        if !modelContext.deleteRecord(record) {
             alerts.report(.deleteFailed)
-        }
-    }
-
-    private func finishDetail() {
-        if let record = deleteAfterDismiss {
-            deleteAfterDismiss = nil
-            memoDrafts[record.persistentModelID] = nil
-            if !viewModel.delete(record, in: modelContext) { alerts.report(.deleteFailed) }
-        } else {
-            viewModel.rebuild(from: records)
         }
     }
 }

@@ -4,18 +4,26 @@ import SwiftUI
 /// 세 탭의 공통 셸. 각 화면이 자신의 내비게이션 상태를 소유한다.
 /// 실패 알림은 어느 탭에서든 생길 수 있어 여기서 띄운다.
 struct ContentView: View {
+    private enum Tab: Hashable {
+        case home, records, statistics
+    }
+
     @EnvironmentObject private var alerts: AppAlertCenter
+    @State private var tab: Tab = .home
 
     var body: some View {
-        TabView {
-            HomeView()
+        TabView(selection: $tab) {
+            HomeView(onShowAllRecords: { tab = .records })
                 .tabItem { Label("홈", systemImage: "house.fill") }
+                .tag(Tab.home)
 
             RecordsView()
                 .tabItem { Label("기록", systemImage: "list.bullet.rectangle") }
+                .tag(Tab.records)
 
             StatisticsView()
                 .tabItem { Label("통계", systemImage: "chart.bar.fill") }
+                .tag(Tab.statistics)
         }
         .tint(HaruchiPalette.accent)
         .toolbarBackground(HaruchiPalette.surface, for: .tabBar)

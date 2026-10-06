@@ -13,7 +13,7 @@
 - 무엇을 어떤 순서로 — `docs/specs/shared/2026/2026-09-07-haruchi-fit-roadmap.md` (**살아있는 문서**. 진행 상태도 여기가 단일 출처)
 
 **구현 초기 단계다.** 워치 세션 기반과 세그먼트 저장까지 되어 있다. iOS는 홈·기록·통계
-3탭 셸이 있으며, 홈에는 실데이터 확인용 임시 잔디 그리드가 있고 기록 탭은 주 단위 목록이다. 행을 탭하면 부위·메모를 고치는 상세 시트가 열린다.
+3탭 셸이 있으며, 홈은 잔디·축적 스탯·이번 주 구성·최근 기록 대시보드이고 기록 탭은 주 단위 목록이다. 행을 탭하면 부위·메모를 고치는 상세 시트가 열린다.
 제품 화면은 로드맵의 후속 작업에서 채운다.
 
 | 타깃 | 번들 ID | 최소 버전 |
@@ -73,7 +73,8 @@ iOSApp/
   iOSApp.swift · ContentView.swift  ContentView 는 홈·기록·통계 3탭 셸이다
   AppAlert.swift · AppAlertCenter.swift  앱 전역 실패 알림
   HaruchiPalette.swift               iOS 다크 색 토큰
-  Features/Home/                     제품 홈 전까지 잔디 확인 화면 + 집계 배선
+  Components/                        두 Feature 이상이 쓰는 컴포넌트 (RecordRow — 홈·기록)
+  Features/Home/                     홈 대시보드 — 잔디 히어로·스탯·이번 주 구성·최근 기록
   Features/Records/                  주 단위 기록 목록 · 스와이프 삭제
     Detail/                           기록 상세 하프 시트 · 부위 태깅 · 메모
   Features/Statistics/               후속 작업이 채울 탭 화면
@@ -81,7 +82,7 @@ iOSApp/
 ComplicationApp/                    컴플리케이션 익스텐션
 Common/                             세 타깃 공유 — 외부 의존 0
 Shared/                             워치 앱 ↔ iOS 앱 공유
-  Models/                           순수 모델·집계 규칙 (잔디 집계 · 기록 목록 섹션). 워치 테스트가 여기를 검증한다
+  Models/                           순수 모델·집계 규칙 (잔디 집계 · 기록 목록 섹션 · 홈 대시보드). 워치 테스트가 여기를 검증한다
   Persistence/                      SwiftData @Model
   Services/                         전송 메시지
 watchosTests/
