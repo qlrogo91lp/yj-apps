@@ -31,6 +31,7 @@ struct Provider: TimelineProvider {
 
 struct HaruchiComplicationEntryView: View {
     @Environment(\.widgetFamily) private var widgetFamily
+    @Environment(\.widgetRenderingMode) private var renderingMode
     var entry: ComplicationEntry
 
     /// 유형 구분은 색으로만 한다 — W0 홈 토글과 같은 규칙이다 (근력 오렌지 · 유산소 파랑).
@@ -38,44 +39,54 @@ struct HaruchiComplicationEntryView: View {
         entry.state.mode == .cardio ? .blue : .brandOrange
     }
 
-    /// 대기 중엔 시스템 반투명 판을 깐다 — 검은 워치 페이스에서도 영역이 보이고 틴트 페이스에도 맞는다.
-    /// 진행 중 원형·코너는 유형 색으로 채워 "운동 중" 신호를 남긴다.
-    @ViewBuilder
-    private var badgeBackground: some View {
-        if entry.state.isActive {
-            tint
-        } else {
-            AccessoryWidgetBackground()
-        }
+    /// 대기 중에도 배경을 채운다 — 비워 두면 검은 워치 페이스에서 영역이 안 보인다 (골프·Ralli 와 같다).
+    /// 대기는 회색 판에 오렌지 로고, 진행 중은 유형 색 판에 검정 로고.
+    private var backgroundColor: Color {
+        entry.state.isActive ? tint : Color(white: 0.12)
     }
 
+    /// `containerBackground` 는 선택 화면·로딩에서만 보이고 실제 페이스에선 안 그려지는 경우가 많아,
+    /// 풀컬러일 때 같은 색을 `ZStack` 안에 한 번 더 깐다. 틴트 페이스에선 배경을 빼고 로고만 페이스 색을 따른다.
     var body: some View {
         switch widgetFamily {
         case .accessoryRectangular:
             rectangularBody
-                .containerBackground(for: .widget) { AccessoryWidgetBackground() }
+                .containerBackground(.clear, for: .widget)
+        case .accessoryCorner:
+            badgeBody
+                .containerBackground(backgroundColor, for: .widget)
         default:
             badgeBody
-                .containerBackground(for: .widget) { badgeBackground }
+                .clipShape(Circle())
+                .containerBackground(backgroundColor, for: .widget)
         }
     }
 
     /// 원형·코너 공용.
     private var badgeBody: some View {
-        icon(active: .black)
-            .padding(4)
-            .widgetAccentable()
+        ZStack {
+            if renderingMode == .fullColor {
+                backgroundColor
+            }
+            icon
+                .foregroundStyle(entry.state.isActive ? Color.black : .brandOrange)
+                .scaleEffect(0.6)
+                .widgetAccentable()
+        }
     }
 
     private var rectangularBody: some View {
         HStack(spacing: 8) {
-            icon(active: tint)
+            icon
+                .foregroundStyle(entry.state.isActive ? tint : .brandOrange)
                 .frame(width: 24, height: 24)
+                .widgetAccentable()
 
             if entry.state.isActive {
                 VStack(alignment: .leading, spacing: 0) {
                     elapsed
                         .font(.headline)
+                        .widgetAccentable()
                     Text(entry.state.mode.title)
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -83,6 +94,7 @@ struct HaruchiComplicationEntryView: View {
             } else {
                 Text("운동 시작")
                     .font(.headline)
+                    .widgetAccentable()
             }
 
             Spacer(minLength: 0)
@@ -99,13 +111,11 @@ struct HaruchiComplicationEntryView: View {
         }
     }
 
-    /// 앱 아이콘과 같은 로고(`HaruchiIcon`)를 템플릿으로 쓴다. 근력·유산소 구분은 색이 한다.
-    /// 진행 중 색은 배경에 따라 달라 호출부가 정한다 — 색 배경 위에선 검정, 반투명 판 위에선 유형 색.
-    private func icon(active: Color) -> some View {
+    /// 앱 아이콘과 같은 로고(`HaruchiIcon`)를 템플릿으로 쓴다. 색은 호출부가 정한다.
+    private var icon: some View {
         Image("HaruchiIcon")
             .resizable()
             .scaledToFit()
-            .foregroundStyle(entry.state.isActive ? active : .brandOrange)
     }
 }
 
