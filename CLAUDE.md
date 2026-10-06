@@ -9,7 +9,7 @@ yj-apps/
 ├─ Packages/YJKit/       공용 인프라 패키지 (WorkoutCore / WorkoutUI / WorkoutShareUI / ConnectivityCore / PersistenceCore)
 ├─ Apps/GolfCounter/     GolfCounter — iOS + Watch + Complication
 ├─ Apps/TennisCounter/   Ralli(TennisCounter) — iOS + Watch + Complication + LiveActivity
-├─ Apps/HaruchiFit/      하루치 핏(HaruchiFit) — iOS + Watch + Complication
+├─ Apps/HaruchiFit/      HaruchiFit — iOS + Watch + Complication
 ├─ YJApps.xcworkspace    이것 하나만 연다. 앱별 .xcodeproj 를 따로 열지 않는다
 ├─ Makefile              앱 순회 lint / format / fix
 ├─ .swiftlint.yml        공통 규칙 (앱별 설정이 parent_config 로 상속)
@@ -56,7 +56,7 @@ xcodebuild -workspace YJApps.xcworkspace -scheme "<스킴>" -destination "<대�
 `TennisCounter` / `TennisCounter Watch App` / `RalliComplicationExtension` / `TennisLiveActivityExtension` /
 `HaruchiFit` / `HaruchiFit Watch App` / `HaruchiComplicationExtension` / `HaruchiFitWatchTests`
 
-하루치 핏만 **워치 테스트 전용 스킴**(`HaruchiFitWatchTests`)을 갖는다. 나머지 두 앱은 앱 스킴에
+HaruchiFit만 **워치 테스트 전용 스킴**(`HaruchiFitWatchTests`)을 갖는다. 나머지 두 앱은 앱 스킴에
 `-only-testing` 을 걸어 테스트한다 — 그쪽 워치 스킴에는 iOS 테스트 타깃까지 들어 있기 때문이다.
 
 > **시뮬레이터는 이름이 아니라 UDID로 지정한다.** 런타임이 둘 이상 설치되면 같은 이름의 기기가

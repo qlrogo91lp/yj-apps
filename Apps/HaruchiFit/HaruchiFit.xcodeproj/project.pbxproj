@@ -19,7 +19,7 @@
 		3999D2BA3048F8B9005343C7 /* HaruchiFit Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 3999D29A3048F8B8005343C7 /* HaruchiFit Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		3999D2CC3048FA54005343C7 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3999D2CB3048FA54005343C7 /* WidgetKit.framework */; };
 		3999D2CE3048FA54005343C7 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3999D2CD3048FA54005343C7 /* SwiftUI.framework */; };
-		3999D2D93048FA55005343C7 /* HaruchiComplicationExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3999D2C93048FA54005343C7 /* HaruchiComplicationExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		3999D2D93048FA55005343C7 /* ComplicationAppExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 3999D2C93048FA54005343C7 /* ComplicationAppExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		3999D531304909AF005343C7 /* ConnectivityCore in Frameworks */ = {isa = PBXBuildFile; productRef = 3999D530304909AF005343C7 /* ConnectivityCore */; };
 		3999D533304909AF005343C7 /* PersistenceCore in Frameworks */ = {isa = PBXBuildFile; productRef = 3999D532304909AF005343C7 /* PersistenceCore */; };
 		3999D535304909AF005343C7 /* WorkoutCore in Frameworks */ = {isa = PBXBuildFile; productRef = 3999D534304909AF005343C7 /* WorkoutCore */; };
@@ -72,7 +72,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				3999D2D93048FA55005343C7 /* HaruchiComplicationExtension.appex in Embed Foundation Extensions */,
+				3999D2D93048FA55005343C7 /* ComplicationAppExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -84,7 +84,7 @@
 		3999D2883048F77F005343C7 /* HaruchiFit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HaruchiFit.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3999D29A3048F8B8005343C7 /* HaruchiFit Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "HaruchiFit Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3999D2A63048F8B9005343C7 /* HaruchiFitWatchTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HaruchiFitWatchTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		3999D2C93048FA54005343C7 /* HaruchiComplicationExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = HaruchiComplicationExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		3999D2C93048FA54005343C7 /* ComplicationAppExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ComplicationAppExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		3999D2CB3048FA54005343C7 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		3999D2CD3048FA54005343C7 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		3999D540304909FD005343C7 /* HaruchiFit Watch App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "HaruchiFit Watch App.entitlements"; sourceTree = "<group>"; };
@@ -92,12 +92,12 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		3999D2DA3048FA55005343C7 /* Exceptions for "ComplicationApp" folder in "HaruchiComplicationExtension" target */ = {
+		3999D2DA3048FA55005343C7 /* Exceptions for "ComplicationApp" folder in "ComplicationAppExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = 3999D2C83048FA54005343C7 /* HaruchiComplicationExtension */;
+			target = 3999D2C83048FA54005343C7 /* ComplicationAppExtension */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -130,7 +130,7 @@
 		3999D2CF3048FA54005343C7 /* ComplicationApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				3999D2DA3048FA55005343C7 /* Exceptions for "ComplicationApp" folder in "HaruchiComplicationExtension" target */,
+				3999D2DA3048FA55005343C7 /* Exceptions for "ComplicationApp" folder in "ComplicationAppExtension" target */,
 			);
 			path = ComplicationApp;
 			sourceTree = "<group>";
@@ -202,7 +202,7 @@
 				3999D2883048F77F005343C7 /* HaruchiFit.app */,
 				3999D29A3048F8B8005343C7 /* HaruchiFit Watch App.app */,
 				3999D2A63048F8B9005343C7 /* HaruchiFitWatchTests.xctest */,
-				3999D2C93048FA54005343C7 /* HaruchiComplicationExtension.appex */,
+				3999D2C93048FA54005343C7 /* ComplicationAppExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -302,9 +302,9 @@
 			productReference = 3999D2A63048F8B9005343C7 /* HaruchiFitWatchTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		3999D2C83048FA54005343C7 /* HaruchiComplicationExtension */ = {
+		3999D2C83048FA54005343C7 /* ComplicationAppExtension */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 3999D2DB3048FA55005343C7 /* Build configuration list for PBXNativeTarget "HaruchiComplicationExtension" */;
+			buildConfigurationList = 3999D2DB3048FA55005343C7 /* Build configuration list for PBXNativeTarget "ComplicationAppExtension" */;
 			buildPhases = (
 				3999D2C53048FA54005343C7 /* Sources */,
 				3999D2C63048FA54005343C7 /* Frameworks */,
@@ -318,11 +318,11 @@
 				393C2307304FEA8D00744D07 /* Common */,
 				3999D2CF3048FA54005343C7 /* ComplicationApp */,
 			);
-			name = HaruchiComplicationExtension;
+			name = ComplicationAppExtension;
 			packageProductDependencies = (
 			);
 			productName = HaruchiComplicationExtensionExtension;
-			productReference = 3999D2C93048FA54005343C7 /* HaruchiComplicationExtension.appex */;
+			productReference = 3999D2C93048FA54005343C7 /* ComplicationAppExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
@@ -370,7 +370,7 @@
 				3999D2873048F77F005343C7 /* HaruchiFit */,
 				3999D2993048F8B8005343C7 /* HaruchiFit Watch App */,
 				3999D2A53048F8B9005343C7 /* HaruchiFitWatchTests */,
-				3999D2C83048FA54005343C7 /* HaruchiComplicationExtension */,
+				3999D2C83048FA54005343C7 /* ComplicationAppExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -459,7 +459,7 @@
 		};
 		3999D2D83048FA55005343C7 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 3999D2C83048FA54005343C7 /* HaruchiComplicationExtension */;
+			target = 3999D2C83048FA54005343C7 /* ComplicationAppExtension */;
 			targetProxy = 3999D2D73048FA55005343C7 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -599,6 +599,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "HaruchiFit-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = HaruchiFit;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Haruchi Fit reads your workouts from Apple Health to fill in your activity grid.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Haruchi Fit saves workouts recorded on your Apple Watch to Apple Health.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -611,7 +612,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.yj.HaruchiFit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -641,6 +642,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "HaruchiFit-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = HaruchiFit;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Haruchi Fit reads your workouts from Apple Health to fill in your activity grid.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Haruchi Fit saves workouts recorded on your Apple Watch to Apple Health.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -653,7 +655,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.yj.HaruchiFit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -682,7 +684,7 @@
 				DEVELOPMENT_TEAM = P2TU28W32L;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "HaruchiFit Watch App";
+				INFOPLIST_KEY_CFBundleDisplayName = HaruchiFit;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Haruchi Fit reads your workouts from Apple Health to fill in your activity grid.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Haruchi Fit saves workouts recorded on your Apple Watch to Apple Health.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
@@ -691,7 +693,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.yj.HaruchiFit.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -719,7 +721,7 @@
 				DEVELOPMENT_TEAM = P2TU28W32L;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "HaruchiFit Watch App";
+				INFOPLIST_KEY_CFBundleDisplayName = HaruchiFit;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Haruchi Fit reads your workouts from Apple Health to fill in your activity grid.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Haruchi Fit saves workouts recorded on your Apple Watch to Apple Health.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
@@ -728,7 +730,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.yj.HaruchiFit.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -801,7 +803,7 @@
 				DEVELOPMENT_TEAM = P2TU28W32L;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ComplicationApp/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = HaruchiComplicationExtension;
+				INFOPLIST_KEY_CFBundleDisplayName = HaruchiFit;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -809,7 +811,7 @@
 					"@executable_path/../../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.yj.HaruchiFit.watchkitapp.ComplicationApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -835,7 +837,7 @@
 				DEVELOPMENT_TEAM = P2TU28W32L;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ComplicationApp/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = HaruchiComplicationExtension;
+				INFOPLIST_KEY_CFBundleDisplayName = HaruchiFit;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -843,7 +845,7 @@
 					"@executable_path/../../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.yj.HaruchiFit.watchkitapp.ComplicationApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -897,7 +899,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		3999D2DB3048FA55005343C7 /* Build configuration list for PBXNativeTarget "HaruchiComplicationExtension" */ = {
+		3999D2DB3048FA55005343C7 /* Build configuration list for PBXNativeTarget "ComplicationAppExtension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				3999D2DC3048FA55005343C7 /* Debug */,

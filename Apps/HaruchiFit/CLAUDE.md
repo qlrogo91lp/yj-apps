@@ -1,11 +1,11 @@
 # CLAUDE.md — HaruchiFit
 
 **공통 규약(작업 방식·Git Workflow·빌드 개요·YJKit 사용법)은 저장소 루트 `CLAUDE.md` 를 먼저 본다.**
-이 문서는 하루치 핏 앱 고유 내용만 다룬다.
+이 문서는 HaruchiFit 앱 고유 내용만 다룬다.
 
 ## Project overview
 
-하루치 핏(Haruchi Fit) — 워치에서 근력/유산소 **세그먼트**를 기록하고, iOS는 잔디·기록·통계를
+HaruchiFit — 워치에서 근력/유산소 **세그먼트**를 기록하고, iOS는 잔디·기록·통계를
 보여주는 운동 기록 앱. 폰을 한 번도 안 열어도 기록이 완결되는 것이 해피패스다.
 
 - 무엇을 만들지 — `docs/specs/shared/2026/2026-09-02-haruchi-fit-product-spec.md`
