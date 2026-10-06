@@ -15,7 +15,10 @@ enum RecordDetailBuilder {
                                    durationText: record.totalSeconds < 60 ? "1분 미만" : "\(record.totalSeconds / 60)분",
                                    caloriesText: record.totalCalories.map { "\(Int($0.rounded()))" } ?? placeholder,
                                    heartRateText: record.averageHeartRate.map { "\(Int($0.rounded()))" } ?? placeholder,
-                                   spans: record.orderedSegments.filter { $0.durationSeconds > 0 }.map { .init(kind: $0.kind, seconds: $0.durationSeconds) },
+                                   spans: record.orderedSegments.filter { $0.durationSeconds > 0 }.map { .init(
+                                       kind: $0.kind,
+                                       seconds: $0.durationSeconds
+                                   ) },
                                    compositionText: chips.isEmpty ? nil : chips.map(\.text).joined(separator: " · "))
     }
 
