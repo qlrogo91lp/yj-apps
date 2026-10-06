@@ -111,12 +111,9 @@ struct HaruchiComplicationEntryView: View {
         }
     }
 
-    /// 골프는 전용 `GolfIcon` 애셋을 쓴다. 하루치엔 아직 그 애셋이 없어 SF Symbol 로 둔다 —
-    /// 아이콘을 그리면 여기만 바꾸면 된다.
+    /// 앱 아이콘과 같은 로고(`HaruchiIcon`)를 템플릿으로 쓴다. 근력·유산소 구분은 배경색이 한다.
     private var icon: some View {
-        Image(systemName: entry.state.isActive
-            ? (entry.state.mode == .cardio ? "figure.run" : "figure.strengthtraining.traditional")
-            : "flame.fill")
+        Image("HaruchiIcon")
             .resizable()
             .scaledToFit()
             .foregroundStyle(entry.state.isActive ? .black : Color.brandOrange)
