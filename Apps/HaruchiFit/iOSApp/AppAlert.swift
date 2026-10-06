@@ -5,6 +5,7 @@ enum AppAlert: String, Identifiable {
     case saveFailed
     case syncFailed
     case deleteFailed
+    case editFailed
 
     var id: String {
         rawValue
@@ -15,6 +16,7 @@ enum AppAlert: String, Identifiable {
         case .saveFailed: "워치 기록을 저장하지 못했어요"
         case .syncFailed: "건강 앱 기록을 가져오지 못했어요"
         case .deleteFailed: "기록을 삭제하지 못했어요"
+        case .editFailed: "변경 내용을 저장하지 못했어요"
         }
     }
 
@@ -24,6 +26,7 @@ enum AppAlert: String, Identifiable {
         case .saveFailed: "다음 동기화 때 건강 앱에서 다시 가져와요. 근력·유산소 구분은 남지 않을 수 있어요."
         case .syncFailed: "목록을 당겨서 다시 시도해 주세요."
         case .deleteFailed: "잠시 후 다시 시도해 주세요."
+        case .editFailed: "잠시 후 다시 시도해 주세요."
         }
     }
 }
