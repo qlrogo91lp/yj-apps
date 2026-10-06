@@ -71,11 +71,13 @@ enum RecordListBuilder {
     private static func row(for record: WorkoutRecord, formatter: DateFormatter) -> RecordListRow {
         // 잔디 칼로리 기준(GrassAggregator)과 같은 값을 쓴다
         let calories = record.totalCalories.map { "\(Int($0.rounded())) kcal" }
+        let parts = record.bodyParts
         return RecordListRow(id: record.persistentModelID,
                              record: record,
                              dateTitle: formatter.string(from: record.startedAt),
                              chips: segmentChips(for: record),
-                             caloriesText: calories)
+                             caloriesText: calories,
+                             bodyPartsText: parts.isEmpty ? nil : parts.map(\.title).joined(separator: " · "))
     }
 
     static func formatter(_ format: String, calendar: Calendar, locale: Locale) -> DateFormatter {

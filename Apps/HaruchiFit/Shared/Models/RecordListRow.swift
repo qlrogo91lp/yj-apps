@@ -11,6 +11,8 @@ struct RecordListRow: Identifiable {
     let chips: [Chip]
     /// 칼로리 값이 없는 기록은 nil — 화면이 자리를 비운다.
     let caloriesText: String?
+    /// `가슴 · 팔`. 태그가 없으면 nil 이며, 태깅을 유도하는 문구는 두지 않는다.
+    let bodyPartsText: String?
 
     /// 구간 종류 하나의 합계. 전환 횟수는 담지 않는다 (D7).
     struct Chip: Hashable {
