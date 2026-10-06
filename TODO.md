@@ -188,28 +188,40 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
 | W0 홈 시작 유형 토글 (근력 / 유산소) | [PR #14](https://github.com/qlrogo91lp/yj-apps/pull/14) 머지 · 테스트 12개 통과 · **실기기 검증 완료** | [플랜](Apps/HaruchiFit/docs/plans/watch/2026/2026-09-08-haruchi-fit-w0-start-kind.md) |
 | WC 컴플리케이션 — 세션 상태만 | [PR #14](https://github.com/qlrogo91lp/yj-apps/pull/14) 머지 · 테스트 24개 통과 · **실기기 검증 완료** | [플랜](Apps/HaruchiFit/docs/plans/watch/2026/2026-09-08-haruchi-fit-wc-complication.md) |
 
-### 예정사항 (남은 10개)
+### 예정사항 — 1차 / 2차 / 3차 (2026-10-07 재정렬)
 
-| Phase | # | 항목 | 상태 | 문서 |
-|---|---|---|---|---|
-| ~~2 데이터~~ | ~~1~~ | ~~잔디 집계 (일별 집계)~~ | ~~**완료** ([PR #27](https://github.com/qlrogo91lp/yj-apps/pull/27)) · 영속 캐시는 두지 않기로 확정~~ | ~~[스펙](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-09-grass-daily-aggregate.md) · 로드맵 Phase 2~~ |
-| 2 데이터 | 2 | HealthKit import (증분) | **구현 완료** ([PR #30](https://github.com/qlrogo91lp/yj-apps/pull/30)) · 실기기 확인 대기 · 매핑 표 확정 | [스펙](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-21-healthkit-workout-import.md) · [플랜](Apps/HaruchiFit/docs/plans/shared/2026/2026-09-21-healthkit-workout-import.md) — 근력 3·유산소 8, 나머지는 안 가져온다. **삭제 반영은 뺐다** (아래 YJKit) |
-| ~~3 iOS~~ | ~~3~~ | ~~탭 셸 + 디자인 토큰~~ | ~~**구현 완료 · PR 준비 중**~~ | ~~[플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-09-23-tab-shell-design-tokens.md) · 로드맵 Phase 3 · 스펙 3절·7절~~ |
-| 3 iOS | 4 | 03b 기록 목록 | **구현 완료** ([PR #33](https://github.com/qlrogo91lp/yj-apps/pull/33)) · 시뮬레이터 확인 대기 | [플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-09-28-records-list.md) · 로드맵 Phase 3 · 스펙 03b절 |
-| ~~3 iOS~~ | ~~5~~ | ~~04 기록 상세 (부위 태깅 · 메모)~~ | ~~**완료** ([PR #40](https://github.com/qlrogo91lp/yj-apps/pull/40))~~ | ~~[플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-10-06-record-detail.md) · 로드맵 Phase 3 · 스펙 04절~~ |
-| 3 iOS | 6 | 06 공유 (`WorkoutShareUI` 그대로) | **다음 코드 작업** | 로드맵 Phase 3 · 스펙 06절 |
-| 4 잔디 | 7 | 02 홈 대시보드 | 예정 (선행: 1·3) | 로드맵 Phase 4 · 스펙 02절 |
-| 4 잔디 | 8 | 03a 기록 달력 | 예정 (선행: 1·3) | 로드맵 Phase 4 · 스펙 03a절 |
-| 4 잔디 | 9 | 05 통계 | 예정 (선행: 1·3) | 로드맵 Phase 4 · 스펙 05절 |
-| 5 주변부 | 10 | 07 설정 | 예정 (선행: Phase 2) | 로드맵 Phase 5 · 스펙 07절 |
-| 5 주변부 | 11 | 08 수동 기록 | 예정 | 로드맵 Phase 5 · 스펙 08절·4.3 |
-| 5 주변부 | 12 | 01 온보딩 (HealthKit 권한) | 예정 | 로드맵 Phase 5 · 스펙 01절 |
-| 언제든 | — | CloudKit 엔타이틀먼트 | 예정 · **프로비저닝 작업(사용자)** · 로컬 폴백 있어 급하지 않음 | 로드맵 "언제든" |
+**1차 = 핵심 루프 하나만.** 워치에서 운동 시작·종료 → iOS 기록 탭 목록 → 기록 상세. **기능은 이미 다 있다**
+(W0·W1·W2 · 03b 목록 PR #33 · 04 상세 PR #40). 남은 건 종료 시각 한 줄 수정과 실기기로 이 루프를 돌려 보는 것뿐이다.
+**2차 = 앱다운 화면** (홈 · 통계 · 수동 기록 · 달력). **3차 = 부가** (온보딩 · 설정 · 공유).
+근거는 [로드맵 "우선순위"](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-07-haruchi-fit-roadmap.md#우선순위-2026-10-06).
+
+| 차수 | 순서 | # | 항목 | 왜 이 자리인가 | 상태 | 문서 |
+|---|---|---|---|---|---|---|
+| 1차 | **1** | — | 워치 종료 시각 지연 수정 | 상세 헤더의 끝 시각이 이 값이다. 루프 확인 전에 고친다. 한 줄 | **다음 코드 작업** | 아래 "집 맥북에서 할 것" |
+| 1차 | **2** | — | **핵심 루프 실기기 확인** | 워치 시작·종료 → 폰 목록에 뜨는지 → 상세(시간·kcal·심박·운동 구성·부위·메모). 아래 확인 대기 중 루프에 걸린 것만 | 예정 | 아래 "집 맥북에서 할 것" |
+| 2차 | 1 | 7 | 02 홈 대시보드 | 앱 첫 화면이 아직 임시 잔디 그리드다 | **플랜 검토 대기** | [플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-10-06-home-dashboard.md) · 스펙 02절 |
+| 2차 | 2 | 9 | 05 통계 | 탭 하나가 비어 있다 | 예정 (선행 1·3 완료) | 로드맵 Phase 4 · 스펙 05절 |
+| 2차 | 3 | 11 | 08 수동 기록 | 워치 없이 쓰는 흐름 C. 상세 `편집` 범위도 여기서 정해진다 | 예정 | 로드맵 Phase 5 · 스펙 08절·4.3 |
+| 2차 | 4 | 8 | 03a 기록 달력 | 기록 탭은 목록만으로도 동작한다 | 예정 (선행 1·3 완료) | 로드맵 Phase 4 · 스펙 03a절 |
+| 3차 | — | 12 | 01 온보딩 (HealthKit 권한) | 없어도 시스템 권한 시트는 뜬다. 거부돼도 워치 기록은 들어온다 — import 만 막힌다 | 예정 | 로드맵 Phase 5 · 스펙 01절 |
+| 3차 | — | 10 | 07 설정 | 링크·전환 위주. 칼로리 기준 컷은 데이터가 쌓여야 정한다 | 예정 | 로드맵 Phase 5 · 스펙 07절 |
+| 3차 | — | 6 | 06 공유 (`WorkoutShareUI` 그대로) | 부가 기능. Kit 을 붙이기만 하면 된다 | **플랜 작성됨 · 보류** | [플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-10-06-record-share.md) · 스펙 06절 (10-06 개정) |
+| 3차 | — | — | CloudKit 엔타이틀먼트 | **프로비저닝 작업(사용자)** · 로컬 폴백이 있다 | 예정 | 로드맵 "언제든" |
+
+**구현은 끝났고 확인만 남은 것**
+
+| # | 항목 | 상태 | 문서 |
+|---|---|---|---|
+| 2 | HealthKit import (증분) | **구현 완료** ([PR #30](https://github.com/qlrogo91lp/yj-apps/pull/30)) · 실기기 확인 대기 · 매핑 표 확정 | [스펙](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-21-healthkit-workout-import.md) · [플랜](Apps/HaruchiFit/docs/plans/shared/2026/2026-09-21-healthkit-workout-import.md) — 근력 3·유산소 8, 나머지는 안 가져온다. **삭제 반영은 뺐다** (위 YJKit) |
+| 4 | 03b 기록 목록 | **구현 완료** ([PR #33](https://github.com/qlrogo91lp/yj-apps/pull/33)) · 시뮬레이터 확인 대기 | [플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-09-28-records-list.md) |
+| ~~1~~ | ~~잔디 집계~~ | ~~**완료** ([PR #27](https://github.com/qlrogo91lp/yj-apps/pull/27))~~ | ~~[스펙](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-09-grass-daily-aggregate.md)~~ |
+| ~~3~~ | ~~탭 셸 + 디자인 토큰~~ | ~~**구현 완료**~~ | ~~[플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-09-23-tab-shell-design-tokens.md)~~ |
+| ~~5~~ | ~~04 기록 상세 (부위 태깅 · 메모)~~ | ~~**완료** ([PR #40](https://github.com/qlrogo91lp/yj-apps/pull/40))~~ | ~~[플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-10-06-record-detail.md)~~ |
 
 **Phase 1 이 끝나 폰을 한 번도 안 열어도 흐름 A(해피패스)가 완결된다** — W2 · W0 · WC.
 셋 다 실기기 검증까지 끝났다. Phase 2 착수 전에 **워치 시간에서 일시정지를 빼는 선행 작업**이 하나 끼었다 — 잔디 농도의 입력이라서다.
 Phase 2 코드 구현은 끝났고 HealthKit import 실기기 확인이 남았다. Phase 3 #3 탭 셸·디자인 토큰, #4 기록 목록도 구현했다.
-**다음 코드는 Phase 3 #6 공유**다. 가져온 기록은 홈 탭에 보존한 26주 임시 그리드에서 날짜·농도를 확인한다.
+**다음은 1차 — 종료 시각 한 줄 수정 뒤 핵심 루프(워치 → 목록 → 상세) 실기기 확인**이다. 홈·통계·수동 기록·달력은 2차, 온보딩·설정·공유는 3차 (10-07 재정렬). 가져온 기록은 홈 탭에 보존한 26주 임시 그리드에서 날짜·농도를 확인한다.
 
 > 플랜 문서는 **착수 직전에 하나씩** 쓴다 (로드맵 "작업 중 지킬 것"). 위 표의 "예정" 은
 > 플랜이 아직 없다는 뜻이지 설계가 비어 있다는 뜻이 아니다 — 스펙은 14개 화면 전부 확정돼 있다.
