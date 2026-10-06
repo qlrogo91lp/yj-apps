@@ -68,6 +68,15 @@ enum RecordListBuilder {
         }
     }
 
+    /// 섹션 없이 행만 필요한 화면(홈 최근 기록)이 쓴다. 입력 순서를 그대로 지킨다.
+    static func rows(for records: [WorkoutRecord],
+                     calendar: Calendar = .current,
+                     locale: Locale = Locale(identifier: "ko_KR")) -> [RecordListRow]
+    {
+        let rowFormatter = formatter("M월 d일 (E)", calendar: calendar, locale: locale)
+        return records.map { row(for: $0, formatter: rowFormatter) }
+    }
+
     private static func row(for record: WorkoutRecord, formatter: DateFormatter) -> RecordListRow {
         // 잔디 칼로리 기준(GrassAggregator)과 같은 값을 쓴다
         let calories = record.totalCalories.map { "\(Int($0.rounded())) kcal" }
