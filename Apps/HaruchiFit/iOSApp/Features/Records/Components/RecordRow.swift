@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// 기록 목록의 한 행 — 날짜와 구간 칩, 우측 kcal. 문자열은 `RecordListRow` 가 다 만들어 온다.
+/// 기록 목록의 한 행 — 날짜와 구간 칩, 부위, 우측 kcal. 문자열은 `RecordListRow` 가 다 만들어 온다.
 struct RecordRow: View {
     let row: RecordListRow
 
@@ -14,6 +14,12 @@ struct RecordRow: View {
                     HStack(spacing: 6) {
                         ForEach(row.chips, id: \.self) { chip($0) }
                     }
+                }
+                if let parts = row.bodyPartsText {
+                    Text(parts)
+                        .font(.caption)
+                        .foregroundStyle(HaruchiPalette.dim)
+                        .lineLimit(1)
                 }
             }
             Spacer(minLength: 8)

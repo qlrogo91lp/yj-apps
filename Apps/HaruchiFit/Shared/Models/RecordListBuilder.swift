@@ -52,7 +52,9 @@ enum RecordListBuilder {
         return "\(start) – \(finish)"
     }
 
-    private static func row(for record: WorkoutRecord, formatter: DateFormatter) -> RecordListRow {
+    /// 구간 종류별 합계를 **처음 나온 순서**로. 1분 미만인 종류는 뺀다 — `유산소 0분` 은 정보가 아니다.
+    /// 기록 상세의 운동 구성 문구도 이걸 쓴다 — 두 화면의 숫자가 갈리지 않게.
+    static func segmentChips(for record: WorkoutRecord) -> [RecordListRow.Chip] {
         var order: [SegmentKind] = []
         var seconds: [SegmentKind: Int] = [:]
         for segment in record.orderedSegments {
@@ -60,20 +62,25 @@ enum RecordListBuilder {
             seconds[segment.kind, default: 0] += segment.durationSeconds
         }
         // 1분 미만은 `유산소 0분` 이 되어 정보가 아니다
-        let chips = order.compactMap { kind -> RecordListRow.Chip? in
+        return order.compactMap { kind -> RecordListRow.Chip? in
             let minutes = (seconds[kind] ?? 0) / 60
             return minutes > 0 ? RecordListRow.Chip(kind: kind, minutes: minutes) : nil
         }
+    }
+
+    private static func row(for record: WorkoutRecord, formatter: DateFormatter) -> RecordListRow {
         // 잔디 칼로리 기준(GrassAggregator)과 같은 값을 쓴다
         let calories = record.totalCalories.map { "\(Int($0.rounded())) kcal" }
+        let parts = record.bodyParts
         return RecordListRow(id: record.persistentModelID,
                              record: record,
                              dateTitle: formatter.string(from: record.startedAt),
-                             chips: chips,
-                             caloriesText: calories)
+                             chips: segmentChips(for: record),
+                             caloriesText: calories,
+                             bodyPartsText: parts.isEmpty ? nil : parts.map(\.title).joined(separator: " · "))
     }
 
-    private static func formatter(_ format: String, calendar: Calendar, locale: Locale) -> DateFormatter {
+    static func formatter(_ format: String, calendar: Calendar, locale: Locale) -> DateFormatter {
         let formatter = DateFormatter()
         formatter.calendar = calendar
         formatter.timeZone = calendar.timeZone

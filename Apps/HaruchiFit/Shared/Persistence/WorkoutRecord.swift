@@ -28,12 +28,21 @@ final class WorkoutRecord {
 
     var memo: String?
 
+    /// 태그한 부위의 `BodyPart` rawValue (D1 — 멀티). enum 배열을 직접 저장하지 않는 것은 `Segment.kindRaw` 와 같은 이유다.
+    /// 화면은 `bodyParts` 를 읽는다. 기본값이 있어 기존 저장소는 경량 마이그레이션으로 넘어간다.
+    var bodyPartsRaw: [String] = []
+
     /// `WorkoutSource` 의 rawValue. enum 을 직접 저장하지 않는 것은 Tennis `Match.mode` 와 같은 이유다.
     var sourceRaw: String = WorkoutSource.watch.rawValue
 
     var source: WorkoutSource {
         get { WorkoutSource(rawValue: sourceRaw) ?? .watch }
         set { sourceRaw = newValue.rawValue }
+    }
+
+    /// 태그한 부위. **탭한 순서가 아니라 `BodyPart.allCases` 순서**이고, 모르는 값은 버린다.
+    var bodyParts: [BodyPart] {
+        BodyPart.allCases.filter { bodyPartsRaw.contains($0.rawValue) }
     }
 
     /// 시작 오프셋 순으로 정렬된 구간. 화면은 항상 이쪽을 쓴다.

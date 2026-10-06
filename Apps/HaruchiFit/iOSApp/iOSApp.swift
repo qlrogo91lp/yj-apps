@@ -12,6 +12,7 @@ struct HaruchiFitApp: App {
     @StateObject private var connectivity: HaruchiFitConnectivity
     @StateObject private var sync: WorkoutSyncCoordinator
     @StateObject private var alerts: AppAlertCenter
+    private let context: ModelContext
     private let store: PersistenceService<WorkoutRecord>
 
     init() {
@@ -21,7 +22,8 @@ struct HaruchiFitApp: App {
         _connectivity = StateObject(wrappedValue: wrapper)
         // 워치 기록 저장과 import 삽입이 같은 컨텍스트를 본다. 둘로 나누면
         // 서로의 변경을 못 보고 rollback 이 간섭할 수 있다 (PersistenceService — 단일 컨텍스트).
-        let context = ModelContext(container)
+        let context = container.mainContext
+        self.context = context
         store = PersistenceService<WorkoutRecord>(context: context)
         let alerts = AppAlertCenter()
         _alerts = StateObject(wrappedValue: alerts)
@@ -47,7 +49,7 @@ struct HaruchiFitApp: App {
     /// 워치가 보낸 기록을 저장한다.
     ///
     /// CloudKit 이 `.unique` 를 막으므로 **중복 방지는 여기 책임이다** (아키텍처 3절).
-    /// `healthKitUUID` 가 있으면 그 키로 기존 기록을 갈아끼우고, 없으면 그냥 추가한다 —
+    /// `healthKitUUID` 가 있으면 그 키로 기존 기록을 갈아끼우되 부위·메모는 넘겨받고, 없으면 그냥 추가한다 —
     /// 키가 없는 기록끼리는 구분할 방법이 없어 중복 검사를 걸 수 없다.
     private func save(_ message: WorkoutRecordMessage) {
         let record = WorkoutRecord(healthKitUUID: message.healthKitUUID,
@@ -64,11 +66,20 @@ struct HaruchiFitApp: App {
 
         do {
             if let uuid = message.healthKitUUID {
-                try store.upsert(record, replacing: #Predicate { $0.healthKitUUID == uuid })
+                let replacing = #Predicate<WorkoutRecord> { $0.healthKitUUID == uuid }
+                // 재전송이면 사용자 편집값과 영속 ID를 지킨 채 운동 데이터만 갱신한다.
+                // 열린 상세 시트가 이 객체를 잡고 있으므로 지우고 새로 넣으면 안 된다.
+                if let existing = try store.fetch(matching: replacing).first {
+                    existing.updateWorkoutData(from: message, in: context)
+                    try context.save()
+                } else {
+                    try store.upsert(record, replacing: replacing)
+                }
             } else {
                 try store.upsert(record)
             }
         } catch {
+            context.rollback()
             print("[HaruchiFit] 워크아웃 저장 실패 — \(error)")
             alerts.report(.saveFailed)
         }

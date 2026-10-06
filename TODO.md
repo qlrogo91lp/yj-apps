@@ -196,8 +196,8 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
 | 2 데이터 | 2 | HealthKit import (증분) | **구현 완료** ([PR #30](https://github.com/qlrogo91lp/yj-apps/pull/30)) · 실기기 확인 대기 · 매핑 표 확정 | [스펙](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-21-healthkit-workout-import.md) · [플랜](Apps/HaruchiFit/docs/plans/shared/2026/2026-09-21-healthkit-workout-import.md) — 근력 3·유산소 8, 나머지는 안 가져온다. **삭제 반영은 뺐다** (아래 YJKit) |
 | ~~3 iOS~~ | ~~3~~ | ~~탭 셸 + 디자인 토큰~~ | ~~**구현 완료 · PR 준비 중**~~ | ~~[플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-09-23-tab-shell-design-tokens.md) · 로드맵 Phase 3 · 스펙 3절·7절~~ |
 | 3 iOS | 4 | 03b 기록 목록 | **구현 완료** ([PR #33](https://github.com/qlrogo91lp/yj-apps/pull/33)) · 시뮬레이터 확인 대기 | [플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-09-28-records-list.md) · 로드맵 Phase 3 · 스펙 03b절 |
-| 3 iOS | 5 | 04 기록 상세 (부위 태깅 · 메모) | **다음 코드 작업** (선행: 4 완료) | 로드맵 Phase 3 · 스펙 04절 |
-| 3 iOS | 6 | 06 공유 (`WorkoutShareUI` 그대로) | 예정 (선행: 5) | 로드맵 Phase 3 · 스펙 06절 |
+| ~~3 iOS~~ | ~~5~~ | ~~04 기록 상세 (부위 태깅 · 메모)~~ | ~~**완료** ([PR #40](https://github.com/qlrogo91lp/yj-apps/pull/40))~~ | ~~[플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-10-06-record-detail.md) · 로드맵 Phase 3 · 스펙 04절~~ |
+| 3 iOS | 6 | 06 공유 (`WorkoutShareUI` 그대로) | **다음 코드 작업** | 로드맵 Phase 3 · 스펙 06절 |
 | 4 잔디 | 7 | 02 홈 대시보드 | 예정 (선행: 1·3) | 로드맵 Phase 4 · 스펙 02절 |
 | 4 잔디 | 8 | 03a 기록 달력 | 예정 (선행: 1·3) | 로드맵 Phase 4 · 스펙 03a절 |
 | 4 잔디 | 9 | 05 통계 | 예정 (선행: 1·3) | 로드맵 Phase 4 · 스펙 05절 |
@@ -209,7 +209,7 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
 **Phase 1 이 끝나 폰을 한 번도 안 열어도 흐름 A(해피패스)가 완결된다** — W2 · W0 · WC.
 셋 다 실기기 검증까지 끝났다. Phase 2 착수 전에 **워치 시간에서 일시정지를 빼는 선행 작업**이 하나 끼었다 — 잔디 농도의 입력이라서다.
 Phase 2 코드 구현은 끝났고 HealthKit import 실기기 확인이 남았다. Phase 3 #3 탭 셸·디자인 토큰, #4 기록 목록도 구현했다.
-**다음 코드는 Phase 3 #5 기록 상세**다. 가져온 기록은 홈 탭에 보존한 26주 임시 그리드에서 날짜·농도를 확인한다.
+**다음 코드는 Phase 3 #6 공유**다. 가져온 기록은 홈 탭에 보존한 26주 임시 그리드에서 날짜·농도를 확인한다.
 
 > 플랜 문서는 **착수 직전에 하나씩** 쓴다 (로드맵 "작업 중 지킬 것"). 위 표의 "예정" 은
 > 플랜이 아직 없다는 뜻이지 설계가 비어 있다는 뜻이 아니다 — 스펙은 14개 화면 전부 확정돼 있다.
@@ -245,6 +245,9 @@ Phase 2 코드 구현은 끝났고 HealthKit import 실기기 확인이 남았�
 - [ ] **기록 탭 목록 시뮬레이터·실기기 확인** — 섹션 제목(`이번 주`·날짜 범위), 행 요일·칩
       색·kcal, 스와이프 → 삭제 → 취소 시 행 유지, 삭제 확정 시 행·빈 섹션 사라짐과 홈
       잔디 칸 비움, 재실행 후에도 안 돌아옴
+- [ ] **기록 상세 실기기 확인** — 워치에서 저장한 기록에 부위·메모를 붙인 뒤
+      워치가 같은 기록을 다시 보내도 남는지(재배달은 드물다 — 확인 수단이 없으면 코드 리뷰로 갈음),
+      한국어 기기에서 시간대 이름(`저녁`·`밤`)이 스펙대로 찍히는지
 
 ## YJKit — 확인 필요
 

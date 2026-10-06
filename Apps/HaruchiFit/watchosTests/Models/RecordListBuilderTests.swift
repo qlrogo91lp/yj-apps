@@ -108,4 +108,16 @@ struct RecordListBuilderTests {
         let rows = try #require(try sections(context).first).rows
         #expect(rows.map(\.caloriesText) == ["413 kcal", nil])
     }
+
+    @Test("부위는 고정 순서로 한 줄에 잇고, 태그가 없으면 비운다")
+    func bodyPartsText() throws {
+        let context = try GrassFixture.makeContext()
+        let tagged = GrassFixture.record(in: context, startedAt: GrassFixture.date(2026, 9, 28, 7), totalSeconds: 600)
+        tagged.toggle(.arms)
+        tagged.toggle(.chest)
+        GrassFixture.record(in: context, startedAt: GrassFixture.date(2026, 9, 28, 6), totalSeconds: 600)
+
+        let rows = try #require(try sections(context).first).rows
+        #expect(rows.map(\.bodyPartsText) == ["가슴 · 팔", nil])
+    }
 }
