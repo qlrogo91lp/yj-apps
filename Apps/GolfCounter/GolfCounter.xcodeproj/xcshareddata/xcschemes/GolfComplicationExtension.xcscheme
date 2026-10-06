@@ -111,6 +111,7 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "3974B8F32EBCDFA5002D0EA7"
             BuildableName = "ComplicationAppExtension.appex"
+            BlueprintName = "ComplicationAppExtension"
             ReferencedContainer = "container:GolfCounter.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
