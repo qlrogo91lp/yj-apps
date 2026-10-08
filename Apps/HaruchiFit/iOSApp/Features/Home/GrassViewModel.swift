@@ -35,9 +35,8 @@ final class GrassViewModel: ObservableObject {
     /// 들고 있는 레코드로 다시 접는다.
     ///
     /// **원소 집합이 그대로인 채 값만 바뀌는 경우**를 위해 공개해 둔다 — `@Query` 는
-    /// `persistentModelID` 로 비교하므로 그런 변경을 못 잡는다. 구멍은 그 하나뿐이고
-    /// 그걸 여는 화면이 아직 없다. Phase 5 의 08 수동 기록이 편집 저장 직후 이걸 부른다
-    /// (스펙 5절).
+    /// `persistentModelID` 로 비교하므로 그런 변경을 못 잡는다. 수동 기록 폼에서 날짜·시간을
+    /// 바꾼 뒤 홈의 `rebuild(from:)` 가 이 메서드를 호출한다 (잔디 집계 스펙 5절).
     func refresh() {
         let folded = GrassAggregator.fold(records, calendar: calendar)
         byDay = Dictionary(folded.map { ($0.day, $0) }, uniquingKeysWith: { first, _ in first })

@@ -72,7 +72,7 @@ final class WorkoutRecord {
     }
 }
 
-/// 이 기록이 어디서 왔는지. 잔디 농도가 수동 기록을 최소 농도로 떨어뜨릴 때 쓴다 (제품 스펙 D4).
+/// 이 기록이 어디서 왔는지. 잔디 농도는 source가 아니라 기준 값의 유무로 계산한다.
 enum WorkoutSource: String, Codable, CaseIterable {
     case watch
     case healthKitImport

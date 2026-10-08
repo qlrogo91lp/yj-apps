@@ -14,6 +14,8 @@ private struct RecordDetailSheetModifier: ViewModifier {
     @Environment(\.modelContext) private var modelContext
     @EnvironmentObject private var alerts: AppAlertCenter
     @State private var deleteAfterDismiss: WorkoutRecord?
+    @State private var editAfterDismiss: WorkoutRecord?
+    @State private var editing: WorkoutRecord?
     @State private var memoDrafts: [PersistentIdentifier: String] = [:]
 
     func body(content: Content) -> some View {
@@ -33,8 +35,17 @@ private struct RecordDetailSheetModifier: ViewModifier {
                 onDelete: {
                     deleteAfterDismiss = record
                     item = nil
+                },
+                onEdit: {
+                    editAfterDismiss = record
+                    item = nil
                 }
             )
+        }.sheet(item: $editing) { record in
+            ManualRecordView(record: record, initialMemoDraft: memoDrafts[record.persistentModelID]) {
+                memoDrafts[record.persistentModelID] = nil
+                onFinish()
+            }
         }
     }
 
@@ -45,6 +56,10 @@ private struct RecordDetailSheetModifier: ViewModifier {
             // 지운 직후에는 `onFinish` 를 부르지 않는다 — 호출한 화면이 아직 지워진 모델이 든 `@Query` 결과를
             // 읽으면 크래시한다. 삭제는 `@Query` 변경이 알아서 화면을 다시 만든다.
             if !modelContext.deleteRecord(record) { alerts.report(.deleteFailed) }
+        } else if let record = editAfterDismiss {
+            editAfterDismiss = nil
+            onFinish()
+            editing = record
         } else {
             onFinish()
         }
