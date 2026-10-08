@@ -11,7 +11,7 @@
 **Spec:** [05 통계 상세 스펙](../../../specs/ios/2026/2026-10-08-statistics.md)
 
 작성일: 2026-10-08
-상태: **플랜 검토 대기 — 구현 전**
+상태: **코드 구현 완료 — 워치 테스트·iOS 빌드·lint·format 통과 · 시뮬레이터/실기기 UI 확인 대기**
 예정 브랜치: `feat/haruchi-statistics`
 
 ## Global Constraints
@@ -345,3 +345,10 @@ xcodebuild -workspace YJApps.xcworkspace -scheme HaruchiFitWatchTests -destinati
 커밋·push·PR 작성까지 진행한다. 현재 세션 직접 실행을 권장한다. 집계 결과 인터페이스를
 공유하는 한 화면 작업이므로 한 구현자가 순서대로 진행하면 충분하다.
 PR 머지와 실기기 확인 완료 처리는 별도 사용자 요청/실제 확인 뒤 진행한다.
+
+## 실행 기록 (2026-10-08)
+
+- Task 1: `StatisticsBuilderTests` 24개를 RED→GREEN으로 구현했다. 전체 `HaruchiFitWatchTests`도 통과했다.
+- Task 2: 연도 선택과 연간 잔디를 추가하고 iOS 시뮬레이터 빌드를 통과했다.
+- Task 3: 연 요약·월/요일/부위 차트·운동 구성·마일스톤과 `StatisticsView` 배선을 추가했다. iOS 빌드와 `swiftlint`·`swiftformat --lint`를 통과했다.
+- 시뮬레이터 UI와 실기기 확인은 아직 수동으로 하지 않았다. 0/1/다중 유형/태그 없는 기록, 연도 전환, 상세 부위 편집 반영, 삭제 후 연도 폴백, 당겨서 새로고침, 접근성 XL·VoiceOver를 확인해야 한다.
