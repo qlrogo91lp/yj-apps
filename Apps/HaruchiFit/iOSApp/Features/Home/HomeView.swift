@@ -10,6 +10,7 @@ struct HomeView: View {
     @StateObject private var grass = GrassViewModel()
     @StateObject private var home = HomeViewModel()
     @State private var selected: WorkoutRecord?
+    @State private var showingManualRecord = false
 
     let onShowAllRecords: () -> Void
 
@@ -38,6 +39,9 @@ struct HomeView: View {
                 ToolbarItem(placement: .principal) {
                     Text(home.dashboard.monthTitle).font(.headline).foregroundStyle(HaruchiPalette.text)
                 }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("수동 기록 추가", systemImage: "plus") { showingManualRecord = true }
+                }
             }
             .toolbarBackground(HaruchiPalette.bg, for: .navigationBar)
             .onAppear(perform: rebuild)
@@ -45,6 +49,9 @@ struct HomeView: View {
             // 자정을 넘겨 앱에 돌아오면 `이번 주` · 오늘 칸을 다시 계산한다
             .onChange(of: scenePhase) { _, phase in if phase == .active { rebuild() } }
             .recordDetailSheet(item: $selected, onFinish: rebuild)
+            .sheet(isPresented: $showingManualRecord) {
+                ManualRecordView(onSaved: rebuild)
+            }
         }
     }
 

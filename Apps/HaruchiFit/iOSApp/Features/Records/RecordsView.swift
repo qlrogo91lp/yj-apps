@@ -28,7 +28,7 @@ struct RecordsView: View {
                     Button("삭제", role: .destructive) { confirmDelete() }
                     Button("취소", role: .cancel) { pendingDelete = nil }
                 } message: {
-                    Text("건강 앱의 운동 기록은 그대로 남아요.")
+                    Text(pendingDelete?.source == .manual ? "삭제한 수동 기록은 복구할 수 없어요." : "건강 앱의 운동 기록은 그대로 남아요.")
                 }
                 .onAppear { viewModel.rebuild(from: records) }
                 .onChange(of: records) { _, updated in viewModel.rebuild(from: updated) }
@@ -43,7 +43,7 @@ struct RecordsView: View {
             ScrollView {
                 ContentUnavailableView("아직 기록이 없어요",
                                        systemImage: "list.bullet.rectangle",
-                                       description: Text("워치에서 운동을 저장하면 여기에 쌓여요."))
+                                       description: Text("워치에서 운동하거나 홈의 + 버튼으로 기록해 보세요."))
                     .foregroundStyle(HaruchiPalette.dim)
                     .containerRelativeFrame(.vertical)
             }
