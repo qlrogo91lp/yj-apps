@@ -71,9 +71,11 @@ enum RecordListBuilder {
     /// 섹션 없이 행만 필요한 화면(홈 최근 기록)이 쓴다. 입력 순서를 그대로 지킨다.
     static func rows(for records: [WorkoutRecord],
                      calendar: Calendar = .current,
-                     locale: Locale = Locale(identifier: "ko_KR")) -> [RecordListRow]
+                     locale: Locale = Locale(identifier: "ko_KR"),
+                     includeStartTime: Bool = false) -> [RecordListRow]
     {
-        let rowFormatter = formatter("M월 d일 (E)", calendar: calendar, locale: locale)
+        let rowFormatter = formatter(includeStartTime ? "M월 d일 (E) · a h:mm" : "M월 d일 (E)",
+                                     calendar: calendar, locale: locale)
         return records.map { row(for: $0, formatter: rowFormatter) }
     }
 

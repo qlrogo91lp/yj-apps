@@ -202,7 +202,7 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
 | 2차 | 1 | 7 | 02 홈 대시보드 | 앱 첫 화면이 아직 임시 잔디 그리드다 | **구현 완료** ([PR #44](https://github.com/qlrogo91lp/yj-apps/pull/44)) · 시뮬레이터·실기기 확인 대기 | [플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-10-06-home-dashboard.md) · 스펙 02절 |
 | ~~2차~~ | ~~2~~ | ~~9~~ | ~~05 통계~~ | ~~탭 하나가 비어 있다~~ | **구현 완료 · 시뮬레이터/실기기 확인 대기** | [스펙](Apps/HaruchiFit/docs/specs/ios/2026/2026-10-08-statistics.md) · [플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-10-08-statistics.md) |
 | ~~2차~~ | ~~3~~ | ~~11~~ | ~~08 수동 기록~~ | ~~워치 없이 쓰는 흐름 C. 상세 `편집` 범위도 여기서 정해진다~~ | **코드 구현·로컬 빌드/테스트 완료 · UI/실기기 확인 대기** | [플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-10-08-manual-record.md) · 스펙 08절·4.3 |
-| 2차 | 4 | 8 | 03a 기록 달력 | 기록 탭은 목록만으로도 동작한다 | 예정 (선행 1·3 완료) | 로드맵 Phase 4 · 스펙 03a절 |
+| ~~2차~~ | ~~4~~ | ~~8~~ | ~~03a 기록 달력~~ | ~~기록 탭은 목록만으로도 동작한다~~ | **코드 구현·로컬 검증 완료 · 시뮬레이터 UI/실기기 확인 대기** | [상세 스펙](Apps/HaruchiFit/docs/specs/ios/2026/2026-10-08-records-calendar.md) · [플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-10-08-records-calendar.md) |
 | 3차 | — | 12 | 01 온보딩 (HealthKit 권한) | 없어도 시스템 권한 시트는 뜬다. 거부돼도 워치 기록은 들어온다 — import 만 막힌다 | 예정 | 로드맵 Phase 5 · 스펙 01절 |
 | 3차 | — | 10 | 07 설정 | 링크·전환 위주. 칼로리 기준 컷은 데이터가 쌓여야 정한다 | 예정 | 로드맵 Phase 5 · 스펙 07절 |
 | 3차 | — | 6 | 06 공유 (`WorkoutShareUI` 그대로) | 부가 기능. Kit 을 붙이기만 하면 된다 | **플랜 작성됨 · 보류** | [플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-10-06-record-share.md) · 스펙 06절 (10-06 개정) |

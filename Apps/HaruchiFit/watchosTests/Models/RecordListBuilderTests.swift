@@ -109,6 +109,17 @@ struct RecordListBuilderTests {
         #expect(rows.map(\.caloriesText) == ["413 kcal", nil])
     }
 
+    @Test("달력 날짜별 행은 시작 시각을 함께 보여 준다")
+    func calendarRowsIncludeStartTime() throws {
+        let context = try GrassFixture.makeContext()
+        let record = GrassFixture.record(in: context, startedAt: GrassFixture.date(2026, 9, 28, 19, 30), totalSeconds: 600)
+
+        let row = try #require(RecordListBuilder.rows(for: [record], calendar: Self.calendar,
+                                                      locale: Locale(identifier: "ko_KR"), includeStartTime: true).first)
+
+        #expect(row.dateTitle == "9월 28일 (월) · 오후 7:30")
+    }
+
     @Test("부위는 고정 순서로 한 줄에 잇고, 태그가 없으면 비운다")
     func bodyPartsText() throws {
         let context = try GrassFixture.makeContext()
