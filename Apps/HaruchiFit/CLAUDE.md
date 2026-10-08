@@ -75,7 +75,8 @@ iOSApp/
   HaruchiPalette.swift               iOS 다크 색 토큰
   Components/                        두 Feature 이상이 쓰는 컴포넌트 (RecordRow — 홈·기록)
   Features/Home/                     홈 대시보드 — 잔디 히어로·스탯·이번 주 구성·최근 기록
-  Features/Records/                  주 단위 기록 목록 · 스와이프 삭제
+  Features/Records/                  달력/주 단위 기록 목록 · 스와이프 삭제
+    Calendar/                         월 이동 · 일별 농도 · 날짜별 기록
     Detail/                           기록 상세 하프 시트 · 부위 태깅 · 메모
   Features/Statistics/               후속 작업이 채울 탭 화면
     Components/                      연도 선택 · 연 잔디 · 요약 · 차트 · 마일스톤
