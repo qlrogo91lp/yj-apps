@@ -182,7 +182,7 @@ struct StatisticsBuilderTests {
         let inputs = (0 ..< count).map { _ in input(2026, 1, 1) }
         let milestones = dashboard(inputs).milestones
         if next == 0 {
-            #expect(milestones.allSatisfy(\.isAchieved))
+            #expect(milestones.filter { !$0.isAchieved }.isEmpty)
         } else {
             let locked = milestones.first { !$0.isAchieved }
             #expect(locked?.target == next)
