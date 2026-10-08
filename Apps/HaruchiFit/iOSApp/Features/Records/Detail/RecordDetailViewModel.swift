@@ -7,6 +7,7 @@ final class RecordDetailViewModel: ObservableObject {
     let summary: RecordDetailSummary
     @Published private(set) var bodyParts: [BodyPart]
     @Published var memoDraft: String
+    let isManual: Bool
     private let record: WorkoutRecord
     private let context: ModelContext
 
@@ -16,6 +17,7 @@ final class RecordDetailViewModel: ObservableObject {
          calendar: Calendar = .current)
     {
         self.record = record
+        isManual = record.source == .manual
         self.context = context
         summary = RecordDetailBuilder.summary(for: record, now: Date(), calendar: calendar)
         bodyParts = record.bodyParts
