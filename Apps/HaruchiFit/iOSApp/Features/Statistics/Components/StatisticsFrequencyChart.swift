@@ -5,6 +5,15 @@ struct StatisticsFrequencyChart: View {
     let title: String
     let values: [StatisticsDashboard.Frequency]
 
+    private var maximum: Int {
+        max(1, values.map(\.count).max() ?? 0)
+    }
+
+    private var yAxisValues: [Int] {
+        let step = max(1, Int(ceil(Double(maximum) / 4)))
+        return Array(stride(from: 0, through: maximum, by: step))
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(title).font(.headline).foregroundStyle(HaruchiPalette.text)
@@ -19,8 +28,8 @@ struct StatisticsFrequencyChart: View {
                     AxisValueLabel(values.first { $0.id == item.as(Int.self) }?.title ?? "")
                 }
             }
-            .chartYAxis { AxisMarks(values: .automatic(desiredCount: 4)) { _ in AxisGridLine(); AxisValueLabel() } }
-            .chartYScale(domain: 0 ... max(1, values.map(\.count).max() ?? 0))
+            .chartYAxis { AxisMarks(values: yAxisValues) { _ in AxisGridLine(); AxisValueLabel() } }
+            .chartYScale(domain: 0 ... maximum)
             .frame(height: 180)
             .accessibilityElement(children: .contain)
         }

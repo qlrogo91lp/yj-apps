@@ -36,7 +36,7 @@ struct StatisticsView: View {
                         if !statistics.dashboard.bodyParts.isEmpty {
                             BodyPartFrequencyChart(values: statistics.dashboard.bodyParts)
                         }
-                        AnnualMilestones(values: statistics.dashboard.milestones)
+                        AnnualMilestones(values: statistics.dashboard.displayedMilestones)
                     }
                 }
                 .padding(.vertical)

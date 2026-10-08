@@ -10,9 +10,9 @@ struct AnnualComposition: View {
                 GeometryReader { proxy in
                     HStack(spacing: 0) {
                         Rectangle().fill(HaruchiPalette.accent)
-                            .frame(width: proxy.size.width * CGFloat(composition.strengthPercent) / 100)
+                            .frame(width: proxy.size.width * strengthRatio(for: composition))
                         Rectangle().fill(HaruchiPalette.cardio)
-                            .frame(width: proxy.size.width * CGFloat(composition.cardioPercent) / 100)
+                            .frame(width: proxy.size.width * cardioRatio(for: composition))
                     }
                 }
                 .frame(height: 12)
@@ -35,5 +35,13 @@ struct AnnualComposition: View {
         Label { Text(text).font(.caption).foregroundStyle(HaruchiPalette.text) } icon: {
             Circle().fill(color).frame(width: 8, height: 8)
         }
+    }
+
+    private func strengthRatio(for composition: StatisticsDashboard.Composition) -> CGFloat {
+        CGFloat(composition.strengthSeconds) / CGFloat(composition.strengthSeconds + composition.cardioSeconds)
+    }
+
+    private func cardioRatio(for composition: StatisticsDashboard.Composition) -> CGFloat {
+        1 - strengthRatio(for: composition)
     }
 }

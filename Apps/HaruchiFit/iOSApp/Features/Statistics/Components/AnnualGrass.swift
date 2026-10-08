@@ -73,9 +73,11 @@ struct AnnualGrass: View {
 
     private func monthLabel(for column: Int) -> some View {
         let month = dashboard.monthColumns.first { $0.value == column }?.key
-        return Text(month.map { "\($0)월" } ?? "")
+        let title = month.flatMap { [1, 4, 7, 10, 12].contains($0) ? "\($0)월" : nil } ?? ""
+        return Text(title)
             .font(.caption2)
             .foregroundStyle(HaruchiPalette.dim)
+            .fixedSize(horizontal: true, vertical: false)
             .frame(width: cellSize, alignment: .leading)
             .accessibilityHidden(true)
     }

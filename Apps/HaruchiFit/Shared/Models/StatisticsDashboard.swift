@@ -56,4 +56,11 @@ struct StatisticsDashboard: Equatable {
     let monthColumns: [Int: Int]
     let initialColumn: Int
     let today: Date
+
+    /// 달성한 목표와 바로 다음 목표만 노출해 다음 행동에 집중시킨다.
+    var displayedMilestones: [Milestone] {
+        let achieved = milestones.filter(\.isAchieved)
+        guard let next = milestones.first(where: { !$0.isAchieved }) else { return achieved }
+        return achieved + [next]
+    }
 }

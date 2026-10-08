@@ -21,7 +21,9 @@ enum StatisticsBuilder {
         guard let yearInterval = calendar.dateInterval(of: .year, for: date(in: year, calendar: calendar)) else {
             return emptyDashboard(year: currentYear, today: today)
         }
-        let eligible = inputs.filter { $0.startedAt <= now && yearInterval.contains($0.startedAt) }
+        let eligible = inputs.filter {
+            $0.startedAt <= now && $0.startedAt >= yearInterval.start && $0.startedAt < yearInterval.end
+        }
         let isCurrentYear = year == currentYear
         let end = isCurrentYear ? today : calendar.date(byAdding: .day, value: -1, to: yearInterval.end) ?? today
 

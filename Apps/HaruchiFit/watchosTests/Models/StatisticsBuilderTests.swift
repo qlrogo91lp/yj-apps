@@ -86,6 +86,13 @@ struct StatisticsBuilderTests {
         #expect(dashboard([input(2025, 12, 31)], selectedYear: 2026).countText == "0회")
     }
 
+    @Test("다음 해 자정 기록은 이전 연도 집계에 들어가지 않는다")
+    func nextYearMidnightIsExcludedFromPriorYear() {
+        let records = [input(2025, 12, 31), input(2026, 1, 1)]
+        #expect(dashboard(records, selectedYear: 2025).countText == "1회")
+        #expect(dashboard(records, selectedYear: 2026).countText == "1회")
+    }
+
     @Test("미래에 시작하는 기록은 모든 집계에서 제외한다")
     func futureStartsExcluded() {
         let future = StatisticsRecordInput(startedAt: date(2026, 10, 8, 18), totalSeconds: 3600,
@@ -105,9 +112,9 @@ struct StatisticsBuilderTests {
 
     @Test("과거 윤년은 366일로 주 평균을 계산한다")
     func pastLeapYearAverage() {
-        let inputs = (1 ... 52).map { input(2024, 1, $0 <= 31 ? $0 : 1) }
+        let inputs = (1 ... 953).map { input(2024, 1, $0 <= 31 ? $0 : 1) }
         let result = dashboard(inputs, selectedYear: 2024, now: date(2026, 10, 8))
-        #expect(result.weeklyAverageText == "주 1.0회")
+        #expect(result.weeklyAverageText == "주 18.2회")
     }
 
     @Test("연간 잔디에는 윤년의 모든 날짜가 한 번씩 들어간다")
@@ -180,7 +187,7 @@ struct StatisticsBuilderTests {
     @Test(arguments: [(9, 10, 1), (10, 25, 15), (25, 50, 25), (142, 200, 58), (500, 0, 0)])
     func milestoneBoundaries(count: Int, next: Int, remaining: Int) {
         let inputs = (0 ..< count).map { _ in input(2026, 1, 1) }
-        let milestones = dashboard(inputs).milestones
+        let milestones = dashboard(inputs).displayedMilestones
         if next == 0 {
             #expect(milestones.filter { !$0.isAchieved }.isEmpty)
         } else {
@@ -188,6 +195,12 @@ struct StatisticsBuilderTests {
             #expect(locked?.target == next)
             #expect(locked?.remaining == remaining)
         }
+    }
+
+    @Test("마일스톤은 달성한 목표와 다음 목표만 표시한다")
+    func displayedMilestonesStopAfterNextLockedGoal() {
+        let inputs = (0 ..< 142).map { _ in input(2026, 1, 1) }
+        #expect(dashboard(inputs).displayedMilestones.map(\.target) == [10, 25, 50, 100, 200])
     }
 
     @Test("값 스냅샷은 같은 영속 모델의 제자리 편집을 감지한다")
