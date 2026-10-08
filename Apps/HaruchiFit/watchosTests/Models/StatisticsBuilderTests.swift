@@ -156,11 +156,11 @@ struct StatisticsBuilderTests {
     func bodyTagsCountSessions() {
         let result = dashboard([
             input(2026, 1, 1, bodyParts: [.chest, .chest, .back]),
-            input(2026, 1, 2, bodyParts: [.chest])
+            input(2026, 1, 2, bodyParts: [.chest]),
         ])
         #expect(result.bodyParts == [
             .init(part: .chest, count: 2),
-            .init(part: .back, count: 1)
+            .init(part: .back, count: 1),
         ])
     }
 
@@ -182,7 +182,7 @@ struct StatisticsBuilderTests {
         let inputs = (0 ..< count).map { _ in input(2026, 1, 1) }
         let milestones = dashboard(inputs).milestones
         if next == 0 {
-            #expect(milestones.allSatisfy { $0.isAchieved })
+            #expect(milestones.allSatisfy(\.isAchieved))
         } else {
             let locked = milestones.first { !$0.isAchieved }
             #expect(locked?.target == next)

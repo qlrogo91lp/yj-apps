@@ -18,15 +18,17 @@ enum StatisticsBuilder {
             .filter { $0 < currentYear }
         let availableYears = [currentYear] + pastYears.sorted(by: >)
         let year = availableYears.contains(selectedYear ?? currentYear) ? (selectedYear ?? currentYear) : currentYear
-        let yearInterval = calendar.dateInterval(of: .year, for: date(in: year, calendar: calendar))!
+        guard let yearInterval = calendar.dateInterval(of: .year, for: date(in: year, calendar: calendar)) else {
+            return emptyDashboard(year: currentYear, today: today)
+        }
         let eligible = inputs.filter { $0.startedAt <= now && yearInterval.contains($0.startedAt) }
         let isCurrentYear = year == currentYear
-        let end = isCurrentYear ? today : calendar.date(byAdding: .day, value: -1, to: yearInterval.end)!
+        let end = isCurrentYear ? today : calendar.date(byAdding: .day, value: -1, to: yearInterval.end) ?? today
 
         let grid = gridDays(for: yearInterval, calendar: calendar)
         let monthColumns = Dictionary(uniqueKeysWithValues: (1 ... 12).map { month in
             let first = date(in: year, month: month, day: 1, calendar: calendar)
-            return (month, grid.firstIndex(of: first)! / 7)
+            return (month, grid.firstIndex(of: first).map { $0 / 7 } ?? 0)
         })
 
         let levels = Dictionary(uniqueKeysWithValues: aggregates
@@ -34,7 +36,7 @@ enum StatisticsBuilder {
             .map { ($0.day, GrassIntensity.byTime.level(for: $0)) })
         let count = eligible.count
         let duration = eligible.reduce(0) { $0 + $1.totalSeconds }
-        let periodDays = calendar.dateComponents([.day], from: calendar.startOfDay(for: yearInterval.start), to: end).day! + 1
+        let periodDays = (calendar.dateComponents([.day], from: calendar.startOfDay(for: yearInterval.start), to: end).day ?? 0) + 1
         let weeklyAverage = Double(count) / (Double(periodDays) / 7)
 
         return StatisticsDashboard(
@@ -57,10 +59,11 @@ enum StatisticsBuilder {
             grassLevels: levels,
             monthColumns: monthColumns,
             initialColumn: isCurrentYear ? grid.firstIndex(of: today).map { $0 / 7 } ?? 0 : 0,
-            today: today)
+            today: today
+        )
     }
 
-    private static func emptyMessage(count: Int, year: Int, currentYear: Int,
+    private static func emptyMessage(count: Int, year: Int, currentYear _: Int,
                                      allInputs: [StatisticsRecordInput], now: Date) -> String?
     {
         guard count == 0 else { return nil }
@@ -114,7 +117,7 @@ enum StatisticsBuilder {
         return counts.map { .init(part: $0.key, count: $0.value) }
             .sorted {
                 if $0.count != $1.count { return $0.count > $1.count }
-                return BodyPart.allCases.firstIndex(of: $0.part)! < BodyPart.allCases.firstIndex(of: $1.part)!
+                return (BodyPart.allCases.firstIndex(of: $0.part) ?? .max) < (BodyPart.allCases.firstIndex(of: $1.part) ?? .max)
             }
     }
 
@@ -125,15 +128,23 @@ enum StatisticsBuilder {
     }
 
     private static func gridDays(for interval: DateInterval, calendar: Calendar) -> [Date] {
-        let firstWeek = calendar.dateInterval(of: .weekOfYear, for: interval.start)!.start
-        let finalDay = calendar.date(byAdding: .day, value: -1, to: interval.end)!
-        let lastWeekEnd = calendar.dateInterval(of: .weekOfYear, for: finalDay)!.end
-        let count = calendar.dateComponents([.day], from: firstWeek, to: lastWeekEnd).day!
+        guard let firstWeek = calendar.dateInterval(of: .weekOfYear, for: interval.start)?.start,
+              let finalDay = calendar.date(byAdding: .day, value: -1, to: interval.end),
+              let lastWeekEnd = calendar.dateInterval(of: .weekOfYear, for: finalDay)?.end
+        else { return [] }
+        let count = calendar.dateComponents([.day], from: firstWeek, to: lastWeekEnd).day ?? 0
         return (0 ..< count).compactMap { calendar.date(byAdding: .day, value: $0, to: firstWeek) }
     }
 
     private static func date(in year: Int, month: Int = 1, day: Int = 1, calendar: Calendar) -> Date {
-        calendar.date(from: DateComponents(year: year, month: month, day: day))!
+        calendar.date(from: DateComponents(year: year, month: month, day: day)) ?? .distantPast
+    }
+
+    private static func emptyDashboard(year: Int, today: Date) -> StatisticsDashboard {
+        .init(year: year, availableYears: [year], countText: "0회", durationText: "0분",
+              weeklyAverageText: "주 0.0회", weeklyAverageExplanation: "1월 1일부터 오늘까지의 기록을 주 단위로 환산해요.",
+              isCurrentYear: true, emptyMessage: "아직 운동 기록이 없어요", months: [], weekdays: [], composition: nil,
+              bodyParts: [], milestones: [], gridDays: [], grassLevels: [:], monthColumns: [:], initialColumn: 0, today: today)
     }
 
     private static func durationText(seconds: Int) -> String {

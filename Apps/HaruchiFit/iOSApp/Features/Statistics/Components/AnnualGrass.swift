@@ -62,7 +62,7 @@ struct AnnualGrass: View {
             .frame(width: cellSize, height: cellSize)
             .opacity(isFuture ? 0.3 : 1)
             .overlay {
-                if isInYear && day == dashboard.today {
+                if isInYear, day == dashboard.today {
                     RoundedRectangle(cornerRadius: 3)
                         .stroke(HaruchiPalette.text, lineWidth: 1.5)
                 }
@@ -100,13 +100,12 @@ struct AnnualGrass: View {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "ko_KR")
         formatter.dateFormat = "M월 d일"
-        let amount: String
-        switch level {
-        case .none: amount = "운동 없음"
-        case .light: amount = "운동량 적음"
-        case .medium: amount = "운동량 보통"
-        case .heavy: amount = "운동량 많음"
-        case .peak: amount = "운동량 매우 많음"
+        let amount = switch level {
+        case .none: "운동 없음"
+        case .light: "운동량 적음"
+        case .medium: "운동량 보통"
+        case .heavy: "운동량 많음"
+        case .peak: "운동량 매우 많음"
         }
         return "\(formatter.string(from: day)), \(amount)"
     }

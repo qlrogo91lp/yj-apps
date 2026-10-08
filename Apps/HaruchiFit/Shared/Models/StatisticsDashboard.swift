@@ -14,7 +14,9 @@ struct StatisticsDashboard: Equatable {
         let part: BodyPart
         let count: Int
 
-        var id: BodyPart { part }
+        var id: BodyPart {
+            part
+        }
     }
 
     struct Composition: Equatable {
@@ -31,7 +33,9 @@ struct StatisticsDashboard: Equatable {
         let remaining: Int
         let isAchieved: Bool
 
-        var id: Int { target }
+        var id: Int {
+            target
+        }
     }
 
     let year: Int
