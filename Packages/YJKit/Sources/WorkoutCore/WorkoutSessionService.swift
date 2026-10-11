@@ -21,29 +21,18 @@ public final class WorkoutSessionService: NSObject, ObservableObject {
     public private(set) var startDate: Date?
     private var timer: Timer?
 
-    /// 기본 4종 + configuration이 지정한 추가 타입. 지정이 없으면 기존 소비자와 완전히 동일하다.
-    /// `HKLiveWorkoutDataSource.enableCollection`으로 추가 타입을 수집하면 `finishWorkout()`이
-    /// 그 샘플도 저장하려 하므로, read뿐 아니라 share 권한도 함께 요청해야 한다.
+    /// 쓰기는 운동 하나뿐이다. 심박·칼로리는 읽기 권한만으로 수집·저장됨을
+    /// 2026-10-11 시뮬레이터와 실기기에서 확인했다 (HealthKit 권한 시트 정리 플랜).
     var typesToShare: Set<HKSampleType> {
-        var types: Set<HKSampleType> = [
-            HKQuantityType(.activeEnergyBurned),
-            HKQuantityType(.basalEnergyBurned),
-            HKQuantityType(.heartRate),
-            HKObjectType.workoutType(),
-        ]
-        for identifier in configuration.additionalReadTypes {
-            types.insert(HKQuantityType(identifier))
-        }
-        return types
+        [HKObjectType.workoutType()]
     }
 
-    /// 기본 4종 + configuration이 지정한 추가 타입. 지정이 없으면 기존 소비자와 완전히 동일하다.
+    /// 기본 3종 + configuration이 지정한 추가 타입. 워치는 과거 운동을 조회하지 않는다.
     var typesToRead: Set<HKObjectType> {
         var types: Set<HKObjectType> = [
             HKQuantityType(.activeEnergyBurned),
             HKQuantityType(.basalEnergyBurned),
             HKQuantityType(.heartRate),
-            HKObjectType.workoutType(),
         ]
         for identifier in configuration.additionalReadTypes {
             types.insert(HKQuantityType(identifier))

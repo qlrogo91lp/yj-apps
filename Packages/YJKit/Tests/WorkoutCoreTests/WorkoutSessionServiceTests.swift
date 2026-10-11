@@ -58,27 +58,30 @@ struct WorkoutSessionServiceTests {
 
     @Test @MainActor func typesToReadOmitsAdditionalTypesByDefault() {
         let service = WorkoutSessionService(configuration: WorkoutConfiguration(activityType: .tennis))
-        #expect(service.typesToRead.count == 4)
+        #expect(service.typesToRead.count == 3)
+        #expect(!service.typesToRead.contains(HKObjectType.workoutType()))
         #expect(!service.typesToRead.contains(HKQuantityType(.stepCount)))
         #expect(!service.typesToRead.contains(HKQuantityType(.distanceWalkingRunning)))
     }
 
-    @Test @MainActor func typesToShareOmitsAdditionalTypesByDefault() {
+    @Test @MainActor func typesToShareIsWorkoutOnly() {
         let service = WorkoutSessionService(configuration: WorkoutConfiguration(activityType: .tennis))
-        #expect(service.typesToShare.count == 4)
+        #expect(service.typesToShare.count == 1)
+        #expect(service.typesToShare.contains(HKObjectType.workoutType()))
         #expect(!service.typesToShare.contains(HKQuantityType(.stepCount)))
         #expect(!service.typesToShare.contains(HKQuantityType(.distanceWalkingRunning)))
     }
 
-    @Test @MainActor func typesToShareIncludesAdditionalTypes() {
+    @Test @MainActor func typesToShareExcludesAdditionalTypes() {
         let service = WorkoutSessionService(configuration: WorkoutConfiguration(
             activityType: .golf,
             locationType: .indoor,
             additionalReadTypes: [.distanceWalkingRunning, .stepCount]
         ))
-        #expect(service.typesToShare.count == 6)
-        #expect(service.typesToShare.contains(HKQuantityType(.stepCount)))
-        #expect(service.typesToShare.contains(HKQuantityType(.distanceWalkingRunning)))
+        #expect(service.typesToShare.count == 1)
+        #expect(service.typesToShare.contains(HKObjectType.workoutType()))
+        #expect(!service.typesToShare.contains(HKQuantityType(.stepCount)))
+        #expect(!service.typesToShare.contains(HKQuantityType(.distanceWalkingRunning)))
     }
 
     @Test @MainActor func typesToReadIncludesAdditionalTypes() {
@@ -87,7 +90,7 @@ struct WorkoutSessionServiceTests {
             locationType: .indoor,
             additionalReadTypes: [.distanceWalkingRunning, .stepCount]
         ))
-        #expect(service.typesToRead.count == 6)
+        #expect(service.typesToRead.count == 5)
         #expect(service.typesToRead.contains(HKQuantityType(.stepCount)))
         #expect(service.typesToRead.contains(HKQuantityType(.distanceWalkingRunning)))
     }
