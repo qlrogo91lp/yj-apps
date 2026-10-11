@@ -17,6 +17,7 @@ final class WorkoutViewModel: ObservableObject {
 
     /// 세션 단계. 요약이 낄 자리를 만들려고 `isActive` 불리언을 대체했다.
     @Published private(set) var phase: SessionPhase = .idle
+    @Published private(set) var isStarting = false
     /// 요약 화면이 읽고, 저장이 그대로 보내는 페이로드.
     @Published private(set) var pendingRecord: WorkoutRecordMessage?
 
@@ -92,11 +93,13 @@ final class WorkoutViewModel: ObservableObject {
         .store(in: &cancellables)
     }
 
-    func requestAuthorization() async -> Bool {
-        await session.requestAuthorization()
-    }
+    /// 권한 결정을 기다린 뒤 첫 구간의 시계를 연다.
+    func start() async {
+        guard phase == .idle, !isStarting else { return }
+        isStarting = true
+        defer { isStarting = false }
 
-    func start() {
+        _ = await session.requestAuthorization()
         session.startWorkout()
         phase = .active
         WKInterfaceDevice.current().play(.start)

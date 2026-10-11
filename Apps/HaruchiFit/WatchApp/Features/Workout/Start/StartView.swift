@@ -10,9 +10,10 @@ struct StartView: View {
                 .font(.headline)
                 .foregroundStyle(Color.brandOrange)
 
-            Button("운동 시작") { viewModel.start() }
+            Button("운동 시작") { Task { await viewModel.start() } }
                 .buttonStyle(.borderedProminent)
                 .tint(Color.brandOrange)
+                .disabled(viewModel.isStarting)
 
             startKindToggle
         }

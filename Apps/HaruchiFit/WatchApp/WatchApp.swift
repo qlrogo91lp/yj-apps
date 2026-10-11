@@ -11,7 +11,6 @@ struct HaruchiFitWatchApp: App {
         WindowGroup {
             WorkoutRootView()
                 .environmentObject(viewModel)
-                .task { _ = await viewModel.requestAuthorization() }
         }
     }
 }
