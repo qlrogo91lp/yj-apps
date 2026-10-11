@@ -15,18 +15,8 @@ nonisolated struct HealthKitWorkoutRemover: WorkoutRemoving {
     func remove(workoutWith uuid: UUID) async {
         guard HKHealthStore.isHealthDataAvailable() else { return }
 
-        let samples: [HKSample] = await withCheckedContinuation { continuation in
-            let query = HKSampleQuery(sampleType: .workoutType(),
-                                      predicate: HKQuery.predicateForObject(with: uuid),
-                                      limit: 1,
-                                      sortDescriptors: nil)
-            { _, samples, _ in
-                continuation.resume(returning: samples ?? [])
-            }
-            store.execute(query)
-        }
-
-        guard let workout = samples.first else { return }
-        try? await store.delete(workout)
+        // 워치는 운동 읽기를 요청하지 않는다. 쓰기 권한만으로 UUID에 해당하는 운동을 지운다.
+        _ = try? await store.deleteObjects(of: .workoutType(),
+                                           predicate: HKQuery.predicateForObject(with: uuid))
     }
 }
