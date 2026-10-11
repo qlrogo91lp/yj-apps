@@ -8,7 +8,7 @@ enum RecordDetailBuilder {
     {
         let sameYear = calendar.component(.year, from: record.startedAt) == calendar.component(.year, from: now)
         let dateFormatter = RecordListBuilder.formatter(sameYear ? "M월 d일 (E)" : "yyyy년 M월 d일 (E)", calendar: calendar, locale: locale)
-        let end = record.endedAt ?? record.startedAt.addingTimeInterval(TimeInterval(record.totalSeconds))
+        let end = record.effectiveEndedAt
         let chips = RecordListBuilder.segmentChips(for: record)
         return RecordDetailSummary(dateTitle: dateFormatter.string(from: record.startedAt),
                                    timeRangeTitle: timeRange(from: record.startedAt, to: end, calendar: calendar, locale: locale),

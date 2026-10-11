@@ -31,9 +31,13 @@ struct RecordDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                VStack(alignment: .leading) {
-                    Text(viewModel.summary.dateTitle).font(.title3.bold()); Text(viewModel.summary.timeRangeTitle)
-                        .foregroundStyle(HaruchiPalette.dim)
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading) {
+                        Text(viewModel.summary.dateTitle).font(.title3.bold())
+                        Text(viewModel.summary.timeRangeTitle).foregroundStyle(HaruchiPalette.dim)
+                    }
+                    Spacer()
+                    RecordShareButton(content: viewModel.shareContent)
                 }
                 HStack { stat(viewModel.summary.durationText, "총 시간"); stat(viewModel.summary.caloriesText, "kcal"); stat(
                     viewModel.summary.heartRateText,
