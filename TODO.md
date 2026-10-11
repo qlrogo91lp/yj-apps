@@ -205,8 +205,8 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
 | ~~2차~~ | ~~2~~ | ~~9~~ | ~~05 통계~~ | ~~탭 하나가 비어 있다~~ | **구현 완료 · 시뮬레이터/실기기 확인 대기** | [스펙](Apps/HaruchiFit/docs/specs/ios/2026/2026-10-08-statistics.md) · [플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-10-08-statistics.md) |
 | ~~2차~~ | ~~3~~ | ~~11~~ | ~~08 수동 기록~~ | ~~워치 없이 쓰는 흐름 C. 상세 `편집` 범위도 여기서 정해진다~~ | **코드 구현·로컬 빌드/테스트 완료 · UI/실기기 확인 대기** | [플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-10-08-manual-record.md) · 스펙 08절·4.3 |
 | ~~2차~~ | ~~4~~ | ~~8~~ | ~~03a 기록 달력~~ | ~~기록 탭은 목록만으로도 동작한다~~ | **코드 구현·로컬 검증 완료 · 시뮬레이터 UI/실기기 확인 대기** | [상세 스펙](Apps/HaruchiFit/docs/specs/ios/2026/2026-10-08-records-calendar.md) · [플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-10-08-records-calendar.md) |
-| 3차 | — | 12 | 01 온보딩 (HealthKit 권한) | 없어도 시스템 권한 시트는 뜬다. 거부돼도 워치 기록은 들어온다 — import 만 막힌다 | 예정 | 로드맵 Phase 5 · 스펙 01절 |
-| 3차 | — | 10 | 07 설정 | 링크·전환 위주. 칼로리 기준 컷은 데이터가 쌓여야 정한다 | 예정 | 로드맵 Phase 5 · 스펙 07절 |
+| 3차 | — | 12 | 01 온보딩 (HealthKit 권한) | 없어도 시스템 권한 시트는 뜬다. 거부돼도 워치 기록은 들어온다 — import 만 막힌다 | **출시 준비로 착수 (10-12)** · 브레인스토밍 전 | 아래 "출시 준비" 4번 · 스펙 01절 |
+| 3차 | — | 10 | 07 설정 | 링크·전환 위주. 칼로리 기준 컷은 데이터가 쌓여야 정한다 | **보류 (10-12)** — 1.0 에 넣지 않는다 | 로드맵 Phase 5 · 스펙 07절 |
 | ~~3차~~ | ~~—~~ | ~~6~~ | ~~06 공유 (`WorkoutShareUI` 그대로)~~ | ~~부가 기능. Kit 을 붙이기만 하면 된다~~ | **코드 구현·로컬 검증 완료** ([PR #49](https://github.com/qlrogo91lp/yj-apps/pull/49)) · UI·실기기 확인 대기 | [플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-10-06-record-share.md) · 스펙 06절 (10-06 개정) |
 | 3차 | — | — | CloudKit 엔타이틀먼트 | **프로비저닝 작업(사용자)** · 로컬 폴백이 있다 | 예정 | 로드맵 "언제든" |
 
@@ -227,6 +227,19 @@ Phase 2 코드 구현은 끝났고 HealthKit import 실기기 확인이 남았�
 
 > 플랜 문서는 **착수 직전에 하나씩** 쓴다 (로드맵 "작업 중 지킬 것"). 위 표의 "예정" 은
 > 플랜이 아직 없다는 뜻이지 설계가 비어 있다는 뜻이 아니다 — 스펙은 14개 화면 전부 확정돼 있다.
+
+### 출시 준비 (2026-10-12 착수)
+
+1.0 은 **스토어와 앱 모두 한국어 + 영어**로 낸다. 06 공유는 들어가고(PR #49) 07 설정은 뺀다.
+아래 순서로 간다 — 뒤 항목이 앞 항목의 결과를 쓴다.
+
+| 순서 | 항목 | 상태 | 문서 |
+|---|---|---|---|
+| ~~1~~ | ~~스토어 문구 규약 — `Apps/<앱>/APPSTORE.md`~~ | **완료** (`chore/store-metadata`) | [루트 CLAUDE.md](CLAUDE.md) "스토어 문구" |
+| ~~2~~ | ~~하루치 스토어 문구 (ko · en-US)~~ | **초안 완료** (`chore/store-metadata`) · 스크린샷 캡션은 피그마 작업 뒤 추가 | [APPSTORE.md](Apps/HaruchiFit/APPSTORE.md) |
+| 3 | String Catalog 전환 (iOS · 워치) | 브레인스토밍 전 — UI 문자열이 한국어 하드코딩이고 카탈로그는 `InfoPlist.xcstrings` 뿐이다 | 아직 없음 · 선례 [Ralli 플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-07-string-catalog-migration.md) |
+| 4 | 01 온보딩 | 브레인스토밍 전 — 3번 뒤에 한다 (새 문자열이 처음부터 카탈로그로 들어간다) | 스펙 01절 |
+| — | 출시 체크리스트 (스크린샷 · 개인정보처리방침 URL · 심사 메모 · 표시 이름 현지화) | 목록화 전 | 아직 없음 |
 
 ### 집 맥북에서 할 것
 
@@ -299,14 +312,13 @@ Phase 2 코드 구현은 끝났고 HealthKit import 실기기 확인이 남았�
 
 | 항목 | 상태 | 문서 |
 |---|---|---|
-| **App Store 메타데이터 깃 관리** (`fastlane deliver` 의 메타데이터만) | **논의 필요 — 브레인스토밍 전** · 1.1.9 까지 수동으로 나갔고 **다음 출시부터 적용** | [CI 스펙](docs/specs/2026/2026-08-27-ci-pipeline-design.md) §비범위 · §후속 과제 |
+| ~~**App Store 문구 깃 관리** — 앱마다 `Apps/<앱>/APPSTORE.md` 하나~~ | **완료** (`chore/store-metadata`) — 문구만 텍스트로 형상관리하고 반영은 수동. 세 앱 모두 파일을 만들었다. **Ralli·골프의 부제·키워드·프로모션 텍스트는 비어 있다** — 공개 조회가 안 돼 App Store Connect 에서 옮겨 적어야 한다 | [루트 CLAUDE.md](CLAUDE.md) "스토어 문구" · 배경 [CI 스펙](docs/specs/2026/2026-08-27-ci-pipeline-design.md) §비범위 · §후속 과제 |
 
-배포 자동화(빌드 업로드 · 인증서 · API 키)와 **범위가 다르다.** 메타데이터만 떼면 `deliver download_metadata`
-로 현재 스토어 실값을 파일로 내려받아 시작할 수 있어 인증서 관리가 붙지 않는다.
+`fastlane deliver` 로 올리고 내려받는 방식은 **보류했다** — API 키 관리 없이 문구 형상관리부터 시작한다.
+파일을 먼저 고치고 App Store Connect 에 붙여 넣는다. 도구는 필요해지면 다시 본다.
 
-지금 카피의 출처는 [Ralli 리스팅 스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-05-20-app-store-listing-design.md)
-하나뿐인데 이건 설계 초안이지 스토어 실값의 사본이 아니다 — **어긋나 있어도 알 방법이 없다.**
-3개 앱에 같이 걸리는 문제라 규약을 한 번 정한다.
+Ralli·골프의 이름·설명·출시 노트는 2026-10-12 공개 스토어 실값이다. [Ralli 리스팅 스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-05-20-app-store-listing-design.md)은
+설계 초안으로만 남는다 — 스토어 실값과 이미 다르다 (이름 · 설명의 공유 줄).
 
 ## 규약 참고
 
