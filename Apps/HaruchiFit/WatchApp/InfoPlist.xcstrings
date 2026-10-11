@@ -31,13 +31,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Haruchi Fit reads your workouts from Apple Health to fill in your activity grid."
+            "value" : "Haruchi Fit measures your heart rate and calories during workouts."
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "운동 기록을 가져와 잔디를 채우기 위해 건강 앱 데이터를 읽습니다."
+            "value" : "운동 중 심박수와 칼로리를 측정합니다."
           }
         }
       }

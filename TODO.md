@@ -274,6 +274,7 @@ Phase 2 코드 구현은 끝났고 HealthKit import 실기기 확인이 남았�
 
 | 항목 | 상태 | 문서 |
 |---|---|---|
+| ~~HealthKit 권한 시트 정리 (3개 워치 앱)~~ | **완료** ([PR #48](https://github.com/qlrogo91lp/yj-apps/pull/48)) · 수동 확인 생략 | [플랜](Packages/YJKit/docs/plans/shared/2026/2026-10-11-healthkit-permission-trim.md) |
 | `WorkoutSessionService.elapsedSeconds` 가 벽시계가 아니라 1초 `Timer` 틱 카운터다 | **실기기 확인 대기 · 3개 앱에 걸림** | [탐색 문서](Packages/YJKit/docs/ideas/elapsed-seconds-tick-counter.md) |
 
 하루치 구간 시간이 이것 때문에 실기기에서 몇 초로 잡혔다 (PR #19 로 하루치만 벽시계로 고침).
