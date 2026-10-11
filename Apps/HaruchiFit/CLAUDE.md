@@ -89,6 +89,7 @@ Shared/                             워치 앱 ↔ iOS 앱 공유
   Services/                         전송 메시지
 watchosTests/
   Workout/ · Support/               테스트는 대상 폴더를 따라간다
+APPSTORE.md                         App Store 문구 원본 (ko · en-US). 규약은 루트 `CLAUDE.md` 의 "스토어 문구"
 ```
 
 - **`Shared/` 에 UI 를 두지 않는다.** 루트 `CLAUDE.md` 규약이고, 골프·테니스의 `Shared/` 에도

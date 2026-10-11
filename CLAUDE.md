@@ -10,6 +10,7 @@ yj-apps/
 ├─ Apps/GolfCounter/     GolfCounter — iOS + Watch + Complication
 ├─ Apps/TennisCounter/   Ralli(TennisCounter) — iOS + Watch + Complication + LiveActivity
 ├─ Apps/HaruchiFit/      HaruchiFit — iOS + Watch + Complication
+│  └─ APPSTORE.md        App Store 문구 원본. 세 앱 폴더에 하나씩 있다 (아래 "스토어 문구")
 ├─ YJApps.xcworkspace    이것 하나만 연다. 앱별 .xcodeproj 를 따로 열지 않는다
 ├─ Makefile              앱 순회 lint / format / fix
 ├─ .swiftlint.yml        공통 규칙 (앱별 설정이 parent_config 로 상속)
@@ -260,6 +261,17 @@ docs/
 - **루트 `TODO.md` 는 진행 중인 작업의 링크·상태만 담는다.** 스펙·플랜을 추가하거나 항목을 끝내면
   **같은 커밋에서** 갱신한다 (끝난 행은 `~~취소선~~`). 출시 커밋에서 취소선 행을 비운다.
   내용은 여기 적지 않는다 — 스펙·플랜이 갖는다.
+
+## 스토어 문구
+
+App Store 에 올리는 문구는 **앱마다 `Apps/<앱>/APPSTORE.md` 하나**로 형상관리한다.
+이름 · 부제 · 키워드 · 프로모션 텍스트 · 설명 · 출시 노트를 필드별 절로 두고, 그 아래 `ko` · `en-US` 를 나란히 적는다.
+
+- **코드 블록 안이 App Store Connect 에 들어가는 값 그대로다.** 블록 밖에는 제목과 글자 수 한도만 둔다
+- **파일을 먼저 고치고 그다음에 붙여 넣는다.** 반영은 수동이라, 웹에서 먼저 고치면 파일과 스토어가 어긋나도 알 방법이 없다
+- 출시 노트는 **출시마다 덮어쓴다.** 지난 것은 git 이력이 갖는다
+- 스크린샷 캡션은 이미지에 박히는 글자지만 같은 파일 맨 아래 절에 둔다
+- 문구를 바꾸는 PR 은 코드 변경과 같은 규칙을 따른다 (브랜치 + PR)
 
 ## 코드 스타일 도구
 
