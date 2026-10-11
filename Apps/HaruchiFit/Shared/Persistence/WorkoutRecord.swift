@@ -50,6 +50,10 @@ final class WorkoutRecord {
         (segments ?? []).sorted { $0.startOffset < $1.startOffset }
     }
 
+    var effectiveEndedAt: Date {
+        endedAt ?? startedAt.addingTimeInterval(TimeInterval(totalSeconds))
+    }
+
     init(healthKitUUID: UUID? = nil,
          startedAt: Date = Date(),
          endedAt: Date? = nil,

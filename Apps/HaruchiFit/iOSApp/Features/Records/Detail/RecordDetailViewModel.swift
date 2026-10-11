@@ -5,6 +5,7 @@ import SwiftData
 @MainActor
 final class RecordDetailViewModel: ObservableObject {
     let summary: RecordDetailSummary
+    let shareContent: RecordShareContent
     @Published private(set) var bodyParts: [BodyPart]
     @Published var memoDraft: String
     let isManual: Bool
@@ -20,6 +21,7 @@ final class RecordDetailViewModel: ObservableObject {
         isManual = record.source == .manual
         self.context = context
         summary = RecordDetailBuilder.summary(for: record, now: Date(), calendar: calendar)
+        shareContent = RecordShareBuilder.content(for: record)
         bodyParts = record.bodyParts
         memoDraft = initialMemoDraft ?? record.memo ?? ""
     }
