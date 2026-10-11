@@ -1,27 +1,36 @@
 import SwiftUI
 import WorkoutUI
 
-/// W1 — 지표 / 컨트롤 세로 페이징. 지금 유형은 왼쪽 상단 아이콘이 알리고,
-/// 전환 행은 `WorkoutUI` 확장으로 붙는다 (D-M1).
+/// W1 — 지표 / 컨트롤 세로 페이징. 지금 유형은 지표 페이지의 왼쪽 상단 아이콘이 알리고,
+/// 컨트롤 페이지에는 전환 행이 있어 아이콘을 숨긴다. 전환 행은 `WorkoutUI` 확장으로 붙는다 (D-M1).
 struct SessionView: View {
     @ObservedObject var viewModel: WorkoutViewModel
+    @State private var page: Page = .metrics
+
+    private enum Page {
+        case metrics, controls
+    }
 
     var body: some View {
         // 화면을 쌓지 않는다 — 툴바가 놓일 내비게이션 바를 얻으려고 감쌀 뿐이다.
         NavigationStack {
-            TabView {
+            TabView(selection: $page) {
                 WorkoutMetricsView(metrics: viewModel.metrics, isPaused: viewModel.isPaused)
+                    .tag(Page.metrics)
                 WorkoutControlsView(
                     isPaused: viewModel.isPaused,
                     modeSelection: modeSelection,
                     onPauseResume: { viewModel.togglePause() },
                     onEnd: { Task { await viewModel.end() } }
                 )
+                .tag(Page.controls)
             }
             .tabViewStyle(.verticalPage)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    modeButton
+                    if page == .metrics {
+                        modeButton
+                    }
                 }
             }
         }
