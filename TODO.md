@@ -292,6 +292,7 @@ Phase 2 코드 구현은 끝났고 HealthKit import 실기기 확인이 남았�
 |---|---|---|
 | ~~HealthKit 권한 시트 정리 (3개 워치 앱)~~ | **완료** ([PR #48](https://github.com/qlrogo91lp/yj-apps/pull/48)) · 수동 확인 생략 | [플랜](Packages/YJKit/docs/plans/shared/2026/2026-10-11-healthkit-permission-trim.md) |
 | `WorkoutSessionService.elapsedSeconds` 가 벽시계가 아니라 1초 `Timer` 틱 카운터다 | **실기기 확인 대기 · 3개 앱에 걸림** | [탐색 문서](Packages/YJKit/docs/ideas/elapsed-seconds-tick-counter.md) |
+| `WorkoutMetricsView` 의 `statusText` 제거 | **미착수 (10-12)** — 하루치만 쓰던 파라미터인데 워치 세션 화면이 왼쪽 상단 모드 아이콘(`feat/haruchi-watch-mode-figure`)으로 바뀌며 쓰는 앱이 없어졌다. 아이콘 방식이 확정되면 프로퍼티·init 인자·`if let` 블록·"상태 줄" 프리뷰를 같이 지운다 | `Packages/YJKit/Sources/WorkoutUI/Watch/WorkoutMetricsView.swift` |
 
 하루치 구간 시간이 이것 때문에 실기기에서 몇 초로 잡혔다 (PR #19 로 하루치만 벽시계로 고침).
 **Ralli 는 저장되는 값 자체가 틱 기반**이라 요약의 "운동시간" 과 세션 헤더가 실제보다 짧을 수
