@@ -7,15 +7,15 @@ struct AccumulationStats: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            stat("이번 달", month)
+            stat("home_stat_month", month)
             Rectangle().fill(HaruchiPalette.line).frame(width: 1, height: 44)
-            stat("전체 누적", total)
+            stat("home_stat_total", total)
         }
         .padding(.vertical, 14)
         .background(HaruchiPalette.surface, in: RoundedRectangle(cornerRadius: 14))
     }
 
-    private func stat(_ title: String, _ stat: HomeDashboard.Stat) -> some View {
+    private func stat(_ title: LocalizedStringKey, _ stat: HomeDashboard.Stat) -> some View {
         VStack(spacing: 4) {
             Text(title).font(.caption).foregroundStyle(HaruchiPalette.dim)
             Text(stat.countText).font(.title.bold().monospacedDigit()).foregroundStyle(HaruchiPalette.text)

@@ -10,7 +10,7 @@ struct WeekCompositionBar: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text("이번 주").font(.subheadline.weight(.semibold)).foregroundStyle(HaruchiPalette.text)
+                Text("home_this_week").font(.subheadline.weight(.semibold)).foregroundStyle(HaruchiPalette.text)
                 Spacer()
                 if let week {
                     Text(week.totalText).font(.subheadline.monospacedDigit()).foregroundStyle(HaruchiPalette.dim)

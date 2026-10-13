@@ -10,8 +10,8 @@ enum SegmentKind: String, Codable, CaseIterable {
 
     var title: String {
         switch self {
-        case .strength: "근력"
-        case .cardio: "유산소"
+        case .strength: String(localized: "segment_strength", table: "Common")
+        case .cardio: String(localized: "segment_cardio", table: "Common")
         }
     }
 }

@@ -5,7 +5,7 @@ struct AnnualComposition: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("운동 구성").font(.headline).foregroundStyle(HaruchiPalette.text)
+            Text("stats_composition").font(.headline).foregroundStyle(HaruchiPalette.text)
             if let composition {
                 GeometryReader { proxy in
                     HStack(spacing: 0) {
@@ -18,12 +18,12 @@ struct AnnualComposition: View {
                 .frame(height: 12)
                 .clipShape(Capsule())
                 HStack {
-                    legend("근력 \(composition.strengthText) (\(composition.strengthPercent)%)", HaruchiPalette.accent)
+                    legend("\(SegmentKind.strength.title) \(composition.strengthText) (\(composition.strengthPercent)%)", HaruchiPalette.accent)
                     Spacer()
-                    legend("유산소 \(composition.cardioText) (\(composition.cardioPercent)%)", HaruchiPalette.cardio)
+                    legend("\(SegmentKind.cardio.title) \(composition.cardioText) (\(composition.cardioPercent)%)", HaruchiPalette.cardio)
                 }
             } else {
-                Text("구성 시간이 있는 기록이 없어요")
+                Text("stats_composition_empty")
                     .foregroundStyle(HaruchiPalette.dim)
             }
         }

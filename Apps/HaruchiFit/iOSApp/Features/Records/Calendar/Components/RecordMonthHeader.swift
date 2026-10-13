@@ -25,12 +25,12 @@ struct RecordMonthHeader: View {
         HStack(spacing: 4) {
             Button(action: onPrevious) { Image(systemName: "chevron.left") }
                 .frame(minWidth: 44, minHeight: 44)
-                .accessibilityLabel("이전 달")
+                .accessibilityLabel("calendar_prev_month")
             Text(title).font(.headline).foregroundStyle(HaruchiPalette.text)
             Button(action: onNext) { Image(systemName: "chevron.right") }
                 .frame(minWidth: 44, minHeight: 44)
                 .disabled(!canMoveNext)
-                .accessibilityLabel("다음 달")
+                .accessibilityLabel("calendar_next_month")
         }
     }
 }

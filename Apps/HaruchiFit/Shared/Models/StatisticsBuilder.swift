@@ -3,14 +3,13 @@ import Foundation
 /// 연도 통계의 모든 집계 규칙. 홈·통계 UI와 분리해 워치 테스트에서 검증한다.
 enum StatisticsBuilder {
     private static let milestones = [10, 25, 50, 100, 200, 300, 500]
-    private static let monthTitles = (1 ... 12).map { "\($0)월" }
-    private static let weekdayTitles = ["월", "화", "수", "목", "금", "토", "일"]
 
     static func dashboard(from inputs: [StatisticsRecordInput],
                           aggregates: [DailyAggregate],
                           selectedYear: Int?,
                           now: Date,
-                          calendar: Calendar) -> StatisticsDashboard
+                          calendar: Calendar,
+                          locale: Locale = .current) -> StatisticsDashboard
     {
         let today = calendar.startOfDay(for: now)
         let currentYear = calendar.component(.year, from: today)
@@ -44,16 +43,16 @@ enum StatisticsBuilder {
         return StatisticsDashboard(
             year: year,
             availableYears: availableYears,
-            countText: "\(count)회",
-            durationText: durationText(seconds: duration),
-            weeklyAverageText: String(format: "주 %.1f회", weeklyAverage),
+            countText: DisplayText.workouts(count),
+            durationText: DisplayText.duration(seconds: duration),
+            weeklyAverageText: weeklyAverageText(weeklyAverage),
             weeklyAverageExplanation: isCurrentYear
-                ? "1월 1일부터 오늘까지의 기록을 주 단위로 환산해요."
-                : "선택한 연도 전체의 기록을 주 단위로 환산해요.",
+                ? String(localized: "weekly_average_note_current", table: "Shared")
+                : String(localized: "weekly_average_note_past", table: "Shared"),
             isCurrentYear: isCurrentYear,
             emptyMessage: emptyMessage(count: count, year: year, currentYear: currentYear, allInputs: inputs, now: now),
-            months: monthFrequencies(eligible, year: year, currentYear: currentYear, now: now, calendar: calendar),
-            weekdays: weekdayFrequencies(eligible, calendar: calendar),
+            months: monthFrequencies(eligible, year: year, currentYear: currentYear, now: now, calendar: calendar, locale: locale),
+            weekdays: weekdayFrequencies(eligible, calendar: calendar, locale: locale),
             composition: composition(of: eligible),
             bodyParts: bodyPartFrequencies(eligible),
             milestones: milestoneValues(count: count),
@@ -69,21 +68,29 @@ enum StatisticsBuilder {
                                      allInputs: [StatisticsRecordInput], now: Date) -> String?
     {
         guard count == 0 else { return nil }
-        return allInputs.contains(where: { $0.startedAt <= now }) ? "\(year)년에는 아직 기록이 없어요" : "아직 운동 기록이 없어요"
+        return allInputs.contains(where: { $0.startedAt <= now })
+            ? String(localized: "stats_empty_year \(String(year))", table: "Shared")
+            : String(localized: "stats_empty_all", table: "Shared")
     }
 
     private static func monthFrequencies(_ inputs: [StatisticsRecordInput], year: Int, currentYear: Int,
-                                         now: Date, calendar: Calendar) -> [StatisticsDashboard.Frequency]
+                                         now: Date, calendar: Calendar, locale: Locale) -> [StatisticsDashboard.Frequency]
     {
+        let titles = DisplayDateFormat.formatter("MMM", calendar: calendar, locale: locale).shortMonthSymbols ?? []
         let counts = Dictionary(grouping: inputs, by: { calendar.component(.month, from: $0.startedAt) })
         let currentMonth = calendar.component(.month, from: now)
         return (1 ... 12).map { month in
-            .init(id: month, title: monthTitles[month - 1], count: counts[month]?.count ?? 0,
+            .init(id: month, title: titles[month - 1], count: counts[month]?.count ?? 0,
                   isFuture: year == currentYear && month > currentMonth, isHighlighted: true)
         }
     }
 
-    private static func weekdayFrequencies(_ inputs: [StatisticsRecordInput], calendar: Calendar) -> [StatisticsDashboard.Frequency] {
+    private static func weekdayFrequencies(_ inputs: [StatisticsRecordInput], calendar: Calendar,
+                                           locale: Locale) -> [StatisticsDashboard.Frequency]
+    {
+        // 월요일 시작 순서 — 심볼 배열은 일요일부터다
+        let symbols = DisplayDateFormat.formatter("E", calendar: calendar, locale: locale).shortWeekdaySymbols ?? []
+        let weekdayTitles = symbols.isEmpty ? [] : Array(symbols[1...]) + [symbols[0]]
         let counts = inputs.reduce(into: Array(repeating: 0, count: 7)) { counts, input in
             counts[(calendar.component(.weekday, from: input.startedAt) + 5) % 7] += 1
         }
@@ -143,14 +150,15 @@ enum StatisticsBuilder {
     }
 
     private static func emptyDashboard(year: Int, today: Date) -> StatisticsDashboard {
-        .init(year: year, availableYears: [year], countText: "0회", durationText: "0분",
-              weeklyAverageText: "주 0.0회", weeklyAverageExplanation: "1월 1일부터 오늘까지의 기록을 주 단위로 환산해요.",
-              isCurrentYear: true, emptyMessage: "아직 운동 기록이 없어요", months: [], weekdays: [], composition: nil,
+        .init(year: year, availableYears: [year], countText: DisplayText.workouts(0), durationText: DisplayText.minutes(0),
+              weeklyAverageText: weeklyAverageText(0),
+              weeklyAverageExplanation: String(localized: "weekly_average_note_current", table: "Shared"),
+              isCurrentYear: true, emptyMessage: String(localized: "stats_empty_all", table: "Shared"), months: [], weekdays: [], composition: nil,
               bodyParts: [], milestones: [], gridDays: [], grassLevels: [:], monthColumns: [:], initialColumn: 0, today: today)
     }
 
-    private static func durationText(seconds: Int) -> String {
-        seconds < 3600 ? "\(seconds / 60)분" : String(format: "%.1f시간", Double(seconds) / 3600)
+    private static func weeklyAverageText(_ average: Double) -> String {
+        String(localized: "weekly_average \(String(format: "%.1f", average))", table: "Shared")
     }
 
     private static func hoursText(seconds: Int) -> String {

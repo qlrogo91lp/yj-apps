@@ -8,6 +8,10 @@ struct AnnualGrass: View {
     private let cellSize: CGFloat = 16
     private let cellSpacing: CGFloat = 3
 
+    private var monthSymbols: [String] {
+        DisplayDateFormat.formatter("MMM", calendar: calendar, locale: .current).shortMonthSymbols ?? []
+    }
+
     private var columns: [[Date]] {
         stride(from: 0, to: dashboard.gridDays.count, by: 7).map {
             Array(dashboard.gridDays[$0 ..< min($0 + 7, dashboard.gridDays.count)])
@@ -16,7 +20,7 @@ struct AnnualGrass: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("연간 잔디")
+            Text("stats_grass")
                 .font(.headline)
                 .foregroundStyle(HaruchiPalette.text)
 
@@ -73,7 +77,7 @@ struct AnnualGrass: View {
 
     private func monthLabel(for column: Int) -> some View {
         let month = dashboard.monthColumns.first { $0.value == column }?.key
-        let title = month.flatMap { [1, 4, 7, 10, 12].contains($0) ? "\($0)월" : nil } ?? ""
+        let title = month.flatMap { [1, 4, 7, 10, 12].contains($0) ? monthSymbols[$0 - 1] : nil } ?? ""
         return Text(title)
             .font(.caption2)
             .foregroundStyle(HaruchiPalette.dim)
@@ -84,30 +88,28 @@ struct AnnualGrass: View {
 
     private var legend: some View {
         HStack(spacing: 6) {
-            Text("적음")
+            Text("grass_legend_less")
             ForEach([GrassLevel.light, .medium, .heavy, .peak], id: \.self) { level in
                 RoundedRectangle(cornerRadius: 2)
                     .fill(HaruchiPalette.grass(level))
                     .frame(width: 12, height: 12)
             }
-            Text("많음")
+            Text("grass_legend_more")
         }
         .font(.caption)
         .foregroundStyle(HaruchiPalette.dim)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("운동량 적음에서 많음까지 네 단계")
+        .accessibilityLabel("grass_legend_a11y")
     }
 
     private func accessibilityLabel(for day: Date, level: GrassLevel) -> String {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "ko_KR")
-        formatter.dateFormat = "M월 d일"
+        let formatter = DisplayDateFormat.formatter(.monthDay, calendar: calendar, locale: .current)
         let amount = switch level {
-        case .none: "운동 없음"
-        case .light: "운동량 적음"
-        case .medium: "운동량 보통"
-        case .heavy: "운동량 많음"
-        case .peak: "운동량 매우 많음"
+        case .none: String(localized: "grass_level_none")
+        case .light: String(localized: "grass_level_light")
+        case .medium: String(localized: "grass_level_medium")
+        case .heavy: String(localized: "grass_level_heavy")
+        case .peak: String(localized: "grass_level_peak")
         }
         return "\(formatter.string(from: day)), \(amount)"
     }

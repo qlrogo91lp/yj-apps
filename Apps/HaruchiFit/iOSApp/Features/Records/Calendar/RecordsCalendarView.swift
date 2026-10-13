@@ -26,8 +26,11 @@ struct RecordsCalendarView: View {
         if month.selectedRows.isEmpty {
             VStack(spacing: 12) {
                 Text(selectedTitle).font(.headline).foregroundStyle(HaruchiPalette.text)
-                ContentUnavailableView(month.emptyMessage ?? "이 날에는 기록이 없어요", systemImage: "calendar",
-                                       description: Text(emptyDescription))
+                ContentUnavailableView {
+                    Label(emptyTitle, systemImage: "calendar")
+                } description: {
+                    Text(emptyDescription)
+                }
                     .foregroundStyle(HaruchiPalette.dim)
             }
             .frame(maxWidth: .infinity, minHeight: 180)
@@ -44,15 +47,23 @@ struct RecordsCalendarView: View {
     }
 
     private var selectedTitle: String {
-        let formatter = RecordListBuilder.formatter("M월 d일 (E)", calendar: month.calendar, locale: Locale(identifier: "ko_KR"))
-        return "\(formatter.string(from: selectedDay)) · \(month.selectedRows.count)회"
+        let formatter = DisplayDateFormat.formatter(.monthDayWeekday, calendar: month.calendar, locale: .current)
+        return "\(formatter.string(from: selectedDay)) · \(DisplayText.workouts(month.selectedRows.count))"
     }
 
-    private var emptyDescription: String {
-        switch month.emptyMessage {
-        case "아직 기록이 없어요": "워치에서 운동하거나 홈의 + 버튼으로 기록해 보세요."
-        case "이 달에는 기록이 없어요": "다른 달을 선택해 보세요."
-        default: "다른 날짜를 선택해 보세요."
+    private var emptyTitle: LocalizedStringKey {
+        switch month.emptyState {
+        case .noRecords: "records_empty_title"
+        case .emptyMonth: "calendar_empty_month_title"
+        case .emptyDay, nil: "calendar_empty_day_title"
+        }
+    }
+
+    private var emptyDescription: LocalizedStringKey {
+        switch month.emptyState {
+        case .noRecords: "records_empty_message"
+        case .emptyMonth: "calendar_empty_month_message"
+        case .emptyDay, nil: "calendar_empty_day_message"
         }
     }
 }

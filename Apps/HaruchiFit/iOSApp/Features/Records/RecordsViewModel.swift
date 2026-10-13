@@ -14,7 +14,7 @@ final class RecordsViewModel: ObservableObject {
         }
 
         var title: String {
-            self == .calendar ? "달력" : "목록"
+            self == .calendar ? String(localized: "records_mode_calendar") : String(localized: "records_mode_list")
         }
     }
 

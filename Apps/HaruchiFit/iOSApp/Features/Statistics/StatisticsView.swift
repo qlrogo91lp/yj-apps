@@ -26,13 +26,13 @@ struct StatisticsView: View {
                     AnnualSummary(dashboard: statistics.dashboard)
                     if let message = statistics.dashboard.emptyMessage {
                         ContentUnavailableView(message, systemImage: "chart.bar.fill",
-                                               description: Text("워치에서 운동을 기록하면 한 해의 흐름을 볼 수 있어요."))
+                                               description: Text("stats_empty_message"))
                             .foregroundStyle(HaruchiPalette.dim)
                             .frame(maxWidth: .infinity, minHeight: 220)
                     } else {
-                        StatisticsFrequencyChart(title: "월별 운동", values: statistics.dashboard.months)
+                        StatisticsFrequencyChart(title: "stats_monthly", values: statistics.dashboard.months)
                         AnnualComposition(composition: statistics.dashboard.composition)
-                        StatisticsFrequencyChart(title: "요일 패턴", values: statistics.dashboard.weekdays)
+                        StatisticsFrequencyChart(title: "stats_weekday", values: statistics.dashboard.weekdays)
                         if !statistics.dashboard.bodyParts.isEmpty {
                             BodyPartFrequencyChart(values: statistics.dashboard.bodyParts)
                         }
@@ -43,7 +43,7 @@ struct StatisticsView: View {
             }
             .background(HaruchiPalette.bg.ignoresSafeArea())
             .refreshable { await sync.sync() }
-            .navigationTitle("통계")
+            .navigationTitle("tab_statistics")
             .toolbarBackground(HaruchiPalette.bg, for: .navigationBar)
             .onAppear { statistics.rebuild(from: records) }
             .onChange(of: inputs) { _, _ in statistics.rebuild(from: records) }

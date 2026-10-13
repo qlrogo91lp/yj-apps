@@ -14,13 +14,13 @@ struct AnnualSummary: View {
     }
 
     @ViewBuilder private var stats: some View {
-        value(title: dashboard.isCurrentYear ? "올해 운동" : "연간 운동", value: dashboard.countText)
+        value(title: dashboard.isCurrentYear ? "stats_count_current" : "stats_count_past", value: dashboard.countText)
         Divider().overlay(HaruchiPalette.line)
-        value(title: dashboard.isCurrentYear ? "올해 누적" : "연간 누적", value: dashboard.durationText)
+        value(title: dashboard.isCurrentYear ? "stats_duration_current" : "stats_duration_past", value: dashboard.durationText)
         Divider().overlay(HaruchiPalette.line)
         VStack(spacing: 4) {
             HStack(spacing: 3) {
-                Text("주 평균")
+                Text("stats_weekly_average")
                 Button {
                     showsWeeklyAverageExplanation = true
                 } label: {
@@ -43,7 +43,7 @@ struct AnnualSummary: View {
         .accessibilityHint(dashboard.weeklyAverageExplanation)
     }
 
-    private func value(title: String, value: String) -> some View {
+    private func value(title: LocalizedStringKey, value: String) -> some View {
         VStack(spacing: 4) {
             Text(title).foregroundStyle(HaruchiPalette.dim)
             Text(value).font(.title3.weight(.semibold)).foregroundStyle(HaruchiPalette.text)

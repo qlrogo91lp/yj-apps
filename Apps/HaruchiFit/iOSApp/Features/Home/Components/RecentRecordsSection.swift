@@ -9,16 +9,16 @@ struct RecentRecordsSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text("최근 기록").font(.subheadline.weight(.semibold)).foregroundStyle(HaruchiPalette.text)
+                Text("home_recent").font(.subheadline.weight(.semibold)).foregroundStyle(HaruchiPalette.text)
                 Spacer()
                 if !rows.isEmpty {
-                    Button("전체 보기 ›", action: onShowAll)
+                    Button("home_show_all", action: onShowAll)
                         .font(.footnote)
                         .foregroundStyle(HaruchiPalette.dim)
                 }
             }
             if rows.isEmpty {
-                Text("아직 기록이 없어요")
+                Text("home_recent_empty")
                     .font(.footnote)
                     .foregroundStyle(HaruchiPalette.dim)
                     .frame(maxWidth: .infinity, alignment: .leading)

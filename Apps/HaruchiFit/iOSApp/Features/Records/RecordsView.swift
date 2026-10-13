@@ -20,7 +20,7 @@ struct RecordsView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                Picker("보기", selection: $viewModel.mode) {
+                Picker("records_mode_picker", selection: $viewModel.mode) {
                     ForEach(RecordsViewModel.DisplayMode.allCases) { mode in
                         Text(mode.title).tag(mode)
                     }
@@ -31,17 +31,17 @@ struct RecordsView: View {
             }
             .background(HaruchiPalette.bg.ignoresSafeArea())
             .refreshable { await sync.sync() }
-            .navigationTitle("기록")
+            .navigationTitle("tab_records")
             .toolbarBackground(HaruchiPalette.bg, for: .navigationBar)
-            .confirmationDialog("이 기록을 삭제할까요?",
+            .confirmationDialog("records_delete_confirm",
                                 isPresented: Binding(get: { pendingDelete != nil },
                                                      set: { if !$0 { pendingDelete = nil } }),
                                 titleVisibility: .visible)
             {
-                Button("삭제", role: .destructive) { confirmDelete() }
-                Button("취소", role: .cancel) { pendingDelete = nil }
+                Button("btn_delete", role: .destructive) { confirmDelete() }
+                Button("btn_cancel", role: .cancel) { pendingDelete = nil }
             } message: {
-                Text(pendingDelete?.source == .manual ? "삭제한 수동 기록은 복구할 수 없어요." : "건강 앱의 운동 기록은 그대로 남아요.")
+                Text(pendingDelete?.source == .manual ? LocalizedStringKey("records_delete_note_manual") : LocalizedStringKey("records_delete_note_health"))
             }
             .onAppear { viewModel.rebuild(from: records) }
             .onChange(of: displayInputs) { _, _ in viewModel.rebuild(from: records) }
@@ -64,9 +64,9 @@ struct RecordsView: View {
         } else if viewModel.sections.isEmpty {
             // ScrollView 로 감싸야 빈 상태에서도 당겨서 새로고침이 걸린다
             ScrollView {
-                ContentUnavailableView("아직 기록이 없어요",
+                ContentUnavailableView("records_empty_title",
                                        systemImage: "list.bullet.rectangle",
-                                       description: Text("워치에서 운동하거나 홈의 + 버튼으로 기록해 보세요."))
+                                       description: Text("records_empty_message"))
                     .foregroundStyle(HaruchiPalette.dim)
                     .containerRelativeFrame(.vertical)
             }
@@ -79,7 +79,7 @@ struct RecordsView: View {
                                 .listRowBackground(HaruchiPalette.surface)
                                 .swipeActions(edge: .trailing) {
                                     // role: .destructive 를 쓰지 않는다 — 확인 전에 행이 먼저 사라지는 애니메이션이 돈다
-                                    Button("삭제") { pendingDelete = row.record }
+                                    Button("btn_delete") { pendingDelete = row.record }
                                         .tint(HaruchiPalette.hr)
                                 }
                         }

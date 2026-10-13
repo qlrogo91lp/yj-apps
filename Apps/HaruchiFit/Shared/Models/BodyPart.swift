@@ -14,12 +14,12 @@ enum BodyPart: String, Codable, CaseIterable {
 
     var title: String {
         switch self {
-        case .chest: "가슴"
-        case .back: "등"
-        case .shoulders: "어깨"
-        case .arms: "팔"
-        case .legs: "하체"
-        case .core: "코어"
+        case .chest: String(localized: "body_chest", table: "Shared")
+        case .back: String(localized: "body_back", table: "Shared")
+        case .shoulders: String(localized: "body_shoulders", table: "Shared")
+        case .arms: String(localized: "body_arms", table: "Shared")
+        case .legs: String(localized: "body_legs", table: "Shared")
+        case .core: String(localized: "body_core", table: "Shared")
         }
     }
 }

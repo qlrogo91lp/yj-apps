@@ -21,23 +21,23 @@ struct ManualRecordView: View {
         NavigationStack {
             Form {
                 Section {
-                    DatePicker("언제", selection: $viewModel.draft.startedAt,
+                    DatePicker("manual_when", selection: $viewModel.draft.startedAt,
                                in: ...Date(), displayedComponents: [.date, .hourAndMinute])
                     HStack {
-                        Text("얼마나")
+                        Text("manual_how_long")
                         Spacer()
-                        TextField("분", value: $viewModel.draft.durationMinutes, format: .number)
+                        TextField("manual_minutes_unit", value: $viewModel.draft.durationMinutes, format: .number)
                             .keyboardType(.numberPad)
                             .multilineTextAlignment(.trailing)
                             .frame(width: 64)
-                        Text("분")
+                        Text("manual_minutes_unit")
                     }
                 } footer: {
-                    Text("운동을 시작한 날짜와 시각을 입력해 주세요.")
+                    Text("manual_start_hint")
                 }
 
-                Section("유형") {
-                    Picker("유형", selection: $viewModel.draft.kind) {
+                Section("manual_kind") {
+                    Picker("manual_kind", selection: $viewModel.draft.kind) {
                         ForEach(SegmentKind.allCases, id: \.self) { kind in
                             Text(kind.title).tag(kind)
                         }
@@ -45,29 +45,29 @@ struct ManualRecordView: View {
                     .pickerStyle(.segmented)
                 }
 
-                Section("부위 · 선택") {
+                Section("manual_body_parts_optional") {
                     BodyPartChips(selected: BodyPart.allCases.filter(viewModel.draft.bodyParts.contains),
                                   onToggle: viewModel.toggle)
                         .padding(.vertical, 4)
                 }
 
-                Section("메모 · 선택") {
-                    TextField("메모 추가하기…", text: $viewModel.draft.memo, axis: .vertical)
+                Section("manual_memo_optional") {
+                    TextField("detail_memo_placeholder", text: $viewModel.draft.memo, axis: .vertical)
                         .lineLimit(3 ... 8)
                 }
             }
             .scrollContentBackground(.hidden)
             .background(HaruchiPalette.bg)
-            .navigationTitle(viewModel.record == nil ? "수동 기록 추가" : "기록 편집")
+            .navigationTitle(viewModel.record == nil ? LocalizedStringKey("manual_title_add") : LocalizedStringKey("manual_title_edit"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("취소") { dismiss() } }
-                ToolbarItem(placement: .confirmationAction) { Button("저장", action: save) }
+                ToolbarItem(placement: .cancellationAction) { Button("btn_cancel") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) { Button("btn_save", action: save) }
             }
-            .alert("저장할 수 없어요", isPresented: Binding(get: { errorMessage != nil },
+            .alert("manual_error_title", isPresented: Binding(get: { errorMessage != nil },
                                                      set: { if !$0 { errorMessage = nil } }))
             {
-                Button("확인", role: .cancel) {}
+                Button("btn_ok", role: .cancel) {}
             } message: {
                 Text(errorMessage ?? "")
             }
@@ -81,11 +81,11 @@ struct ManualRecordView: View {
             onSaved()
             dismiss()
         } catch ManualRecordDraft.ValidationError.durationOutOfRange {
-            errorMessage = "운동 시간은 1분부터 24시간까지 입력해 주세요."
+            errorMessage = String(localized: "manual_error_duration")
         } catch ManualRecordDraft.ValidationError.endsInFuture {
-            errorMessage = "운동이 끝난 시각이 현재보다 늦어요."
+            errorMessage = String(localized: "manual_error_future")
         } catch {
-            errorMessage = "변경 내용을 저장하지 못했어요. 잠시 후 다시 시도해 주세요."
+            errorMessage = String(localized: "manual_error_save")
         }
     }
 }

@@ -22,7 +22,7 @@ struct RecordCalendarMonth {
     let cells: [RecordCalendarDay?]
     let days: [RecordCalendarDay]
     let selectedRows: [RecordListRow]
-    let emptyMessage: String?
+    let emptyState: RecordCalendarEmptyState?
 }
 
 enum RecordCalendarBuilder {
@@ -31,7 +31,7 @@ enum RecordCalendarBuilder {
                       selectedDay: Date,
                       now: Date = Date(),
                       calendar: Calendar = .current,
-                      locale: Locale = Locale(identifier: "ko_KR")) -> RecordCalendarMonth
+                      locale: Locale = .current) -> RecordCalendarMonth
     {
         let monthStart = calendar.dateInterval(of: .month, for: displayedMonth)?.start ?? displayedMonth
         let monthEnd = calendar.date(byAdding: .month, value: 1, to: monthStart) ?? monthStart
@@ -55,17 +55,17 @@ enum RecordCalendarBuilder {
         }
 
         let selected = visible.filter { calendar.isDate($0.startedAt, inSameDayAs: selectedDay) }.sorted { $0.startedAt > $1.startedAt }
-        let title = RecordListBuilder.formatter("yyyy년 M월", calendar: calendar, locale: locale).string(from: monthStart)
-        let weekdaySymbols = RecordListBuilder.formatter("", calendar: calendar, locale: locale).shortWeekdaySymbols
+        let title = DisplayDateFormat.formatter(.yearMonth, calendar: calendar, locale: locale).string(from: monthStart)
+        let weekdaySymbols = DisplayDateFormat.formatter("E", calendar: calendar, locale: locale).shortWeekdaySymbols
             ?? calendar.shortWeekdaySymbols
         let weekdayOffset = calendar.firstWeekday - 1
         let weekdays = Array(weekdaySymbols[weekdayOffset...]) + Array(weekdaySymbols[..<weekdayOffset])
-        let emptyMessage: String? = if records.isEmpty {
-            "아직 기록이 없어요"
+        let emptyState: RecordCalendarEmptyState? = if records.isEmpty {
+            .noRecords
         } else if visible.isEmpty {
-            "이 달에는 기록이 없어요"
+            .emptyMonth
         } else if selected.isEmpty {
-            "이 날에는 기록이 없어요"
+            .emptyDay
         } else {
             nil
         }
@@ -78,16 +78,11 @@ enum RecordCalendarBuilder {
                                    days: days,
                                    selectedRows: RecordListBuilder.rows(for: selected, calendar: calendar, locale: locale,
                                                                         includeStartTime: true),
-                                   emptyMessage: emptyMessage)
+                                   emptyState: emptyState)
     }
 
     private static func summary(for records: [WorkoutRecord]) -> String {
         let seconds = records.reduce(0) { $0 + $1.totalSeconds }
-        let duration = if seconds < 3600 {
-            "\(seconds / 60)분"
-        } else {
-            String(format: "%.1f시간", Double(seconds) / 3600)
-        }
-        return "\(records.count)회 · \(duration)"
+        return "\(DisplayText.workouts(records.count)) · \(DisplayText.duration(seconds: seconds))"
     }
 }

@@ -15,16 +15,16 @@ struct BodyPartFrequencyChart: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("운동 부위").font(.headline).foregroundStyle(HaruchiPalette.text)
+            Text("stats_body_parts").font(.headline).foregroundStyle(HaruchiPalette.text)
             Chart(values) { value in
-                BarMark(x: .value("횟수", value.count), y: .value("부위", value.part.title))
+                BarMark(x: .value("chart_count", value.count), y: .value("chart_body_part", value.part.title))
                     .foregroundStyle(HaruchiPalette.accent)
-                    .accessibilityLabel("\(value.part.title), \(value.count)회")
+                    .accessibilityLabel("\(value.part.title), \(DisplayText.workouts(value.count))")
             }
             .chartXAxis { AxisMarks(values: xAxisValues) { _ in AxisGridLine(); AxisValueLabel() } }
             .chartXScale(domain: 0 ... maximum)
             .frame(height: CGFloat(values.count) * 34 + 20)
-            Text("부위를 태그한 운동 횟수예요. 한 운동은 여러 부위에 포함될 수 있어요.")
+            Text("stats_body_parts_note")
                 .font(.caption).foregroundStyle(HaruchiPalette.dim)
         }
         .padding()

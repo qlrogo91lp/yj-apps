@@ -2,7 +2,7 @@ import Charts
 import SwiftUI
 
 struct StatisticsFrequencyChart: View {
-    let title: String
+    let title: LocalizedStringKey
     let values: [StatisticsDashboard.Frequency]
 
     private var maximum: Int {
@@ -18,10 +18,10 @@ struct StatisticsFrequencyChart: View {
         VStack(alignment: .leading, spacing: 10) {
             Text(title).font(.headline).foregroundStyle(HaruchiPalette.text)
             Chart(values) { value in
-                BarMark(x: .value("항목", value.id), y: .value("횟수", value.count))
+                BarMark(x: .value("chart_item", value.id), y: .value("chart_count", value.count))
                     .foregroundStyle(value.isHighlighted ? HaruchiPalette.accent : HaruchiPalette.dim)
                     .opacity(value.isFuture ? 0.3 : 1)
-                    .accessibilityLabel("\(value.title), \(value.count)회")
+                    .accessibilityLabel("\(value.title), \(DisplayText.workouts(value.count))")
             }
             .chartXAxis {
                 AxisMarks(values: values.map(\.id)) { item in
