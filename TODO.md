@@ -205,7 +205,7 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
 | ~~2차~~ | ~~2~~ | ~~9~~ | ~~05 통계~~ | ~~탭 하나가 비어 있다~~ | **구현 완료 · 시뮬레이터/실기기 확인 대기** | [스펙](Apps/HaruchiFit/docs/specs/ios/2026/2026-10-08-statistics.md) · [플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-10-08-statistics.md) |
 | ~~2차~~ | ~~3~~ | ~~11~~ | ~~08 수동 기록~~ | ~~워치 없이 쓰는 흐름 C. 상세 `편집` 범위도 여기서 정해진다~~ | **코드 구현·로컬 빌드/테스트 완료 · UI/실기기 확인 대기** | [플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-10-08-manual-record.md) · 스펙 08절·4.3 |
 | ~~2차~~ | ~~4~~ | ~~8~~ | ~~03a 기록 달력~~ | ~~기록 탭은 목록만으로도 동작한다~~ | **코드 구현·로컬 검증 완료 · 시뮬레이터 UI/실기기 확인 대기** | [상세 스펙](Apps/HaruchiFit/docs/specs/ios/2026/2026-10-08-records-calendar.md) · [플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-10-08-records-calendar.md) |
-| 3차 | — | 12 | 01 온보딩 (HealthKit 권한) | 없어도 시스템 권한 시트는 뜬다. 거부돼도 워치 기록은 들어온다 — import 만 막힌다 | **출시 준비로 착수 (10-12)** · 브레인스토밍 전 | 아래 "출시 준비" 4번 · 스펙 01절 |
+| 3차 | — | 12 | 01 온보딩 (HealthKit 권한) | 없어도 시스템 권한 시트는 뜬다. 거부돼도 워치 기록은 들어온다 — import 만 막힌다 | **출시 준비로 착수 (10-12)** · 스펙 01절 개정 (10-13) · 플랜 작성 전 | 아래 "출시 준비" 4번 · 스펙 01절 |
 | 3차 | — | 10 | 07 설정 | 링크·전환 위주. 칼로리 기준 컷은 데이터가 쌓여야 정한다 | **보류 (10-12)** — 1.0 에 넣지 않는다 | 로드맵 Phase 5 · 스펙 07절 |
 | ~~3차~~ | ~~—~~ | ~~6~~ | ~~06 공유 (`WorkoutShareUI` 그대로)~~ | ~~부가 기능. Kit 을 붙이기만 하면 된다~~ | **코드 구현·로컬 검증 완료** ([PR #49](https://github.com/qlrogo91lp/yj-apps/pull/49)) · UI·실기기 확인 대기 | [플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-10-06-record-share.md) · 스펙 06절 (10-06 개정) |
 | 3차 | — | — | CloudKit 엔타이틀먼트 | **프로비저닝 작업(사용자)** · 로컬 폴백이 있다 | 예정 | 로드맵 "언제든" |
@@ -237,8 +237,8 @@ Phase 2 코드 구현은 끝났고 HealthKit import 실기기 확인이 남았�
 |---|---|---|---|
 | ~~1~~ | ~~스토어 문구 규약 — `Apps/<앱>/APPSTORE.md`~~ | **완료** (`chore/store-metadata`) | [루트 CLAUDE.md](CLAUDE.md) "스토어 문구" |
 | ~~2~~ | ~~하루치 스토어 문구 (ko · en-US)~~ | **초안 완료** (`chore/store-metadata`) · 스크린샷 캡션은 피그마 작업 뒤 추가 | [APPSTORE.md](Apps/HaruchiFit/APPSTORE.md) |
-| 3 | String Catalog 전환 (iOS · 워치 · 컴플리케이션) | **구현 완료 (10-13) · PR 검토 중** — 자동 검증 통과, 언어별 시뮬레이터 수동 확인 남음 | [플랜](Apps/HaruchiFit/docs/plans/shared/2026/2026-10-12-string-catalog.md) · 선례 [Ralli 플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-07-string-catalog-migration.md) |
-| 4 | 01 온보딩 | 브레인스토밍 전 — 3번 뒤에 한다 (새 문자열이 처음부터 카탈로그로 들어간다) | 스펙 01절 |
+| 3 | String Catalog 전환 (iOS · 워치 · 컴플리케이션) | **머지 완료 (10-13, [PR #52](https://github.com/qlrogo91lp/yj-apps/pull/52))** — 자동 검증 통과, 언어별 시뮬레이터 수동 확인 남음 | [플랜](Apps/HaruchiFit/docs/plans/shared/2026/2026-10-12-string-catalog.md) · 선례 [Ralli 플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-07-string-catalog-migration.md) |
+| 4 | 01 온보딩 (3장 — 컨셉 · 워치 · 권한) | **스펙 01절 개정 (10-13)** · 플랜 작성 전 | [스펙 01절](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-02-haruchi-fit-product-spec.md#01-온보딩-3장) |
 | — | 출시 체크리스트 (스크린샷 · 개인정보처리방침 URL · 심사 메모 · 표시 이름 현지화) | 목록화 전 | 아직 없음 |
 
 ### 집 맥북에서 할 것
