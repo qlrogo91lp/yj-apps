@@ -14,15 +14,15 @@ struct ContentView: View {
     var body: some View {
         TabView(selection: $tab) {
             HomeView(onShowAllRecords: { tab = .records })
-                .tabItem { Label("홈", systemImage: "house.fill") }
+                .tabItem { Label("tab_home", systemImage: "house.fill") }
                 .tag(Tab.home)
 
             RecordsView()
-                .tabItem { Label("기록", systemImage: "list.bullet.rectangle") }
+                .tabItem { Label("tab_records", systemImage: "list.bullet.rectangle") }
                 .tag(Tab.records)
 
             StatisticsView()
-                .tabItem { Label("통계", systemImage: "chart.bar.fill") }
+                .tabItem { Label("tab_statistics", systemImage: "chart.bar.fill") }
                 .tag(Tab.statistics)
         }
         .tint(HaruchiPalette.accent)
@@ -33,7 +33,7 @@ struct ContentView: View {
                                     set: { if !$0 { alerts.current = nil } }),
                presenting: alerts.current)
         { _ in
-            Button("확인", role: .cancel) {}
+            Button("btn_ok", role: .cancel) {}
         } message: { alert in
             Text(alert.message)
         }

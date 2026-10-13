@@ -9,14 +9,14 @@ enum RecordListBuilder {
     static func sections(from records: [WorkoutRecord],
                          now: Date = Date(),
                          calendar: Calendar = .current,
-                         locale: Locale = Locale(identifier: "ko_KR")) -> [RecordListSection]
+                         locale: Locale = .current) -> [RecordListSection]
     {
         guard let thisWeek = calendar.dateInterval(of: .weekOfYear, for: now)?.start else { return [] }
         let lastWeek = calendar.date(byAdding: .weekOfYear, value: -1, to: thisWeek)
         let currentYear = calendar.component(.year, from: now)
-        let rowFormatter = formatter("M월 d일 (E)", calendar: calendar, locale: locale)
-        let sameYearFormatter = formatter("M월 d일", calendar: calendar, locale: locale)
-        let otherYearFormatter = formatter("yyyy년 M월 d일", calendar: calendar, locale: locale)
+        let rowFormatter = DisplayDateFormat.formatter(.monthDayWeekday, calendar: calendar, locale: locale)
+        let sameYearFormatter = DisplayDateFormat.formatter(.monthDay, calendar: calendar, locale: locale)
+        let otherYearFormatter = DisplayDateFormat.formatter(.yearMonthDay, calendar: calendar, locale: locale)
 
         var buckets: [Date: [WorkoutRecord]] = [:]
         for record in records {
@@ -26,9 +26,9 @@ enum RecordListBuilder {
 
         return buckets.keys.sorted(by: >).map { week in
             let title: String = if week == thisWeek {
-                "이번 주"
+                String(localized: "list_this_week", table: "Shared")
             } else if week == lastWeek {
-                "지난 주"
+                String(localized: "list_last_week", table: "Shared")
             } else {
                 rangeTitle(week: week, currentYear: currentYear, calendar: calendar,
                            sameYearFormatter: sameYearFormatter, otherYearFormatter: otherYearFormatter)
@@ -71,32 +71,31 @@ enum RecordListBuilder {
     /// 섹션 없이 행만 필요한 화면(홈 최근 기록)이 쓴다. 입력 순서를 그대로 지킨다.
     static func rows(for records: [WorkoutRecord],
                      calendar: Calendar = .current,
-                     locale: Locale = Locale(identifier: "ko_KR"),
+                     locale: Locale = .current,
                      includeStartTime: Bool = false) -> [RecordListRow]
     {
-        let rowFormatter = formatter(includeStartTime ? "M월 d일 (E) · a h:mm" : "M월 d일 (E)",
-                                     calendar: calendar, locale: locale)
-        return records.map { row(for: $0, formatter: rowFormatter) }
+        let dayFormatter = DisplayDateFormat.formatter(.monthDayWeekday, calendar: calendar, locale: locale)
+        return records.map { record in
+            let title = includeStartTime
+                ? DisplayDateFormat.dateAndTime(record.startedAt, dateTemplate: .monthDayWeekday, calendar: calendar, locale: locale)
+                : dayFormatter.string(from: record.startedAt)
+            return row(for: record, dateTitle: title)
+        }
     }
 
     private static func row(for record: WorkoutRecord, formatter: DateFormatter) -> RecordListRow {
+        row(for: record, dateTitle: formatter.string(from: record.startedAt))
+    }
+
+    private static func row(for record: WorkoutRecord, dateTitle: String) -> RecordListRow {
         // 잔디 칼로리 기준(GrassAggregator)과 같은 값을 쓴다
         let calories = record.totalCalories.map { "\(Int($0.rounded())) kcal" }
         let parts = record.bodyParts
         return RecordListRow(id: record.persistentModelID,
                              record: record,
-                             dateTitle: formatter.string(from: record.startedAt),
+                             dateTitle: dateTitle,
                              chips: segmentChips(for: record),
                              caloriesText: calories,
                              bodyPartsText: parts.isEmpty ? nil : parts.map(\.title).joined(separator: " · "))
-    }
-
-    static func formatter(_ format: String, calendar: Calendar, locale: Locale) -> DateFormatter {
-        let formatter = DateFormatter()
-        formatter.calendar = calendar
-        formatter.timeZone = calendar.timeZone
-        formatter.locale = locale
-        formatter.dateFormat = format
-        return formatter
     }
 }

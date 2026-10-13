@@ -11,9 +11,8 @@ enum HomeDashboardBuilder {
     static func dashboard(from records: [WorkoutRecord],
                           now: Date = Date(),
                           calendar: Calendar = .current,
-                          locale: Locale = Locale(identifier: "ko_KR")) -> HomeDashboard
+                          locale: Locale = .current) -> HomeDashboard
     {
-        let monthFormatter = RecordListBuilder.formatter("M월 yyyy", calendar: calendar, locale: locale)
         let month = calendar.dateInterval(of: .month, for: now)
         let thisMonth = records.filter { month?.contains($0.startedAt) ?? false }
 
@@ -26,13 +25,13 @@ enum HomeDashboardBuilder {
             let thisWeek = calendar.dateInterval(of: .weekOfYear, for: now)
             let weekRecords = records.filter { thisWeek?.contains($0.startedAt) ?? false }
             if weekRecords.isEmpty {
-                emptyWeekText = "이번 주는 아직 기록이 없어요"
+                emptyWeekText = String(localized: "home_empty_week", table: "Shared")
             } else {
                 week = composition(of: weekRecords)
             }
         }
 
-        return HomeDashboard(monthTitle: monthFormatter.string(from: now),
+        return HomeDashboard(monthTitle: DisplayDateFormat.homeMonthTitle(for: now, calendar: calendar, locale: locale),
                              monthStat: stat(of: thisMonth),
                              totalStat: stat(of: records),
                              week: week,
@@ -52,18 +51,13 @@ enum HomeDashboardBuilder {
     }
 
     private static func milestoneText(recordCount: Int) -> String {
-        if recordCount == 0 { return "워치에서 첫 운동을 기록해 보세요" }
-        return "\(compositionThreshold)번째 운동을 기록하면 이번 주 구성이 보여요 · \(compositionThreshold - recordCount)회 남음"
+        if recordCount == 0 { return String(localized: "home_milestone_first", table: "Shared") }
+        return String(localized: "home_milestone_progress \(compositionThreshold) \(compositionThreshold - recordCount)", table: "Shared")
     }
 
     private static func stat(of records: [WorkoutRecord]) -> HomeDashboard.Stat {
-        .init(countText: "\(records.count)회",
-              durationText: durationText(seconds: records.reduce(0) { $0 + $1.totalSeconds }))
-    }
-
-    /// 1시간 미만은 분, 이상은 소수 첫째 자리 시간 — 03a 달력 월 요약(`12회 · 9.2시간`)과 같은 표기다.
-    private static func durationText(seconds: Int) -> String {
-        seconds < 3600 ? "\(seconds / 60)분" : String(format: "%.1f시간", Double(seconds) / 3600)
+        .init(countText: DisplayText.workouts(records.count),
+              durationText: DisplayText.duration(seconds: records.reduce(0) { $0 + $1.totalSeconds }))
     }
 
     private static func composition(of records: [WorkoutRecord]) -> HomeDashboard.WeekComposition {

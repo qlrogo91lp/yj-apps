@@ -20,7 +20,7 @@ struct RecordListRow: Identifiable {
         let minutes: Int
 
         var text: String {
-            "\(kind.title) \(minutes)분"
+            String(localized: "chip_kind_minutes \(kind.title) \(minutes)", table: "Shared")
         }
     }
 }

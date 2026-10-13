@@ -68,6 +68,6 @@ struct RecordCalendarBuilderTests {
                                                  now: GrassFixture.date(2026, 10, 9),
                                                  calendar: Self.calendar)
 
-        #expect(result.emptyMessage == "아직 기록이 없어요")
+        #expect(result.emptyState == .noRecords)
     }
 }

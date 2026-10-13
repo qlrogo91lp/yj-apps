@@ -92,7 +92,7 @@ struct HaruchiComplicationEntryView: View {
                         .foregroundStyle(.secondary)
                 }
             } else {
-                Text("운동 시작")
+                Text("complication_start")
                     .font(.headline)
                     .widgetAccentable()
             }
@@ -126,8 +126,8 @@ struct HaruchiComplicationExtension: Widget {
         StaticConfiguration(kind: kind, provider: Provider()) { entry in
             HaruchiComplicationEntryView(entry: entry)
         }
-        .configurationDisplayName("하루치 핏")
-        .description("진행 중인 운동을 보여줍니다.")
+        .configurationDisplayName("complication_name")
+        .description("complication_description")
         .supportedFamilies([.accessoryCircular, .accessoryCorner, .accessoryRectangular])
     }
 }

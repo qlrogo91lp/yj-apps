@@ -40,7 +40,7 @@ struct HomeView: View {
                     Text(home.dashboard.monthTitle).font(.headline).foregroundStyle(HaruchiPalette.text)
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("수동 기록 추가", systemImage: "plus") { showingManualRecord = true }
+                    Button("home_add_manual", systemImage: "plus") { showingManualRecord = true }
                 }
             }
             .toolbarBackground(HaruchiPalette.bg, for: .navigationBar)

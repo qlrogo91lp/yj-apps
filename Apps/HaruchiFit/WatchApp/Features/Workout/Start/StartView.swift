@@ -7,14 +7,14 @@ struct StartView: View {
     var body: some View {
         // 제목은 위, 시작은 가운데, 유형 토글은 아래 — 손가락이 닿기 쉬운 곳에 눌러야 할 것을 둔다.
         VStack(spacing: 12) {
-            Text("Haruchi Fit")
+            Text(verbatim: "Haruchi Fit")
                 .font(.system(size: 20, weight: .semibold))
                 .foregroundStyle(Color.brandOrange)
 
             Spacer(minLength: 0)
 
             Button { Task { await viewModel.start() } } label: {
-                Text("운동 시작")
+                Text("start_workout")
                     .font(.system(size: 22, weight: .semibold))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 6)
@@ -37,7 +37,7 @@ struct StartView: View {
     private var startKindToggle: some View {
         Button { viewModel.toggleStartKind() } label: {
             HStack {
-                Text("시작 운동")
+                Text("start_kind_label")
                     .foregroundStyle(.secondary)
                 Spacer()
                 // 글자만 있으면 설명 문구로 읽힌다 — 세션 화면 아이콘처럼 같은 색 연한 배경을 깐다.

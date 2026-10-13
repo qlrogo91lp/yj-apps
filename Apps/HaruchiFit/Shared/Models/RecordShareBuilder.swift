@@ -5,7 +5,7 @@ enum RecordShareBuilder {
     static func content(for record: WorkoutRecord) -> RecordShareContent {
         let kinds = RecordListBuilder.segmentChips(for: record).map(\.kind.title)
         return RecordShareContent(
-            title: kinds.isEmpty ? "운동" : kinds.joined(separator: " · "),
+            title: kinds.isEmpty ? String(localized: "share_title_default", table: "Shared") : kinds.joined(separator: " · "),
             startedAt: record.startedAt,
             endedAt: record.effectiveEndedAt,
             result: WorkoutResult(

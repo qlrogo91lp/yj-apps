@@ -29,10 +29,13 @@ struct RecordDayCell: View {
     }
 
     private var accessibilityLabel: String {
-        let formatter = RecordListBuilder.formatter("yyyy년 M월 d일", calendar: calendar, locale: Locale(identifier: "ko_KR"))
-        let workout = day.sessionCount == 0 ? "운동 기록 없음" : "운동 \(day.sessionCount)회, \(day.totalSeconds / 60)분"
-        let today = calendar.isDateInToday(day.date) ? ", 오늘" : ""
-        let selected = isSelected ? ", 선택됨" : ""
-        return "\(formatter.string(from: day.date)), \(workout)\(today)\(selected)"
+        let formatter = DisplayDateFormat.formatter(.yearMonthDay, calendar: calendar, locale: .current)
+        let workout = day.sessionCount == 0
+            ? String(localized: "calendar_day_a11y_none")
+            : String(localized: "calendar_day_a11y_workouts \(day.sessionCount) \(day.totalSeconds / 60)")
+        var parts = [formatter.string(from: day.date), workout]
+        if calendar.isDateInToday(day.date) { parts.append(String(localized: "calendar_day_a11y_today")) }
+        if isSelected { parts.append(String(localized: "calendar_day_a11y_selected")) }
+        return parts.joined(separator: ", ")
     }
 }

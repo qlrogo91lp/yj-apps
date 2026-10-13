@@ -4,15 +4,16 @@ enum RecordDetailBuilder {
     static let placeholder = "–"
 
     static func summary(for record: WorkoutRecord, now: Date = Date(), calendar: Calendar = .current,
-                        locale: Locale = Locale(identifier: "ko_KR")) -> RecordDetailSummary
+                        locale: Locale = .current) -> RecordDetailSummary
     {
         let sameYear = calendar.component(.year, from: record.startedAt) == calendar.component(.year, from: now)
-        let dateFormatter = RecordListBuilder.formatter(sameYear ? "M월 d일 (E)" : "yyyy년 M월 d일 (E)", calendar: calendar, locale: locale)
+        let dateFormatter = DisplayDateFormat.formatter(sameYear ? .monthDayWeekday : .yearMonthDayWeekday, calendar: calendar, locale: locale)
         let end = record.effectiveEndedAt
         let chips = RecordListBuilder.segmentChips(for: record)
         return RecordDetailSummary(dateTitle: dateFormatter.string(from: record.startedAt),
-                                   timeRangeTitle: timeRange(from: record.startedAt, to: end, calendar: calendar, locale: locale),
-                                   durationText: record.totalSeconds < 60 ? "1분 미만" : "\(record.totalSeconds / 60)분",
+                                   timeRangeTitle: DisplayDateFormat.timeRange(from: record.startedAt, to: end, calendar: calendar, locale: locale),
+                                   durationText: record.totalSeconds < 60 ? String(localized: "duration_under_minute", table: "Shared") : DisplayText
+                                       .minutes(record.totalSeconds / 60),
                                    caloriesText: record.totalCalories.map { "\(Int($0.rounded()))" } ?? placeholder,
                                    heartRateText: record.averageHeartRate.map { "\(Int($0.rounded()))" } ?? placeholder,
                                    spans: record.orderedSegments.filter { $0.durationSeconds > 0 }.map { .init(
@@ -20,13 +21,5 @@ enum RecordDetailBuilder {
                                        seconds: $0.durationSeconds
                                    ) },
                                    compositionText: chips.isEmpty ? nil : chips.map(\.text).joined(separator: " · "))
-    }
-
-    private static func timeRange(from start: Date, to end: Date, calendar: Calendar, locale: Locale) -> String {
-        let withPeriod = RecordListBuilder.formatter("B h:mm", calendar: calendar, locale: locale)
-        let withoutPeriod = RecordListBuilder.formatter("h:mm", calendar: calendar, locale: locale)
-        let period = RecordListBuilder.formatter("B", calendar: calendar, locale: locale)
-        let endFormatter = period.string(from: start) == period.string(from: end) ? withoutPeriod : withPeriod
-        return "\(withPeriod.string(from: start)) – \(endFormatter.string(from: end))"
     }
 }
