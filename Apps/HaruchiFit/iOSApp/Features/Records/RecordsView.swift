@@ -41,7 +41,8 @@ struct RecordsView: View {
                 Button("btn_delete", role: .destructive) { confirmDelete() }
                 Button("btn_cancel", role: .cancel) { pendingDelete = nil }
             } message: {
-                Text(pendingDelete?.source == .manual ? LocalizedStringKey("records_delete_note_manual") : LocalizedStringKey("records_delete_note_health"))
+                Text(pendingDelete?
+                    .source == .manual ? LocalizedStringKey("records_delete_note_manual") : LocalizedStringKey("records_delete_note_health"))
             }
             .onAppear { viewModel.rebuild(from: records) }
             .onChange(of: displayInputs) { _, _ in viewModel.rebuild(from: records) }

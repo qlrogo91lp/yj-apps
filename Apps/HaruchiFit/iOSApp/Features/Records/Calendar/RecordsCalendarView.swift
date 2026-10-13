@@ -31,7 +31,7 @@ struct RecordsCalendarView: View {
                 } description: {
                     Text(emptyDescription)
                 }
-                    .foregroundStyle(HaruchiPalette.dim)
+                .foregroundStyle(HaruchiPalette.dim)
             }
             .frame(maxWidth: .infinity, minHeight: 180)
         } else {

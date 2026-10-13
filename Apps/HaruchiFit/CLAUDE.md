@@ -116,6 +116,27 @@ APPSTORE.md                         App Store 문구 원본 (ko · en-US). 규�
 - 폴더·컴포넌트 계층·Import·네이밍 컨벤션은 루트 `CLAUDE.md` 의 **앱 코드 컨벤션**을 따른다
 - 테스트: Swift Testing, ViewModel 우선, View는 테스트하지 않는다.
 
+### 문자열 — String Catalog (ko · en)
+
+화면 문자열은 **의미 키**(`tab_home`)로 쓰고 한국어·영어 값은 카탈로그에 둔다. 코드에 한국어 리터럴을 남기지 않는다.
+개발 언어는 `en` 이라 지원하지 않는 언어는 영어로 뜬다. 플랜: `docs/plans/shared/2026/2026-10-12-string-catalog.md`.
+
+| 카탈로그 | 테이블 | 호출 |
+|---|---|---|
+| `iOSApp/Localizable.xcstrings` · `WatchApp/…` · `ComplicationApp/…` | 기본 | `Text("key")` · `String(localized: "key")` |
+| `Shared/Shared.xcstrings` | `Shared` | `String(localized: "key", table: "Shared")` |
+| `Common/Common.xcstrings` | `Common` | `String(localized: "key", table: "Common")` |
+
+- **같은 키가 iOS 와 워치에서 필요하면 두 카탈로그에 따로 둔다** (`btn_cancel`). 빠지면 빌드는 통과하고 키 이름이 화면에 뜬다
+- `Shared/` 코드가 `table:` 을 빠뜨리면 기본 테이블에서 찾다가 키가 그대로 뜬다
+- 키에 값을 끼우면 인자 키가 된다 — `String(localized: "count_workouts \(n)", table: "Shared")` 는 `count_workouts %lld`. 연도는 `String(year)` 로 넘긴다 (`2,026` 방지)
+- `String` 을 받는 헬퍼에 키를 넘기면 번역되지 않는다. 파라미터를 `LocalizedStringKey` 로 받거나 호출부에서 `String(localized:)` 로 넘긴다
+- 날짜·시각은 번역하지 않고 `DisplayDateFormat`(로케일 템플릿), 횟수·시간은 `DisplayText` 를 쓴다. 한국어만 지금 표기를 지키는 곳은 홈 월 제목(`8월 2026`)과 상세 시간 범위(`저녁 7:12 – 8:24`)
+- 표시 문자열로 분기하지 않는다 — 빌더가 이유(enum)를 내고 뷰가 키를 고른다 (`RecordCalendarEmptyState`)
+- 브랜드 표기 `Haruchi Fit` 은 `Text(verbatim:)`. 표시 이름(`CFBundleDisplayName`)은 한국어 기기에서도 영어다
+- **`HaruchiFitWatchTests` 스킴은 테스트 언어를 한국어로 고정한다.** 빌더 테스트의 기대값이 한국어 표기다
+- 번역 제외: `print` · `fatalError` · `#Preview` · 주석 · 테스트 이름 · `kcal`
+
 ### 데이터 — HealthKit 과 SwiftData 의 역할 분리
 
 | 데이터 | 원본 |

@@ -39,7 +39,10 @@ struct RecordDetailView: View {
                     Spacer()
                     RecordShareButton(content: viewModel.shareContent)
                 }
-                HStack { stat(viewModel.summary.durationText, Text("detail_total_time")); stat(viewModel.summary.caloriesText, Text(verbatim: "kcal")); stat(
+                HStack { stat(viewModel.summary.durationText, Text("detail_total_time")); stat(
+                    viewModel.summary.caloriesText,
+                    Text(verbatim: "kcal")
+                ); stat(
                     viewModel.summary.heartRateText,
                     Text("detail_avg_heart_rate")
                 ) }
@@ -55,11 +58,13 @@ struct RecordDetailView: View {
                 VStack(alignment: .leading) {
                     Text("detail_body_parts"); BodyPartChips(selected: viewModel.bodyParts) { if !viewModel.toggle($0) { failure = .editFailed } }
                 }
-                VStack(alignment: .leading) { HStack { Text("detail_memo"); Spacer(); if memoFocused { Button("btn_done") { memoFocused = false } } }; TextField(
-                    "detail_memo_placeholder",
-                    text: $viewModel.memoDraft,
-                    axis: .vertical
-                ).lineLimit(3 ... 8).focused($memoFocused).padding(12).background(HaruchiPalette.surface, in: RoundedRectangle(cornerRadius: 12)) }
+                VStack(alignment: .leading) {
+                    HStack { Text("detail_memo"); Spacer(); if memoFocused { Button("btn_done") { memoFocused = false } } }; TextField(
+                        "detail_memo_placeholder",
+                        text: $viewModel.memoDraft,
+                        axis: .vertical
+                    ).lineLimit(3 ... 8).focused($memoFocused).padding(12).background(HaruchiPalette.surface, in: RoundedRectangle(cornerRadius: 12))
+                }
                 HStack {
                     Button("btn_delete", role: .destructive) { confirmingDelete = true }
                         .frame(maxWidth: .infinity).buttonStyle(.bordered).tint(HaruchiPalette.hr)
@@ -75,10 +80,12 @@ struct RecordDetailView: View {
         .onDisappear {
             onDismissCommit(viewModel.commitMemo() ? nil : viewModel.memoDraft)
         }
-        .confirmationDialog("records_delete_confirm", isPresented: $confirmingDelete) { Button("btn_delete", role: .destructive) { onDelete() }; Button(
-            "btn_cancel",
-            role: .cancel
-        ) {} } message: {
+        .confirmationDialog("records_delete_confirm", isPresented: $confirmingDelete) {
+            Button("btn_delete", role: .destructive) { onDelete() }; Button(
+                "btn_cancel",
+                role: .cancel
+            ) {}
+        } message: {
             Text(viewModel.isManual ? LocalizedStringKey("records_delete_note_manual") : LocalizedStringKey("records_delete_note_health"))
         }
         .alert(failure?.title ?? "", isPresented: Binding(get: { failure != nil }, set: { if !$0 { failure = nil } }), presenting: failure) { _ in

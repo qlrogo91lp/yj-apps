@@ -65,7 +65,7 @@ struct ManualRecordView: View {
                 ToolbarItem(placement: .confirmationAction) { Button("btn_save", action: save) }
             }
             .alert("manual_error_title", isPresented: Binding(get: { errorMessage != nil },
-                                                     set: { if !$0 { errorMessage = nil } }))
+                                                              set: { if !$0 { errorMessage = nil } }))
             {
                 Button("btn_ok", role: .cancel) {}
             } message: {

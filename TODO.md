@@ -237,7 +237,7 @@ Phase 2 코드 구현은 끝났고 HealthKit import 실기기 확인이 남았�
 |---|---|---|---|
 | ~~1~~ | ~~스토어 문구 규약 — `Apps/<앱>/APPSTORE.md`~~ | **완료** (`chore/store-metadata`) | [루트 CLAUDE.md](CLAUDE.md) "스토어 문구" |
 | ~~2~~ | ~~하루치 스토어 문구 (ko · en-US)~~ | **초안 완료** (`chore/store-metadata`) · 스크린샷 캡션은 피그마 작업 뒤 추가 | [APPSTORE.md](Apps/HaruchiFit/APPSTORE.md) |
-| 3 | String Catalog 전환 (iOS · 워치 · 컴플리케이션) | **플랜 작성 (10-12) · 검토 전** — 의미 키 + 카탈로그 5개, 영어 번역 초안 포함 | [플랜](Apps/HaruchiFit/docs/plans/shared/2026/2026-10-12-string-catalog.md) · 선례 [Ralli 플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-07-string-catalog-migration.md) |
+| 3 | String Catalog 전환 (iOS · 워치 · 컴플리케이션) | **구현 완료 (10-13) · PR 검토 중** — 자동 검증 통과, 언어별 시뮬레이터 수동 확인 남음 | [플랜](Apps/HaruchiFit/docs/plans/shared/2026/2026-10-12-string-catalog.md) · 선례 [Ralli 플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-07-string-catalog-migration.md) |
 | 4 | 01 온보딩 | 브레인스토밍 전 — 3번 뒤에 한다 (새 문자열이 처음부터 카탈로그로 들어간다) | 스펙 01절 |
 | — | 출시 체크리스트 (스크린샷 · 개인정보처리방침 URL · 심사 메모 · 표시 이름 현지화) | 목록화 전 | 아직 없음 |
 

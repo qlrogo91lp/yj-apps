@@ -12,7 +12,8 @@ enum RecordDetailBuilder {
         let chips = RecordListBuilder.segmentChips(for: record)
         return RecordDetailSummary(dateTitle: dateFormatter.string(from: record.startedAt),
                                    timeRangeTitle: DisplayDateFormat.timeRange(from: record.startedAt, to: end, calendar: calendar, locale: locale),
-                                   durationText: record.totalSeconds < 60 ? String(localized: "duration_under_minute", table: "Shared") : DisplayText.minutes(record.totalSeconds / 60),
+                                   durationText: record.totalSeconds < 60 ? String(localized: "duration_under_minute", table: "Shared") : DisplayText
+                                       .minutes(record.totalSeconds / 60),
                                    caloriesText: record.totalCalories.map { "\(Int($0.rounded()))" } ?? placeholder,
                                    heartRateText: record.averageHeartRate.map { "\(Int($0.rounded()))" } ?? placeholder,
                                    spans: record.orderedSegments.filter { $0.durationSeconds > 0 }.map { .init(

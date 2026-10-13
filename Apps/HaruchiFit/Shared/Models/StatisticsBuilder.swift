@@ -51,7 +51,7 @@ enum StatisticsBuilder {
                 : String(localized: "weekly_average_note_past", table: "Shared"),
             isCurrentYear: isCurrentYear,
             emptyMessage: emptyMessage(count: count, year: year, currentYear: currentYear, allInputs: inputs, now: now),
-            months: monthFrequencies(eligible, year: year, currentYear: currentYear, now: now, calendar: calendar, locale: locale),
+            months: monthFrequencies(eligible, isCurrentYear: isCurrentYear, now: now, calendar: calendar, locale: locale),
             weekdays: weekdayFrequencies(eligible, calendar: calendar, locale: locale),
             composition: composition(of: eligible),
             bodyParts: bodyPartFrequencies(eligible),
@@ -73,7 +73,7 @@ enum StatisticsBuilder {
             : String(localized: "stats_empty_all", table: "Shared")
     }
 
-    private static func monthFrequencies(_ inputs: [StatisticsRecordInput], year: Int, currentYear: Int,
+    private static func monthFrequencies(_ inputs: [StatisticsRecordInput], isCurrentYear: Bool,
                                          now: Date, calendar: Calendar, locale: Locale) -> [StatisticsDashboard.Frequency]
     {
         let titles = DisplayDateFormat.formatter("MMM", calendar: calendar, locale: locale).shortMonthSymbols ?? []
@@ -81,7 +81,7 @@ enum StatisticsBuilder {
         let currentMonth = calendar.component(.month, from: now)
         return (1 ... 12).map { month in
             .init(id: month, title: titles[month - 1], count: counts[month]?.count ?? 0,
-                  isFuture: year == currentYear && month > currentMonth, isHighlighted: true)
+                  isFuture: isCurrentYear && month > currentMonth, isHighlighted: true)
         }
     }
 

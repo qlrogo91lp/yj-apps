@@ -12,7 +12,8 @@ struct AnnualMilestones: View {
                         Image(systemName: value.isAchieved ? "checkmark.seal.fill" : "lock.fill")
                             .foregroundStyle(value.isAchieved ? HaruchiPalette.accent : HaruchiPalette.dim)
                         Text(DisplayText.workouts(value.target)).foregroundStyle(HaruchiPalette.text)
-                        if !value.isAchieved { Text("stats_milestone_remaining \(value.remaining)").font(.caption).foregroundStyle(HaruchiPalette.dim) }
+                        if !value
+                            .isAchieved { Text("stats_milestone_remaining \(value.remaining)").font(.caption).foregroundStyle(HaruchiPalette.dim) }
                     }
                     .frame(maxWidth: .infinity, minHeight: 82)
                     .background(HaruchiPalette.surface2, in: RoundedRectangle(cornerRadius: 12))
