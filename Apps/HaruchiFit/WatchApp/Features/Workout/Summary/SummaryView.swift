@@ -12,7 +12,7 @@ struct SummaryView: View {
 
     var body: some View {
         VStack(spacing: 6) {
-            Text("운동 완료")
+            Text("summary_title")
                 .font(.system(size: 15, weight: .semibold))
                 .foregroundStyle(Color.brandOrange)
 
@@ -32,12 +32,12 @@ struct SummaryView: View {
             buttons
         }
         .padding(.horizontal, 8)
-        .confirmationDialog("이 기록을 버릴까요?",
+        .confirmationDialog("summary_discard_confirm",
                             isPresented: $isConfirmingDiscard,
                             titleVisibility: .visible)
         {
-            Button("버리기", role: .destructive) { viewModel.discard() }
-            Button("취소", role: .cancel) {}
+            Button("btn_discard", role: .destructive) { viewModel.discard() }
+            Button("btn_cancel", role: .cancel) {}
         }
     }
 
@@ -51,7 +51,7 @@ struct SummaryView: View {
             ForEach(SegmentKind.allCases, id: \.self) { kind in
                 let seconds = segments.filter { $0.kind == kind }.reduce(0) { $0 + $1.durationSeconds }
                 if seconds > 0 {
-                    Text("\(kind.title) \(seconds / 60)분")
+                    Text(String(localized: "chip_kind_minutes \(kind.title) \(seconds / 60)", table: "Shared"))
                         .font(.system(size: 12))
                         .foregroundStyle(.secondary)
                 }
@@ -75,14 +75,14 @@ struct SummaryView: View {
     private var buttons: some View {
         HStack(spacing: 8) {
             Button { isConfirmingDiscard = true } label: {
-                Text("버리기")
+                Text("btn_discard")
                     .font(.system(size: 15, weight: .semibold))
                     .frame(maxWidth: .infinity, minHeight: 38)
             }
             .buttonStyle(.bordered)
 
             Button { viewModel.save() } label: {
-                Text("저장")
+                Text("btn_save")
                     .font(.system(size: 15, weight: .bold))
                     .frame(maxWidth: .infinity, minHeight: 38)
             }
