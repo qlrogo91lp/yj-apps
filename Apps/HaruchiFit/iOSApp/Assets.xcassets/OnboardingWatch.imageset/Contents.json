@@ -1,21 +1,12 @@
 {
   "images" : [
     {
-      "filename" : "watch-ko.png",
-      "idiom" : "universal",
-      "locale" : "ko"
-    },
-    {
-      "filename" : "watch-en.png",
-      "idiom" : "universal",
-      "locale" : "en"
+      "filename" : "watch.png",
+      "idiom" : "universal"
     }
   ],
   "info" : {
     "author" : "xcode",
     "version" : 1
-  },
-  "properties" : {
-    "localizable" : true
   }
 }

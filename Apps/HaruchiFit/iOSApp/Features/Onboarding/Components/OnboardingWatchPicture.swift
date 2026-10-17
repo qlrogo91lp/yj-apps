@@ -6,8 +6,8 @@ struct OnboardingWatchPicture: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var pulsing = false
 
-    private let ringCenter = CGPoint(x: 0.3167, y: 0.1867)
-    private let ringDiameter: CGFloat = 0.14
+    private let ringCenter = CGPoint(x: 0.2952, y: 0.2959)
+    private let ringDiameter: CGFloat = 0.13
 
     var body: some View {
         GeometryReader { geo in

@@ -1,6 +1,9 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%lld" : {
+
+    },
     "btn_cancel" : {
       "extractionState" : "manual",
       "localizations" : {
