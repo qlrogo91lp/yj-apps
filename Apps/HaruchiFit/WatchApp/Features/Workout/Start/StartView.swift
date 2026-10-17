@@ -40,7 +40,7 @@ struct StartView: View {
                     .foregroundStyle(.secondary)
                 Spacer()
                 // 글자만 있으면 설명 문구로 읽힌다 — 세션 화면 아이콘처럼 같은 색 연한 배경을 깐다.
-                Text(shortTitle)
+                Text(viewModel.mode.shortTitle)
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundStyle(tint)
                     .padding(.horizontal, 14)
@@ -53,14 +53,6 @@ struct StartView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-    }
-
-    /// 영어 "Strength" 는 캡슐에서 잘린다 — 이 자리만 짧은 표기를 쓴다. 다른 화면은 `mode.title` 그대로다.
-    private var shortTitle: String {
-        switch viewModel.mode {
-        case .strength: String(localized: "start_kind_strength_short")
-        case .cardio: String(localized: "start_kind_cardio_short")
-        }
     }
 
     private var tint: Color {
