@@ -15,9 +15,8 @@ struct StartView: View {
 
             Button { Task { await viewModel.start() } } label: {
                 Text("start_workout")
-                    .font(.system(size: 22, weight: .semibold))
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 6)
+                    .font(.system(size: 16, weight: .bold))
+                    .frame(maxWidth: .infinity, minHeight: 40)
             }
             .buttonStyle(.borderedProminent)
             .tint(Color.brandOrange)
@@ -41,7 +40,7 @@ struct StartView: View {
                     .foregroundStyle(.secondary)
                 Spacer()
                 // 글자만 있으면 설명 문구로 읽힌다 — 세션 화면 아이콘처럼 같은 색 연한 배경을 깐다.
-                Text(viewModel.mode.title)
+                Text(viewModel.mode.shortTitle)
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundStyle(tint)
                     .padding(.horizontal, 14)
