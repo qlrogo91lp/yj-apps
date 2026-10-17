@@ -42,6 +42,7 @@
                     let isSelected = option.id == selection.selectedID
                     Button { selection.onSelect(option.id) } label: {
                         Text(option.title)
+                            .fontWeight(.semibold)
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
