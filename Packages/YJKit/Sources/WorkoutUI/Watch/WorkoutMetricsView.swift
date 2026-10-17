@@ -42,11 +42,11 @@
 
                 HStack(alignment: .bottom, spacing: 6) {
                     Text(String(format: "%.0f", metrics.totalCalories))
-                        .font(.system(size: 30, weight: .semibold, design: .rounded))
+                        .font(.system(size: 30, weight: .bold, design: .rounded))
                     StackedLabel(text: String(localized: "metrics_total_kcal", bundle: .module),
-                                 font: .system(size: 11, weight: .medium),
-                                 color: .white.opacity(0.5))
-                        .padding(.bottom, 2)
+                                 font: .system(size: 12, weight: .semibold),
+                                 color: .white)
+                        .padding(.bottom, 5)
                 }
 
                 HStack(alignment: .bottom, spacing: 6) {
