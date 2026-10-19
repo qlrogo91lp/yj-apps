@@ -8,6 +8,8 @@ final class RecordDetailViewModel: ObservableObject {
     let shareContent: RecordShareContent
     @Published private(set) var bodyParts: [BodyPart]
     @Published var memoDraft: String
+    /// 메모를 실제로 저장할 때마다 1씩 오른다. 화면은 이 값의 변화를 보고 `저장됨` 표시를 띄운다.
+    @Published private(set) var memoSaveCount = 0
     let isManual: Bool
     private let record: WorkoutRecord
     private let context: ModelContext
@@ -35,7 +37,9 @@ final class RecordDetailViewModel: ObservableObject {
         let before = record.memo
         record.setMemo(memoDraft)
         guard record.memo != before else { memoDraft = record.memo ?? ""; return true }
-        return persist(normalizeMemoDraft: true)
+        let saved = persist(normalizeMemoDraft: true)
+        if saved { memoSaveCount += 1 }
+        return saved
     }
 
     private func persist(normalizeMemoDraft: Bool) -> Bool {

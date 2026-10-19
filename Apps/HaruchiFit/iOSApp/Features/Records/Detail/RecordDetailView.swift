@@ -4,6 +4,8 @@ import SwiftUI
 struct RecordDetailView: View {
     @StateObject private var viewModel: RecordDetailViewModel
     @FocusState private var memoFocused: Bool
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var showsMemoSaved = false
     @State private var detent: PresentationDetent = .medium
     @State private var confirmingDelete = false
     @State private var failure: AppAlert?
@@ -59,7 +61,7 @@ struct RecordDetailView: View {
                     Text("detail_body_parts"); BodyPartChips(selected: viewModel.bodyParts) { if !viewModel.toggle($0) { failure = .editFailed } }
                 }
                 VStack(alignment: .leading) {
-                    HStack { Text("detail_memo"); Spacer(); if memoFocused { Button("btn_done") { memoFocused = false } } }; TextField(
+                    HStack { Text("detail_memo"); Spacer(); memoAccessory }; TextField(
                         "detail_memo_placeholder",
                         text: $viewModel.memoDraft,
                         axis: .vertical
@@ -77,6 +79,8 @@ struct RecordDetailView: View {
         }
         .presentationDetents([.medium, .large], selection: $detent).presentationDragIndicator(.visible).presentationBackground(HaruchiPalette.bg)
         .onChange(of: memoFocused) { _, focused in if focused { detent = .large } else { commitMemo() } }
+        // 연달아 저장되면 앞의 타이머는 취소되고 1.5초를 새로 센다
+        .task(id: viewModel.memoSaveCount) { await flashMemoSaved() }
         .onDisappear {
             onDismissCommit(viewModel.commitMemo() ? nil : viewModel.memoDraft)
         }
@@ -105,6 +109,27 @@ struct RecordDetailView: View {
                 .vertical,
                 12
             ).background(HaruchiPalette.surface, in: RoundedRectangle(cornerRadius: 12))
+    }
+
+    /// 입력 중에는 `완료`, 저장 직후 잠깐은 `저장됨`.
+    @ViewBuilder private var memoAccessory: some View {
+        if memoFocused {
+            Button("btn_done") { memoFocused = false }
+        } else if showsMemoSaved {
+            Label("detail_memo_saved", systemImage: "checkmark.circle.fill")
+                .font(.subheadline)
+                .foregroundStyle(HaruchiPalette.accent)
+                .transition(.opacity)
+        }
+    }
+
+    private func flashMemoSaved() async {
+        guard viewModel.memoSaveCount > 0 else { return }
+        withAnimation(reduceMotion ? nil : .easeOut(duration: 0.2)) { showsMemoSaved = true }
+        AccessibilityNotification.Announcement(String(localized: "detail_memo_saved")).post()
+        try? await Task.sleep(for: .seconds(1.5))
+        guard !Task.isCancelled else { return }
+        withAnimation(reduceMotion ? nil : .easeOut(duration: 0.3)) { showsMemoSaved = false }
     }
 
     private func commitMemo() {

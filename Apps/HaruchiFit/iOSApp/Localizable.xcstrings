@@ -587,6 +587,23 @@
         }
       }
     },
+    "detail_memo_saved" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saved"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "저장됨"
+          }
+        }
+      }
+    },
     "detail_total_time" : {
       "extractionState" : "manual",
       "localizations" : {
