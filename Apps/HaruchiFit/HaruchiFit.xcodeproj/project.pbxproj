@@ -600,6 +600,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "HaruchiFit-Info.plist";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_CFBundleDisplayName = HaruchiFit;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Haruchi Fit reads your workouts from Apple Health to fill in your activity grid.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Haruchi Fit saves workouts recorded on your Apple Watch to Apple Health.";
@@ -643,6 +644,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "HaruchiFit-Info.plist";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_CFBundleDisplayName = HaruchiFit;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Haruchi Fit reads your workouts from Apple Health to fill in your activity grid.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Haruchi Fit saves workouts recorded on your Apple Watch to Apple Health.";
@@ -685,6 +687,7 @@
 				DEVELOPMENT_TEAM = P2TU28W32L;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_CFBundleDisplayName = HaruchiFit;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Haruchi Fit measures your heart rate and calories during workouts.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Haruchi Fit saves workouts recorded on your Apple Watch to Apple Health.";
@@ -722,6 +725,7 @@
 				DEVELOPMENT_TEAM = P2TU28W32L;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_CFBundleDisplayName = HaruchiFit;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Haruchi Fit measures your heart rate and calories during workouts.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Haruchi Fit saves workouts recorded on your Apple Watch to Apple Health.";

@@ -41,7 +41,7 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
 | ~~4~~ | ~~크라운 점수 입력 (워치, 위=나 아래=상대)~~ | B | **완료** (버그 수정 PR, 실기기 확인 완료) | [플랜](Apps/TennisCounter/docs/plans/watch/2026/2026-09-07-crown-scoring.md) — PR #22 구현이 회전량 기반이라 실기기에서 오작동, 디텐트 방식으로 재구현. 온보딩(#6) 항목 하나 파생 |
 | ~~6~~ | ~~온보딩 **5페이지** (워치 중심, iOS 만)~~ | A → 합류 | **완료** (PR #25) · 실기기 확인 완료 | [스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-09-07-onboarding-design.md) (09-18 개정) · [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-17-onboarding-watch-focused.md) — 4페이지에서 5페이지로 재편, 기능 목록 페이지 제거. 워치 3장은 Figma 목업 합성, 공유 그림은 인스타 스티커 화면 |
 | ~~7~~ | ~~Firebase Crashlytics (iOS + 워치, 익스텐션 제외)~~ | 단독 (맨 뒤) | **완료** (Kit [PR #35](https://github.com/qlrogo91lp/yj-apps/pull/35) · Ralli [PR #36](https://github.com/qlrogo91lp/yj-apps/pull/36)) · 실기기 확인 완료. plist 는 git 밖, CI 는 Noop 으로 돈다. 워치는 크래시를 못 잡아 non-fatal 만 | [스펙](Packages/YJKit/docs/specs/shared/2026/2026-09-07-crash-reporting-design.md) → [YJKit 플랜](Packages/YJKit/docs/plans/shared/2026/2026-09-07-monitoring-core.md) (트랙 C, 지금 병렬 가능) → [Ralli 플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-07-crashlytics-integration.md) |
-| 8 | 설정 페이지 + 다른 앱 노출 | — | **논의 필요 — 아직 브레인스토밍 전** | 아래 "남은 논의" 참고 |
+| 8 | 설정 페이지 + 다른 앱 노출 | — | **논의 필요 — 아직 브레인스토밍 전** · 앱 안 개인정보처리방침 링크(iOS)도 여기서 넣는다 (아래 "모노레포 공통") | 아래 "남은 논의" 참고 |
 | ~~9~~ | ~~iOS 기록·요약 **세션 중심 재편**~~ | D | **완료** · 실기기 확인 완료 | [스펙](Apps/TennisCounter/docs/specs/ios/2026/2026-09-18-session-centric-history.md) · [플랜](Apps/TennisCounter/docs/plans/ios/2026/2026-09-18-session-centric-history.md) — `WorkoutSessionRecord` 신설이 포함된다. #2 스펙을 개정한다 |
 | ~~10~~ | ~~기록 삭제 시 **건강 앱 워크아웃도 삭제**~~ | E (YJKit+iOS) | **완료** ([PR #29](https://github.com/qlrogo91lp/yj-apps/pull/29)) · 실기기 확인 완료 | [플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-21-healthkit-workout-deletion.md) — YJKit `WorkoutDeletionService` 신설. 건강 앱에서 먼저 지운 경우 Ralli 기록은 유지한다 |
 | 11 | 클럽 대진표 · 실시간 중계 (Firebase) | — | **탐색 중** — 다음 출시 범위 아님 | [탐색 문서](Apps/TennisCounter/docs/ideas/club-live-scoring.md) — CourtMate 분석에서 출발. 백엔드·단위·기록자·게스트까지 결정, 안드로이드·매칭·ELO 는 열림 |
@@ -206,7 +206,7 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
 | ~~2차~~ | ~~3~~ | ~~11~~ | ~~08 수동 기록~~ | ~~워치 없이 쓰는 흐름 C. 상세 `편집` 범위도 여기서 정해진다~~ | **코드 구현·로컬 빌드/테스트 완료 · UI/실기기 확인 대기** | [플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-10-08-manual-record.md) · 스펙 08절·4.3 |
 | ~~2차~~ | ~~4~~ | ~~8~~ | ~~03a 기록 달력~~ | ~~기록 탭은 목록만으로도 동작한다~~ | **코드 구현·로컬 검증 완료 · 시뮬레이터 UI/실기기 확인 대기** | [상세 스펙](Apps/HaruchiFit/docs/specs/ios/2026/2026-10-08-records-calendar.md) · [플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-10-08-records-calendar.md) |
 | 3차 | — | 12 | 01 온보딩 (HealthKit 권한) | 없어도 시스템 권한 시트는 뜬다. 거부돼도 워치 기록은 들어온다 — import 만 막힌다 | **출시 준비로 착수 (10-12)** · **머지 완료 (10-19)** | 아래 "출시 준비" 4번 · [플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-10-13-onboarding.md) · 스펙 01절 |
-| 3차 | — | 10 | 07 설정 | 링크·전환 위주. 칼로리 기준 컷은 데이터가 쌓여야 정한다 | **보류 (10-12)** — 1.0 에 넣지 않는다 | 로드맵 Phase 5 · 스펙 07절 |
+| 3차 | — | 10 | 07 설정 | 링크·전환 위주. 칼로리 기준 컷은 데이터가 쌓여야 정한다 | **보류 (10-12)** — 1.0 에 넣지 않는다. 만들 때 `정보` 그룹의 개인정보처리방침 링크(iOS)를 반드시 넣는다 | 로드맵 Phase 5 · 스펙 07절 |
 | ~~3차~~ | ~~—~~ | ~~6~~ | ~~06 공유 (`WorkoutShareUI` 그대로)~~ | ~~부가 기능. Kit 을 붙이기만 하면 된다~~ | **코드 구현·로컬 검증 완료** ([PR #49](https://github.com/qlrogo91lp/yj-apps/pull/49)) · UI·실기기 확인 대기 | [플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-10-06-record-share.md) · 스펙 06절 (10-06 개정) |
 | 3차 | — | — | CloudKit 엔타이틀먼트 | **프로비저닝 작업(사용자)** · 로컬 폴백이 있다 | 예정 | 로드맵 "언제든" |
 
@@ -239,7 +239,7 @@ Phase 2 코드 구현은 끝났고 HealthKit import 실기기 확인이 남았�
 | ~~2~~ | ~~하루치 스토어 문구 (ko · en-US)~~ | **초안 완료** (`chore/store-metadata`) · 스크린샷 캡션은 피그마 작업 뒤 추가 | [APPSTORE.md](Apps/HaruchiFit/APPSTORE.md) |
 | 3 | String Catalog 전환 (iOS · 워치 · 컴플리케이션) | **머지 완료 (10-13, [PR #52](https://github.com/qlrogo91lp/yj-apps/pull/52))** — 자동 검증 통과, 언어별 시뮬레이터 수동 확인 남음 | [플랜](Apps/HaruchiFit/docs/plans/shared/2026/2026-10-12-string-catalog.md) · 선례 [Ralli 플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-07-string-catalog-migration.md) |
 | 4 | 01 온보딩 (3장 — 컨셉 · 워치 · 권한) | **머지 완료 (10-19, [PR #53](https://github.com/qlrogo91lp/yj-apps/pull/53))** · 시뮬레이터 확인 완료 (영어·동작 줄이기 포함 여부는 미기록) | [스펙 01절](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-02-haruchi-fit-product-spec.md#01-온보딩-3장) · [플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-10-13-onboarding.md) |
-| — | 출시 체크리스트 (스크린샷 · 개인정보처리방침 URL · 심사 메모 · 표시 이름 현지화) | 목록화 전 | 아직 없음 |
+| — | 출시 체크리스트 (결정 3 · 코드 · ASC · 스크린샷 · 빌드·제출) | **목록화 완료 (10-19)** · 사용자 검토 전 — CloudKit 1.0 제외 · 앱 안 방침 링크 1.0 제외 결정 (10-19), 남은 결정 1개(방침 · 지원 URL) 대기 | [체크리스트](Apps/HaruchiFit/docs/plans/shared/2026/2026-10-19-release-checklist.md) |
 
 ### 집 맥북에서 할 것
 
@@ -313,6 +313,9 @@ Phase 2 코드 구현은 끝났고 HealthKit import 실기기 확인이 남았�
 
 | 항목 | 상태 | 문서 |
 |---|---|---|
+| ~~**수출 규정 키** `ITSAppUsesNonExemptEncryption = NO` — 세 앱 iOS · 워치 타깃~~ | **완료 (10-19, `chore/export-compliance-key`)** · 다음 TestFlight 업로드에서 질문이 안 뜨는지 확인 — 업로드마다 뜨는 수출 규정 질문을 없앤다. 표준 암호화만 쓰므로 면제 | [하루치 출시 체크리스트](Apps/HaruchiFit/docs/plans/shared/2026/2026-10-19-release-checklist.md) 2절 |
+| **앱 프라이버시 매니페스트** `PrivacyInfo.xcprivacy` — 세 앱 | **예정 — 각 앱의 다음 배포 전** · 앱 자체 코드의 `UserDefaults` 사유 신고 (수집 데이터 없음). Ralli 의 Crashlytics 몫은 Firebase SDK 가 자기 매니페스트로 신고하므로 앱 쪽은 자체 코드만 적는다. 지금 세 앱 모두 없는데 심사는 통과했다 — 업로드를 막지는 않지만 ITMS-91053 경고 대상이다 | 같은 체크리스트 2절 |
+| **앱 안 개인정보처리방침 링크** — iOS 앱에만 | **예정 — 설정 화면을 만들 때** (Ralli #8 · 하루치 07). 가이드라인 5.1.1(i) 이 앱 안 링크를 요구하지만 지금까지 링크 없이 통과했다. 워치에는 두지 않는다 — 한 앱으로 심사되고 워치는 웹을 못 연다. 하루치 1.0 은 링크 없이 내고, 반려되면 홈 `ⓘ` 시트로 당긴다 | 같은 체크리스트 1절 결정 2 |
 | ~~**App Store 문구 깃 관리** — 앱마다 `Apps/<앱>/APPSTORE.md` 하나~~ | **완료** (`chore/store-metadata`) — 문구만 텍스트로 형상관리하고 반영은 수동. 세 앱 모두 파일을 만들었다. **Ralli·골프의 부제·키워드·프로모션 텍스트는 비어 있다** — 공개 조회가 안 돼 App Store Connect 에서 옮겨 적어야 한다 | [루트 CLAUDE.md](CLAUDE.md) "스토어 문구" · 배경 [CI 스펙](docs/specs/2026/2026-08-27-ci-pipeline-design.md) §비범위 · §후속 과제 |
 
 `fastlane deliver` 로 올리고 내려받는 방식은 **보류했다** — API 키 관리 없이 문구 형상관리부터 시작한다.
