@@ -1092,7 +1092,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "운동한 날마다 한 칸씩 채워집니다. 쌓여 가는 잔디를 보러 오세요."
+            "value" : "하루 운동하면 하루 한 칸. 쌓여 가는 칸을 보러 오세요."
           }
         }
       }
@@ -1109,7 +1109,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "운동하면\n잔디가 자랍니다"
+            "value" : "운동한 날마다\n한 칸씩 채워집니다"
           }
         }
       }
@@ -1143,7 +1143,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "다른 앱의 운동도\n잔디가 됩니다"
+            "value" : "다른 앱의 운동도\n칸을 채웁니다"
           }
         }
       }
@@ -1500,7 +1500,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "연간 잔디"
+            "value" : "연간 기록"
           }
         }
       }
