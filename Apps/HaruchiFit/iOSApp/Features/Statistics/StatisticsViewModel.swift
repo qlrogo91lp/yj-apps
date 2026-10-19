@@ -15,6 +15,10 @@ final class StatisticsViewModel: ObservableObject {
         rebuild(from: records, selectedYear: dashboard.year, now: now, calendar: calendar)
     }
 
+    func resetToCurrentYear(from records: [WorkoutRecord], now: Date = Date(), calendar: Calendar = .current) {
+        rebuild(from: records, selectedYear: nil, now: now, calendar: calendar)
+    }
+
     func select(year: Int, from records: [WorkoutRecord], now: Date = Date(), calendar: Calendar = .current) {
         rebuild(from: records, selectedYear: year, now: now, calendar: calendar)
     }

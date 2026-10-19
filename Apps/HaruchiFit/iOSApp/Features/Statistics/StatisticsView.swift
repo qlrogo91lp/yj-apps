@@ -45,7 +45,7 @@ struct StatisticsView: View {
             .refreshable { await sync.sync() }
             .navigationTitle("tab_statistics")
             .toolbarBackground(HaruchiPalette.bg, for: .navigationBar)
-            .onAppear { statistics.rebuild(from: records) }
+            .onAppear { statistics.resetToCurrentYear(from: records) }
             .onChange(of: inputs) { _, _ in statistics.rebuild(from: records) }
             .onChange(of: scenePhase) { _, phase in if phase == .active { statistics.rebuild(from: records) } }
         }
