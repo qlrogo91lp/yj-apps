@@ -23,21 +23,24 @@ struct StatisticsView: View {
                         statistics.select(year: $0, from: records)
                     }
                     AnnualGrass(dashboard: statistics.dashboard)
-                    AnnualSummary(dashboard: statistics.dashboard)
-                    if let message = statistics.dashboard.emptyMessage {
-                        ContentUnavailableView(message, systemImage: "chart.bar.fill",
-                                               description: Text("stats_empty_message"))
-                            .foregroundStyle(HaruchiPalette.dim)
-                            .frame(maxWidth: .infinity, minHeight: 220)
-                    } else {
-                        StatisticsFrequencyChart(title: "stats_monthly", values: statistics.dashboard.months)
-                        AnnualComposition(composition: statistics.dashboard.composition)
-                        StatisticsFrequencyChart(title: "stats_weekday", values: statistics.dashboard.weekdays)
-                        if !statistics.dashboard.bodyParts.isEmpty {
-                            BodyPartFrequencyChart(values: statistics.dashboard.bodyParts)
+                    VStack(alignment: .leading, spacing: 20) {
+                        AnnualSummary(dashboard: statistics.dashboard)
+                        if let message = statistics.dashboard.emptyMessage {
+                            ContentUnavailableView(message, systemImage: "chart.bar.fill",
+                                                   description: Text("stats_empty_message"))
+                                .foregroundStyle(HaruchiPalette.dim)
+                                .frame(maxWidth: .infinity, minHeight: 220)
+                        } else {
+                            StatisticsFrequencyChart(title: "stats_monthly", values: statistics.dashboard.months)
+                            AnnualComposition(composition: statistics.dashboard.composition)
+                            StatisticsFrequencyChart(title: "stats_weekday", values: statistics.dashboard.weekdays)
+                            if !statistics.dashboard.bodyParts.isEmpty {
+                                BodyPartFrequencyChart(values: statistics.dashboard.bodyParts)
+                            }
+                            AnnualMilestones(values: statistics.dashboard.displayedMilestones)
                         }
-                        AnnualMilestones(values: statistics.dashboard.displayedMilestones)
                     }
+                    .padding(.horizontal)
                 }
                 .padding(.vertical)
             }

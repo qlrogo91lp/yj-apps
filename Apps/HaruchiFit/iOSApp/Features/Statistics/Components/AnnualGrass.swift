@@ -23,6 +23,7 @@ struct AnnualGrass: View {
             Text("stats_grass")
                 .font(.headline)
                 .foregroundStyle(HaruchiPalette.text)
+                .padding(.horizontal)
 
             ScrollViewReader { proxy in
                 ScrollView(.horizontal, showsIndicators: false) {
@@ -98,6 +99,7 @@ struct AnnualGrass: View {
         }
         .font(.caption)
         .foregroundStyle(HaruchiPalette.dim)
+        .padding(.horizontal)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("grass_legend_a11y")
     }
