@@ -238,12 +238,12 @@ iOS 에만 있다 — 워치 앱에는 온보딩이 없다.
 
 | 장 | | 한국어 | 영어 |
 |---|---|---|---|
-| 1 | 제목 | 운동하면 / 잔디가 자랍니다 | Work out, / grow your grid |
-| 1 | 본문 | 운동한 날마다 한 칸씩 채워집니다. 쌓여 가는 잔디를 보러 오세요. | Every day you work out fills one square. Come back and watch it grow. |
+| 1 | 제목 | 운동한 날마다 / 한 칸씩 채워집니다 | Work out, / grow your grid |
+| 1 | 본문 | 하루 운동하면 하루 한 칸. 쌓여 가는 칸을 보러 오세요. | Every day you work out fills one square. Come back and watch it grow. |
 | 2 | 제목 | 워치에서 시작하고 / 탭 한 번으로 전환 | Start on your watch, / switch with one tap |
 | 2 | 본문 | 근력에서 유산소로 넘어갈 때 왼쪽 위 아이콘을 누르세요. 한 번의 운동에 둘 다 기록됩니다. | Tap the top-left icon when you move from strength to cardio. Both are recorded in one workout. |
 | 2 | 작은 글씨 | 운동이 끝나면 폰에서 기록을 눌러 부위와 메모를 남길 수 있습니다. | Afterward, tap the workout on your iPhone to add body parts and a note. |
-| 3 | 제목 | 다른 앱의 운동도 / 잔디가 됩니다 | Workouts from other apps / count too |
+| 3 | 제목 | 다른 앱의 운동도 / 칸을 채웁니다 | Workouts from other apps / count too |
 | 3 | 본문 | 다음 화면에서 건강 앱 접근을 허용해 주세요. 허용하지 않아도 워치 기록과 직접 기록은 그대로 쓸 수 있습니다. | Allow access to Health on the next screen. If you don't, watch workouts and manual entries still work. |
 
 제목의 `/` 는 줄바꿈이다. 2장의 작은 글씨는 흐름 B(보강)를 알리는 한 줄이다 — 운동이 끝났을 때 앱이 먼저 묻지 않으므로
@@ -486,7 +486,7 @@ W0 운동 시작 → W1 세션 → 전환 1탭(햅틱) → W2 저장
 | **세그먼트** | 한 세션 안의 근력/유산소 구간 | 인터벌, 랩 |
 | **부위** | 근력 대상 신체 부위 6종 | 근육군, 파트 |
 | **버리기** | 워치 요약에서 저장하지 않고 폐기 | 저장 안 함, 폐기 |
-| **잔디** | 일별 운동 히트맵 | 캘린더 히트맵 |
+| **잔디** | 일별 운동 히트맵. **스펙 · 코드 안의 이름이다** — 사용자에게 보이는 한국어 문구는 **`칸`**(`한 칸씩 채워진다`, `연간 기록`). 많은 사람이 `잔디`를 모른다고 보고 2026-10-19 에 화면 · 스토어 문구에서 뺐다 (스토어 키워드에만 남김). 영어는 `grid` · `square` | 캘린더 히트맵, 화면 문구의 `잔디` · `그리드` |
 
 ---
 

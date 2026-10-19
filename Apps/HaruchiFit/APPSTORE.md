@@ -10,7 +10,7 @@
 ### ko
 
 ```
-하루치 핏 — 운동 잔디 기록
+하루치 핏 — 하루 한 칸 운동 기록
 ```
 
 ### en-US
@@ -38,7 +38,7 @@ Strength & cardio, one workout
 ### ko
 
 ```
-운동기록,헬스,헬스장,근력,웨이트,유산소,러닝,습관,루틴,오운완,애플워치,워치,칼로리,심박수,건강,피트니스,달력,통계
+운동기록,헬스,헬스장,근력,웨이트,유산소,러닝,습관,루틴,오운완,애플워치,잔디,칼로리,심박수,건강,피트니스,달력,통계
 ```
 
 ### en-US
@@ -52,7 +52,7 @@ gym,strength,cardio,weights,lifting,habit,tracker,heatmap,calendar,watch,log,fit
 ### ko
 
 ```
-운동한 날마다 잔디 한 칸. 애플워치에서 시작하면 근력과 유산소가 나뉘어 기록되고, 폰을 꺼내지 않아도 잔디가 채워집니다.
+운동한 날마다 한 칸. 애플워치에서 시작하면 근력과 유산소가 나뉘어 기록되고, 폰을 꺼내지 않아도 칸이 채워집니다.
 ```
 
 ### en-US
@@ -66,9 +66,9 @@ One square for every day you work out. Start on Apple Watch, switch between stre
 ### ko
 
 ```
-운동하면 잔디가 자랍니다.
+운동한 날마다 한 칸씩 채워집니다.
 
-하루치 핏은 운동한 날을 잔디 한 칸으로 남기는 기록 앱입니다.
+하루치 핏은 운동한 날을 하루 한 칸으로 남기는 기록 앱입니다.
 애플워치에서 운동을 시작하고 끝내면 그날의 칸이 채워집니다.
 폰은 꺼내지 않아도 됩니다.
 
@@ -87,10 +87,10 @@ One square for every day you work out. Start on Apple Watch, switch between stre
 • 문자판 컴플리케이션에서 한 번 탭으로 실행
 
 
-■ 쌓이는 잔디
+■ 쌓이는 칸
 
-• 운동 시간이 길수록 진해지는 4단계 잔디
-• 지난 잔디는 사라지지 않고 연도별로 보관
+• 운동 시간이 길수록 진해지는 4단계 칸
+• 지난 칸은 사라지지 않고 연도별로 보관
 • 월별 · 요일별 패턴과 근력 · 유산소 비율
 
 
@@ -98,7 +98,7 @@ One square for every day you work out. Start on Apple Watch, switch between stre
 
 • 세트와 무게는 적지 않습니다. 부위 태그와 메모면 충분합니다
 • 워치 없이 운동한 날은 직접 추가
-• 건강 앱에 있던 운동을 가져와 잔디를 채웁니다
+• 건강 앱에 있던 운동을 가져와 칸을 채웁니다
 • 기록 카드를 인스타그램 스토리나 메시지로 공유
 
 
@@ -152,7 +152,7 @@ Made for people who go to the gym a few times a week and want to keep it simple.
 ### ko
 
 ```
-하루치 핏의 첫 버전입니다. 운동한 날마다 잔디 한 칸씩 채워 보세요.
+하루치 핏의 첫 버전입니다. 운동한 날마다 한 칸씩 채워 보세요.
 ```
 
 ### en-US
