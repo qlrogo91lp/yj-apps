@@ -49,6 +49,7 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
 | ~~13~~ | ~~iOS 건강 쓰기 권한 문구를 삭제 연동 문구로 맞춤~~ | E | **완료** ([PR #34](https://github.com/qlrogo91lp/yj-apps/pull/34)) | — |
 | ~~14~~ | ~~매치 화면의 `WorkoutSessionViewModel` 의존 끊기 (iOS + 워치)~~ | — | **완료** ([PR #37](https://github.com/qlrogo91lp/yj-apps/pull/37)) · 수동 확인 대기 | [플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-10-06-match-view-dependency-cut.md) — Notion 폴더 재정비 논의의 B안. 폴더 이동(A안)·`MatchFlowView` 분리는 별도 판단 |
 | ~~15~~ | ~~매치 폴더를 `WorkoutSession/` 하위로 이동 (iOS + 워치, A안)~~ | — | **완료** ([PR #39](https://github.com/qlrogo91lp/yj-apps/pull/39)) | [플랜 2단계](Apps/TennisCounter/docs/plans/shared/2026/2026-10-06-match-view-dependency-cut.md) — 코드 변경 없음, 폴더 rename 32건 + 구조 문서·규칙 예시 갱신 |
+| 16 | **개인정보처리방침에 Crashlytics 반영 (yjlogs)** — #7 이 든 버전을 **배포하기 전에** | — | **예정** — 지금 방침은 "no analytics SDKs, no third-party tracking" 이라 Crashlytics(크래시 리포트를 Firebase 로 전송)와 어긋난다. #7 버전은 아직 배포 전이라 지금은 틀리지 않았다. 크래시 데이터 문단 추가 · 해당 문장 수정 · 시행일 갱신. ASC 앱 개인정보는 10-02 에 이미 반영 | yjlogs `apps/web/src/app/(main)/apps/ralli/privacy/page.tsx` |
 
 ### 집 맥북에서 할 것
 
