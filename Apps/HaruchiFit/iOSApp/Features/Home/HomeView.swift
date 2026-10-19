@@ -20,7 +20,7 @@ struct HomeView: View {
                 VStack(alignment: .leading, spacing: 20) {
                     GrassHero(days: home.gridDays, level: { grass.level(on: $0) }, today: home.today)
                     VStack(spacing: 20) {
-                        AccumulationStats(month: home.dashboard.monthStat, total: home.dashboard.totalStat)
+                        AccumulationStats(month: home.dashboard.monthStat, streak: home.dashboard.streak)
                         WeekCompositionBar(week: home.dashboard.week,
                                            milestone: home.dashboard.milestone,
                                            emptyText: home.dashboard.emptyWeekText)

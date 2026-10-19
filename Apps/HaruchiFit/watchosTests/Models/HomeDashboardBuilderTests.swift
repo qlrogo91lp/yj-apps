@@ -10,9 +10,14 @@ struct HomeDashboardBuilderTests {
     private let calendar = GrassFixture.seoul
     private let locale = Locale(identifier: "ko_KR")
 
-    private func dashboard(_ records: [WorkoutRecord], calendar: Calendar? = nil) -> HomeDashboard {
-        HomeDashboardBuilder.dashboard(from: records, now: now,
+    private func dashboard(_ records: [WorkoutRecord], calendar: Calendar? = nil, now: Date? = nil) -> HomeDashboard {
+        HomeDashboardBuilder.dashboard(from: records, now: now ?? self.now,
                                        calendar: calendar ?? self.calendar, locale: locale)
+    }
+
+    /// 날짜마다 30분짜리 기록 하나.
+    private func records(on dates: [Date], in context: ModelContext) -> [WorkoutRecord] {
+        dates.map { GrassFixture.record(in: context, startedAt: $0, totalSeconds: 1800) }
     }
 
     /// 이번 주(10/5·10/6)에 구간이 있는 두 건 + 구간 없는 한 건 = 3회.
@@ -33,7 +38,7 @@ struct HomeDashboardBuilderTests {
     func emptyHistoryShowsFirstMilestone() {
         let result = dashboard([])
         #expect(result.monthStat == .init(countText: "0회", durationText: "0분"))
-        #expect(result.totalStat == .init(countText: "0회", durationText: "0분"))
+        #expect(result.streak == .init(countText: "0주", detailText: "이번 주에 시작해 보세요"))
         #expect(result.week == nil)
         #expect(result.emptyWeekText == nil)
         #expect(result.milestone == "워치에서 첫 운동을 기록해 보세요")
@@ -65,17 +70,6 @@ struct HomeDashboardBuilderTests {
                        GrassFixture.record(in: context, startedAt: GrassFixture.date(2026, 10, 1, 0, 10), totalSeconds: 1800)]
         let result = dashboard(records)
         #expect(result.monthStat.countText == "1회")
-        #expect(result.totalStat.countText == "2회")
-    }
-
-    @Test("전체 누적은 오래된 기록도 센다")
-    func totalStatSpansAllHistory() throws {
-        let context = try GrassFixture.makeContext()
-        let records = [GrassFixture.record(in: context, startedAt: GrassFixture.date(2025, 10, 6), totalSeconds: 3600),
-                       GrassFixture.record(in: context, startedAt: GrassFixture.date(2026, 10, 6), totalSeconds: 1800)]
-        let result = dashboard(records)
-        #expect(result.totalStat == .init(countText: "2회", durationText: "1.5시간"))
-        #expect(result.monthStat == .init(countText: "1회", durationText: "30분"))
     }
 
     @Test("1시간 미만은 분, 이상은 소수 첫째 자리 시간으로 쓴다")
@@ -83,8 +77,67 @@ struct HomeDashboardBuilderTests {
         let context = try GrassFixture.makeContext()
         let short = [GrassFixture.record(in: context, startedAt: GrassFixture.date(2026, 10, 6), totalSeconds: 2400)]
         let long = [GrassFixture.record(in: context, startedAt: GrassFixture.date(2026, 10, 6), totalSeconds: 5400)]
-        #expect(dashboard(short).totalStat.durationText == "40분")
-        #expect(dashboard(long).totalStat.durationText == "1.5시간")
+        #expect(dashboard(short).monthStat.durationText == "40분")
+        #expect(dashboard(long).monthStat.durationText == "1.5시간")
+    }
+
+    // MARK: - 연속 (주 단위). 서울 달력은 일요일 시작 — 이번 주 10/4~10/10, 지난주 9/27~10/3.
+
+    @Test("이번 주까지 채운 주를 거슬러 센다")
+    func streakCountsThroughThisWeek() throws {
+        let context = try GrassFixture.makeContext()
+        let result = dashboard(records(on: [GrassFixture.date(2026, 9, 15), GrassFixture.date(2026, 9, 29),
+                                            GrassFixture.date(2026, 10, 5)], in: context))
+        // 9/13 주 · (9/20 주 비어 있음) · 9/27 주 · 10/4 주 → 지금 2주, 최장 2주
+        #expect(result.streak == .init(countText: "2주", detailText: "최장 2주"))
+    }
+
+    @Test("이번 주를 아직 안 채웠으면 지난주까지 센다 — 주가 끝나기 전에는 끊지 않는다")
+    func streakKeepsLastWeekUntilThisWeekEnds() throws {
+        let context = try GrassFixture.makeContext()
+        let result = dashboard(records(on: [GrassFixture.date(2026, 9, 22), GrassFixture.date(2026, 9, 29)], in: context))
+        #expect(result.streak.countText == "2주")
+    }
+
+    @Test("지난주와 이번 주가 모두 비면 0주이고 시작 안내가 나온다")
+    func streakBreaksAfterAnEmptyWeek() throws {
+        let context = try GrassFixture.makeContext()
+        let result = dashboard(records(on: [GrassFixture.date(2026, 9, 1), GrassFixture.date(2026, 9, 8),
+                                            GrassFixture.date(2026, 9, 15)], in: context))
+        #expect(result.streak == .init(countText: "0주", detailText: "이번 주에 시작해 보세요"))
+    }
+
+    @Test("최장 기록은 지금 연속과 따로 센다")
+    func streakBestIsLongestRun() throws {
+        let context = try GrassFixture.makeContext()
+        // 8/2 · 8/9 · 8/16 · 8/23 주 4주 연속, 끊기고, 10/4 주 1주
+        let result = dashboard(records(on: [GrassFixture.date(2026, 8, 3), GrassFixture.date(2026, 8, 10),
+                                            GrassFixture.date(2026, 8, 17), GrassFixture.date(2026, 8, 24),
+                                            GrassFixture.date(2026, 10, 6)], in: context))
+        #expect(result.streak == .init(countText: "1주", detailText: "최장 4주"))
+    }
+
+    @Test("한 주에 여러 번 운동해도 한 주로 센다")
+    func streakCountsWeeksNotWorkouts() throws {
+        let context = try GrassFixture.makeContext()
+        #expect(dashboard(thisWeekRecords(in: context)).streak.countText == "1주")
+    }
+
+    @Test("미래 기록은 연속에 넣지 않는다")
+    func streakIgnoresFutureRecords() throws {
+        let context = try GrassFixture.makeContext()
+        let result = dashboard(records(on: [GrassFixture.date(2026, 10, 12)], in: context))
+        #expect(result.streak.countText == "0주")
+    }
+
+    @Test("연말연시를 넘어도 이어진다")
+    func streakCrossesYearBoundary() throws {
+        let context = try GrassFixture.makeContext()
+        // 12/21 주 · 12/28 주(1/3 까지) · 1/4 주
+        let result = dashboard(records(on: [GrassFixture.date(2025, 12, 23), GrassFixture.date(2025, 12, 30),
+                                            GrassFixture.date(2026, 1, 5)], in: context),
+                               now: GrassFixture.date(2026, 1, 6))
+        #expect(result.streak == .init(countText: "3주", detailText: "최장 3주"))
     }
 
     @Test("주간 구성은 이번 주 구간을 종류별로 합친다")

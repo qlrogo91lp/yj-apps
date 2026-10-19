@@ -71,7 +71,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "It will be imported from Apple Health on the next sync. The strength and cardio split may be lost."
+            "value" : "It will be imported from Apple Health on the next sync. The lift and cardio split may be lost."
           }
         },
         "ko" : {
@@ -842,19 +842,19 @@
         }
       }
     },
-    "home_stat_total" : {
+    "home_stat_streak" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "All Time"
+            "value" : "Streak"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "전체 누적"
+            "value" : "연속"
           }
         }
       }
@@ -1171,7 +1171,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tap the top-left icon when you move from strength to cardio. Both are recorded in one workout."
+            "value" : "Tap the top-left icon when you move from lifting to cardio. Both are recorded in one workout."
           }
         },
         "ko" : {
@@ -1409,7 +1409,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No workouts with a strength or cardio split"
+            "value" : "No workouts with lift or cardio time"
           }
         },
         "ko" : {

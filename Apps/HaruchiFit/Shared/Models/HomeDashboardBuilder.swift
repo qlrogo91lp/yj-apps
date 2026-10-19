@@ -33,7 +33,7 @@ enum HomeDashboardBuilder {
 
         return HomeDashboard(monthTitle: DisplayDateFormat.homeMonthTitle(for: now, calendar: calendar, locale: locale),
                              monthStat: stat(of: thisMonth),
-                             totalStat: stat(of: records),
+                             streak: streak(of: records, now: now, calendar: calendar),
                              week: week,
                              milestone: milestone,
                              emptyWeekText: emptyWeekText)
@@ -53,6 +53,38 @@ enum HomeDashboardBuilder {
     private static func milestoneText(recordCount: Int) -> String {
         if recordCount == 0 { return String(localized: "home_milestone_first", table: "Shared") }
         return String(localized: "home_milestone_progress \(compositionThreshold) \(compositionThreshold - recordCount)", table: "Shared")
+    }
+
+    /// 기록이 하나라도 있는 주를 "채운 주"로 보고 이번 주부터 거슬러 센다.
+    /// **이번 주가 아직 비어 있으면 지난주부터 센다** — 주가 끝나기 전에 0 으로 떨어뜨리지 않는다.
+    static func streak(of records: [WorkoutRecord], now: Date, calendar: Calendar) -> HomeDashboard.Streak {
+        let weeks = Set(records.filter { $0.startedAt <= now }
+            .compactMap { calendar.dateInterval(of: .weekOfYear, for: $0.startedAt)?.start })
+        let thisWeek = calendar.dateInterval(of: .weekOfYear, for: now)?.start
+        var cursor = thisWeek.flatMap { weeks.contains($0) ? $0 : previousWeek(of: $0, calendar: calendar) }
+        var current = 0
+        while let week = cursor, weeks.contains(week) {
+            current += 1
+            cursor = previousWeek(of: week, calendar: calendar)
+        }
+
+        var best = 0
+        var run = 0
+        var previous: Date?
+        for week in weeks.sorted() {
+            run = previous.flatMap { calendar.date(byAdding: .weekOfYear, value: 1, to: $0) } == week ? run + 1 : 1
+            best = max(best, run)
+            previous = week
+        }
+
+        return .init(countText: String(localized: "streak_weeks \(current)", table: "Shared"),
+                     detailText: current == 0
+                         ? String(localized: "streak_start", table: "Shared")
+                         : String(localized: "streak_best \(best)", table: "Shared"))
+    }
+
+    private static func previousWeek(of week: Date, calendar: Calendar) -> Date? {
+        calendar.date(byAdding: .weekOfYear, value: -1, to: week)
     }
 
     private static func stat(of records: [WorkoutRecord]) -> HomeDashboard.Stat {

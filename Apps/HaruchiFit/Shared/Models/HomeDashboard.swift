@@ -6,7 +6,9 @@ struct HomeDashboard: Equatable {
     /// `10월 2026`. 오늘이 속한 달이다.
     let monthTitle: String
     let monthStat: Stat
-    let totalStat: Stat
+    /// 운동한 주가 몇 주 이어졌나. `전체 누적`을 대신한다 — 건강 앱 과거 기록을 가져와 첫날부터 수백 회가 되고
+    /// 오늘 운동해도 변화가 안 보여서다 (스펙 02절, 2026-10-20 개정).
+    let streak: Streak
     /// 이번 주 운동 구성. 전체 기록이 3회 미만이거나 이번 주 기록이 없으면 nil.
     let week: WeekComposition?
     /// 전체 기록이 3회 미만일 때 구성 바 자리에 나오는 한 줄.
@@ -18,6 +20,12 @@ struct HomeDashboard: Equatable {
     struct Stat: Equatable {
         let countText: String
         let durationText: String
+    }
+
+    /// `12주` · 아래 줄은 `최장 20주`. 지금 연속이 0이면 아래 줄은 시작 안내다.
+    struct Streak: Equatable {
+        let countText: String
+        let detailText: String
     }
 
     struct WeekComposition: Equatable {
