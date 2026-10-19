@@ -1,6 +1,6 @@
 # 01 온보딩 구현 계획
 
-상태: 사용자 검토 전 (2026-10-13 작성).
+상태: 구현 완료 (2026-10-13). 자동 검증 통과, 시뮬레이터 수동 확인(2·3장, 언어별, 권한 흐름)이 남았다.
 스펙: [제품 스펙 01절](../../../specs/shared/2026/2026-09-02-haruchi-fit-product-spec.md#01-온보딩-3장) (2026-10-13 개정)
 선례: Ralli `Apps/TennisCounter/iOSApp/Features/Onboarding/` — 루트 교체 · 버전 번호 판정 · 현지화 이미지 세트
 
@@ -38,7 +38,7 @@
   | `btn_next` · `btn_continue` | 아래 버튼 |
 
   제목의 줄바꿈은 값에 `\n` 으로 넣는다.
-- Create: `iOSApp/Assets.xcassets/OnboardingWatch.imageset/` — `Contents.json`(`localizable: true`) + `watch-ko.png` · `watch-en.png`.
+- Create: `iOSApp/Assets.xcassets/OnboardingWatch.imageset/` — `Contents.json` + `watch.png` 한 장 (10-17 변경: 영어 화면 하나를 두 언어에 쓴다. 원래는 ko · en 두 장).
 
 **이미지 규격 (피그마에서 뽑을 때):** 세로 **4:5**, 1200 × 1500 px PNG. 배경은 앱 배경색 `#1C1C18` 로 채운다.
 워치 프레임 안에 W1a 지표 화면(근력 모드)을 합성하고, 왼쪽 위 모드 아이콘이 프레임에 가려지지 않게 한다.
@@ -106,3 +106,9 @@
 - 구현은 `feat/haruchi-onboarding` 브랜치. 커밋은 Task 단위로 나눈다 —
   ① 판정 규칙과 테스트 ② 문자열 · 이미지 · 화면 ③ 루트 연결 ④ 문서.
 - PR 을 올리고, 머지는 사용자 확인 뒤 `gh pr merge <n> --merge --delete-branch`.
+
+## 구현 중 판단과 확인 상태
+
+- 2장 이미지(`watch.png`)는 **실제 워치 시뮬레이터 캡처(영어)** 를 워치 프레임에 합성한 것이다 (10-17). 한국어 · 영어 모두 같은 이미지를 쓴다 — 사용자 결정. 강조 고리 위치(`ringCenter`)는 이 이미지에 맞춰 있다.
+- 확인함: 새로 설치하면 1장이 뜨고 권한 시트는 뜨지 않는다 (한국어).
+- **남음:** (2장 이미지는 위 항목으로 해결됨) 2·3장 화면, `계속` → 권한 시트 → 홈, 재실행 시 온보딩 미표시, 영어, 동작 줄이기.

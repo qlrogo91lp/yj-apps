@@ -78,6 +78,7 @@ iOSApp/
   Features/Records/                  달력/주 단위 기록 목록 · 스와이프 삭제
     Calendar/                         월 이동 · 일별 농도 · 날짜별 기록
     Detail/                           기록 상세 하프 시트 · 부위 태깅 · 메모
+  Features/Onboarding/               첫 실행 3장(컨셉·워치·권한) — 루트 교체, 판정은 Shared/Models/OnboardingGate
   Features/Statistics/               후속 작업이 채울 탭 화면
     Components/                      연도 선택 · 연 잔디 · 요약 · 차트 · 마일스톤
   Services/

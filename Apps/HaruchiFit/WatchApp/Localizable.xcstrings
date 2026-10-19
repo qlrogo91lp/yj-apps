@@ -1,6 +1,9 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%lld" : {
+
+    },
     "btn_cancel" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -52,6 +55,23 @@
         }
       }
     },
+    "start_kind_cardio_short" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cardio"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "유산소"
+          }
+        }
+      }
+    },
     "start_kind_label" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -65,6 +85,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "시작 운동"
+          }
+        }
+      }
+    },
+    "start_kind_strength_short" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lift"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "근력"
           }
         }
       }

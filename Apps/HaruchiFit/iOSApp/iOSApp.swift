@@ -9,6 +9,7 @@ struct HaruchiFitApp: App {
     /// CloudKit 엔타이틀먼트가 아직 없다 — 팩토리가 조용히 로컬로 폴백한다 (PersistenceCore README).
     private let container = PersistenceContainerFactory.make(for: [WorkoutRecord.self, Segment.self])
     @Environment(\.scenePhase) private var scenePhase
+    @AppStorage("onboardingSeenVersion") private var onboardingSeenVersion = 0
     @StateObject private var connectivity: HaruchiFitConnectivity
     @StateObject private var sync: WorkoutSyncCoordinator
     @StateObject private var alerts: AppAlertCenter
@@ -32,18 +33,36 @@ struct HaruchiFitApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .preferredColorScheme(.dark)
-                .modelContainer(container)
-                .environmentObject(sync)
-                .environmentObject(alerts)
-                .onReceive(connectivity.$receivedRecord.compactMap(\.self)) { save($0) }
-                .onChange(of: scenePhase, initial: true) { _, phase in
-                    // onChange 는 기본으로 초기값을 넘기지 않는다. 콜드 런치도 포그라운드 진입이다.
-                    guard phase == .active else { return }
-                    Task { await sync.sync() }
+            Group {
+                if showsOnboarding {
+                    OnboardingView(onFinished: finishOnboarding)
+                } else {
+                    ContentView()
                 }
+            }
+            .preferredColorScheme(.dark)
+            .modelContainer(container)
+            .environmentObject(sync)
+            .environmentObject(alerts)
+            // 온보딩 중에도 워치 기록은 저장한다
+            .onReceive(connectivity.$receivedRecord.compactMap(\.self)) { save($0) }
+            .onChange(of: scenePhase, initial: true) { _, phase in
+                // onChange 는 기본으로 초기값을 넘기지 않는다. 콜드 런치도 포그라운드 진입이다.
+                // 온보딩을 마치기 전에는 동기화를 돌리지 않는다 — 동기화가 건강 권한을 요청하기 때문이다.
+                guard phase == .active, !showsOnboarding else { return }
+                Task { await sync.sync() }
+            }
         }
+    }
+
+    private var showsOnboarding: Bool {
+        OnboardingGate.shouldShow(seenVersion: onboardingSeenVersion)
+    }
+
+    /// 본 버전을 먼저 남기고 첫 동기화를 돌린다 — 권한 시트가 뜬 채 앱이 꺼져도 다시 온보딩이 뜨지 않는다.
+    private func finishOnboarding() {
+        onboardingSeenVersion = OnboardingGate.version
+        Task { await sync.sync() }
     }
 
     /// 워치가 보낸 기록을 저장한다.

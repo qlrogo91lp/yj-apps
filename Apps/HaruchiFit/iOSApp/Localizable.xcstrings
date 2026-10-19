@@ -1,6 +1,19 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%@, %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@, %2$@"
+          }
+        }
+      }
+    },
+    "%lld" : {
+
+    },
     "alert_delete_failed_title" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -137,6 +150,23 @@
         }
       }
     },
+    "btn_continue" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "계속"
+          }
+        }
+      }
+    },
     "btn_delete" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -184,6 +214,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "편집"
+          }
+        }
+      }
+    },
+    "btn_next" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다음"
           }
         }
       }
@@ -1029,6 +1076,125 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "언제"
+          }
+        }
+      }
+    },
+    "onboarding_concept_body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every day you work out fills one square. Come back and watch it grow."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "운동한 날마다 한 칸씩 채워집니다. 쌓여 가는 잔디를 보러 오세요."
+          }
+        }
+      }
+    },
+    "onboarding_concept_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Work out,\ngrow your grid"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "운동하면\n잔디가 자랍니다"
+          }
+        }
+      }
+    },
+    "onboarding_health_body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allow access to Health on the next screen. If you don't, watch workouts and manual entries still work."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다음 화면에서 건강 앱 접근을 허용해 주세요. 허용하지 않아도 워치 기록과 직접 기록은 그대로 쓸 수 있습니다."
+          }
+        }
+      }
+    },
+    "onboarding_health_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Workouts from other apps\ncount too"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다른 앱의 운동도\n잔디가 됩니다"
+          }
+        }
+      }
+    },
+    "onboarding_watch_body" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap the top-left icon when you move from strength to cardio. Both are recorded in one workout."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "근력에서 유산소로 넘어갈 때 왼쪽 위 아이콘을 누르세요. 한 번의 운동에 둘 다 기록됩니다."
+          }
+        }
+      }
+    },
+    "onboarding_watch_note" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afterward, tap the workout on your iPhone to add body parts and a note."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "운동이 끝나면 폰에서 기록을 눌러 부위와 메모를 남길 수 있습니다."
+          }
+        }
+      }
+    },
+    "onboarding_watch_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start on your watch,\nswitch with one tap"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "워치에서 시작하고\n탭 한 번으로 전환"
           }
         }
       }

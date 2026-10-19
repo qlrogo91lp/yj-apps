@@ -11,7 +11,7 @@ struct StatisticsYearPicker: View {
             HStack(spacing: 8) {
                 ForEach(years, id: \.self) { year in
                     Button { onSelect(year) } label: {
-                        Text("\(year)")
+                        Text(String(year))
                             .font(.headline)
                             .foregroundStyle(year == selectedYear ? HaruchiPalette.bg : HaruchiPalette.text)
                             .frame(minWidth: 58, minHeight: 44)

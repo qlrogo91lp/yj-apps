@@ -60,7 +60,7 @@ struct SessionView: View {
         WorkoutModeSelection(
             options: SegmentKind.allCases.enumerated().map { index, kind in
                 WorkoutModeOption(id: index,
-                                  title: kind.title,
+                                  title: kind.shortTitle,
                                   tint: tint(for: kind))
             },
             selectedID: SegmentKind.allCases.firstIndex(of: viewModel.mode) ?? 0,
