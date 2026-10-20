@@ -241,7 +241,7 @@ Phase 2 코드 구현은 끝났고 HealthKit import 실기기 확인이 남았�
 | 3 | String Catalog 전환 (iOS · 워치 · 컴플리케이션) | **머지 완료 (10-13, [PR #52](https://github.com/qlrogo91lp/yj-apps/pull/52))** — 자동 검증 통과, 언어별 시뮬레이터 수동 확인 남음 | [플랜](Apps/HaruchiFit/docs/plans/shared/2026/2026-10-12-string-catalog.md) · 선례 [Ralli 플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-07-string-catalog-migration.md) |
 | 4 | 01 온보딩 (3장 — 컨셉 · 워치 · 권한) | **머지 완료 (10-19, [PR #53](https://github.com/qlrogo91lp/yj-apps/pull/53))** · 시뮬레이터 확인 완료 (영어·동작 줄이기 포함 여부는 미기록) | [스펙 01절](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-02-haruchi-fit-product-spec.md#01-온보딩-3장) · [플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-10-13-onboarding.md) |
 | ~~—~~ | ~~홈 `n주 연속` 스탯 · 영어 근력 표기 `Lift` 통일 · 누적 카드 넘침~~ | **머지 완료 (10-20, [PR #56](https://github.com/qlrogo91lp/yj-apps/pull/56))** · 실기기 화면 확인 완료 | 스펙 02절 · 9절 · 10절 (10-20 개정) |
-| — | 공유 카드 — 제목 `Haruchi Fit` · 헤더 아래 구성 막대 · 로고 여백 60% (YJKit 자리 추가) | **스펙·플랜 작성 (10-20)** · 구현 전 (`feat/haruchi-share-composition`) | 스펙 06절 · 아키텍처 D-M2 (10-20 개정) · [플랜](Apps/HaruchiFit/docs/plans/shared/2026/2026-10-20-share-card-composition.md) |
+| — | 공유 카드 — 제목 `Haruchi Fit` · 헤더 아래 구성 막대 · 로고 여백 60% (YJKit 자리 추가) | **코드 구현·로컬 검증 완료 (10-21, `feat/haruchi-share-composition`)** · 시뮬레이터 카드 확인·실기기 확인 대기 | 스펙 06절 · 아키텍처 D-M2 (10-20 개정) · [플랜](Apps/HaruchiFit/docs/plans/shared/2026/2026-10-20-share-card-composition.md) |
 | — | 출시 체크리스트 (결정 3 · 코드 · ASC · 스크린샷 · 빌드·제출) | **목록화 완료 (10-19)** · 사용자 검토 전 — CloudKit 1.0 제외 · 앱 안 방침 링크 1.0 제외 결정 (10-19), 남은 결정 1개(방침 · 지원 URL) 대기 | [체크리스트](Apps/HaruchiFit/docs/plans/shared/2026/2026-10-19-release-checklist.md) |
 
 ### 집 맥북에서 할 것

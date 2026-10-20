@@ -1,7 +1,7 @@
 # 하루치 핏 — 공유 카드 구성 막대 · 브랜드 제목 · 로고 여백 구현 플랜
 
 작성일: 2026-10-20
-상태: **검토 대기**
+상태: **코드 구현·로컬 검증 완료 (10-21) · 시뮬레이터 카드 확인·실기기 확인 대기**
 
 작업 브랜치: `feat/haruchi-share-composition`
 
@@ -127,7 +127,7 @@
 
 ## Task 1 — YJKit 헤더 아래 자리 (TDD, 패키지 테스트)
 
-- [ ] **Step 1: 실패하는 테스트 작성**
+- [x] **Step 1: 실패하는 테스트 작성**
 
 | 파일 | 테스트 | 기대 |
 |---|---|---|
@@ -139,34 +139,34 @@
 
 기존 `imageIsCardSized` 등은 그대로 둔다 — 자리 없는 경로의 회귀 테스트다.
 
-- [ ] **Step 2: RED 확인**
+- [x] **Step 2: RED 확인**
 
 ```bash
 IOS=$(.github/scripts/pick-simulator.sh iOS '^iPhone')
 make kit-test KIT_DESTINATION="id=$IOS"
 ```
 
-- [ ] **Step 3: 구현** — `ShareCanvas` → `WorkoutShareCard` → `WorkoutShareRenderer` → `WorkoutShareButton` 순.
+- [x] **Step 3: 구현** — `ShareCanvas` → `WorkoutShareCard` → `WorkoutShareRenderer` → `WorkoutShareButton` 순.
   카드는 `VStack(spacing: 14) { header; if let accessory { accessory.frame(ShareCanvas.accessorySize, alignment: .topLeading).clipped() }; metrics }`,
   프레임 높이는 `ShareCanvas.cardSize(hasAccessory: accessory != nil)`
 - [x] **Step 4: 자리 높이 확정** — 카드 프리뷰에 막대(10pt) + 문구(11pt 한 줄)와 같은 높이의 자리 내용을 넣어 렌더하고,
   자리 아래 지표 두 줄이 기존 카드와 같은 아래 여백을 갖는 높이를 고른다. **확정: 자리 30pt · 카드 244pt** (D2 · 스펙 06절에 반영)
-- [ ] **Step 5: GREEN + Ralli 빌드**
+- [x] **Step 5: GREEN + Ralli 빌드**
 
 ```bash
 make kit-test KIT_DESTINATION="id=$IOS"
 xcodebuild -workspace YJApps.xcworkspace -scheme TennisCounter -destination "id=$IOS" build
 ```
 
-- [ ] **Step 6: README** — 사용법에 자리 예시 한 단락, "카드는 1080×800" 문장을 "자리 없으면 1080×800, 있으면 1080×(확정값)" 으로
-- [ ] **Step 7: 커밋** — `✨ feat: 공유 카드 헤더 아래에 앱이 채우는 자리를 연다`
+- [x] **Step 6: README** — 사용법에 자리 예시 한 단락, "카드는 1080×800" 문장을 "자리 없으면 1080×800, 있으면 1080×(확정값)" 으로
+- [x] **Step 7: 커밋** — `✨ feat: 공유 카드 헤더 아래에 앱이 채우는 자리를 연다`
 
 ## Task 2 — 구성 계산을 함수로 뽑기 (리팩터링, 워치 테스트)
 
-- [ ] **Step 1:** `RecordDetailBuilder` 에 `static func spans(for: WorkoutRecord) -> [RecordDetailSummary.Span]`
+- [x] **Step 1:** `RecordDetailBuilder` 에 `static func spans(for: WorkoutRecord) -> [RecordDetailSummary.Span]`
   (`orderedSegments` 중 0초 초과) · `static func compositionText(for: WorkoutRecord) -> String?` (`segmentChips` 텍스트를 ` · ` 로, 비면 nil) 를 뽑는다.
   `summary(for:)` 는 두 함수를 부른다 — 동작 변화 없음
-- [ ] **Step 2: 기존 `RecordDetailBuilderTests` 그대로 통과 확인**
+- [x] **Step 2: 기존 `RecordDetailBuilderTests` 그대로 통과 확인**
 
 ```bash
 WATCH=$(.github/scripts/pick-simulator.sh watchOS '^Apple Watch')
@@ -174,11 +174,11 @@ xcodebuild -workspace YJApps.xcworkspace -scheme HaruchiFitWatchTests -destinati
   -only-testing:HaruchiFitWatchTests/RecordDetailBuilderTests
 ```
 
-- [ ] **Step 3: 커밋** — `♻️ refactor: 하루치 기록 구성 계산을 상세 빌더 함수로 뽑는다`
+- [x] **Step 3: 커밋** — `♻️ refactor: 하루치 기록 구성 계산을 상세 빌더 함수로 뽑는다`
 
 ## Task 3 — 공유 값에 구성 넣기 (TDD, 워치 테스트)
 
-- [ ] **Step 1: 테스트 교체** — `RecordShareBuilderTests` 의 제목 테스트 4개(`strengthOnlyTitle` · `mixedTitleKeepsFirstSeenOrder` ·
+- [x] **Step 1: 테스트 교체** — `RecordShareBuilderTests` 의 제목 테스트 4개(`strengthOnlyTitle` · `mixedTitleKeepsFirstSeenOrder` ·
   `titleIgnoresSubMinuteKinds` · `noSegmentsTitleIsWorkout`)를 지우고 아래로. 스킴이 한국어 고정이라 기대값은 한국어다
 
 | 테스트 | 입력 | 기대 |
@@ -192,15 +192,15 @@ xcodebuild -workspace YJApps.xcworkspace -scheme HaruchiFitWatchTests -destinati
 
 시간·kcal·끝 시각 테스트 4개는 그대로 둔다.
 
-- [ ] **Step 2: RED 확인** (`-only-testing:HaruchiFitWatchTests/RecordShareBuilderTests`)
-- [ ] **Step 3: 구현** — `RecordShareContent.Composition` 추가, `RecordShareBuilder` 가 `Haruchi Fit` 과
+- [x] **Step 2: RED 확인** (`-only-testing:HaruchiFitWatchTests/RecordShareBuilderTests`)
+- [x] **Step 3: 구현** — `RecordShareContent.Composition` 추가, `RecordShareBuilder` 가 `Haruchi Fit` 과
   `compositionText(for:).map { Composition(spans: spans(for:), text: $0) }` 를 채운다. `Shared.xcstrings` 에서 `share_title_default` 삭제
-- [ ] **Step 4: GREEN + 워치 테스트 전체 통과**
-- [ ] **Step 5: 커밋** — `✨ feat: 하루치 공유 카드 값에 브랜드 제목과 운동 구성을 담는다`
+- [x] **Step 4: GREEN + 워치 테스트 전체 통과**
+- [x] **Step 5: 커밋** — `✨ feat: 하루치 공유 카드 값에 브랜드 제목과 운동 구성을 담는다`
 
 ## Task 4 — 카드에 막대 붙이기 · 로고 여백 (iOS)
 
-- [ ] **Step 1:** `ShareComposition` 작성 — `let composition: RecordShareContent.Composition`
+- [x] **Step 1:** `ShareComposition` 작성 — `let composition: RecordShareContent.Composition`
 
 ```swift
 VStack(alignment: .leading, spacing: 5) {
@@ -215,21 +215,21 @@ VStack(alignment: .leading, spacing: 5) {
 
   프리뷰 두 개 — 한국어 `근력 54분 · 유산소 18분`, 영어 `Lift 54 min · Cardio 18 min`
 
-- [ ] **Step 2:** `RecordShareButton` 에 `accessory: content.composition.map { ShareComposition(composition: $0) }`.
+- [x] **Step 2:** `RecordShareButton` 에 `accessory: content.composition.map { ShareComposition(composition: $0) }`.
   `haruchfit.svg` `viewBox` 를 `-57 -57 929 929` 로 (D4)
 - [ ] **Step 3: 카드 눈 확인** — `WorkoutShareCard` 는 패키지 internal 이라 앱에서 프리뷰할 수 없다. 시뮬레이터에서 기록 상세 → `공유…` → `사진에 저장`
   - 혼합 기록: 막대 색 순서가 상세 화면 막대와 같은지 · 문구가 상세의 운동 구성 문구와 같은지
   - 영어 기기: `Lift … · Cardio …` 가 잘리지 않는지 (Review Focus 3)
   - 1분 미만 기록: 막대 없이 기존 크기 카드 (D3)
   - 로고: 원 안 가운데 · 여백이 원형 컴플리케이션과 비슷한지 (Review Focus 5)
-- [ ] **Step 4: 빌드 · lint**
+- [x] **Step 4: 빌드 · lint**
 
 ```bash
 xcodebuild -workspace YJApps.xcworkspace -scheme HaruchiFit -destination "id=$IOS" build
 make lint && make format
 ```
 
-- [ ] **Step 5: 커밋** — `✨ feat: 하루치 공유 카드 머리줄 아래에 운동 구성 막대를 그린다`
+- [x] **Step 5: 커밋** — `✨ feat: 하루치 공유 카드 머리줄 아래에 운동 구성 막대를 그린다`
 
 ## Task 5 — 문서 갱신 · PR
 
