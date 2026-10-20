@@ -838,8 +838,8 @@
 				DEVELOPMENT_TEAM = P2TU28W32L;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_CFBundleDisplayName = Ralli;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Ralli uses HealthKit to track calories and heart rate during matches.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Ralli saves your tennis workout to Apple Health.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
@@ -874,8 +874,8 @@
 				DEVELOPMENT_TEAM = P2TU28W32L;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_CFBundleDisplayName = Ralli;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Ralli uses HealthKit to track calories and heart rate during matches.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Ralli saves your tennis workout to Apple Health.";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
@@ -913,8 +913,8 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "TennisCounter-Info.plist";
-				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_CFBundleDisplayName = Ralli;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.sports";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Ralli uses HealthKit to track calories and heart rate during matches.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Ralli removes deleted matches from your Apple Health workouts.";
@@ -959,8 +959,8 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "TennisCounter-Info.plist";
-				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_CFBundleDisplayName = Ralli;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.sports";
 				INFOPLIST_KEY_NSHealthShareUsageDescription = "Ralli uses HealthKit to track calories and heart rate during matches.";
 				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "Ralli removes deleted matches from your Apple Health workouts.";
