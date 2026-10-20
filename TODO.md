@@ -315,7 +315,7 @@ Phase 2 코드 구현은 끝났고 HealthKit import 실기기 확인이 남았�
 
 | 항목 | 상태 | 문서 |
 |---|---|---|
-| ~~**수출 규정 키** `ITSAppUsesNonExemptEncryption = NO` — 세 앱 iOS · 워치 타깃~~ | **완료 (10-19, `chore/export-compliance-key`)** · 다음 TestFlight 업로드에서 질문이 안 뜨는지 확인 — 업로드마다 뜨는 수출 규정 질문을 없앤다. 표준 암호화만 쓰므로 면제 | [하루치 출시 체크리스트](Apps/HaruchiFit/docs/plans/shared/2026/2026-10-19-release-checklist.md) 2절 |
+| ~~**수출 규정 키** `ITSAppUsesNonExemptEncryption = NO` — 세 앱 iOS · 워치 타깃~~ | **완료 (10-19, `chore/export-compliance-key`)** · TestFlight 업로드에서 질문이 안 뜨는 것 확인 (10-20, 하루치) — 업로드마다 뜨는 수출 규정 질문을 없앤다. 표준 암호화만 쓰므로 면제 | [하루치 출시 체크리스트](Apps/HaruchiFit/docs/plans/shared/2026/2026-10-19-release-checklist.md) 2절 |
 | **앱 프라이버시 매니페스트** `PrivacyInfo.xcprivacy` — 세 앱 | **예정 — 각 앱의 다음 배포 전** · 앱 자체 코드의 `UserDefaults` 사유 신고 (수집 데이터 없음). Ralli 의 Crashlytics 몫은 Firebase SDK 가 자기 매니페스트로 신고하므로 앱 쪽은 자체 코드만 적는다. 지금 세 앱 모두 없는데 심사는 통과했다 — 업로드를 막지는 않지만 ITMS-91053 경고 대상이다 | 같은 체크리스트 2절 |
 | **"새로운 기능" 시트** — Ralli · 하루치 (YJKit 공용 후보) | **브레인스토밍 전** · 온보딩을 다시 띄우지 않고, 업데이트한 기존 사용자에게 그 버전의 새 기능만 시트 한 장(1~3개 · `계속`)으로 보여 준다. 새로 설치한 사람은 온보딩만 본다. 판정은 온보딩처럼 "마지막으로 본 번호" — 건너뛴 버전은 모아서. 사용자가 알아야 쓸 수 있는 기능이 든 버전에만 띄운다. 온보딩 번호(`OnboardingGate.version`)는 온보딩 내용을 바꿀 때만 올린다. 첫 대상은 Ralli 다음 버전. 정할 것: YJKit 공용으로 만들지 · Ralli 에 먼저 만들지 | — |
 | **App Store 기본 언어를 영어로** — Ralli · 골프 | **예정 — 다음 배포 때** · **Ralli · 골프 모두 기본 언어가 한국어다** (10-20 확인). 이름은 고치지 않는다 — 기본 언어만 바꾸면 목록에도 기존 영어 이름이 나온다. 사용자 언어에 맞는 현지화가 없으면 App Store 는 기본 언어로 보여 주므로, 영어 · 한국어가 아닌 기기(독일 · 일본 등)에는 한국어 이름 · 설명이 보일 가능성이 크다 (Apple 문서 기준, 실기기 미확인). App Store Connect 앱 정보 → 기본 언어 → 영어(미국). 영어 현지화는 이미 있어 바로 고를 수 있고, 한국 사용자에게는 계속 한국어가 보인다. 하루치는 처음부터 영어 기본 | — |
