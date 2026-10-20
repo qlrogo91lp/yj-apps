@@ -66,9 +66,10 @@
   `init(result:header:style:appearance:accessory: Accessory?)` 를 더한다. 기존 시그니처는 `where Accessory == EmptyView` 확장에 남긴다.
   `@ViewBuilder` 클로저 대신 **옵셔널 값**인 이유 — 자리 유무가 카드 크기를 바꾸므로 패키지가 `nil` 로 분명히 알아야 한다.
   클로저 안의 `if` 는 `Optional<View>` 가 되어 타입으로는 비었는지 알 수 없다. 하루치는 `content.composition.map { ShareComposition(...) }` 한 줄로 넘긴다
-- **D2. 자리 높이는 패키지 상수, 카드 높이는 목표 240pt(1080×960px).** 자리는 폭 234pt(카드 270 − 좌우 패딩 18×2) · 높이 고정이고,
-  넘친 내용은 잘린다(`clipped`). 막대(10) + 간격 + 문구 한 줄(11pt)이 들어갈 높이로 잡고 카드 전체를 240 에 맞춘다.
-  **정확한 높이는 Task 1 Step 4 에서 렌더해 보고 확정**해 이 문서와 스펙 06절에 적는다(240 이 안 맞으면 4의 배수 px 가 되는 가장 가까운 값)
+- **D2. 자리 높이는 패키지 상수 30pt, 카드 높이는 244pt(1080×976px) — 렌더로 확정 (10-21).** 자리는 폭 234pt(카드 270 − 좌우 패딩 18×2) · 높이 고정이고,
+  넘친 내용은 잘린다(`clipped`). 카드 높이 = 기본 200 + 자리 30 + 간격 14.
+  처음 목표 240 은 막대(10) + 간격(5) + 문구 한 줄(약 14)이 빠듯해 244 로 늘렸다. 영어 `Lift 54 min · Cardio 18 min` 렌더에서
+  아래 여백이 기존 카드와 같고(96px) 문구가 폭 안에 들어옴을 확인했다
 - **D3. 1분 이상 종류가 없으면 `composition = nil` → 자리 없음.** 문구와 막대를 함께 빼고 1080×800 카드다. 막대만 홀로 남기지 않는다
 - **D4. 로고 여백은 SVG `viewBox` 로 준다.** `HaruchiLogo.imageset/haruchfit.svg` 의 `viewBox` 를 `0 0 815 815` → `-57 -57 929 929` 로.
   원 38pt 안 로고 프레임 26pt 에서 마크가 22.8pt(원의 60%)가 된다 — 원형 컴플리케이션 `.scaleEffect(0.6)` 과 같은 비율.
@@ -148,8 +149,8 @@ make kit-test KIT_DESTINATION="id=$IOS"
 - [ ] **Step 3: 구현** — `ShareCanvas` → `WorkoutShareCard` → `WorkoutShareRenderer` → `WorkoutShareButton` 순.
   카드는 `VStack(spacing: 14) { header; if let accessory { accessory.frame(ShareCanvas.accessorySize, alignment: .topLeading).clipped() }; metrics }`,
   프레임 높이는 `ShareCanvas.cardSize(hasAccessory: accessory != nil)`
-- [ ] **Step 4: 자리 높이 확정** — 카드 프리뷰에 막대(10pt) + 문구(11pt 한 줄)와 같은 높이의 자리 내용을 넣어 렌더하고,
-  자리 아래 지표 두 줄이 기존 카드와 같은 아래 여백을 갖는 높이를 고른다. 목표 카드 240pt. 확정값을 D2 · 스펙 06절에 적는다
+- [x] **Step 4: 자리 높이 확정** — 카드 프리뷰에 막대(10pt) + 문구(11pt 한 줄)와 같은 높이의 자리 내용을 넣어 렌더하고,
+  자리 아래 지표 두 줄이 기존 카드와 같은 아래 여백을 갖는 높이를 고른다. **확정: 자리 30pt · 카드 244pt** (D2 · 스펙 06절에 반영)
 - [ ] **Step 5: GREEN + Ralli 빌드**
 
 ```bash
@@ -238,5 +239,5 @@ make lint && make format
 ## 실기기 확인 (PR 뒤, 사용자)
 
 - 인스타 스토리에 `스티커로 복사` 한 카드를 붙여 막대 색이 사진 위에서 구분되는지 (`cardio` 파랑이 짙은 회색 위에서)
-- `공유…` → 네모 카드가 1080×960 비율로 들어가는지
+- `공유…` → 네모 카드가 1080×976 비율로 들어가는지
 - Ralli 공유 카드가 이전과 같은지 (크기 · 배치)

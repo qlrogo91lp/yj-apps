@@ -32,6 +32,29 @@
             }
         }
 
+        private let model = WorkoutShareCardModel(
+            result: WorkoutResult(durationSeconds: 9351, caloriesBurned: 1343,
+                                  averageHeartRate: 136, totalCaloriesBurned: 1584),
+            header: WorkoutShareHeader(title: "테니스", startedAt: Date(timeIntervalSince1970: 0),
+                                       endedAt: Date(timeIntervalSince1970: 9351))
+        )
+
+        /// 헤더 아래 자리가 있으면 카드가 더 높은 고정 크기로 구워진다.
+        @Test func accessoryImageUsesTallerCard() {
+            let image = WorkoutShareRenderer.image(model: model, style: style, accessory: Color.red)
+            let size = ShareCanvas.cardSize(hasAccessory: true)
+            #expect(image?.cgImage?.width == Int(size.width * ShareCanvas.scale))
+            #expect(image?.cgImage?.height == Int(size.height * ShareCanvas.scale))
+        }
+
+        /// 자리를 `nil` 로 넘기면 안 넘긴 것과 같은 크기다 — 하루치가 구성이 없는 기록에서 `nil` 을 넘긴다.
+        @Test func nilAccessoryMatchesNoAccessory() {
+            let none: Color? = nil
+            let withNil = WorkoutShareRenderer.image(model: model, style: style, accessory: none)
+            #expect(withNil?.cgImage?.height == image()?.cgImage?.height)
+            #expect(withNil?.cgImage?.width == image()?.cgImage?.width)
+        }
+
         /// 심박이 없어도 칸을 빼지 않으므로 크기가 같다.
         @Test func missingHeartRateKeepsSameSize() {
             #expect(image(heartRate: nil)?.cgImage?.height == image()?.cgImage?.height)

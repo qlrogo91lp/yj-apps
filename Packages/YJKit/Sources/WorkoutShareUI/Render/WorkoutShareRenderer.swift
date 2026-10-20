@@ -21,7 +21,16 @@
                           style: WorkoutShareStyle,
                           corners: ShareCardCorners = .rounded) -> UIImage?
         {
-            let renderer = ImageRenderer(content: WorkoutShareCard(model: model, style: style, corners: corners))
+            image(model: model, style: style, accessory: Optional<EmptyView>.none, corners: corners)
+        }
+
+        static func image<Accessory: View>(model: WorkoutShareCardModel,
+                                           style: WorkoutShareStyle,
+                                           accessory: Accessory?,
+                                           corners: ShareCardCorners = .rounded) -> UIImage?
+        {
+            let card = WorkoutShareCard(model: model, style: style, accessory: accessory, corners: corners)
+            let renderer = ImageRenderer(content: card)
             renderer.scale = ShareCanvas.scale
             // 둥근 모서리 바깥을 투명하게 남기려면 불투명 렌더를 꺼야 한다 — 켜면 모서리가 검게 찬다.
             renderer.isOpaque = corners == .square

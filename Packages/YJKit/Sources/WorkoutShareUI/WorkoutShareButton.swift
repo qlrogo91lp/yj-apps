@@ -16,24 +16,29 @@
     ///
     /// 공유 시트로 넘긴 사진에는 인스타가 배경을 붙인다. 배경 없는 스티커는 클립보드에 넣고
     /// 스토리에서 붙여넣는 경로로만 된다 (딥링크는 Meta App ID 가 필요해 걷어냈다).
-    public struct WorkoutShareButton: View {
+    public struct WorkoutShareButton<Accessory: View>: View {
         private let result: WorkoutResult
         private let header: WorkoutShareHeader
         private let style: WorkoutShareStyle
         private let appearance: WorkoutShareButtonAppearance
+        private let accessory: Accessory?
 
         @State private var shared: SharedFile?
         @State private var showCopied = false
 
+        /// `accessory` 는 머리줄 아래 자리에 앱이 채우는 뷰다. 넘기면 카드가 그 자리만큼 높아지고(크기는 하나로 고정),
+        /// `nil` 이면 자리 없는 기본 카드다. 패키지는 안에 무엇을 그리는지 모른다 — 종목별 정보는 앱이 그린다.
         public init(result: WorkoutResult,
                     header: WorkoutShareHeader,
                     style: WorkoutShareStyle,
-                    appearance: WorkoutShareButtonAppearance = .standalone)
+                    appearance: WorkoutShareButtonAppearance = .standalone,
+                    accessory: Accessory?)
         {
             self.result = result
             self.header = header
             self.style = style
             self.appearance = appearance
+            self.accessory = accessory
         }
 
         public var body: some View {
@@ -70,6 +75,7 @@
         private func renderCard(corners: ShareCardCorners) -> UIImage? {
             WorkoutShareRenderer.image(model: WorkoutShareCardModel(result: result, header: header),
                                        style: style,
+                                       accessory: accessory,
                                        corners: corners)
         }
 
@@ -87,6 +93,17 @@
             guard let image = renderCard(corners: .rounded),
                   WorkoutShareExport.copySticker(image) else { return }
             showCopied = true
+        }
+    }
+
+    extension WorkoutShareButton where Accessory == EmptyView {
+        /// 자리 없는 기본 카드 — 머리줄 아래를 비우는 앱.
+        public init(result: WorkoutResult,
+                    header: WorkoutShareHeader,
+                    style: WorkoutShareStyle,
+                    appearance: WorkoutShareButtonAppearance = .standalone)
+        {
+            self.init(result: result, header: header, style: style, appearance: appearance, accessory: nil)
         }
     }
 
