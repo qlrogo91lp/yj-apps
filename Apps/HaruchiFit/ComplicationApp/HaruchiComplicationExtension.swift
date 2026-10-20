@@ -34,13 +34,13 @@ struct HaruchiComplicationEntryView: View {
     @Environment(\.widgetRenderingMode) private var renderingMode
     var entry: ComplicationEntry
 
-    /// 유형 구분은 색으로만 한다 — W0 홈 토글과 같은 규칙이다 (근력 오렌지 · 유산소 파랑).
+    /// 유형 구분은 색과 심볼로 한다 — 워치 운동 화면과 같은 규칙이다 (근력 오렌지 · 웨이트, 유산소 파랑 · 달리기).
     private var tint: Color {
         entry.state.mode == .cardio ? .blue : .brandOrange
     }
 
     /// 대기 중에도 배경을 채운다 — 비워 두면 검은 워치 페이스에서 영역이 안 보인다 (골프·Ralli 와 같다).
-    /// 대기는 회색 판에 오렌지 로고, 진행 중은 유형 색 판에 검정 로고.
+    /// 대기는 회색 판에 오렌지 로고, 진행 중은 유형 색 판에 검정 종목 심볼.
     private var backgroundColor: Color {
         entry.state.isActive ? tint : Color(white: 0.12)
     }
@@ -111,11 +111,26 @@ struct HaruchiComplicationEntryView: View {
         }
     }
 
-    /// 앱 아이콘과 같은 로고(`HaruchiIcon`)를 템플릿으로 쓴다. 색은 호출부가 정한다.
+    /// 대기 중은 앱 로고(`HaruchiIcon`), 운동 중은 지금 종목 심볼 — 워치 운동 화면 왼쪽 위 아이콘과 같다.
+    /// 둘 다 템플릿이라 색은 호출부가 정한다.
     private var icon: some View {
-        Image("HaruchiIcon")
-            .resizable()
-            .scaledToFit()
+        Group {
+            if entry.state.isActive {
+                Image(systemName: symbolName(for: entry.state.mode))
+                    .resizable()
+            } else {
+                Image("HaruchiIcon")
+                    .resizable()
+            }
+        }
+        .scaledToFit()
+    }
+
+    private func symbolName(for kind: SegmentKind) -> String {
+        switch kind {
+        case .strength: "figure.strengthtraining.traditional"
+        case .cardio: "figure.run"
+        }
     }
 }
 
