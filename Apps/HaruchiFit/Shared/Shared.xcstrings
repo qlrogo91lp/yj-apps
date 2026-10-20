@@ -285,23 +285,6 @@
         }
       }
     },
-    "share_title_default" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Workout"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "운동"
-          }
-        }
-      }
-    },
     "stats_empty_all" : {
       "extractionState" : "manual",
       "localizations" : {

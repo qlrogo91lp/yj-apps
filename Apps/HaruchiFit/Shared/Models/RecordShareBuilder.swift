@@ -3,9 +3,12 @@ import WorkoutCore
 
 enum RecordShareBuilder {
     static func content(for record: WorkoutRecord) -> RecordShareContent {
-        let kinds = RecordListBuilder.segmentChips(for: record).map(\.kind.title)
+        // 제목은 브랜드 고정 — 구성은 머리줄 아래 막대가 보여준다. 번역하지 않는다.
+        let composition = RecordDetailBuilder.compositionText(for: record).map {
+            RecordShareContent.Composition(spans: RecordDetailBuilder.spans(for: record), text: $0)
+        }
         return RecordShareContent(
-            title: kinds.isEmpty ? String(localized: "share_title_default", table: "Shared") : kinds.joined(separator: " · "),
+            title: "Haruchi Fit",
             startedAt: record.startedAt,
             endedAt: record.effectiveEndedAt,
             result: WorkoutResult(
@@ -13,7 +16,8 @@ enum RecordShareBuilder {
                 caloriesBurned: record.activeCalories ?? 0,
                 averageHeartRate: record.averageHeartRate,
                 totalCaloriesBurned: record.totalCalories ?? 0
-            )
+            ),
+            composition: composition
         )
     }
 }

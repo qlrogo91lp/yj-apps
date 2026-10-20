@@ -8,32 +8,54 @@ import WorkoutCore
 struct RecordShareBuilderTests {
     private let start = GrassFixture.date(2026, 9, 28, 19, 12)
 
-    @Test func strengthOnlyTitle() throws {
+    @Test func titleIsBrand() throws {
         let context = try GrassFixture.makeContext()
         let record = GrassFixture.record(in: context, startedAt: start, totalSeconds: 1800,
                                          segments: [(.strength, 0, 1800)])
-        #expect(RecordShareBuilder.content(for: record).title == "근력")
+        #expect(RecordShareBuilder.content(for: record).title == "Haruchi Fit")
     }
 
-    @Test func mixedTitleKeepsFirstSeenOrder() throws {
+    @Test func compositionKeepsRecordOrder() throws {
         let context = try GrassFixture.makeContext()
-        let record = GrassFixture.record(in: context, startedAt: start, totalSeconds: 1800,
-                                         segments: [(.cardio, 0, 600), (.strength, 600, 1200)])
-        #expect(RecordShareBuilder.content(for: record).title == "유산소 · 근력")
+        let record = GrassFixture.record(in: context, startedAt: start, totalSeconds: 2100,
+                                         segments: [(.strength, 0, 1200), (.cardio, 1200, 600), (.strength, 1800, 300)])
+        let composition = try #require(RecordShareBuilder.content(for: record).composition)
+        #expect(composition.spans.map(\.kind) == [.strength, .cardio, .strength])
+        #expect(composition.spans.map(\.seconds) == [1200, 600, 300])
+        #expect(composition.text == "근력 25분 · 유산소 10분")
     }
 
-    @Test func titleIgnoresSubMinuteKinds() throws {
+    @Test func compositionTextIgnoresSubMinuteKinds() throws {
         let context = try GrassFixture.makeContext()
         let record = GrassFixture.record(in: context, startedAt: start, totalSeconds: 1240,
                                          segments: [(.strength, 0, 1200), (.cardio, 1200, 40)])
-        #expect(RecordShareBuilder.content(for: record).title == "근력")
+        let composition = try #require(RecordShareBuilder.content(for: record).composition)
+        #expect(composition.spans.count == 2)
+        #expect(composition.text == "근력 20분")
     }
 
-    @Test func noSegmentsTitleIsWorkout() throws {
+    @Test func compositionIsNilWithoutMinuteKinds() throws {
         let context = try GrassFixture.makeContext()
-        let record = GrassFixture.record(in: context, startedAt: start, totalSeconds: 600,
-                                         segments: [(.strength, 0, 0)])
-        #expect(RecordShareBuilder.content(for: record).title == "운동")
+        let record = GrassFixture.record(in: context, startedAt: start, totalSeconds: 40,
+                                         segments: [(.cardio, 0, 40)])
+        #expect(RecordShareBuilder.content(for: record).composition == nil)
+    }
+
+    @Test func spansSkipZeroSeconds() throws {
+        let context = try GrassFixture.makeContext()
+        let record = GrassFixture.record(in: context, startedAt: start, totalSeconds: 1200,
+                                         segments: [(.strength, 0, 1200), (.strength, 1200, 0)])
+        #expect(RecordShareBuilder.content(for: record).composition?.spans.count == 1)
+    }
+
+    @Test func compositionMatchesDetail() throws {
+        let context = try GrassFixture.makeContext()
+        let record = GrassFixture.record(in: context, startedAt: start, totalSeconds: 1800,
+                                         segments: [(.strength, 0, 1200), (.cardio, 1200, 600)])
+        let composition = try #require(RecordShareBuilder.content(for: record).composition)
+        let detail = RecordDetailBuilder.summary(for: record)
+        #expect(composition.spans == detail.spans)
+        #expect(composition.text == detail.compositionText)
     }
 
     @Test func resultCarriesCumulativeValues() throws {
