@@ -35,19 +35,28 @@
 
     /// 공유 이미지. 짙은 회색 둥근 카드 한 장 — 머리줄(원형 로고 · 제목 · 날짜)과 2×2 지표.
     /// 모서리 바깥은 투명하다. 값과 스타일만 받는다 — 서비스나 ViewModel을 모른다.
-    struct WorkoutShareCard: View {
+    struct WorkoutShareCard<Accessory: View>: View {
         let model: WorkoutShareCardModel
         let style: WorkoutShareStyle
+        /// 머리줄과 지표 사이에 앱이 채우는 자리. nil 이면 자리 없이 기본 크기 카드다.
+        var accessory: Accessory?
         var corners: ShareCardCorners = .rounded
 
         var body: some View {
-            VStack(alignment: .leading, spacing: 14) {
+            let size = ShareCanvas.cardSize(hasAccessory: accessory != nil)
+            VStack(alignment: .leading, spacing: ShareCanvas.stackSpacing) {
                 header
+                if let accessory {
+                    accessory
+                        .frame(width: ShareCanvas.accessorySize.width, height: ShareCanvas.accessorySize.height,
+                               alignment: .topLeading)
+                        .clipped()
+                }
                 metrics
             }
-            .padding(.horizontal, 18)
+            .padding(.horizontal, ShareCanvas.horizontalPadding)
             .padding(.top, 16)
-            .frame(width: ShareCanvas.cardSize.width, height: ShareCanvas.cardSize.height, alignment: .topLeading)
+            .frame(width: size.width, height: size.height, alignment: .topLeading)
             .background(ShareCardPalette.background)
             .clipShape(RoundedRectangle(cornerRadius: corners == .rounded ? ShareCanvas.cornerRadius : 0,
                                         style: .continuous))
@@ -119,6 +128,13 @@
         }
     }
 
+    extension WorkoutShareCard where Accessory == EmptyView {
+        /// 자리 없는 카드 — Ralli · 골프처럼 머리줄 아래를 비우는 앱.
+        init(model: WorkoutShareCardModel, style: WorkoutShareStyle, corners: ShareCardCorners = .rounded) {
+            self.init(model: model, style: style, accessory: nil, corners: corners)
+        }
+    }
+
     private let previewHeader = WorkoutShareHeader(title: "테니스",
                                                    startedAt: Date().addingTimeInterval(-9351),
                                                    endedAt: Date())
@@ -130,6 +146,22 @@
                                          header: previewHeader),
             style: WorkoutShareStyle(badgeColor: Color(red: 0.6784, green: 1.0, blue: 0.2549),
                                      logo: Image(systemName: "tennisball"))
+        )
+        .padding()
+        .background(.blue)
+    }
+
+    #Preview("구성 자리") {
+        WorkoutShareCard(
+            model: WorkoutShareCardModel(result: WorkoutResult(durationSeconds: 2270, caloriesBurned: 356,
+                                                               averageHeartRate: 144, totalCaloriesBurned: 356),
+                                         header: previewHeader),
+            style: WorkoutShareStyle(badgeColor: Color(red: 1, green: 0.58, blue: 0), logo: Image(systemName: "dumbbell")),
+            accessory: VStack(alignment: .leading, spacing: 5) {
+                Capsule().fill(.orange).frame(height: 10)
+                Text("Lift 26 min · Cardio 12 min").font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(ShareCardPalette.secondary)
+            }
         )
         .padding()
         .background(.blue)
