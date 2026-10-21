@@ -30,7 +30,7 @@ Haruchi Fit – Workout Grid
 ### en-US
 
 ```
-Strength & cardio, one workout
+Lift & cardio, one workout
 ```
 
 ## 키워드 (100자)
@@ -44,7 +44,7 @@ Strength & cardio, one workout
 ### en-US
 
 ```
-gym,strength,cardio,weights,lifting,habit,tracker,heatmap,calendar,watch,log,fitness,routine,stats
+gym,lift,cardio,weights,lifting,habit,tracker,heatmap,calendar,watch,log,fitness,routine,stats
 ```
 
 ## 프로모션 텍스트 (170자)
@@ -58,7 +58,7 @@ gym,strength,cardio,weights,lifting,habit,tracker,heatmap,calendar,watch,log,fit
 ### en-US
 
 ```
-One square for every day you work out. Start on Apple Watch, switch between strength and cardio with a tap, and your activity grid fills in without touching your phone.
+One square for every day you work out. Start on Apple Watch, switch between lift and cardio with a tap, and your activity grid fills in without touching your phone.
 ```
 
 ## 설명 (4000자)
@@ -115,9 +115,9 @@ Start and finish a workout on Apple Watch, and today's square fills in.
 No need to reach for your phone.
 
 
-■ Strength and cardio in a single workout
+■ Lift and cardio in a single workout
 
-• Switch between strength and cardio with one tap, mid-workout
+• Switch between lift and cardio with one tap, mid-workout
 • Each segment keeps its own time: 54 min of weights, 18 min of running
 • A tap on your wrist confirms every switch
 
@@ -133,7 +133,7 @@ No need to reach for your phone.
 
 • Four shades: the longer you work out, the deeper the color
 • Past years are never erased. Browse your grid year by year
-• Monthly and weekday patterns, plus your strength and cardio split
+• Monthly and weekday patterns, plus your lift and cardio split
 
 
 ■ Light-touch logging
