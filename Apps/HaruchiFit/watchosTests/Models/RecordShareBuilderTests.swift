@@ -22,7 +22,8 @@ struct RecordShareBuilderTests {
         let composition = try #require(RecordShareBuilder.content(for: record).composition)
         #expect(composition.spans.map(\.kind) == [.strength, .cardio, .strength])
         #expect(composition.spans.map(\.seconds) == [1200, 600, 300])
-        #expect(composition.text == "근력 25분 · 유산소 10분")
+        #expect(composition.chips.map(\.kind) == [.strength, .cardio])
+        #expect(composition.chips.map(\.minutes) == [25, 10])
     }
 
     @Test func compositionTextIgnoresSubMinuteKinds() throws {
@@ -31,7 +32,8 @@ struct RecordShareBuilderTests {
                                          segments: [(.strength, 0, 1200), (.cardio, 1200, 40)])
         let composition = try #require(RecordShareBuilder.content(for: record).composition)
         #expect(composition.spans.count == 2)
-        #expect(composition.text == "근력 20분")
+        #expect(composition.chips.map(\.kind) == [.strength])
+        #expect(composition.chips.map(\.minutes) == [20])
     }
 
     @Test func compositionIsNilWithoutMinuteKinds() throws {
@@ -55,7 +57,7 @@ struct RecordShareBuilderTests {
         let composition = try #require(RecordShareBuilder.content(for: record).composition)
         let detail = RecordDetailBuilder.summary(for: record)
         #expect(composition.spans == detail.spans)
-        #expect(composition.text == detail.compositionText)
+        #expect(composition.chips == detail.compositionChips)
     }
 
     @Test func resultCarriesCumulativeValues() throws {

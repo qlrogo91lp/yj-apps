@@ -16,17 +16,11 @@ enum RecordDetailBuilder {
                                    caloriesText: record.totalCalories.map { "\(Int($0.rounded()))" } ?? placeholder,
                                    heartRateText: record.averageHeartRate.map { "\(Int($0.rounded()))" } ?? placeholder,
                                    spans: spans(for: record),
-                                   compositionText: compositionText(for: record))
+                                   compositionChips: RecordListBuilder.segmentChips(for: record))
     }
 
     /// 운동 구성 막대의 구간 — 기록 순서대로, 0초 구간은 뺀다. 상세와 공유 카드가 같이 쓴다.
     static func spans(for record: WorkoutRecord) -> [RecordDetailSummary.Span] {
         record.orderedSegments.filter { $0.durationSeconds > 0 }.map { .init(kind: $0.kind, seconds: $0.durationSeconds) }
-    }
-
-    /// `근력 26분 · 유산소 12분` — 1분 이상인 종류가 없으면 nil. 막대를 보일지도 이 값으로 정한다.
-    static func compositionText(for record: WorkoutRecord) -> String? {
-        let chips = RecordListBuilder.segmentChips(for: record)
-        return chips.isEmpty ? nil : chips.map(\.text).joined(separator: " · ")
     }
 }

@@ -8,9 +8,8 @@ struct ShareComposition: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
             SegmentTimelineBar(spans: composition.spans)
-            Text(composition.text)
+            CompositionCaption(chips: composition.chips)
                 .font(.system(size: 11, weight: .medium))
-                .foregroundStyle(HaruchiPalette.dim)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
         }
@@ -20,7 +19,7 @@ struct ShareComposition: View {
 #Preview("한 줄") {
     ShareComposition(composition: .init(
         spans: [.init(kind: .strength, seconds: 3240), .init(kind: .cardio, seconds: 1080), .init(kind: .strength, seconds: 300)],
-        text: "Lift 59 min · Cardio 18 min"
+        chips: [.init(kind: .strength, minutes: 59), .init(kind: .cardio, minutes: 18)]
     ))
     .frame(width: 234, height: 30, alignment: .topLeading)
     .padding()

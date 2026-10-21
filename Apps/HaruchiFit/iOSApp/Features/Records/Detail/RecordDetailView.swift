@@ -52,8 +52,8 @@ struct RecordDetailView: View {
                     .isEmpty
                 {
                     VStack(alignment: .leading) {
-                        Text("detail_composition"); SegmentTimelineBar(spans: viewModel.summary.spans); if let text = viewModel.summary
-                            .compositionText { Text(text).foregroundStyle(HaruchiPalette.dim) }
+                        Text("detail_composition"); SegmentTimelineBar(spans: viewModel.summary.spans)
+                        if !viewModel.summary.compositionChips.isEmpty { CompositionCaption(chips: viewModel.summary.compositionChips) }
                     }
                 }
                 Divider().overlay(HaruchiPalette.line)
