@@ -81,7 +81,8 @@ struct RecordDetailBuilderTests {
         let result = summary(record)
         #expect(result.spans.map(\.kind) == [.strength, .cardio, .strength])
         #expect(result.spans.map(\.seconds) == [1800, 1080, 1440])
-        #expect(result.compositionText == "근력 54분 · 유산소 18분")
+        #expect(result.compositionChips.map(\.kind) == [.strength, .cardio])
+        #expect(result.compositionChips.map(\.minutes) == [54, 18])
     }
 
     @Test("길이 0인 구간은 운동 구성을 만들지 않는다")
@@ -90,6 +91,6 @@ struct RecordDetailBuilderTests {
         let record = GrassFixture.record(in: context, startedAt: GrassFixture.date(2026, 9, 28), totalSeconds: 600, segments: [(.strength, 0, 0)])
         let result = summary(record)
         #expect(result.spans.isEmpty)
-        #expect(result.compositionText == nil)
+        #expect(result.compositionChips.isEmpty)
     }
 }

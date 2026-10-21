@@ -7,7 +7,7 @@ struct RecordDetailSummary {
     let caloriesText: String
     let heartRateText: String
     let spans: [Span]
-    let compositionText: String?
+    let compositionChips: [RecordListRow.Chip]
 
     struct Span: Hashable {
         let kind: SegmentKind
