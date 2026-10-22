@@ -13,6 +13,7 @@ yj-apps/
 │  └─ APPSTORE.md        App Store 문구 원본. 세 앱 폴더에 하나씩 있다 (아래 "스토어 문구")
 ├─ YJApps.xcworkspace    이것 하나만 연다. 앱별 .xcodeproj 를 따로 열지 않는다
 ├─ Makefile              앱 순회 lint / format / fix
+├─ tools/store-assets/   App Store 크리에이티브 에셋(헤더·검색 결과 영상) 제작 도구. Xcode 프로젝트 밖 — README 참고
 ├─ .swiftlint.yml        공통 규칙 (앱별 설정이 parent_config 로 상속)
 ├─ TODO.md               진행 중인 작업의 문서 링크와 상태. 오랜만에 돌아오면 여기부터
 └─ docs/               모노레포 공통 문서 (specs/ideas/plans/logs)
