@@ -165,23 +165,27 @@ The first version of Haruchi Fit. Fill in one square for every day you work out.
 
 이미지에 박히는 글자라 App Store Connect 에 붙여 넣는 값이 아니다. 원본 이미지는 피그마에 두고 저장소에는 넣지 않는다.
 **화면** 열은 어느 장면을 찍었는지다 — 앱 화면이 바뀌면 이 열로 다시 찍을 장을 찾는다.
-메시지 순서는 설명과 같다: 칸 → 근력 · 유산소 구간 → 워치만으로 완결 → 보조 기능. 앞 3장에 핵심을 둔다.
+메시지 순서: 칸(워치와 함께) → 매일의 기록(달력 · 목록) → 상세 → 통계 → 공유. 근력 · 유산소 전환은 Watch 3 화면이 보여 준다.
 
 ### iPhone
 
 | # | 화면 | ko | en-US |
 |---|---|---|---|
-| 1 | 홈 — 칸이 채워진 격자 + 연속 | 운동한 날마다 한 칸 | One square for every workout day |
-| 2 | 워치 운동 중 화면 — 왼쪽 위 전환 아이콘 강조 | 탭 한 번으로 근력 ↔ 유산소 | Switch lift ↔ cardio in one tap |
-| 3 | 기록 상세 — 구간 바 · 부위 · 메모 | 구간별 시간이 따로 남아요 | Every segment, timed on its own |
-| 4 | 통계 — 연간 기록 · 차트 | 한 해의 운동을 한눈에 | Your year of workouts at a glance |
-| 5 | 홈 연속 칸 또는 기록 달력 (미정) | 몇 주째 이어가고 있는지 | See how many weeks you've kept going |
-| 6 | 건강 앱 가져오기 또는 공유 카드 (미정) | 다른 앱으로 한 운동도 함께 | Workouts from other apps count too |
+| 1 | 홈 격자 + 운동 중 워치 (기기 두 대) | 운동한 날마다 한 칸 | One square for every workout day |
+| 2 | 기록 — 달력 | 매일 운동, 달력 한 장에 | Your daily workouts, on one calendar |
+| 3 | 기록 — 목록 | 쌓인 기록도 쉽게 찾아요 | Every workout, easy to look back on |
+| 4 | 기록 상세 — 구성 막대 · 부위 · 메모 | 운동마다 상세 기록까지 | Dive into the details |
+| 5 | 통계 — 연도 격자 · 요약 · 차트 | 한 해의 운동을 한눈에 | Your year of workouts at a glance |
+| 6 | 공유 스티커 — 사진 위 기록 카드 | 운동 기록이 일상으로 | Workout tracking made everyday |
 
 ### Apple Watch
 
-| # | 화면 | ko | en-US |
-|---|---|---|---|
-| 1 | 시작 화면 — Lift / Cardio 토글 | 손목에서 바로 시작 | Start right from your wrist |
-| 2 | 운동 중 지표 | 폰은 꺼내지 않아도 돼요 | No phone needed |
-| 3 | 운동 요약 — 구간 바 | 끝나면 구간까지 정리 | Segments sorted when you finish |
+캡션 없이 화면만 올린다 — 워치 스크린샷은 작게 보여 글자가 화면을 가린다. 아래는 다시 찍을 장을 찾기 위한 목록이다.
+
+| # | 화면 |
+|---|---|
+| 1 | 시작 화면 |
+| 2 | 운동 중 지표 |
+| 3 | 컨트롤 — Lift / Cardio 전환 |
+| 4 | 운동 요약 — 구성 막대 |
+| 5 | 문자판 컴플리케이션 |
