@@ -3,6 +3,10 @@
 코드 블록 안이 App Store Connect 에 들어가는 값 그대로다. **이 파일을 먼저 고치고 그다음에 붙여 넣는다.**
 출시 노트는 출시마다 덮어쓴다. 규약은 루트 `CLAUDE.md` 를 본다.
 
+- Apple ID: `6824680383`
+- App Store: https://apps.apple.com/app/id6824680383
+- 리뷰 작성: https://apps.apple.com/app/id6824680383?action=write-review
+
 1.0 출시 전 초안이다. 스크린샷 캡션은 맨 아래 절에 있다 (피그마 작업 중 — 확정되면 고친다).
 
 ## 이름 (30자)
@@ -52,13 +56,13 @@ gym,lift,cardio,weights,lifting,habit,tracker,heatmap,calendar,watch,log,fitness
 ### ko
 
 ```
-운동한 날마다 한 칸. 애플워치에서 시작하면 근력과 유산소가 나뉘어 기록되고, 폰을 꺼내지 않아도 칸이 채워집니다.
+운동한 날마다 한 칸. 애플워치에서 시작하면 근력과 유산소가 나뉘어 기록되고, 날마다 칸이 채워집니다.
 ```
 
 ### en-US
 
 ```
-One square for every day you work out. Start on Apple Watch, switch between lift and cardio with a tap, and your activity grid fills in without touching your phone.
+One square for every day you work out. Start on Apple Watch, switch between lift and cardio with a tap, and your activity grid fills in day by day.
 ```
 
 ## 설명 (4000자)
