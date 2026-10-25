@@ -14,9 +14,10 @@ struct RoundTransmitter: RoundTransmitting {
         self.service = service
     }
 
-    /// `.reliable`은 sendMessage 실패 시 transferUserInfo로 큐잉되고 시스템이 배달을
-    /// 보장한다 — 워치 쪽 재시도 로직은 만들지 않는다 (spec §7).
+    /// `.queued`는 항상 transferUserInfo로 보내 시스템이 배달을 보장한다 — 워치 쪽 재시도
+    /// 로직은 만들지 않는다 (spec §7). `.reliable`은 폰이 근처에 있으면 sendMessage를 쓰는데
+    /// 실패해도 다시 보내지 않아 기록이 사라진다.
     func send(_ message: RoundCompletedMessage) {
-        service.send(message, via: .reliable)
+        service.send(message, via: .queued)
     }
 }

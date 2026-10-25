@@ -174,7 +174,7 @@ final class WorkoutViewModel: ObservableObject {
     /// 세션을 끝내고 기록을 폰으로 보낸다.
     ///
     /// **저장은 폰이 한다** — 워치 타깃은 `PersistenceCore` 를 링크하지 않는다 (아키텍처 7절).
-    /// `.reliable` 이라 폰이 꺼져 있어도 `transferUserInfo` 가 큐잉하므로 기록이 유실되지 않는다.
+    /// `.queued` 라 항상 `transferUserInfo` 로 큐잉되므로 폰이 꺼져 있어도 기록이 유실되지 않는다.
     @discardableResult
     func end() async -> WorkoutResult? {
         // stopWorkout() 보다 먼저 닫는다. 그쪽이 총 시간을 재는 시점과 가장 가까워야

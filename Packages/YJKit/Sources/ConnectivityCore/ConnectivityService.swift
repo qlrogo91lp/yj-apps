@@ -3,7 +3,7 @@
     import Foundation
     import WatchConnectivity
 
-    /// WCSession 래퍼. 전송(3가지 Delivery)·수신 라우팅·콜드런치 컨텍스트 채택·sentAt 스탬프만 담당한다.
+    /// WCSession 래퍼. 전송(4가지 Delivery)·수신 라우팅·콜드런치 컨텍스트 채택·sentAt 스탬프만 담당한다.
     /// 메시지 정의는 앱 몫. macOS에는 WatchConnectivity가 없어 이 파일 전체가 제외된다.
     public final class ConnectivityService: NSObject, ObservableObject {
         @Published public private(set) var isCounterpartReachable: Bool = false
@@ -57,6 +57,8 @@
                 } else {
                     WCSession.default.transferUserInfo(dict)
                 }
+            case .queued:
+                WCSession.default.transferUserInfo(dict)
             case .context:
                 #if os(iOS)
                     guard WCSession.default.isWatchAppInstalled else { return }
