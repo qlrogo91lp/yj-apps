@@ -97,13 +97,15 @@ struct RecordListBuilderTests {
         #expect(row.chips.map(\.text) == ["근력 50분"])
     }
 
-    @Test("kcal 은 반올림해 붙이고, 값이 없으면 비운다")
+    @Test("kcal 은 활동 칼로리를 반올림해 붙이고, 값이 없으면 비운다")
     func caloriesText() throws {
         let context = try GrassFixture.makeContext()
-        GrassFixture.record(in: context, startedAt: GrassFixture.date(2026, 9, 28, 7),
-                            totalSeconds: 600, totalCalories: 412.6)
+        let withValue = GrassFixture.record(in: context, startedAt: GrassFixture.date(2026, 9, 28, 7),
+                                            totalSeconds: 600, totalCalories: 520)
+        withValue.activeCalories = 412.6
+        // 총 칼로리만 있어도 목록에는 활동 칼로리가 기준이라 비운다
         GrassFixture.record(in: context, startedAt: GrassFixture.date(2026, 9, 28, 6),
-                            totalSeconds: 600, totalCalories: nil)
+                            totalSeconds: 600, totalCalories: 500)
 
         let rows = try #require(try sections(context).first).rows
         #expect(rows.map(\.caloriesText) == ["413 kcal", nil])

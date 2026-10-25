@@ -244,7 +244,7 @@ Phase 2 코드 구현은 끝났고 HealthKit import 실기기 확인이 남았�
 | ~~—~~ | ~~홈 `n주 연속` 스탯 · 영어 근력 표기 `Lift` 통일 · 누적 카드 넘침~~ | **머지 완료 (10-20, [PR #56](https://github.com/qlrogo91lp/yj-apps/pull/56))** · 실기기 화면 확인 완료 | 스펙 02절 · 9절 · 10절 (10-20 개정) |
 | — | 공유 카드 — 제목 `Haruchi Fit` · 헤더 아래 구성 막대 · 로고 여백 60% (YJKit 자리 추가) | **코드 구현·로컬 검증 완료 (10-21, `feat/haruchi-share-composition`)** · 시뮬레이터 카드 확인·실기기 확인 대기 | 스펙 06절 · 아키텍처 D-M2 (10-20 개정) · [플랜](Apps/HaruchiFit/docs/plans/shared/2026/2026-10-20-share-card-composition.md) |
 | — | 출시 체크리스트 (결정 3 · 코드 · ASC · 스크린샷 · 빌드·제출) | **목록화 완료 (10-19)** · 사용자 검토 전 — CloudKit 1.0 제외 · 앱 안 방침 링크 1.0 제외 결정 (10-19), 남은 결정 1개(방침 · 지원 URL) 대기 | [체크리스트](Apps/HaruchiFit/docs/plans/shared/2026/2026-10-19-release-checklist.md) |
-| — | **1.0.1** 워치 기록 전송 유실 수정 (PR 1 하루치 · 골프, YJKit `.queued` · PR 3 Ralli) · 하루치 칼로리 활동 칼로리로 통일 (PR 2) | **플랜 승인 (10-25) · PR 1 구현 완료(머지 대기, 실기기 확인 남음) · PR 2·3 미착수** — 10-25 TestFlight 에서 유산소 섞은 운동이 근력 하나로 저장됨 · Ralli 10-21 경기 저장 유실 | [플랜](docs/plans/2026/2026-10-25-watch-record-delivery.md) |
+| — | **1.0.1** 워치 기록 전송 유실 수정 (PR 1 하루치 · 골프, YJKit `.queued` · PR 3 Ralli) · 하루치 칼로리 활동 칼로리로 통일 (PR 2) | **플랜 승인 (10-25) · PR 1 머지(#63, 실기기 확인 남음) · PR 2 구현 완료(머지 대기) · PR 3 미착수** — 10-25 TestFlight 에서 유산소 섞은 운동이 근력 하나로 저장됨 · Ralli 10-21 경기 저장 유실 | [플랜](docs/plans/2026/2026-10-25-watch-record-delivery.md) |
 
 ### 집 맥북에서 할 것
 

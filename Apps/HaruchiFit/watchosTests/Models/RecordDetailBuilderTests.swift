@@ -45,7 +45,8 @@ struct RecordDetailBuilderTests {
     @Test("요약은 분과 반올림한 수치를 표시한다")
     func statsAreMinutesAndRoundedValues() throws {
         let context = try GrassFixture.makeContext()
-        let record = GrassFixture.record(in: context, startedAt: GrassFixture.date(2026, 9, 28), totalSeconds: 4320, totalCalories: 412.4)
+        let record = GrassFixture.record(in: context, startedAt: GrassFixture.date(2026, 9, 28), totalSeconds: 4320, totalCalories: 500)
+        record.activeCalories = 412.4
         record.averageHeartRate = 127.6
         let result = summary(record)
         #expect(result.durationText == "72분")
@@ -56,7 +57,7 @@ struct RecordDetailBuilderTests {
     @Test("값이 없는 지표는 대시로 자리를 지킨다")
     func missingMetricsKeepTheirPlace() throws {
         let context = try GrassFixture.makeContext()
-        let record = GrassFixture.record(in: context, startedAt: GrassFixture.date(2026, 9, 28), totalSeconds: 600)
+        let record = GrassFixture.record(in: context, startedAt: GrassFixture.date(2026, 9, 28), totalSeconds: 600, totalCalories: 500)
         let result = summary(record)
         #expect(result.caloriesText == "–")
         #expect(result.heartRateText == "–")
