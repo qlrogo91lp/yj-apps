@@ -54,6 +54,7 @@ swift -swift-version 5 video/grab.swift out/ralli-header.mp4 out
 | `mockups/ralli-header.html` | **`ralliHeaderWatch`** — 코트 + 워치. 워치를 탭하면 코트 점수가 따라 바뀐다 (40:40 ↔ AD). 입력 `inputs/watch-match-global.png` | 3840x1646 · 8.8초 | **확정 (10-25)** |
 | 〃 | `ralliHeader` — 코트만 (처음 시안, 비교용) | 3840x1646 · 8.8초 | 쓰지 않음 |
 | `mockups/ralli-search-en.html` | `ralliSearch` — 워치 하나. 화면 탭과 크라운(위 ME · 아래 OPP)으로 번갈아 점수를 넣는다. 입력 `inputs/watch-match-global.png` | 2880x1920 · 8.8초 | **확정 (10-25)** |
+| `mockups/ralli-onboarding-crown.html` | `ralliOnboardingCrown` — 검색 결과 장면에서 캡션을 뺀 것. 앱 온보딩 1페이지에 쓴다. 입력 `inputs/watch-match-{en,ko}.png` (`--lang ko\|en`) | 1200x1500 (4:5) · 8.8초 | **적용 (10-25)** |
 
 워치 숫자는 스크린샷 한 장(30:15) 위에 코드로 다시 그린다. 워치 시스템 글꼴 `"SF Compact"` 를 캔버스에서 쓸 수 있어 원본과 같게 나온다.
 배경이 단색인 자리(ME/OPP · Undo · 연결 끊김 아이콘)는 배경색으로 덮는다 — 헤더는 전부, 검색 결과는 실제 화면이라 아이콘만. 좌표는 시안의 `WI`(화면) · `CROWN`(크라운)에 있다.
@@ -78,3 +79,21 @@ swift -swift-version 5 video/grab.swift out/ralli-header.mp4 out
 
 - 화면을 코드로 그린 부분(폰 등)은 앱 화면이 바뀌면 시안을 손으로 맞춘다.
 - 스크린샷에 찍힌 문구·숫자는 그대로 나온다. 바꾸려면 다시 찍는다.
+
+## 앱 안에서 재생할 영상 (온보딩)
+
+스토어 영상과 달리 **소리 트랙이 없어야** 하므로 인코더에 `no-audio` 를 붙인다. 결과는
+`Apps/TennisCounter/iOSApp/Resources/Onboarding/onboarding-crown-{en,ko}.mp4` 로 복사한다.
+
+```bash
+for L in ko en; do
+  python3 video/build-render.py mockups/ralli-onboarding-crown.html out/onb-$L \
+    --scene ralliOnboardingCrown --size 1200x1500 --seconds 8.8 --lang $L \
+    --images inputs/watch-match-en.png inputs/watch-match-ko.png
+  python3 video/capture.py out/onb-$L
+  swift -swift-version 5 video/encode.swift out/onb-$L/frames out/onboarding-crown-$L.mp4 30 no-audio
+done
+```
+
+정지 이미지(`OnboardingCrown` 에셋 · 시스템 "동작 줄이기" 를 켠 사용자에게 보인다)는 같은 프레임 중 96번(3.2초, 크라운 화살표가 보이는 순간)을
+`out/onb-$L/frames/f00096.png` 에서 꺼내 `crown-$L.png` 로 바꾼다.

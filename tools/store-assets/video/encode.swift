@@ -1,5 +1,5 @@
-// 프레임 PNG 들을 H.264 mp4 로 묶는다. 무음 스테레오 AAC 트랙을 함께 넣는다.
-// 사용: swift encode.swift <frames 폴더> <출력.mp4> [fps]
+// 프레임 PNG 들을 H.264 mp4 로 묶는다. 기본은 무음 스테레오 AAC 트랙을 함께 넣는다 (스토어 업로드용).
+// 사용: swift encode.swift <frames 폴더> <출력.mp4> [fps] [no-audio]   — no-audio: 앱 안에서 재생할 영상, 소리 트랙 없음
 import AVFoundation
 import CoreVideo
 import Foundation
@@ -9,6 +9,7 @@ let args = CommandLine.arguments
 let framesDir = URL(fileURLWithPath: args[1])
 let outURL = URL(fileURLWithPath: args[2])
 let fps = Int32(args.count > 3 ? Int(args[3])! : 30)
+let withAudio = !(args.count > 4 && args[4] == "no-audio")
 
 let files = try FileManager.default.contentsOfDirectory(atPath: framesDir.path)
     .filter { $0.hasSuffix(".png") }.sorted()
@@ -52,7 +53,7 @@ let audio = AVAssetWriterInput(mediaType: .audio, outputSettings: [
     AVEncoderBitRateKey: 128_000,
 ])
 audio.expectsMediaDataInRealTime = false
-writer.add(audio)
+if withAudio { writer.add(audio) }
 
 guard writer.startWriting() else { fatalError("startWriting: \(String(describing: writer.error))") }
 writer.startSession(atSourceTime: .zero)
@@ -100,6 +101,7 @@ var asbd = AudioStreamBasicDescription(mSampleRate: Float64(sampleRate), mFormat
 var audioFormat: CMAudioFormatDescription?
 CMAudioFormatDescriptionCreate(allocator: nil, asbd: &asbd, layoutSize: 0, layout: nil, magicCookieSize: 0,
                                magicCookie: nil, extensions: nil, formatDescriptionOut: &audioFormat)
+if withAudio {
 group.enter()
 var samplesWritten = 0
 var audioDone = false
@@ -122,6 +124,7 @@ audio.requestMediaDataWhenReady(on: DispatchQueue(label: "audio")) {
         if !audio.append(sample!) { fatalError("오디오 append 실패: \(String(describing: writer.error))") }
         samplesWritten += n
     }
+}
 }
 
 group.wait()
