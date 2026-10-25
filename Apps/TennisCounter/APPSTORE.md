@@ -3,9 +3,10 @@
 코드 블록 안이 App Store Connect 에 들어가는 값 그대로다. **이 파일을 먼저 고치고 그다음에 붙여 넣는다.**
 출시 노트는 출시마다 덮어쓴다. 규약은 루트 `CLAUDE.md` 를 본다.
 
-이름·설명·출시 노트는 2026-10-12, 부제·프로모션 텍스트·스크린샷 캡션은 2026-10-22 에 공개 스토어(1.1.9)에서 가져온 실값이다.
+이름·설명은 2026-10-12, 부제·프로모션 텍스트·스크린샷 캡션은 2026-10-22 에 공개 스토어(1.1.9)에서 가져온 실값이다.
 프로모션 텍스트는 공개 페이지가 설명 앞에 붙여 보여 주는 단락을 떼어 낸 것이다 — App Store Connect 와 한 번 맞춰 본다.
 키워드는 공개되지 않아 2026-10-25 에 App Store Connect 값을 옮겨 적고 다듬었다 — 이름·부제와 겹치는 단어를 빼고 빈 개념을 채웠다.
+출시 노트는 1.1.9 다음 버전용으로 2026-10-26 에 새로 썼다 (1.1.9+1 이후 커밋 기준).
 
 ## 이름 (30자)
 
@@ -156,13 +157,19 @@ Weekend tennis with friends — let Ralli keep it light.
 ### ko
 
 ```
-버그를 수정했어요.
+• 워치 경기 기록이 더 확실하게 저장돼요. 폰 앱이 다른 화면에 있어도 기록을 받아 저장하고, 폰 응답이 늦으면 워치에 대기 상태로 보여 줘요.
+• 온보딩에서 크라운과 탭으로 점수를 넣는 모습을 영상으로 보여 줘요.
+• 워치가 요청하는 건강 권한을 꼭 필요한 항목으로 줄였어요.
+• 워치 칼로리 표시를 다듬었어요.
 ```
 
 ### en-US
 
 ```
-The bug has been fixed.
+• Match records from your watch now save more reliably. Your iPhone saves them even when Ralli is on another screen, and your watch shows when it's waiting for the phone.
+• Onboarding now shows a video of scoring with the crown and taps.
+• Ralli asks for fewer Health permissions — only what it needs.
+• Refined the calorie display on the watch.
 ```
 
 ## 스크린샷 캡션
