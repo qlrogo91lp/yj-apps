@@ -145,6 +145,7 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
 |---|---|---|
 | `MonitoringCore` (CrashReporting 프로토콜 + Crashlytics 구현) | **구현 완료** ([PR #35](https://github.com/qlrogo91lp/yj-apps/pull/35) · Ralli 연동 [PR #36](https://github.com/qlrogo91lp/yj-apps/pull/36)) | 위 Ralli #7 과 같은 문서. 골프·하루치 연동은 별도 (Firebase 프로젝트 앱마다 새로) |
 | **건강 앱에서 지운 것을 앱이 따라 지운다** (`HKDeletedObject`) | **미착수** — 브레인스토밍 전. 3개 앱이 같은 구조라 Kit 이 한 번 정한다 | 하루치 [import 스펙](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-21-healthkit-workout-import.md) 4절에 정할 것이 적혀 있다. **Ralli #10 과 방향이 반대다** — 그쪽은 앱에서 지우면 건강 앱을 지운다 |
+| **워크아웃 종료 순서** — `stopWorkout()` 이 `session.end()` 를 먼저 불러 마무리 중 앱이 멈춘다 (3개 앱 공통) | **미착수 (10-25)** — 별도 플랜 필요. 건강 앱 운동까지 사라질 수 있다 | [전송 유실 플랜](docs/plans/2026/2026-10-25-watch-record-delivery.md) "범위 밖" 절 |
 | ~~`WorkoutShareUI` 공유 카드 배경색을 Kit 이 소유~~ | **완료** (`feat/share-card-sticker`) — 짙은 회색 카드 + 지표별 고정 색. 앱은 원형 로고 `badgeColor` 만 넘김 | 아래 "카드 대비" · [Kit 사용법](Packages/YJKit/README.md#workoutshareui-사용법) |
 
 ### 카드 대비 (2026-09-09)
@@ -243,6 +244,7 @@ Phase 2 코드 구현은 끝났고 HealthKit import 실기기 확인이 남았�
 | ~~—~~ | ~~홈 `n주 연속` 스탯 · 영어 근력 표기 `Lift` 통일 · 누적 카드 넘침~~ | **머지 완료 (10-20, [PR #56](https://github.com/qlrogo91lp/yj-apps/pull/56))** · 실기기 화면 확인 완료 | 스펙 02절 · 9절 · 10절 (10-20 개정) |
 | — | 공유 카드 — 제목 `Haruchi Fit` · 헤더 아래 구성 막대 · 로고 여백 60% (YJKit 자리 추가) | **코드 구현·로컬 검증 완료 (10-21, `feat/haruchi-share-composition`)** · 시뮬레이터 카드 확인·실기기 확인 대기 | 스펙 06절 · 아키텍처 D-M2 (10-20 개정) · [플랜](Apps/HaruchiFit/docs/plans/shared/2026/2026-10-20-share-card-composition.md) |
 | — | 출시 체크리스트 (결정 3 · 코드 · ASC · 스크린샷 · 빌드·제출) | **목록화 완료 (10-19)** · 사용자 검토 전 — CloudKit 1.0 제외 · 앱 안 방침 링크 1.0 제외 결정 (10-19), 남은 결정 1개(방침 · 지원 URL) 대기 | [체크리스트](Apps/HaruchiFit/docs/plans/shared/2026/2026-10-19-release-checklist.md) |
+| — | **1.0.1** 워치 기록 전송 유실 수정 (PR 1 하루치 · 골프, YJKit `.queued` · PR 3 Ralli) · 하루치 칼로리 활동 칼로리로 통일 (PR 2) | **플랜 작성 (10-25) · 사용자 검토 대기** — 10-25 TestFlight 에서 유산소 섞은 운동이 근력 하나로 저장됨 · Ralli 10-21 경기 저장 유실 | [플랜](docs/plans/2026/2026-10-25-watch-record-delivery.md) |
 
 ### 집 맥북에서 할 것
 
