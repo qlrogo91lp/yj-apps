@@ -28,6 +28,8 @@ struct OnboardingView: View {
                 TabView(selection: $page) {
                     OnboardingScreenshotPage(
                         imageName: "OnboardingCrown",
+                        videoName: "onboarding-crown",
+                        isActive: page == 0,
                         title: String(localized: "onboarding_crown_title"),
                         message: String(localized: "onboarding_crown_body")
                     )
