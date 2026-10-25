@@ -219,8 +219,9 @@ let connectivity = ConnectivityService()
 //    콜드런치 applicationContext 배달이 등록 전에 도착하면 유실된다.
 connectivity.onReceive(RoundRecordMessage.self, maxAge: 60) { record in ... }
 
-// 전송: .realtimeOnly(미도달 드롭) / .reliable(transferUserInfo 큐잉) / .context(마지막 상태 보존)
-connectivity.send(RoundRecordMessage(...), via: .reliable)
+// 전송: .realtimeOnly(미도달 드롭) / .reliable(미도달 시에만 transferUserInfo 큐잉) / .queued(항상 transferUserInfo) / .context(마지막 상태 보존)
+// 완료 기록은 .queued, 실시간 명령은 .reliable — .reliable 은 sendMessage 가 실패하면 그대로 사라진다
+connectivity.send(RoundRecordMessage(...), via: .queued)
 ```
 
 - 코어가 모든 발신에 `type`·`sentAt`을 스탬프한다. `maxAge`는 sentAt 기준이며, sentAt 없는 수신(구버전)은 stale로 보지 않는다.
