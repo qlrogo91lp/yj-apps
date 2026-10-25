@@ -13,7 +13,7 @@ enum RecordDetailBuilder {
                                    timeRangeTitle: DisplayDateFormat.timeRange(from: record.startedAt, to: end, calendar: calendar, locale: locale),
                                    durationText: record.totalSeconds < 60 ? String(localized: "duration_under_minute", table: "Shared") : DisplayText
                                        .minutes(record.totalSeconds / 60),
-                                   caloriesText: record.totalCalories.map { "\(Int($0.rounded()))" } ?? placeholder,
+                                   caloriesText: record.activeCalories.map { "\(Int($0.rounded()))" } ?? placeholder,
                                    heartRateText: record.averageHeartRate.map { "\(Int($0.rounded()))" } ?? placeholder,
                                    spans: spans(for: record),
                                    compositionChips: RecordListBuilder.segmentChips(for: record))

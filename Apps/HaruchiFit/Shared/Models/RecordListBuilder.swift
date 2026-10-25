@@ -88,8 +88,9 @@ enum RecordListBuilder {
     }
 
     private static func row(for record: WorkoutRecord, dateTitle: String) -> RecordListRow {
-        // 잔디 칼로리 기준(GrassAggregator)과 같은 값을 쓴다
-        let calories = record.totalCalories.map { "\(Int($0.rounded())) kcal" }
+        // 목록의 대표 칼로리는 활동 칼로리 — 워치 요약·골프·Ralli 와 같다 (루트 CLAUDE.md 워크아웃 계약).
+        // 잔디 집계(GrassAggregator)의 칼로리 입력은 별개다 — 칼로리 기준 농도를 켤 때 함께 정한다.
+        let calories = record.activeCalories.map { "\(Int($0.rounded())) kcal" }
         let parts = record.bodyParts
         return RecordListRow(id: record.persistentModelID,
                              record: record,
