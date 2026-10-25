@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ralli 헤더 시안</title>
+<style>
+  body { margin: 0; padding: 32px; background: #111; color: #eee; font-family: -apple-system, system-ui, sans-serif; }
+  h1 { font-size: 20px; margin: 0 0 6px; }
+  h2 { font-size: 15px; margin: 28px 0 8px; color: #ddd; }
+  p { color: #999; font-size: 13px; margin: 0 0 20px; line-height: 1.6; }
+  .stage { display: block; width: 100%; max-width: 1400px; aspect-ratio: 21 / 9; background: #000; border-radius: 10px; }
+  .phone { width: 280px; height: 300px; margin-top: 24px; border-radius: 46px 46px 0 0; border: 9px solid #1d1d1d; border-bottom: 0; overflow: hidden; background: #000; position: relative; }
+  .phone .stage { border-radius: 0; }
+  .cap { font-size: 12px; color: #888; margin-top: 24px; }
+</style>
+</head>
+<body>
+<h1>Ralli 헤더 — 코트 위 랠리 (21:9 · 3840×1646 · 8.8초 반복)</h1>
+<p>위에서 본 복식 코트(약 2.17:1)가 21:9 띠에 들어간다. 공이 오가고, 코트에 깔린 점수가 40:40 → AD:40 → 40:40 → 40:AD 로 돈다.
+글자가 없어 한국어·영어 파일 하나로 끝난다.</p>
+
+<h2>지금 시안 — <code>ralliHeader</code></h2>
+<canvas class="stage" data-scene="ralliHeader"></canvas>
+
+<h2>A안 — 코트 옆 워치 · <code>ralliHeaderWatch</code></h2>
+<p>점수가 나는 순간 워치를 탭하고, 워치 숫자가 바뀐 뒤 점이 코트로 날아가 코트 숫자가 따라 바뀐다. "손목으로 점수를 넣는다".<br>
+워치는 실제 스크린샷(영어 · 30:15) 한 장이고, 점수 숫자만 코드로 바꿔 그린다 (워치 글꼴 SF Compact 그대로).<br>
+ME/OPP · Undo · 연결 끊김 아이콘은 배경색으로 덮어 헤더에 글자가 남지 않는다.</p>
+<canvas class="stage" data-scene="ralliHeaderWatch"></canvas>
+
+<div class="cap">폰 제품 페이지에서 보이는 크기 (화면폭 262px 기준) — 왼쪽 지금 시안 · 오른쪽 A안</div>
+<div style="display:flex;gap:24px;flex-wrap:wrap">
+  <div class="phone"><canvas class="stage" data-scene="ralliHeader"></canvas></div>
+  <div class="phone"><canvas class="stage" data-scene="ralliHeaderWatch"></canvas></div>
+</div>
+
+<script>
+(function () {
+  const TAU = Math.PI * 2;
+  const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const ease = t => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+  const eOut = t => 1 - Math.pow(1 - t, 3);
+  const mod = (a, n) => ((a % n) + n) % n;
+  const FONT_R = 'ui-rounded, "SF Pro Rounded", -apple-system, system-ui, sans-serif';
+  const FONT_T = '-apple-system, system-ui, "Apple SD Gothic Neo", sans-serif';
+  // 앱의 선수 색 — ME 초록 · OPP 주황 (TennisCounter CLAUDE.md "Player colors")
+  const ME = '#30D158', OPP = '#FF9F0A';
+
+  function hexA(hex, a) { const n = parseInt(hex.slice(1), 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`; }
+  function txt(ctx, s, x, y, size, color, o = {}) {
+    const { w = 700, align = 'center', family = FONT_T, alpha = 1 } = o;
+    if (alpha <= 0) return;
+    ctx.save(); ctx.globalAlpha *= alpha;
+    ctx.font = `${w} ${size}px ${family}`; ctx.fillStyle = color; ctx.textAlign = align; ctx.textBaseline = 'middle';
+    ctx.fillText(s, x, y); ctx.restore();
+  }
+  function roll(ctx, from, to, p, x, y, size, color, o = {}) {
+    if (p >= 1 || from === to) { txt(ctx, to, x, y, size, color, o); return; }
+    const e = eOut(clamp(p)), a = o.alpha ?? 1;
+    txt(ctx, from, x, y - size * 0.45 * e, size, color, { ...o, alpha: a * (1 - e) });
+    txt(ctx, to, x, y + size * 0.45 * (1 - e), size, color, { ...o, alpha: a * e });
+  }
+
+  // 한 바퀴 = 공 8번(1.1초씩) = 8.8초. 점수 4단계가 2타마다 바뀌어 처음으로 돌아온다.
+  const D = 1.1, P = D * 8;
+  const STATES = [['40', '40'], ['AD', '40'], ['40', '40'], ['40', 'AD']];
+  const WINNER = [0, 0, 1, 1];          // 그 상태로 오게 한 포인트를 딴 쪽 (0 = ME)
+  const POINT_AT = 0.8 * D;             // 첫 포인트 시각. 이후 2타(2.2초)마다
+  // 시각 x 의 점수 상태 — lag 만큼 늦게 따라가는 표시(코트 숫자)는 lag 를 준다
+  function scoreAt(x, lag = 0) {
+    const u = mod(x - POINT_AT - lag, P), idx = Math.floor(u / (2 * D));
+    return { idx, since: u - idx * 2 * D, prev: STATES[mod(idx - 1, 4)], cur: STATES[idx] };
+  }
+
+  // 코트 · 선수 · 공 · 코트 숫자. o.cx 코트 중심 x, o.ch 코트 높이, o.lag 코트 숫자가 늦는 시간
+  function court(ctx, W, H, t, o) {
+    const tt = mod(t, P);
+    ctx.fillStyle = '#090c08'; ctx.fillRect(0, 0, W, H);
+    const gl = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, W * 0.5);
+    gl.addColorStop(0, 'rgba(173,255,65,0.08)'); gl.addColorStop(1, 'rgba(173,255,65,0)');
+    ctx.fillStyle = gl; ctx.fillRect(0, 0, W, H);
+
+    const ch = o.ch, cw = ch * 23.77 / 10.97, x0 = o.cx - cw / 2, y0 = (H - ch) / 2;
+    const si = ch * 1.37 / 10.97, sl = cw * 6.40 / 23.77, mx = x0 + cw / 2, my = y0 + ch / 2;
+    const lw = Math.max(1, H * 0.0055);
+    ctx.fillStyle = '#0f170d'; ctx.fillRect(x0, y0, cw, ch);
+
+    // 코트에 깔린 점수
+    const { idx, since, prev, cur } = scoreAt(tt, o.lag);
+    const numAt = i => [x0 + cw * (i ? 0.75 : 0.25), my + ch * 0.02];
+    [[0, ME], [1, OPP]].forEach(([i, c]) => {
+      const flash = WINNER[idx] === i ? 0.42 * (1 - clamp((since - 0.2) / 1.2)) : 0;
+      roll(ctx, prev[i], cur[i], since / 0.35, ...numAt(i), ch * 0.46, c, { w: 800, family: FONT_R, alpha: 0.2 + flash });
+    });
+
+    ctx.strokeStyle = 'rgba(173,255,65,0.6)'; ctx.lineWidth = lw;
+    ctx.strokeRect(x0, y0, cw, ch);
+    ctx.beginPath();
+    ctx.moveTo(x0, y0 + si); ctx.lineTo(x0 + cw, y0 + si); ctx.moveTo(x0, y0 + ch - si); ctx.lineTo(x0 + cw, y0 + ch - si);
+    ctx.moveTo(mx - sl, y0 + si); ctx.lineTo(mx - sl, y0 + ch - si); ctx.moveTo(mx + sl, y0 + si); ctx.lineTo(mx + sl, y0 + ch - si);
+    ctx.moveTo(mx - sl, my); ctx.lineTo(mx + sl, my);
+    ctx.moveTo(x0, my); ctx.lineTo(x0 + cw * 0.012, my); ctx.moveTo(x0 + cw, my); ctx.lineTo(x0 + cw * 0.988, my);
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(240,245,230,0.85)'; ctx.lineWidth = lw * 2;
+    ctx.beginPath(); ctx.moveTo(mx, y0 - ch * 0.07); ctx.lineTo(mx, y0 + ch * 1.07); ctx.stroke();
+    ctx.fillStyle = '#e8eee0';
+    [y0 - ch * 0.07, y0 + ch * 1.07].forEach(y => { ctx.beginPath(); ctx.arc(mx, y, lw * 2.2, 0, TAU); ctx.fill(); });
+
+    const ys = [0.30, 0.70, 0.44, 0.20, 0.62, 0.48, 0.32, 0.76];
+    const LX = x0 - cw * 0.035, RX = x0 + cw + cw * 0.035;
+    const hitPos = k => { k = mod(k, 8); return [k % 2 === 0 ? LX : RX, y0 + ch * ys[k]]; };
+    const BOUNCE = 0.72;
+    function ball(time) {
+      time = mod(time, P);
+      const k = Math.floor(time / D), s = (time - k * D) / D;
+      const [ax, ay] = hitPos(k), [bx, by] = hitPos(k + 1);
+      const h = s < BOUNCE ? Math.sin(Math.PI * s / BOUNCE) : 0.35 * Math.sin(Math.PI * (s - BOUNCE) / (1 - BOUNCE));
+      return { gx: lerp(ax, bx, s), gy: lerp(ay, by, s), h, k, s };
+    }
+    function playerY(side, time) {
+      const local = mod(time - (side ? D : 0), P), m = Math.floor(local / (2 * D));
+      const hit = side ? 2 * m + 1 : 2 * m, nxt = mod(hit + 2, 8), p = (local - m * 2 * D) / (2 * D);
+      return y0 + ch * lerp(ys[hit], ys[nxt], ease(clamp((p - 0.12) / 0.7)));
+    }
+    [[0, ME, LX], [1, OPP, RX]].forEach(([side, c, x]) => {
+      const y = playerY(side, tt), R = H * 0.024;
+      const g = ctx.createRadialGradient(x, y, 0, x, y, R * 3.2);
+      g.addColorStop(0, hexA(c, 0.35)); g.addColorStop(1, hexA(c, 0));
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, R * 3.2, 0, TAU); ctx.fill();
+      ctx.fillStyle = c; ctx.beginPath(); ctx.arc(x, y, R, 0, TAU); ctx.fill();
+      const sw = mod(tt - (side ? D : 0), 2 * D);
+      if (sw < 0.35) { ctx.save(); ctx.globalAlpha = 1 - sw / 0.35; ctx.strokeStyle = c; ctx.lineWidth = lw * 1.4; ctx.beginPath(); ctx.arc(x, y, R * (1.3 + 2.2 * eOut(sw / 0.35)), 0, TAU); ctx.stroke(); ctx.restore(); }
+    });
+
+    const b = ball(tt), lift = ch * 0.17;
+    if (b.s > BOUNCE) {
+      const age = (b.s - BOUNCE) * D, [ax, ay] = hitPos(b.k), [bx, by] = hitPos(b.k + 1);
+      const px = lerp(ax, bx, BOUNCE), py = lerp(ay, by, BOUNCE);
+      ctx.save(); ctx.globalAlpha = clamp(1 - age / 0.4); ctx.strokeStyle = '#E6FF5C'; ctx.lineWidth = lw;
+      ctx.beginPath(); ctx.ellipse(px, py, H * (0.01 + age * 0.09), H * (0.006 + age * 0.055), 0, 0, TAU); ctx.stroke(); ctx.restore();
+    }
+    for (let j = 10; j >= 1; j--) {
+      const q = ball(tt - j * 0.018);
+      ctx.fillStyle = `rgba(230,255,92,${0.22 * (1 - j / 11)})`;
+      ctx.beginPath(); ctx.arc(q.gx, q.gy - q.h * lift, H * 0.013 * (1 + 0.3 * q.h) * (1 - j / 16), 0, TAU); ctx.fill();
+    }
+    ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.beginPath(); ctx.ellipse(b.gx, b.gy, H * 0.014, H * 0.008, 0, 0, TAU); ctx.fill();
+    const br = H * 0.016 * (1 + 0.3 * b.h), bx = b.gx, by = b.gy - b.h * lift;
+    const bg = ctx.createRadialGradient(bx - br * 0.35, by - br * 0.35, br * 0.1, bx, by, br);
+    bg.addColorStop(0, '#F7FFB8'); bg.addColorStop(1, '#C9EE2E');
+    ctx.fillStyle = bg; ctx.beginPath(); ctx.arc(bx, by, br, 0, TAU); ctx.fill();
+    return { numAt };
+  }
+
+  // 지금 시안 — 코트를 가운데
+  function ralliHeader(ctx, W, H, t) {
+    court(ctx, W, H, t, { cx: W / 2, ch: H * 0.68, lag: 0 });
+  }
+
+  // ---- A안: 코트 옆 워치 ----
+  function rr(ctx, x, y, w, h, r) {
+    r = Math.max(0, Math.min(r, w / 2, h / 2));
+    ctx.beginPath(); ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+  }
+  // 워치 스크린샷 (피그마 Ultra 테두리 3x, 1266x1542 · 30:15 · 게임 4:3). 좌표는 이 이미지 기준으로 잰 값.
+  const IMG = { match: new Image() };
+  IMG.match.src = '../inputs/watch-match-global.png';
+  const WI = { w: 1266, h: 1542, mid: 621, bgL: '#071f0d', bgR: '#261607',
+    col: [423.5, 820], base: 850, numFont: 169, numBox: [700, 885], numHalf: 158,
+    numColor: ['#30D158', '#FF9230'],
+    cover: [ // 글자·아이콘을 배경색으로 덮는다 — 헤더에 글자를 남기지 않고, 연결 끊김 아이콘을 지운다
+      [387, 617, 460, 663, 'L'], [768, 617, 867, 664, 'R'],     // ME · OPP
+      [464, 1022, 621, 1142, 'L'], [621, 1022, 778, 1142, 'R'],  // Undo
+      [774, 346, 824, 404, 'R'],                                  // 연결 끊김 아이콘
+    ] };
+  // 이미지 바깥의 검은 바탕만 투명하게 오린다 — 가장자리에서 출발해 거의 검은 픽셀을 따라 채운다.
+  // 테두리·밴드가 막아 화면 안의 검정까지는 번지지 않는다. file:// 로 열면 브라우저가 픽셀 읽기를 막아 원본을 그대로 쓴다.
+  let CUT = null;
+  function cutImage() {
+    if (CUT) return CUT;
+    const im = IMG.match;
+    if (!im.complete || !im.naturalWidth) return null;
+    try {
+      const c = document.createElement('canvas'); c.width = im.naturalWidth; c.height = im.naturalHeight;
+      const g = c.getContext('2d'); g.drawImage(im, 0, 0);
+      const d = g.getImageData(0, 0, c.width, c.height), px = d.data, Wd = c.width, Hd = c.height;
+      const seen = new Uint8Array(Wd * Hd), stack = [];
+      const dark = i => px[i * 4] < 16 && px[i * 4 + 1] < 16 && px[i * 4 + 2] < 16;
+      for (let x = 0; x < Wd; x++) stack.push(x, (Hd - 1) * Wd + x);
+      for (let y = 0; y < Hd; y++) stack.push(y * Wd, y * Wd + Wd - 1);
+      while (stack.length) {
+        const i = stack.pop();
+        if (seen[i] || !dark(i)) continue;
+        seen[i] = 1; px[i * 4 + 3] = 0;
+        const x = i % Wd, y = (i / Wd) | 0;
+        if (x > 0) stack.push(i - 1); if (x < Wd - 1) stack.push(i + 1);
+        if (y > 0) stack.push(i - Wd); if (y < Hd - 1) stack.push(i + Wd);
+      }
+      // 밴드가 잘린 위·아래 끝은 투명도로 흐린다 (배경색을 덧칠하면 헤더의 은은한 빛과 어긋나 사각형이 보인다)
+      const fr = Math.round(Hd * 0.08);
+      for (let y = 0; y < fr; y++) {
+        const k = y / fr;
+        for (let x = 0; x < Wd; x++) { px[(y * Wd + x) * 4 + 3] *= k; px[((Hd - 1 - y) * Wd + x) * 4 + 3] *= k; }
+      }
+      g.putImageData(d, 0, 0); CUT = c;
+    } catch (e) { CUT = im; }
+    return CUT;
+  }
+  // 워치를 그리고, 점수 숫자만 코드로 바꿔 그린다. 글꼴은 워치 시스템 글꼴(SF Compact)이라 원본과 같다.
+  function watchShot(ctx, x, y, s, score, H) {
+    const im = cutImage();
+    if (!im) return;
+    ctx.drawImage(im, x, y, WI.w * s, WI.h * s);
+    ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+    for (const [x0, y0, x1, y1, side] of WI.cover) { ctx.fillStyle = side === 'L' ? WI.bgL : WI.bgR; ctx.fillRect(x0, y0, x1 - x0, y1 - y0); }
+    [0, 1].forEach(i => {
+      const cx = WI.col[i], [ny0, ny1] = WI.numBox;
+      ctx.fillStyle = i ? WI.bgR : WI.bgL; ctx.fillRect(cx - WI.numHalf, ny0, WI.numHalf * 2, ny1 - ny0);
+      ctx.save(); ctx.beginPath(); ctx.rect(cx - WI.numHalf, ny0, WI.numHalf * 2, ny1 - ny0); ctx.clip();
+      const draw = (str, dy, a) => {
+        if (a <= 0) return;
+        ctx.globalAlpha = a; ctx.font = `700 ${WI.numFont}px "SF Compact", system-ui`; ctx.fillStyle = WI.numColor[i];
+        const m = ctx.measureText(str);
+        ctx.fillText(str, cx - (m.actualBoundingBoxRight - m.actualBoundingBoxLeft) / 2 + m.actualBoundingBoxLeft, WI.base + dy);
+      };
+      const p = clamp(score.since / 0.25), e = eOut(p);
+      if (score.prev[i] === score.cur[i] || p >= 1) draw(score.cur[i], 0, 1);
+      else { draw(score.prev[i], -60 * e, 1 - e); draw(score.cur[i], 60 * (1 - e), e); }
+      ctx.restore();
+    });
+    ctx.restore();
+  }
+  function tapFx(ctx, x, y, since, R) {
+    if (since < -0.22 || since > 0.6) return;
+    ctx.save();
+    if (since < 0.1) { const a = clamp((since + 0.22) / 0.22); ctx.globalAlpha = 0.5 * a; ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x, y, R * 0.3, 0, TAU); ctx.fill(); }
+    if (since >= 0) { const p = clamp(since / 0.55); ctx.globalAlpha = 0.75 * (1 - p); ctx.strokeStyle = '#fff'; ctx.lineWidth = R * 0.05; ctx.beginPath(); ctx.arc(x, y, R * (0.3 + 0.8 * eOut(p)), 0, TAU); ctx.stroke(); }
+    ctx.restore();
+  }
+  function curve(ax, ay, bx, by, lift) {
+    const mx = (ax + bx) / 2, my = Math.min(ay, by) - lift;
+    return s => { const u = 1 - s; return [u * u * ax + 2 * u * s * mx + s * s * bx, u * u * ay + 2 * u * s * my + s * s * by]; };
+  }
+  function flyDot(ctx, f, color, H, since, dur) {
+    if (since < -0.25 || since > dur + 0.5) return;
+    ctx.save();
+    const vis = clamp((since + 0.25) / 0.25) * (1 - clamp((since - dur - 0.1) / 0.4));
+    ctx.fillStyle = color;
+    for (let i = 1; i < 28; i++) { const [x, y] = f(i / 28); ctx.globalAlpha = 0.22 * vis; ctx.beginPath(); ctx.arc(x, y, H * 0.004, 0, TAU); ctx.fill(); }
+    if (since >= 0 && since < dur + 0.1) {
+      const [x, y] = f(clamp(eOut(since / dur)));
+      ctx.globalAlpha = 1 - clamp((since - dur) / 0.1);
+      const g = ctx.createRadialGradient(x, y, 0, x, y, H * 0.04); g.addColorStop(0, color); g.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, H * 0.04, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x, y, H * 0.008, 0, TAU); ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  // 코트를 왼쪽으로 옮기고 줄여 오른쪽에 워치 자리를 만든다. 워치를 탭한 뒤 LAG 초 뒤에 코트 숫자가 바뀐다.
+  // 워치는 오른쪽 끝에 붙이지 않는다 — 기기·방향에 따라 헤더 가장자리가 잘릴 수 있다
+  function ralliHeaderWatch(ctx, W, H, t) {
+    const tt = mod(t, P), LAG = 0.4;
+    const { numAt } = court(ctx, W, H, t, { cx: W * 0.33, ch: H * 0.52, lag: LAG });
+    const s = (H * 0.95) / WI.h, wx = W * 0.775 - WI.w * s / 2, wy = (H - WI.h * s) / 2;
+    const ws = scoreAt(tt, 0);
+    watchShot(ctx, wx, wy, s, ws, H);
+    // 다음(또는 방금) 포인트를 딴 쪽 숫자를 탭한다
+    const next = ws.since > 1.0, side = WINNER[mod(ws.idx + (next ? 1 : 0), 4)];
+    const tx = wx + WI.col[side] * s, ty = wy + (WI.base - 60) * s;
+    tapFx(ctx, tx, ty, next ? ws.since - 2 * D : ws.since, H * 0.16);
+    // 워치에서 코트 숫자로 점이 날아간다
+    const won = WINNER[ws.idx], [nx, ny] = numAt(won);
+    flyDot(ctx, curve(wx + WI.col[won] * s, wy + (WI.base - 60) * s, nx, ny - H * 0.1, H * 0.18), won ? OPP : ME, H, ws.since - 0.02, LAG - 0.05);
+  }
+
+  // build-render.py 는 이 선언을 찾아 장면을 꺼낸다 — 이름을 바꾸면 --scene 인자도 바꾼다
+  const scenes = { ralliHeader, ralliHeaderWatch };
+
+  const canvases = [...document.querySelectorAll('canvas[data-scene]')];
+  const t0 = performance.now();
+  function frame(now) {
+    const t = (now - t0) / 1000, dpr = Math.min(window.devicePixelRatio || 1, 2);
+    for (const c of canvases) {
+      const r = c.getBoundingClientRect();
+      const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+      if (c.width !== w || c.height !== h) { c.width = w; c.height = h; }
+      const ctx = c.getContext('2d');
+      ctx.save(); scenes[c.dataset.scene](ctx, w, h, t, 'en'); ctx.restore();
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
