@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ralli 검색 결과 시안</title>
+<style>
+  body { margin: 0; padding: 32px; background: #111; color: #eee; font-family: -apple-system, system-ui, sans-serif; }
+  h1 { font-size: 20px; margin: 0 0 6px; }
+  p { color: #999; font-size: 13px; margin: 0 0 20px; line-height: 1.6; }
+  .stage { display: block; width: 100%; max-width: 1100px; aspect-ratio: 3 / 2; background: #000; border-radius: 10px; }
+  .cap { font-size: 12px; color: #888; margin-top: 24px; }
+  .phone { width: 262px; margin-top: 8px; padding: 14px; border-radius: 40px; border: 9px solid #1d1d1d; background: #000; }
+  .phone .row { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; color: #fff; font: 700 13px -apple-system, system-ui; }
+  .phone .ic { width: 44px; height: 44px; border-radius: 11px; background: radial-gradient(circle, #ADFF41 0 30%, transparent 31%), #0b0f0a; }
+  .phone .get { margin-left: auto; background: #0A84FF; padding: 5px 14px; border-radius: 14px; font-size: 12px; }
+  .phone .stage { border-radius: 12px; }
+</style>
+</head>
+<body>
+<h1>Ralli 검색 결과 — 탭 · 크라운으로 점수 넣기 (3:2 · 2880×1920 · 8.8초 반복 · 영어)</h1>
+<p>워치는 실제 스크린샷(영어 · 30:15) 한 장이고 점수 숫자만 코드로 바꿔 그린다. 실제 화면을 보여 주는 자리라 ME/OPP · Undo 는 남기고 연결 끊김 아이콘만 지운다.
+화면 반쪽을 탭하거나, 크라운을 위로 돌리면 ME · 아래로 돌리면 OPP 점수가 오른다 (앱의 <code>CrownPointGate</code> 와 같은 방향). 탭과 크라운을 번갈아 쓴다. 점수는 헤더와 같은 듀스 루프.</p>
+<canvas class="stage" data-scene="ralliSearch"></canvas>
+<div class="cap">폰 검색 결과에서 보이는 크기</div>
+<div class="phone">
+  <div class="row"><div class="ic"></div><div>Ralli - Tennis Score Counter<br><span style="color:#8e8e93;font-weight:400;font-size:11px">Watch Scoreboard &amp; Match Log</span></div><div class="get">Get</div></div>
+  <canvas class="stage" data-scene="ralliSearch"></canvas>
+</div>
+
+<script>
+(function () {
+  const TAU = Math.PI * 2;
+  const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+  const eOut = t => 1 - Math.pow(1 - t, 3);
+  const mod = (a, n) => ((a % n) + n) % n;
+  const FONT_T = '-apple-system, system-ui, "Apple SD Gothic Neo", sans-serif';
+  const FONT_R = 'ui-rounded, "SF Pro Rounded", -apple-system, system-ui, sans-serif';
+  // 앱 색 — 워치 숫자는 스크린샷에서 잰 값, 화살표는 SwiftUI .green · .orange (다크)
+  const ME = '#30D158', OPP = '#FF9F0A', LIME = '#ADFF41';
+
+  // 점수 — 헤더와 같은 듀스 루프. 2.2초마다 한 포인트, 8.8초에 처음으로 돌아온다
+  const D = 1.1, P = D * 8;
+  const STATES = [['40', '40'], ['AD', '40'], ['40', '40'], ['40', 'AD']];
+  const WINNER = [0, 0, 1, 1];
+  const METHOD = ['tap', 'crown', 'tap', 'crown']; // 그 상태로 오게 한 입력 — 검색 결과에서만 쓴다
+  const POINT_AT = 0.8 * D;
+  function scoreAt(x, lag = 0) {
+    const u = mod(x - POINT_AT - lag, P), idx = Math.floor(u / (2 * D));
+    return { idx, since: u - idx * 2 * D, prev: STATES[mod(idx - 1, 4)], cur: STATES[idx] };
+  }
+
+  function rr(ctx, x, y, w, h, r) {
+    r = Math.max(0, Math.min(r, w / 2, h / 2));
+    ctx.beginPath(); ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+  }
+  function txt(ctx, s, x, y, size, color, o = {}) {
+    const { w = 700, align = 'center', family = FONT_T, alpha = 1, italic = false } = o;
+    if (alpha <= 0) return;
+    ctx.save(); ctx.globalAlpha *= alpha;
+    ctx.font = `${italic ? 'italic ' : ''}${w} ${size}px ${family}`; ctx.fillStyle = color; ctx.textAlign = align; ctx.textBaseline = 'middle';
+    ctx.fillText(s, x, y); ctx.restore();
+  }
+  function roll(ctx, from, to, p, x, y, size, color, o = {}) {
+    if (p >= 1 || from === to) { txt(ctx, to, x, y, size, color, o); return; }
+    const e = eOut(clamp(p)), a = o.alpha ?? 1;
+    txt(ctx, from, x, y - size * 0.45 * e, size, color, { ...o, alpha: a * (1 - e) });
+    txt(ctx, to, x, y + size * 0.45 * (1 - e), size, color, { ...o, alpha: a * e });
+  }
+  function caption(ctx, parts, cx, y, size, hl) {
+    ctx.save(); ctx.font = `700 ${size}px ${FONT_T}`;
+    const ws = parts.map(p => ctx.measureText(p[0]).width);
+    let x = cx - ws.reduce((a, b) => a + b, 0) / 2;
+    ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+    parts.forEach((p, i) => { ctx.fillStyle = p[1] ? hl : '#F4F4EF'; ctx.fillText(p[0], x, y); x += ws[i]; });
+    ctx.restore();
+  }
+  // 화면 탭 — 손가락이 닿고 링이 퍼진다. since 는 점수가 들어가는 순간 기준 초
+  function tapFx(ctx, x, y, since, R) {
+    if (since < -0.22 || since > 0.6) return;
+    ctx.save();
+    if (since < 0.1) { const a = clamp((since + 0.22) / 0.22); ctx.globalAlpha = 0.5 * a; ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x, y, R * 0.3, 0, TAU); ctx.fill(); }
+    if (since >= 0) { const p = clamp(since / 0.55); ctx.globalAlpha = 0.75 * (1 - p); ctx.strokeStyle = '#fff'; ctx.lineWidth = R * 0.05; ctx.beginPath(); ctx.arc(x, y, R * (0.3 + 0.8 * eOut(p)), 0, TAU); ctx.stroke(); }
+    ctx.restore();
+  }
+
+  // ---- 워치 (ralli-header.html 과 같은 스크린샷 · 같은 좌표) ----
+  const IMG = { match: new Image() };
+  IMG.match.src = '../inputs/watch-match-global.png';
+  const WI = { w: 1266, h: 1542, bgL: '#071f0d', bgR: '#261607',
+    col: [423.5, 820], base: 850, numFont: 169, numBox: [700, 885], numHalf: 158,
+    numColor: ['#30D158', '#FF9230'],
+    cover: [[774, 346, 824, 404, 'R']] }; // 연결 끊김 아이콘만 지운다 — ME/OPP · Undo 는 실제 화면이라 남긴다
+  let CUT = null;
+  function cutImage() {
+    if (CUT) return CUT;
+    const im = IMG.match;
+    if (!im.complete || !im.naturalWidth) return null;
+    try {
+      const c = document.createElement('canvas'); c.width = im.naturalWidth; c.height = im.naturalHeight;
+      const g = c.getContext('2d'); g.drawImage(im, 0, 0);
+      const d = g.getImageData(0, 0, c.width, c.height), px = d.data, Wd = c.width, Hd = c.height;
+      const seen = new Uint8Array(Wd * Hd), stack = [];
+      const dark = i => px[i * 4] < 16 && px[i * 4 + 1] < 16 && px[i * 4 + 2] < 16;
+      for (let x = 0; x < Wd; x++) stack.push(x, (Hd - 1) * Wd + x);
+      for (let y = 0; y < Hd; y++) stack.push(y * Wd, y * Wd + Wd - 1);
+      while (stack.length) {
+        const i = stack.pop();
+        if (seen[i] || !dark(i)) continue;
+        seen[i] = 1; px[i * 4 + 3] = 0;
+        const x = i % Wd, y = (i / Wd) | 0;
+        if (x > 0) stack.push(i - 1); if (x < Wd - 1) stack.push(i + 1);
+        if (y > 0) stack.push(i - Wd); if (y < Hd - 1) stack.push(i + Wd);
+      }
+      const fr = Math.round(Hd * 0.08);
+      for (let y = 0; y < fr; y++) {
+        const k = y / fr;
+        for (let x = 0; x < Wd; x++) { px[(y * Wd + x) * 4 + 3] *= k; px[((Hd - 1 - y) * Wd + x) * 4 + 3] *= k; }
+      }
+      g.putImageData(d, 0, 0); CUT = c;
+    } catch (e) { CUT = im; }
+    return CUT;
+  }
+  function watchShot(ctx, x, y, s, score) {
+    const im = cutImage();
+    if (!im) return;
+    ctx.drawImage(im, x, y, WI.w * s, WI.h * s);
+    ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+    for (const [x0, y0, x1, y1, side] of WI.cover) { ctx.fillStyle = side === 'L' ? WI.bgL : WI.bgR; ctx.fillRect(x0, y0, x1 - x0, y1 - y0); }
+    [0, 1].forEach(i => {
+      const cx = WI.col[i], [ny0, ny1] = WI.numBox;
+      ctx.fillStyle = i ? WI.bgR : WI.bgL; ctx.fillRect(cx - WI.numHalf, ny0, WI.numHalf * 2, ny1 - ny0);
+      ctx.save(); ctx.beginPath(); ctx.rect(cx - WI.numHalf, ny0, WI.numHalf * 2, ny1 - ny0); ctx.clip();
+      const draw = (str, dy, a) => {
+        if (a <= 0) return;
+        ctx.globalAlpha = a; ctx.font = `700 ${WI.numFont}px "SF Compact", system-ui`; ctx.fillStyle = WI.numColor[i];
+        const m = ctx.measureText(str);
+        ctx.fillText(str, cx - (m.actualBoundingBoxRight - m.actualBoundingBoxLeft) / 2 + m.actualBoundingBoxLeft, WI.base + dy);
+      };
+      const p = clamp(score.since / 0.25), e = eOut(p);
+      if (score.prev[i] === score.cur[i] || p >= 1) draw(score.cur[i], 0, 1);
+      else { draw(score.prev[i], -60 * e, 1 - e); draw(score.cur[i], 60 * (1 - e), e); }
+      ctx.restore();
+    });
+    ctx.restore();
+  }
+
+  // ---- 크라운 (이미지 기준 좌표) — 위로 돌리면 내 점수, 아래로 돌리면 상대 점수 (CrownPointGate) ----
+  const CROWN = { x0: 1132, x1: 1200, y0: 522, y1: 712 };
+  // 크라운을 돌리는 손가락 · 톱니가 미끄러지는 결 · 돌리는 방향 화살표. since 는 점수가 들어가는 순간(딸깍) 기준 초
+  function crownTurn(ctx, x, y, s, since, up, H) {
+    if (since < -0.6 || since > 0.7) return;
+    const cx = x + (CROWN.x0 + CROWN.x1) / 2 * s, cy = y + (CROWN.y0 + CROWN.y1) / 2 * s;
+    const ch = (CROWN.y1 - CROWN.y0) * s, cw = (CROWN.x1 - CROWN.x0) * s;
+    const turn = clamp((since + 0.35) / 0.35);          // 돌리는 진행 (딸깍 0.35초 전부터)
+    const dir = up ? -1 : 1, color = up ? ME : OPP;
+    const fade = since < -0.45 ? clamp((since + 0.6) / 0.15) : since > 0.35 ? 1 - clamp((since - 0.35) / 0.35) : 1;
+    // 톱니 결 — 돌리는 동안만 미끄러진다
+    if (since > -0.4 && since < 0.15) {
+      ctx.save(); rr(ctx, cx - cw / 2, cy - ch / 2, cw, ch, cw * 0.25); ctx.clip();
+      const gap = 14 * s, off = mod(dir * turn * 6 * gap, gap);
+      ctx.globalAlpha = 0.35 * Math.sin(Math.PI * clamp((since + 0.4) / 0.55));
+      ctx.fillStyle = '#ffffff';
+      for (let yy = cy - ch / 2 - gap + off; yy < cy + ch / 2 + gap; yy += gap) ctx.fillRect(cx - cw / 2, yy, cw, 2.5 * s);
+      ctx.restore();
+    }
+    // 손가락 — 크라운 옆면을 문지르듯 위/아래로 움직인다
+    const fy = cy - dir * ch * 0.22 + dir * ch * 0.44 * ease(turn);
+    ctx.save(); ctx.globalAlpha = 0.5 * fade; ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.ellipse(cx + cw * 0.9, fy, cw * 0.55, ch * 0.2, 0, 0, TAU); ctx.fill(); ctx.restore();
+    // 방향 화살표 — 크라운 바깥으로 휘는 호
+    const R = H * 0.13, ax = cx + cw * 0.6, a0 = up ? 0.75 : -0.75, a1 = up ? -0.75 : 0.75;
+    const prog = eOut(clamp((since + 0.35) / 0.4));
+    const aEnd = a0 + (a1 - a0) * prog;
+    ctx.save(); ctx.globalAlpha = fade; ctx.strokeStyle = color; ctx.lineWidth = H * 0.012; ctx.lineCap = 'round';
+    ctx.shadowColor = color; ctx.shadowBlur = H * 0.02;
+    ctx.beginPath(); ctx.arc(ax, cy, R, a0, aEnd, up); ctx.stroke();
+    if (prog > 0.15) {
+      const hx = ax + R * Math.cos(aEnd), hy = cy + R * Math.sin(aEnd), tang = aEnd + (up ? -Math.PI / 2 : Math.PI / 2), hl = H * 0.035;
+      ctx.fillStyle = color; ctx.beginPath();
+      ctx.moveTo(hx + Math.cos(tang) * hl, hy + Math.sin(tang) * hl);
+      ctx.lineTo(hx + Math.cos(tang + 2.5) * hl, hy + Math.sin(tang + 2.5) * hl);
+      ctx.lineTo(hx + Math.cos(tang - 2.5) * hl, hy + Math.sin(tang - 2.5) * hl);
+      ctx.closePath(); ctx.fill();
+    }
+    ctx.restore();
+  }
+  const ease = t => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
+  // 워치 하나를 크게 — 크라운으로 점수를 넣는다. 위로 돌리면 ME, 아래로 돌리면 OPP.
+  function ralliSearch(ctx, W, H, t) {
+    const tt = mod(t, P);
+    ctx.fillStyle = '#090c08'; ctx.fillRect(0, 0, W, H);
+    const gl = ctx.createRadialGradient(W * 0.48, H * 0.58, 0, W * 0.48, H * 0.58, W * 0.5);
+    gl.addColorStop(0, 'rgba(173,255,65,0.08)'); gl.addColorStop(1, 'rgba(173,255,65,0)');
+    ctx.fillStyle = gl; ctx.fillRect(0, 0, W, H);
+    caption(ctx, [['complex scoring, ', 0], ['just one touch away', 1]], W / 2, H * 0.095, H * 0.056, LIME);
+
+    const s = (H * 0.84) / WI.h, wx = W * 0.45 - WI.w * s / 2, wy = H * 0.17;
+    const ws = scoreAt(tt, 0);
+    watchShot(ctx, wx, wy, s, ws);
+    // 다음(또는 방금) 포인트 — 탭과 크라운을 번갈아 쓴다. 한 바퀴에 ME · OPP 가 둘 다 한 번씩
+    const next = ws.since > 1.0, k = mod(ws.idx + (next ? 1 : 0), 4), since = next ? ws.since - 2 * D : ws.since;
+    const side = WINNER[k];
+    if (METHOD[k] === 'crown') crownTurn(ctx, wx, wy, s, since, side === 0, H);
+    else tapFx(ctx, wx + WI.col[side] * s, wy + (WI.base - 60) * s, since, H * 0.16);
+  }
+
+  // build-render.py 는 이 선언을 찾아 장면을 꺼낸다
+  const scenes = { ralliSearch };
+
+  const canvases = [...document.querySelectorAll('canvas[data-scene]')];
+  const t0 = performance.now();
+  function frame(now) {
+    const t = (now - t0) / 1000, dpr = Math.min(window.devicePixelRatio || 1, 2);
+    for (const c of canvases) {
+      const r = c.getBoundingClientRect();
+      const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+      if (c.width !== w || c.height !== h) { c.width = w; c.height = h; }
+      const ctx = c.getContext('2d');
+      ctx.save(); scenes[c.dataset.scene](ctx, w, h, t, 'en'); ctx.restore();
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
