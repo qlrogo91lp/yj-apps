@@ -171,125 +171,39 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
 배경색(`badgeColor`)으로만 드러난다. 결정은 대화 중 시안 페이지로 확정해 스펙 문서 대신 README 와 PR 에 남겼다.
 로컬 SPM 이라 Kit 만 먼저 머지할 수 없어 PR 은 하나로 묶었다.
 
-## HaruchiFit — 첫 출시 전 (Phase 1 완료 · Phase 2 진행 중)
+## HaruchiFit — 1.0.0 출시됨 · 1.0.1 대기
 
-순서와 설계 근거의 단일 출처는 [로드맵](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-07-haruchi-fit-roadmap.md)이다.
-선행 문서 — [제품 스펙](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-02-haruchi-fit-product-spec.md) · [아키텍처](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-02-haruchi-fit-architecture.md).
-아래 표는 **로드맵의 상태를 비추는 것**이고, 항목별 상세 근거·의존 관계는 로드맵이 갖는다.
+설계 근거는 [로드맵](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-07-haruchi-fit-roadmap.md) · [제품 스펙](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-02-haruchi-fit-product-spec.md) · [아키텍처](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-02-haruchi-fit-architecture.md).
+1.0.0 에 들어간 항목은 출시로 정리했다 (10-25). 지난 상태는 git 이력이 갖는다.
 
-### 진행사항 (완료)
-
-| 항목 | 결과 | 문서 |
+| 항목 | 상태 | 문서 |
 |---|---|---|
-| 타깃 3개 생성 · CI 등록 | [PR #6](https://github.com/qlrogo91lp/yj-apps/pull/6) | [플랜](Apps/HaruchiFit/docs/plans/shared/2026/2026-09-03-haruchi-fit-target-scaffold.md) |
-| `HKWorkoutActivity` 실기기 검증 | 이종 전환 불가 확정 → 폴백 (`b51f1b6`) | — |
-| 스파이크 코드 제거 | [PR #7](https://github.com/qlrogo91lp/yj-apps/pull/7) | — |
-| W1 모드 라벨 · 전환 행 (D-M1) | [PR #8](https://github.com/qlrogo91lp/yj-apps/pull/8) | — |
-| 세그먼트 SwiftData 저장 | [PR #9](https://github.com/qlrogo91lp/yj-apps/pull/9) | — |
-| W2 종료 후 요약 (저장 / 버리기) | [PR #12](https://github.com/qlrogo91lp/yj-apps/pull/12) 머지 · **실기기 검증 완료** | [플랜](Apps/HaruchiFit/docs/plans/watch/2026/2026-09-07-haruchi-fit-w2-summary.md) |
-| W0 홈 시작 유형 토글 (근력 / 유산소) | [PR #14](https://github.com/qlrogo91lp/yj-apps/pull/14) 머지 · 테스트 12개 통과 · **실기기 검증 완료** | [플랜](Apps/HaruchiFit/docs/plans/watch/2026/2026-09-08-haruchi-fit-w0-start-kind.md) |
-| WC 컴플리케이션 — 세션 상태만 | [PR #14](https://github.com/qlrogo91lp/yj-apps/pull/14) 머지 · 테스트 24개 통과 · **실기기 검증 완료** | [플랜](Apps/HaruchiFit/docs/plans/watch/2026/2026-09-08-haruchi-fit-wc-complication.md) |
+| **1.0.1** 워치 기록 전송 유실 수정 (하루치 · 골프 · Ralli, YJKit `.queued`) · 하루치 칼로리 활동 칼로리로 통일 | **머지 완료 (10-25, [PR #63](https://github.com/qlrogo91lp/yj-apps/pull/63) · [#64](https://github.com/qlrogo91lp/yj-apps/pull/64) · [#65](https://github.com/qlrogo91lp/yj-apps/pull/65))** · 실기기 확인 대기 (아래) — 다음: 버전 올림 · 출시 노트. 골프 · Ralli 수정은 각 앱의 다음 출시에 실린다 | [플랜](docs/plans/2026/2026-10-25-watch-record-delivery.md) |
+| 07 설정 | **보류** — 만들 때 `정보` 그룹의 개인정보처리방침 링크(iOS)를 반드시 넣는다 | 로드맵 Phase 5 · 스펙 07절 |
+| CloudKit 엔타이틀먼트 | **예정** — 프로비저닝 작업(사용자) · 로컬 폴백이 있다 | 로드맵 "언제든" |
 
-### 예정사항 — 1차 / 2차 / 3차 (2026-10-07 재정렬)
+### 1.0.1 실기기 확인
 
-**1차 = 핵심 루프 하나만.** 워치에서 운동 시작·종료 → iOS 기록 탭 목록 → 기록 상세. **기능은 이미 다 있다**
-(W0·W1·W2 · 03b 목록 PR #33 · 04 상세 PR #40). 남은 건 종료 시각 한 줄 수정과 실기기로 이 루프를 돌려 보는 것뿐이다.
-**2차 = 앱다운 화면** (홈 · 통계 · 수동 기록 · 달력). **3차 = 부가** (온보딩 · 설정 · 공유).
-근거는 [로드맵 "우선순위"](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-07-haruchi-fit-roadmap.md#우선순위-2026-10-06).
+**하루치** — 근력 · 유산소를 번갈아 넣은 운동을 끝내고 저장. 폰 기록에 구간이 나뉘어 있고 `kcal` 이 워치 요약 숫자와 같은지
+- [ ] 폰 앱을 백그라운드로 둔 채
+- [ ] 폰 앱을 완전히 종료한 채 → 운동 2개를 연달아 끝낸 뒤 폰 앱을 연다 (밀린 기록 2건이 다 들어오는지)
 
-> **하루치핏 실기기 테스트 운영 원칙:** 기능 구현과 로컬 검증을 먼저 모두 끝낸 뒤, 실기기 테스트는 한 번에 묶어 진행한다. 구현 중에는 기능별 확인 대기 항목만 기록하고, 중간 실기기 검증 때문에 다음 구현을 멈추지 않는다.
+**골프**
+- [ ] 폰 앱을 종료한 채 라운드를 끝내고 저장 → 폰 앱을 열면 라운드가 있다
 
-| 차수 | 순서 | # | 항목 | 왜 이 자리인가 | 상태 | 문서 |
-|---|---|---|---|---|---|---|
-| ~~1차~~ | ~~**1**~~ | — | ~~워치 종료 시각 지연 수정~~ | ~~상세 헤더의 끝 시각이 이 값이다~~ | **코드 수정 완료** (`fix/haruchi-watch-ended-at`) · 실기기 확인은 2번에서 | 아래 "집 맥북에서 할 것" |
-| 1차 | **2** | — | **핵심 루프 실기기 확인 — 다음 작업** | 워치 시작·종료 → 폰 목록에 뜨는지 → 상세(시간·kcal·심박·운동 구성·부위·메모). 아래 확인 대기 중 루프에 걸린 것만 | **일부 확인 (10-07)** — 워치 운동 시작·종료·저장과 건강/피트니스 앱 연동 정상, 기록 값 정확. **남음:** 종료 시각 · 정지 제외 · 목록·상세 · import · 피트니스 앱 운동 목록 아이콘이 자리 표시자로 보임 | 아래 "집 맥북에서 할 것" |
-| 2차 | 1 | 7 | 02 홈 대시보드 | 앱 첫 화면이 아직 임시 잔디 그리드다 | **구현 완료** ([PR #44](https://github.com/qlrogo91lp/yj-apps/pull/44)) · 시뮬레이터·실기기 확인 대기 | [플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-10-06-home-dashboard.md) · 스펙 02절 |
-| ~~2차~~ | ~~2~~ | ~~9~~ | ~~05 통계~~ | ~~탭 하나가 비어 있다~~ | **구현 완료 · 시뮬레이터/실기기 확인 대기** | [스펙](Apps/HaruchiFit/docs/specs/ios/2026/2026-10-08-statistics.md) · [플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-10-08-statistics.md) |
-| ~~2차~~ | ~~3~~ | ~~11~~ | ~~08 수동 기록~~ | ~~워치 없이 쓰는 흐름 C. 상세 `편집` 범위도 여기서 정해진다~~ | **코드 구현·로컬 빌드/테스트 완료 · UI/실기기 확인 대기** | [플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-10-08-manual-record.md) · 스펙 08절·4.3 |
-| ~~2차~~ | ~~4~~ | ~~8~~ | ~~03a 기록 달력~~ | ~~기록 탭은 목록만으로도 동작한다~~ | **코드 구현·로컬 검증 완료 · 시뮬레이터 UI/실기기 확인 대기** | [상세 스펙](Apps/HaruchiFit/docs/specs/ios/2026/2026-10-08-records-calendar.md) · [플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-10-08-records-calendar.md) |
-| 3차 | — | 12 | 01 온보딩 (HealthKit 권한) | 없어도 시스템 권한 시트는 뜬다. 거부돼도 워치 기록은 들어온다 — import 만 막힌다 | **출시 준비로 착수 (10-12)** · **머지 완료 (10-19)** | 아래 "출시 준비" 4번 · [플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-10-13-onboarding.md) · 스펙 01절 |
-| 3차 | — | 10 | 07 설정 | 링크·전환 위주. 칼로리 기준 컷은 데이터가 쌓여야 정한다 | **보류 (10-12)** — 1.0 에 넣지 않는다. 만들 때 `정보` 그룹의 개인정보처리방침 링크(iOS)를 반드시 넣는다 | 로드맵 Phase 5 · 스펙 07절 |
-| ~~3차~~ | ~~—~~ | ~~6~~ | ~~06 공유 (`WorkoutShareUI` 그대로)~~ | ~~부가 기능. Kit 을 붙이기만 하면 된다~~ | **코드 구현·로컬 검증 완료** ([PR #49](https://github.com/qlrogo91lp/yj-apps/pull/49)) · UI·실기기 확인 대기 | [플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-10-06-record-share.md) · 스펙 06절 (10-06 개정) |
-| 3차 | — | — | CloudKit 엔타이틀먼트 | **프로비저닝 작업(사용자)** · 로컬 폴백이 있다 | 예정 | 로드맵 "언제든" |
+**Ralli** — `CURRENT_PROJECT_VERSION = 1` 고정이라 App Store 설치본과 Xcode 설치본이 둘 다 "1.1.9 (1)" 로 보인다. Xcode 설치본인지 먼저 확인
+- [ ] 폰 앱을 백그라운드로 둔 채 → 워치 "저장됨" 또는 "폰에서 저장 대기" → 폰 앱을 열면 기록 1건
+- [ ] 폰 앱을 완전히 종료한 채 → 경기 2개 저장 → 폰 앱을 열고 바로 새 경기를 시작해도 2건 다 남는다
+- [ ] 운동 종료 시 폰 미러 화면이 닫히는 지연이 견딜 만한지 (플랜 D6)
 
-**구현은 끝났고 확인만 남은 것**
+### 열려 있는 것
 
-| # | 항목 | 상태 | 문서 |
-|---|---|---|---|
-| 2 | HealthKit import (증분) | **구현 완료** ([PR #30](https://github.com/qlrogo91lp/yj-apps/pull/30)) · 실기기 확인 대기 · 매핑 표 확정 | [스펙](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-21-healthkit-workout-import.md) · [플랜](Apps/HaruchiFit/docs/plans/shared/2026/2026-09-21-healthkit-workout-import.md) — 근력 3·유산소 8, 나머지는 안 가져온다. **삭제 반영은 뺐다** (위 YJKit) |
-| 4 | 03b 기록 목록 | **구현 완료** ([PR #33](https://github.com/qlrogo91lp/yj-apps/pull/33)) · 시뮬레이터 확인 대기 | [플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-09-28-records-list.md) |
-| ~~1~~ | ~~잔디 집계~~ | ~~**완료** ([PR #27](https://github.com/qlrogo91lp/yj-apps/pull/27))~~ | ~~[스펙](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-09-grass-daily-aggregate.md)~~ |
-| ~~3~~ | ~~탭 셸 + 디자인 토큰~~ | ~~**구현 완료**~~ | ~~[플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-09-23-tab-shell-design-tokens.md)~~ |
-| ~~5~~ | ~~04 기록 상세 (부위 태깅 · 메모)~~ | ~~**완료** ([PR #40](https://github.com/qlrogo91lp/yj-apps/pull/40))~~ | ~~[플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-10-06-record-detail.md)~~ |
-
-**Phase 1 이 끝나 폰을 한 번도 안 열어도 흐름 A(해피패스)가 완결된다** — W2 · W0 · WC.
-셋 다 실기기 검증까지 끝났다. Phase 2 착수 전에 **워치 시간에서 일시정지를 빼는 선행 작업**이 하나 끼었다 — 잔디 농도의 입력이라서다.
-Phase 2 코드 구현은 끝났고 HealthKit import 실기기 확인이 남았다. Phase 3 #3 탭 셸·디자인 토큰, #4 기록 목록도 구현했다.
-**다음은 1차 — 종료 시각 한 줄 수정 뒤 핵심 루프(워치 → 목록 → 상세) 실기기 확인**이다. 홈·통계·수동 기록·달력은 2차, 온보딩·설정·공유는 3차 (10-07 재정렬). 가져온 기록은 홈 탭에 보존한 26주 임시 그리드에서 날짜·농도를 확인한다.
-
-> 플랜 문서는 **착수 직전에 하나씩** 쓴다 (로드맵 "작업 중 지킬 것"). 위 표의 "예정" 은
-> 플랜이 아직 없다는 뜻이지 설계가 비어 있다는 뜻이 아니다 — 스펙은 14개 화면 전부 확정돼 있다.
-
-### 출시 준비 (2026-10-12 착수)
-
-1.0 은 **스토어와 앱 모두 한국어 + 영어**로 낸다. 06 공유는 들어가고(PR #49) 07 설정은 뺀다.
-아래 순서로 간다 — 뒤 항목이 앞 항목의 결과를 쓴다.
-
-| 순서 | 항목 | 상태 | 문서 |
-|---|---|---|---|
-| ~~1~~ | ~~스토어 문구 규약 — `Apps/<앱>/APPSTORE.md`~~ | **완료** (`chore/store-metadata`) | [루트 CLAUDE.md](CLAUDE.md) "스토어 문구" |
-| ~~2~~ | ~~하루치 스토어 문구 (ko · en-US)~~ | **초안 완료** (`chore/store-metadata`) · 스크린샷 캡션은 피그마 작업 뒤 추가 | [APPSTORE.md](Apps/HaruchiFit/APPSTORE.md) |
-| 3 | String Catalog 전환 (iOS · 워치 · 컴플리케이션) | **머지 완료 (10-13, [PR #52](https://github.com/qlrogo91lp/yj-apps/pull/52))** — 자동 검증 통과, 언어별 시뮬레이터 수동 확인 남음 | [플랜](Apps/HaruchiFit/docs/plans/shared/2026/2026-10-12-string-catalog.md) · 선례 [Ralli 플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-07-string-catalog-migration.md) |
-| 4 | 01 온보딩 (3장 — 컨셉 · 워치 · 권한) | **머지 완료 (10-19, [PR #53](https://github.com/qlrogo91lp/yj-apps/pull/53))** · 시뮬레이터 확인 완료 (영어·동작 줄이기 포함 여부는 미기록) | [스펙 01절](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-02-haruchi-fit-product-spec.md#01-온보딩-3장) · [플랜](Apps/HaruchiFit/docs/plans/ios/2026/2026-10-13-onboarding.md) |
-| ~~—~~ | ~~홈 `n주 연속` 스탯 · 영어 근력 표기 `Lift` 통일 · 누적 카드 넘침~~ | **머지 완료 (10-20, [PR #56](https://github.com/qlrogo91lp/yj-apps/pull/56))** · 실기기 화면 확인 완료 | 스펙 02절 · 9절 · 10절 (10-20 개정) |
-| — | 공유 카드 — 제목 `Haruchi Fit` · 헤더 아래 구성 막대 · 로고 여백 60% (YJKit 자리 추가) | **코드 구현·로컬 검증 완료 (10-21, `feat/haruchi-share-composition`)** · 시뮬레이터 카드 확인·실기기 확인 대기 | 스펙 06절 · 아키텍처 D-M2 (10-20 개정) · [플랜](Apps/HaruchiFit/docs/plans/shared/2026/2026-10-20-share-card-composition.md) |
-| — | 출시 체크리스트 (결정 3 · 코드 · ASC · 스크린샷 · 빌드·제출) | **목록화 완료 (10-19)** · 사용자 검토 전 — CloudKit 1.0 제외 · 앱 안 방침 링크 1.0 제외 결정 (10-19), 남은 결정 1개(방침 · 지원 URL) 대기 | [체크리스트](Apps/HaruchiFit/docs/plans/shared/2026/2026-10-19-release-checklist.md) |
-| — | **1.0.1** 워치 기록 전송 유실 수정 (PR 1 하루치 · 골프, YJKit `.queued` · PR 3 Ralli) · 하루치 칼로리 활동 칼로리로 통일 (PR 2) | **플랜 승인 (10-25) · PR 1 머지(#63) · PR 2 머지(#64) · PR 3 구현 완료(머지 대기) · 실기기 확인 남음(하루치·골프·Ralli)** — 10-25 TestFlight 에서 유산소 섞은 운동이 근력 하나로 저장됨 · Ralli 10-21 경기 저장 유실 | [플랜](docs/plans/2026/2026-10-25-watch-record-delivery.md) |
-
-### 집 맥북에서 할 것
-
-- [x] W2 구현 — ViewModel 테스트 7개 통과. `BUNDLE_LOADER` 누락도 함께 고침. PR #12 머지
-- [x] **W2 실기기 검증 4항목** — 햅틱 5종 확인. **버리기 후 건강 앱에서도 사라진다** —
-      `HKHealthStore.delete` 가 실기기 워치에서 통과했다 (W2 플랜 1절 B안 불필요)
-- [x] W0 플랜 실행 — 테스트 12개 통과. 시뮬레이터에서 토글 히트영역·좌우 여백 두 곳을 더 고쳤다
-- [x] **W0 실기기 검증 5항목** — 토글 `.click` 햅틱, 재실행 시 유형 유지, W1 라벨, 요약 바 파랑, 건강 앱에 근력으로 기록 모두 확인
-- [x] WC 구현 — `Shared` 가 아니라 새 `Common/` 폴더를 세 타깃에 붙였다 (`Shared` 는 `ConnectivityCore` 의존으로 불가)
-- [x] **WC 실기기 검증 6항목** — 앱을 안 열어도 상태 전환, 경과시간, 일시정지 시 멈춤,
-      종료 후 복귀, 탭하면 앱 열림, 재부팅 후 유지 모두 확인
-      · 경과시간은 `.accessoryRectangular` 패밀리에서만 그린다 — 원형·코너는 아이콘만
-- [x] **구간 시간이 "근력 0분" 으로 나온 문제** — 틱 카운터를 벽시계로 바꿨다 (PR #19).
-      [작업 기록](Apps/HaruchiFit/docs/logs/2026/2026-09-09-segment-duration-tick-counter.md)
-- [ ] **구간 시간 재검증** — 고친 뒤 실기기에서 40분쯤 돌려 종목별 분이 맞는지 (PR #19)
-- [x] **워치 시간에서 일시정지 제외** — `SegmentTracker` 가 워치 단일 시계가 됐다. 테스트 39개 통과 (PR #26).
-      곁다리로 테스트 스파이의 Xcode 27 컴파일 에러도 고쳤다 (`actor` → `@MainActor final class`)
-- [ ] **정지 제외 실기기 검증** — 5분 정지 후 총 시간, 구간 합계 일치,
-      **WC 재검증 2항목**(컴플리케이션 경과시간·일시정지 시 멈춤), 손목 30초 내림
-- [ ] **경과시간이 뒤처지는지** — 워크아웃 중 손목을 30초 내렸다 올렸을 때 시간이 건너뛰는지
-      멈춰 있었는지. 3개 앱 공통 ([탐색 문서](Packages/YJKit/docs/ideas/elapsed-seconds-tick-counter.md))
-- [ ] **잔디 농도 컷 눈으로 확인** — 실기기 기록이 쌓인 뒤 임시 화면에서 농도가 실제 운동
-      시간과 맞는지. 컷은 30/60/90분 (D-M6)
-- [ ] **잔디 저장 실시간 갱신 확인** — 폰을 켜 둔 채 워치에서 운동을 저장했을 때
-      `@Query` 전파로 해당 날짜의 칸이 재실행 없이 채워지는지. 기록 탭 목록도 같은 경로
-- [ ] **HealthKit import 실기기 확인** — 최초 권한 허용·거부, 앱 재활성화와 당겨서 새로고침,
-      달리기·걷기 import, 요가·수영 제외, 재동기화 중복 없음, 하루치 워치 기록 보존 확인
-- [x] ~~**03b 기록 목록 다음 — 종료 시각 지연 수정**~~ — `endedAt: result.endedAt ?? Date()` 로 바꿨다. 워치 테스트 통과.
-      **실기기 확인은 남음** — 종료 버튼을 누른 시각이 상세 헤더 끝 시각과 맞는지 (핵심 루프 확인 때 같이 본다)
-- [ ] **기록 탭 목록 시뮬레이터·실기기 확인** — 섹션 제목(`이번 주`·날짜 범위), 행 요일·칩
-      색·kcal, 스와이프 → 삭제 → 취소 시 행 유지, 삭제 확정 시 행·빈 섹션 사라짐과 홈
-      잔디 칸 비움, 재실행 후에도 안 돌아옴
 - [ ] **피트니스 앱 운동 목록 아이콘이 자리 표시자** (10-07, 원인 미확인) — 하루치 운동 행이 앱 아이콘 대신 회색 동심원으로 뜬다
       (테니스 앱은 로고가 나온다). 앱 아이콘 연결은 Ralli 와 같다. 건강 앱 › 앱 목록의 아이콘 확인 · 앱 재설치 후 1~2분짜리 운동 재확인 ·
       두 앱의 설치 방식(TestFlight / Xcode) 비교 순으로 좁힌다
-- [ ] **홈 대시보드 시뮬레이터·실기기 확인** — 기록 0 · 2 · 5건에서 스탯 `0회`·마일스톤 두 문구·3건부터 구성 바, 이번 주 0건이면 `이번 주는 아직 기록이 없어요`,
-      잔디가 오른쪽 끝에서 시작하고 오늘 칸 펄스가 돌며 동작 줄이기를 켜면 멈추는지, 최근 기록 탭 → 상세 시트(부위 변경이 행에 반영 ·
-      시트에서 삭제하면 크래시 없이 스탯·잔디가 줄어듦), `전체 보기 ›` → 기록 탭, 큰 글자 크기에서 스탯·범례가 안 잘리는지, 당겨서 새로고침.
-      워치 저장 직후 재실행 없이 스탯·이번 주 바·최근 기록이 바뀌는지 (플랜 Task 4)
-- [ ] **기록 상세 실기기 확인** — 워치에서 저장한 기록에 부위·메모를 붙인 뒤
-      워치가 같은 기록을 다시 보내도 남는지(재배달은 드물다 — 확인 수단이 없으면 코드 리뷰로 갈음),
-      한국어 기기에서 시간대 이름(`저녁`·`밤`)이 스펙대로 찍히는지
-- [ ] **공유 UI·실기기 확인** — 상세 헤더 공유 메뉴와 시트 겹침·복사 알림, 카드 로고·제목·네 칸 값.
-      인스타 스토리에서 사진 위에 스티커 붙여넣기·크기 조절, `공유…` → 인스타·메시지·사진 저장,
-      한국어 기기에서 카드 부제 시간대가 상세 헤더와 같은지 (PR #49)
+- [ ] **경과시간이 뒤처지는지** — 워크아웃 중 손목을 30초 내렸다 올렸을 때 시간이 건너뛰는지
+      멈춰 있었는지. 3개 앱 공통 ([탐색 문서](Packages/YJKit/docs/ideas/elapsed-seconds-tick-counter.md))
+- [ ] **잔디 농도 컷 조정** — 기록이 쌓인 뒤 농도가 실제 운동 시간과 맞는지 본다. 지금 컷은 30/60/90분 (D-M6)
 
 ## YJKit — 확인 필요
 
@@ -323,7 +237,7 @@ Phase 2 코드 구현은 끝났고 HealthKit import 실기기 확인이 남았�
 | **"새로운 기능" 시트** — Ralli · 하루치 (YJKit 공용 후보) | **브레인스토밍 전** · 온보딩을 다시 띄우지 않고, 업데이트한 기존 사용자에게 그 버전의 새 기능만 시트 한 장(1~3개 · `계속`)으로 보여 준다. 새로 설치한 사람은 온보딩만 본다. 판정은 온보딩처럼 "마지막으로 본 번호" — 건너뛴 버전은 모아서. 사용자가 알아야 쓸 수 있는 기능이 든 버전에만 띄운다. 온보딩 번호(`OnboardingGate.version`)는 온보딩 내용을 바꿀 때만 올린다. 첫 대상은 Ralli 다음 버전. 정할 것: YJKit 공용으로 만들지 · Ralli 에 먼저 만들지 | — |
 | **App Store 기본 언어를 영어로** — Ralli · 골프 | **예정 — 다음 배포 때** · **Ralli · 골프 모두 기본 언어가 한국어다** (10-20 확인). 이름은 고치지 않는다 — 기본 언어만 바꾸면 목록에도 기존 영어 이름이 나온다. 사용자 언어에 맞는 현지화가 없으면 App Store 는 기본 언어로 보여 주므로, 영어 · 한국어가 아닌 기기(독일 · 일본 등)에는 한국어 이름 · 설명이 보일 가능성이 크다 (Apple 문서 기준, 실기기 미확인). App Store Connect 앱 정보 → 기본 언어 → 영어(미국). 영어 현지화는 이미 있어 바로 고를 수 있고, 한국 사용자에게는 계속 한국어가 보인다. 하루치는 처음부터 영어 기본 | — |
 | **App Store 크리에이티브 에셋** (제품 페이지 헤더 · 검색 결과) — Ralli · 하루치 | **하루치 검색 결과 영상(영어판) 완료 (10-23, `chore/store-asset-tools`)** — 2880×1920 · 12초 mp4, 제작 도구는 `tools/store-assets/`. 남은 것: 헤더(21:9) · Ralli · 한국어판 · App Store Connect 업로드 · **예정 — 다음 배포 때 (10-21 기록)** · iOS 27 부터 생긴 자리. 헤더 21:9 · 검색 결과 3:2 · 둘을 겸하는 공용 16:9 PNG(5244×2950). 이미지·영상 모두 가능(영상 5~30초, 음소거 반복 재생이라 소리 없이 읽혀야 한다). 검색 결과는 선택 — 없으면 지금처럼 스크린샷·프리뷰가 나온다. 4+ 등급 기준 · 가격·URL·수상 표기 금지. ASC 새 버전 제출 또는 Asset Library 로 올린다. 정할 것: 이미지로 갈지 영상으로 갈지 · 공용 한 장으로 갈지 · `APPSTORE.md` 에 에셋 절을 둘지 | [Apple 가이드](https://developer.apple.com/app-store/asset-best-practices/) · [규격](https://developer.apple.com/help/app-store-connect/reference/app-information/creative-assets-specifications) |
-| **앱 안 개인정보처리방침 링크** — iOS 앱에만 | **예정 — 설정 화면을 만들 때** (Ralli #8 · 하루치 07). 가이드라인 5.1.1(i) 이 앱 안 링크를 요구하지만 지금까지 링크 없이 통과했다. 워치에는 두지 않는다 — 한 앱으로 심사되고 워치는 웹을 못 연다. 하루치 1.0 은 링크 없이 내고, 반려되면 홈 `ⓘ` 시트로 당긴다 | 같은 체크리스트 1절 결정 2 |
+| **앱 안 개인정보처리방침 링크** — iOS 앱에만 | **예정 — 설정 화면을 만들 때** (Ralli #8 · 하루치 07). 가이드라인 5.1.1(i) 이 앱 안 링크를 요구하지만 지금까지 링크 없이 통과했다. 워치에는 두지 않는다 — 한 앱으로 심사되고 워치는 웹을 못 연다. 하루치 1.0 도 링크 없이 통과했다 | 같은 체크리스트 1절 결정 2 |
 | ~~**App Store 문구 깃 관리** — 앱마다 `Apps/<앱>/APPSTORE.md` 하나~~ | **완료** (`chore/store-metadata`) — 문구만 텍스트로 형상관리하고 반영은 수동. 세 앱 모두 파일을 만들었다. **Ralli·골프의 키워드는 비어 있다** — 공개되지 않아 App Store Connect 에서 옮겨 적어야 한다 (부제·프로모션 텍스트·스크린샷 캡션은 10-22 공개 스토어에서 채웠다) | [루트 CLAUDE.md](CLAUDE.md) "스토어 문구" · 배경 [CI 스펙](docs/specs/2026/2026-08-27-ci-pipeline-design.md) §비범위 · §후속 과제 |
 
 `fastlane deliver` 로 올리고 내려받는 방식은 **보류했다** — API 키 관리 없이 문구 형상관리부터 시작한다.
