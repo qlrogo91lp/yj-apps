@@ -145,7 +145,7 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
 |---|---|---|
 | `MonitoringCore` (CrashReporting 프로토콜 + Crashlytics 구현) | **구현 완료** ([PR #35](https://github.com/qlrogo91lp/yj-apps/pull/35) · Ralli 연동 [PR #36](https://github.com/qlrogo91lp/yj-apps/pull/36)) | 위 Ralli #7 과 같은 문서. 골프·하루치 연동은 별도 (Firebase 프로젝트 앱마다 새로) |
 | **건강 앱에서 지운 것을 앱이 따라 지운다** (`HKDeletedObject`) | **미착수** — 브레인스토밍 전. 3개 앱이 같은 구조라 Kit 이 한 번 정한다 | 하루치 [import 스펙](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-21-healthkit-workout-import.md) 4절에 정할 것이 적혀 있다. **Ralli #10 과 방향이 반대다** — 그쪽은 앱에서 지우면 건강 앱을 지운다 |
-| **워크아웃 종료 순서** — `stopWorkout()` 이 `session.end()` 를 먼저 불러 마무리 중 앱이 멈춘다 (3개 앱 공통) | **미착수 (10-25)** — 별도 플랜 필요. 건강 앱 운동까지 사라질 수 있다 | [전송 유실 플랜](docs/plans/2026/2026-10-25-watch-record-delivery.md) "범위 밖" 절 |
+| **워크아웃 종료 순서** — `stopWorkout()` 이 `session.end()` 를 먼저 불러 마무리 중 앱이 멈춘다 (3개 앱 공통) | **구현 (10-26, `fix/workout-stop-order`)** — `stopActivity` → `.stopped` 대기 → 마무리 → `end()` 순서로. Ralli 다음 출시에 싣는다. 실기기 확인: 경기 종료 직후 손목을 내리고 1~2분 뒤 건강 앱에 운동·종료 시각이 맞는지. 남은 것: 워크아웃 복구(`handleActiveWorkoutRecovery`) · `didFailWithError` · `startWorkout` 의 `catch {}` | [전송 유실 플랜](docs/plans/2026/2026-10-25-watch-record-delivery.md) "범위 밖" 절 |
 | ~~`WorkoutShareUI` 공유 카드 배경색을 Kit 이 소유~~ | **완료** (`feat/share-card-sticker`) — 짙은 회색 카드 + 지표별 고정 색. 앱은 원형 로고 `badgeColor` 만 넘김 | 아래 "카드 대비" · [Kit 사용법](Packages/YJKit/README.md#workoutshareui-사용법) |
 
 ### 카드 대비 (2026-09-09)
@@ -192,8 +192,8 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
 - [ ] 폰 앱을 종료한 채 라운드를 끝내고 저장 → 폰 앱을 열면 라운드가 있다
 
 **Ralli** — `CURRENT_PROJECT_VERSION = 1` 고정이라 App Store 설치본과 Xcode 설치본이 둘 다 "1.1.9 (1)" 로 보인다. Xcode 설치본인지 먼저 확인
-- [ ] 폰 앱을 백그라운드로 둔 채 → 워치 "저장됨" 또는 "폰에서 저장 대기" → 폰 앱을 열면 기록 1건
-- [ ] 폰 앱을 완전히 종료한 채 → 경기 2개 저장 → 폰 앱을 열고 바로 새 경기를 시작해도 2건 다 남는다
+- [x] ~~폰 앱을 백그라운드로 둔 채 → 워치 "저장됨" 또는 "폰에서 저장 대기" → 폰 앱을 열면 기록 1건~~ — 검증 생략 (10-26): 보내는 쪽은 시스템 큐, 받는 쪽은 `WatchMatchSaverTests` 가 덮는다
+- [x] ~~폰 앱을 완전히 종료한 채 → 경기 2개 저장 → 폰 앱을 열고 바로 새 경기를 시작해도 2건 다 남는다~~ — 같은 이유로 생략
 - [ ] 운동 종료 시 폰 미러 화면이 닫히는 지연이 견딜 만한지 (플랜 D6)
 
 ### 열려 있는 것
