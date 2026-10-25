@@ -11,7 +11,7 @@
 
 1. 라운드 시작 시 **9홀/18홀 선택** — "다음" 버튼에 상한이 없어 마지막 홀에서 한 번 더 누르면 빈 홀이 무한정 생기는 현재 문제를 막는다
 2. 라운드 종료 시 **확인 → 요약 화면**
-3. `.reliable` **발신** — 받는 쪽(iOS)은 plan ⑤ 범위다
+3. `.queued` **발신** — 받는 쪽(iOS)은 plan ⑤ 범위다
 
 ## 2. 유지되는 설계 결정
 
@@ -177,12 +177,12 @@ var holeCount: Int    // 신규 — 9 또는 18
 └──────────────────┘
 
 요약 (phase == .summary)
-  [저장 & 전송] ─ metrics 도착? ─예→ send(.reliable) → 스냅샷 삭제 → 홈
+  [저장 & 전송] ─ metrics 도착? ─예→ send(.queued) → 스냅샷 삭제 → 홈
                               └아니오→ "전송 중…" → 도착 후 위와 동일
   이탈(edge swipe)          → 스냅샷 유지 → 다음 실행 때 복구
 ```
 
-발신은 `RoundTransmitting` 프로토콜 뒤에 둔다(`RoundSnapshotPublishing`과 같은 방식) — ViewModel 테스트가 WatchConnectivity 없이 돈다. `.reliable`은 `sendMessage` 실패 시 `transferUserInfo`로 큐잉되고 시스템이 배달을 보장하므로 워치 쪽 재시도 로직은 만들지 않는다.
+발신은 `RoundTransmitting` 프로토콜 뒤에 둔다(`RoundSnapshotPublishing`과 같은 방식) — ViewModel 테스트가 WatchConnectivity 없이 돈다. `.queued`는 항상 `transferUserInfo`로 보내 시스템이 배달을 보장하므로 워치 쪽 재시도 로직은 만들지 않는다. (2026-10-25 개정: 처음엔 `.reliable`이 `sendMessage` 실패 시에도 큐잉된다고 적었으나, 실제로는 `isReachable` 이면 `sendMessage` 만 쓰고 실패해도 다시 보내지 않아 기록이 유실됐다.)
 
 ## 8. 엣지 케이스
 

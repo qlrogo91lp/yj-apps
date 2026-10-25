@@ -4,7 +4,7 @@ import Foundation
 /// 워치 → 폰 워크아웃 저장 요청. **저장 시점에 결과와 세그먼트를 한 번만 보낸다** —
 /// 세션 중 폰 화면에 세그먼트를 띄울 계획이 없으므로 실시간 전환 메시지는 두지 않는다 (아키텍처 8절).
 ///
-/// `.reliable` 로 보낸다. 폰이 꺼져 있어도 `transferUserInfo` 가 큐잉하므로 기록이 유실되지 않는다.
+/// `.queued` 로 보낸다. 항상 `transferUserInfo` 로 큐잉되므로 폰이 꺼져 있어도 기록이 유실되지 않는다.
 struct WorkoutRecordMessage: ConnectivityMessage {
     static let messageType = "workoutRecord"
 
