@@ -46,7 +46,9 @@ struct OnboardingView: View {
                         imageName: "OnboardingComplication",
                         title: String(localized: "onboarding_complication_title"),
                         message: String(localized: "onboarding_complication_body")
-                    )
+                    ) {
+                        OnboardingComplicationRing()
+                    }
                     .tag(2)
 
                     OnboardingScreenshotPage(
