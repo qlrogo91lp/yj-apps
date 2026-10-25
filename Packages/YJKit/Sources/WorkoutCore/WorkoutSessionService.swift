@@ -17,6 +17,8 @@ public final class WorkoutSessionService: NSObject, ObservableObject {
     #if os(watchOS)
         private var workoutSession: HKWorkoutSession?
         private var liveWorkoutBuilder: HKLiveWorkoutBuilder?
+        /// `stopWorkout()` 이 세션의 `.stopped` 전환을 기다리는 동안만 있다. delegate 가 푼다.
+        private var stopWaiter: StopWaiter?
     #endif
     public private(set) var startDate: Date?
     private var timer: Timer?
@@ -131,9 +133,13 @@ public final class WorkoutSessionService: NSObject, ObservableObject {
             liveWorkoutBuilder = nil
             startDate = nil
 
-            session.end()
             let endDate = Date()
             stopTimer()
+
+            // 세션을 끝내기(end) 전에 활동만 멈춘다. `.stopped` 동안은 앱이 백그라운드 실행 권한을 유지해
+            // 손목을 내려도 아래 마무리(특히 finishWorkout — 건강 앱 운동 저장)가 멈추지 않는다.
+            // end() 를 먼저 부르면 권한을 잃어 마무리가 다음 활성화까지 밀리거나 사라졌다 (10-21 Ralli 저장 지연).
+            await stopActivity(of: session, at: endDate)
 
             let elapsed = Int(endDate.timeIntervalSince(start))
 
@@ -150,6 +156,7 @@ public final class WorkoutSessionService: NSObject, ObservableObject {
             // finishWorkout()이 방금 저장된 HKWorkout을 돌려준다. 앱이 자기 저장소의 기록과
             // 잇는 매칭 키로 쓰므로 버리지 않는다. 저장 실패 시엔 nil이 되고 앱은 시간으로 맞춘다.
             let saved = try? await builder.finishWorkout()
+            session.end()
 
             DispatchQueue.main.async { self.isWorkoutActive = false }
             return WorkoutResult(durationSeconds: elapsed,
@@ -160,6 +167,16 @@ public final class WorkoutSessionService: NSObject, ObservableObject {
                                  steps: steps,
                                  healthKitUUID: saved?.uuid,
                                  endedAt: endDate)
+        }
+
+        /// `stopActivity` 뒤 `.stopped` 전환을 기다린다 (Apple 워크아웃 미러링 샘플의 종료 순서).
+        /// 전환이 오지 않는 경우에 대비해 3초 뒤엔 그냥 진행한다.
+        private func stopActivity(of session: HKWorkoutSession, at date: Date) async {
+            guard session.state != .stopped else { return }
+            let waiter = StopWaiter()
+            stopWaiter = waiter
+            await waiter.wait(timeout: 3) { session.stopActivity(with: date) }
+            stopWaiter = nil
         }
 
         private func collectCalories(builder: HKLiveWorkoutBuilder) async -> Double {
@@ -241,6 +258,7 @@ public final class WorkoutSessionService: NSObject, ObservableObject {
                                    from _: HKWorkoutSessionState,
                                    date _: Date)
         {
+            if toState == .stopped { stopWaiter?.resume() }
             DispatchQueue.main.async {
                 self.isWorkoutActive = toState == .running
                 self.isPaused = toState == .paused
@@ -270,6 +288,33 @@ public final class WorkoutSessionService: NSObject, ObservableObject {
                     self.currentSteps = value.map { Int($0) } ?? self.currentSteps
                 }
             }
+        }
+    }
+#endif
+
+#if os(watchOS)
+    /// `.stopped` 전환과 타임아웃 중 먼저 온 쪽이 continuation 을 한 번만 푼다.
+    /// delegate 는 임의의 큐에서 불리므로 잠금으로 지킨다.
+    private final class StopWaiter: @unchecked Sendable {
+        private let lock = NSLock()
+        private var continuation: CheckedContinuation<Void, Never>?
+
+        func wait(timeout seconds: Double, starting start: () -> Void) async {
+            await withCheckedContinuation { continuation in
+                lock.lock()
+                self.continuation = continuation
+                lock.unlock()
+                start()
+                DispatchQueue.global().asyncAfter(deadline: .now() + seconds) { self.resume() }
+            }
+        }
+
+        func resume() {
+            lock.lock()
+            let continuation = continuation
+            self.continuation = nil
+            lock.unlock()
+            continuation?.resume()
         }
     }
 #endif
