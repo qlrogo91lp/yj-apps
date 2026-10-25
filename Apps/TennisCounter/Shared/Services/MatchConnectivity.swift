@@ -74,9 +74,9 @@ final class MatchConnectivity: ObservableObject {
         service.send(msg, via: .reliable)
     }
 
-    /// 저장 버튼 전용. iOS가 이 메시지를 받을 때만 히스토리에 persist 한다.
+    /// 저장 버튼 전용. iOS가 이 메시지를 받을 때만 히스토리에 persist 한다. 기록이라 항상 큐로 보낸다.
     func sendMatchSave(_ msg: MatchEndMessage) {
-        service.send(MatchSaveMessage(base: msg), via: .reliable)
+        service.send(MatchSaveMessage(base: msg), via: .queued)
     }
 
     /// iOS가 저장 요청을 처리한 뒤 실제 persist 성공/실패를 Watch에 회신한다.
@@ -89,7 +89,14 @@ final class MatchConnectivity: ObservableObject {
     }
 
     func sendWorkoutEnd(sessionId: UUID, result: WorkoutResult? = nil, startedAt: Date? = nil) {
-        service.send(Self.workoutEndMessage(sessionId: sessionId, result: result, startedAt: startedAt), via: .reliable)
+        // 워치 → 폰 종료 메시지는 세션 기록의 유일한 운반체라 큐로 보낸다. 폰 → 워치는 "끝내라"는
+        // 명령이라 늦게 도착하면 안 되므로 .reliable 을 유지한다.
+        #if os(watchOS)
+            let delivery = Delivery.queued
+        #else
+            let delivery = Delivery.reliable
+        #endif
+        service.send(Self.workoutEndMessage(sessionId: sessionId, result: result, startedAt: startedAt), via: delivery)
     }
 
     static func workoutEndMessage(sessionId: UUID, result: WorkoutResult?, startedAt: Date?) -> WorkoutEndMessage {

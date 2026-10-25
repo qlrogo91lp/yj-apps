@@ -241,6 +241,22 @@
         }
       }
     },
+    "result_save_waiting" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saving on iPhone"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "폰에서 저장 대기"
+          }
+        }
+      }
+    },
     "result_saving" : {
       "localizations" : {
         "en" : {

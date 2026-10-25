@@ -142,7 +142,7 @@ setupConnectivityBindings()
 setupMatchLifecycleBindings()
   connectivity.$receivedSessionStart  →  handleIncomingSessionStart()
   connectivity.$receivedMatchEnd      →  phase = .finished (결과 화면)
-  connectivity.$receivedMatchSave     →  saveFromWatch() → SwiftData 저장 + ACK 회신
+  (앱 루트) WatchMatchSaver ← connectivity.$receivedMatchSave → SwiftData 저장 + ACK 회신
   connectivity.$receivedWorkoutEnd    →  handleIncomingWorkoutEnd()
   connectivity.$receivedMatchReset    →  handleIncomingMatchReset()
 ```
@@ -211,8 +211,8 @@ if case .playing = phase {
 
 ```
 Watch → sendMatchSave(MatchEndMessage)
-iOS   → saveFromWatch(msg)
-        buildMatchFromMessage(msg) → Match 객체 생성
+iOS   → WatchMatchSaver.save(msg) (앱 루트 — 경기 화면 무관)
+        Match 객체 생성
         MatchPersistenceService.shared.upsert(match)
         sendMatchSaveResult(sessionId:success:) → Watch에 ACK 회신
 ```

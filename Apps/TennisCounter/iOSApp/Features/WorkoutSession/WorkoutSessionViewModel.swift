@@ -112,18 +112,10 @@ class WorkoutSessionViewModel: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] msg in
                 guard let self else { return }
-                // 경기 종료 = 결과 화면 표시만. 저장은 사용자가 저장 버튼을 누를 때(receivedMatchSave)만 한다.
+                // 경기 종료 = 결과 화면 표시만. 저장은 사용자가 저장 버튼을 누를 때(WatchMatchSaver 가 receivedMatchSave 를 받아)만 한다.
                 liveActivity.end()
                 let session = buildSession(from: msg)
                 phase = .finished(session)
-            }
-            .store(in: &cancellables)
-
-        connectivity.$receivedMatchSave
-            .compactMap(\.self)
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] msg in
-                self?.saveFromWatch(msg)
             }
             .store(in: &cancellables)
 
@@ -309,20 +301,6 @@ class WorkoutSessionViewModel: ObservableObject {
         liveActivity.update(from: state, score: scoreVM.score)
     }
 
-    private func saveFromWatch(_ msg: MatchEndMessage) {
-        let match = buildMatchFromMessage(msg)
-        var success = true
-        crashReporter.log("save attempted (watch)")
-        do { try matchStore.upsert(match) } catch {
-            success = false
-            crashReporter.record(
-                MonitoringError(domain: "Ralli.Save", code: 2, message: "\(error)"),
-                context: ["source": "watch", "sessionId": msg.sessionId.uuidString]
-            )
-        }
-        connectivity.sendMatchSaveResult(MatchSaveResultMessage(sessionId: msg.sessionId, success: success))
-    }
-
     private func startTimer() {
         timer?.invalidate()
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
@@ -355,30 +333,6 @@ class WorkoutSessionViewModel: ObservableObject {
 // MARK: - Match building
 
 private extension WorkoutSessionViewModel {
-    func buildMatchFromMessage(_ msg: MatchEndMessage) -> Match {
-        let match = Match()
-        match.matchId = msg.matchId
-        match.workoutSessionId = msg.sessionId
-        match.startedAt = msg.startedAt
-        match.endedAt = msg.endedAt
-        match.durationSeconds = msg.durationSeconds
-        match.caloriesBurned = msg.calories
-        match.totalCaloriesBurned = msg.totalCalories
-        match.workoutElapsedSeconds = msg.workoutElapsedSeconds
-        match.workoutCaloriesBurned = msg.workoutCalories
-        match.workoutTotalCaloriesBurned = msg.workoutTotalCalories
-        match.averageHeartRate = msg.averageHeartRate
-        match.mode = msg.mode
-        match.noAdRule = msg.noAdRule
-        match.resultRaw = msg.result
-        match.myTotalSets = msg.completedSets.count(where: { $0[0] > $0[1] })
-        match.yourTotalSets = msg.completedSets.count(where: { $0[1] > $0[0] })
-        match.sets = msg.completedSets.enumerated().map {
-            SetRecord(myGames: $0.element[0], yourGames: $0.element[1], setNumber: $0.offset + 1)
-        }
-        return match
-    }
-
     func buildMatchFromSession(_ session: MatchSession) -> Match {
         let match = Match()
         match.matchId = session.id
@@ -448,10 +402,6 @@ private extension WorkoutSessionViewModel {
 
         func applyIncomingSessionStartForTest(_ msg: SessionStartMessage) {
             handleIncomingSessionStart(msg)
-        }
-
-        func saveFromWatchForTest(_ msg: MatchEndMessage) {
-            saveFromWatch(msg)
         }
 
         var currentSessionForTest: MatchSession? {

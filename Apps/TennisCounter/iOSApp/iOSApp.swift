@@ -9,6 +9,8 @@ struct TennisCounterApp: App {
     /// 경기 화면과 무관하게 세션 레코드를 저장한다. 앱 수명 내내 잡고 있어야 경기 없는
     /// 워크아웃의 기록을 놓치지 않는다 — WorkoutSessionRecorder 주석을 본다.
     private let sessionRecorder: WorkoutSessionRecorder
+    /// 경기 화면과 무관하게 워치의 경기 저장 요청을 받는다 — WatchMatchSaver 주석을 본다.
+    private let matchSaver: WatchMatchSaver
     @State private var isLaunching = true
     /// 마지막으로 본 온보딩 버전. 0 = 본 적 없음. 규칙은 OnboardingGate.
     @AppStorage("onboardingSeenVersion") private var onboardingSeenVersion = 0
@@ -22,6 +24,7 @@ struct TennisCounterApp: App {
         MatchPersistenceService.shared.configure(with: ModelContext(container))
         SessionPersistenceService.shared.configure(with: ModelContext(container))
         sessionRecorder = WorkoutSessionRecorder()
+        matchSaver = WatchMatchSaver()
         Task { @MainActor in LiveActivityService.shared.endAll() }
     }
 
@@ -61,7 +64,6 @@ struct MainTabView: View {
                 HomeView(onMatchStart: {
                     connectivity.receivedWorkoutEnd = nil
                     connectivity.receivedMatchEnd = nil
-                    connectivity.receivedMatchSave = nil
                     connectivity.receivedMatchSaveResult = nil
                     withAnimation { isMatchActive = true }
                 })
@@ -96,7 +98,6 @@ struct MainTabView: View {
             connectivity.receivedSessionStart = nil
             connectivity.receivedWorkoutEnd = nil
             connectivity.receivedMatchEnd = nil
-            connectivity.receivedMatchSave = nil
             connectivity.receivedMatchSaveResult = nil
             withAnimation { isMatchActive = true }
         }

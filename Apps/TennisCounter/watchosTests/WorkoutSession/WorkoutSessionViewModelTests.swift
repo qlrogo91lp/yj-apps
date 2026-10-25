@@ -404,13 +404,33 @@ struct WorkoutSessionViewModelTests {
         #expect(vm.saveAckState == .pending) // 다른 세션의 ack는 무시
     }
 
-    @Test @MainActor func saveCurrentMatchTimesOutToFailedWhenNoAck() async throws {
+    /// 기록은 큐로 가므로 폰 앱이 꺼져 있으면 ACK 가 늦다 — 실패가 아니라 폰 대기다.
+    @Test @MainActor func ackTimeoutShowsWaiting() async throws {
         let vm = WorkoutSessionViewModel(ackTimeoutSeconds: 0.05)
         vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
         vm.saveCurrentMatch()
         #expect(vm.saveAckState == .pending)
 
         try await Task.sleep(nanoseconds: 150_000_000) // 0.15s > 0.05s 타임아웃
+        #expect(vm.saveAckState == .waiting)
+    }
+
+    @Test @MainActor func lateAckAfterTimeoutShowsSucceeded() async throws {
+        let vm = WorkoutSessionViewModel(ackTimeoutSeconds: 0.05)
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.saveCurrentMatch()
+        try await Task.sleep(nanoseconds: 150_000_000)
+        #expect(vm.saveAckState == .waiting)
+
+        vm.handleMatchSaveResultForTest(MatchSaveResultMessage(sessionId: vm.activeSessionId, success: true))
+        #expect(vm.saveAckState == .succeeded)
+    }
+
+    @Test @MainActor func failureAckShowsFailed() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.saveCurrentMatch()
+        vm.handleMatchSaveResultForTest(MatchSaveResultMessage(sessionId: vm.activeSessionId, success: false))
         #expect(vm.saveAckState == .failed)
     }
 
@@ -420,7 +440,7 @@ struct WorkoutSessionViewModelTests {
 
         vm.saveCurrentMatch() // 시도 1
         try await Task.sleep(nanoseconds: 70_000_000) // 시도 1의 타임아웃 발동 (0.05s 경과)
-        #expect(vm.saveAckState == .failed)
+        #expect(vm.saveAckState == .waiting)
 
         vm.saveCurrentMatch() // 시도 2 (재시도) — pending으로 전환
         #expect(vm.saveAckState == .pending)
@@ -661,8 +681,8 @@ struct WorkoutSessionViewModelTests {
         #expect(spy.played.last == .saveFailed)
     }
 
-    /// 손목을 내린 뒤 결과가 오므로 타임아웃도 촉각으로 알려야 한다. 놓치면 기록이 날아간다.
-    @Test @MainActor func saveAckTimeoutPlaysSaveFailed() async throws {
+    /// 타임아웃은 실패가 아니다 — 기록은 큐에 있고 늦은 ACK 가 성공으로 바꾼다. 실패 촉각을 울리지 않는다.
+    @Test @MainActor func saveAckTimeoutDoesNotPlaySaveFailed() async throws {
         let spy = HapticsSpy()
         let vm = WorkoutSessionViewModel(ackTimeoutSeconds: 0.05, haptics: spy)
         vm.startMatch(options: oneSet)
@@ -670,7 +690,7 @@ struct WorkoutSessionViewModelTests {
 
         try await Task.sleep(nanoseconds: 150_000_000)
 
-        #expect(spy.played.last == .saveFailed)
+        #expect(!spy.played.contains(.saveFailed))
     }
 
     @Test @MainActor func mismatchedSaveAckStaysSilent() {

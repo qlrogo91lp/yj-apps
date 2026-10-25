@@ -32,7 +32,8 @@ class WorkoutSessionViewModel: ObservableObject {
     private var workoutStartedAt: Date?
 
     enum SaveAckState: Equatable {
-        case idle, pending, succeeded, failed
+        /// `waiting`: ACK 시간 초과. 기록은 큐에 있어 폰 앱이 켜지면 저장된다 — 늦은 ACK 가 성공으로 바꾼다.
+        case idle, pending, waiting, succeeded, failed
     }
 
     @Published var saveAckState: SaveAckState = .idle
@@ -118,7 +119,7 @@ class WorkoutSessionViewModel: ObservableObject {
 
     private func handleMatchSaveResult(_ result: MatchSaveResultMessage) {
         guard result.sessionId == activeSessionId else { return }
-        guard saveAckState == .pending || saveAckState == .failed else { return }
+        guard saveAckState == .pending || saveAckState == .waiting || saveAckState == .failed else { return }
         connectivity.receivedMatchSaveResult = nil
         saveAckState = result.success ? .succeeded : .failed
         haptics.play(result.success ? .saveSucceeded : .saveFailed)
@@ -257,8 +258,9 @@ class WorkoutSessionViewModel: ObservableObject {
     }
 
     /// Watch엔 로컬 저장소가 없다. 저장 버튼 → iOS에 저장 요청을 보내고 iOS가 히스토리에 persist 한다.
+    /// 요청은 큐(`transferUserInfo`)로 가므로 폰 앱이 꺼져 있으면 ack 가 늦다.
     /// iOS의 ack(`matchSaveResult`)를 받아 실제 결과를 반영하며, ackTimeoutSeconds 안에 ack가
-    /// 없으면 failed로 전환한다. saveAttemptToken은 재시도로 새 시도가 시작된 뒤 이전 시도의
+    /// 없으면 failed가 아니라 waiting(폰 대기)으로 전환한다 — 늦은 ack 도 받는다. saveAttemptToken은 재시도로 새 시도가 시작된 뒤 이전 시도의
     /// 지연된 타임아웃이 새 상태를 덮어쓰지 않게 막는 표식이다.
     func saveCurrentMatch() {
         guard let session = _currentSession else { return }
@@ -269,9 +271,8 @@ class WorkoutSessionViewModel: ObservableObject {
         connectivity.sendMatchSave(makeMatchEndMessage(session: session))
         DispatchQueue.main.asyncAfter(deadline: .now() + ackTimeoutSeconds) { [weak self] in
             guard let self, saveAttemptToken == token, saveAckState == .pending else { return }
-            saveAckState = .failed
+            saveAckState = .waiting
             recordSaveAckTimeout()
-            haptics.play(.saveFailed)
         }
     }
 
@@ -365,7 +366,7 @@ class WorkoutSessionViewModel: ObservableObject {
 /// 본체 밖으로 뺀 helper 들. 클래스 본문 길이 제한(type_body_length)에 걸리지 않게 하려는 것이고,
 /// 같은 파일이라 private 멤버에 닿는다.
 private extension WorkoutSessionViewModel {
-    /// 저장 ACK 가 제한 시간 안에 오지 않았다 — 워치가 본 저장 실패의 유일한 신호다.
+    /// 저장 ACK 가 제한 시간 안에 오지 않았다 — 폰이 얼마나 자주 늦는지 보는 신호다.
     func recordSaveAckTimeout() {
         crashReporter.record(
             MonitoringError(domain: "Ralli.Save", code: 3, message: "ack timeout after \(ackTimeoutSeconds)s"),
