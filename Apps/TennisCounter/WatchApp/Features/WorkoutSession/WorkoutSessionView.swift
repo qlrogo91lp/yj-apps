@@ -93,6 +93,7 @@ struct WorkoutSessionView: View {
         switch viewModel.saveAckState {
         case .idle: .idle
         case .pending: .pending
+        case .waiting: .waiting
         case .succeeded: .saved
         case .failed: .failed
         }

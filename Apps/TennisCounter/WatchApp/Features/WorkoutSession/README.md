@@ -49,7 +49,7 @@ phase = .finished       →  MatchResultView
 | `currentMetrics: WorkoutMetrics` | 화면 표시용 실시간 스냅샷 (경과/칼로리/기초대사/BPM) |
 | `lastMetrics: WorkoutMetrics?` | iOS로 마지막에 전송한 스냅샷 |
 | `remoteWorkoutEnded: Bool` | iOS가 워크아웃 종료했을 때 View가 dismiss 트리거로 사용 |
-| `saveAckState: SaveAckState` | iOS 저장 ACK 상태 (idle / pending / succeeded / failed) |
+| `saveAckState: SaveAckState` | iOS 저장 ACK 상태 (idle / pending / waiting / succeeded / failed) |
 
 칼로리는 **워크아웃 누적값**으로 표시·전송한다. 경기 구간 값은 저장 시점에 `종료값 - 시작값`으로 계산한다.
 
@@ -108,7 +108,7 @@ startMatch(options:, sessionId:, isRemote:)
 saveCurrentMatch()
   Watch엔 로컬 저장소 없음 → iOS에 matchSave 요청 (sendReliably)
   saveAckState = .pending
-  ackTimeoutSeconds(8초) 후 ACK 없으면 .failed
+  ackTimeoutSeconds(8초) 후 ACK 없으면 .waiting (폰 대기 — 기록은 큐에 있고 늦은 ACK 가 .succeeded 로 바꾼다)
 
 startNewMatch(notifyRemote:)
   (isDriver + .playing 상태인 경우) connectivity.sendMatchReset(sessionId: activeSessionId)
@@ -191,12 +191,12 @@ saveCurrentMatch()
   saveAckState = .pending
   connectivity.sendMatchSave(...)
   DispatchQueue.main.asyncAfter(+8초) {
-      if saveAttemptToken == token, saveAckState == .pending → .failed
+      if saveAttemptToken == token, saveAckState == .pending → .waiting
   }
 
 handleMatchSaveResult(result:)
   guard result.sessionId == activeSessionId  ←  다른 세션 ACK 무시
-  guard saveAckState == .pending || .failed
+  guard saveAckState == .pending || .waiting || .failed
   saveAckState = result.success ? .succeeded : .failed
 ```
 
