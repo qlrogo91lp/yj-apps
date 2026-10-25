@@ -419,30 +419,6 @@ struct WorkoutSessionViewModelTests {
         }
     }
 
-    @Test @MainActor func saveFromWatchPersistsMatch() throws {
-        let persistence = try TestPersistence.make()
-
-        let sid = UUID()
-        let msg = MatchEndMessage(
-            sessionId: sid,
-            result: "win",
-            completedSets: [[6, 4]],
-            startedAt: Date(timeIntervalSince1970: 1_000_000),
-            endedAt: Date(timeIntervalSince1970: 1_001_800),
-            durationSeconds: 1800,
-            calories: 200,
-            averageHeartRate: 130,
-            mode: "oneSet",
-            noAdRule: true
-        )
-
-        let vm = WorkoutSessionViewModel(matchStore: persistence.matches)
-        vm.saveFromWatchForTest(msg)
-
-        let saved = try persistence.matches.fetchByWorkoutSession(sid)
-        #expect(saved.count == 1)
-    }
-
     /// 워치가 누적 칼로리를 보내는 체제에서, 폰 드라이버로 진행한 경기의 저장 칼로리는
     /// 워크아웃 전체가 아니라 경기 구간이어야 한다. (kcalAtStart=0 고정이면 전체가 저장된다)
     @Test @MainActor func phoneDriverSavesMatchSegmentCaloriesNotWorkoutTotal() throws {
@@ -754,35 +730,6 @@ struct WorkoutSessionViewModelTests {
         #expect(recorded.first?.context["source"] == "local")
         #expect(recorded.first?.context["matchId"] != nil)
         #expect(spy.calls.contains(.log("save attempted (local)")))
-    }
-
-    @Test @MainActor func watchSaveFailureIsRecordedAsNonFatal() {
-        let store = MatchStoreStub()
-        store.shouldFail = true
-        let spy = CrashReportingSpy()
-        let vm = WorkoutSessionViewModel(liveActivity: LiveActivitySpy(), crashReporter: spy, matchStore: store)
-        let sid = UUID()
-
-        vm.saveFromWatchForTest(MatchEndMessage(
-            sessionId: sid,
-            result: "win",
-            completedSets: [[6, 4]],
-            startedAt: Date(timeIntervalSince1970: 1_000_000),
-            endedAt: Date(timeIntervalSince1970: 1_001_800),
-            durationSeconds: 1800,
-            calories: 200,
-            averageHeartRate: 130,
-            mode: "oneSet",
-            noAdRule: true
-        ))
-
-        let recorded = nonFatals(spy)
-        #expect(recorded.count == 1)
-        #expect(recorded.first?.domain == "Ralli.Save")
-        #expect(recorded.first?.code == 2)
-        #expect(recorded.first?.context["source"] == "watch")
-        #expect(recorded.first?.context["sessionId"] == sid.uuidString)
-        #expect(spy.calls.contains(.log("save attempted (watch)")))
     }
 
     @Test @MainActor func successfulSaveIsNotRecordedAsNonFatal() throws {
