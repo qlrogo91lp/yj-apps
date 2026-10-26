@@ -236,7 +236,7 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
 
 | 항목 | 상태 | 문서 |
 |---|---|---|
-| **iOS 온보딩 3장** (모드 전환 영상 · 크라운 스코어카드 영상 · 컴플리케이션) | **구현 완료 (`feat/golf-onboarding`) · PR 대기 · 2.1.2 에 싣는다** — 건강 앱 페이지는 뺐다 (10-26). 실기기 확인 대기 | [스펙](Apps/GolfCounter/docs/specs/ios/2026/2026-10-26-onboarding-design.md) · [플랜](Apps/GolfCounter/docs/plans/ios/2026/2026-10-26-onboarding.md) |
+| **iOS 온보딩 3장** (모드 전환 영상 · 크라운 스코어카드 영상 · 컴플리케이션) | **머지 완료 ([PR #74](https://github.com/qlrogo91lp/yj-apps/pull/74)) · 2.1.2 에 싣는다** — 건강 앱 페이지는 뺐다 (10-26). 실기기 확인 대기 (2·3페이지 넘기기 · 영상 반복 · 백그라운드 복귀 재생 · 동작 줄이기 정지 이미지 · 링 위치). 출시 커밋에서 `APPSTORE.md` 출시 노트에 한 줄 | [스펙](Apps/GolfCounter/docs/specs/ios/2026/2026-10-26-onboarding-design.md) · [플랜](Apps/GolfCounter/docs/plans/ios/2026/2026-10-26-onboarding.md) |
 | **라운드 위치 지도** | **아이디어 (10-26) — 구현 미착수** · 워치에서 라운드 시작 위치를 1회 저장하고, 폰 상세 지도에서 기록 위치 핀과 주변 장소를 확인한다. 골프장명은 수동 입력 유지 | [기존 설계 §9](Apps/GolfCounter/docs/specs/shared/2026/2026-07-31-golfcounter-rebuild-design.md#9-mapkit-골프장-감지) — 자동 이름 감지에서 위치 지도 중심으로 방향 변경 예정 |
 
 ## 모노레포 공통
