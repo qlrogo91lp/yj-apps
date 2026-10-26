@@ -2,15 +2,20 @@ import SwiftUI
 
 /// 점 계산을 뷰에서 떼어 테스트한다.
 enum DayCellDots {
-    enum Dot: Equatable { case win, loss, more }
+    enum Dot: Equatable { case win, draw, loss, more }
 
     /// 셀 폭이 40pt라 5pt 점 4개 + 간격이 한계다. 넘으면 마지막을 회색 `.more` 로.
     static func dots(for matches: [Match], limit: Int = 4) -> [Dot] {
         let sorted = matches.sorted { $0.startedAt < $1.startedAt }
         if sorted.count <= limit {
-            return sorted.map { $0.myTotalSets > $0.yourTotalSets ? .win : .loss }
+            return sorted.map { dot(for: $0) }
         }
-        return sorted.prefix(limit - 1).map { $0.myTotalSets > $0.yourTotalSets ? .win : .loss } + [.more]
+        return sorted.prefix(limit - 1).map { dot(for: $0) } + [.more]
+    }
+
+    private static func dot(for match: Match) -> Dot {
+        if match.resultRaw == MatchResult.draw.rawValue { return .draw }
+        return match.myTotalSets > match.yourTotalSets ? .win : .loss
     }
 }
 
@@ -54,6 +59,7 @@ struct DayCell: View {
     private func color(for dot: DayCellDots.Dot) -> Color {
         switch dot {
         case .win: .green
+        case .draw: .yellow
         case .loss: .orange
         case .more: .secondary
         }

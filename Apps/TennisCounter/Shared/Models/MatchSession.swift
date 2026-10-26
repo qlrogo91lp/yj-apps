@@ -12,6 +12,14 @@ class MatchSession {
     var yourSetScore: Int = 0
     var completedSets: [SetScore] = []
 
+    /// 원세트 결과는 게임 점수(5:5 등), 여러 세트 경기는 세트 전적으로 보여준다.
+    var resultScore: SetScore {
+        if options.mode == .oneSet, let set = completedSets.first {
+            return set
+        }
+        return SetScore(my: mySetScore, your: yourSetScore)
+    }
+
     /// 활동 에너지 기준 경기 구간 계산용 시작·종료값.
     let kcalAtStart: Double
     var kcalAtEnd: Double?

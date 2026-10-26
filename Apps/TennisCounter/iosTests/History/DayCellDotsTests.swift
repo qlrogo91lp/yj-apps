@@ -3,6 +3,24 @@ import Foundation
 import Testing
 
 struct DayCellDotsTests {
+    @Test func drawGetsItsOwnDot() {
+        let draw = match(startedAt: Date(), mySets: 0, yourSets: 0)
+        draw.resultRaw = "draw"
+
+        #expect(DayCellDots.dots(for: [draw]) == [.draw])
+    }
+
+    @Test func cappedDotsPreserveDrawInsteadOfShowingALoss() {
+        let base = Date()
+        let draw = match(startedAt: base, mySets: 1, yourSets: 0)
+        draw.resultRaw = "draw"
+        let wins = (1 ... 4).map { index in
+            match(startedAt: base.addingTimeInterval(Double(index) * 600), mySets: 1, yourSets: 0)
+        }
+
+        #expect(DayCellDots.dots(for: [draw] + wins) == [.draw, .win, .win, .more])
+    }
+
     private func match(startedAt: Date, mySets: Int, yourSets: Int) -> Match {
         let match = Match()
         match.startedAt = startedAt

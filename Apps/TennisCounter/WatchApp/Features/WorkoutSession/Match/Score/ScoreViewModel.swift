@@ -22,10 +22,12 @@ class ScoreViewModel: ObservableObject {
         let yourSetScore: Int
         let completedSets: [SetScore]
         let tieBreakInProgress: Bool
+        let matchResult: MatchResult?
     }
 
     private var snapshots: [Snapshot] = []
     private var tieBreakInProgress: Bool = false
+    private var matchResult: MatchResult?
     private var cancellables = Set<AnyCancellable>()
     private let haptics: MatchHapticsPlaying
 
@@ -33,6 +35,26 @@ class ScoreViewModel: ObservableObject {
 
     var canUndo: Bool {
         !snapshots.isEmpty
+    }
+
+    /// 시작 직후 0:0을 제외하고 세트·게임·현재 포인트까지 모두 같을 때만 무승부로 끝낸다.
+    var canFinishAsDraw: Bool {
+        matchResult == nil &&
+            mySetScore == yourSetScore &&
+            myGameScore == yourGameScore &&
+            score.myDisplayScore == score.yourDisplayScore &&
+            (myGameScore > 0 || !completedSets.isEmpty)
+    }
+
+    func finishAsDraw() {
+        guard canFinishAsDraw else { return }
+        // 진행 중 세트도 저장해야 5:5가 결과·전송·기록에서 사라지지 않는다.
+        if myGameScore > 0 {
+            completedSets.append(SetScore(my: myGameScore, your: yourGameScore))
+        }
+        matchResult = .draw
+        haptics.play(.matchFinished(.draw))
+        onMatchFinished?(.draw, completedSets)
     }
 
     init(options: MatchOptions, haptics: MatchHapticsPlaying = MatchHaptics()) {
@@ -46,6 +68,7 @@ class ScoreViewModel: ObservableObject {
     }
 
     func addPoint(_ side: PlayerSide) {
+        guard matchResult == nil else { return }
         snapshots.append(captureSnapshot())
         var event: MatchHapticEvent = .point
         if score.addPoint(side) != nil {
@@ -88,6 +111,7 @@ class ScoreViewModel: ObservableObject {
         yourSetScore = 0
         completedSets = []
         tieBreakInProgress = false
+        matchResult = nil
         snapshots.removeAll()
         score.noAdRule = options.noAdRule
         score.reset()
@@ -113,7 +137,8 @@ class ScoreViewModel: ObservableObject {
             mySetScore: mySetScore,
             yourSetScore: yourSetScore,
             completedSets: completedSets,
-            tieBreakInProgress: tieBreakInProgress
+            tieBreakInProgress: tieBreakInProgress,
+            matchResult: matchResult
         )
     }
 
@@ -125,6 +150,7 @@ class ScoreViewModel: ObservableObject {
         yourSetScore = snapshot.yourSetScore
         completedSets = snapshot.completedSets
         tieBreakInProgress = snapshot.tieBreakInProgress
+        matchResult = snapshot.matchResult
     }
 
     /// 세트·매치 판정. 세트나 매치가 끝났으면 그 이벤트를, 아니면 nil 을 돌려준다.
@@ -145,6 +171,7 @@ class ScoreViewModel: ObservableObject {
         if my == threshold, your == threshold {
             if options.noTieRule {
                 completedSets.append(SetScore(my: my, your: your))
+                matchResult = .draw
                 onMatchFinished?(.draw, completedSets)
                 return .matchFinished(.draw)
             } else {
@@ -167,9 +194,11 @@ class ScoreViewModel: ObservableObject {
 
         let setsToWin = options.mode.setsToWin
         if mySetScore >= setsToWin {
+            matchResult = .win
             onMatchFinished?(.win, completedSets)
             return .matchFinished(.win)
         } else if yourSetScore >= setsToWin {
+            matchResult = .loss
             onMatchFinished?(.loss, completedSets)
             return .matchFinished(.loss)
         }

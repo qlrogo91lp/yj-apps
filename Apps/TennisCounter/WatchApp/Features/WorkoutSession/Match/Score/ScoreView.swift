@@ -119,14 +119,21 @@ struct ScoreView: View {
             }
         }
         .confirmationDialog(
-            String(localized: "early_end_confirm_title"),
+            String(localized: viewModel.canFinishAsDraw ? "early_end_draw_confirm_title" : "early_end_confirm_title"),
             isPresented: $showExitConfirm
         ) {
+            if viewModel.canFinishAsDraw {
+                Button(String(localized: "early_end_draw_confirm_yes")) {
+                    guard isDriver else { return }
+                    viewModel.finishAsDraw()
+                }
+            }
             Button(String(localized: "early_end_confirm_yes"), role: .destructive) {
+                guard isDriver else { return }
                 onExit()
             }
         } message: {
-            Text(String(localized: "early_end_confirm_message"))
+            Text(String(localized: viewModel.canFinishAsDraw ? "early_end_draw_confirm_message" : "early_end_confirm_message"))
         }
         .onChange(of: showExitConfirm) { _, shown in
             if !shown { isCrownFocused = true }

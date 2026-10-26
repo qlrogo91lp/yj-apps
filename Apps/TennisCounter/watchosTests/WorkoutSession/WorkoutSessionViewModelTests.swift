@@ -5,6 +5,112 @@ import Testing
 import WorkoutCore
 
 struct WorkoutSessionViewModelTests {
+    @Test @MainActor func manualDrawResultShowsFiveAll() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.scoreVM.myGameScore = 5
+        vm.scoreVM.yourGameScore = 5
+
+        vm.scoreVM.finishAsDraw()
+
+        guard case let .finished(session) = vm.phase else {
+            Issue.record("Expected draw result screen")
+            return
+        }
+        #expect(session.result == .draw)
+        #expect(session.resultScore.my == 5)
+        #expect(session.resultScore.your == 5)
+        #expect(session.mySetScore == 0)
+    }
+
+    @Test @MainActor func phoneEndFinishesMirrorOnceAndPreservesItsMatchIdentity() {
+        let vm = WorkoutSessionViewModel()
+        let sid = UUID()
+        let mid = UUID()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false), sessionId: sid, matchId: mid, isRemote: true)
+        let message = phoneEnd(sessionId: sid, matchId: mid)
+
+        #expect(vm.handleIncomingMatchEnd(message))
+
+        guard case let .finished(session) = vm.phase else {
+            Issue.record("Expected mirrored draw result")
+            return
+        }
+        #expect(session.id == mid)
+        #expect(session.startedAt == message.startedAt)
+        #expect(session.endedAt == message.endedAt)
+        #expect(session.result == .draw)
+        #expect(session.resultScore.my == 5)
+        #expect(session.resultScore.your == 5)
+        #expect(session.elapsedAtEnd == 1200)
+        #expect(session.elapsedAtStart == 600)
+        #expect(session.kcalAtStart == 100)
+        #expect(session.kcalAtEnd == 160)
+        #expect(session.totalKcalAtStart == 120)
+        #expect(session.totalKcalAtEnd == 190)
+        #expect(vm.saveAckState == .idle)
+        #expect(!vm.handleIncomingMatchEnd(message))
+    }
+
+    @Test(arguments: [(true, false, false), (false, true, false), (false, false, true)])
+    @MainActor func phoneEndRejectsDriverAndUnrelatedMatches(driver: Bool, wrongSession: Bool, wrongMatch: Bool) {
+        let vm = WorkoutSessionViewModel()
+        let sid = UUID()
+        let mid = UUID()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false), sessionId: sid, matchId: mid, isRemote: !driver)
+        let message = phoneEnd(sessionId: wrongSession ? UUID() : sid, matchId: wrongMatch ? UUID() : mid)
+
+        #expect(!vm.handleIncomingMatchEnd(message))
+        guard case .playing = vm.phase else {
+            Issue.record("Unrelated match end must not finish the active match")
+            return
+        }
+    }
+
+    @Test @MainActor func phoneEndRejectsMalformedSetScores() {
+        let vm = WorkoutSessionViewModel()
+        let sid = UUID()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false), sessionId: sid, isRemote: true)
+
+        #expect(!vm.handleIncomingMatchEnd(phoneEnd(sessionId: sid, matchId: nil, sets: [[]])))
+    }
+
+    @Test @MainActor func legacyPhoneEndWithoutMatchIdFinishesCurrentMirror() {
+        let vm = WorkoutSessionViewModel()
+        let sid = UUID()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false), sessionId: sid, isRemote: true)
+
+        #expect(vm.handleIncomingMatchEnd(phoneEnd(sessionId: sid, matchId: nil)))
+    }
+
+    @Test @MainActor func publishedPhoneEndReachesTheMirroredResult() async throws {
+        let vm = WorkoutSessionViewModel()
+        let sid = UUID()
+        let mid = UUID()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false), sessionId: sid, matchId: mid, isRemote: true)
+        MatchConnectivity.shared.receivedMatchEnd = phoneEnd(sessionId: sid, matchId: mid)
+        defer { MatchConnectivity.shared.receivedMatchEnd = nil }
+
+        try await Task.sleep(for: .milliseconds(50))
+
+        guard case let .finished(session) = vm.phase else {
+            Issue.record("Expected receivedMatchEnd subscription to finish the mirror")
+            return
+        }
+        #expect(session.id == mid)
+        #expect(session.result == .draw)
+    }
+
+    private func phoneEnd(sessionId: UUID, matchId: UUID?, sets: [[Int]] = [[5, 5]]) -> MatchEndMessage {
+        MatchEndMessage(
+            sessionId: sessionId, result: "draw", completedSets: sets,
+            startedAt: Date(timeIntervalSince1970: 1_000_000), endedAt: Date(timeIntervalSince1970: 1_000_600),
+            durationSeconds: 600, calories: 60, averageHeartRate: 130,
+            mode: MatchFormat.oneSet.rawValue, noAdRule: true, totalCalories: 70,
+            matchId: matchId, workoutElapsedSeconds: 1200, workoutCalories: 160, workoutTotalCalories: 190
+        )
+    }
+
     @Test @MainActor func finishMatchSetsPhaseImmediately() {
         let vm = WorkoutSessionViewModel()
         vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))

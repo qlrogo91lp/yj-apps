@@ -137,6 +137,54 @@ struct MatchEndMessage: ConnectivityMessage {
     let workoutCalories: Double?
     let workoutTotalCalories: Double?
 
+    init(session: MatchSession) {
+        self.init(
+            sessionId: session.workoutSessionId,
+            result: session.result?.rawValue ?? "win",
+            completedSets: session.completedSets.map { [$0.my, $0.your] },
+            startedAt: session.startedAt,
+            endedAt: session.endedAt ?? Date(),
+            durationSeconds: Swift.max(0, (session.elapsedAtEnd ?? session.elapsedAtStart) - session.elapsedAtStart),
+            calories: (session.kcalAtEnd ?? 0) - session.kcalAtStart,
+            averageHeartRate: session.averageHeartRate,
+            mode: session.options.mode.rawValue,
+            noAdRule: session.options.noAdRule,
+            totalCalories: session.totalKcalAtEnd.map { $0 - session.totalKcalAtStart },
+            matchId: session.id,
+            workoutElapsedSeconds: session.elapsedAtEnd,
+            workoutCalories: session.kcalAtEnd,
+            workoutTotalCalories: session.totalKcalAtEnd
+        )
+    }
+
+    /// 표시와 저장에 같은 세션을 사용하고, 경기 구간값과 운동 누적값을 양쪽 기기에서 보존한다.
+    func makeSession(options: MatchOptions, fallbackMatchId: UUID) -> MatchSession? {
+        guard let matchResult = MatchResult(rawValue: result),
+              completedSets.allSatisfy({ $0.count == 2 && $0.allSatisfy { $0 >= 0 } }) else { return nil }
+        let elapsed = workoutElapsedSeconds ?? durationSeconds
+        let kcal = workoutCalories ?? calories
+        let totalKcal = workoutTotalCalories ?? totalCalories
+        let session = MatchSession(
+            id: matchId ?? fallbackMatchId,
+            workoutSessionId: sessionId,
+            options: options,
+            startedAt: startedAt,
+            kcalAtStart: kcal - calories,
+            totalKcalAtStart: (totalKcal ?? 0) - (totalCalories ?? 0),
+            elapsedAtStart: elapsed - durationSeconds
+        )
+        session.endedAt = endedAt
+        session.result = matchResult
+        session.completedSets = completedSets.map { SetScore(my: $0[0], your: $0[1]) }
+        session.mySetScore = completedSets.count(where: { $0[0] > $0[1] })
+        session.yourSetScore = completedSets.count(where: { $0[1] > $0[0] })
+        session.elapsedAtEnd = elapsed
+        session.kcalAtEnd = kcal
+        session.totalKcalAtEnd = totalKcal
+        session.averageHeartRate = averageHeartRate
+        return session
+    }
+
     func toDictionary() -> [String: Any] {
         dictionary(type: Self.messageType)
     }

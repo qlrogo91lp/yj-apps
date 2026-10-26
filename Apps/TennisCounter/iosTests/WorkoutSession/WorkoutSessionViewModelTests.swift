@@ -35,6 +35,121 @@ final class MatchStoreStub: MatchUpserting {
 
 @Suite(.serialized)
 struct WorkoutSessionViewModelTests {
+    @Test @MainActor func manualDrawKeepsGameScoreThroughLocalSave() throws {
+        let persistence = try TestPersistence.make()
+        let vm = WorkoutSessionViewModel(liveActivity: LiveActivitySpy(), matchStore: persistence.matches)
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.scoreVM.myGameScore = 5
+        vm.scoreVM.yourGameScore = 5
+        vm.scoreVM.finishAsDraw()
+        let result = try #require(vm.scoreVM.matchResult)
+        vm.finishMatch(result: result, completedSets: vm.scoreVM.completedSets)
+
+        guard case let .finished(session) = vm.phase else {
+            Issue.record("Expected draw result screen")
+            return
+        }
+        #expect(session.resultScore.my == 5)
+        #expect(session.resultScore.your == 5)
+        #expect(session.mySetScore == 0)
+        let saved = try #require(vm.saveCurrentMatch())
+        #expect(saved.resultRaw == "draw")
+        #expect(saved.sets?.first?.myGames == 5)
+        #expect(saved.sets?.first?.yourGames == 5)
+        #expect(try persistence.matches.fetchByWorkoutSession(session.workoutSessionId).count == 1)
+    }
+
+    @Test @MainActor func bestOfThreeResultKeepsSetTotals() {
+        let vm = WorkoutSessionViewModel(liveActivity: LiveActivitySpy())
+        vm.startMatch(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false))
+        vm.finishMatch(result: .draw, completedSets: [(my: 6, your: 4), (my: 4, your: 6), (my: 5, your: 5)])
+
+        guard case let .finished(session) = vm.phase else {
+            Issue.record("Expected draw result screen")
+            return
+        }
+        #expect(session.resultScore.my == 1)
+        #expect(session.resultScore.your == 1)
+    }
+
+    @Test @MainActor func localCompletionSendsDrawAndMatchIdentityToWatch() throws {
+        var sent: [MatchEndMessage] = []
+        let vm = WorkoutSessionViewModel(liveActivity: LiveActivitySpy(), sendMatchEnd: { sent.append($0) })
+        let mid = UUID()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false), matchId: mid)
+
+        vm.finishMatch(result: .draw, completedSets: [(my: 5, your: 5)])
+
+        let message = try #require(sent.first)
+        #expect(sent.count == 1)
+        #expect(message.matchId == mid)
+        #expect(message.sessionId == vm.currentSessionIdForTest)
+        #expect(message.result == "draw")
+        #expect(message.completedSets == [[5, 5]])
+    }
+
+    @Test @MainActor func mirrorCompletionDoesNotEchoMatchEnd() {
+        var sent: [MatchEndMessage] = []
+        let vm = WorkoutSessionViewModel(liveActivity: LiveActivitySpy(), sendMatchEnd: { sent.append($0) })
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false), isRemote: true)
+
+        vm.finishMatch(result: .draw, completedSets: [(my: 5, your: 5)])
+
+        #expect(sent.isEmpty)
+    }
+
+    @Test @MainActor func remoteDrawCanBeSavedWithItsIdentityAndMetrics() throws {
+        let persistence = try TestPersistence.make()
+        let vm = WorkoutSessionViewModel(liveActivity: LiveActivitySpy(), matchStore: persistence.matches)
+        let sid = UUID()
+        let mid = UUID()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false), sessionId: sid, matchId: mid, isRemote: true)
+        let message = MatchEndMessage(
+            sessionId: sid, result: "draw", completedSets: [[5, 5]],
+            startedAt: Date(timeIntervalSince1970: 1_000_000), endedAt: Date(timeIntervalSince1970: 1_000_600),
+            durationSeconds: 600, calories: 60, averageHeartRate: 130,
+            mode: MatchFormat.oneSet.rawValue, noAdRule: true, totalCalories: 70,
+            matchId: mid, workoutElapsedSeconds: 1200, workoutCalories: 160, workoutTotalCalories: 190
+        )
+
+        #expect(vm.handleIncomingMatchEnd(message))
+
+        let saved = try #require(vm.saveCurrentMatch())
+        #expect(saved.matchId == mid)
+        #expect(saved.workoutSessionId == sid)
+        #expect(saved.resultRaw == "draw")
+        #expect(saved.startedAt == message.startedAt)
+        #expect(saved.endedAt == message.endedAt)
+        #expect(saved.durationSeconds == 600)
+        #expect(saved.workoutElapsedSeconds == 1200)
+        #expect(saved.caloriesBurned == 60)
+        #expect(saved.workoutCaloriesBurned == 160)
+        #expect(saved.totalCaloriesBurned == 70)
+        #expect(saved.workoutTotalCaloriesBurned == 190)
+        #expect(saved.sets?.first?.myGames == 5)
+        #expect(saved.sets?.first?.yourGames == 5)
+        #expect(!vm.handleIncomingMatchEnd(message))
+    }
+
+    @Test(arguments: [(true, false, false), (false, true, false), (false, false, true)])
+    @MainActor func remoteCompletionRejectsDriverAndUnrelatedMatches(driver: Bool, wrongSession: Bool, wrongMatch: Bool) {
+        let vm = WorkoutSessionViewModel(liveActivity: LiveActivitySpy())
+        let sid = UUID()
+        let mid = UUID()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false), sessionId: sid, matchId: mid, isRemote: !driver)
+        let message = MatchEndMessage(
+            sessionId: wrongSession ? UUID() : sid, result: "draw", completedSets: [[5, 5]],
+            startedAt: Date(), endedAt: Date(), durationSeconds: 600, calories: 60, averageHeartRate: nil,
+            mode: MatchFormat.oneSet.rawValue, noAdRule: true, matchId: wrongMatch ? UUID() : mid
+        )
+
+        #expect(!vm.handleIncomingMatchEnd(message))
+        guard case .playing = vm.phase else {
+            Issue.record("Unrelated match end must not finish the active match")
+            return
+        }
+    }
+
     @Test @MainActor func remoteSessionStartStartsLiveActivityOnce() {
         let spy = LiveActivitySpy()
         let vm = WorkoutSessionViewModel(liveActivity: spy)

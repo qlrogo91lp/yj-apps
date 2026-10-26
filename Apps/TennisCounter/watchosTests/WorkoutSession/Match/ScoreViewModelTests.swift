@@ -3,6 +3,155 @@ import Foundation
 import Testing
 
 struct ScoreViewModelTests {
+    @Test(arguments: [
+        (0, 0, 0, 0, false),
+        (0, 0, 1, 1, true),
+        (0, 0, 5, 5, true),
+        (0, 0, 5, 4, false),
+        (0, 0, 4, 5, false),
+        (1, 0, 5, 5, false),
+        (0, 1, 5, 5, false),
+        (1, 1, 0, 0, true),
+    ])
+    @MainActor func manualDrawRequiresTiedSetsAndGames(
+        mySets: Int, yourSets: Int, myGames: Int, yourGames: Int, allowed: Bool
+    ) {
+        let vm = ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false))
+        vm.mySetScore = mySets
+        vm.yourSetScore = yourSets
+        vm.myGameScore = myGames
+        vm.yourGameScore = yourGames
+        vm.completedSets = Array(repeating: SetScore(my: 6, your: 4), count: mySets)
+            + Array(repeating: SetScore(my: 4, your: 6), count: yourSets)
+        var result: MatchResult?
+        vm.onMatchFinished = { value, _ in result = value }
+
+        #expect(vm.canFinishAsDraw == allowed)
+        vm.finishAsDraw()
+
+        #expect(result == (allowed ? .draw : nil))
+    }
+
+    @Test @MainActor func manualDrawPreservesFiveAllAndFinishesOnce() {
+        let haptics = HapticsSpy()
+        let vm = ScoreViewModel(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false), haptics: haptics)
+        var results: [MatchResult] = []
+        var sets: [SetScore] = []
+        vm.onMatchFinished = { result, scores in
+            results.append(result)
+            sets = scores
+        }
+        for _ in 0 ..< 5 {
+            for side in [PlayerSide.me, .opponent] {
+                for _ in 0 ..< 4 {
+                    vm.addPoint(side)
+                }
+            }
+        }
+
+        vm.finishAsDraw()
+        vm.finishAsDraw()
+
+        #expect(results == [.draw])
+        #expect(sets.count == 1)
+        #expect(sets.first?.my == 5)
+        #expect(sets.first?.your == 5)
+        #expect(vm.mySetScore == 0)
+        #expect(vm.yourSetScore == 0)
+        #expect(!vm.canFinishAsDraw)
+        #expect(haptics.played.count(where: { $0 == .matchFinished(.draw) }) == 1)
+    }
+
+    @Test @MainActor func manualDrawRequiresTiedPoints() {
+        let vm = ScoreViewModel(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.myGameScore = 5
+        vm.yourGameScore = 5
+        vm.addPoint(.me)
+        var result: MatchResult?
+        vm.onMatchFinished = { value, _ in result = value }
+
+        #expect(!vm.canFinishAsDraw)
+        vm.finishAsDraw()
+        #expect(result == nil)
+        #expect(vm.completedSets.isEmpty)
+
+        vm.addPoint(.opponent)
+        #expect(vm.canFinishAsDraw)
+    }
+
+    @Test @MainActor func manualDrawRejectsUnequalTieBreakPoints() {
+        let vm = ScoreViewModel(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.myGameScore = 6
+        vm.yourGameScore = 6
+        vm.score.setTieBreakMode()
+        vm.addPoint(.me)
+        var result: MatchResult?
+        vm.onMatchFinished = { value, _ in result = value }
+
+        vm.finishAsDraw()
+        #expect(result == nil)
+
+        vm.addPoint(.opponent)
+        vm.finishAsDraw()
+        #expect(result == .draw)
+        #expect(vm.completedSets.first?.my == 6)
+        #expect(vm.completedSets.first?.your == 6)
+    }
+
+    @Test @MainActor func manualDrawBetweenTiedSetsDoesNotAppendAnEmptySet() {
+        let vm = ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false))
+        vm.mySetScore = 1
+        vm.yourSetScore = 1
+        vm.completedSets = [SetScore(my: 6, your: 4), SetScore(my: 4, your: 6)]
+        var result: MatchResult?
+        vm.onMatchFinished = { value, _ in result = value }
+
+        vm.finishAsDraw()
+
+        #expect(result == .draw)
+        #expect(vm.completedSets.count == 2)
+        #expect(vm.completedSets.last?.my == 4)
+        #expect(vm.completedSets.last?.your == 6)
+    }
+
+    @Test @MainActor func resetAfterManualDrawAllowsAnotherTiedMatch() {
+        let vm = ScoreViewModel(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.myGameScore = 5
+        vm.yourGameScore = 5
+        vm.finishAsDraw()
+
+        vm.resetAll(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        #expect(!vm.canFinishAsDraw)
+        vm.myGameScore = 1
+        vm.yourGameScore = 1
+        var result: MatchResult?
+        vm.onMatchFinished = { value, _ in result = value }
+
+        #expect(vm.canFinishAsDraw)
+        vm.finishAsDraw()
+        #expect(result == .draw)
+        #expect(vm.completedSets.count == 1)
+        #expect(vm.completedSets.first?.my == 1)
+    }
+
+    @Test @MainActor func manualDrawDoesNotFinishAnAutomaticDrawTwice() {
+        let vm = ScoreViewModel(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: true))
+        var results: [MatchResult] = []
+        vm.onMatchFinished = { result, _ in results.append(result) }
+        for _ in 0 ..< 6 {
+            for side in [PlayerSide.me, .opponent] {
+                for _ in 0 ..< 4 {
+                    vm.addPoint(side)
+                }
+            }
+        }
+
+        #expect(!vm.canFinishAsDraw)
+        vm.finishAsDraw()
+
+        #expect(results == [.draw])
+        #expect(vm.completedSets.count == 1)
+    }
 
     @Test @MainActor func watchNoEarlyEndAt_T6_6to5_noTie() {
         // Watch 버그: noTieRule=true에서 6-5에 세트 종료되는 것 방지

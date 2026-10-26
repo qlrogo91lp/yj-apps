@@ -15,13 +15,13 @@ struct MatchResultView: View {
                 .multilineTextAlignment(.center)
 
             HStack(spacing: 8) {
-                Text(verbatim: "\(session.mySetScore)")
+                Text(verbatim: "\(session.resultScore.my)")
                     .font(.system(size: 25, weight: .bold))
                     .foregroundColor(.green)
                 Text(verbatim: ":")
                     .font(.system(size: 20, weight: .bold))
                     .foregroundColor(.white.opacity(0.6))
-                Text(verbatim: "\(session.yourSetScore)")
+                Text(verbatim: "\(session.resultScore.your)")
                     .font(.system(size: 25, weight: .bold))
                     .foregroundColor(.orange)
             }

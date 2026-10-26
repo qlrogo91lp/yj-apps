@@ -53,6 +53,24 @@ final class ScoreViewModel: ObservableObject {
             canUndo
     }
 
+    /// 시작 직후 0:0을 제외하고 세트·게임·현재 포인트까지 모두 같을 때만 무승부로 끝낸다.
+    var canFinishAsDraw: Bool {
+        !isMatchOver &&
+            mySetScore == yourSetScore &&
+            myGameScore == yourGameScore &&
+            score.myDisplayScore == score.yourDisplayScore &&
+            (myGameScore > 0 || !completedSets.isEmpty)
+    }
+
+    func finishAsDraw() {
+        guard canFinishAsDraw else { return }
+        // 진행 중 세트도 저장해야 5:5가 결과·전송·기록에서 사라지지 않는다.
+        if myGameScore > 0 {
+            completedSets.append((my: myGameScore, your: yourGameScore))
+        }
+        matchResult = .draw
+    }
+
     private var tieBreakInProgress = false
     private var cancellables = Set<AnyCancellable>()
 

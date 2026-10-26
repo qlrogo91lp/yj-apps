@@ -63,7 +63,7 @@ final class SummaryViewModel: ObservableObject {
 
     func stats(from matches: [Match], records: [WorkoutSessionRecord]) -> SummaryStats {
         let filtered = filteredMatches(from: matches)
-        let wins = filtered.count(where: { $0.myTotalSets > $0.yourTotalSets })
+        let wins = filtered.count(where: { $0.resultRaw != MatchResult.draw.rawValue && $0.myTotalSets > $0.yourTotalSets })
         let total = filtered.count
         let winRate = total > 0 ? Double(wins) / Double(total) : 0.0
 
