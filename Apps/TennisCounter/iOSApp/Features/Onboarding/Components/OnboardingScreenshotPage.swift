@@ -2,7 +2,7 @@ import SwiftUI
 
 /// 스크린샷 한 장(또는 반복 영상) + 제목 + 본문. 이미지 위에 얹을 게 있으면 `overlay` 로 넘긴다 (크라운 화살표).
 ///
-/// `videoName` 을 주면 번들의 `<이름>-<ko|en>.mp4` 를 소리 없이 반복 재생한다. 영상이 없거나
+/// `videoName` 을 주면 번들의 `<이름>-<ko|en>.mp4`, 없으면 언어 공통 `<이름>.mp4` 를 소리 없이 반복 재생한다. 영상이 없거나
 /// 시스템의 "동작 줄이기" 가 켜져 있으면 `imageName` 의 정지 이미지를 보여 준다.
 ///
 /// 본문 파라미터를 `body` 로 두면 `View.body` 와 이름이 겹쳐 컴파일이 안 된다.
@@ -92,6 +92,7 @@ private extension OnboardingScreenshotPage {
         guard let videoName else { return nil }
         let language = Bundle.main.preferredLocalizations.first == "ko" ? "ko" : "en"
         return Bundle.main.url(forResource: "\(videoName)-\(language)", withExtension: "mp4")
+            ?? Bundle.main.url(forResource: videoName, withExtension: "mp4")
     }
 }
 

@@ -37,6 +37,8 @@ struct OnboardingView: View {
 
                     OnboardingScreenshotPage(
                         imageName: "OnboardingSwipe",
+                        videoName: "onboarding-swipe",
+                        isActive: page == 1,
                         title: String(localized: "onboarding_swipe_title"),
                         message: String(localized: "onboarding_swipe_body")
                     )
