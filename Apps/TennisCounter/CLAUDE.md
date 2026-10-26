@@ -68,7 +68,7 @@ iOSApp/
 ├── Components/
 │   ├── BackButton.swift   # 공통 뒤로가기 버튼
 │   ├── BrandTitle.swift   # 앱 브랜드 타이틀 컴포넌트
-│   ├── MatchCard.swift    # Summary·History 공유 경기 카드
+│   ├── SessionCard.swift  # 세션 하나를 담는 카드 (Summary·History 공유)
 │   └── StatCard.swift     # 통계 수치 카드 (Summary·History 공유)
 └── Features/
     ├── Home/
@@ -111,6 +111,7 @@ iOSApp/
     └── History/
         ├── HistoryView.swift
         ├── HistoryViewModel.swift
+        ├── SessionDetailView.swift      # 세션 상세 (총 지표 + 경기 카드)
         ├── Calendar/                    # 캘린더 뷰 서브 피처
         │   ├── CalendarView.swift
         │   └── Components/
@@ -120,8 +121,9 @@ iOSApp/
         │       └── WeekdayLabels.swift
         └── Components/
             ├── HistoryEmptyState.swift  # 기록 없을 때 빈 상태 뷰
-            ├── MatchDetailSheet.swift   # 경기 상세 시트
-            └── MatchList.swift          # 경기 목록
+            ├── MatchCard.swift          # 세션 상세의 경기 카드 (결과·세트 스코어·경기 지표)
+            ├── SessionList.swift        # 세션 목록 (기록·캘린더 하단 공용)
+            └── SessionShareButton.swift # 세션 공유 버튼
 
 WatchApp/
 │  # Apple Watch 전용 타겟. HealthKit 통합 Workout 경험 제공.

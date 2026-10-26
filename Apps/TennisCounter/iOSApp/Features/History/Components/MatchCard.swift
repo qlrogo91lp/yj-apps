@@ -49,7 +49,7 @@ struct MatchCard: View {
     private var headlineText: String {
         var parts = [
             String(format: String(localized: "session_match_order"), order),
-            match.matchFormat.title,
+            match.matchFormat.localizedTitle,
         ]
         if match.noAdRule { parts.append(String(localized: "mode_no_ad")) }
         return parts.joined(separator: " · ")
@@ -153,14 +153,5 @@ struct MatchCard: View {
 
     private func format(_ value: Double?) -> String {
         value?.formatted(.number.precision(.fractionLength(0))) ?? "–"
-    }
-}
-
-private extension MatchFormat {
-    var title: String {
-        switch self {
-        case .oneSet: String(localized: "match_format_one_set")
-        case .bestOfThree: String(localized: "match_format_best_of_3")
-        }
     }
 }

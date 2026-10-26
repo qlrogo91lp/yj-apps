@@ -534,23 +534,6 @@
         }
       }
     },
-    "match_detail_me" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Me"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "나"
-          }
-        }
-      }
-    },
     "match_detail_no_sets" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -564,23 +547,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "세트 기록이 없습니다"
-          }
-        }
-      }
-    },
-    "match_detail_opponent" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opponent"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "상대"
           }
         }
       }
@@ -1217,23 +1183,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%d경기"
-          }
-        }
-      }
-    },
-    "session_match_duration" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%d min"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%d분"
           }
         }
       }
