@@ -104,7 +104,6 @@ GolfCounter는 골퍼를 위한 스코어 카운팅 도우미입니다.
 
 - 9홀 · 18홀 선택
 - 스윙과 퍼팅을 나눠서 카운트
-- 라운드 시작 시 골프장 자동 감지
 - 복잡한 설정 없이, 스코어에만 집중
 
 
@@ -147,7 +146,6 @@ and heart rate are all organized for you automatically.
 
 - Choose 9 or 18 holes
 - Count swings and putts separately
-- Golf course detected automatically when you start a round
 - No complicated setup — just focus on your score
 
 
@@ -159,13 +157,13 @@ Weekend rounds with friends — make that time a little lighter.
 ### ko
 
 ```
-스크린샷을 업데이트 했어요.
+워치에서 라운드 기록을 전송할 때 기록이 유실될 수 있는 문제를 수정했어요.
 ```
 
 ### en-US
 
 ```
-Updated app screenshots
+Fixed an issue that could cause round records to be lost when sending them from Apple Watch.
 ```
 
 ## 스크린샷 캡션
