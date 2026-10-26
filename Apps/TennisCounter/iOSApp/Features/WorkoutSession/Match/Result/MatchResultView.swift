@@ -20,11 +20,11 @@ struct MatchResultView: View {
                     .foregroundColor(resultColor)
 
                 HStack(spacing: 12) {
-                    Text(verbatim: "\(session.mySetScore)")
+                    Text(verbatim: "\(session.resultScore.my)")
                         .foregroundColor(.green)
                     Text(verbatim: ":")
                         .foregroundColor(.white)
-                    Text(verbatim: "\(session.yourSetScore)")
+                    Text(verbatim: "\(session.resultScore.your)")
                         .foregroundColor(.orange)
                 }
                 .font(.system(size: 40, weight: .bold))

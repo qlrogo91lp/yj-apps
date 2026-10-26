@@ -50,17 +50,24 @@ struct WorkoutSessionView: View {
                     .frame(height: Self.toolbarTitleHeight)
             }
         }
-        .alert(
-            String(localized: "early_end_confirm_title"),
+        .confirmationDialog(
+            String(localized: viewModel.scoreVM.canFinishAsDraw ? "early_end_draw_confirm_title" : "early_end_confirm_title"),
             isPresented: $showEndMatchConfirm
         ) {
+            if viewModel.scoreVM.canFinishAsDraw {
+                Button(String(localized: "early_end_draw_confirm_yes")) {
+                    guard viewModel.isDriver else { return }
+                    viewModel.scoreVM.finishAsDraw()
+                }
+            }
             Button(String(localized: "early_end_confirm_yes"), role: .destructive) {
+                guard viewModel.isDriver else { return }
                 hasMatchProgress = false
                 viewModel.startNewMatch()
             }
             Button(String(localized: "btn_cancel"), role: .cancel) {}
         } message: {
-            Text(String(localized: "early_end_confirm_message"))
+            Text(String(localized: viewModel.scoreVM.canFinishAsDraw ? "early_end_draw_confirm_message" : "early_end_confirm_message"))
         }
         .alert(
             String(localized: "end_workout_confirm_title"),

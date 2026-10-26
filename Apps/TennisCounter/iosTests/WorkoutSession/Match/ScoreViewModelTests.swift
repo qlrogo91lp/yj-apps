@@ -3,6 +3,119 @@ import Foundation
 import Testing
 
 struct ScoreViewModelTests {
+    @Test(arguments: [
+        (0, 0, 0, 0, false),
+        (0, 0, 1, 1, true),
+        (0, 0, 5, 5, true),
+        (0, 0, 5, 4, false),
+        (0, 0, 4, 5, false),
+        (1, 0, 5, 5, false),
+        (0, 1, 5, 5, false),
+        (1, 1, 0, 0, true),
+    ])
+    @MainActor func manualDrawRequiresTiedSetsAndGames(
+        mySets: Int, yourSets: Int, myGames: Int, yourGames: Int, allowed: Bool
+    ) {
+        let vm = ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false))
+        vm.mySetScore = mySets
+        vm.yourSetScore = yourSets
+        vm.myGameScore = myGames
+        vm.yourGameScore = yourGames
+        vm.completedSets = Array(repeating: (my: 6, your: 4), count: mySets)
+            + Array(repeating: (my: 4, your: 6), count: yourSets)
+
+        #expect(vm.canFinishAsDraw == allowed)
+        vm.finishAsDraw()
+
+        #expect(vm.matchResult == (allowed ? .draw : nil))
+    }
+
+    @Test @MainActor func manualDrawPreservesFiveAllWithoutAwardingASet() {
+        let vm = ScoreViewModel()
+        for _ in 0 ..< 5 {
+            for side in [PlayerSide.me, .opponent] {
+                for _ in 0 ..< 4 {
+                    vm.addPoint(side)
+                }
+            }
+        }
+
+        vm.finishAsDraw()
+        vm.finishAsDraw()
+
+        #expect(vm.matchResult == .draw)
+        #expect(vm.completedSets.count == 1)
+        #expect(vm.completedSets.first?.my == 5)
+        #expect(vm.completedSets.first?.your == 5)
+        #expect(vm.mySetScore == 0)
+        #expect(vm.yourSetScore == 0)
+        #expect(!vm.canFinishAsDraw)
+    }
+
+    @Test @MainActor func manualDrawRequiresTiedPoints() {
+        let vm = ScoreViewModel()
+        vm.myGameScore = 5
+        vm.yourGameScore = 5
+        vm.addPoint(.me)
+
+        #expect(!vm.canFinishAsDraw)
+        vm.finishAsDraw()
+        #expect(vm.matchResult == nil)
+        #expect(vm.completedSets.isEmpty)
+
+        vm.addPoint(.opponent)
+        #expect(vm.canFinishAsDraw)
+    }
+
+    @Test @MainActor func manualDrawRejectsUnequalTieBreakPoints() {
+        let vm = ScoreViewModel()
+        vm.myGameScore = 6
+        vm.yourGameScore = 6
+        vm.score.setTieBreakMode()
+        vm.addPoint(.me)
+
+        vm.finishAsDraw()
+        #expect(vm.matchResult == nil)
+
+        vm.addPoint(.opponent)
+        vm.finishAsDraw()
+        #expect(vm.matchResult == .draw)
+        #expect(vm.completedSets.first?.my == 6)
+        #expect(vm.completedSets.first?.your == 6)
+    }
+
+    @Test @MainActor func manualDrawBetweenTiedSetsDoesNotAppendAnEmptySet() {
+        let vm = ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false))
+        vm.mySetScore = 1
+        vm.yourSetScore = 1
+        vm.completedSets = [(my: 6, your: 4), (my: 4, your: 6)]
+
+        vm.finishAsDraw()
+
+        #expect(vm.matchResult == .draw)
+        #expect(vm.completedSets.count == 2)
+        #expect(vm.completedSets.last?.my == 4)
+        #expect(vm.completedSets.last?.your == 6)
+    }
+
+    @Test @MainActor func resetAfterManualDrawAllowsAnotherTiedMatch() {
+        let vm = ScoreViewModel()
+        vm.myGameScore = 5
+        vm.yourGameScore = 5
+        vm.finishAsDraw()
+
+        vm.resetAll(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        #expect(!vm.canFinishAsDraw)
+        vm.myGameScore = 1
+        vm.yourGameScore = 1
+
+        #expect(vm.canFinishAsDraw)
+        vm.finishAsDraw()
+        #expect(vm.matchResult == .draw)
+        #expect(vm.completedSets.count == 1)
+        #expect(vm.completedSets.first?.my == 1)
+    }
+
     @Test @MainActor func addPointWinsGame() {
         let vm = ScoreViewModel()
         // 4번 탭하면 게임 승리 (noAdRule=true 기본값: 0→15→30→40→win)

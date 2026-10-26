@@ -4,6 +4,20 @@ import Testing
 
 @MainActor
 struct SummaryViewModelTests {
+    @Test func explicitDrawDoesNotCountAsAWinDespiteSetLead() {
+        let vm = SummaryViewModel()
+        vm.selectedPeriod = .all
+        let draw = Match()
+        draw.resultRaw = "draw"
+        draw.myTotalSets = 1
+
+        let stats = vm.stats(from: [draw], records: [])
+
+        #expect(stats.totalMatches == 1)
+        #expect(stats.wins == 0)
+        #expect(stats.winRate == 0)
+    }
+
     @Test func winRatePercentageRoundsTwoWinsInThreeMatchesUp() {
         let vm = SummaryViewModel()
         vm.selectedPeriod = .all

@@ -98,6 +98,12 @@ class WorkoutSessionViewModel: ObservableObject {
             .sink { [weak self] message in self?.handleIncomingWorkoutEnd(message) }
             .store(in: &cancellables)
 
+        connectivity.$receivedMatchEnd
+            .compactMap(\.self)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] message in _ = self?.handleIncomingMatchEnd(message) }
+            .store(in: &cancellables)
+
         connectivity.$receivedMatchReset
             .compactMap(\.self)
             .receive(on: DispatchQueue.main)
@@ -375,25 +381,23 @@ private extension WorkoutSessionViewModel {
     }
 
     func makeMatchEndMessage(session: MatchSession) -> MatchEndMessage {
-        MatchEndMessage(
-            sessionId: session.workoutSessionId,
-            result: session.result?.rawValue ?? "win",
-            completedSets: session.completedSets.map { [$0.my, $0.your] },
-            startedAt: session.startedAt,
-            endedAt: session.endedAt ?? Date(),
-            // 워크아웃 경계 앵커 레이스로 elapsedSeconds가 일시적으로 뒤로 갈 수 있다.
-            // 음수 경과시간이 표시 포맷까지 흘러가지 않도록 0에서 바닥을 친다.
-            durationSeconds: Swift.max(0, (session.elapsedAtEnd ?? session.elapsedAtStart) - session.elapsedAtStart),
-            calories: (session.kcalAtEnd ?? 0) - session.kcalAtStart,
-            averageHeartRate: session.averageHeartRate,
-            mode: session.options.mode.rawValue,
-            noAdRule: session.options.noAdRule,
-            totalCalories: session.totalKcalAtEnd.map { $0 - session.totalKcalAtStart },
-            matchId: session.id,
-            workoutElapsedSeconds: session.elapsedAtEnd,
-            workoutCalories: session.kcalAtEnd,
-            workoutTotalCalories: session.totalKcalAtEnd
-        )
+        MatchEndMessage(session: session)
+    }
+}
+
+extension WorkoutSessionViewModel {
+    /// 폰이 입력 담당인 경기를 끝낸다. 종료 통지를 되돌려 보내거나 기록을 자동 저장하지 않는다.
+    @discardableResult
+    func handleIncomingMatchEnd(_ message: MatchEndMessage) -> Bool {
+        guard !isDriver, case .playing = phase,
+              let current = _currentSession,
+              message.sessionId == current.workoutSessionId,
+              message.matchId == nil || message.matchId == current.id,
+              let session = message.makeSession(options: current.options, fallbackMatchId: current.id) else { return false }
+        connectivity.receivedMatchEnd = nil
+        _currentSession = session
+        phase = .finished(session)
+        return true
     }
 }
 

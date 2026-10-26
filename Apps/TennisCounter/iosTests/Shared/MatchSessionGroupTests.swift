@@ -3,6 +3,38 @@ import Foundation
 import Testing
 
 struct MatchSessionGroupTests {
+    @Test func drawsAreCountedSeparatelyFromWinsAndLosses() {
+        let sid = UUID()
+        let win = Match()
+        win.workoutSessionId = sid
+        win.myTotalSets = 1
+        let loss = Match()
+        loss.workoutSessionId = sid
+        loss.yourTotalSets = 1
+        loss.resultRaw = "loss"
+        let draw = Match()
+        draw.workoutSessionId = sid
+        draw.resultRaw = "draw"
+
+        let group = MatchSessionGroup.group([win, draw, loss], records: [])[0]
+
+        #expect(group.matchCount == 3)
+        #expect(group.wins == 1)
+        #expect(group.draws == 1)
+        #expect(group.losses == 1)
+    }
+
+    @Test func explicitDrawWithSetLeadIsNotCountedAsAWin() {
+        let draw = Match()
+        draw.resultRaw = "draw"
+        draw.myTotalSets = 1
+        let group = MatchSessionGroup.group([draw], records: [])[0]
+
+        #expect(group.wins == 0)
+        #expect(group.losses == 0)
+        #expect(group.draws == 1)
+    }
+
     private func match(
         session: UUID?,
         startedAt: Date,

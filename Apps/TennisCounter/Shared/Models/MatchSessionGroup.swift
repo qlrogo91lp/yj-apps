@@ -15,11 +15,15 @@ struct MatchSessionGroup: Identifiable {
     }
 
     var wins: Int {
-        matches.count(where: { $0.myTotalSets > $0.yourTotalSets })
+        matches.count(where: { $0.resultRaw != MatchResult.draw.rawValue && $0.myTotalSets > $0.yourTotalSets })
+    }
+
+    var draws: Int {
+        matches.count(where: { $0.resultRaw == MatchResult.draw.rawValue })
     }
 
     var losses: Int {
-        matchCount - wins
+        matchCount - wins - draws
     }
 
     /// 세션 정렬 기준. 레코드가 있으면 그 시작 시각, 없으면 마지막 경기의 시작.

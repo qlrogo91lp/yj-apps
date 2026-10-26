@@ -54,6 +54,11 @@ struct SessionCard: View {
                 Text(String(format: String(localized: "session_wins"), session.wins))
                     .foregroundStyle(Color.brand)
                     .fontWeight(.semibold)
+                if session.draws > 0 {
+                    Text(verbatim: " ")
+                    Text(String(format: String(localized: "session_draws"), session.draws))
+                        .foregroundStyle(.yellow)
+                }
                 if session.losses > 0 {
                     Text(verbatim: " ")
                     Text(String(format: String(localized: "session_losses"), session.losses))

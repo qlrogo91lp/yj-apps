@@ -24,6 +24,7 @@ class WorkoutSessionViewModel: ObservableObject {
     private let liveActivity: LiveActivityControlling
     private let crashReporter: CrashReporting
     private let matchStore: MatchUpserting
+    private let sendMatchEnd: (MatchEndMessage) -> Void
     private(set) var isDriver = false
 
     /// 워치가 reachable하다는 것만으로는 pause 명령을 받아줄 워크아웃이 있다는 보장이 없다 —
@@ -34,11 +35,13 @@ class WorkoutSessionViewModel: ObservableObject {
 
     init(liveActivity: LiveActivityControlling = LiveActivityService.shared,
          crashReporter: CrashReporting = AppCrashReporter.current,
-         matchStore: MatchUpserting = MatchPersistenceService.shared)
+         matchStore: MatchUpserting = MatchPersistenceService.shared,
+         sendMatchEnd: @escaping (MatchEndMessage) -> Void = { MatchConnectivity.shared.sendMatchEnd($0) })
     {
         self.liveActivity = liveActivity
         self.crashReporter = crashReporter
         self.matchStore = matchStore
+        self.sendMatchEnd = sendMatchEnd
         setupScoreSync()
         setupConnectivityBindings()
     }
@@ -110,13 +113,7 @@ class WorkoutSessionViewModel: ObservableObject {
         connectivity.$receivedMatchEnd
             .compactMap(\.self)
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] msg in
-                guard let self else { return }
-                // 경기 종료 = 결과 화면 표시만. 저장은 사용자가 저장 버튼을 누를 때(WatchMatchSaver 가 receivedMatchSave 를 받아)만 한다.
-                liveActivity.end()
-                let session = buildSession(from: msg)
-                phase = .finished(session)
-            }
+            .sink { [weak self] msg in _ = self?.handleIncomingMatchEnd(msg) }
             .store(in: &cancellables)
 
         connectivity.$receivedWorkoutEnd
@@ -225,6 +222,7 @@ class WorkoutSessionViewModel: ObservableObject {
         phase = .finished(session)
         crashReporter.log("match finished")
         liveActivity.end()
+        if isDriver { sendMatchEnd(MatchEndMessage(session: session)) }
     }
 
     /// 저장에 성공하면 저장된 `Match` 를 돌려준다. 결과 화면이 이 인스턴스로 공유 버튼을 켠다.
@@ -358,27 +356,22 @@ private extension WorkoutSessionViewModel {
         return match
     }
 
-    func buildSession(from msg: MatchEndMessage) -> MatchSession {
-        let options = MatchOptions(
-            mode: MatchFormat(rawValue: msg.mode) ?? .oneSet,
-            noAdRule: msg.noAdRule,
-            noTieRule: false
-        )
-        let session = MatchSession(
-            workoutSessionId: msg.sessionId,
-            options: options,
-            startedAt: msg.startedAt,
-            kcalAtStart: 0
-        )
-        session.endedAt = msg.endedAt
-        session.result = MatchResult(rawValue: msg.result) ?? .loss
-        session.completedSets = msg.completedSets.map { SetScore(my: $0[0], your: $0[1]) }
-        session.mySetScore = msg.completedSets.count(where: { $0[0] > $0[1] })
-        session.yourSetScore = msg.completedSets.count(where: { $0[1] > $0[0] })
-        session.kcalAtEnd = msg.calories
-        session.totalKcalAtEnd = msg.totalCalories
-        session.averageHeartRate = msg.averageHeartRate
-        return session
+}
+
+extension WorkoutSessionViewModel {
+    /// 종료 통지는 결과 표시까지. 기록 저장은 기존 저장 버튼을 눌렀을 때만 한다.
+    @discardableResult
+    func handleIncomingMatchEnd(_ message: MatchEndMessage) -> Bool {
+        guard !isDriver, case .playing = phase,
+              let current = _currentSession,
+              message.sessionId == current.workoutSessionId,
+              message.matchId == nil || message.matchId == current.id,
+              let session = message.makeSession(options: current.options, fallbackMatchId: current.id) else { return false }
+        connectivity.receivedMatchEnd = nil
+        _currentSession = session
+        phase = .finished(session)
+        liveActivity.end()
+        return true
     }
 }
 

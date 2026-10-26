@@ -50,6 +50,7 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
 | ~~14~~ | ~~매치 화면의 `WorkoutSessionViewModel` 의존 끊기 (iOS + 워치)~~ | — | **완료** ([PR #37](https://github.com/qlrogo91lp/yj-apps/pull/37)) · 수동 확인 대기 | [플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-10-06-match-view-dependency-cut.md) — Notion 폴더 재정비 논의의 B안. 폴더 이동(A안)·`MatchFlowView` 분리는 별도 판단 |
 | ~~15~~ | ~~매치 폴더를 `WorkoutSession/` 하위로 이동 (iOS + 워치, A안)~~ | — | **완료** ([PR #39](https://github.com/qlrogo91lp/yj-apps/pull/39)) | [플랜 2단계](Apps/TennisCounter/docs/plans/shared/2026/2026-10-06-match-view-dependency-cut.md) — 코드 변경 없음, 폴더 rename 32건 + 구조 문서·규칙 예시 갱신 |
 | 16 | **개인정보처리방침에 Crashlytics 반영 (yjlogs)** — #7 이 든 버전을 **배포하기 전에** | — | **예정** — 지금 방침은 "no analytics SDKs, no third-party tracking" 이라 Crashlytics(크래시 리포트를 Firebase 로 전송)와 어긋난다. #7 버전은 아직 배포 전이라 지금은 틀리지 않았다. 크래시 데이터 문단 추가 · 해당 문장 수정 · 시행일 갱신. ASC 앱 개인정보는 10-02 에 이미 반영 | yjlogs `apps/web/src/app/(main)/apps/ralli/privacy/page.tsx` |
+| 17 | **동점 경기 수동 무승부 종료 (iOS + 워치)** | — | **구현·자동 검증 완료 · 사용자 검토 대기 (10-26, `feat/ralli-manual-draw`)** — 첫 0:0을 제외하고 세트·게임·포인트 동점일 때 나가기 팝업에 `무승부로 종료` 추가. 원세트 결과에 게임 점수 표시, 무승부 전적·캘린더 구분, 폰↔워치 종료 결과 및 저장 데이터 동기화. 작은 워치 실화면 배치는 확인 대기 | [iOS 점수 로직](Apps/TennisCounter/iOSApp/Features/WorkoutSession/Match/Score/ScoreViewModel.swift) · [워치 점수 로직](Apps/TennisCounter/WatchApp/Features/WorkoutSession/Match/Score/ScoreViewModel.swift) |
 
 ### 집 맥북에서 할 것
 
