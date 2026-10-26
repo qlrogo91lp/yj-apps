@@ -152,6 +152,7 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
 | `MonitoringCore` (CrashReporting 프로토콜 + Crashlytics 구현) | **구현 완료** ([PR #35](https://github.com/qlrogo91lp/yj-apps/pull/35) · Ralli 연동 [PR #36](https://github.com/qlrogo91lp/yj-apps/pull/36)) | 위 Ralli #7 과 같은 문서. 골프·하루치 연동은 별도 (Firebase 프로젝트 앱마다 새로) |
 | **건강 앱에서 지운 것을 앱이 따라 지운다** (`HKDeletedObject`) | **미착수** — 브레인스토밍 전. 3개 앱이 같은 구조라 Kit 이 한 번 정한다 | 하루치 [import 스펙](Apps/HaruchiFit/docs/specs/shared/2026/2026-09-21-healthkit-workout-import.md) 4절에 정할 것이 적혀 있다. **Ralli #10 과 방향이 반대다** — 그쪽은 앱에서 지우면 건강 앱을 지운다 |
 | **워크아웃 종료 순서** — `stopWorkout()` 이 `session.end()` 를 먼저 불러 마무리 중 앱이 멈춘다 (3개 앱 공통) | **구현 (10-26, `fix/workout-stop-order`)** — `stopActivity` → `.stopped` 대기 → 마무리 → `end()` 순서로. Ralli 다음 출시에 싣는다. 실기기 확인: 경기 종료 직후 손목을 내리고 1~2분 뒤 건강 앱에 운동·종료 시각이 맞는지. 남은 것: 워크아웃 복구(`handleActiveWorkoutRecovery`) · `didFailWithError` · `startWorkout` 의 `catch {}` | [전송 유실 플랜](docs/plans/2026/2026-10-25-watch-record-delivery.md) "범위 밖" 절 |
+| **리팩터링: 온보딩 틀 공통화** (가칭 `OnboardingUI`, iOS) | **대기 — 세 앱 모두 현재 출시분 심사가 끝난 뒤 새 버전으로 (10-26 결정)**. Ralli · 하루치 · 골프(2.1.2) 가 같은 틀을 앱마다 복사해 쓴다. 공통: `OnboardingGate`(세 앱 동일) · 페이지 넘기기 틀 · 4:5 그림 + 고정 높이 글 배치 · `LoopingVideo`(동작 줄이기 시 정지 이미지). 앱이 넘길 것: 배경·버튼 색, 건너뛰기 유무(하루치는 없음), 마지막 버튼 문구, 글 영역 높이(112/190) · 작은 글씨 줄, 그림. 영상·이미지는 앱 번들에 두고 경로만 넘긴다. 공용 버튼 문구는 패키지 ko/en (`WorkoutShareUI` 와 같은 방식) | 골프 [온보딩 스펙](Apps/GolfCounter/docs/specs/ios/2026/2026-10-26-onboarding-design.md) "코드 배치" · Ralli `Apps/TennisCounter/iOSApp/Features/Onboarding/` · 하루치 `Apps/HaruchiFit/iOSApp/Features/Onboarding/` |
 | ~~`WorkoutShareUI` 공유 카드 배경색을 Kit 이 소유~~ | **완료** (`feat/share-card-sticker`) — 짙은 회색 카드 + 지표별 고정 색. 앱은 원형 로고 `badgeColor` 만 넘김 | 아래 "카드 대비" · [Kit 사용법](Packages/YJKit/README.md#workoutshareui-사용법) |
 
 ### 카드 대비 (2026-09-09)
@@ -216,6 +217,7 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
 | 항목 | 상태 | 문서 |
 |---|---|---|
 | ~~HealthKit 권한 시트 정리 (3개 워치 앱)~~ | **완료** ([PR #48](https://github.com/qlrogo91lp/yj-apps/pull/48)) · 수동 확인 생략 | [플랜](Packages/YJKit/docs/plans/shared/2026/2026-10-11-healthkit-permission-trim.md) |
+| **운동 시작 위치 기록 (YJKit 공용 · 세 앱)** | **논의 정리 (10-26) · 구현 미착수** — 시작 위치를 1회 수집해 각 앱 상세 지도에 표시하고 피트니스 앱 연동도 검토. 첫 운동 시작 때 건강 권한에 `운동 경로`를 포함하고 위치 권한(`사용 중`)을 요청하는 방향. 위치 거부 시 장소 없이 운동 기록. 단일 좌표 `HKWorkoutRoute`의 피트니스 표시 확인 필요 | [Apple 답변 — 단일 위치 경로](https://developer.apple.com/forums/thread/773408) · 별도 스펙·플랜 미작성 |
 | `WorkoutSessionService.elapsedSeconds` 가 벽시계가 아니라 1초 `Timer` 틱 카운터다 | **실기기 확인 대기 · 3개 앱에 걸림** | [탐색 문서](Packages/YJKit/docs/ideas/elapsed-seconds-tick-counter.md) |
 | `WorkoutMetricsView` 의 `statusText` 제거 | **미착수 (10-12)** — 하루치만 쓰던 파라미터인데 워치 세션 화면이 왼쪽 상단 모드 아이콘(`feat/haruchi-watch-mode-figure`)으로 바뀌며 쓰는 앱이 없어졌다. 아이콘 방식이 확정되면 프로퍼티·init 인자·`if let` 블록·"상태 줄" 프리뷰를 같이 지운다 | `Packages/YJKit/Sources/WorkoutUI/Watch/WorkoutMetricsView.swift` |
 
@@ -232,7 +234,10 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
 
 ## GolfCounter
 
-아직 없음.
+| 항목 | 상태 | 문서 |
+|---|---|---|
+| **iOS 온보딩 3장** (모드 전환 영상 · 크라운 스코어카드 영상 · 컴플리케이션) | **구현 완료 (`feat/golf-onboarding`) · PR 대기 · 2.1.2 에 싣는다** — 건강 앱 페이지는 뺐다 (10-26). 실기기 확인 대기 | [스펙](Apps/GolfCounter/docs/specs/ios/2026/2026-10-26-onboarding-design.md) · [플랜](Apps/GolfCounter/docs/plans/ios/2026/2026-10-26-onboarding.md) |
+| **라운드 위치 지도** | **아이디어 (10-26) — 구현 미착수** · 워치에서 라운드 시작 위치를 1회 저장하고, 폰 상세 지도에서 기록 위치 핀과 주변 장소를 확인한다. 골프장명은 수동 입력 유지 | [기존 설계 §9](Apps/GolfCounter/docs/specs/shared/2026/2026-07-31-golfcounter-rebuild-design.md#9-mapkit-골프장-감지) — 자동 이름 감지에서 위치 지도 중심으로 방향 변경 예정 |
 
 ## 모노레포 공통
 
