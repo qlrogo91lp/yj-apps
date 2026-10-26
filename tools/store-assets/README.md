@@ -122,15 +122,15 @@ done
 ```bash
 python3 video/build-render.py mockups/golf-onboarding.html out/onb-golf-mode \
   --scene golfOnboardingMode --size 1200x1500 --seconds 10 \
-  --images inputs/golf-watch.png inputs/golf-swing-icon.png
+  --images inputs/golf-watch.png inputs/golf-swing-icon.png inputs/golf-scorecard.png
 python3 video/capture.py out/onb-golf-mode
 swift -swift-version 5 video/encode.swift out/onb-golf-mode/frames out/onboarding-mode.mp4 30 no-audio
 ```
 
-결과는 `Apps/GolfCounter/iOSApp/Resources/Onboarding/onboarding-mode.mp4` 로 복사한다. 정지 이미지(`OnboardingMode`)는 `grab.swift` 가
-뽑은 6.0초 프레임(퍼팅 모드로 바뀐 뒤)이다.
+결과는 `Apps/GolfCounter/iOSApp/Resources/Onboarding/onboarding-mode.mp4` 로 복사한다. 정지 이미지(`OnboardingMode`)는 `out/onb-golf-mode/frames/f00180.png`(6.0초, 퍼팅 모드로 바뀐 뒤)다.
+(시안이 스코어카드 이미지도 불러오므로 장면과 관계없이 `--images` 에 세 장을 모두 넘긴다.)
 
 2페이지 영상도 같은 방식이다 (`--scene golfOnboardingCrown --images inputs/golf-watch.png inputs/golf-swing-icon.png inputs/golf-scorecard.png`,
-출력 `out/onboarding-crown.mp4`). 정지 이미지(`OnboardingCrown`)는 4.0초 프레임(스코어카드가 다 올라온 순간)이다.
-3페이지 정지 이미지(`OnboardingComplication`)는 `watch-complication.png` 를 같은 워치 렌더링에 얹어 1200×1500 으로 자른 것 —
-컴플리케이션이 올라간 문자판 스크린샷이라 영상 도구를 쓰지 않았다.
+출력 `out/onboarding-crown.mp4`). 정지 이미지(`OnboardingCrown`)는 `out/onb-golf-crown/frames/f00120.png`(4.0초) 프레임(스코어카드가 다 올라온 순간)이다.
+3페이지 정지 이미지(`OnboardingComplication`)는 `watch-complication.png`(1266×1542)를 `golf-watch.png`(1266 폭으로 줄인 것) 위 (0,0)에 얹고
+높이 1500 으로 줄여 가운데 1200 폭을 자른 것 — 영상 도구를 쓰지 않았다. 링 위치는 앱 코드(`OnboardingComplicationRing`)가 갖는다.

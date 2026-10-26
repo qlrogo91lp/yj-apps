@@ -100,9 +100,9 @@ private extension OnboardingScreenshotPage {
     ZStack {
         Color.black.ignoresSafeArea()
         OnboardingScreenshotPage(
-            imageName: "OnboardingHealth",
-            title: "건강 앱에 기록돼요",
-            message: "라운드마다 골프 운동으로 저장돼요."
+            imageName: "OnboardingComplication",
+            title: "한 번 탭으로 바로 시작",
+            message: "문자판에 컴플리케이션을 올려두면 바로 열려요."
         )
     }
 }

@@ -26,6 +26,9 @@ struct LoopingVideo: UIViewRepresentable {
 
         private let player = AVQueuePlayer()
         private var looper: AVPlayerLooper?
+        /// 백그라운드에 다녀오면 시스템이 재생을 멈춘 채로 둔다 — 보이는 페이지라면 돌아올 때 다시 튼다.
+        private var wantsPlaying = false
+        private var activeObserver: NSObjectProtocol?
 
         init(url: URL) {
             super.init(frame: .zero)
@@ -36,6 +39,12 @@ struct LoopingVideo: UIViewRepresentable {
             player.isMuted = true
             player.allowsExternalPlayback = false
             looper = AVPlayerLooper(player: player, templateItem: AVPlayerItem(url: url))
+            activeObserver = NotificationCenter.default.addObserver(
+                forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main
+            ) { [weak self] _ in
+                guard let self, wantsPlaying else { return }
+                player.play()
+            }
         }
 
         @available(*, unavailable)
@@ -43,7 +52,12 @@ struct LoopingVideo: UIViewRepresentable {
             fatalError("init(coder:) has not been implemented")
         }
 
+        deinit {
+            if let activeObserver { NotificationCenter.default.removeObserver(activeObserver) }
+        }
+
         func setPlaying(_ playing: Bool) {
+            wantsPlaying = playing
             if playing {
                 player.play()
             } else {
