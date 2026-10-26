@@ -33,9 +33,10 @@
   const mod = t => ((t % PERIOD) + PERIOD) % PERIOD;
   // 워치 렌더링 · 좌표 · 입력 순서는 승인한 golf-header / golf-search 와 같다.
   const TAPS = [1.94, 4.04, 6.57, 8.18];
-  const IMG = { watch: new Image(), swing: new Image() };
+  const IMG = { watch: new Image(), swing: new Image(), score: new Image() };
   IMG.watch.src = '../inputs/golf-watch.png';
   IMG.swing.src = '../inputs/golf-swing-icon.png';
+  IMG.score.src = '../inputs/golf-scorecard.png';
   const WI = { w: 1266, h: 1266 * 4575 / 3705, cx: 621, cy: 897, radius: 180, stroke: 36, modeX: 898, modeY: 589 };
 
   function ellipse(ctx, x, y, rx, ry, color) {
@@ -97,7 +98,89 @@
     if (t > 9.25) { ctx.globalAlpha *= ease(clamp((t - 9.25) / .75)); rawMode(ctx, 0); }
     ctx.restore();
   }
-  const scenes = { golfOnboardingMode };
+
+  // ── 2페이지: 카운터에서 크라운을 돌려 스코어카드로 내려간다 ─────────────────
+  // 화면 영역(워치 이미지 좌표). 스크린샷의 화면 안쪽만 페이지로 쓴다 — 가장자리 베젤이 섞이지 않게 6px 안쪽 (모서리 반지름은 화면 가장자리를 재서 맞췄다).
+  const SCREEN = { x: 196, y: 264, w: 870, h: 1016, r: 244 };
+  const CROWN = { x0: 1132, x1: 1200, y0: 522, y1: 712 };
+  const LIME = '#ADFF41';
+  const wrap = (a, n) => ((a % n) + n) % n;
+  function rr(ctx, x, y, w, h, r) {
+    r = Math.max(0, Math.min(r, w / 2, h / 2));
+    ctx.beginPath(); ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+  }
+  // 페이지는 자기 모서리를 둥글게 잘라 둔다 — 스크린샷의 모서리는 베젤이라, 넘기는 중에 화면 한가운데 비치지 않게.
+  const pages = {};
+  function makePage(draw) {
+    const c = document.createElement('canvas'); c.width = SCREEN.w; c.height = SCREEN.h;
+    const g = c.getContext('2d'); g.fillStyle = '#000'; g.fillRect(0, 0, c.width, c.height);
+    g.save(); rr(g, 0, 0, SCREEN.w, SCREEN.h, SCREEN.r); g.clip(); draw(g); g.restore();
+    return c;
+  }
+  const counterPage = () => pages.counter || (pages.counter = makePage(g => { g.translate(-SCREEN.x, -SCREEN.y); watchFace(g, 6.0); }));
+  const scorePage = () => pages.score || (pages.score = makePage(g => g.drawImage(IMG.score, -SCREEN.x, -SCREEN.y)));
+  // 크라운을 돌리는 동안 손가락·톱니 결·방향 화살표. up=true 면 위로 돌린다.
+  function crownTurn(ctx, since, up, R) {
+    if (since < -0.6 || since > 0.7) return;
+    const cx = (CROWN.x0 + CROWN.x1) / 2, cy = (CROWN.y0 + CROWN.y1) / 2, ch = CROWN.y1 - CROWN.y0, cw = CROWN.x1 - CROWN.x0;
+    const turn = clamp((since + 0.35) / 0.35), dir = up ? -1 : 1;
+    const fade = since < -0.45 ? clamp((since + 0.6) / 0.15) : since > 0.35 ? 1 - clamp((since - 0.35) / 0.35) : 1;
+    if (since > -0.4 && since < 0.15) {
+      ctx.save(); rr(ctx, cx - cw / 2, cy - ch / 2, cw, ch, cw * 0.25); ctx.clip();
+      const gap = 14, off = wrap(dir * turn * 6 * gap, gap);
+      ctx.globalAlpha = 0.35 * Math.sin(Math.PI * clamp((since + 0.4) / 0.55)); ctx.fillStyle = '#fff';
+      for (let yy = cy - ch / 2 - gap + off; yy < cy + ch / 2 + gap; yy += gap) ctx.fillRect(cx - cw / 2, yy, cw, 2.5);
+      ctx.restore();
+    }
+    const fy = cy - dir * ch * 0.22 + dir * ch * 0.44 * ease(turn);
+    ctx.save(); ctx.globalAlpha = 0.5 * fade; ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.ellipse(cx + cw * 0.9, fy, cw * 0.55, ch * 0.2, 0, 0, TAU); ctx.fill(); ctx.restore();
+    const ax = cx + cw * 0.6, a0 = up ? 0.75 : -0.75, a1 = up ? -0.75 : 0.75;
+    const prog = out(clamp((since + 0.35) / 0.4)), aEnd = a0 + (a1 - a0) * prog;
+    ctx.save(); ctx.globalAlpha = fade; ctx.strokeStyle = LIME; ctx.lineWidth = R * 0.09; ctx.lineCap = 'round';
+    ctx.shadowColor = LIME; ctx.shadowBlur = R * 0.15;
+    ctx.beginPath(); ctx.arc(ax, cy, R, a0, aEnd, up); ctx.stroke();
+    if (prog > 0.15) {
+      const hx = ax + R * Math.cos(aEnd), hy = cy + R * Math.sin(aEnd), tang = aEnd + (up ? -Math.PI / 2 : Math.PI / 2), hl = R * 0.27;
+      ctx.fillStyle = LIME; ctx.beginPath();
+      ctx.moveTo(hx + Math.cos(tang) * hl, hy + Math.sin(tang) * hl);
+      ctx.lineTo(hx + Math.cos(tang + 2.5) * hl, hy + Math.sin(tang + 2.5) * hl);
+      ctx.lineTo(hx + Math.cos(tang - 2.5) * hl, hy + Math.sin(tang - 2.5) * hl);
+      ctx.closePath(); ctx.fill();
+    }
+    ctx.restore();
+  }
+  // 페이지 위치 0(카운터) ↔ 1(스코어카드). 한 바퀴가 같은 상태로 끝나 이음매가 없다.
+  const DOWN = 1.9, UP = 6.0, SWING = .8;
+  function pagePos(t) {
+    if (t < DOWN - SWING / 2) return 0;
+    if (t < DOWN + SWING / 2) return ease((t - (DOWN - SWING / 2)) / SWING);
+    if (t < UP - SWING / 2) return 1;
+    if (t < UP + SWING / 2) return 1 - ease((t - (UP - SWING / 2)) / SWING);
+    return 0;
+  }
+  function rawCrown(ctx, t) {
+    ctx.fillStyle = '#000'; ctx.fillRect(0, 0, 1200, 1500);
+    if (!IMG.watch.complete || !IMG.watch.naturalWidth || !IMG.score.naturalWidth) return;
+    const s = 1500 / WI.h, x = (1200 - WI.w * s) / 2 - 80;   // 왼쪽으로 비켜 크라운 화살표 자리를 낸다
+    ctx.save(); ctx.translate(x, 0); ctx.scale(s, s);
+    ctx.drawImage(IMG.watch, 0, 0, WI.w, WI.h);
+    ctx.save(); rr(ctx, SCREEN.x, SCREEN.y, SCREEN.w, SCREEN.h, SCREEN.r); ctx.clip();
+    ctx.fillStyle = '#000'; ctx.fillRect(SCREEN.x, SCREEN.y, SCREEN.w, SCREEN.h);
+    const p = pagePos(t);
+    ctx.drawImage(counterPage(), SCREEN.x, SCREEN.y - p * SCREEN.h);
+    ctx.drawImage(scorePage(), SCREEN.x, SCREEN.y + (1 - p) * SCREEN.h);
+    ctx.restore();
+    crownTurn(ctx, t - DOWN, false, 75);
+    crownTurn(ctx, t - UP, true, 75);
+    ctx.restore();
+  }
+  function golfOnboardingCrown(ctx, W, H, t) {
+    ctx.save(); ctx.scale(W / 1200, H / 1500); rawCrown(ctx, mod(t)); ctx.restore();
+  }
+  const scenes = { golfOnboardingMode, golfOnboardingCrown };
   const canvases = Array.from(document.querySelectorAll('canvas[data-scene]'));
   let time = 0, last = performance.now();
   function draw() {

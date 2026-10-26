@@ -6,8 +6,8 @@ struct OnboardingComplicationRing: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var pulsing = false
 
-    private let center = CGPoint(x: 0.3867, y: 0.36)
-    private let diameter: CGFloat = 0.125
+    private let center = CGPoint(x: 0.34, y: 0.2833)
+    private let diameter: CGFloat = 0.155
 
     var body: some View {
         GeometryReader { geo in

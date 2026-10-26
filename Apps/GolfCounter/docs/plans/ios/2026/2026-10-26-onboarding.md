@@ -1,5 +1,7 @@
 # GolfCounter iOS 온보딩 Implementation Plan
 
+> **개정 (10-26, 구현 중):** 4페이지(건강 앱, Task 6)는 사용자 결정으로 **뺐다.** 3장(모드 · 크라운 · 컴플리케이션)으로 낸다. Task 6 은 하지 않는다.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 폰 앱 첫 실행(기존 사용자는 업데이트 후 첫 실행)에 워치 사용법 4장을 보여 준다 — 퍼팅 모드 전환 영상 · 크라운 스코어카드 영상 · 컴플리케이션 · 건강 앱.

@@ -1,14 +1,14 @@
 import SwiftUI
 
-/// 첫 실행(및 온보딩 버전이 오른 업데이트 직후)에 뜨는 4페이지.
+/// 첫 실행(및 온보딩 버전이 오른 업데이트 직후)에 뜨는 3페이지.
 ///
-/// 1~2 가 워치 사용법, 3 이 빠른 진입, 4 가 결과물이다. 시트가 아니라 루트 교체로 띄운다 —
+/// 1~2 가 워치 사용법, 3 이 빠른 진입이다. 시트가 아니라 루트 교체로 띄운다 —
 /// 시트는 당겨서 닫히고 그러면 플래그가 안 남는다.
 struct OnboardingView: View {
     let onFinished: () -> Void
 
     @State private var page = 0
-    private let lastPage = 3
+    private let lastPage = 2
 
     var body: some View {
         ZStack {
@@ -52,13 +52,6 @@ struct OnboardingView: View {
                         OnboardingComplicationRing()
                     }
                     .tag(2)
-
-                    OnboardingScreenshotPage(
-                        imageName: "OnboardingHealth",
-                        title: String(localized: "onboarding_health_title"),
-                        message: String(localized: "onboarding_health_body")
-                    )
-                    .tag(3)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .always))
                 .indexViewStyle(.page(backgroundDisplayMode: .always))
