@@ -9,6 +9,8 @@ struct GolfCounterApp: App {
     private let receiver: RoundReceiveService
 
     @State private var isLaunching = true
+    /// 마지막으로 본 온보딩 버전. 0 = 본 적 없음. 규칙은 OnboardingGate.
+    @AppStorage("onboardingSeenVersion") private var onboardingSeenVersion = 0
 
     init() {
         let container = PersistenceContainerFactory.make(for: [GolfRound.self])
@@ -24,6 +26,10 @@ struct GolfCounterApp: App {
         WindowGroup {
             if isLaunching {
                 LaunchScreenView(onFinished: { isLaunching = false })
+            } else if OnboardingGate.shouldShow(seenVersion: onboardingSeenVersion) {
+                OnboardingView(onFinished: {
+                    withAnimation { onboardingSeenVersion = OnboardingGate.version }
+                })
             } else {
                 MainTabView()
             }

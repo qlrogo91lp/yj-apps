@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GolfCounter · 헤더 시안</title>
+<style>
+  :root { color-scheme: dark; --paper: #e8eee2; --muted: #94a28f; --line: #2b3729; --accent: #c4e69a; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #10160f; color: var(--paper); font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif; }
+  main { max-width: 1440px; margin: auto; padding: 32px 40px 56px; }
+  .masthead { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-bottom: 23px; border-bottom: 1px solid var(--line); }
+  .brand { font-size: 17px; font-weight: 650; letter-spacing: -.5px; }
+  .brand span { color: var(--accent); }
+  .eyebrow { font: 10px ui-monospace, monospace; letter-spacing: 1.7px; color: var(--muted); }
+  .intro { display: flex; justify-content: space-between; align-items: end; gap: 24px; margin: 30px 0 22px; }
+  h1 { font-size: clamp(26px, 3.1vw, 42px); line-height: 1.2; font-weight: 550; letter-spacing: -1.8px; margin: 0 0 11px; }
+  p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.8; word-break: keep-all; }
+  .pill { flex-shrink: 0; padding: 7px 11px; color: var(--accent); border: 1px solid #3b4b31; border-radius: 30px; font-size: 11px; }
+  .hero { border: 1px solid #34422e; border-radius: 18px; overflow: hidden; background: #152211; }
+  canvas { display: block; width: 100%; aspect-ratio: 3840 / 1646; }
+  .controls { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; margin: 18px 0 11px; }
+  button { font: inherit; cursor: pointer; color: var(--paper); background: transparent; border: 1px solid #3c4934; border-radius: 25px; padding: 9px 16px; font-size: 12px; min-height: 36px; }
+  button:hover, button[aria-pressed="true"] { background: #27371d; color: #d9edc5; border-color: #6d8856; }
+  button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+  #play { background: var(--accent); color: #172111; border-color: var(--accent); min-width: 90px; font-weight: 600; }
+  input[type="range"] { flex: 1; min-width: 100px; height: 25px; accent-color: var(--accent); cursor: pointer; }
+  output { font: 11px ui-monospace, monospace; color: var(--muted); min-width: 90px; }
+  .moments { display: flex; gap: 7px; flex-wrap: wrap; }
+  .moments button { font-size: 11px; padding: 5px 12px; min-height: 30px; }
+  .lower { display: grid; grid-template-columns: 1fr 1fr; gap: 44px; margin-top: 35px; border-top: 1px solid var(--line); padding-top: 25px; }
+  h2 { font-size: 13px; font-weight: 550; margin: 0 0 16px; }
+  .phone { width: 100%; max-width: 390px; border-radius: 25px; border: 1px solid #36432f; overflow: hidden; background: #050705; }
+  .phone.narrow { max-width: 280px; margin-top: 16px; border-radius: 18px; }
+  .app-row { padding: 17px 20px 20px; display: flex; gap: 12px; align-items: center; }
+  .app-icon { width: 40px; height: 40px; flex: 0 0 40px; border-radius: 11px; background: #183b21; display: grid; place-items: center; color: #a9d89d; font-size: 24px; }
+  .app-name { font-size: 13px; font-weight: 600; }
+  .app-subtitle { margin-top: 5px; color: #8b9985; font-size: 10px; }
+  .get { margin-left: auto; font-size: 11px; color: #98c4ff; background: #1c251d; border-radius: 20px; padding: 7px 13px; }
+  .sequence { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 20px; }
+  .step { border-top: 1px solid var(--line); padding-top: 12px; }
+  .step small { color: var(--accent); font: 10px ui-monospace, monospace; }
+  .step strong { display: block; font-size: 12px; margin: 9px 0 4px; font-weight: 550; }
+  .step p { font-size: 11px; }
+  .note { margin-top: 21px; font-size: 11px; color: #7e8d77; }
+  .comparison { margin-top: 30px; border-top: 1px solid var(--line); padding-top: 24px; }
+  .watch-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 630px; }
+  .watch-pair figure { margin: 0; }
+  .watch-pair figcaption { color: var(--muted); font-size: 12px; margin-bottom: 10px; }
+  .watch-pair img, canvas.watch-detail { display: block; width: 100%; height: auto; aspect-ratio: 3705 / 4575; background: #000; object-fit: contain; }
+  @media (max-width: 720px) {
+    main { padding: 22px 18px 36px; } .masthead { padding-bottom: 18px; } .eyebrow { font-size: 9px; letter-spacing: .7px; }
+    .intro { display: block; margin-top: 26px; } .pill { display: inline-block; margin-top: 13px; } .lower { grid-template-columns: 1fr; gap: 28px; }
+    .controls { gap: 11px; } .hero { border-radius: 11px; } h1 { letter-spacing: -1.1px; } .sequence { gap: 18px; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="masthead"><div class="brand">Golf<span>Counter</span></div><div class="eyebrow">CREATIVE STUDY / 03</div></div>
+  <div class="intro">
+    <div><h1>한 타씩, 손목에서.</h1><p>필드의 움직임과 워치 입력을 연결하는 제품 페이지 헤더 시안.</p></div>
+    <span class="pill">21:9 · 10초 반복 · 무음</span>
+  </div>
+  <div class="hero"><canvas class="stage" data-scene="golfHeader" role="img" aria-label="그린에서 공이 움직인 뒤 워치를 탭하면 초록색 타수와 주황색 퍼팅 링이 채워지는 헤더 시안"></canvas></div>
+  <div class="controls">
+    <button id="play" type="button" aria-pressed="false">일시정지</button>
+    <input id="scrub" type="range" min="0" max="9.99" value="0" step="0.01" aria-label="영상 시간">
+    <output id="time" for="scrub">0.0 / 10.0 s</output>
+  </div>
+  <div class="moments" aria-label="주요 장면">
+    <button type="button" data-time="2.25">01 샷 기록</button><button type="button" data-time="4.95">02 퍼팅 전환</button>
+    <button type="button" data-time="6.9">03 퍼팅 기록</button><button type="button" data-time="8.7">04 홀 마무리</button>
+    <button type="button" id="restart">처음부터 재생 ↺</button>
+  </div>
+  <section class="comparison">
+    <h2>원본 워치와 애니메이션</h2>
+    <div class="watch-pair">
+      <figure><figcaption>보내주신 원본</figcaption><img id="watch-original" src="../inputs/golf-watch.png" alt="사용자가 제공한 Apple Watch 원본 목업" width="3705" height="4575"></figure>
+      <figure><figcaption>같은 이미지에 화면만 애니메이션</figcaption><canvas class="watch-detail" data-scene="golfWatch" role="img" aria-label="원본 비율과 외곽을 유지하고 화면 안의 타수와 링만 움직이는 워치"></canvas></figure>
+    </div>
+  </section>
+  <div class="lower">
+    <section>
+      <h2>작게 표시했을 때</h2>
+      <div class="phone"><canvas class="stage" data-scene="golfHeader" role="img" aria-label="390픽셀 너비에서 보는 헤더"></canvas><div class="app-row"><div class="app-icon" aria-hidden="true">⚑</div><div><div class="app-name">GolfCounter</div><div class="app-subtitle">타수도 퍼팅도, 손목에서.</div></div><span class="get">받기</span></div></div>
+      <div class="phone narrow"><canvas class="stage" data-scene="golfHeader" role="img" aria-label="280픽셀 너비에서 보는 헤더"></canvas></div>
+    </section>
+    <section>
+      <h2>장면의 순서</h2>
+      <div class="sequence">
+        <div class="step"><small>01 / SWING</small><strong>공이 멈추면, 한 번 톡.</strong><p>샷 이후 화면 중앙을 탭.<br>타수와 초록색 링이 함께 증가.</p></div>
+        <div class="step"><small>02 / SWITCH</small><strong>그린에서는 퍼팅 모드로.</strong><p>워치 오른쪽 위 버튼을 탭.<br>입력 모드가 주황색으로 전환.</p></div>
+        <div class="step"><small>03 / PUTT</small><strong>퍼팅도 같은 방식으로.</strong><p>공이 멈춘 뒤 중앙을 탭.<br>퍼팅은 주황색 칸으로 구분.</p></div>
+        <div class="step"><small>04 / FINISH</small><strong>네 번의 탭, 하나의 홀.</strong><p>2번의 샷과 2번의 퍼팅.<br>완성된 링을 보여준 뒤 부드럽게 반복.</p></div>
+      </div>
+      <p class="note">원본 이미지의 비율과 외곽을 그대로 사용했습니다. 화면 안의 타수·누적 점수·링·입력 모드만 움직입니다. 비교 영역과 재생 버튼은 영상에 포함되지 않습니다.</p>
+    </section>
+  </div>
+</main>
+<script>
+(function () {
+  'use strict';
+  const TAU = Math.PI * 2, PERIOD = 10;
+  const GREEN = '#30d158', ORANGE = '#ff9230';
+  const FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif';
+  const ROUNDED = 'ui-rounded, "SF Pro Rounded", -apple-system, sans-serif';
+  const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+  const mix = (a, b, t) => a + (b - a) * t;
+  const ease = t => t * t * (3 - 2 * t);
+  const out = t => 1 - Math.pow(1 - t, 3);
+  const mod = t => ((t % PERIOD) + PERIOD) % PERIOD;
+  const SHOTS = [
+    { start: .5, end: 1.5, a: [118, 513], b: [374, 359], bend: -70, lift: 52 },
+    { start: 2.65, end: 3.65, a: [374, 359], b: [620, 305], bend: -67, lift: 45 },
+    { start: 5.25, end: 6.08, a: [620, 305], b: [625, 238], bend: 12, lift: 0 },
+    { start: 7.12, end: 7.83, a: [625, 238], b: [601, 202], bend: -3, lift: 0 }
+  ];
+  const TAPS = [1.94, 4.04, 6.57, 8.18];
+  const IMG = { watch: new Image(), swing: new Image() };
+  IMG.watch.src = '../inputs/golf-watch.png';
+  IMG.swing.src = '../inputs/golf-swing-icon.png';
+  // Measurements in the supplied 3705×4575 image, normalized to 1266px wide.
+  const WI = { w: 1266, h: 1266 * 4575 / 3705, cx: 621, cy: 897, radius: 180, stroke: 36, modeX: 898, modeY: 589 };
+  const WATCH_HEIGHT = 686, WATCH_SCALE = WATCH_HEIGHT / WI.h;
+  const WATCH_X = 1238 - WI.w * WATCH_SCALE / 2, WATCH_Y = 0;
+
+  function rounded(ctx, x, y, w, h, r) {
+    ctx.beginPath(); ctx.roundRect(x, y, w, h, r);
+  }
+  function ellipse(ctx, x, y, rx, ry, color, rotation = 0) {
+    ctx.beginPath(); ctx.ellipse(x, y, rx, ry, rotation, 0, TAU); ctx.fillStyle = color; ctx.fill();
+  }
+  function text(ctx, value, x, y, size, color, weight = 550, family = FONT, align = 'center') {
+    ctx.font = `${weight} ${size}px ${family}`; ctx.fillStyle = color;
+    ctx.textAlign = align; ctx.textBaseline = 'middle'; ctx.fillText(value, x, y);
+  }
+  function fairwayPath() {
+    const p = new Path2D(); p.moveTo(13, 514);
+    p.bezierCurveTo(85, 424, 235, 435, 294, 320); p.bezierCurveTo(353, 198, 476, 110, 633, 118);
+    p.bezierCurveTo(836, 129, 888, 306, 750, 383); p.bezierCurveTo(625, 453, 514, 375, 427, 424);
+    p.bezierCurveTo(322, 483, 336, 561, 202, 596); p.bezierCurveTo(98, 623, -39, 589, 13, 514); p.closePath(); return p;
+  }
+  function greenPath() {
+    const p = new Path2D(); p.moveTo(487, 220);
+    p.bezierCurveTo(497, 143, 614, 133, 682, 174); p.bezierCurveTo(765, 218, 761, 294, 697, 324);
+    p.bezierCurveTo(640, 355, 619, 308, 565, 323); p.bezierCurveTo(510, 337, 463, 280, 487, 220); p.closePath(); return p;
+  }
+  function bunker(ctx, x, y, scale, rotation) {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(rotation); ctx.scale(scale, scale);
+    const p = new Path2D(); p.moveTo(-54, 3); p.bezierCurveTo(-79, -41, -32, -63, 2, -30);
+    p.bezierCurveTo(24, -8, 60, -34, 72, -4); p.bezierCurveTo(94, 43, 31, 45, 4, 28);
+    p.bezierCurveTo(-21, 13, -41, 31, -54, 3); p.closePath();
+    ctx.strokeStyle = '#1b351b'; ctx.lineWidth = 16; ctx.stroke(p);
+    ctx.fillStyle = '#c3b990'; ctx.fill(p); ctx.save(); ctx.clip(p);
+    ctx.strokeStyle = '#ded1aa'; ctx.lineWidth = 1.1;
+    for (let n = -90; n < 95; n += 9) { ctx.beginPath(); ctx.moveTo(n, -70); ctx.lineTo(n + 45, 70); ctx.stroke(); }
+    ctx.restore(); ctx.restore();
+  }
+  function course(ctx, t) {
+    const bg = ctx.createLinearGradient(0, 0, 1600, 686);
+    bg.addColorStop(0, '#152510'); bg.addColorStop(.55, '#1b2c14'); bg.addColorStop(1, '#101c0e');
+    ctx.fillStyle = bg; ctx.fillRect(0, 0, 1600, 686);
+    ctx.save(); ctx.strokeStyle = 'rgba(180,205,144,.065)'; ctx.lineWidth = 1;
+    for (let i = 0; i < 7; i++) {
+      ctx.beginPath(); ctx.ellipse(280, 330, 360 + i * 31, 260 + i * 25, -.35, 0, TAU); ctx.stroke();
+    }
+    const fairway = fairwayPath(); ctx.shadowColor = 'rgba(0,0,0,.25)'; ctx.shadowBlur = 22; ctx.shadowOffsetY = 12;
+    ctx.fillStyle = '#355e2b'; ctx.fill(fairway); ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+    ctx.clip(fairway); ctx.rotate(-.43);
+    for (let i = -4; i < 20; i++) { ctx.fillStyle = i % 2 ? '#3d6930' : '#38622c'; ctx.fillRect(i * 69, -300, 69, 1450); }
+    ctx.restore();
+    const green = greenPath(); ctx.save(); ctx.strokeStyle = '#638448'; ctx.lineWidth = 18; ctx.stroke(green);
+    const g = ctx.createLinearGradient(490, 150, 720, 340); g.addColorStop(0, '#83a65e'); g.addColorStop(1, '#678e49');
+    ctx.fillStyle = g; ctx.fill(green); ctx.clip(green);
+    ctx.strokeStyle = 'rgba(214,229,169,.09)'; ctx.lineWidth = 1;
+    for (let i = 0; i < 7; i++) { ctx.beginPath(); ctx.ellipse(601, 220, 34 + i * 29, 23 + i * 22, .24, 0, TAU); ctx.stroke(); }
+    ctx.restore();
+    bunker(ctx, 425, 191, .75, -.7); bunker(ctx, 734, 392, .9, .35);
+    // A few clipped, quiet rough textures, stable for deterministic video export.
+    for (let i = 0; i < 75; i++) {
+      const x = (i * 137.31 + 41) % 930, y = (i * 83.59 + 23) % 686;
+      if (ctx.isPointInPath(fairway, x, y)) continue;
+      ellipse(ctx, x, y, 1.1, 2.1, 'rgba(171,191,122,.12)', -.3);
+    }
+    // Tee markers and a flag make the scene read as golf even at small sizes.
+    rounded(ctx, 91, 523, 8, 15, 2); ctx.fillStyle = '#e1dfc4'; ctx.fill();
+    rounded(ctx, 130, 501, 8, 15, 2); ctx.fillStyle = '#e1dfc4'; ctx.fill();
+    ellipse(ctx, 610, 218, 28, 6, 'rgba(14,30,12,.17)', .5);
+    ellipse(ctx, 601, 202, 6, 3.6, '#203b1a');
+    ctx.beginPath(); ctx.moveTo(601, 201); ctx.lineTo(601, 121); ctx.strokeStyle = '#e6e7c8'; ctx.lineWidth = 2.6; ctx.stroke();
+    const wind = Math.sin(TAU * t / PERIOD) * 3;
+    ctx.beginPath(); ctx.moveTo(602, 121); ctx.bezierCurveTo(618, 119 + wind, 625, 133, 643, 128 + wind);
+    ctx.lineTo(639, 150 + wind); ctx.bezierCurveTo(622, 153, 617, 140 + wind, 602, 143); ctx.closePath();
+    ctx.fillStyle = '#f0edcf'; ctx.fill();
+    // Dark edge keeps the product itself in focus without dividing the artwork.
+    // The untouched photo has a black background. Let the course fade to that same black.
+    const shade = ctx.createLinearGradient(810, 0, 950, 0); shade.addColorStop(0, 'rgba(0,0,0,0)');
+    shade.addColorStop(1, '#000'); ctx.fillStyle = shade; ctx.fillRect(0, 0, 1600, 686);
+  }
+  function ballAt(t) {
+    let x = SHOTS[0].a[0], y = SHOTS[0].a[1], height = 0, active = -1;
+    for (let i = 0; i < SHOTS.length; i++) {
+      const s = SHOTS[i]; if (t < s.start) break;
+      const u = clamp((t - s.start) / (s.end - s.start)), p = 1 - Math.pow(1 - u, 1.65);
+      x = mix(s.a[0], s.b[0], p); y = mix(s.a[1], s.b[1], p) + Math.sin(Math.PI * p) * s.bend;
+      height = Math.sin(Math.PI * u) * s.lift; if (u < 1) active = i;
+    }
+    return { x, y, height, active, sunk: t >= SHOTS[3].end };
+  }
+  function ball(ctx, t) {
+    const b = ballAt(t);
+    if (b.sunk) {
+      const p = clamp((t - SHOTS[3].end) / .65); ctx.strokeStyle = `rgba(239,239,202,${(1 - p) * .65})`; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.ellipse(601, 202, 6 + p * 20, 4 + p * 12, 0, 0, TAU); ctx.stroke(); return;
+    }
+    if (b.active >= 0) {
+      for (let i = 11; i >= 1; i--) {
+        const q = ballAt(t - i * .025);
+        ellipse(ctx, q.x, q.y - q.height, 3.1 * (1 - i / 16), 3.1 * (1 - i / 16), `rgba(248,250,218,${.28 * (1 - i / 12)})`);
+      }
+    }
+    ellipse(ctx, b.x + b.height * .13, b.y + 3, 5 + b.height * .05, 2.9, 'rgba(8,20,7,.33)');
+    ctx.save(); ctx.shadowColor = 'rgba(241,242,202,.25)'; ctx.shadowBlur = 10;
+    ellipse(ctx, b.x, b.y - b.height, 5, 5, '#f6f4de'); ctx.restore();
+    ellipse(ctx, b.x - 1.4, b.y - b.height - 1.5, 1.1, 1.1, '#fffef1');
+  }
+  function tap(ctx, t, at, x, y, size = 1) {
+    const p = (t - at + .18) / .64; if (p < 0 || p > 1) return;
+    const a = Math.sin(p * Math.PI), r = (11 + out(p) * 23) * size;
+    ctx.strokeStyle = `rgba(255,255,245,${a * .9})`; ctx.lineWidth = 2 * size;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.stroke();
+    ellipse(ctx, x, y, 7 * size, 7 * size, `rgba(255,255,245,${a * .65})`);
+  }
+  function watchFace(ctx, t) {
+    if (!IMG.watch.complete || !IMG.watch.naturalWidth) return;
+    const count = TAPS.filter(at => t >= at).length, puttMode = t >= 4.82;
+    ctx.save();
+    // Draw the original directly: identical aspect ratio, no mask, cutout or strap fading.
+    ctx.drawImage(IMG.watch, 0, 0, WI.w, WI.h);
+    // Preserve the actual hardware, time, Par, navigation, Undo and page indicators.
+    ctx.fillStyle = '#000'; ctx.fillRect(735, 365, 58, 75); // Disconnected-phone status.
+    ctx.fillRect(475, 551, 300, 78); // Hole/round total.
+    ellipse(ctx, WI.cx, WI.cy, 223, 223, '#000'); // Old ring, overflow and score.
+    text(ctx, `Hole 2 · ${4 + count}`, 621, 591, 56, '#fff', 600, '"SF Compact", -apple-system, sans-serif');
+    if (!puttMode) {
+      ellipse(ctx, WI.modeX, WI.modeY, 76, 76, '#000');
+      ellipse(ctx, WI.modeX, WI.modeY, 71, 71, '#092610');
+      ctx.strokeStyle = '#248f3e'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(WI.modeX, WI.modeY, 71, 0, TAU); ctx.stroke();
+      if (IMG.swing.complete && IMG.swing.naturalWidth) ctx.drawImage(IMG.swing, WI.modeX - 45, WI.modeY - 45, 90, 90);
+    }
+    const gap = .125;
+    for (let i = 0; i < 4; i++) {
+      const start = -Math.PI / 2 + i * TAU / 4 + gap, end = -Math.PI / 2 + (i + 1) * TAU / 4 - gap;
+      ctx.strokeStyle = '#27282a'; ctx.lineWidth = WI.stroke; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.arc(WI.cx, WI.cy, WI.radius, start, end); ctx.stroke();
+      const filled = out(clamp((t - TAPS[i]) / .23));
+      if (filled > 0) { ctx.strokeStyle = i < 2 ? GREEN : ORANGE; ctx.beginPath(); ctx.arc(WI.cx, WI.cy, WI.radius, start, mix(start, end, filled)); ctx.stroke(); }
+    }
+    const lastTap = TAPS[count - 1], pop = count ? Math.sin(clamp((t - lastTap) / .22) * Math.PI) : 0;
+    text(ctx, String(count), WI.cx, 873, 166 + pop * 5, '#fff', 600, ROUNDED);
+    const relative = count ? count - 4 : 0;
+    text(ctx, relative === 0 ? 'E' : String(relative).replace('-', '−'), WI.cx, 995, 55, '#737373', 500, ROUNDED);
+    TAPS.forEach(at => tap(ctx, t, at, WI.cx, WI.cy, 3)); tap(ctx, t, 4.82, WI.modeX, WI.modeY, 2.7);
+    ctx.restore();
+  }
+  function watchShot(ctx, t) {
+    ctx.save(); ctx.translate(WATCH_X, WATCH_Y); ctx.scale(WATCH_SCALE, WATCH_SCALE);
+    watchFace(ctx, t); ctx.restore();
+  }
+  function golfWatch(ctx, W, H, t) {
+    t = mod(t); ctx.save(); ctx.scale(W / WI.w, H / WI.h); watchFace(ctx, t);
+    if (t > 9.25) { ctx.globalAlpha *= ease(clamp((t - 9.25) / .75)); watchFace(ctx, 0); }
+    ctx.restore();
+  }
+  function rawScene(ctx, t) { course(ctx, t); ball(ctx, t); watchShot(ctx, t); }
+  function golfHeader(ctx, W, H, t) {
+    t = mod(t); ctx.save(); ctx.scale(W / 1600, H / 686); rawScene(ctx, t);
+    // Dissolve back to the opening pose instead of jumping the ball and score.
+    if (t > 9.25) { ctx.globalAlpha *= ease(clamp((t - 9.25) / .75)); rawScene(ctx, 0); }
+    ctx.restore();
+  }
+  const scenes = { golfHeader, golfWatch };
+  // Same scene contract as the existing store-assets rendering tools.
+  const canvases = Array.from(document.querySelectorAll('canvas[data-scene]'));
+  const params = new URLSearchParams(location.search), frozenValue = Number(params.get('t'));
+  const frozen = params.has('t') && Number.isFinite(frozenValue);
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
+  let playing = !frozen && !reduceMotion.matches;
+  let time = frozen ? mod(frozenValue) : reduceMotion.matches ? 6.9 : 0;
+  let last = performance.now();
+  const play = document.getElementById('play'), scrub = document.getElementById('scrub'), output = document.getElementById('time');
+  function updateControls() {
+    if (!play) return;
+    play.textContent = playing ? '일시정지' : '재생'; play.setAttribute('aria-pressed', String(!playing));
+    scrub.value = String(time); output.value = `${time.toFixed(1)} / 10.0 s`;
+    document.querySelectorAll('[data-time]').forEach(button => button.setAttribute('aria-pressed', String(!playing && Math.abs(time - Number(button.dataset.time)) < .04)));
+  }
+  function draw() {
+    for (const c of canvases) {
+      const width = Math.max(1, Math.round(c.getBoundingClientRect().width * Math.min(devicePixelRatio || 1, 2)));
+      const height = Math.round(width * (c.dataset.scene === 'golfWatch' ? WI.h / WI.w : 1646 / 3840));
+      if (c.width !== width || c.height !== height) { c.width = width; c.height = height; }
+      const ctx = c.getContext('2d'); ctx.clearRect(0, 0, c.width, c.height); scenes[c.dataset.scene](ctx, c.width, c.height, time);
+    }
+    updateControls();
+  }
+  window.golfPreview = { renderAt(t) { time = mod(t); playing = false; draw(); }, get time() { return time; }, get playing() { return playing; }, get ready() { return Object.values(IMG).every(im => im.complete && im.naturalWidth > 0); } };
+  if (play) {
+    play.addEventListener('click', () => { playing = !playing; last = performance.now(); draw(); });
+    scrub.addEventListener('input', () => { playing = false; time = Number(scrub.value); draw(); });
+    document.querySelectorAll('[data-time]').forEach(button => button.addEventListener('click', () => window.golfPreview.renderAt(Number(button.dataset.time))));
+    document.getElementById('restart').addEventListener('click', () => { time = 0; playing = true; last = performance.now(); draw(); });
+    reduceMotion.addEventListener('change', event => { if (event.matches) { playing = false; time = 6.9; draw(); } });
+    document.addEventListener('visibilitychange', () => { last = performance.now(); });
+  }
+  function tick(now) {
+    if (playing && !document.hidden) { time = mod(time + Math.min((now - last) / 1000, .1)); draw(); }
+    last = now; requestAnimationFrame(tick);
+  }
+  window.addEventListener('resize', draw); draw(); if (canvases.length) requestAnimationFrame(tick);
+  Promise.all(Object.values(IMG).map(im => im.decode())).then(() => { last = performance.now(); draw(); }).catch(error => console.error('Watch preview image could not load.', error));
+})();
+</script>
+</body>
+</html>

@@ -3,9 +3,10 @@
 코드 블록 안이 App Store Connect 에 들어가는 값 그대로다. **이 파일을 먼저 고치고 그다음에 붙여 넣는다.**
 출시 노트는 출시마다 덮어쓴다. 규약은 루트 `CLAUDE.md` 를 본다.
 
-이름·설명·출시 노트는 2026-10-12, 부제·프로모션 텍스트·스크린샷 캡션은 2026-10-22 에 공개 스토어(2.1.1)에서 가져온 실값이다.
+이름·설명은 2026-10-12, 부제·프로모션 텍스트·스크린샷 캡션은 2026-10-22 에 공개 스토어(2.1.1)에서 가져온 실값이다.
+출시 노트는 2.1.2 용으로 2026-10-26 에 새로 썼다.
 프로모션 텍스트는 공개 페이지가 설명 앞에 붙여 보여 주는 단락을 떼어 낸 것이다 — App Store Connect 와 한 번 맞춰 본다.
-키워드는 공개되지 않아 비어 있다 — App Store Connect 에서 옮겨 적는다.
+키워드는 공개되지 않아 2026-10-26 에 App Store Connect 값을 옮겨 적었다.
 
 ## 이름 (30자)
 
@@ -40,16 +41,14 @@ Tap your wrist, track strokes
 ### ko
 
 ```
+스코어,점수,라운드,필드,스윙,퍼트,골프장,골린이,애플,홀,버디,스코어카드,스코어보드,운동,칼로리,심박수,통계,컴플리케이션,연습,초보,파크골프,워크아웃,건강,관리,점수판
 ```
-
-_스토어 값을 아직 옮겨 적지 않았다._
 
 ### en-US
 
 ```
+score,scorecard,round,par,birdie,bogey,eagle,hole,course,tee,swing,apple,watch,workout,calorie,heart
 ```
-
-_스토어 값을 아직 옮겨 적지 않았다._
 
 ## 프로모션 텍스트 (170자)
 
@@ -157,13 +156,15 @@ Weekend rounds with friends — make that time a little lighter.
 ### ko
 
 ```
-워치에서 라운드 기록을 전송할 때 기록이 유실될 수 있는 문제를 수정했어요.
+• 버그를 수정했어요.
+• 온보딩 페이지가 추가됐어요.
 ```
 
 ### en-US
 
 ```
-Fixed an issue that could cause round records to be lost when sending them from Apple Watch.
+• Bug fixes.
+• Added onboarding pages.
 ```
 
 ## 스크린샷 캡션

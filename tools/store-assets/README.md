@@ -55,6 +55,10 @@ swift -swift-version 5 video/grab.swift out/ralli-header.mp4 out
 | 〃 | `ralliHeader` — 코트만 (처음 시안, 비교용) | 3840x1646 · 8.8초 | 쓰지 않음 |
 | `mockups/ralli-search-en.html` | `ralliSearch` — 워치 하나. 화면 탭과 크라운(위 ME · 아래 OPP)으로 번갈아 점수를 넣는다. 입력 `inputs/watch-match-global.png` | 2880x1920 · 8.8초 | **확정 (10-25)** |
 | `mockups/ralli-onboarding-crown.html` | `ralliOnboardingCrown` — 검색 결과 장면에서 캡션을 뺀 것. 앱 온보딩 1페이지에 쓴다. 입력 `inputs/watch-match-{en,ko}.png` (`--lang ko\|en`) | 1200x1500 (4:5) · 8.8초 | **적용 (10-25)** |
+| `mockups/golf-header.html` | `golfHeader` — 골프 코스 + 실제 워치. 샷·퍼팅 후 탭하면 숫자와 초록·주황 링이 채워진다. 입력 `inputs/golf-watch.png` · `inputs/golf-swing-icon.png` | 3840x1646 · 10초 | **시안 승인 (10-26)** · mp4 출력 전 |
+| `mockups/golf-search.html` | `golfSearch` — 왼쪽 문구 + 크게 보이는 실제 워치. 타수 입력 → 퍼팅 전환 → 퍼팅 입력. 헤더와 같은 입력 이미지, 한국어·영어 전환 (`--lang ko\|en`) | 2880x1920 · 10초 | **제작 완료 (10-26)** · 한국어·영어 MP4 |
+| `mockups/golf-onboarding.html` | `golfOnboardingMode` — 검색 장면에서 왼쪽 문구를 뺀 워치 하나. 타수 입력 → 퍼팅 전환(모드 버튼 탭을 크게) → 퍼팅 입력. 앱 온보딩 1페이지에 쓴다. 입력 `inputs/golf-watch.png` · `inputs/golf-swing-icon.png` | 1200x1500 (4:5) · 10초 | **적용 (10-26)** · 언어 공통 한 벌 |
+| 〃 | `golfOnboardingCrown` — 크라운을 돌리면 카운터가 위로 밀리고 스코어카드가 올라왔다 돌아온다. 앱 온보딩 2페이지에 쓴다. 입력 위 둘 + `inputs/golf-scorecard.png` (스코어카드 워치 스크린샷의 시계를 10:23 으로 맞추고 연결 끊김 아이콘을 지운 것) | 1200x1500 (4:5) · 10초 | **적용 (10-26)** · 언어 공통 한 벌 |
 
 워치 숫자는 스크린샷 한 장(30:15) 위에 코드로 다시 그린다. 워치 시스템 글꼴 `"SF Compact"` 를 캔버스에서 쓸 수 있어 원본과 같게 나온다.
 배경이 단색인 자리(ME/OPP · Undo · 연결 끊김 아이콘)는 배경색으로 덮는다 — 헤더는 전부, 검색 결과는 실제 화면이라 아이콘만. 좌표는 시안의 `WI`(화면) · `CROWN`(크라운)에 있다.
@@ -62,6 +66,10 @@ swift -swift-version 5 video/grab.swift out/ralli-header.mp4 out
 하루치 헤더 · 검색 결과(영어판)는 업로드를 마쳐 시안을 지웠다. 검색 결과 시안은 커밋 `03da6f7` 의
 `tools/store-assets/mockups/haruchi-search-en.html` 로 되살릴 수 있다
 (`git show 03da6f7:tools/store-assets/mockups/haruchi-search-en.html > mockups/haruchi-search-en.html`).
+
+골프 워치 목업은 **원본 비율·외곽·스트랩을 그대로** 쓴다. 배경을 오려내거나 스트랩 끝을 흐리게 하지 않는다.
+검은 배경에 원본을 직접 그리고 화면 안 숫자·링·입력 모드만 덧그린다. `golf-swing-icon.png`는 앱과 같은
+`figure.golf` 시스템 심벌이다. 검색 시안은 헤더에서 승인한 워치 렌더링을 그대로 사용한다.
 
 ## 파일
 
@@ -97,3 +105,32 @@ done
 
 정지 이미지(`OnboardingCrown` 에셋 · 시스템 "동작 줄이기" 를 켠 사용자에게 보인다)는 같은 프레임 중 96번(3.2초, 크라운 화살표가 보이는 순간)을
 `out/onb-$L/frames/f00096.png` 에서 꺼내 `crown-$L.png` 로 바꾼다.
+
+## GolfCounter 검색 영상 출력본
+
+승인된 `mockups/golf-search.html`에서 출력한 최종 파일:
+
+- 한국어: `out/golf-search-ko.mp4`
+- 영어: `out/golf-search-en.mp4`
+- 공통: 2880×1920 · 30fps · 10초 · H.264 + 무음 AAC. App Store 업로드 전.
+
+재출력은 위 제작 순서에서 장면 `golfSearch`, 크기 `2880x1920`, 길이 `10`,
+언어 `--lang ko` 또는 `--lang en`, 입력 `inputs/golf-watch.png inputs/golf-swing-icon.png`를 사용한다.
+
+### GolfCounter 온보딩 영상
+
+```bash
+python3 video/build-render.py mockups/golf-onboarding.html out/onb-golf-mode \
+  --scene golfOnboardingMode --size 1200x1500 --seconds 10 \
+  --images inputs/golf-watch.png inputs/golf-swing-icon.png inputs/golf-scorecard.png
+python3 video/capture.py out/onb-golf-mode
+swift -swift-version 5 video/encode.swift out/onb-golf-mode/frames out/onboarding-mode.mp4 30 no-audio
+```
+
+결과는 `Apps/GolfCounter/iOSApp/Resources/Onboarding/onboarding-mode.mp4` 로 복사한다. 정지 이미지(`OnboardingMode`)는 `out/onb-golf-mode/frames/f00180.png`(6.0초, 퍼팅 모드로 바뀐 뒤)다.
+(시안이 스코어카드 이미지도 불러오므로 장면과 관계없이 `--images` 에 세 장을 모두 넘긴다.)
+
+2페이지 영상도 같은 방식이다 (`--scene golfOnboardingCrown --images inputs/golf-watch.png inputs/golf-swing-icon.png inputs/golf-scorecard.png`,
+출력 `out/onboarding-crown.mp4`). 정지 이미지(`OnboardingCrown`)는 `out/onb-golf-crown/frames/f00120.png`(4.0초) 프레임(스코어카드가 다 올라온 순간)이다.
+3페이지 정지 이미지(`OnboardingComplication`)는 `watch-complication.png`(1266×1542)를 `golf-watch.png`(1266 폭으로 줄인 것) 위 (0,0)에 얹고
+높이 1500 으로 줄여 가운데 1200 폭을 자른 것 — 영상 도구를 쓰지 않았다. 링 위치는 앱 코드(`OnboardingComplicationRing`)가 갖는다.
