@@ -117,7 +117,12 @@ Localizable(6·10) / 워치 `WorkoutSessionViewModel`(3·7) / iOS `History/`(9·
 - [ ] **워치 저장 실패 non-fatal 콘솔 확인** — 워치에 "저장 실패" 는 떴는데(10-02) 며칠이 지나도 콘솔 `ralli-watch` 에 `Ralli.Save` code 3 이 안 올라왔다.
       다음은 `-FIRDebugEnabled` 로 업로드 로그를 본다. 절차·dSYM `62AD67DD` 누락 메모는 [플랜](Apps/TennisCounter/docs/plans/shared/2026/2026-09-07-crashlytics-integration.md) Task 4
 - [ ] **iOS 가 워치 저장 뒤에도 "경기 진행 중" 에 남는다** (10-02, 원인 미확인) — 워치는 "저장됨" 까지 갔다. 같은 경기 점수였는지,
-      기록 탭에 저장됐는지부터 본다. 의심 경로: 경기 시작이 `applicationContext` 에 남아 콜드 런치 때 다시 읽힘 / `sendMessage` 실패 시 `errorHandler: nil` 이라 경기 종료가 유실
+      기록 탭에 저장됐는지부터 본다. 의심 경로: 경기 시작이 `applicationContext` 에 남아 콜드 런치 때 다시 읽힘 / `sendMessage` 실패 시 `errorHandler: nil` 이라 경기 종료가 유실.
+      **10-26 재검토: PR #65 는 이 경로를 건드리지 않았다** — 폰 화면은 `receivedMatchEnd` 로만 결과로 넘어가고, 그 메시지는 여전히 `.reliable`.
+      기록 손실은 없고 폰 화면만 남아 1.2.0 은 그대로 낸다. 재현되면 폰이 저장 요청을 받을 때 진행 중 경기를 결과로 넘기는 쪽이 가장 작다
+- [ ] **연속 경기 때 이전 경기의 저장 응답이 지금 경기 버튼을 "저장됨" 으로 바꿀 수 있다** (10-26, 알려진 문제 · 보류) —
+      `MatchSaveResultMessage` 가 `sessionId`(운동)만 싣고 경기 ID 가 없다. 재시작 뒤에는 응답이 무시되고 기록도 결국 저장되므로,
+      놓치는 건 폰 저장이 실제로 실패한 경우뿐이다. 고친다면 응답에 `matchId` 를 선택 필드로 더하고 워치가 지금 경기와 비교한다
 - [x] ~~**`saveFromWatchPersistsMatch` 테스트 오염 수정** — 싱글턴 `MatchPersistenceService.shared` 에
       인메모리 컨테이너를 꽂았던 테스트가 끝난 뒤 다른 테스트가 그 컨텍스트를 조회해
       `NSInternalInconsistencyException: "No eligible connection available"` 로 죽는다. 단독 실행은 통과.
