@@ -533,6 +533,38 @@
         }
       }
     },
+    "match_card_loss" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Defeat"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "패배"
+          }
+        }
+      }
+    },
+    "match_card_win" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Victory"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "승리"
+          }
+        }
+      }
+    },
     "match_detail_format" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -550,23 +582,6 @@
         }
       }
     },
-    "match_detail_me" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Me"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "나"
-          }
-        }
-      }
-    },
     "match_detail_no_sets" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -580,23 +595,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "세트 기록이 없습니다"
-          }
-        }
-      }
-    },
-    "match_detail_opponent" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opponent"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "상대"
           }
         }
       }
@@ -1250,23 +1248,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%d경기"
-          }
-        }
-      }
-    },
-    "session_match_duration" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%d min"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%d분"
           }
         }
       }
