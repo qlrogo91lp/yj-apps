@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GolfCounter · 온보딩 영상 시안</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #10160f; color: #e8eee2; font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif; }
+  main { max-width: 520px; margin: auto; padding: 24px 16px 40px; }
+  h1 { font-size: 18px; font-weight: 600; margin: 0 0 6px; }
+  p { margin: 0 0 16px; color: #94a28f; font-size: 13px; line-height: 1.7; }
+  canvas { display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; background: #000; border-radius: 24px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>골프 온보딩 영상</h1>
+  <p>앱 온보딩 페이지(4:5)에 들어가는 반복 영상. 왼쪽 문구 없이 워치만 보여준다. 브라우저에서는 장면이 계속 반복된다.</p>
+  <canvas id="preview" data-scene="golfOnboardingMode" role="img" aria-label="탭으로 타수를 올리고 오른쪽 위 버튼으로 퍼팅 모드로 바꾼 뒤 퍼팅을 올리는 워치 영상"></canvas>
+</main>
+<script>
+(function () {
+  'use strict';
+  const TAU = Math.PI * 2, PERIOD = 10;
+  const GREEN = '#30d158', ORANGE = '#ff9230';
+  const ROUNDED = 'ui-rounded, "SF Pro Rounded", -apple-system, sans-serif';
+  const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+  const mix = (a, b, t) => a + (b - a) * t;
+  const ease = t => t * t * (3 - 2 * t);
+  const out = t => 1 - Math.pow(1 - t, 3);
+  const mod = t => ((t % PERIOD) + PERIOD) % PERIOD;
+  // 워치 렌더링 · 좌표 · 입력 순서는 승인한 golf-header / golf-search 와 같다.
+  const TAPS = [1.94, 4.04, 6.57, 8.18];
+  const IMG = { watch: new Image(), swing: new Image() };
+  IMG.watch.src = '../inputs/golf-watch.png';
+  IMG.swing.src = '../inputs/golf-swing-icon.png';
+  const WI = { w: 1266, h: 1266 * 4575 / 3705, cx: 621, cy: 897, radius: 180, stroke: 36, modeX: 898, modeY: 589 };
+
+  function ellipse(ctx, x, y, rx, ry, color) {
+    ctx.beginPath(); ctx.ellipse(x, y, rx, ry, 0, 0, TAU); ctx.fillStyle = color; ctx.fill();
+  }
+  function text(ctx, value, x, y, size, color, weight = 550, family = ROUNDED) {
+    ctx.font = `${weight} ${size}px ${family}`; ctx.fillStyle = color;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(value, x, y);
+  }
+  function tap(ctx, t, at, x, y, size = 1) {
+    const p = (t - at + .18) / .64; if (p < 0 || p > 1) return;
+    const a = Math.sin(p * Math.PI), r = (11 + out(p) * 23) * size;
+    ctx.strokeStyle = `rgba(255,255,245,${a * .9})`; ctx.lineWidth = 2 * size;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.stroke();
+    ellipse(ctx, x, y, 7 * size, 7 * size, `rgba(255,255,245,${a * .65})`);
+  }
+  function watchFace(ctx, t) {
+    if (!IMG.watch.complete || !IMG.watch.naturalWidth) return;
+    const count = TAPS.filter(at => t >= at).length, puttMode = t >= 4.82;
+    ctx.save();
+    ctx.drawImage(IMG.watch, 0, 0, WI.w, WI.h);
+    ctx.fillStyle = '#000'; ctx.fillRect(735, 365, 58, 75);
+    ctx.fillRect(475, 551, 300, 78);
+    ellipse(ctx, WI.cx, WI.cy, 223, 223, '#000');
+    text(ctx, `Hole 2 · ${4 + count}`, 621, 591, 56, '#fff', 600, '"SF Compact", -apple-system, sans-serif');
+    if (!puttMode) {
+      ellipse(ctx, WI.modeX, WI.modeY, 76, 76, '#000');
+      ellipse(ctx, WI.modeX, WI.modeY, 71, 71, '#092610');
+      ctx.strokeStyle = '#248f3e'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(WI.modeX, WI.modeY, 71, 0, TAU); ctx.stroke();
+      if (IMG.swing.complete && IMG.swing.naturalWidth) ctx.drawImage(IMG.swing, WI.modeX - 45, WI.modeY - 45, 90, 90);
+    }
+    const gap = .125;
+    for (let i = 0; i < 4; i++) {
+      const start = -Math.PI / 2 + i * TAU / 4 + gap, end = -Math.PI / 2 + (i + 1) * TAU / 4 - gap;
+      ctx.strokeStyle = '#27282a'; ctx.lineWidth = WI.stroke; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.arc(WI.cx, WI.cy, WI.radius, start, end); ctx.stroke();
+      const filled = out(clamp((t - TAPS[i]) / .23));
+      if (filled > 0) { ctx.strokeStyle = i < 2 ? GREEN : ORANGE; ctx.beginPath(); ctx.arc(WI.cx, WI.cy, WI.radius, start, mix(start, end, filled)); ctx.stroke(); }
+    }
+    const lastTap = TAPS[count - 1], pop = count ? Math.sin(clamp((t - lastTap) / .22) * Math.PI) : 0;
+    text(ctx, String(count), WI.cx, 873, 166 + pop * 5, '#fff', 600);
+    const relative = count ? count - 4 : 0;
+    text(ctx, relative === 0 ? 'E' : String(relative).replace('-', '−'), WI.cx, 995, 55, '#737373', 500);
+    TAPS.forEach(at => tap(ctx, t, at, WI.cx, WI.cy, 3));
+    // 모드 버튼 탭이 이 영상의 핵심이라 검색 영상(2.7)보다 크게 보여 준다.
+    tap(ctx, t, 4.82, WI.modeX, WI.modeY, 3.6);
+    ctx.restore();
+  }
+  // 워치 한 대를 1200x1500 가운데에 꽉 차게 그린다. 스트랩은 위아래 끝에 닿는다.
+  function rawMode(ctx, t) {
+    ctx.fillStyle = '#000'; ctx.fillRect(0, 0, 1200, 1500);
+    const s = 1500 / WI.h, x = (1200 - WI.w * s) / 2;
+    ctx.save(); ctx.translate(x, 0); ctx.scale(s, s); watchFace(ctx, t); ctx.restore();
+  }
+  function golfOnboardingMode(ctx, W, H, t) {
+    t = mod(t);
+    ctx.save(); ctx.scale(W / 1200, H / 1500); rawMode(ctx, t);
+    if (t > 9.25) { ctx.globalAlpha *= ease(clamp((t - 9.25) / .75)); rawMode(ctx, 0); }
+    ctx.restore();
+  }
+  const scenes = { golfOnboardingMode };
+  const canvases = Array.from(document.querySelectorAll('canvas[data-scene]'));
+  let time = 0, last = performance.now();
+  function draw() {
+    for (const c of canvases) {
+      const width = Math.max(1, Math.round(c.getBoundingClientRect().width * Math.min(devicePixelRatio || 1, 2))), height = Math.round(width * 5 / 4);
+      if (c.width !== width || c.height !== height) { c.width = width; c.height = height; }
+      const ctx = c.getContext('2d'); ctx.clearRect(0, 0, c.width, c.height); scenes[c.dataset.scene](ctx, c.width, c.height, time);
+    }
+  }
+  function tick(now) { if (!document.hidden) { time = mod(time + Math.min((now - last) / 1000, .1)); draw(); } last = now; requestAnimationFrame(tick); }
+  window.addEventListener('resize', draw); draw(); if (canvases.length) requestAnimationFrame(tick);
+  Promise.all(Object.values(IMG).map(im => im.decode())).then(draw).catch(error => console.error('이미지를 불러오지 못했다.', error));
+})();
+</script>
+</body>
+</html>

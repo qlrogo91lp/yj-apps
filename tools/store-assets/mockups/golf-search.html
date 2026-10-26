@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GolfCounter · 검색 영상 시안</title>
+<style>
+  :root { color-scheme: dark; --paper: #e8eee2; --muted: #94a28f; --line: #2b3729; --accent: #c4e69a; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #10160f; color: var(--paper); font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif; }
+  main { max-width: 1260px; margin: auto; padding: 30px 40px 50px; }
+  .masthead { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-bottom: 22px; border-bottom: 1px solid var(--line); }
+  .brand { font-size: 17px; font-weight: 650; letter-spacing: -.5px; } .brand span { color: var(--accent); }
+  .eyebrow { font: 10px ui-monospace, monospace; letter-spacing: 1.5px; color: var(--muted); }
+  .intro { display: flex; justify-content: space-between; align-items: end; gap: 20px; margin: 28px 0 22px; }
+  h1 { margin: 0 0 10px; font-size: clamp(26px, 3.2vw, 40px); font-weight: 550; letter-spacing: -1.5px; }
+  p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.8; word-break: keep-all; }
+  .languages { display: flex; gap: 5px; flex-shrink: 0; }
+  button { font: inherit; font-size: 12px; color: var(--paper); border: 1px solid #3c4934; background: transparent; border-radius: 25px; padding: 9px 15px; min-height: 36px; cursor: pointer; }
+  button:hover, button[aria-pressed="true"] { background: #27371d; color: #d9edc5; border-color: #6d8856; }
+  button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+  .hero { border: 1px solid #34422e; border-radius: 18px; overflow: hidden; background: #000; }
+  canvas { display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; background: #000; }
+  .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 15px; margin: 17px 0 11px; }
+  #play { background: var(--accent); color: #172111; border-color: var(--accent); min-width: 90px; font-weight: 600; }
+  input[type="range"] { flex: 1; min-width: 100px; height: 25px; accent-color: var(--accent); cursor: pointer; }
+  output { font: 11px ui-monospace, monospace; color: var(--muted); min-width: 90px; }
+  .moments { display: flex; gap: 7px; flex-wrap: wrap; }
+  .moments button { font-size: 11px; padding: 5px 12px; min-height: 30px; }
+  .lower { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; margin-top: 30px; padding-top: 25px; border-top: 1px solid var(--line); }
+  h2 { font-size: 13px; font-weight: 550; margin: 0 0 15px; }
+  .search-card { max-width: 390px; background: #050705; border: 1px solid #36432f; border-radius: 23px; overflow: hidden; }
+  .search-card.small { max-width: 280px; margin-top: 19px; border-radius: 16px; }
+  .app-row { padding: 16px; display: flex; gap: 11px; align-items: center; }
+  .app-icon { flex: 0 0 38px; height: 38px; border-radius: 10px; background: #183b21; color: #a9d89d; display: grid; place-items: center; font-size: 23px; }
+  .app-name { font-size: 12px; font-weight: 600; } .app-subtitle { font-size: 10px; color: #8b9985; margin-top: 4px; }
+  .get { margin-left: auto; padding: 6px 12px; border-radius: 20px; background: #1c251d; color: #98c4ff; font-size: 11px; }
+  .notes { display: grid; gap: 17px; } .note { border-top: 1px solid var(--line); padding-top: 12px; }
+  .note strong { display: block; font-size: 13px; font-weight: 550; margin-bottom: 5px; } .note p { font-size: 12px; }
+  .swatches { display: flex; gap: 20px; margin-top: 20px; font-size: 11px; color: var(--muted); }
+  .dot { display: inline-block; width: 7px; height: 7px; margin-right: 6px; border-radius: 50%; background: #30d158; } .dot.orange { background: #ff9230; }
+  .spec { font: 10px ui-monospace, monospace; color: #7e8d77; margin-top: 23px; }
+  @media(max-width:720px) { main { padding: 22px 18px 36px; } .intro { display: block; } .languages { margin-top: 14px; } .lower { grid-template-columns: 1fr; gap: 28px; } .hero { border-radius: 11px; } .eyebrow { font-size: 9px; letter-spacing: .6px; } .controls { gap: 10px; } }
+</style>
+</head>
+<body>
+<main>
+  <div class="masthead"><div class="brand">Golf<span>Counter</span></div><div class="eyebrow">SEARCH / CREATIVE STUDY 01</div></div>
+  <div class="intro"><div><h1>검색에서도, 워치가 먼저.</h1><p>타수 입력과 퍼팅 전환을 가까이 보여주는 검색 결과 영상 시안.</p></div><div class="languages" aria-label="영상 언어"><button type="button" data-lang="ko" aria-pressed="true">한국어</button><button type="button" data-lang="en" aria-pressed="false">English</button></div></div>
+  <div class="hero"><canvas data-scene="golfSearch" role="img" aria-label="타수도 퍼팅도 손목에서 문구와 함께 실제 Apple Watch 화면의 타수와 링이 움직이는 검색 영상"></canvas></div>
+  <div class="controls"><button id="play" type="button" aria-pressed="false">일시정지</button><input id="scrub" type="range" min="0" max="9.99" value="0" step="0.01" aria-label="영상 시간"><output id="time" for="scrub">0.0 / 10.0 s</output></div>
+  <div class="moments" aria-label="주요 장면"><button type="button" data-time="2.25">01 타수 입력</button><button type="button" data-time="4.95">02 퍼팅 전환</button><button type="button" data-time="6.9">03 퍼팅 입력</button><button type="button" data-time="8.7">04 기록 완성</button><button type="button" id="restart">처음부터 재생 ↺</button></div>
+  <div class="lower">
+    <section><h2>검색 결과에서 보이는 크기</h2><div class="search-card"><div class="app-row"><div class="app-icon" aria-hidden="true">⚑</div><div><div class="app-name">GolfCounter</div><div class="app-subtitle" id="subtitle">골프 타수·퍼팅 기록</div></div><span class="get" id="get-label">받기</span></div><canvas data-scene="golfSearch" role="img" aria-label="390픽셀 검색 결과 미리보기"></canvas></div><div class="search-card small"><canvas data-scene="golfSearch" role="img" aria-label="280픽셀 검색 결과 미리보기"></canvas></div></section>
+    <section><h2>이번 시안에서 볼 것</h2><div class="notes"><div class="note"><strong>작게 보여도 읽히는 한 문장.</strong><p>왼쪽 문구로 용도를 알리고, 오른쪽 워치로 실제 입력 모습을 보여줍니다.</p></div><div class="note"><strong>초록색 타수에서 주황색 퍼팅으로.</strong><p>중앙 탭 → 모드 버튼 탭 → 중앙 탭. 입력 위치와 링의 변화를 이어서 보여줍니다.</p></div><div class="note"><strong>승인한 워치 형태 그대로.</strong><p>본체와 스트랩은 원본 이미지를 사용합니다. 화면 안쪽에만 움직임을 더했습니다.</p></div></div><div class="swatches"><span><i class="dot"></i>타수 입력</span><span><i class="dot orange"></i>퍼팅 입력</span></div><div class="spec">3:2 · 2880 × 1920 · 10초 반복 · 무음</div></section>
+  </div>
+</main>
+<script>
+(function () {
+  'use strict';
+  const TAU = Math.PI * 2, PERIOD = 10;
+  const GREEN = '#30d158', ORANGE = '#ff9230', CREAM = '#f2f3e9';
+  const FONT = '-apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif';
+  const ROUNDED = 'ui-rounded, "SF Pro Rounded", -apple-system, sans-serif';
+  const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+  const mix = (a, b, t) => a + (b - a) * t;
+  const ease = t => t * t * (3 - 2 * t);
+  const out = t => 1 - Math.pow(1 - t, 3);
+  const mod = t => ((t % PERIOD) + PERIOD) % PERIOD;
+  // Same actual watch image, drawing coordinates and input sequence as the approved header.
+  const TAPS = [1.94, 4.04, 6.57, 8.18];
+  const IMG = { watch: new Image(), swing: new Image() };
+  IMG.watch.src = '../inputs/golf-watch.png';
+  IMG.swing.src = '../inputs/golf-swing-icon.png';
+  const WI = { w: 1266, h: 1266 * 4575 / 3705, cx: 621, cy: 897, radius: 180, stroke: 36, modeX: 898, modeY: 589 };
+  const COPY = {
+    ko: { title: ['타수도', '퍼팅도,', '손목에서.'], steps: ['탭해서 타수 기록', '퍼팅 모드로 전환', '퍼팅도 한 번 톡'], subtitle: '골프 타수·퍼팅 기록', get: '받기' },
+    en: { title: ['Strokes.', 'Putts.', 'On your wrist.'], steps: ['Tap to count', 'Switch to putting', 'Tap for each putt'], subtitle: 'Strokes & Putts', get: 'Get' }
+  };
+
+  function ellipse(ctx, x, y, rx, ry, color, rotation = 0) {
+    ctx.beginPath(); ctx.ellipse(x, y, rx, ry, rotation, 0, TAU); ctx.fillStyle = color; ctx.fill();
+  }
+  function text(ctx, value, x, y, size, color, weight = 550, family = FONT, align = 'center') {
+    ctx.font = `${weight} ${size}px ${family}`; ctx.fillStyle = color;
+    ctx.textAlign = align; ctx.textBaseline = 'middle'; ctx.fillText(value, x, y);
+  }
+  function tap(ctx, t, at, x, y, size = 1) {
+    const p = (t - at + .18) / .64; if (p < 0 || p > 1) return;
+    const a = Math.sin(p * Math.PI), r = (11 + out(p) * 23) * size;
+    ctx.strokeStyle = `rgba(255,255,245,${a * .9})`; ctx.lineWidth = 2 * size;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.stroke();
+    ellipse(ctx, x, y, 7 * size, 7 * size, `rgba(255,255,245,${a * .65})`);
+  }
+  function watchFace(ctx, t) {
+    if (!IMG.watch.complete || !IMG.watch.naturalWidth) return;
+    const count = TAPS.filter(at => t >= at).length, puttMode = t >= 4.82;
+    ctx.save();
+    ctx.drawImage(IMG.watch, 0, 0, WI.w, WI.h);
+    ctx.fillStyle = '#000'; ctx.fillRect(735, 365, 58, 75);
+    ctx.fillRect(475, 551, 300, 78);
+    ellipse(ctx, WI.cx, WI.cy, 223, 223, '#000');
+    text(ctx, `Hole 2 · ${4 + count}`, 621, 591, 56, '#fff', 600, '"SF Compact", -apple-system, sans-serif');
+    if (!puttMode) {
+      ellipse(ctx, WI.modeX, WI.modeY, 76, 76, '#000');
+      ellipse(ctx, WI.modeX, WI.modeY, 71, 71, '#092610');
+      ctx.strokeStyle = '#248f3e'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(WI.modeX, WI.modeY, 71, 0, TAU); ctx.stroke();
+      if (IMG.swing.complete && IMG.swing.naturalWidth) ctx.drawImage(IMG.swing, WI.modeX - 45, WI.modeY - 45, 90, 90);
+    }
+    const gap = .125;
+    for (let i = 0; i < 4; i++) {
+      const start = -Math.PI / 2 + i * TAU / 4 + gap, end = -Math.PI / 2 + (i + 1) * TAU / 4 - gap;
+      ctx.strokeStyle = '#27282a'; ctx.lineWidth = WI.stroke; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.arc(WI.cx, WI.cy, WI.radius, start, end); ctx.stroke();
+      const filled = out(clamp((t - TAPS[i]) / .23));
+      if (filled > 0) { ctx.strokeStyle = i < 2 ? GREEN : ORANGE; ctx.beginPath(); ctx.arc(WI.cx, WI.cy, WI.radius, start, mix(start, end, filled)); ctx.stroke(); }
+    }
+    const lastTap = TAPS[count - 1], pop = count ? Math.sin(clamp((t - lastTap) / .22) * Math.PI) : 0;
+    text(ctx, String(count), WI.cx, 873, 166 + pop * 5, '#fff', 600, ROUNDED);
+    const relative = count ? count - 4 : 0;
+    text(ctx, relative === 0 ? 'E' : String(relative).replace('-', '−'), WI.cx, 995, 55, '#737373', 500, ROUNDED);
+    TAPS.forEach(at => tap(ctx, t, at, WI.cx, WI.cy, 3)); tap(ctx, t, 4.82, WI.modeX, WI.modeY, 2.7);
+    ctx.restore();
+  }
+  function label(ctx, t, language) {
+    const step = t < 4.35 ? 0 : t < 5.65 ? 1 : 2;
+    const copy = COPY[language], color = step === 0 ? GREEN : ORANGE;
+    text(ctx, copy.title[0], 76, 247, 68, GREEN, 700, FONT, 'left');
+    text(ctx, copy.title[1], 76, 328, 68, ORANGE, 700, FONT, 'left');
+    text(ctx, copy.title[2], 76, 426, language === 'ko' ? 69 : 52, CREAM, 650, FONT, 'left');
+    ctx.fillStyle = '#242821'; ctx.fillRect(78, 491, 70, 1.5);
+    const starts = [0, 4.35, 5.65], since = t - starts[step];
+    ctx.save(); ctx.globalAlpha *= step === 0 ? 1 : clamp(since / .18);
+    ellipse(ctx, 83, 534, 4.5, 4.5, color);
+    text(ctx, copy.steps[step], 101, 535, 25, '#c1c9ba', 500, FONT, 'left'); ctx.restore();
+  }
+  function rawSearch(ctx, t, language) {
+    ctx.fillStyle = '#000'; ctx.fillRect(0, 0, 1200, 800);
+    // The entire original image is scaled uniformly; its strap meets the frame edges.
+    const s = 800 / WI.h, x = 861 - WI.w * s / 2;
+    ctx.save(); ctx.translate(x, 0); ctx.scale(s, s); watchFace(ctx, t); ctx.restore();
+    label(ctx, t, language);
+  }
+  function golfSearch(ctx, W, H, t, language = 'ko') {
+    const lang = COPY[language] ? language : 'en'; t = mod(t);
+    ctx.save(); ctx.scale(W / 1200, H / 800); rawSearch(ctx, t, lang);
+    if (t > 9.25) { ctx.globalAlpha *= ease(clamp((t - 9.25) / .75)); rawSearch(ctx, 0, lang); }
+    ctx.restore();
+  }
+  const scenes = { golfSearch };
+  const canvases = Array.from(document.querySelectorAll('canvas[data-scene]'));
+  const params = new URLSearchParams(location.search), frozenValue = Number(params.get('t'));
+  const frozen = params.has('t') && Number.isFinite(frozenValue), reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
+  let language = params.get('lang') === 'en' ? 'en' : 'ko';
+  let playing = !frozen && !reduceMotion.matches, time = frozen ? mod(frozenValue) : reduceMotion.matches ? 6.9 : 0, last = performance.now();
+  const play = document.getElementById('play'), scrub = document.getElementById('scrub'), output = document.getElementById('time');
+  function updateControls() {
+    if (!play) return;
+    play.textContent = playing ? '일시정지' : '재생'; play.setAttribute('aria-pressed', String(!playing));
+    scrub.value = String(time); output.value = `${time.toFixed(1)} / 10.0 s`;
+    document.querySelectorAll('[data-time]').forEach(button => button.setAttribute('aria-pressed', String(!playing && Math.abs(time - Number(button.dataset.time)) < .04)));
+    document.querySelectorAll('[data-lang]').forEach(button => button.setAttribute('aria-pressed', String(language === button.dataset.lang)));
+    document.getElementById('subtitle').textContent = COPY[language].subtitle; document.getElementById('get-label').textContent = COPY[language].get;
+  }
+  function draw() {
+    for (const c of canvases) {
+      const width = Math.max(1, Math.round(c.getBoundingClientRect().width * Math.min(devicePixelRatio || 1, 2))), height = Math.round(width * 2 / 3);
+      if (c.width !== width || c.height !== height) { c.width = width; c.height = height; }
+      const ctx = c.getContext('2d'); ctx.clearRect(0, 0, c.width, c.height); golfSearch(ctx, c.width, c.height, time, language);
+    }
+    updateControls();
+  }
+  window.golfSearchPreview = {
+    renderAt(t) { time = mod(t); playing = false; draw(); },
+    setLanguage(lang) { language = COPY[lang] ? lang : 'en'; draw(); },
+    get time() { return time; }, get playing() { return playing; }, get language() { return language; },
+    get ready() { return Object.values(IMG).every(im => im.complete && im.naturalWidth > 0); }
+  };
+  if (play) {
+    play.addEventListener('click', () => { playing = !playing; last = performance.now(); draw(); });
+    scrub.addEventListener('input', () => { playing = false; time = Number(scrub.value); draw(); });
+    document.querySelectorAll('[data-time]').forEach(button => button.addEventListener('click', () => window.golfSearchPreview.renderAt(Number(button.dataset.time))));
+    document.querySelectorAll('[data-lang]').forEach(button => button.addEventListener('click', () => window.golfSearchPreview.setLanguage(button.dataset.lang)));
+    document.getElementById('restart').addEventListener('click', () => { time = 0; playing = true; last = performance.now(); draw(); });
+    reduceMotion.addEventListener('change', event => { if (event.matches) { playing = false; time = 6.9; draw(); } });
+    document.addEventListener('visibilitychange', () => { last = performance.now(); });
+  }
+  function tick(now) { if (playing && !document.hidden) { time = mod(time + Math.min((now - last) / 1000, .1)); draw(); } last = now; requestAnimationFrame(tick); }
+  window.addEventListener('resize', draw); draw(); if (canvases.length) requestAnimationFrame(tick);
+  Promise.all(Object.values(IMG).map(im => im.decode())).then(() => { last = performance.now(); draw(); }).catch(error => console.error('Watch search preview image could not load.', error));
+})();
+</script>
+</body>
+</html>
