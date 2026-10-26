@@ -43,7 +43,7 @@ struct SessionDetailView: View {
                 .foregroundStyle(.white)
 
             ForEach(Array(session.matches.enumerated()), id: \.element.id) { index, match in
-                SessionMatchCard(match: match, order: index + 1)
+                MatchCard(match: match, order: index + 1)
             }
         }
     }
@@ -113,30 +113,5 @@ private struct SessionMetricsGrid: View {
 
     private func format(_ value: Double?) -> String {
         value?.formatted(.number.precision(.fractionLength(0))) ?? "–"
-    }
-}
-
-private struct SessionMatchCard: View {
-    let match: Match
-    let order: Int
-
-    var body: some View {
-        VStack(spacing: 12) {
-            HStack {
-                Text(String(format: String(localized: "session_match_order"), order))
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(.secondary)
-                Spacer()
-                if let seconds = match.durationSeconds {
-                    Text(String(format: String(localized: "session_match_duration"), seconds / 60))
-                        .font(.system(size: 13))
-                        .foregroundStyle(.secondary)
-                }
-            }
-            Scoreboard(match: match)
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 14)
-        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
 }

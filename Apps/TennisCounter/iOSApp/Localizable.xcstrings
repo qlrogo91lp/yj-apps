@@ -485,6 +485,38 @@
         }
       }
     },
+    "match_card_loss" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Defeat"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "패배"
+          }
+        }
+      }
+    },
+    "match_card_win" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Victory"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "승리"
+          }
+        }
+      }
+    },
     "match_detail_format" : {
       "extractionState" : "manual",
       "localizations" : {
