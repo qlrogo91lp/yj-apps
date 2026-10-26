@@ -204,6 +204,7 @@
       }
     },
     "early_end_confirm_message" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -220,6 +221,7 @@
       }
     },
     "early_end_confirm_title" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -252,6 +254,7 @@
       }
     },
     "early_end_draw_confirm_message" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -268,6 +271,7 @@
       }
     },
     "early_end_draw_confirm_title" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
