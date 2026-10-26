@@ -77,3 +77,16 @@
 "chart_axis_even_par" = "Even";
 "chart_axis_date" = "Date";
 "chart_axis_over_par" = "Over par";
+
+/* Onboarding */
+"onboarding_skip" = "Skip";
+"onboarding_next" = "Next";
+"onboarding_start" = "Get Started";
+"onboarding_mode_title" = "Count strokes on your wrist";
+"onboarding_mode_body" = "Start your round on Apple Watch. Tap after every shot — before you putt, switch to putting with the top-right button.";
+"onboarding_crown_title" = "Turn the crown for your scorecard";
+"onboarding_crown_body" = "From the counter, turn the Digital Crown to see strokes and putts for every hole, nine at a time.";
+"onboarding_complication_title" = "Start with one tap";
+"onboarding_complication_body" = "Add the GolfCounter complication to your watch face and open it in one tap.";
+"onboarding_health_title" = "Saved to Health";
+"onboarding_health_body" = "Every round is saved as a golf workout, with calories, heart rate and time in Health.";

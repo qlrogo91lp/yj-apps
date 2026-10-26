@@ -76,3 +76,16 @@
 "chart_axis_even_par" = "이븐파";
 "chart_axis_date" = "날짜";
 "chart_axis_over_par" = "오버파";
+
+/* Onboarding */
+"onboarding_skip" = "건너뛰기";
+"onboarding_next" = "다음";
+"onboarding_start" = "시작하기";
+"onboarding_mode_title" = "손목으로 타수 기록";
+"onboarding_mode_body" = "라운드는 워치에서 시작해요. 칠 때마다 화면을 톡, 퍼팅 전엔 오른쪽 위 버튼으로 퍼팅 모드로 바꾸세요.";
+"onboarding_crown_title" = "크라운으로 스코어카드";
+"onboarding_crown_body" = "카운터 화면에서 크라운을 돌리면 홀별 타수와 퍼팅이 9홀씩 보여요.";
+"onboarding_complication_title" = "한 번 탭으로 바로 시작";
+"onboarding_complication_body" = "문자판에 GolfCounter 컴플리케이션을 올려두면 앱을 찾지 않고 바로 열려요.";
+"onboarding_health_title" = "건강 앱에 기록돼요";
+"onboarding_health_body" = "라운드마다 골프 운동으로 저장돼요. 칼로리·심박·시간이 건강 앱에 쌓여요.";
