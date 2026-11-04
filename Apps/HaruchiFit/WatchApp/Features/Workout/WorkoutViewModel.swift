@@ -18,6 +18,8 @@ final class WorkoutViewModel: ObservableObject {
     /// 세션 단계. 요약이 낄 자리를 만들려고 `isActive` 불리언을 대체했다.
     @Published private(set) var phase: SessionPhase = .idle
     @Published private(set) var isStarting = false
+    /// HealthKit 마무리가 끝날 때까지 추가 종료와 운동 조작을 막는다.
+    @Published private(set) var isEnding = false
     /// 요약 화면이 읽고, 저장이 그대로 보내는 페이로드.
     @Published private(set) var pendingRecord: WorkoutRecordMessage?
 
@@ -26,6 +28,7 @@ final class WorkoutViewModel: ObservableObject {
     private let remover: WorkoutRemoving
     private let defaults: UserDefaults
     private let snapshots: WorkoutSnapshotPublishing
+    private let stopWorkout: @MainActor () async -> WorkoutResult?
 
     /// `isPaused` 구독을 붙잡아 둔다. 놓으면 정지/재개가 컴플리케이션에 안 나간다.
     private var cancellables: Set<AnyCancellable> = []
@@ -43,13 +46,15 @@ final class WorkoutViewModel: ObservableObject {
          remover: WorkoutRemoving = HealthKitWorkoutRemover(),
          defaults: UserDefaults = .standard,
          snapshots: WorkoutSnapshotPublishing = WorkoutSnapshotPublisher(),
-         now: @escaping () -> Date = Date.init)
+         now: @escaping () -> Date = Date.init,
+         stopWorkout: (@MainActor () async -> WorkoutResult?)? = nil)
     {
         self.session = session
         self.connectivity = connectivity
         self.remover = remover
         self.defaults = defaults
         self.snapshots = snapshots
+        self.stopWorkout = stopWorkout ?? { await session.stopWorkout() }
         segments = SegmentTracker(now: now)
 
         // 저장된 값이 없거나 알아볼 수 없으면 근력으로 연다.
@@ -95,7 +100,7 @@ final class WorkoutViewModel: ObservableObject {
 
     /// 권한 결정을 기다린 뒤 첫 구간의 시계를 연다.
     func start() async {
-        guard phase == .idle, !isStarting else { return }
+        guard phase == .idle, !isStarting, !isEnding else { return }
         isStarting = true
         defer { isStarting = false }
 
@@ -115,7 +120,7 @@ final class WorkoutViewModel: ObservableObject {
     /// **세션이 열린 뒤에는 이 경로를 쓰지 않는다.** 진행 중 전환은 구간을 닫아야 하므로
     /// `switchMode(to:)` 가 맡는다.
     func toggleStartKind() {
-        guard phase == .idle else { return }
+        guard phase == .idle, !isEnding else { return }
         mode = mode == .strength ? .cardio : .strength
         defaults.set(mode.rawValue, forKey: Self.startKindKey)
         WKInterfaceDevice.current().play(.click)
@@ -126,7 +131,7 @@ final class WorkoutViewModel: ObservableObject {
     /// **햅틱이 필수다.** watchOS 커스텀 버튼은 햅틱이 자동으로 나지 않는데, 운동 중에는
     /// 화면을 계속 볼 수 없어 촉각이 유일한 확인 수단이다 (제품 스펙 5절).
     func switchMode(to newMode: SegmentKind) {
-        guard newMode != mode else { return }
+        guard newMode != mode, !isEnding else { return }
         segments.closeOpenSegment(kind: mode)
         mode = newMode
         // 눈 없이 방향을 구분할 수 있도록 상행·하행을 대칭으로 쓴다.
@@ -144,7 +149,7 @@ final class WorkoutViewModel: ObservableObject {
         } else {
             segments.resume()
         }
-        guard phase == .active else { return }
+        guard phase == .active, !isEnding else { return }
         publishSnapshot(isPaused: paused)
     }
 
@@ -163,6 +168,7 @@ final class WorkoutViewModel: ObservableObject {
 
     /// pause 는 워치가 소유한다. 폰에서 오는 명령은 후속 플랜에서 붙인다.
     func togglePause() {
+        guard !isEnding else { return }
         if session.isPaused {
             session.resumeWorkout()
         } else {
@@ -177,13 +183,18 @@ final class WorkoutViewModel: ObservableObject {
     /// `.queued` 라 항상 `transferUserInfo` 로 큐잉되므로 폰이 꺼져 있어도 기록이 유실되지 않는다.
     @discardableResult
     func end() async -> WorkoutResult? {
+        // 첫 await 전에 잠근다. 중복 요청의 nil 결과가 시작 화면으로 돌려보내면 안 된다.
+        guard !isEnding, phase != .summary else { return nil }
+        isEnding = true
+        defer { isEnding = false }
+
         // stopWorkout() 보다 먼저 닫는다. 그쪽이 총 시간을 재는 시점과 가장 가까워야
         // 구간 합계와 총 시간이 어긋나지 않는다 — HealthKit 마무리에 시간이 걸린다.
         segments.closeOpenSegment(kind: mode)
         // **여기서 붙든다.** stopWorkout() 뒤에 읽으면 마무리에 걸린 시간만큼 구간 합계보다 커진다.
         let totalSeconds = segments.elapsedSeconds
 
-        let result = await session.stopWorkout()
+        let result = await stopWorkout()
         WKInterfaceDevice.current().play(.stop)
         // 세션이 끝났으니 컴플리케이션은 평상시 표시로 돌아간다. 저장/버리기와 무관하다.
         snapshots.clear()

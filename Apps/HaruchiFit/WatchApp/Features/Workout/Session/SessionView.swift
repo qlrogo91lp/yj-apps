@@ -34,6 +34,18 @@ struct SessionView: View {
                 }
             }
         }
+        .disabled(viewModel.isEnding)
+        .accessibilityHidden(viewModel.isEnding)
+        .overlay {
+            if viewModel.isEnding {
+                ZStack {
+                    Color.black.ignoresSafeArea()
+                    ProgressView {
+                        Text("workout_ending")
+                    }
+                }
+            }
+        }
     }
 
     /// 왼쪽 상단 원형 아이콘. 지금 유형을 보여 주고, 누르면 반대 유형으로 넘긴다.

@@ -156,6 +156,23 @@
           }
         }
       }
+    },
+    "workout_ending" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ending workout…"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "운동 종료 중…"
+          }
+        }
+      }
     }
   },
   "version" : "1.0"
