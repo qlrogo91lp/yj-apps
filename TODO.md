@@ -60,6 +60,7 @@
 | 항목 | 상태 | 문서 |
 |---|---|---|
 | 워치 기록 전송 유실 수정 (세 앱, YJKit `.queued`) · 하루치 칼로리 활동 칼로리로 통일 — 원래 1.0.1 로 잡았던 것 | **1.0.0(6) 에 포함** — 빌드 6 은 [PR #63](https://github.com/qlrogo91lp/yj-apps/pull/63) · [#64](https://github.com/qlrogo91lp/yj-apps/pull/64) · [#65](https://github.com/qlrogo91lp/yj-apps/pull/65) 머지 뒤에 만들었다. 골프 2.1.2 · Ralli 1.2.0 에도 실렸다. 실기기 확인 대기 (아래) | [플랜](docs/plans/2026/2026-10-25-watch-record-delivery.md) |
+| ~~워치 운동 종료 중복 요청 방지~~ | **구현·자동 검증 완료 (11-04)** — 워치 199개 테스트·lint·format 통과. 실기기/UI 확인 대기 | [플랜](Apps/HaruchiFit/docs/plans/watch/2026/2026-11-04-workout-end-reentrancy.md) · [로그](Apps/HaruchiFit/docs/logs/2026/2026-11-04-workout-end-reentrancy.md) |
 | 07 설정 | **보류** — 만들 때 `정보` 그룹의 개인정보처리방침 링크(iOS)를 반드시 넣는다 | 로드맵 Phase 5 · 스펙 07절 |
 | CloudKit 엔타이틀먼트 | **예정** — 프로비저닝 작업(사용자) · 로컬 폴백이 있다 | 로드맵 "언제든" |
 
