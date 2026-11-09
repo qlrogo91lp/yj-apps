@@ -15,7 +15,6 @@ yj-apps/
 ├─ Makefile              앱 순회 lint / format / fix
 ├─ tools/store-assets/   App Store 크리에이티브 에셋(헤더·검색 결과 영상) 제작 도구. Xcode 프로젝트 밖 — README 참고
 ├─ .swiftlint.yml        공통 규칙 (앱별 설정이 parent_config 로 상속)
-├─ TODO.md               진행 중인 작업의 문서 링크와 상태. 오랜만에 돌아오면 여기부터
 └─ docs/               모노레포 공통 문서 (specs/ideas/plans/logs)
 ```
 
@@ -38,6 +37,28 @@ yj-apps/
 
 플랜은 **바꿀 파일 단위로** 적는다. 규모가 크면 `docs/plans/`에 문서로
 남기고, 작으면 대화 안에서 제시해도 된다.
+
+## 진행 중인 작업 — Linear
+
+진행 중인 작업과 나중에 할 일은 **Linear `yj-workpace` › YJ 팀**에서 관리한다. 오랜만에 돌아오면 여기부터 본다.
+
+```bash
+orca linear list --filter open --team YJ --workspace all --limit 50 --json
+```
+
+| 상태 | 무엇을 두는가 |
+|---|---|
+| Backlog | 나중에 할 것 · 아이디어 · 보류 · 브레인스토밍 전 |
+| Todo | 다음 버전에 넣기로 정한 것 |
+| In Progress | 구현 중 |
+| Done / Canceled | 끝났거나 접은 것 |
+
+- **라벨** — 앱: `Ralli` / `Haruchi` / `Golf` / `YJKit`, 종류: `Bug` / `Feature` / `Improvement`.
+  여러 개를 같이 붙인다 (세 앱 공통이면 앱 라벨 셋 다). 라벨 그룹으로 묶지 않는다 — 그룹 안에서는 하나만 고를 수 있다
+- **이슈에는 요약과 문서 링크만 적는다.** 내용은 repo 의 스펙·플랜이 갖는다. 링크는 GitHub URL
+  (`https://github.com/qlrogo91lp/yj-apps/blob/main/...`) — repo 상대경로는 Linear 에서 열리지 않는다
+- PR 본문에 이슈 키(`YJ-n`)를 적는다
+- Ralli 의 예전 번호(#8 · #11 등)는 이슈 제목 앞에 `[Ralli #8]` 로 남아 있다. 지난 문서의 `TODO.md` 언급은 당시 기록이라 고치지 않는다
 
 ## 공통 명령
 
@@ -260,9 +281,7 @@ docs/
 - 빈 폴더는 미리 만들지 않는다. 첫 문서를 쓸 때 만든다.
 - **사용자 검토 전에는 커밋하지 않는다.** 스킬이 커밋을 지시하더라도 마찬가지다.
 - 완료된 문서만 커밋한다. 작성 중인 스펙·계획은 커밋하지 않는다.
-- **루트 `TODO.md` 는 진행 중인 작업의 링크·상태만 담는다.** 스펙·플랜을 추가하거나 항목을 끝내면
-  **같은 커밋에서** 갱신한다 (끝난 행은 `~~취소선~~`). 출시 커밋에서 취소선 행을 비운다.
-  내용은 여기 적지 않는다 — 스펙·플랜이 갖는다.
+- 스펙·플랜을 새로 쓰면 Linear 이슈를 만들거나 기존 이슈에 링크를 단다 (위 "진행 중인 작업 — Linear")
 
 ## 스토어 문구
 

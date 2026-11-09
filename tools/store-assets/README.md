@@ -13,7 +13,7 @@ App Store 크리에이티브 에셋(제품 페이지 헤더 · 검색 결과) �
 | 형식 | .mov / .m4v / .mp4 |
 | 소리 | 음소거 고정 — 소리 없이 읽혀야 한다 |
 
-가격·URL·수상 표기 금지, 4+ 등급 기준. 헤더는 21:9(3840×1646). 출처는 루트 `TODO.md` 의 크리에이티브 에셋 행.
+가격·URL·수상 표기 금지, 4+ 등급 기준. 헤더는 21:9(3840×1646). 출처는 [Apple 가이드](https://developer.apple.com/app-store/asset-best-practices/) · [규격](https://developer.apple.com/help/app-store-connect/reference/app-information/creative-assets-specifications).
 
 ## 준비물
 
