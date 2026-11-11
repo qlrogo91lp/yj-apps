@@ -99,7 +99,8 @@ final class MatchConnectivity: ObservableObject {
         #else
             let delivery = Delivery.reliable
         #endif
-        service.send(Self.workoutEndMessage(sessionId: sessionId, result: result, startedAt: startedAt, totalElapsedSeconds: totalElapsedSeconds), via: delivery)
+        let message = Self.workoutEndMessage(sessionId: sessionId, result: result, startedAt: startedAt, totalElapsedSeconds: totalElapsedSeconds)
+        service.send(message, via: delivery)
     }
 
     static func workoutEndMessage(sessionId: UUID, result: WorkoutResult?, startedAt: Date?, totalElapsedSeconds: Int? = nil) -> WorkoutEndMessage {

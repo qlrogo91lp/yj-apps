@@ -357,13 +357,13 @@ class WorkoutSessionViewModel: ObservableObject {
     /// Task 4b — 화면(currentMetrics/snapshot)·폰 앵커(broadcastMetrics)·경기 시간(startMatch/finishMatch)이
     /// **모두 이 한 곳**에서 경과시간을 읽는다. 표시 모델(`elapsedDisplay`, 정지 제외 벽시계)이 있으면
     /// 그 값을, 없으면(구버전 경로·HK 이벤트 전) 기존 틱 카운터로 폴백한다.
-    internal static func elapsedSeconds(from healthKit: WorkoutSessionService, at date: Date = Date()) -> TimeInterval {
+    static func elapsedSeconds(from healthKit: WorkoutSessionService, at date: Date = Date()) -> TimeInterval {
         healthKit.elapsedDisplay?.elapsed(at: date) ?? TimeInterval(healthKit.elapsedSeconds)
     }
 
     /// 종료 메시지에 실을 총시간(정지 제외). 표시 모델이 없으면(구버전 경로) nil을 돌려주고,
     /// 호출부(`MatchConnectivity.workoutEndMessage`)가 기존 `result.durationSeconds`(정지 포함 벽시계)로 폴백한다.
-    internal static func totalElapsedSeconds(from healthKit: WorkoutSessionService, at date: Date = Date()) -> Int? {
+    static func totalElapsedSeconds(from healthKit: WorkoutSessionService, at date: Date = Date()) -> Int? {
         healthKit.elapsedDisplay.map { Int($0.elapsed(at: date)) }
     }
 

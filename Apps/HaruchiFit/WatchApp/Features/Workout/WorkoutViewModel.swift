@@ -119,12 +119,12 @@ final class WorkoutViewModel: ObservableObject {
     }
 
     /// 새 세션의 표시 기준을 잡는다. `start()`의 `segments.reset()` 바로 뒤에서만 부른다.
-    internal func resetElapsedDisplay() {
+    func resetElapsedDisplay() {
         elapsedDisplay = segments.elapsedDisplay
     }
 
     /// 표시를 지금 시각에 고정한다. `end()`에서 구간을 닫은 뒤, 구간 원본은 바꾸지 않고 조회만 한다.
-    internal func freezeElapsedDisplay() {
+    func freezeElapsedDisplay() {
         elapsedDisplay = segments.frozenElapsedDisplay()
     }
 
