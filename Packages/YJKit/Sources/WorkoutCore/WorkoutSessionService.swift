@@ -392,5 +392,10 @@ public final class WorkoutSessionService: NSObject, ObservableObject {
             if let distanceMeters { currentDistanceMeters = distanceMeters }
             if let steps { currentSteps = steps }
         }
+
+        /// 테스트·프리뷰 전용: 실제 HealthKit 세션 생명주기 없이 표시 모델을 직접 주입한다.
+        func setElapsedDisplayForTesting(_ display: WorkoutElapsedDisplay?) {
+            elapsedDisplay = display
+        }
     }
 #endif

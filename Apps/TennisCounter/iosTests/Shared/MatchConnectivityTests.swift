@@ -34,4 +34,30 @@ struct MatchConnectivityTests {
 
         #expect(message.endedAt == endedAt)
     }
+
+    @Test func workoutEndMessageFallsBackToResultDurationWhenTotalElapsedSecondsIsNil() {
+        let result = WorkoutResult(durationSeconds: 900, caloriesBurned: 120, averageHeartRate: 135)
+
+        let message = MatchConnectivity.workoutEndMessage(
+            sessionId: UUID(),
+            result: result,
+            startedAt: Date(timeIntervalSince1970: 1_000_000)
+        )
+
+        #expect(message.elapsedSeconds == 900)
+    }
+
+    /// Task 4b — 정지 제외 표시 기준 총시간이 있으면 그걸 쓴다. 정지를 포함한 `result.durationSeconds`(벽시계)는 덮인다.
+    @Test func workoutEndMessageUsesTotalElapsedSecondsWhenProvided() {
+        let result = WorkoutResult(durationSeconds: 900, caloriesBurned: 120, averageHeartRate: 135)
+
+        let message = MatchConnectivity.workoutEndMessage(
+            sessionId: UUID(),
+            result: result,
+            startedAt: Date(timeIntervalSince1970: 1_000_000),
+            totalElapsedSeconds: 600
+        )
+
+        #expect(message.elapsedSeconds == 600)
+    }
 }
