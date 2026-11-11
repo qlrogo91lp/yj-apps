@@ -10,6 +10,9 @@ import WorkoutCore
 final class WorkoutViewModel: ObservableObject {
     @Published private(set) var isPaused = false
     @Published private(set) var metrics = WorkoutMetrics()
+    /// `segments`(단일 시계)를 그대로 투영한 표시 값. 시작·정지/재개·종료 경계에서만 발행한다 —
+    /// 화면 갱신은 공용 `WorkoutElapsedText`(시스템 timer)가 metrics 신호와 무관하게 알아서 한다.
+    @Published private(set) var elapsedDisplay: WorkoutElapsedDisplay?
     /// 현재 구간. **HealthKit 은 이 전환을 모른다** — 근력↔유산소처럼 카테고리가 다른
     /// activityType 전환을 거부하기 때문이다 (아키텍처 2절 · D-M8).
     /// 세션은 근력 하나로 유지되고, 구간은 앱이 소유한다.
@@ -111,7 +114,18 @@ final class WorkoutViewModel: ObservableObject {
         // mode 는 W0 에서 고른 값 그대로다 — 첫 구간이 그 유형으로 열린다.
         // 세션 자체는 유형과 무관하게 실내 근력이다 (D-M8).
         segments.reset()
+        resetElapsedDisplay()
         publishSnapshot(isPaused: false)
+    }
+
+    /// 새 세션의 표시 기준을 잡는다. `start()`의 `segments.reset()` 바로 뒤에서만 부른다.
+    internal func resetElapsedDisplay() {
+        elapsedDisplay = segments.elapsedDisplay
+    }
+
+    /// 표시를 지금 시각에 고정한다. `end()`에서 구간을 닫은 뒤, 구간 원본은 바꾸지 않고 조회만 한다.
+    internal func freezeElapsedDisplay() {
+        elapsedDisplay = segments.frozenElapsedDisplay()
     }
 
     /// W0 — 시작 유형을 근력↔유산소로 돌린다. 종류가 2개뿐이라 피커도 화살표도 두지 않는다
@@ -149,6 +163,7 @@ final class WorkoutViewModel: ObservableObject {
         } else {
             segments.resume()
         }
+        elapsedDisplay = segments.elapsedDisplay
         guard phase == .active, !isEnding else { return }
         publishSnapshot(isPaused: paused)
     }
@@ -193,6 +208,7 @@ final class WorkoutViewModel: ObservableObject {
         segments.closeOpenSegment(kind: mode)
         // **여기서 붙든다.** stopWorkout() 뒤에 읽으면 마무리에 걸린 시간만큼 구간 합계보다 커진다.
         let totalSeconds = segments.elapsedSeconds
+        freezeElapsedDisplay()
 
         let result = await stopWorkout()
         WKInterfaceDevice.current().play(.stop)

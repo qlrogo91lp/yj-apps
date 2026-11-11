@@ -1,6 +1,7 @@
 import Foundation
 @testable import HaruchiFit_Watch_App
 import Testing
+import WorkoutCore
 
 /// 구간 길이가 **벽시계**로 재지는지 본다.
 ///
@@ -218,5 +219,48 @@ struct SegmentTrackerTests {
         // 종료 처리(HealthKit 마무리)에 시간이 걸려도 붙든 값은 변하지 않는다
         clock.advance(12)
         #expect(totalSeconds == sum)
+    }
+
+    // MARK: - elapsedDisplay (표시·폰 앵커·저장이 보는 투영)
+
+    @Test("elapsedDisplay는 elapsedSeconds와 같은 정지 제외 값을 투영한다")
+    func elapsedDisplayProjectsSameValueAsElapsedSeconds() {
+        var (tracker, clock) = makeTracker()
+        tracker.reset()
+
+        clock.advance(1200) // 20분
+        tracker.pause()
+        clock.advance(600) // 10분 정지
+        tracker.resume()
+        clock.advance(1200) // 20분
+
+        #expect(Int(tracker.elapsedDisplay.elapsed(at: clock.now)) == tracker.elapsedSeconds)
+        #expect(tracker.elapsedSeconds == 2400)
+    }
+
+    @Test("정지 중에는 elapsedDisplay.pausedAt이 정지 시작 시각을 담는다")
+    func elapsedDisplayHoldsPausedAtWhilePaused() {
+        var (tracker, clock) = makeTracker()
+        tracker.reset()
+
+        clock.advance(600)
+        let pauseStart = clock.now
+        tracker.pause()
+
+        #expect(tracker.elapsedDisplay.pausedAt == pauseStart)
+    }
+
+    @Test("frozenElapsedDisplay는 현재 시각에 고정한 값을 돌려주되 구간 원본은 바꾸지 않는다")
+    func frozenElapsedDisplayDoesNotMutateTrackerState() {
+        var (tracker, clock) = makeTracker()
+        tracker.reset()
+
+        clock.advance(1800) // 30분
+        let frozen = tracker.frozenElapsedDisplay()
+
+        #expect(Int(frozen.elapsed(at: clock.now.addingTimeInterval(999))) == 1800)
+        // 호출 뒤에도 tracker 자신의 시계는 계속 흐른다 — frozenElapsedDisplay가 pause() 를 부르지 않았다.
+        clock.advance(60)
+        #expect(tracker.elapsedSeconds == 1860)
     }
 }
