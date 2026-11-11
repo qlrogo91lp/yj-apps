@@ -220,7 +220,7 @@ git commit -m "✨ feat: 워치 점수 VM 에 10점 매치 타이브레이크를
 - Consumes: Task 1 의 `SetScore.isMatchTieBreak`, `SetRecord.isMatchTieBreak`, `MatchOptions.matchTieBreak`
 
 - [ ] **Step 1: `ModeViewModel` + `ModeView` 구현.** 토글은 항상 보인다 (이 화면은 포맷 선택 상태가 없고, `mode_no_ad`·`mode_no_tie` 도 같은 방식으로 항상 보인다). `oneSet` 에서는 효과가 없다.
-- [ ] **Step 2: 문자열 추가.** 카피 초안 — ko `3세트는 매치 타이브레이크 (10점)` / en `Match tiebreak as 3rd set (10)`. String Catalog 는 Xcode 가 추출 상태(`extractionState`)를 갱신하므로 빌드 후 diff 를 확인한다.
+- [ ] **Step 2: 문자열 추가.** 카피 — ko·en 모두 `Match Tiebreak` (기존 `No-AD`·`No-Tiebreak` 처럼 테니스 용어는 번역하지 않는 컨벤션을 따른다). String Catalog 는 Xcode 가 추출 상태(`extractionState`)를 갱신하므로 빌드 후 diff 를 확인한다.
 - [ ] **Step 3: 표기 구현.** 칩의 승패 색(`myGames > yourGames`)은 그대로 두고 문자열만 `[10–7]` 로 바꾼다.
 - [ ] **Step 4: 빌드** — `xcodebuild -workspace YJApps.xcworkspace -scheme "TennisCounter" -destination "id=$IOS" build`. Expected: BUILD SUCCEEDED
 - [ ] **Step 5: Commit**
@@ -238,7 +238,7 @@ git commit -m "✨ feat: iOS 모드 화면에 매치 TB 토글과 결과·기록
 - Modify: `WatchApp/Features/WorkoutSession/Match/Mode/ModeViewModel.swift` — Task 5 와 같은 프로퍼티·키(`lastMatchTieBreak`)
 - Modify: `WatchApp/Features/WorkoutSession/Match/Mode/ModeView.swift` — `mode_no_tie` 토글 아래에 `Toggle`
 - Modify: `WatchApp/Features/WorkoutSession/Match/Result/MatchResultView.swift` (세트 칩 29-36) — `[10–7]`
-- Modify: `WatchApp/Localizable.xcstrings` — `mode_match_tiebreak`. 워치는 줄이 좁아 짧은 카피: ko `3세트 매치 TB` / en `Match TB`
+- Modify: `WatchApp/Localizable.xcstrings` — `mode_match_tiebreak`. 워치는 줄이 좁아 `Match Tiebreak`가 40mm 기기에서 잘릴 수 있다 (실측 근사치 100pt vs 기존 `No-Tiebreak` 79.8pt). ko·en 모두 `Match TIE` — 점수 화면이 이미 쓰는 `set_tiebreak`(`TIE`) 용어를 재사용해 새 약어를 만들지 않는다
 
 - [ ] **Step 1: 구현** — Task 5 와 같은 방식.
 - [ ] **Step 2: 빌드** — `xcodebuild … -scheme "TennisCounter Watch App" -destination "id=$WATCH" build`. Expected: BUILD SUCCEEDED
@@ -273,7 +273,7 @@ git commit -m "✨ feat: 워치 모드 화면에 매치 TB 토글과 결과의 [
 | A | 토글 노출 | 항상 표시 (`oneSet` 에서는 효과 없음). 모드 화면에 포맷 선택 상태가 없어 "3세트일 때만 표시"가 불가능 | 포맷을 3개로 쪼개 선택지로 노출 |
 | B | 기록 저장 | `SetRecord` 에 `(10, 7)` 그대로 저장, 표시에서 10 이상이면 `[ ]`. 일반 세트 게임 수는 최대 7 이라 구분이 모호하지 않다. 스키마 변경 없음 | `Match` 에 `matchTieBreak` 필드 추가 (CloudKit 스키마 변경 필요) |
 | C | 점수 화면 라벨 | 기존 `TIE` 재사용 | 매치 TB 전용 라벨 (`MTB`) — 문자열 2 곳 추가 |
-| D | 카피 | Task 5·6 의 초안 | 사용자 확정 필요 |
+| D | 카피 | ko·en 모두 영어 — iOS `Match Tiebreak`, Watch `Match TIE`(기존 `TIE` 재사용, 폭 문제로 `Match Tiebreak` 대신 선택) | 한글 번역, Watch 전용 `Match TB`(앱에 없던 새 약어) |
 | E | 범위 | 3세트 대체 방식만. "마지막 세트 6-6 에서 10점" 방식과 5세트는 제외 | 별도 이슈 |
 | F | 스토어 문구 | 이 플랜 범위 밖. 구현이 머지되면 `APPSTORE.md` 출시 노트에 한 줄 (별도 PR) | — |
 
