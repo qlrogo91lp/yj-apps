@@ -14,6 +14,9 @@ class WorkoutSessionViewModel: ObservableObject {
     let workoutSessionId: UUID = .init()
     @Published private(set) var lastMetrics: WorkoutMetrics?
     @Published private(set) var currentMetrics = WorkoutMetrics()
+    /// `healthKit.elapsedDisplay` 를 그대로 다시 발행한다. 서비스와 이 뷰모델은 서로 다른
+    /// ObservableObject 라 감싸기만 하면 뷰가 갱신되지 않는다 — 구독해서 republish 해야 한다.
+    @Published private(set) var elapsedDisplay: WorkoutElapsedDisplay?
 
     private let connectivity = MatchConnectivity.shared
     private let appGroupDefaults = UserDefaults(suiteName: "group.com.yj.TennisCounter")
@@ -58,6 +61,10 @@ class WorkoutSessionViewModel: ObservableObject {
         healthKit.$isPaused
             .receive(on: DispatchQueue.main)
             .assign(to: &$isPaused)
+
+        healthKit.$elapsedDisplay
+            .receive(on: DispatchQueue.main)
+            .assign(to: &$elapsedDisplay)
 
         healthKit.$isPaused
             .dropFirst()
