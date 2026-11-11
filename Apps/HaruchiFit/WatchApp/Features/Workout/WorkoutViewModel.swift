@@ -163,8 +163,13 @@ final class WorkoutViewModel: ObservableObject {
         } else {
             segments.resume()
         }
+        // `segments`(저장용 시계)는 종료 중에도 계속 갱신한다 — 구간 합계가 어긋나면 안 된다.
+        // 하지만 `elapsedDisplay`(화면이 읽는 값)는 `end()`가 이미 고정해 뒀으므로, 종료 중 지연
+        // 도착한 신호로 다시 흐르게 하면 HealthKit 마무리를 기다리는 동안 화면 숫자가 올라간다
+        // (코드 리뷰 finding).
+        guard !isEnding else { return }
         elapsedDisplay = segments.elapsedDisplay
-        guard phase == .active, !isEnding else { return }
+        guard phase == .active else { return }
         publishSnapshot(isPaused: paused)
     }
 

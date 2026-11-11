@@ -153,7 +153,11 @@ public final class WorkoutSessionService: NSObject, ObservableObject {
 
             let endDate = Date()
             stopTimer()
-            endElapsedDisplaySession(at: endDate)
+            // `stopWorkout()`은 비격리 async라 이 지점부터 어느 실행자에서 돌지 보장이 없다 — 다른
+            // @Published 쓰기(아래 `isWorkoutActive`)와 같은 이유. 여기만 `await`로 완료를 기다리는
+            // 까닭은 이 메서드가 반환된 "직후" 호출부(Ralli `endWorkout()`)가 `elapsedDisplay`를
+            // 바로 읽기 때문이다 — fire-and-forget이면 그 시점에 아직 고정되지 않았을 수 있다.
+            await MainActor.run { self.endElapsedDisplaySession(at: endDate) }
 
             // 세션을 끝내기(end) 전에 활동만 멈춘다. `.stopped` 동안은 앱이 백그라운드 실행 권한을 유지해
             // 손목을 내려도 아래 마무리(특히 finishWorkout — 건강 앱 운동 저장)가 멈추지 않는다.

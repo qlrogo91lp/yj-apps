@@ -122,6 +122,28 @@ struct WorkoutViewModelEndingTests {
         #expect(fixture.snapshots.published.last?.elapsedSeconds == 60)
     }
 
+    /// 코드 리뷰 finding — 종료 중 지연 도착한 "정지 해제" 신호가 `elapsedDisplay`(화면이 읽는 값)를
+    /// 다시 흐르게 만들면, HealthKit 마무리를 기다리는 동안 메트릭 화면의 숫자가 다시 올라간다.
+    /// `segments`(저장용 시계) 자체는 계속 갱신돼야 하므로(위 테스트) 막는 대상은 `elapsedDisplay` 발행뿐이다.
+    @Test("종료 중 지연 도착한 정지 해제 신호가 고정된 표시를 되돌리지 않는다")
+    func pauseChangeDuringEndingDoesNotUnfreezeElapsedDisplay() async {
+        let fixture = Fixture()
+        fixture.clock.now.addTimeInterval(60) // 1분 운동
+        fixture.viewModel.handlePauseChange(true) // 정지
+        fixture.clock.now.addTimeInterval(500) // 정지한 채로 시간이 많이 흐른다
+
+        let task = Task { await fixture.viewModel.end() } // 여기서 멈춘 시점(60초)에 고정
+        await fixture.stopper.waitUntilPending()
+
+        fixture.viewModel.handlePauseChange(false) // 종료 처리 중 지연 도착한 "정지 해제"
+        fixture.clock.now.addTimeInterval(5) // HealthKit 마무리에 몇 초 더 걸린다
+
+        #expect(Int(fixture.viewModel.elapsedDisplay?.elapsed(at: fixture.clock.now) ?? -1) == 60)
+
+        fixture.stopper.complete(with: nil)
+        await task.value
+    }
+
     private final class Clock {
         var now = Date(timeIntervalSince1970: 0)
     }

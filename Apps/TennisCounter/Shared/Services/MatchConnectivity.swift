@@ -108,7 +108,10 @@ final class MatchConnectivity: ObservableObject {
             sessionId: sessionId,
             startedAt: startedAt,
             endedAt: result?.endedAt,
-            elapsedSeconds: totalElapsedSeconds ?? result?.durationSeconds,
+            // result가 nil이면(이미 멈춘 세션 등) 유효한 종료가 아니었다는 뜻이다. totalElapsedSeconds가
+            // 이전 세션의 고정값을 들고 있어도 여기선 무시한다 — 안 그러면 "값이 하나라도 있으면 저장"
+            // 가드(WorkoutSessionRecorder)를 통과해 빈 레코드가 기존 레코드를 덮어쓴다 (코드 리뷰 finding).
+            elapsedSeconds: result == nil ? nil : (totalElapsedSeconds ?? result?.durationSeconds),
             activeCalories: result?.caloriesBurned,
             totalCalories: result?.totalCaloriesBurned,
             averageHeartRate: result?.averageHeartRate,
