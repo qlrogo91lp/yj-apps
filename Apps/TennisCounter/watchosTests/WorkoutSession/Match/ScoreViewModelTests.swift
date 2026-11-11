@@ -500,14 +500,19 @@ struct ScoreViewModelTests {
         } // 10-7 me, match over
         #expect(result == .win)
 
-        vm.undo()
+        vm.undo() // 9-7
+        vm.undo() // 8-7
 
         #expect(vm.score.gameMode == .tieBreak)
-        #expect(vm.score.myDisplayScore == "9")
+        #expect(vm.score.myDisplayScore == "8")
         #expect(vm.score.yourDisplayScore == "7")
 
         result = nil
-        vm.addPoint(.me) // 목표가 여전히 10이라 다시 승리해야 한다
+        vm.addPoint(.me) // 9-7 — 목표가 7로 되돌아갔다면 diff 2로 여기서 끝나야 하지만, 10이 유지되므로 계속된다
+
+        #expect(result == nil)
+
+        vm.addPoint(.me) // 10-7 — 목표 10 유지 확인
 
         #expect(result == .win)
     }
