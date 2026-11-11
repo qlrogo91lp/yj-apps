@@ -32,7 +32,7 @@ struct MatchResultView: View {
                 if session.options.mode == .bestOfThree, !session.completedSets.isEmpty {
                     HStack(spacing: 10) {
                         ForEach(Array(session.completedSets.enumerated()), id: \.offset) { index, set in
-                            Text(verbatim: "\(set.my):\(set.your)")
+                            Text(verbatim: set.isMatchTieBreak ? "[\(set.my)–\(set.your)]" : "\(set.my):\(set.your)")
                                 .font(.system(size: 24, weight: .bold))
                                 .kerning(5)
                                 .foregroundColor(.white)

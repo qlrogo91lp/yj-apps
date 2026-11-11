@@ -804,6 +804,22 @@
         }
       }
     },
+    "mode_match_tiebreak" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Match Tiebreak"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Match Tiebreak"
+          }
+        }
+      }
+    },
     "mode_no_ad" : {
       "localizations" : {
         "en" : {
