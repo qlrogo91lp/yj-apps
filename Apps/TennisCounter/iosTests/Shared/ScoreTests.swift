@@ -60,4 +60,84 @@ struct ScoreTests {
         #expect(score.myDisplayScore == "AD")
         #expect(score.yourDisplayScore == "40")
     }
+
+    @Test @MainActor func matchTieBreak_endsAtTenWithTwoPointLead() {
+        let score = Score()
+        score.setTieBreakMode(target: Score.matchTieBreakTarget)
+
+        var results: [PlayerSide?] = []
+        for _ in 0 ..< 10 {
+            results.append(score.addPoint(.me))
+        }
+
+        #expect(results[8] == nil) // 9-0
+        #expect(results[9] == .me) // 10-0
+    }
+
+    @Test @MainActor func matchTieBreak_continuesPastNineAll() {
+        let score = Score()
+        score.setTieBreakMode(target: Score.matchTieBreakTarget)
+
+        var lastResult: PlayerSide?
+        for _ in 0 ..< 9 {
+            score.addPoint(.me)
+            lastResult = score.addPoint(.opponent)
+        } // 9-9
+
+        #expect(lastResult == nil) // 9-9
+        #expect(score.addPoint(.me) == nil) // 10-9
+        #expect(score.addPoint(.me) == .me) // 11-9
+    }
+
+    @Test @MainActor func standardTieBreak_stillEndsAtSeven() {
+        let score = Score()
+        score.setTieBreakMode()
+
+        var result: PlayerSide?
+        for _ in 0 ..< 7 {
+            result = score.addPoint(.me)
+        }
+
+        #expect(result == .me)
+    }
+
+    @Test @MainActor func snapshotRestoresTieBreakTarget() {
+        let score = Score()
+        score.setTieBreakMode(target: Score.matchTieBreakTarget)
+        let snapshot = score.makeSnapshot()
+
+        score.reset()
+        score.restore(snapshot)
+
+        var results: [PlayerSide?] = []
+        for _ in 0 ..< 10 {
+            results.append(score.addPoint(.me))
+        }
+
+        #expect(results[6] == nil) // 7-0, 목표가 10 이라 아직 안 끝남
+        #expect(results[9] == .me) // 10-0
+    }
+
+    @Test @MainActor func resetRestoresStandardTieBreakTarget() {
+        let score = Score()
+        score.setTieBreakMode(target: Score.matchTieBreakTarget)
+        score.reset()
+        score.setTieBreakMode()
+
+        var result: PlayerSide?
+        for _ in 0 ..< 7 {
+            result = score.addPoint(.me)
+        }
+
+        #expect(result == .me)
+    }
+
+    @Test func setScore_isMatchTieBreakOnlyFromTen() {
+        #expect(SetScore(my: 10, your: 7).isMatchTieBreak)
+        #expect(SetScore(my: 7, your: 10).isMatchTieBreak)
+        #expect(SetScore(my: 11, your: 9).isMatchTieBreak)
+        #expect(!SetScore(my: 7, your: 6).isMatchTieBreak)
+        #expect(!SetScore(my: 6, your: 4).isMatchTieBreak)
+        #expect(!SetScore(my: 7, your: 5).isMatchTieBreak)
+    }
 }

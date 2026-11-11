@@ -14,3 +14,9 @@ class SetRecord {
         self.setNumber = setNumber
     }
 }
+
+extension SetRecord {
+    var isMatchTieBreak: Bool {
+        max(myGames, yourGames) >= Score.matchTieBreakTarget
+    }
+}
