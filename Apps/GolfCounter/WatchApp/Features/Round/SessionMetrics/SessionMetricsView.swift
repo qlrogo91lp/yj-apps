@@ -11,7 +11,7 @@ struct SessionMetricsView: View {
     @ObservedObject var healthKit: WorkoutSessionService
 
     var body: some View {
-        WorkoutMetricsView(metrics: metrics, isPaused: healthKit.isPaused)
+        WorkoutMetricsView(metrics: metrics, isPaused: healthKit.isPaused, elapsedDisplay: healthKit.elapsedDisplay)
     }
 
     private var metrics: WorkoutMetrics {
