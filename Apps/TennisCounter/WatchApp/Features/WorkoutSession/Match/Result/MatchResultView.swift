@@ -30,7 +30,7 @@ struct MatchResultView: View {
                 HStack {
                     ForEach(Array(session.completedSets.enumerated()), id: \.offset) { index, set in
                         HStack {
-                            Text(verbatim: "\(set.my) : \(set.your)")
+                            Text(verbatim: set.isMatchTieBreak ? "[\(set.my)–\(set.your)]" : "\(set.my) : \(set.your)")
                                 .font(.system(size: 14, weight: .bold))
                                 .foregroundColor(.white.opacity(0.7))
                             if index < session.completedSets.count - 1 {
