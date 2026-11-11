@@ -2,11 +2,11 @@
 
 > **For agentic workers:** 승인 후 `superpowers:executing-plans`로 단계별 실행한다. 이 문서는 분석·구현 플랜이며 구현 승인이 아니다. 추가 하위 세션을 만들지 않는다.
 
-**상태:** 사용자 검토 대기 · 2026-11-02 · 코드/브랜치/커밋/PR 미착수
+**상태:** 사용자 승인됨(2026-11-11, 대화 중 확인 — 정지 시간 제외 방식, Task 4b 포함) · 구현 착수 · 코드/브랜치/커밋/PR 진행 중
 
-**Goal:** 세 앱 워치의 운동 경과시간이 timer·health 이벤트 도착 간격에 끌려 머물다가 급히 바뀌는 표시 경로를 개선한다.
+**Goal:** 세 앱 워치의 운동 경과시간이 timer·health 이벤트 도착 간격에 끌려 머물다가 급히 바뀌는 표시 경로를 개선한다. Ralli는 새 운동부터 워치 표시·폰 앵커·저장 기록이 같은 정지 제외 시간 기준을 쓰게 한다.
 
-**Architecture:** 표시용 기준시각과 화면 갱신을 분리한다. WorkoutCore의 순수 기준시각 값과 WorkoutUI의 시스템 timer text를 사용하고, HaruchiFit은 기존 SegmentTracker의 시간 원본을 유지한다. 기존 저장·전송용 시간의 의미 통합은 별도 승인 대상으로 남긴다.
+**Architecture:** 표시용 기준시각과 화면 갱신을 분리한다. WorkoutCore의 순수 기준시각 값과 WorkoutUI의 시스템 timer text를 사용하고, HaruchiFit은 기존 SegmentTracker의 시간 원본을 유지한다. **범위 확장(2026-11-09):** Ralli는 표시에서 끝내지 않고, 워치가 폰에 보내는 앵커 값(`WorkoutMetrics.elapsedSeconds`)과 종료 시 저장하는 최종값(`WorkoutSessionRecord.elapsedSeconds`, `Match.durationSeconds`/`workoutElapsedSeconds`)도 같은 `WorkoutElapsedDisplay` 기준으로 바꾼다 — **새 운동만** 대상이고 과거 기록 보정은 별도 트랙으로 남긴다. Golf는 실시간 폰 앵커 경로가 없어 이번 확장 대상이 아니다(표시만 Task 4 그대로).
 
 **Tech Stack:** Swift / SwiftUI / Combine / HealthKit / Swift Testing. 패키지 최소 iOS 17, watchOS 10.
 
@@ -17,8 +17,8 @@
 - 루트와 세 앱 `CLAUDE.md` 적용. 컴포넌트에는 ViewModel 대신 값 전달. ViewModel에 SwiftUI import 금지. 코어는 종목 도메인을 모른다.
 - 이번 세션에서 쓰는 파일은 본 문서와 루트 TODO의 관련 항목뿐이다. 기존 사용자 변경은 보존한다.
 - 기존 public initializer는 유지하고 새 optional 인자는 기본값을 둔다. 프로젝트 파일·타깃·의존성·폴더 체계는 변경하지 않는다.
-- 이번 승인 대상은 **워치 표시**다. `elapsedSeconds` 카운터를 통째로 교체하면 저장·폰 앵커까지 바뀌므로 이번 플랜에서는 교체하지 않는다.
-- 주의할 다섯 조건: 신호가 없는 동안 시간 진행, 분수초 pause/resume 반복, AOD/화면 꺼짐 후 복귀, 종료 처리 지연·연속 세션, 워치 표시와 기존 폰·저장값 차이. 아래 테스트와 실기기 절차에서 각각 확인한다.
+- 이번 승인 대상은 **워치 표시 + Ralli 폰 앵커·저장(신규 운동만)**이다(2026-11-09 범위 확장). `Packages/YJKit`의 `WorkoutSessionService.elapsedSeconds`(틱 카운터) 자체는 교체하지 않는다 — Golf가 그대로 쓴다. Ralli는 그 위에서 메시지·저장에 쓰는 값의 **출처만** `elapsedDisplay`로 바꾼다.
+- 주의할 다섯 조건: 신호가 없는 동안 시간 진행, 분수초 pause/resume 반복, AOD/화면 꺼짐 후 복귀, 종료 처리 지연·연속 세션, 워치 표시와 폰·저장값의 **의도된** 일치(Ralli 신규 운동) 또는 **알려진** 차이(Golf·Ralli 과거 기록). 아래 테스트와 실기기 절차에서 각각 확인한다.
 
 ## 1. 현재 코드에서 확인한 것
 
@@ -104,13 +104,17 @@ elapsed 행의 `.contentTransition(.numericText())`를 제거하고 `.monospaced
 
 ### 범위 분리와 알려진 제한
 
-| 이번 표시 트랙 | 별도 승인할 저장 의미 트랙 |
+| 이번 트랙(승인 대상) | 별도 승인할 트랙(이번에 포함하지 않음) |
 |---|---|
-| 실행 중 정지 제외 기준시각, 고정 pause, 시스템 표시 갱신, 세 앱 배선 | YJKit 기존 카운터 대체와 폰 앵커 원본 통합 |
-| HaruchiFit tracker·위젯·저장 의미 보존 | WorkoutResult/HKWorkout.duration의 의미 검증과 총시간 정책 통일 |
-| 기존 저장·메시지 회귀 검증 | Ralli 경기/세션/구버전 폴백 정리, 과거 기록 보정·마이그레이션 |
+| 실행 중 정지 제외 기준시각, 고정 pause, 시스템 표시 갱신, 세 앱 배선 | — |
+| **Ralli: 새 운동의 워치 표시·폰 앵커·저장 기록을 같은 `WorkoutElapsedDisplay` 기준으로 통합** (Task 4b) | Ralli **과거 기록**의 보정·마이그레이션 |
+| HaruchiFit tracker·위젯·저장 의미 보존 (변경 없음, 이미 PR #26) | WorkoutResult/HKWorkout.duration의 의미 검증과 총시간 정책의 패키지 전체 통일 |
+| Golf: 표시만 개선, 저장 의미 변경 없음(실시간 폰 앵커 경로 없음) | Golf 저장 시간 수정 |
+| 기존 메시지 와이어 포맷(필드) 변경 없음 — 값의 출처만 바꾼다 | — |
 
-**알려진 제한:** 이번 변경 뒤 Golf/Ralli 워치 표시가 실제 시각을 따라가도 기존 폰 앵커·경기 저장 틱 값은 뒤처질 수 있다. Ralli 종료 요약은 정지 포함 시간이라 표시와 차이가 날 수 있다. 이 불일치를 해결했다고 주장하지 않는다. 제품상 이 한계를 수용할지는 구현 승인 전 확인할 결정이다. 수용하지 않으면 저장/앵커 트랙을 별도 설계한 뒤 순서를 정한다. 사용자 동의 없이 해당 트랙을 이번 구현에 끼워 넣지 않는다.
+**2026-11-09 결정으로 닫힌 것:** 아래 "알려진 제한"은 Golf와 과거 기록에는 여전히 적용되지만, **Ralli 신규 운동**에는 더 이상 적용되지 않는다 — Task 4b가 폰 앵커·저장 기록의 출처를 표시와 같은 기준으로 바꾸기 때문이다.
+
+**남는 제한:** Golf는 표시만 바뀌고 저장 의미는 그대로다(실시간 폰 앵커 경로가 없어 불일치가 드러나는 화면도 없다). Ralli의 **과거** 기록은 옛 틱 기준 그대로 남고, 새 기록과 나란히 보면 짧게 보일 수 있다 — 이 보정은 범위 밖이다. HaruchiFit은 이미 PR #26으로 앱 레이어에서 정지 제외·단일 시계를 끝냈으므로 변경하지 않는다.
 
 운동 시작 위치 기록, 전반 폴더 리팩터링, `statusText` 제거, 재실행 HK 세션 복구, 시계 수동 변경에 대한 monotonic clock 체계 도입은 범위 밖이다.
 
@@ -173,10 +177,34 @@ elapsed 행의 `.contentTransition(.numericText())`를 제거하고 `.monospaced
 
 **Interfaces:** Ralli/Haruchi VM은 위 optional published 값만 UI에 노출한다. Ralli의 테스트는 service DEBUG 입력을 통해 표시 모델을 주입하며 실제 WatchConnectivity/HealthKit를 호출하지 않는다. Haruchi는 기존 주입 now 및 세션 테스트 지원을 사용한다.
 
-- [ ] Ralli 실패 테스트: 틱 elapsed=7, 표시 모델 t=100 시작 후 now=140에서도 표시 모델은 40을 계산하며 기존 currentMetrics/경기/송신 스냅샷은 7 유지. 심박 신호가 없어도 모델은 새 Date에서 진행한다. pause/resume 발행은 기준점을 보존한다.
+- [ ] Ralli 실패 테스트: 틱 elapsed=7, 표시 모델 t=100 시작 후 now=140에서도 표시 모델은 40을 계산한다. 심박 신호가 없어도 모델은 새 Date에서 진행한다. pause/resume 발행은 기준점을 보존한다. **(2026-11-09 수정: `currentMetrics`/경기/송신 스냅샷을 7로 유지한다는 원래 서술은 Task 4b로 대체됐다 — 아래에서 이 값들도 표시 모델을 쓰게 바꾼다.)**
 - [ ] Haruchi 실패 테스트: 심박/서비스 틱을 멈춘 채 주입 now를 30초 이동하면 표시 모델도 30초. `Int(elapsedDisplay.elapsed(at: now)) == segments.elapsedSeconds`; pause 10초/구간 전환/재개/종료로 구간 합계==저장 totalSeconds 유지.
 - [ ] 필요한 배선만 구현하고 신규 테스트 및 기존 pause·snapshot·저장 테스트 통과. Golf는 UI 전달만 바뀌므로 배선 자체를 복제하는 테스트는 추가하지 않고 패키지 상태 테스트+workspace 빌드+실기기로 검증한다.
 - [ ] Ralli iOS의 `WorkoutSessionViewModelTests`, `MatchEndMessageTests`, `MatchSessionGroupTests` 및 Haruchi `WorkoutViewModelSnapshotTests`, `WorkoutSnapshotTests`(ComplicationState 검증 포함)의 기존 회귀 검사를 실행한다. 기존 테스트 기대값을 새 표시 시각에 맞추어 임의로 바꾸지 않는다.
+
+### Task 4b — Ralli: 폰 앵커·저장 기록을 표시와 같은 기준으로 통합 (2026-11-09 범위 확장, 신규 운동만)
+
+현재 코드 확인 결과, Ralli 워치의 `Self.snapshot(of:)`(아래 파일 L340-345)가 `currentMetrics`(화면)와 `broadcastMetrics()`(폰 앵커 `WorkoutMetricsMessage`) 양쪽이 공유하는 **유일한** `WorkoutMetrics` 생성 지점이다. `startMatch`/`finishMatch`의 `elapsedAtStart`/`elapsedAtEnd`, `endWorkout()`이 보내는 `WorkoutEndMessage.elapsedSeconds`(저장 총시간의 원본)는 각각 `healthKit.elapsedSeconds`(틱)·`result.durationSeconds`(정지 포함 벽시계)를 따로 읽는다. 이 지점들의 **출처만** `elapsedDisplay`로 바꾸면 와이어 포맷(필드) 변경 없이 표시·앵커·저장이 한 기준(정지 제외)으로 맞는다.
+
+**Files:**
+
+- Modify: `Apps/TennisCounter/WatchApp/Features/WorkoutSession/WorkoutSessionViewModel.swift`
+  - `Self.snapshot(of:)` — `elapsedSeconds: TimeInterval(healthKit.elapsedSeconds)` 를 `healthKit.elapsedDisplay`가 있으면 `healthKit.elapsedDisplay!.elapsed(at: Date())`, 없으면(구버전 경로·HK 이벤트 전) 기존 `healthKit.elapsedSeconds`로 폴백하는 값으로 바꾼다. `currentMetrics`(CombineLatest4)와 `broadcastMetrics()`가 이 한 메서드를 공유하므로 **둘 다 동시에** 바뀐다.
+  - `startMatch(...)` 의 `elapsedAtStart: healthKit.elapsedSeconds` → 같은 폴백 규칙의 display 기반 값.
+  - `finishMatch(...)` 의 `session.elapsedAtEnd = healthKit.elapsedSeconds` → 같은 값.
+  - `endWorkout()` — `stopWorkout()` 호출 **전에** `healthKit.elapsedDisplay`(있으면)로 고정 총시간(Int)을 붙들어 `connectivity.sendWorkoutEnd(sessionId:result:startedAt:totalElapsedSeconds:)`(아래 새 파라미터)로 넘긴다. Task 2의 `applyElapsedDisplayState`가 종료 요청 시각에 이미 고정하므로 `stopWorkout()` 완료를 기다리는 동안 값이 늘지 않는다.
+- Modify: `Apps/TennisCounter/Shared/Services/MatchConnectivity.swift`
+  - `sendWorkoutEnd(sessionId:result:startedAt:totalElapsedSeconds: Int? = nil)` — 새 optional 파라미터. 기존 호출부(파라미터 생략)는 그대로 컴파일된다.
+  - `workoutEndMessage(sessionId:result:startedAt:totalElapsedSeconds:)` — `elapsedSeconds: totalElapsedSeconds ?? result?.durationSeconds`. **`WorkoutEndMessage`의 필드는 늘리지 않는다** — 같은 `elapsedSeconds` 필드에 어느 값을 넣을지만 바뀐다.
+- Modify: `Apps/TennisCounter/watchosTests/WorkoutSession/WorkoutSessionViewModelTests.swift` — `snapshot`/`startMatch`/`finishMatch`/`endWorkout`이 주입된 표시 모델을 읽는지 검증. 표시 모델이 nil인 구버전 경로(HK 이벤트 전)는 기존 틱 값으로 폴백하는지도 검증.
+- Modify: `Apps/TennisCounter/iosTests/Shared/MatchConnectivityTests.swift` — `totalElapsedSeconds` 생략 호출이 기존 `result?.durationSeconds` 동작과 동일한지(회귀), 값을 넘기면 그 값이 쓰이는지.
+
+**Interfaces:** Task 2의 `WorkoutSessionService.elapsedDisplay: WorkoutElapsedDisplay?`, `WorkoutElapsedDisplay.elapsed(at:)`. `WorkoutEndMessage`·`WorkoutMetrics`·`WorkoutMetricsMessage`의 기존 필드·시그니처는 바꾸지 않는다.
+
+- [ ] 실패 테스트부터: `snapshot_usesElapsedDisplayWhenAvailable`, `snapshot_fallsBackToTickWhenDisplayNil`, `startMatch_elapsedAtStart_usesDisplay`, `finishMatch_elapsedAtEnd_usesDisplay`, `endWorkout_sendsFrozenDisplayTotal_notTickOrWallClock`.
+- [ ] 폰 쪽 `WorkoutSessionViewModelTests`(iOS) 의 `recomputeElapsed`/`WorkoutAnchor` 관련 기존 테스트가 입력 변경만으로 통과하는지 확인한다 — `WorkoutAnchor.interpolatedElapsed` 자체의 시그니처·로직은 바꾸지 않는다.
+- [ ] `MatchEndMessageTests`, `MatchSessionGroupTests`, `MatchWorkoutResultTests` 기존 회귀. 신규 운동 시나리오(정지 포함)를 추가해 `match.durationSeconds`/`workoutElapsedSeconds`/`WorkoutSessionRecord.elapsedSeconds`가 정지를 뺀 값인지 확인한다. **과거 기록(이 변경 이전 저장)의 기대값은 바꾸지 않는다** — 이 트랙은 신규 운동만 대상이다.
+- [ ] 실기기: 20초 진행→30초 정지→20초 진행 경기에서 (a) 워치 화면, (b) 폰 진행 화면(앵커 보간), (c) 저장된 기록(History의 "운동시간"/세션 레코드)이 **셋 다 같은 값**(≈40초)을 보이는지 확인한다. 과거(이 작업 이전) 기록은 비교 대상에서 제외한다.
 
 ### Task 5 — 전체 검증·문서·Git (후속 승인 대상)
 
@@ -226,14 +254,14 @@ Watch test 명령은 호스트 Watch 앱 빌드도 수행한다. 패키지는 wa
 | pause/resume | 20초 진행→30초 pause→20초 진행, 세 번 반복. pause 반영 후 값 고정, resume 직후 0으로 리셋/역행 없음. 분수초 반복 누적 오차 1초 이내. Ralli는 폰 pause 명령 왕복도 확인 |
 | 종료/재시작 | 실행 중/정지 중 각각 종료. 저장 대기 동안 숫자가 증가하지 않고 새 운동은 0부터 시작. 늦은 delegate가 새 표시를 덮어쓰지 않음 |
 | 포맷·레이아웃 | 작은/큰 워치, ko/en, 1시간 경계에서 잘림·크기 튐 없음. 시스템 timer의 앞자리 0 차이는 승인된 포맷 선택과 일치 |
-| 폰·저장 회귀 | Ralli 폰의 anchor/pause 동작·경기 저장·최종 레코드 기존 의미 유지. 워치 새 표시와 다른 값이 발생하면 차이/경로를 기록하며 표시 수정의 해결 범위를 구분. Golf의 점수 저장과 Haruchi의 구간합==totalSeconds 유지 |
+| 폰·저장 일치(Ralli 신규 운동) | Task 4b 적용 후 워치 화면·폰 앵커 보간·저장된 세션 레코드/경기 기록이 **같은 정지 제외 값**을 보여야 한다(20/30/20초 시나리오 ≈40초). 다르면 Task 4b 코드로 회귀. Golf는 저장 의미 변경이 없으므로 기존처럼 점수 저장만 확인하고, Haruchi는 구간합==totalSeconds 유지만 확인한다. **Ralli 과거 기록**은 이 비교에서 제외한다(옛 틱 기준 그대로가 기대값) |
 | 컴플리케이션 | Haruchi 실행→pause→resume→종료에서 timer/고정 문자열/초기 상태 전환 정상, 워치 표시와 정수화 수준 차이 이내. Golf/Ralli 점수·라운드 표시는 기존과 같음 |
 
 위 전면 허용치는 승인 전 조정 가능한 제안이다. 현상 재현이 안 되면 미재현으로 기록하고 원인 해결이라고 쓰지 않는다.
 
 ## 7. 미확정 결정과 승인 게이트
 
-1. **표시만 먼저 개선하는 범위 수용 여부:** 새 워치 표시와 기존 폰 앵커/경기 저장/정지 포함 최종 요약 차이를 이 트랙에서 남겨도 되는가. 권장: 이 한계를 명시하고 표시 트랙부터 검증하되, 사용자 수용이 있어야 구현한다.
+1. **(2026-11-09 결정됨)** 표시만 먼저 고치고 폰 앵커·저장 차이를 남기는 범위는 **수용하지 않는다.** Ralli는 Task 4b로 새 운동의 표시·앵커·저장을 통합한다. 과거 기록 보정은 이 결정에 포함되지 않고 별도 트랙으로 남는다. **이 결정 자체는 "스코프 질문에 대한 답"이며, 본 문서가 그 답을 반영해 Task 4b까지 넓어진 상태에 대한 구현 승인은 이 게이트와 별도로 받는다** (루트 `CLAUDE.md` 작업 방식 — 스코프 답변이 곧 구현 승인은 아니다).
 2. **포맷:** 시스템 `.timer`의 로케일별 앞자리 0/시간 표현을 허용하는가. 권장: 가능하면 시스템 표현 사용. 기존 문자열 형식의 엄밀한 유지가 필수면 TimelineView 대안 재승인.
 3. **실제 원인:** 기기/OS/AOD 조건과 tick→metrics→화면 지연 위치는 미확정. 계측 결과가 가설과 다르면 Task 1에서 설계를 다시 검토한다.
 4. **HK 상태 경계 지연:** Golf/Ralli는 delegate date, Haruchi는 기존 서비스 isPaused 수신 시각을 쓴다. 이번에 Haruchi 저장 의미까지 바꾸지 않는다. 경계 차이가 제품 허용치를 넘으면 별도 통합 설계 대상으로 보고한다.
