@@ -97,10 +97,14 @@ struct ScoreViewModelHapticsTests {
             options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false, matchTieBreak: true),
             haptics: spy
         )
-        for _ in 0 ..< 6 { winGame(vm, for: .me) } // Set 1: 6-0 me
+        for _ in 0 ..< 6 {
+            winGame(vm, for: .me)
+        } // Set 1: 6-0 me
         let afterSet1 = spy.played.count
 
-        for _ in 0 ..< 6 { winGame(vm, for: .opponent) } // Set 2: 0-6 opponent → 1-1, enters match tiebreak
+        for _ in 0 ..< 6 {
+            winGame(vm, for: .opponent)
+        } // Set 2: 0-6 opponent → 1-1, enters match tiebreak
 
         let eventsForSet2 = spy.played[afterSet1...]
         #expect(eventsForSet2.last == .setWon)
@@ -113,12 +117,20 @@ struct ScoreViewModelHapticsTests {
             options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false, matchTieBreak: true),
             haptics: spy
         )
-        for _ in 0 ..< 6 { winGame(vm, for: .me) }
-        for _ in 0 ..< 6 { winGame(vm, for: .opponent) } // 1-1, match tiebreak
+        for _ in 0 ..< 6 {
+            winGame(vm, for: .me)
+        }
+        for _ in 0 ..< 6 {
+            winGame(vm, for: .opponent)
+        } // 1-1, match tiebreak
         let afterSet2 = spy.played.count
 
-        for _ in 0 ..< 7 { vm.addPoint(.opponent) }
-        for _ in 0 ..< 10 { vm.addPoint(.me) } // 10-7 me
+        for _ in 0 ..< 7 {
+            vm.addPoint(.opponent)
+        }
+        for _ in 0 ..< 10 {
+            vm.addPoint(.me)
+        } // 10-7 me
 
         let tieBreakEvents = spy.played[afterSet2...]
         #expect(tieBreakEvents.last == .matchFinished(.win))

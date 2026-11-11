@@ -417,8 +417,12 @@ struct ScoreViewModelTests {
 
     @Test @MainActor func matchTieBreak_startsAtOneAllInBestOfThree() {
         let vm = ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false, matchTieBreak: true))
-        for _ in 0 ..< 6 { vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me) } // Set 1: 6-0 me
-        for _ in 0 ..< 6 { vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent) } // Set 2: 0-6 opponent
+        for _ in 0 ..< 6 {
+            vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
+        } // Set 1: 6-0 me
+        for _ in 0 ..< 6 {
+            vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent)
+        } // Set 2: 0-6 opponent
 
         #expect(vm.isTieBreak == true)
         #expect(vm.myGameScore == 0)
@@ -430,8 +434,12 @@ struct ScoreViewModelTests {
 
     @Test @MainActor func matchTieBreak_notStartedWhenOptionOff() {
         let vm = ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false, matchTieBreak: false))
-        for _ in 0 ..< 6 { vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me) }
-        for _ in 0 ..< 6 { vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent) }
+        for _ in 0 ..< 6 {
+            vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
+        }
+        for _ in 0 ..< 6 {
+            vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent)
+        }
 
         #expect(vm.isTieBreak == false)
         #expect(vm.matchResult == nil)
@@ -439,8 +447,12 @@ struct ScoreViewModelTests {
 
     @Test @MainActor func matchTieBreak_notStartedWhenMatchAlreadyDecided() {
         let vm = ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false, matchTieBreak: true))
-        for _ in 0 ..< 6 { vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me) } // Set 1: 6-0 me
-        for _ in 0 ..< 6 { vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me) } // Set 2: 6-0 me
+        for _ in 0 ..< 6 {
+            vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
+        } // Set 1: 6-0 me
+        for _ in 0 ..< 6 {
+            vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
+        } // Set 2: 6-0 me
 
         #expect(vm.matchResult == .win)
         #expect(vm.isTieBreak == false)
@@ -448,10 +460,18 @@ struct ScoreViewModelTests {
 
     @Test @MainActor func matchTieBreak_startsEvenWithNoTieRuleOn() {
         let vm = ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: true, matchTieBreak: true))
-        for _ in 0 ..< 4 { vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent) }
-        for _ in 0 ..< 6 { vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me) } // Set 1: 6-4 me
-        for _ in 0 ..< 4 { vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me) }
-        for _ in 0 ..< 6 { vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent) } // Set 2: 4-6 opponent
+        for _ in 0 ..< 4 {
+            vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent)
+        }
+        for _ in 0 ..< 6 {
+            vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
+        } // Set 1: 6-4 me
+        for _ in 0 ..< 4 {
+            vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
+        }
+        for _ in 0 ..< 6 {
+            vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent)
+        } // Set 2: 4-6 opponent
 
         #expect(vm.isTieBreak == true)
         #expect(vm.mySetScore == 1)
@@ -460,12 +480,20 @@ struct ScoreViewModelTests {
 
     @Test @MainActor func matchTieBreak_winEndsMatchAndRecordsPoints() {
         let vm = ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false, matchTieBreak: true))
-        for _ in 0 ..< 6 { vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me) }
-        for _ in 0 ..< 6 { vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent) }
+        for _ in 0 ..< 6 {
+            vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
+        }
+        for _ in 0 ..< 6 {
+            vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent)
+        }
         #expect(vm.isTieBreak == true)
 
-        for _ in 0 ..< 7 { vm.addPoint(.opponent) }
-        for _ in 0 ..< 10 { vm.addPoint(.me) } // 10-7 me
+        for _ in 0 ..< 7 {
+            vm.addPoint(.opponent)
+        }
+        for _ in 0 ..< 10 {
+            vm.addPoint(.me)
+        } // 10-7 me
 
         #expect(vm.matchResult == .win)
         #expect(vm.completedSets.last?.my == 10)
@@ -477,11 +505,19 @@ struct ScoreViewModelTests {
 
     @Test @MainActor func matchTieBreak_lossRecordsLoss() {
         let vm = ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false, matchTieBreak: true))
-        for _ in 0 ..< 6 { vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me) }
-        for _ in 0 ..< 6 { vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent) }
+        for _ in 0 ..< 6 {
+            vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
+        }
+        for _ in 0 ..< 6 {
+            vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent)
+        }
 
-        for _ in 0 ..< 8 { vm.addPoint(.me) }
-        for _ in 0 ..< 10 { vm.addPoint(.opponent) } // 8-10 opponent
+        for _ in 0 ..< 8 {
+            vm.addPoint(.me)
+        }
+        for _ in 0 ..< 10 {
+            vm.addPoint(.opponent)
+        } // 8-10 opponent
 
         #expect(vm.matchResult == .loss)
         #expect(vm.completedSets.last?.my == 8)
@@ -490,10 +526,16 @@ struct ScoreViewModelTests {
 
     @Test @MainActor func matchTieBreak_continuesPastNineAll() {
         let vm = ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false, matchTieBreak: true))
-        for _ in 0 ..< 6 { vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me) }
-        for _ in 0 ..< 6 { vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent) }
+        for _ in 0 ..< 6 {
+            vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
+        }
+        for _ in 0 ..< 6 {
+            vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent)
+        }
 
-        for _ in 0 ..< 9 { vm.addPoint(.me); vm.addPoint(.opponent) } // 9-9
+        for _ in 0 ..< 9 {
+            vm.addPoint(.me); vm.addPoint(.opponent)
+        } // 9-9
         #expect(vm.matchResult == nil)
 
         vm.addPoint(.me) // 10-9
@@ -507,11 +549,19 @@ struct ScoreViewModelTests {
 
     @Test @MainActor func matchTieBreak_undoOfWinningPointRestoresTarget() {
         let vm = ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false, matchTieBreak: true))
-        for _ in 0 ..< 6 { vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me) }
-        for _ in 0 ..< 6 { vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent) }
+        for _ in 0 ..< 6 {
+            vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
+        }
+        for _ in 0 ..< 6 {
+            vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent)
+        }
 
-        for _ in 0 ..< 7 { vm.addPoint(.opponent) }
-        for _ in 0 ..< 10 { vm.addPoint(.me) } // 10-7 me, match over
+        for _ in 0 ..< 7 {
+            vm.addPoint(.opponent)
+        }
+        for _ in 0 ..< 10 {
+            vm.addPoint(.me)
+        } // 10-7 me, match over
         #expect(vm.matchResult == .win)
 
         vm.undo()
@@ -528,9 +578,13 @@ struct ScoreViewModelTests {
 
     @Test @MainActor func matchTieBreak_undoOfFirstPointReturnsToSetTwoEnd() {
         let vm = ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false, matchTieBreak: true))
-        for _ in 0 ..< 6 { vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me) } // Set 1: 6-0 me
+        for _ in 0 ..< 6 {
+            vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
+        } // Set 1: 6-0 me
 
-        for _ in 0 ..< 5 { vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent) } // 5 games
+        for _ in 0 ..< 5 {
+            vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent)
+        } // 5 games
         vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent) // 40-0 in the 6th game
         vm.addPoint(.opponent) // wins the 6th game 6-0, finishes Set 2 → 1-1, enters match tiebreak
 
@@ -549,8 +603,12 @@ struct ScoreViewModelTests {
 
     @Test @MainActor func noTieDrawAtSixAll_endsMatchBeforeMatchTieBreak() {
         let vm = ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: true, matchTieBreak: true))
-        for _ in 0 ..< 4 { vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent) }
-        for _ in 0 ..< 6 { vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me) } // Set 1: 6-4 me
+        for _ in 0 ..< 4 {
+            vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent)
+        }
+        for _ in 0 ..< 6 {
+            vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
+        } // Set 1: 6-4 me
 
         for _ in 0 ..< 6 {
             vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
