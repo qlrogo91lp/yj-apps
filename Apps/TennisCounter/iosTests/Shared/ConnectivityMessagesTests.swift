@@ -75,4 +75,34 @@ struct ConnectivityMessagesTests {
         }
         #expect(decoded.matchId == nil)
     }
+
+    @Test func sessionStart_roundTripsMatchTieBreak() {
+        let original = SessionStartMessage(
+            sessionId: UUID(),
+            options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false, matchTieBreak: true),
+            workoutStartDate: Date(timeIntervalSince1970: 1_000_000)
+        )
+        guard let decoded = SessionStartMessage(from: original.toDictionary()) else {
+            Issue.record("SessionStartMessage 파싱 실패")
+            return
+        }
+        #expect(decoded.options.matchTieBreak == true)
+    }
+
+    @Test func sessionStart_withoutMatchTieBreakKeyDefaultsToFalse() {
+        let legacy: [String: Any] = [
+            "type": "sessionStart",
+            "sessionId": UUID().uuidString,
+            "mode": "best_of_3",
+            "noAdRule": true,
+            "noTieRule": false,
+            "gameThreshold": 6,
+            "workoutStartDate": 1_000_000.0,
+        ]
+        guard let decoded = SessionStartMessage(from: legacy) else {
+            Issue.record("구버전 페이로드가 거부됨 — 세션 미러링이 깨진다")
+            return
+        }
+        #expect(decoded.options.matchTieBreak == false)
+    }
 }

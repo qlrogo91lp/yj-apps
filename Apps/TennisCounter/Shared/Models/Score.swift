@@ -14,9 +14,13 @@ class Score: ObservableObject {
         case zero, fifteen, thirty, forty, advantage
     }
 
+    static let standardTieBreakTarget = 7
+    static let matchTieBreakTarget = 10
+
     @Published private(set) var gameMode: GameMode = .normal
     @Published private(set) var myTieBreak: Int = 0
     @Published private(set) var yourTieBreak: Int = 0
+    private(set) var tieBreakTarget: Int = Score.standardTieBreakTarget
 
     private var myNormal: NormalState = .zero
     private var yourNormal: NormalState = .zero
@@ -53,13 +57,15 @@ class Score: ObservableObject {
         myTieBreak = 0
         yourTieBreak = 0
         gameMode = .normal
+        tieBreakTarget = Self.standardTieBreakTarget
         objectWillChange.send()
     }
 
-    func setTieBreakMode() {
+    func setTieBreakMode(target: Int = Score.standardTieBreakTarget) {
         gameMode = .tieBreak
         myTieBreak = 0
         yourTieBreak = 0
+        tieBreakTarget = target
         objectWillChange.send()
     }
 
@@ -110,8 +116,8 @@ class Score: ObservableObject {
     private func addTieBreakPoint(_ side: PlayerSide) -> PlayerSide? {
         if side == .me { myTieBreak += 1 } else { yourTieBreak += 1 }
         let diff = abs(myTieBreak - yourTieBreak)
-        if myTieBreak >= 7, diff >= 2 { return .me }
-        if yourTieBreak >= 7, diff >= 2 { return .opponent }
+        if myTieBreak >= tieBreakTarget, diff >= 2 { return .me }
+        if yourTieBreak >= tieBreakTarget, diff >= 2 { return .opponent }
         return nil
     }
 
@@ -136,13 +142,14 @@ class Score: ObservableObject {
         fileprivate let myTieBreak: Int
         fileprivate let yourTieBreak: Int
         fileprivate let gameMode: GameMode
+        fileprivate let tieBreakTarget: Int
     }
 
     /// 현재 Score 상태를 불투명한 Snapshot으로 변환해 넘긴다.
     func makeSnapshot() -> Snapshot {
         Snapshot(myNormal: myNormal, yourNormal: yourNormal,
                  myTieBreak: myTieBreak, yourTieBreak: yourTieBreak,
-                 gameMode: gameMode)
+                 gameMode: gameMode, tieBreakTarget: tieBreakTarget)
     }
 
     /// Snapshot 으로부터 이전 Score 상태를 복원한다.
@@ -152,6 +159,7 @@ class Score: ObservableObject {
         myTieBreak = snapshot.myTieBreak
         yourTieBreak = snapshot.yourTieBreak
         gameMode = snapshot.gameMode
+        tieBreakTarget = snapshot.tieBreakTarget
         objectWillChange.send()
     }
 

@@ -25,6 +25,7 @@ final class ScoreViewModel: ObservableObject {
         let currentSetNumber: Int
         let completedSets: [(my: Int, your: Int)]
         let tieBreakInProgress: Bool
+        let matchTieBreakInProgress: Bool
         let matchResult: MatchResult?
     }
 
@@ -65,13 +66,19 @@ final class ScoreViewModel: ObservableObject {
     func finishAsDraw() {
         guard canFinishAsDraw else { return }
         // 진행 중 세트도 저장해야 5:5가 결과·전송·기록에서 사라지지 않는다.
-        if myGameScore > 0 {
+        // 매치 TB 중엔 게임 스코어가 0:0으로 고정되어 있어 타이브레이크 점수를 따로 본다.
+        if matchTieBreakInProgress {
+            if score.myTieBreak > 0 {
+                completedSets.append((my: score.myTieBreak, your: score.yourTieBreak))
+            }
+        } else if myGameScore > 0 {
             completedSets.append((my: myGameScore, your: yourGameScore))
         }
         matchResult = .draw
     }
 
     private var tieBreakInProgress = false
+    private var matchTieBreakInProgress = false
     private var cancellables = Set<AnyCancellable>()
 
     var onStateChanged: (() -> Void)?
@@ -89,10 +96,14 @@ final class ScoreViewModel: ObservableObject {
         guard !isMatchOver else { return }
         snapshots.append(captureSnapshot())
         let gameWon = score.addPoint(side)
-        if gameWon != nil {
-            if side == .me { myGameScore += 1 } else { yourGameScore += 1 }
-            score.resetData()
-            checkSetUpdate()
+        if let winner = gameWon {
+            if matchTieBreakInProgress {
+                finalizeMatchTieBreak(winner: winner)
+            } else {
+                if side == .me { myGameScore += 1 } else { yourGameScore += 1 }
+                score.resetData()
+                checkSetUpdate()
+            }
         }
         onStateChanged?()
     }
@@ -121,6 +132,7 @@ final class ScoreViewModel: ObservableObject {
         completedSets = []
         matchResult = nil
         tieBreakInProgress = false
+        matchTieBreakInProgress = false
         snapshots.removeAll()
         score.noAdRule = options.noAdRule
         score.resetData()
@@ -162,6 +174,7 @@ final class ScoreViewModel: ObservableObject {
             currentSetNumber: currentSetNumber,
             completedSets: completedSets,
             tieBreakInProgress: tieBreakInProgress,
+            matchTieBreakInProgress: matchTieBreakInProgress,
             matchResult: matchResult
         )
     }
@@ -175,7 +188,19 @@ final class ScoreViewModel: ObservableObject {
         currentSetNumber = snapshot.currentSetNumber
         completedSets = snapshot.completedSets
         tieBreakInProgress = snapshot.tieBreakInProgress
+        matchTieBreakInProgress = snapshot.matchTieBreakInProgress
         matchResult = snapshot.matchResult
+    }
+
+    /// 매치 타이브레이크(3세트 대체 10점)의 승자를 정한다. 게임 스코어는 올리지 않고
+    /// 완료 세트에 타이브레이크 점수를 그대로 기록한다 (예: 10-7).
+    private func finalizeMatchTieBreak(winner: PlayerSide) {
+        let my = score.myTieBreak, your = score.yourTieBreak
+        score.resetData()
+        completedSets.append((my: my, your: your))
+        if winner == .me { mySetScore += 1 } else { yourSetScore += 1 }
+        matchTieBreakInProgress = false
+        matchResult = winner == .me ? .win : .loss
     }
 
     private func checkSetUpdate() {
@@ -217,6 +242,11 @@ final class ScoreViewModel: ObservableObject {
             matchResult = .win
         } else if yourSetScore >= options.mode.setsToWin {
             matchResult = .loss
+        } else if options.matchTieBreak, options.mode == .bestOfThree,
+                  mySetScore == yourSetScore, mySetScore == options.mode.setsToWin - 1
+        {
+            score.setTieBreakMode(target: Score.matchTieBreakTarget)
+            matchTieBreakInProgress = true
         }
     }
 }

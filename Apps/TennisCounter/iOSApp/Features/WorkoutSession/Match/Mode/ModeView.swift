@@ -42,6 +42,10 @@ struct ModeView: View {
                     .font(.system(size: 15))
                     .tint(.green)
 
+                Toggle(String(localized: "mode_match_tiebreak"), isOn: $selectionVM.matchTieBreak)
+                    .font(.system(size: 15))
+                    .tint(.green)
+
                 Spacer()
             }
             .padding(.horizontal, 24)

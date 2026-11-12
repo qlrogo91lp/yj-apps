@@ -22,11 +22,13 @@ class ScoreViewModel: ObservableObject {
         let yourSetScore: Int
         let completedSets: [SetScore]
         let tieBreakInProgress: Bool
+        let matchTieBreakInProgress: Bool
         let matchResult: MatchResult?
     }
 
     private var snapshots: [Snapshot] = []
     private var tieBreakInProgress: Bool = false
+    private var matchTieBreakInProgress: Bool = false
     private var matchResult: MatchResult?
     private var cancellables = Set<AnyCancellable>()
     private let haptics: MatchHapticsPlaying
@@ -49,7 +51,12 @@ class ScoreViewModel: ObservableObject {
     func finishAsDraw() {
         guard canFinishAsDraw else { return }
         // 진행 중 세트도 저장해야 5:5가 결과·전송·기록에서 사라지지 않는다.
-        if myGameScore > 0 {
+        // 매치 TB 중엔 게임 스코어가 0:0으로 고정되어 있어 타이브레이크 점수를 따로 본다.
+        if matchTieBreakInProgress {
+            if score.myTieBreak > 0 {
+                completedSets.append(SetScore(my: score.myTieBreak, your: score.yourTieBreak))
+            }
+        } else if myGameScore > 0 {
             completedSets.append(SetScore(my: myGameScore, your: yourGameScore))
         }
         matchResult = .draw
@@ -71,13 +78,17 @@ class ScoreViewModel: ObservableObject {
         guard matchResult == nil else { return }
         snapshots.append(captureSnapshot())
         var event: MatchHapticEvent = .point
-        if score.addPoint(side) != nil {
-            withAnimation(.bouncy) {
-                if side == .me { myGameScore += 1 } else { yourGameScore += 1 }
+        if let winner = score.addPoint(side) {
+            if matchTieBreakInProgress {
+                event = finalizeMatchTieBreak(winner: winner)
+            } else {
+                withAnimation(.bouncy) {
+                    if side == .me { myGameScore += 1 } else { yourGameScore += 1 }
+                }
+                score.reset()
+                // 게임 → 세트 → 매치가 한 포인트에 겹칠 수 있다. 가장 상위 이벤트 하나만 울린다.
+                event = checkSetUpdate() ?? .gameWon
             }
-            score.reset()
-            // 게임 → 세트 → 매치가 한 포인트에 겹칠 수 있다. 가장 상위 이벤트 하나만 울린다.
-            event = checkSetUpdate() ?? .gameWon
         }
         haptics.play(event)
         onStateChanged?()
@@ -111,6 +122,7 @@ class ScoreViewModel: ObservableObject {
         yourSetScore = 0
         completedSets = []
         tieBreakInProgress = false
+        matchTieBreakInProgress = false
         matchResult = nil
         snapshots.removeAll()
         score.noAdRule = options.noAdRule
@@ -138,6 +150,7 @@ class ScoreViewModel: ObservableObject {
             yourSetScore: yourSetScore,
             completedSets: completedSets,
             tieBreakInProgress: tieBreakInProgress,
+            matchTieBreakInProgress: matchTieBreakInProgress,
             matchResult: matchResult
         )
     }
@@ -150,7 +163,22 @@ class ScoreViewModel: ObservableObject {
         yourSetScore = snapshot.yourSetScore
         completedSets = snapshot.completedSets
         tieBreakInProgress = snapshot.tieBreakInProgress
+        matchTieBreakInProgress = snapshot.matchTieBreakInProgress
         matchResult = snapshot.matchResult
+    }
+
+    /// 매치 타이브레이크(3세트 대체 10점)의 승자를 정한다. 기존 `finalizeSet`처럼
+    /// `onMatchFinished`·햅틱 이벤트를 정확히 한 번 반환한다.
+    private func finalizeMatchTieBreak(winner: PlayerSide) -> MatchHapticEvent {
+        let my = score.myTieBreak, your = score.yourTieBreak
+        score.reset()
+        completedSets.append(SetScore(my: my, your: your))
+        if winner == .me { mySetScore += 1 } else { yourSetScore += 1 }
+        matchTieBreakInProgress = false
+        let result: MatchResult = winner == .me ? .win : .loss
+        matchResult = result
+        onMatchFinished?(result, completedSets)
+        return .matchFinished(result)
     }
 
     /// 세트·매치 판정. 세트나 매치가 끝났으면 그 이벤트를, 아니면 nil 을 돌려준다.
@@ -201,6 +229,11 @@ class ScoreViewModel: ObservableObject {
             matchResult = .loss
             onMatchFinished?(.loss, completedSets)
             return .matchFinished(.loss)
+        } else if options.matchTieBreak, options.mode == .bestOfThree,
+                  mySetScore == yourSetScore, mySetScore == setsToWin - 1
+        {
+            score.setTieBreakMode(target: Score.matchTieBreakTarget)
+            matchTieBreakInProgress = true
         }
         return .setWon
     }

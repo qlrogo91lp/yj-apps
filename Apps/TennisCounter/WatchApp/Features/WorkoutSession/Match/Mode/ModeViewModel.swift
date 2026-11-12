@@ -17,8 +17,15 @@ class ModeViewModel: ObservableObject {
         didSet { UserDefaults.standard.set(gameThreshold, forKey: "lastGameThreshold") }
     }
 
+    @Published var matchTieBreak: Bool {
+        didSet { UserDefaults.standard.set(matchTieBreak, forKey: "lastMatchTieBreak") }
+    }
+
     var options: MatchOptions {
-        MatchOptions(mode: selectedMode, noAdRule: noAdRule, noTieRule: noTieRule, gameThreshold: gameThreshold)
+        MatchOptions(
+            mode: selectedMode, noAdRule: noAdRule, noTieRule: noTieRule,
+            gameThreshold: gameThreshold, matchTieBreak: matchTieBreak
+        )
     }
 
     init() {
@@ -27,5 +34,6 @@ class ModeViewModel: ObservableObject {
         noAdRule = ud.object(forKey: "lastNoAdRule") as? Bool ?? true
         noTieRule = ud.object(forKey: "lastNoTieRule") as? Bool ?? true
         gameThreshold = ud.object(forKey: "lastGameThreshold") as? Int ?? 6
+        matchTieBreak = ud.object(forKey: "lastMatchTieBreak") as? Bool ?? false
     }
 }

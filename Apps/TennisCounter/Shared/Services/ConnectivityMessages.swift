@@ -21,6 +21,7 @@ struct SessionStartMessage: ConnectivityMessage {
             "noAdRule": options.noAdRule,
             "noTieRule": options.noTieRule,
             "gameThreshold": options.gameThreshold,
+            "matchTieBreak": options.matchTieBreak,
             "workoutStartDate": workoutStartDate.timeIntervalSince1970,
         ]
         if let matchId { dict["matchId"] = matchId.uuidString }
@@ -39,7 +40,8 @@ struct SessionStartMessage: ConnectivityMessage {
             mode: mode,
             noAdRule: dict["noAdRule"] as? Bool ?? true,
             noTieRule: dict["noTieRule"] as? Bool ?? false,
-            gameThreshold: dict["gameThreshold"] as? Int ?? 6
+            gameThreshold: dict["gameThreshold"] as? Int ?? 6,
+            matchTieBreak: dict["matchTieBreak"] as? Bool ?? false
         )
         let ts = dict["workoutStartDate"] as? Double ?? Date().timeIntervalSince1970
         workoutStartDate = Date(timeIntervalSince1970: ts)

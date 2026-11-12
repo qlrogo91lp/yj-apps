@@ -413,6 +413,239 @@ struct ScoreViewModelTests {
     /// 누수 진단: 강한 참조를 놓으면 ScoreViewModel이 해제되는지 검증.
     /// 통과 → VM 자체엔 retain cycle 없음(앱에서 deinit 안 보이는 건 SwiftUI StateObject 보유 때문).
     /// 실패 → VM 내부에 실제 retain cycle 존재.
+    // MARK: - 매치 타이브레이크 (3세트 대체 10점)
+
+    @Test @MainActor func matchTieBreak_startsAtOneAllInBestOfThree() {
+        let vm = ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false, matchTieBreak: true))
+        for _ in 0 ..< 6 {
+            vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
+        } // Set 1: 6-0 me
+        for _ in 0 ..< 6 {
+            vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent)
+        } // Set 2: 0-6 opponent
+
+        #expect(vm.isTieBreak == true)
+        #expect(vm.myGameScore == 0)
+        #expect(vm.yourGameScore == 0)
+        #expect(vm.mySetScore == 1)
+        #expect(vm.yourSetScore == 1)
+        #expect(vm.matchResult == nil)
+    }
+
+    @Test @MainActor func matchTieBreak_notStartedWhenOptionOff() {
+        let vm = ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false, matchTieBreak: false))
+        for _ in 0 ..< 6 {
+            vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
+        }
+        for _ in 0 ..< 6 {
+            vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent)
+        }
+
+        #expect(vm.isTieBreak == false)
+        #expect(vm.matchResult == nil)
+    }
+
+    @Test @MainActor func matchTieBreak_notStartedWhenMatchAlreadyDecided() {
+        let vm = ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false, matchTieBreak: true))
+        for _ in 0 ..< 6 {
+            vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
+        } // Set 1: 6-0 me
+        for _ in 0 ..< 6 {
+            vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
+        } // Set 2: 6-0 me
+
+        #expect(vm.matchResult == .win)
+        #expect(vm.isTieBreak == false)
+    }
+
+    @Test @MainActor func matchTieBreak_startsEvenWithNoTieRuleOn() {
+        let vm = ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: true, matchTieBreak: true))
+        for _ in 0 ..< 4 {
+            vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent)
+        }
+        for _ in 0 ..< 6 {
+            vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
+        } // Set 1: 6-4 me
+        for _ in 0 ..< 4 {
+            vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
+        }
+        for _ in 0 ..< 6 {
+            vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent)
+        } // Set 2: 4-6 opponent
+
+        #expect(vm.isTieBreak == true)
+        #expect(vm.mySetScore == 1)
+        #expect(vm.yourSetScore == 1)
+    }
+
+    @Test @MainActor func matchTieBreak_winEndsMatchAndRecordsPoints() {
+        let vm = ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false, matchTieBreak: true))
+        for _ in 0 ..< 6 {
+            vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
+        }
+        for _ in 0 ..< 6 {
+            vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent)
+        }
+        #expect(vm.isTieBreak == true)
+
+        for _ in 0 ..< 7 {
+            vm.addPoint(.opponent)
+        }
+        for _ in 0 ..< 10 {
+            vm.addPoint(.me)
+        } // 10-7 me
+
+        #expect(vm.matchResult == .win)
+        #expect(vm.completedSets.last?.my == 10)
+        #expect(vm.completedSets.last?.your == 7)
+        #expect(vm.mySetScore == 2)
+        #expect(vm.myGameScore == 0)
+        #expect(vm.yourGameScore == 0)
+    }
+
+    @Test @MainActor func matchTieBreak_lossRecordsLoss() {
+        let vm = ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false, matchTieBreak: true))
+        for _ in 0 ..< 6 {
+            vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
+        }
+        for _ in 0 ..< 6 {
+            vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent)
+        }
+
+        for _ in 0 ..< 8 {
+            vm.addPoint(.me)
+        }
+        for _ in 0 ..< 10 {
+            vm.addPoint(.opponent)
+        } // 8-10 opponent
+
+        #expect(vm.matchResult == .loss)
+        #expect(vm.completedSets.last?.my == 8)
+        #expect(vm.completedSets.last?.your == 10)
+    }
+
+    @Test @MainActor func matchTieBreak_continuesPastNineAll() {
+        let vm = ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false, matchTieBreak: true))
+        for _ in 0 ..< 6 {
+            vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
+        }
+        for _ in 0 ..< 6 {
+            vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent)
+        }
+
+        for _ in 0 ..< 9 {
+            vm.addPoint(.me); vm.addPoint(.opponent)
+        } // 9-9
+        #expect(vm.matchResult == nil)
+
+        vm.addPoint(.me) // 10-9
+        #expect(vm.matchResult == nil)
+        vm.addPoint(.me) // 11-9
+
+        #expect(vm.matchResult == .win)
+        #expect(vm.completedSets.last?.my == 11)
+        #expect(vm.completedSets.last?.your == 9)
+    }
+
+    @Test @MainActor func matchTieBreak_undoOfWinningPointRestoresTarget() {
+        let vm = ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false, matchTieBreak: true))
+        for _ in 0 ..< 6 {
+            vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
+        }
+        for _ in 0 ..< 6 {
+            vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent)
+        }
+
+        for _ in 0 ..< 7 {
+            vm.addPoint(.opponent)
+        }
+        for _ in 0 ..< 10 {
+            vm.addPoint(.me)
+        } // 10-7 me, match over
+        #expect(vm.matchResult == .win)
+
+        vm.undo() // 9-7
+        vm.undo() // 8-7
+
+        #expect(vm.matchResult == nil)
+        #expect(vm.isTieBreak == true)
+        #expect(vm.score.myDisplayScore == "8")
+        #expect(vm.score.yourDisplayScore == "7")
+
+        vm.addPoint(.me) // 9-7 — 목표가 7로 되돌아갔다면 diff 2로 여기서 끝나야 하지만, 10이 유지되므로 계속된다
+
+        #expect(vm.matchResult == nil)
+
+        vm.addPoint(.me) // 10-7 — 목표 10 유지 확인
+
+        #expect(vm.matchResult == .win)
+    }
+
+    @Test @MainActor func matchTieBreak_manualDrawPreservesTiedPoints() {
+        let vm = ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false, matchTieBreak: true))
+        for _ in 0 ..< 6 {
+            vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
+        }
+        for _ in 0 ..< 6 {
+            vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent)
+        }
+        #expect(vm.isTieBreak == true)
+
+        for _ in 0 ..< 5 {
+            vm.addPoint(.me); vm.addPoint(.opponent)
+        } // 5-5
+
+        #expect(vm.canFinishAsDraw == true)
+        vm.finishAsDraw()
+
+        #expect(vm.matchResult == .draw)
+        #expect(vm.completedSets.last?.my == 5)
+        #expect(vm.completedSets.last?.your == 5)
+    }
+
+    @Test @MainActor func matchTieBreak_undoOfFirstPointReturnsToSetTwoEnd() {
+        let vm = ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false, matchTieBreak: true))
+        for _ in 0 ..< 6 {
+            vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
+        } // Set 1: 6-0 me
+
+        for _ in 0 ..< 5 {
+            vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent)
+        } // 5 games
+        vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent) // 40-0 in the 6th game
+        vm.addPoint(.opponent) // wins the 6th game 6-0, finishes Set 2 → 1-1, enters match tiebreak
+
+        #expect(vm.isTieBreak == true)
+        #expect(vm.mySetScore == 1)
+        #expect(vm.yourSetScore == 1)
+
+        vm.undo()
+
+        #expect(vm.isTieBreak == false)
+        #expect(vm.mySetScore == 1)
+        #expect(vm.yourSetScore == 0)
+        #expect(vm.yourGameScore == 5)
+        #expect(vm.score.yourDisplayScore == "40")
+    }
+
+    @Test @MainActor func noTieDrawAtSixAll_endsMatchBeforeMatchTieBreak() {
+        let vm = ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: true, matchTieBreak: true))
+        for _ in 0 ..< 4 {
+            vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent)
+        }
+        for _ in 0 ..< 6 {
+            vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
+        } // Set 1: 6-4 me
+
+        for _ in 0 ..< 6 {
+            vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
+            vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent)
+        } // Set 2: 6-6, noTieRule → draw
+
+        #expect(vm.matchResult == .draw)
+        #expect(vm.isTieBreak == false)
+    }
+
     @Test @MainActor func scoreViewModelDeallocatesWhenReleased() {
         weak var weakVM: ScoreViewModel?
         autoreleasepool {

@@ -104,7 +104,7 @@ struct MatchCard: View {
     private var setChips: some View {
         HStack(spacing: 8) {
             ForEach(sets, id: \.setNumber) { set in
-                Text(verbatim: "\(set.myGames)–\(set.yourGames)")
+                Text(verbatim: set.isMatchTieBreak ? "[\(set.myGames)–\(set.yourGames)]" : "\(set.myGames)–\(set.yourGames)")
                     .font(.system(size: 14, weight: .semibold, design: .rounded))
                     .monospacedDigit()
                     .foregroundStyle(set.myGames > set.yourGames ? AnyShapeStyle(.white) : AnyShapeStyle(.secondary))

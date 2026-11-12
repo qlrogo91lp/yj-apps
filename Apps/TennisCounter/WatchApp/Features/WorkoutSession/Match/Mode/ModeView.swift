@@ -45,6 +45,10 @@ struct ModeView: View {
                 Toggle(String(localized: "mode_no_tie"), isOn: $selectionVM.noTieRule)
                     .font(.system(size: 14))
                     .toggleStyle(SwitchToggleStyle(tint: .green))
+
+                Toggle(String(localized: "mode_match_tiebreak"), isOn: $selectionVM.matchTieBreak)
+                    .font(.system(size: 14))
+                    .toggleStyle(SwitchToggleStyle(tint: .green))
             }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
