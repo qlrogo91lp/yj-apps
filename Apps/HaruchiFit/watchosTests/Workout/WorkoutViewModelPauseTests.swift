@@ -1,6 +1,7 @@
 import Foundation
 @testable import HaruchiFit_Watch_App
 import Testing
+import WorkoutCore
 
 /// 정지 신호가 **시계**에 닿는지 본다.
 ///
@@ -77,5 +78,45 @@ struct WorkoutViewModelPauseTests {
 
         let snapshot = try #require(spy.published.last)
         #expect(snapshot.elapsedSeconds == 1200)
+    }
+
+    // MARK: - elapsedDisplay
+
+    @Test("handlePauseChange가 elapsedDisplay를 시계와 같은 값으로 갱신한다")
+    func handlePauseChangeUpdatesElapsedDisplay() {
+        let (viewModel, _, clock) = makeViewModel()
+
+        clock.advance(600) // 10분
+        viewModel.handlePauseChange(true)
+        #expect(viewModel.elapsedDisplay?.pausedAt == clock.now)
+
+        clock.advance(300) // 5분 정지
+        viewModel.handlePauseChange(false)
+        #expect(viewModel.elapsedDisplay?.pausedAt == nil)
+
+        clock.advance(600) // 10분 더
+        #expect(Int(viewModel.elapsedDisplay?.elapsed(at: clock.now) ?? -1) == 1200) // 20분. 정지 5분 제외
+    }
+
+    @Test("resetElapsedDisplay는 segments의 표시 값을 그대로 반영한다")
+    func resetElapsedDisplayMirrorsSegments() {
+        let (viewModel, _, clock) = makeViewModel()
+
+        clock.advance(500) // init 시점(0)에서 500초 흘려둔다
+        viewModel.resetElapsedDisplay()
+
+        #expect(viewModel.elapsedDisplay?.pausedAt == nil)
+        #expect(Int(viewModel.elapsedDisplay?.elapsed(at: clock.now) ?? -1) == 500)
+    }
+
+    @Test("freezeElapsedDisplay는 지금 시각에 고정하고, 이후 시간이 흘러도 늘지 않는다")
+    func freezeElapsedDisplayFreezesAtCurrentTime() {
+        let (viewModel, _, clock) = makeViewModel()
+
+        clock.advance(1800) // 30분
+        viewModel.freezeElapsedDisplay()
+
+        clock.advance(12) // 종료 처리(HealthKit 마무리)에 걸리는 시간
+        #expect(Int(viewModel.elapsedDisplay?.elapsed(at: clock.now) ?? -1) == 1800)
     }
 }

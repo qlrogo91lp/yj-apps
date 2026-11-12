@@ -893,4 +893,72 @@ struct WorkoutSessionViewModelTests {
 
         #expect(spy.calls == [.log("match started"), .log("match finished"), .log("save attempted")])
     }
+
+    // MARK: - elapsedDisplay (Task 4b — 표시·폰 앵커·저장이 같은 기준을 쓴다)
+
+    @Test @MainActor func snapshot_usesElapsedDisplayWhenAvailable() {
+        let vm = WorkoutSessionViewModel()
+        vm.healthKit.setLiveMetricsForTesting(elapsedSeconds: 7) // 틱 — 쓰이면 안 된다
+        vm.healthKit.setElapsedDisplayForTesting(WorkoutElapsedDisplay(
+            referenceDate: Date(timeIntervalSince1970: 0),
+            pausedAt: Date(timeIntervalSince1970: 100)
+        ))
+
+        vm.broadcastMetrics()
+
+        #expect(vm.lastMetrics?.elapsedSeconds == 100)
+    }
+
+    @Test @MainActor func snapshot_fallsBackToTickWhenDisplayNil() {
+        let vm = WorkoutSessionViewModel()
+        vm.healthKit.setLiveMetricsForTesting(elapsedSeconds: 7)
+
+        vm.broadcastMetrics()
+
+        #expect(vm.lastMetrics?.elapsedSeconds == 7)
+    }
+
+    @Test @MainActor func startMatch_elapsedAtStart_usesDisplay() {
+        let vm = WorkoutSessionViewModel()
+        vm.healthKit.setLiveMetricsForTesting(elapsedSeconds: 7)
+        vm.healthKit.setElapsedDisplayForTesting(WorkoutElapsedDisplay(
+            referenceDate: Date(timeIntervalSince1970: 0),
+            pausedAt: Date(timeIntervalSince1970: 300)
+        ))
+
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+
+        #expect(vm.currentSession()?.elapsedAtStart == 300)
+    }
+
+    @Test @MainActor func finishMatch_elapsedAtEnd_usesDisplay() {
+        let vm = WorkoutSessionViewModel()
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.healthKit.setLiveMetricsForTesting(elapsedSeconds: 7)
+        vm.healthKit.setElapsedDisplayForTesting(WorkoutElapsedDisplay(
+            referenceDate: Date(timeIntervalSince1970: 0),
+            pausedAt: Date(timeIntervalSince1970: 500)
+        ))
+
+        vm.finishMatch(result: .win, completedSets: [SetScore(my: 6, your: 3)])
+
+        #expect(vm.currentSession()?.elapsedAtEnd == 500)
+    }
+
+    @Test @MainActor func totalElapsedSeconds_readsFrozenDisplay_ignoresTick() {
+        let healthKit = WorkoutSessionService(configuration: .tennis)
+        healthKit.setLiveMetricsForTesting(elapsedSeconds: 7)
+        healthKit.setElapsedDisplayForTesting(WorkoutElapsedDisplay(
+            referenceDate: Date(timeIntervalSince1970: 0),
+            pausedAt: Date(timeIntervalSince1970: 1800)
+        ))
+
+        #expect(WorkoutSessionViewModel.totalElapsedSeconds(from: healthKit) == 1800)
+    }
+
+    @Test @MainActor func totalElapsedSeconds_nilWhenNoDisplay_fallsBackToResultDuration() {
+        let healthKit = WorkoutSessionService(configuration: .tennis)
+
+        #expect(WorkoutSessionViewModel.totalElapsedSeconds(from: healthKit) == nil)
+    }
 }

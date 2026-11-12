@@ -10,6 +10,13 @@ public final class WorkoutSessionService: NSObject, ObservableObject {
     @Published public private(set) var elapsedSeconds: Int = 0
     @Published public private(set) var currentDistanceMeters: Double = 0
     @Published public private(set) var currentSteps: Int = 0
+    /// 정지 제외 기준시각 모델. 운동이 시작되기 전이나 시작에 실패하면 nil.
+    /// 기존 `elapsedSeconds`(틱 카운터)는 그대로 유지한다 — 저장·전송 의미는 이 값에 의존하지 않는다.
+    @Published public private(set) var elapsedDisplay: WorkoutElapsedDisplay?
+
+    /// 운동 생애주기(시작·종료)마다 바뀌는 세대 토큰. 지연 도착한 delegate 콜백이 이미 끝났거나
+    /// 다음 운동이 시작된 뒤의 표시 모델을 덮어쓰지 않도록, 호출 시점에 캡처한 세대와 비교한다.
+    private var elapsedDisplayGeneration = 0
 
     public let configuration: WorkoutConfiguration
 
@@ -95,6 +102,7 @@ public final class WorkoutSessionService: NSObject, ObservableObject {
                 currentDistanceMeters = 0
                 currentSteps = 0
                 startTimer()
+                beginElapsedDisplaySession(at: now)
 
                 session.startActivity(with: now)
                 builder.beginCollection(withStart: now) { [weak self] _, _ in
@@ -108,7 +116,12 @@ public final class WorkoutSessionService: NSObject, ObservableObject {
         public func pauseWorkout() {
             guard let session = workoutSession else { return }
             session.pause()
-            DispatchQueue.main.async { self.isPaused = true }
+            let now = Date()
+            let generation = elapsedDisplayGeneration
+            DispatchQueue.main.async {
+                self.isPaused = true
+                self.applyElapsedDisplayState(.paused, at: now, generation: generation)
+            }
             timer?.invalidate()
             timer = nil
         }
@@ -116,7 +129,12 @@ public final class WorkoutSessionService: NSObject, ObservableObject {
         public func resumeWorkout() {
             guard let session = workoutSession else { return }
             session.resume()
-            DispatchQueue.main.async { self.isPaused = false }
+            let now = Date()
+            let generation = elapsedDisplayGeneration
+            DispatchQueue.main.async {
+                self.isPaused = false
+                self.applyElapsedDisplayState(.running, at: now, generation: generation)
+            }
             timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
                 DispatchQueue.main.async {
                     self?.elapsedSeconds += 1
@@ -135,6 +153,11 @@ public final class WorkoutSessionService: NSObject, ObservableObject {
 
             let endDate = Date()
             stopTimer()
+            // `stopWorkout()`은 비격리 async라 이 지점부터 어느 실행자에서 돌지 보장이 없다 — 다른
+            // @Published 쓰기(아래 `isWorkoutActive`)와 같은 이유. 여기만 `await`로 완료를 기다리는
+            // 까닭은 이 메서드가 반환된 "직후" 호출부(Ralli `endWorkout()`)가 `elapsedDisplay`를
+            // 바로 읽기 때문이다 — fire-and-forget이면 그 시점에 아직 고정되지 않았을 수 있다.
+            await MainActor.run { self.endElapsedDisplaySession(at: endDate) }
 
             // 세션을 끝내기(end) 전에 활동만 멈춘다. `.stopped` 동안은 앱이 백그라운드 실행 권한을 유지해
             // 손목을 내려도 아래 마무리(특히 finishWorkout — 건강 앱 운동 저장)가 멈추지 않는다.
@@ -240,6 +263,39 @@ public final class WorkoutSessionService: NSObject, ObservableObject {
         timer = nil
     }
 
+    /// 현재 세대 토큰. 호출 시점(delegate 콜백이 실제로 불린 시점)에 캡처해 `applyElapsedDisplayState`에
+    /// 넘기면, 그 세대가 끝난 뒤 지연 도착해도 `generation` 비교로 걸러진다.
+    internal var currentElapsedDisplayGeneration: Int {
+        elapsedDisplayGeneration
+    }
+
+    /// 새 운동의 표시 기준을 만든다. `startWorkout()`의 성공 경로에서 `startDate`와 같은 지점에 부른다.
+    internal func beginElapsedDisplaySession(at date: Date) {
+        elapsedDisplayGeneration += 1
+        elapsedDisplay = WorkoutElapsedDisplay(referenceDate: date)
+    }
+
+    /// 표시를 종료 요청 시각에 고정한다. `stopWorkout()`의 HealthKit 마무리를 기다리는 동안
+    /// 표시가 더 흐르지 않게, 그리고 이후 지연 도착한 이벤트가 덮어쓰지 못하게 세대도 함께 올린다.
+    internal func endElapsedDisplaySession(at date: Date) {
+        elapsedDisplay = elapsedDisplay?.pausing(at: date)
+        elapsedDisplayGeneration += 1
+    }
+
+    /// HK 세션 상태 변화를 표시 모델에 반영한다. `generation`이 현재 세대와 다르면(이미 끝났거나
+    /// 다음 운동이 시작된 뒤 지연 도착한 이벤트) 무시한다.
+    internal func applyElapsedDisplayState(_ state: HKWorkoutSessionState, at date: Date, generation: Int) {
+        guard generation == elapsedDisplayGeneration else { return }
+        switch state {
+        case .running:
+            elapsedDisplay = elapsedDisplay?.resuming(at: date)
+        case .paused:
+            elapsedDisplay = elapsedDisplay?.pausing(at: date)
+        default:
+            break
+        }
+    }
+
     public func formattedElapsed() -> String {
         let hours = elapsedSeconds / 3600
         let minutes = (elapsedSeconds % 3600) / 60
@@ -256,12 +312,16 @@ public final class WorkoutSessionService: NSObject, ObservableObject {
         public func workoutSession(_: HKWorkoutSession,
                                    didChangeTo toState: HKWorkoutSessionState,
                                    from _: HKWorkoutSessionState,
-                                   date _: Date)
+                                   date: Date)
         {
             if toState == .stopped { stopWaiter?.resume() }
+            // 호출 시점(이 delegate가 실제로 불린 시점)에 세대를 캡처한다 — dispatch된 블록 안에서
+            // 읽으면 그 사이 다음 운동이 시작돼 세대가 이미 바뀐 뒤일 수 있어, 지연 도착 판별이 무의미해진다.
+            let generation = elapsedDisplayGeneration
             DispatchQueue.main.async {
                 self.isWorkoutActive = toState == .running
                 self.isPaused = toState == .paused
+                self.applyElapsedDisplayState(toState, at: date, generation: generation)
             }
         }
 
@@ -335,6 +395,11 @@ public final class WorkoutSessionService: NSObject, ObservableObject {
             if let elapsedSeconds { self.elapsedSeconds = elapsedSeconds }
             if let distanceMeters { currentDistanceMeters = distanceMeters }
             if let steps { currentSteps = steps }
+        }
+
+        /// 테스트·프리뷰 전용: 실제 HealthKit 세션 생명주기 없이 표시 모델을 직접 주입한다.
+        func setElapsedDisplayForTesting(_ display: WorkoutElapsedDisplay?) {
+            elapsedDisplay = display
         }
     }
 #endif

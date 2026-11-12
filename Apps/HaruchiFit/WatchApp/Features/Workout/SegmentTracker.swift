@@ -1,4 +1,5 @@
 import Foundation
+import WorkoutCore
 
 /// 세션 안의 구간 경계를 잰다. 근력↔유산소 전환 한 번이 구간 하나를 닫고 다음을 연다.
 ///
@@ -55,6 +56,19 @@ struct SegmentTracker {
         guard let since = pausedSince else { return }
         pausedAccumulated += now().timeIntervalSince(since)
         pausedSince = nil
+    }
+
+    /// 이 구간 원본을 `WorkoutElapsedDisplay`로 투영한다 — 시계를 두 개 두지 않고, 공용
+    /// `WorkoutElapsedText`(워치 화면)와 Ralli 쪽 폰 앵커·저장이 읽는 값과 같은 모양으로 맞춘다.
+    /// 투영일 뿐이다 — 이 타입이 pause/resume의 단일 소스라는 사실은 바뀌지 않는다.
+    var elapsedDisplay: WorkoutElapsedDisplay {
+        WorkoutElapsedDisplay(referenceDate: startedAt.addingTimeInterval(pausedAccumulated), pausedAt: pausedSince)
+    }
+
+    /// 지금 시각에 고정한 표시 값을 돌려준다. **이 구간 원본의 pause/저장 상태를 바꾸지 않는다** —
+    /// `end()`가 화면에 "멈췄다"를 보여주려고 부르는 조회용 호출이다.
+    func frozenElapsedDisplay() -> WorkoutElapsedDisplay {
+        elapsedDisplay.pausing(at: now())
     }
 
     /// 열린 구간을 닫고 다음 구간을 연다.

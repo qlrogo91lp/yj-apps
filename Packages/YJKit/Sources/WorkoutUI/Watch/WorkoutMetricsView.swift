@@ -10,11 +10,13 @@
         private let metrics: WorkoutMetrics
         private let isPaused: Bool
         private let statusText: String?
+        private let elapsedDisplay: WorkoutElapsedDisplay?
 
-        public init(metrics: WorkoutMetrics, isPaused: Bool, statusText: String? = nil) {
+        public init(metrics: WorkoutMetrics, isPaused: Bool, statusText: String? = nil, elapsedDisplay: WorkoutElapsedDisplay? = nil) {
             self.metrics = metrics
             self.isPaused = isPaused
             self.statusText = statusText
+            self.elapsedDisplay = elapsedDisplay
         }
 
         public var body: some View {
@@ -26,10 +28,10 @@
                         .lineLimit(1)
                 }
 
-                Text(metrics.formattedElapsed)
+                elapsedView
                     .font(.system(size: 45, weight: .semibold, design: .rounded))
                     .foregroundColor(isPaused ? Color.yellow.opacity(0.5) : .yellow)
-                    .contentTransition(.numericText())
+                    .monospacedDigit()
 
                 HStack(alignment: .bottom, spacing: 6) {
                     Text(String(format: "%.0f", metrics.activeCalories))
@@ -64,6 +66,15 @@
         private var heartRateText: String {
             metrics.heartRate > 0 ? String(format: "%.0f", metrics.heartRate) : "--"
         }
+
+        @ViewBuilder
+        private var elapsedView: some View {
+            if let elapsedDisplay {
+                WorkoutElapsedText(display: elapsedDisplay)
+            } else {
+                Text(metrics.formattedElapsed)
+            }
+        }
     }
 
     #Preview("기본") {
@@ -78,6 +89,25 @@
             metrics: WorkoutMetrics(elapsedSeconds: 1523, activeCalories: 245, totalCalories: 303, heartRate: 102),
             isPaused: false,
             statusText: "진행 중 · 근력"
+        )
+    }
+
+    #Preview("elapsedDisplay — 실행 중") {
+        WorkoutMetricsView(
+            metrics: WorkoutMetrics(elapsedSeconds: 1523, activeCalories: 245, totalCalories: 303, heartRate: 102),
+            isPaused: false,
+            elapsedDisplay: WorkoutElapsedDisplay(referenceDate: Date().addingTimeInterval(-1523))
+        )
+    }
+
+    #Preview("elapsedDisplay — 정지 중") {
+        WorkoutMetricsView(
+            metrics: WorkoutMetrics(elapsedSeconds: 1523, activeCalories: 245, totalCalories: 303, heartRate: 102),
+            isPaused: true,
+            elapsedDisplay: WorkoutElapsedDisplay(
+                referenceDate: Date().addingTimeInterval(-1523),
+                pausedAt: Date()
+            )
         )
     }
 #endif

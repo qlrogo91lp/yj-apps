@@ -59,7 +59,7 @@ struct WorkoutSessionView: View {
     }
 
     private var metricsTab: some View {
-        WorkoutMetricsView(metrics: viewModel.currentMetrics, isPaused: viewModel.isPaused)
+        WorkoutMetricsView(metrics: viewModel.currentMetrics, isPaused: viewModel.isPaused, elapsedDisplay: viewModel.elapsedDisplay)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Color.clear.frame(width: 36, height: 36)

@@ -14,6 +14,9 @@ class WorkoutSessionViewModel: ObservableObject {
     let workoutSessionId: UUID = .init()
     @Published private(set) var lastMetrics: WorkoutMetrics?
     @Published private(set) var currentMetrics = WorkoutMetrics()
+    /// `healthKit.elapsedDisplay` 를 그대로 다시 발행한다. 서비스와 이 뷰모델은 서로 다른
+    /// ObservableObject 라 감싸기만 하면 뷰가 갱신되지 않는다 — 구독해서 republish 해야 한다.
+    @Published private(set) var elapsedDisplay: WorkoutElapsedDisplay?
 
     private let connectivity = MatchConnectivity.shared
     private let appGroupDefaults = UserDefaults(suiteName: "group.com.yj.TennisCounter")
@@ -58,6 +61,10 @@ class WorkoutSessionViewModel: ObservableObject {
         healthKit.$isPaused
             .receive(on: DispatchQueue.main)
             .assign(to: &$isPaused)
+
+        healthKit.$elapsedDisplay
+            .receive(on: DispatchQueue.main)
+            .assign(to: &$elapsedDisplay)
 
         healthKit.$isPaused
             .dropFirst()
@@ -215,7 +222,7 @@ class WorkoutSessionViewModel: ObservableObject {
             options: options,
             kcalAtStart: healthKit.currentCalories,
             totalKcalAtStart: healthKit.currentCalories + healthKit.currentBasalCalories,
-            elapsedAtStart: healthKit.elapsedSeconds
+            elapsedAtStart: Int(Self.elapsedSeconds(from: healthKit))
         )
         _currentSession = session
 
@@ -247,7 +254,7 @@ class WorkoutSessionViewModel: ObservableObject {
         session.completedSets = completedSets
         session.kcalAtEnd = healthKit.currentCalories
         session.totalKcalAtEnd = healthKit.currentCalories + healthKit.currentBasalCalories
-        session.elapsedAtEnd = healthKit.elapsedSeconds
+        session.elapsedAtEnd = Int(Self.elapsedSeconds(from: healthKit))
         session.mySetScore = completedSets.count(where: { $0.my > $0.your })
         session.yourSetScore = completedSets.count(where: { $0.your > $0.my })
 
@@ -324,8 +331,11 @@ class WorkoutSessionViewModel: ObservableObject {
 
         Task {
             // 워크아웃 전체 평균 심박과 최종 시간·칼로리를 종료 메시지에 함께 보낸다.
+            // stopWorkout() 이 종료 요청 시각에 이미 elapsedDisplay 를 고정하므로(WorkoutCore Task 2),
+            // 여기서 읽어도 HealthKit 마무리에 걸린 시간만큼 늘어나 있지 않다.
             let result = await healthKit.stopWorkout()
-            connectivity.sendWorkoutEnd(sessionId: sessionId, result: result, startedAt: startedAt)
+            let totalElapsedSeconds = Self.totalElapsedSeconds(from: healthKit)
+            connectivity.sendWorkoutEnd(sessionId: sessionId, result: result, startedAt: startedAt, totalElapsedSeconds: totalElapsedSeconds)
         }
     }
 
@@ -338,10 +348,23 @@ class WorkoutSessionViewModel: ObservableObject {
     /// healthKit의 현재 값을 즉시 읽는 동기 스냅샷.
     /// currentMetrics 파이프라인(비동기)과 broadcastMetrics(동기)가 같은 매핑을 쓰도록 한 곳에 둔다.
     private static func snapshot(of healthKit: WorkoutSessionService) -> WorkoutMetrics {
-        WorkoutMetrics(elapsedSeconds: TimeInterval(healthKit.elapsedSeconds),
+        WorkoutMetrics(elapsedSeconds: elapsedSeconds(from: healthKit),
                        activeCalories: healthKit.currentCalories,
                        totalCalories: healthKit.currentCalories + healthKit.currentBasalCalories,
                        heartRate: healthKit.currentHeartRate)
+    }
+
+    /// Task 4b — 화면(currentMetrics/snapshot)·폰 앵커(broadcastMetrics)·경기 시간(startMatch/finishMatch)이
+    /// **모두 이 한 곳**에서 경과시간을 읽는다. 표시 모델(`elapsedDisplay`, 정지 제외 벽시계)이 있으면
+    /// 그 값을, 없으면(구버전 경로·HK 이벤트 전) 기존 틱 카운터로 폴백한다.
+    static func elapsedSeconds(from healthKit: WorkoutSessionService, at date: Date = Date()) -> TimeInterval {
+        healthKit.elapsedDisplay?.elapsed(at: date) ?? TimeInterval(healthKit.elapsedSeconds)
+    }
+
+    /// 종료 메시지에 실을 총시간(정지 제외). 표시 모델이 없으면(구버전 경로) nil을 돌려주고,
+    /// 호출부(`MatchConnectivity.workoutEndMessage`)가 기존 `result.durationSeconds`(정지 포함 벽시계)로 폴백한다.
+    static func totalElapsedSeconds(from healthKit: WorkoutSessionService, at date: Date = Date()) -> Int? {
+        healthKit.elapsedDisplay.map { Int($0.elapsed(at: date)) }
     }
 
     private func handleIncomingSessionStart(_ msg: SessionStartMessage) {

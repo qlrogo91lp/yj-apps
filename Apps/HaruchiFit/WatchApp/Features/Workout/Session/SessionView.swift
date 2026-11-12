@@ -15,7 +15,7 @@ struct SessionView: View {
         // 화면을 쌓지 않는다 — 툴바가 놓일 내비게이션 바를 얻으려고 감쌀 뿐이다.
         NavigationStack {
             TabView(selection: $page) {
-                WorkoutMetricsView(metrics: viewModel.metrics, isPaused: viewModel.isPaused)
+                WorkoutMetricsView(metrics: viewModel.metrics, isPaused: viewModel.isPaused, elapsedDisplay: viewModel.elapsedDisplay)
                     .tag(Page.metrics)
                 WorkoutControlsView(
                     isPaused: viewModel.isPaused,

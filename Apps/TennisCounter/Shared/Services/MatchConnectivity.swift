@@ -88,7 +88,10 @@ final class MatchConnectivity: ObservableObject {
         service.send(WorkoutMetricsMessage(metrics: metrics, isPaused: isPaused), via: .realtimeOnly)
     }
 
-    func sendWorkoutEnd(sessionId: UUID, result: WorkoutResult? = nil, startedAt: Date? = nil) {
+    /// - Parameter totalElapsedSeconds: 정지 제외 표시 기준(`WorkoutElapsedDisplay`) 총시간. 있으면
+    ///   정지를 포함한 `result.durationSeconds`(벽시계) 대신 이 값을 싣는다 — 워치 화면·폰 앵커·저장
+    ///   기록이 같은 기준을 쓰게 한다 (신규 운동만. 과거 기록은 건드리지 않는다).
+    func sendWorkoutEnd(sessionId: UUID, result: WorkoutResult? = nil, startedAt: Date? = nil, totalElapsedSeconds: Int? = nil) {
         // 워치 → 폰 종료 메시지는 세션 기록의 유일한 운반체라 큐로 보낸다. 폰 → 워치는 "끝내라"는
         // 명령이라 늦게 도착하면 안 되므로 .reliable 을 유지한다.
         #if os(watchOS)
@@ -96,15 +99,19 @@ final class MatchConnectivity: ObservableObject {
         #else
             let delivery = Delivery.reliable
         #endif
-        service.send(Self.workoutEndMessage(sessionId: sessionId, result: result, startedAt: startedAt), via: delivery)
+        let message = Self.workoutEndMessage(sessionId: sessionId, result: result, startedAt: startedAt, totalElapsedSeconds: totalElapsedSeconds)
+        service.send(message, via: delivery)
     }
 
-    static func workoutEndMessage(sessionId: UUID, result: WorkoutResult?, startedAt: Date?) -> WorkoutEndMessage {
+    static func workoutEndMessage(sessionId: UUID, result: WorkoutResult?, startedAt: Date?, totalElapsedSeconds: Int? = nil) -> WorkoutEndMessage {
         WorkoutEndMessage(
             sessionId: sessionId,
             startedAt: startedAt,
             endedAt: result?.endedAt,
-            elapsedSeconds: result?.durationSeconds,
+            // result가 nil이면(이미 멈춘 세션 등) 유효한 종료가 아니었다는 뜻이다. totalElapsedSeconds가
+            // 이전 세션의 고정값을 들고 있어도 여기선 무시한다 — 안 그러면 "값이 하나라도 있으면 저장"
+            // 가드(WorkoutSessionRecorder)를 통과해 빈 레코드가 기존 레코드를 덮어쓴다 (코드 리뷰 finding).
+            elapsedSeconds: result == nil ? nil : (totalElapsedSeconds ?? result?.durationSeconds),
             activeCalories: result?.caloriesBurned,
             totalCalories: result?.totalCaloriesBurned,
             averageHeartRate: result?.averageHeartRate,
