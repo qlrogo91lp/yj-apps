@@ -562,6 +562,31 @@ struct ScoreViewModelTests {
         #expect(vm.score.gameMode == .normal)
     }
 
+    @Test @MainActor func watchMatchTieBreak_manualDrawPreservesTiedPoints() {
+        var result: MatchResult?
+        var sets: [SetScore] = []
+        let vm = ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false, matchTieBreak: true))
+        vm.onMatchFinished = { value, scores in result = value; sets = scores }
+        for _ in 0 ..< 6 {
+            vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
+        }
+        for _ in 0 ..< 6 {
+            vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent)
+        }
+        #expect(vm.score.gameMode == .tieBreak)
+
+        for _ in 0 ..< 5 {
+            vm.addPoint(.me); vm.addPoint(.opponent)
+        } // 5-5
+
+        #expect(vm.canFinishAsDraw == true)
+        vm.finishAsDraw()
+
+        #expect(result == .draw)
+        #expect(sets.last?.my == 5)
+        #expect(sets.last?.your == 5)
+    }
+
     @Test @MainActor func watchMatchTieBreak_finishesOnceThroughCallback() {
         var results: [MatchResult] = []
         var sets: [SetScore] = []

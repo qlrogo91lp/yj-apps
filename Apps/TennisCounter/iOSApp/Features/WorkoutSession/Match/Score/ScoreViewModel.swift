@@ -66,7 +66,12 @@ final class ScoreViewModel: ObservableObject {
     func finishAsDraw() {
         guard canFinishAsDraw else { return }
         // 진행 중 세트도 저장해야 5:5가 결과·전송·기록에서 사라지지 않는다.
-        if myGameScore > 0 {
+        // 매치 TB 중엔 게임 스코어가 0:0으로 고정되어 있어 타이브레이크 점수를 따로 본다.
+        if matchTieBreakInProgress {
+            if score.myTieBreak > 0 {
+                completedSets.append((my: score.myTieBreak, your: score.yourTieBreak))
+            }
+        } else if myGameScore > 0 {
             completedSets.append((my: myGameScore, your: yourGameScore))
         }
         matchResult = .draw

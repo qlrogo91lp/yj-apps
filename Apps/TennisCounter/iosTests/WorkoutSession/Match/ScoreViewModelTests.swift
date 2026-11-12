@@ -581,6 +581,28 @@ struct ScoreViewModelTests {
         #expect(vm.matchResult == .win)
     }
 
+    @Test @MainActor func matchTieBreak_manualDrawPreservesTiedPoints() {
+        let vm = ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false, matchTieBreak: true))
+        for _ in 0 ..< 6 {
+            vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
+        }
+        for _ in 0 ..< 6 {
+            vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent); vm.addPoint(.opponent)
+        }
+        #expect(vm.isTieBreak == true)
+
+        for _ in 0 ..< 5 {
+            vm.addPoint(.me); vm.addPoint(.opponent)
+        } // 5-5
+
+        #expect(vm.canFinishAsDraw == true)
+        vm.finishAsDraw()
+
+        #expect(vm.matchResult == .draw)
+        #expect(vm.completedSets.last?.my == 5)
+        #expect(vm.completedSets.last?.your == 5)
+    }
+
     @Test @MainActor func matchTieBreak_undoOfFirstPointReturnsToSetTwoEnd() {
         let vm = ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false, matchTieBreak: true))
         for _ in 0 ..< 6 {
