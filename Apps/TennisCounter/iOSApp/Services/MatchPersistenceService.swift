@@ -2,6 +2,13 @@ import Foundation
 import PersistenceCore
 import SwiftData
 
+extension Notification.Name {
+    /// `MatchPersistenceService.upsert` 가 성공했다. `object` 는 저장한 서비스.
+    /// 기록 탭이 이미 열린 뒤 도착한 워치 저장을 목록에 반영하는 신호다 — 화면은 서비스와 다른
+    /// `ModelContext` 를 써서 저장을 스스로 알아채지 못한다.
+    static let matchStoreDidChange = Notification.Name("matchStoreDidChange")
+}
+
 enum PersistenceError: Error {
     case notConfigured
     case saveFailed(Error)
@@ -50,6 +57,7 @@ final class MatchPersistenceService: MatchUpserting {
         } catch {
             throw PersistenceError.saveFailed(error)
         }
+        NotificationCenter.default.post(name: .matchStoreDidChange, object: self)
     }
 
     /// SetRecord 는 deleteRule: .cascade 라 함께 지워진다.

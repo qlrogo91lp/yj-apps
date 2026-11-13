@@ -172,4 +172,37 @@ struct MatchPersistenceServiceTests {
 
         #expect(try service.fetchAll().isEmpty)
     }
+
+    /// 기록 탭이 이미 열린 뒤 워치 저장이 도착해도 목록이 따라오게 하는 신호.
+    @Test func upsertPostsMatchStoreDidChange() async throws {
+        let service = try makeService()
+        let match = Match()
+        match.matchId = UUID()
+
+        await confirmation(expectedCount: 1) { confirm in
+            let observer = NotificationCenter.default.addObserver(
+                forName: .matchStoreDidChange,
+                object: service,
+                queue: nil
+            ) { _ in confirm() }
+            defer { NotificationCenter.default.removeObserver(observer) }
+
+            try? service.upsert(match)
+        }
+    }
+
+    @Test func failedUpsertDoesNotPostMatchStoreDidChange() async {
+        let service = MatchPersistenceService() // configure 안 함 → notConfigured 로 실패
+
+        await confirmation(expectedCount: 0) { confirm in
+            let observer = NotificationCenter.default.addObserver(
+                forName: .matchStoreDidChange,
+                object: service,
+                queue: nil
+            ) { _ in confirm() }
+            defer { NotificationCenter.default.removeObserver(observer) }
+
+            #expect(throws: PersistenceError.self) { try service.upsert(Match()) }
+        }
+    }
 }
