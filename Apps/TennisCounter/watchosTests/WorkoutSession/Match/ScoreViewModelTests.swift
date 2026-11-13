@@ -483,7 +483,10 @@ struct ScoreViewModelTests {
 
     @Test @MainActor func watchMatchTieBreak_undoOfWinningPointRestoresTarget() {
         var result: MatchResult?
-        let vm = ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false, matchTieBreak: true), undoGuardInterval: 0)
+        let vm = ScoreViewModel(
+            options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false, matchTieBreak: true),
+            undoGuardInterval: 0
+        )
         vm.onMatchFinished = { value, _ in result = value }
         for _ in 0 ..< 6 {
             vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
