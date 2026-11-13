@@ -95,4 +95,29 @@ struct WatchMatchSaverTests {
 
         #expect(try persistence.matches.fetchByWorkoutSession(sid).count == 1)
     }
+
+    /// 워치 보관함이 이 ACK 로 그 경기 하나만 지운다.
+    @Test func ackCarriesMatchIdOfSavedMatch() {
+        let acks = AckBox()
+        let mid = UUID()
+
+        makeSaver(store: MatchStoreStub(), acks: acks).save(message(matchId: mid))
+
+        #expect(acks.sent.count == 1)
+        #expect(acks.sent.first?.matchId == mid)
+        #expect(acks.sent.first?.success == true)
+    }
+
+    @Test func failedSaveAckAlsoCarriesMatchId() {
+        let store = MatchStoreStub()
+        store.shouldFail = true
+        let acks = AckBox()
+        let mid = UUID()
+
+        makeSaver(store: store, acks: acks).save(message(matchId: mid))
+
+        #expect(acks.sent.count == 1)
+        #expect(acks.sent.first?.success == false)
+        #expect(acks.sent.first?.matchId == mid)
+    }
 }
