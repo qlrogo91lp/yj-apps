@@ -7,6 +7,9 @@
     /// 메시지 정의는 앱 몫. macOS에는 WatchConnectivity가 없어 이 파일 전체가 제외된다.
     public final class ConnectivityService: NSObject, ObservableObject {
         @Published public private(set) var isCounterpartReachable: Bool = false
+        /// WCSession 이 `.activated` 인지. 활성화 전에 `send` 하면 아무것도 보내지 않으므로,
+        /// 보관했다가 다시 보내는 호출부는 이 값이 `true` 가 될 때 다시 시도한다. main 큐에서 갱신된다.
+        @Published public private(set) var isActivated: Bool = false
 
         /// clearSessionContext가 쓰는 예약 타입. 수신 측엔 등록이 없으므로 라우터가 자연히 무시한다.
         static let sessionClearedType = "sessionCleared"
@@ -36,8 +39,12 @@
             }
         }
 
-        public func send(_ message: some ConnectivityMessage, via delivery: Delivery) {
-            guard WCSession.default.activationState == .activated else { return }
+        /// - Returns: WCSession 전송 API 를 실제로 호출했으면 `true`. 활성화 전이거나 `isWatchAppInstalled`·
+        ///   `isReachable` 가드에 걸려 아무것도 하지 않았으면 `false`. `true` 는 배달 확인이 아니다 —
+        ///   시스템에 넘겼다는 뜻일 뿐이다.
+        @discardableResult
+        public func send(_ message: some ConnectivityMessage, via delivery: Delivery) -> Bool {
+            guard WCSession.default.activationState == .activated else { return false }
             let dict = MessageEnvelope.stamp(
                 message.toDictionary(),
                 type: type(of: message).messageType,
@@ -46,9 +53,9 @@
             switch delivery {
             case .realtimeOnly:
                 #if os(iOS)
-                    guard WCSession.default.isWatchAppInstalled else { return }
+                    guard WCSession.default.isWatchAppInstalled else { return false }
                 #endif
-                guard WCSession.default.isReachable else { return }
+                guard WCSession.default.isReachable else { return false }
                 WCSession.default.sendMessage(dict, replyHandler: nil, errorHandler: nil)
             case .reliable:
                 // 원본 sendReliably와 가드 파리티 유지 — iOS isWatchAppInstalled 가드 없음
@@ -61,7 +68,7 @@
                 WCSession.default.transferUserInfo(dict)
             case .context:
                 #if os(iOS)
-                    guard WCSession.default.isWatchAppInstalled else { return }
+                    guard WCSession.default.isWatchAppInstalled else { return false }
                 #endif
                 if WCSession.default.isReachable {
                     WCSession.default.sendMessage(dict, replyHandler: nil, errorHandler: nil)
@@ -69,6 +76,7 @@
                     try? WCSession.default.updateApplicationContext(dict)
                 }
             }
+            return true
         }
 
         /// 드라이버가 운동/매치를 끝낼 때 자기 outgoing applicationContext를 비운다.
@@ -88,10 +96,14 @@
 
     extension ConnectivityService: WCSessionDelegate {
         public func session(_ session: WCSession,
-                            activationDidCompleteWith _: WCSessionActivationState,
+                            activationDidCompleteWith activationState: WCSessionActivationState,
                             error _: Error?)
         {
-            DispatchQueue.main.async { self.isCounterpartReachable = session.isReachable }
+            let isActivated = activationState == .activated
+            DispatchQueue.main.async {
+                self.isActivated = isActivated
+                self.isCounterpartReachable = session.isReachable
+            }
             // 콜드 런치 함정: 앱이 꺼져 있는 동안 updateApplicationContext로 도착한 값은
             // didReceiveApplicationContext가 불리지 않고 receivedApplicationContext에만 남는다.
             // 활성화 직후 직접 읽어 같은 라우팅으로 배달한다. staleness는 등록된 maxAge와
@@ -120,6 +132,7 @@
         #if os(iOS)
             public func sessionDidBecomeInactive(_: WCSession) {}
             public func sessionDidDeactivate(_: WCSession) {
+                DispatchQueue.main.async { self.isActivated = false }
                 WCSession.default.activate()
             }
         #endif

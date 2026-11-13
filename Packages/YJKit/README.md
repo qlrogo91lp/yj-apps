@@ -224,6 +224,7 @@ connectivity.onReceive(RoundRecordMessage.self, maxAge: 60) { record in ... }
 connectivity.send(RoundRecordMessage(...), via: .queued)
 ```
 
+- `send` 는 WCSession 전송 API 를 실제로 호출했으면 `true`, 활성화 전이거나 설치·도달 가드에 걸려 아무것도 안 했으면 `false` 를 돌려준다 (`@discardableResult`). `true` 는 배달 확인이 아니다. 활성화 여부는 `isActivated` 로 발행한다.
 - 코어가 모든 발신에 `type`·`sentAt`을 스탬프한다. `maxAge`는 sentAt 기준이며, sentAt 없는 수신(구버전)은 stale로 보지 않는다.
 - sticky 값이 필요하면(SwiftUI `@Published` 구독) 앱 레이어에서 얇은 래퍼로 복원할 것 — 테니스 앱의 `MatchConnectivity` 참조.
 
