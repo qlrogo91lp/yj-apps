@@ -31,7 +31,11 @@ struct MatchSaveOutboxTests {
         MatchSaveOutbox(defaults: defaults, send: { spy.send($0) }, now: { clock.date })
     }
 
-    private func message(sessionId: UUID = UUID(), matchId: UUID = UUID(), endedAt: Date = Date(timeIntervalSince1970: 2_000_000_000)) -> MatchEndMessage {
+    private func message(
+        sessionId: UUID = UUID(),
+        matchId: UUID = UUID(),
+        endedAt: Date = Date(timeIntervalSince1970: 2_000_000_000)
+    ) -> MatchEndMessage {
         MatchEndMessage(
             sessionId: sessionId,
             result: "win",
