@@ -26,6 +26,7 @@ class WorkoutSessionViewModel: ObservableObject {
     let scoreVM: ScoreViewModel
     private let haptics: MatchHapticsPlaying
     private let crashReporter: CrashReporting
+    private let saveOutbox: MatchSaveEnqueuing
     private(set) var isDriver = false
     /// 워크아웃 식별자. 상대 기기의 id를 채택하면 그 값으로 바뀌고, 워크아웃이 끝날 때까지 유지된다.
     /// handleIncomingSessionStart의 동시 시작 race 가드는 이 값(workoutSessionId 아님)과 비교한다 —
@@ -46,13 +47,15 @@ class WorkoutSessionViewModel: ObservableObject {
     init(healthKit: WorkoutSessionService = WorkoutSessionService(configuration: .tennis),
          metricsThrottle: TimeInterval = 5, ackTimeoutSeconds: TimeInterval = 8,
          haptics: MatchHapticsPlaying = MatchHaptics(),
-         crashReporter: CrashReporting = AppCrashReporter.current)
+         crashReporter: CrashReporting = AppCrashReporter.current,
+         saveOutbox: MatchSaveEnqueuing = MatchSaveOutbox.shared)
     {
         self.healthKit = healthKit
         self.metricsThrottle = metricsThrottle
         self.ackTimeoutSeconds = ackTimeoutSeconds
         self.haptics = haptics
         self.crashReporter = crashReporter
+        self.saveOutbox = saveOutbox
         // 점수 햅틱도 같은 인스턴스를 타야 테스트 스파이가 한 곳에서 다 본다
         scoreVM = ScoreViewModel(
             options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false),
@@ -271,7 +274,8 @@ class WorkoutSessionViewModel: ObservableObject {
     }
 
     /// Watch엔 로컬 저장소가 없다. 저장 버튼 → iOS에 저장 요청을 보내고 iOS가 히스토리에 persist 한다.
-    /// 요청은 큐(`transferUserInfo`)로 가므로 폰 앱이 꺼져 있으면 ack 가 늦다.
+    /// 요청은 보관함(`MatchSaveOutbox`)에 먼저 적힌 뒤 큐(`transferUserInfo`)로 가고, 폰의 ack 가 올 때까지
+    /// 보관함이 다시 보낸다. 폰 앱이 꺼져 있으면 ack 가 늦다.
     /// iOS의 ack(`matchSaveResult`)를 받아 실제 결과를 반영하며, ackTimeoutSeconds 안에 ack가
     /// 없으면 failed가 아니라 waiting(폰 대기)으로 전환한다 — 늦은 ack 도 받는다. saveAttemptToken은 재시도로 새 시도가 시작된 뒤 이전 시도의
     /// 지연된 타임아웃이 새 상태를 덮어쓰지 않게 막는 표식이다.
@@ -281,7 +285,7 @@ class WorkoutSessionViewModel: ObservableObject {
         let token = saveAttemptToken
         crashReporter.log("save attempted")
         saveAckState = .pending
-        connectivity.sendMatchSave(makeMatchEndMessage(session: session))
+        saveOutbox.enqueue(makeMatchEndMessage(session: session))
         DispatchQueue.main.asyncAfter(deadline: .now() + ackTimeoutSeconds) { [weak self] in
             guard let self, saveAttemptToken == token, saveAckState == .pending else { return }
             saveAckState = .waiting

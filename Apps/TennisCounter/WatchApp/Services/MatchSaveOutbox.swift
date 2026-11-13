@@ -1,3 +1,4 @@
+import Combine
 import Foundation
 
 /// 경기 저장 요청을 보관함에 넣는 좁은 인터페이스. 뷰모델 테스트가 스파이를 넣는다.
@@ -18,6 +19,12 @@ protocol MatchSaveEnqueuing {
 /// `"lastSentAt"`(epoch 초) 를 갖는다.
 @MainActor
 final class MatchSaveOutbox: MatchSaveEnqueuing {
+    /// 앱 수명 내내 살아 있어야 운동 화면이 없을 때도 재전송한다 (폰의 `WatchMatchSaver` 와 같은 이유).
+    static let shared = MatchSaveOutbox(
+        defaults: .standard,
+        send: { MatchConnectivity.shared.sendMatchSave($0) }
+    )
+
     static let storageKey = "pendingMatchSaves"
 
     private enum EntryKey {
@@ -32,6 +39,7 @@ final class MatchSaveOutbox: MatchSaveEnqueuing {
     private let now: () -> Date
     private let resendInterval: TimeInterval
     private let maxAge: TimeInterval
+    private var cancellables = Set<AnyCancellable>()
 
     /// - Parameter send: WCSession 전송 API 를 실제로 불렀으면 `true`. `false` 면 보낸 것으로 치지 않는다.
     init(defaults: UserDefaults,
@@ -45,6 +53,32 @@ final class MatchSaveOutbox: MatchSaveEnqueuing {
         self.now = now
         self.resendInterval = resendInterval
         self.maxAge = maxAge
+    }
+
+    /// 세션 활성화·폰 연결 복귀 때 다시 보내고, 폰의 ACK 로 항목을 지운다.
+    /// 다시 불러도 구독이 겹치지 않는다.
+    ///
+    /// `receivedMatchSaveResult` 를 nil 로 지우지 않는다 — 결과 화면의 뷰모델이 같은 값을 소비한다.
+    func bind(to connectivity: MatchConnectivity) {
+        cancellables.removeAll()
+
+        connectivity.$isActivated
+            .filter(\.self)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.flush() }
+            .store(in: &cancellables)
+
+        connectivity.$isWatchReachable
+            .filter(\.self)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.flush() }
+            .store(in: &cancellables)
+
+        connectivity.$receivedMatchSaveResult
+            .compactMap(\.self)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] result in self?.acknowledge(result) }
+            .store(in: &cancellables)
     }
 
     /// 보관 중인 경기의 matchId. 테스트와 진단용.
