@@ -32,6 +32,7 @@ jobs:
       golf: ${{ steps.filter.outputs.golf }}
       tennis: ${{ steps.filter.outputs.tennis }}
       haruchi: ${{ steps.filter.outputs.haruchi }}
+      hanjan: ${{ steps.filter.outputs.hanjan }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -52,11 +53,12 @@ jobs:
           golf=false
           tennis=false
           haruchi=false
+          hanjan=false
 
           # base 를 못 구하는 경우(첫 푸시, force-push)에는 안전하게 전부 실행한다.
           if [ -z "$base" ] || ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
             echo "base 커밋을 확인할 수 없다 — 전 대상을 실행한다"
-            kit=true; golf=true; tennis=true; haruchi=true
+            kit=true; golf=true; tennis=true; haruchi=true; hanjan=true
           else
             changed=$(git diff --name-only "$base" "$head")
             echo "--- 변경된 파일 ---"
@@ -74,11 +76,11 @@ jobs:
 
             # 루트 설정과 워크스페이스는 전 대상에 영향을 준다.
             if echo "$relevant" | grep -qE '^(\.github/|Makefile|\.swiftlint\.yml|YJApps\.xcworkspace/)'; then
-              kit=true; golf=true; tennis=true; haruchi=true
+              kit=true; golf=true; tennis=true; haruchi=true; hanjan=true
             fi
             # 코어 변경은 전 앱으로 파급된다.
             if echo "$relevant" | grep -qE '^Packages/YJKit/'; then
-              kit=true; golf=true; tennis=true; haruchi=true
+              kit=true; golf=true; tennis=true; haruchi=true; hanjan=true
             fi
             if echo "$relevant" | grep -qE '^Apps/GolfCounter/'; then
               golf=true
@@ -89,6 +91,9 @@ jobs:
             if echo "$relevant" | grep -qE '^Apps/HaruchiFit/'; then
               haruchi=true
             fi
+            if echo "$relevant" | grep -qE '^Apps/Hanjan/'; then
+              hanjan=true
+            fi
           fi
 
           {
@@ -96,13 +101,14 @@ jobs:
             echo "golf=$golf"
             echo "tennis=$tennis"
             echo "haruchi=$haruchi"
+            echo "hanjan=$hanjan"
           } >> "$GITHUB_OUTPUT"
-          echo "판별 결과 — kit=$kit golf=$golf tennis=$tennis haruchi=$haruchi"
+          echo "판별 결과 — kit=$kit golf=$golf tennis=$tennis haruchi=$haruchi hanjan=$hanjan"
 
   lint:
     name: 린트
     needs: changes
-    if: needs.changes.outputs.golf == 'true' || needs.changes.outputs.tennis == 'true' || needs.changes.outputs.haruchi == 'true'
+    if: needs.changes.outputs.golf == 'true' || needs.changes.outputs.tennis == 'true' || needs.changes.outputs.haruchi == 'true' || needs.changes.outputs.hanjan == 'true'
     runs-on: macos-26
     timeout-minutes: 15
     steps:
@@ -338,3 +344,39 @@ jobs:
           xcodebuild -workspace "$WORKSPACE" -scheme "HaruchiComplicationExtension" \
             -destination "id=${{ steps.sim.outputs.watch }}" \
             CODE_SIGNING_ALLOWED=NO -quiet build
+
+  hanjan-ios:
+    name: Hanjan (iOS)
+    needs: changes
+    if: needs.changes.outputs.hanjan == 'true'
+    runs-on: xcode-27
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - name: Xcode 확인
+        run: xcodebuild -version
+      - name: 시뮬레이터 선택
+        id: sim
+        run: echo "ios=$(.github/scripts/pick-simulator.sh iOS "$IOS_DEVICE")" >> "$GITHUB_OUTPUT"
+      - name: iOS 테스트
+        run: xcodebuild -workspace "$WORKSPACE" -scheme HanjanTests -destination "id=${{ steps.sim.outputs.ios }}" CODE_SIGNING_ALLOWED=NO -quiet test
+      - name: Live Activity 빌드
+        run: xcodebuild -workspace "$WORKSPACE" -scheme HanjanLiveActivityExtension -destination "id=${{ steps.sim.outputs.ios }}" CODE_SIGNING_ALLOWED=NO -quiet build
+
+  hanjan-watch:
+    name: Hanjan (watchOS)
+    needs: changes
+    if: needs.changes.outputs.hanjan == 'true'
+    runs-on: xcode-27
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - name: Xcode 확인
+        run: xcodebuild -version
+      - name: 시뮬레이터 선택
+        id: sim
+        run: echo "watch=$(.github/scripts/pick-simulator.sh watchOS "$WATCH_DEVICE")" >> "$GITHUB_OUTPUT"
+      - name: 워치 테스트
+        run: xcodebuild -workspace "$WORKSPACE" -scheme HanjanWatchTests -destination "id=${{ steps.sim.outputs.watch }}" CODE_SIGNING_ALLOWED=NO -quiet test
+      - name: 컴플리케이션 빌드
+        run: xcodebuild -workspace "$WORKSPACE" -scheme HanjanComplicationExtension -destination "id=${{ steps.sim.outputs.watch }}" CODE_SIGNING_ALLOWED=NO -quiet build
