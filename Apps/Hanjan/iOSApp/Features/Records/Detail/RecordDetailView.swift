@@ -89,10 +89,10 @@ struct RecordDetailView: View {
                     }
                 }
 
-                RecordCapsuleButton(title: session.condition == nil && session.memo == nil ? "회고 남기기" : "회고 고치기") {
+                CapsuleButton(title: session.condition == nil && session.memo == nil ? "회고 남기기" : "회고 고치기") {
                     isEditingReview = true
                 }
-                RecordCapsuleButton(title: "기록 삭제", style: .danger) {
+                CapsuleButton(title: "기록 삭제", style: .danger) {
                     isConfirmingDelete = true
                 }
                 .padding(.top, 8)

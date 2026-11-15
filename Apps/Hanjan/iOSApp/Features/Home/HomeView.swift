@@ -32,8 +32,7 @@ struct HomeView: View {
                         DrinkButtons(canUndo: session.ledger.last != nil, toastOnly: session.toastProgress.map { !$0.isDrinkTurn } ?? false,
                                      exceeded: LimitLevel.of(equivalent: session.ledger.sojuEquivalent(), limit: session.limit) == .exceeded,
                                      onUndo: store.undo, onDrink: store.tapMain)
-                        Button("종료") { confirmEnd = true }.buttonStyle(.plain).foregroundStyle(BrandColor.danger)
-                            .frame(maxWidth: .infinity).padding(12).overlay(Capsule().stroke(BrandColor.danger))
+                        CapsuleButton(title: "종료", style: .danger) { confirmEnd = true }
                     } else {
                         Text("오늘의 한 잔").font(.title.bold())
                         VStack(alignment: .leading, spacing: 8) {
@@ -43,8 +42,7 @@ struct HomeView: View {
                             BrandColor.surface,
                             in: RoundedRectangle(cornerRadius: 18)
                         )
-                        Button("시작", action: store.start).frame(maxWidth: .infinity).padding(.vertical, 6)
-                            .buttonStyle(.borderedProminent).tint(BrandColor.amber).foregroundStyle(.black)
+                        PrimaryButton(title: "시작", action: store.start)
                         MonthSummaryCard(summary: .of(records, month: Date()))
                         HStack { Text("최근 기록").font(.headline); Spacer(); Button("전체 보기", action: onRecords) }
                         ForEach(Array(records.filter { $0.endedAt != nil }.prefix(3))) { record in
