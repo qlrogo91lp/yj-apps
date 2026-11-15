@@ -114,11 +114,18 @@ import Foundation
         onChange?(value)
     }
 
-    private func receive(_ incoming: LiveSession) {
+    func receive(_ incoming: LiveSession) {
         var incoming = incoming
         pending.merge(into: &incoming)
         if let record = try? archive.record(owning: incoming.id), record.endedAt != nil {
             save(incoming); return
+        }
+        if let endedAt = incoming.endedAt, !(session?.owns(sessionId: incoming.id) ?? false),
+           !(session.map { incoming.owns(sessionId: $0.id) } ?? false)
+        {
+            save(incoming)
+            if settings.alertsEnabled { reminder.schedule(sessionId: incoming.id, endedAt: endedAt) }
+            return
         }
         let old = session
         let before = old.map(level) ?? .normal
