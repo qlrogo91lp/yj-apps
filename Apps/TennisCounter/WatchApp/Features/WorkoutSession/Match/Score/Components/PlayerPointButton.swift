@@ -1,5 +1,9 @@
 import SwiftUI
 
+private enum Layout {
+    static let pointOffset: CGFloat = 10
+}
+
 struct PlayerPointButton: View {
     let displayScore: String
     let player: String
@@ -23,6 +27,7 @@ struct PlayerPointButton: View {
                             .foregroundColor(color)
                             .contentTransition(.numericText())
                     }
+                    .offset(y: Layout.pointOffset)
                 }
             }
         }

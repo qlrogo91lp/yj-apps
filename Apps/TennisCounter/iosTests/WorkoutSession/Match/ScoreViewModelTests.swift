@@ -4,9 +4,16 @@ import Testing
 
 struct ScoreViewModelTests {
     @MainActor private func matchTieBreakDriver() -> ScoreViewModel {
-        let vm = ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false, matchTieBreak: true), undoGuardInterval: 0)
-        for _ in 0 ..< 24 { vm.addPoint(.me) }
-        for _ in 0 ..< 24 { vm.addPoint(.opponent) }
+        let vm = ScoreViewModel(
+            options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false, matchTieBreak: true),
+            undoGuardInterval: 0
+        )
+        for _ in 0 ..< 24 {
+            vm.addPoint(.me)
+        }
+        for _ in 0 ..< 24 {
+            vm.addPoint(.opponent)
+        }
         return vm
     }
 
@@ -16,14 +23,26 @@ struct ScoreViewModelTests {
 
     @Test @MainActor func setTieBreakIsNotMatchTieBreakShown() {
         let vm = ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false))
-        for _ in 0 ..< 6 { for side in [PlayerSide.me, .opponent] { for _ in 0 ..< 4 { vm.addPoint(side) } } }
+        for _ in 0 ..< 6 {
+            for side in [PlayerSide.me, .opponent] {
+                for _ in 0 ..< 4 {
+                    vm.addPoint(side)
+                }
+            }
+        }
         #expect(vm.score.gameMode == .tieBreak)
         #expect(!vm.isMatchTieBreakShown)
     }
 
     @Test @MainActor func oneSetTieBreakIsNotMatchTieBreakShown() {
         let vm = ScoreViewModel(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
-        for _ in 0 ..< 6 { for side in [PlayerSide.me, .opponent] { for _ in 0 ..< 4 { vm.addPoint(side) } } }
+        for _ in 0 ..< 6 {
+            for side in [PlayerSide.me, .opponent] {
+                for _ in 0 ..< 4 {
+                    vm.addPoint(side)
+                }
+            }
+        }
         #expect(vm.score.gameMode == .tieBreak)
         #expect(!vm.isMatchTieBreakShown)
     }
