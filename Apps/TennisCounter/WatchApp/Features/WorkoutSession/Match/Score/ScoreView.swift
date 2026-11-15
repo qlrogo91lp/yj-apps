@@ -62,13 +62,12 @@ struct ScoreView: View {
                     if !isDriver {
                         MirrorBadge()
                             .padding(.bottom, isSmall ? 20 : 25)
-                    } else if viewModel.canUndo {
-                        UndoButton { viewModel.undo() }
+                    } else {
+                        UndoButton(isEnabled: viewModel.canUndo) { viewModel.undo() }
                             .padding(.bottom, isSmall ? 20 : 25)
                     }
                 }
                 .ignoresSafeArea(.container)
-                .animation(.easeInOut(duration: 0.2), value: viewModel.canUndo)
             }
         }
         .focusable()

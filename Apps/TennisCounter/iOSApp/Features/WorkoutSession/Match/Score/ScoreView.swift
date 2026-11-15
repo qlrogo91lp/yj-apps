@@ -57,12 +57,10 @@ struct ScoreView: View {
             .padding(.bottom, 300)
 
             if isDriver {
-                if viewModel.canUndo {
-                    VStack {
-                        Spacer()
-                        UndoButton(action: { viewModel.undo() })
-                            .padding(.bottom, 150)
-                    }
+                VStack {
+                    Spacer()
+                    UndoButton(isEnabled: viewModel.canUndo, action: { viewModel.undo() })
+                        .padding(.bottom, 150)
                 }
             } else {
                 VStack {
