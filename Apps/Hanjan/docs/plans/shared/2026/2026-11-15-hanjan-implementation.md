@@ -386,6 +386,7 @@ func test_toastOnly_excludedFromGramsAndKindCounts() { /* 짠만 2 + 소주 1 �
 - [ ] 탭: 홈 / 기록 / 설정. `hasOnboarded == false` 면 온보딩 → `onFinish` 에서 한도 저장. 설정의 `onKindsChanged` · 한도 변경 → `store.pushConfig()`
 - [ ] 회고 알림을 누르면 `ReviewFormView(sessionId:)` 를 시트로 띄운다
 - [ ] 앱이 활성화될 때와 1분 타이머로 `store.tick()` (양쪽)
+- [ ] Wave 1 보고에서 넘어온 것: 루트에 `.preferredColorScheme(.dark)` / `seedPresetsIfNeeded()` 를 화면보다 먼저 / 기록 삭제(`RecordStore`) → `SessionArchive.markDeleted(sessionId:)` 연결 / `PlaceNameLookup` · `SystemPermissionRequester` 를 `iOSApp/Services/` 로 이동 / 기능별 버튼(`RecordPrimaryButton` · `RecordCapsuleButton` · `OnboardingNextButton` 등)을 `iOSApp/Components/` 의 공용 버튼으로 통합 / `OnboardingViewModelTests` 를 `iosTests/Onboarding/` 으로 이동
 - [ ] 워치 루트: `ConnectivityService` 하나 → `WatchSessionStore` → `SessionView`
 - [ ] 검증: 스킴 6개 빌드, `HanjanTests` 전체, `make lint`, `make format`. 시뮬레이터 한 쌍(폰+워치)에서 시작 → 한 잔 3번 → 취소 → 종료가 양쪽에 같은 숫자로 보이는지
 
