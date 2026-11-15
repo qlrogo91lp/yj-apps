@@ -3,8 +3,26 @@ import SwiftData
 
 @MainActor final class SessionArchive {
     private let context: ModelContext
-    init(context: ModelContext) {
+    private let defaults: UserDefaults
+    private let deletedKey = "deletedSessionIds"
+    init(context: ModelContext, defaults: UserDefaults = .standard) {
         self.context = context
+        self.defaults = defaults
+    }
+
+    private var deletedIds: Set<UUID> {
+        Set((defaults.stringArray(forKey: deletedKey) ?? []).compactMap(UUID.init(uuidString:)))
+    }
+
+    /// 저장된 별칭까지 수집할 수 있도록 기록을 삭제하기 전에 호출한다.
+    func markDeleted(sessionId: UUID) {
+        var ids = deletedIds
+        ids.insert(sessionId)
+        if let record = try? record(owning: sessionId) {
+            ids.insert(record.id)
+            ids.formUnion(record.mergedSessionIds)
+        }
+        defaults.set(ids.map(\.uuidString).sorted(), forKey: deletedKey)
     }
 
     func record(owning id: UUID) throws -> SessionRecord? {
@@ -13,9 +31,11 @@ import SwiftData
 
     func save(_ session: LiveSession) throws {
         let ids = session.mergedSessionIds.union([session.id])
+        guard deletedIds.isDisjoint(with: ids) else { return }
         let matches = try context.fetch(FetchDescriptor<SessionRecord>()).filter { record in
             ids.contains(where: { record.owns(sessionId: $0) }) || session.owns(sessionId: record.id)
         }
+        guard matches.allSatisfy({ deletedIds.isDisjoint(with: $0.mergedSessionIds.union([$0.id])) }) else { return }
         let record = matches.first(where: { $0.id == session.id }) ?? matches.first ?? SessionRecord(id: session.id, startedAt: session.startedAt)
         if record.modelContext == nil { context.insert(record) }
         var merged = session
@@ -25,9 +45,10 @@ import SwiftData
                                  longitude: session.longitude, ledger: session.ledger,
                                  mergedSessionIds: record.mergedSessionIds.union(session.mergedSessionIds))
         }
-        var ledger = session.ledger
+        var ledger = record.ledger
+        ledger.merge(session.ledger)
         for old in matches {
-            ledger.merge(old.ledger)
+            if old !== record { ledger.merge(old.ledger) }
             merged.mergedSessionIds.formUnion(old.mergedSessionIds)
             if old.id != merged.id { merged.mergedSessionIds.insert(old.id) }
             merged.endedAt = old.endedAt ?? merged.endedAt

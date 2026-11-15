@@ -45,4 +45,40 @@ import Testing
         #expect(records.first?.owns(sessionId: later.id) == true)
     }
 
+    @Test func preservesRecordEditsWhenStaleSessionArrives() throws {
+        let container = try ModelContainer(for: Schema(HanjanSchema.models), configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+        let archive = SessionArchive(context: container.mainContext)
+        var value = session()
+        value.endedAt = Date(timeIntervalSince1970: 100)
+        value.ledger.add(entry(1, sessionId: value.id))
+        try archive.save(value)
+        let record = try #require(try archive.record(owning: value.id))
+        let records = RecordStore(context: container.mainContext)
+        try records.setCount(2, kind: DrinkPresets.beer, in: record, now: Date(timeIntervalSince1970: 3))
+        try records.setCount(0, kind: DrinkPresets.soju, in: record, now: Date(timeIntervalSince1970: 4))
+        try archive.save(value)
+        #expect(record.ledger.drinkEntries.count == 2)
+        #expect(record.ledger.countsByKind().first?.kindId == DrinkPresets.beer.id)
+        #expect(record.totalGrams == 2 * DrinkPresets.beer.alcoholGrams)
+    }
+
+    @Test func deletedSessionAndAbsorbedIdCannotRecreateRecord() throws {
+        let name = "archive-deleted-\(UUID())"
+        let defaults = try #require(UserDefaults(suiteName: name))
+        defer { defaults.removePersistentDomain(forName: name) }
+        let container = try ModelContainer(for: Schema(HanjanSchema.models), configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+        let archive = SessionArchive(context: container.mainContext, defaults: defaults)
+        let earlier = session(0)
+        let later = session(10)
+        let merged = earlier.absorbing(later)
+        try archive.save(merged)
+        archive.markDeleted(sessionId: earlier.id)
+        let record = try #require(try archive.record(owning: earlier.id))
+        try RecordStore(context: container.mainContext).delete(record)
+        let restored = SessionArchive(context: container.mainContext, defaults: defaults)
+        try restored.save(earlier)
+        try restored.save(later)
+        #expect(try container.mainContext.fetch(FetchDescriptor<SessionRecord>()).isEmpty)
+    }
+
 }
