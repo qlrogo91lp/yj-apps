@@ -104,6 +104,21 @@ struct RecordStoreTests {
         #expect(try allEntries().isEmpty)
     }
 
+    @Test func delete_preventsLateSessionAndAliasFromReturning() throws {
+        let defaults = try #require(UserDefaults(suiteName: "RecordDeletion.\(UUID())"))
+        let archive = SessionArchive(context: container.mainContext, defaults: defaults)
+        let alias = UUID()
+        record.mergedSessionIds = [alias]
+        let original = record.id
+        try container.mainContext.save()
+        try RecordStore(context: container.mainContext, archive: archive).delete(record)
+        for id in [original, alias] {
+            let late = LiveSession(id: id, startedAt: Date(), endedAt: Date(), limit: 8, currentKindId: DrinkPresets.soju.id)
+            try archive.save(late)
+        }
+        #expect(try container.mainContext.fetch(FetchDescriptor<SessionRecord>()).isEmpty)
+    }
+
     @Test func editableKinds_catalogFirstThenUnknownKindsWithSameGrams() {
         let removedKind = UUID()
         let extra = EntryRecord(kindId: removedKind, kindName: "하이볼", alcoholGrams: 11, session: record)

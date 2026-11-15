@@ -35,7 +35,7 @@ struct ReviewFormView: View {
                 VStack(spacing: 16) {
                     Text("기록을 찾을 수 없어요")
                         .foregroundStyle(.secondary)
-                    RecordCapsuleButton(title: "닫기", action: onDone)
+                    CapsuleButton(title: "닫기", action: onDone)
                         .frame(maxWidth: 200)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -84,7 +84,7 @@ struct ReviewFormView: View {
                 }
 
                 VStack(spacing: 10) {
-                    RecordPrimaryButton(title: "저장하기") { save(session) }
+                    PrimaryButton(title: "저장하기") { save(session) }
                     Button("나중에 하기", action: onDone)
                         .font(.system(size: 15, weight: .medium))
                         .foregroundStyle(.secondary)

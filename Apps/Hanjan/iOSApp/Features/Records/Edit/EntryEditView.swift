@@ -90,7 +90,7 @@ struct EntryEditView: View {
                 }
                 .padding(.top, 8)
 
-                RecordPrimaryButton(title: "변경사항 저장", isEnabled: hasChanges(session)) { save(session) }
+                PrimaryButton(title: "변경사항 저장", isEnabled: hasChanges(session)) { save(session) }
                     .padding(.top, 8)
             }
             .padding(16)

@@ -1,9 +1,10 @@
 import SwiftUI
 
 /// 주 버튼(`저장하기` 등). 시스템 강조 버튼에 앰버, 글자는 검정 — 앰버 위 흰 글자는 대비가 낮다.
-struct RecordPrimaryButton: View {
+struct PrimaryButton: View {
     let title: String
     var isEnabled = true
+    var isDanger = false
     let action: () -> Void
 
     var body: some View {
@@ -16,7 +17,7 @@ struct RecordPrimaryButton: View {
         }
         .buttonStyle(.borderedProminent)
         .buttonBorderShape(.capsule)
-        .tint(BrandColor.amber)
+        .tint(isDanger ? BrandColor.danger : BrandColor.amber)
         .disabled(!isEnabled)
         .opacity(isEnabled ? 1 : 0.4)
     }
@@ -24,8 +25,8 @@ struct RecordPrimaryButton: View {
 
 #Preview {
     VStack(spacing: 16) {
-        RecordPrimaryButton(title: "저장하기") {}
-        RecordPrimaryButton(title: "변경사항 저장", isEnabled: false) {}
+        PrimaryButton(title: "저장하기") {}
+        PrimaryButton(title: "변경사항 저장", isEnabled: false) {}
     }
     .padding()
     .background(BrandColor.background)

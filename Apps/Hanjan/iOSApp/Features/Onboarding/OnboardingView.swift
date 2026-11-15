@@ -42,7 +42,7 @@ struct OnboardingView: View {
             .tabViewStyle(.page(indexDisplayMode: .always))
             .indexViewStyle(.page(backgroundDisplayMode: .interactive))
 
-            OnboardingNextButton(title: viewModel.primaryTitle) {
+            PrimaryButton(title: viewModel.primaryTitle) {
                 if viewModel.isLastPage {
                     onFinish(viewModel.limit)
                 } else {

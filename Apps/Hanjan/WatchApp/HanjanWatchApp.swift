@@ -1,17 +1,14 @@
-//
-//  HanjanWatchApp.swift
-//  Hanjan Watch App Watch App
-//
-//  Created by 윤재 on 11/15/26.
-//
-
+import ConnectivityCore
 import SwiftUI
 
-@main
-struct HanjanWatchApp: App {
+@main struct HanjanWatchApp: App {
+    @StateObject private var store: WatchSessionStore
+    init() {
+        let connectivity = ConnectivityService()
+        _store = StateObject(wrappedValue: WatchSessionStore(connectivity: connectivity))
+    }
+
     var body: some Scene {
-        WindowGroup {
-            ContentView()
-        }
+        WindowGroup { SessionView(store: store).preferredColorScheme(.dark) }
     }
 }

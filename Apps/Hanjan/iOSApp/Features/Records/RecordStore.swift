@@ -4,6 +4,12 @@ import SwiftData
 /// 기록 탭이 SwiftData 를 직접 읽고 쓰는 곳. 끝난 세션만 다룬다 — 진행 중 세션은 홈의 세션 저장소 몫이다.
 struct RecordStore {
     let context: ModelContext
+    private let archive: SessionArchive
+
+    init(context: ModelContext, archive: SessionArchive? = nil) {
+        self.context = context
+        self.archive = archive ?? SessionArchive(context: context)
+    }
 
     // MARK: - 읽기
 
@@ -107,6 +113,7 @@ struct RecordStore {
 
     /// CloudKit 으로 다른 기기에도 전파되고 되돌릴 수 없다. 호출부가 확인을 받는다.
     func delete(_ record: SessionRecord) throws {
+        archive.markDeleted(sessionId: record.id)
         context.delete(record)
         try context.save()
     }
