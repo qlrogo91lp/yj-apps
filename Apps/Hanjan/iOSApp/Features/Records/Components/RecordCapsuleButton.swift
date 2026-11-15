@@ -2,7 +2,7 @@ import SwiftUI
 
 /// 보조 버튼. Ralli `UndoButton` 과 같은 얇은 캡슐.
 /// `.neutral` 은 흰색 10% 채움 + 20% 테두리, `.danger`(삭제)는 채움 없이 빨강 테두리 + 글자.
-struct CapsuleButton: View {
+struct RecordCapsuleButton: View {
     enum Style { case neutral, danger }
 
     let title: String
@@ -26,8 +26,8 @@ struct CapsuleButton: View {
 
 #Preview {
     VStack(spacing: 16) {
-        CapsuleButton(title: "나중에 하기") {}
-        CapsuleButton(title: "기록 삭제", style: .danger) {}
+        RecordCapsuleButton(title: "나중에 하기") {}
+        RecordCapsuleButton(title: "기록 삭제", style: .danger) {}
     }
     .padding()
     .background(BrandColor.background)
