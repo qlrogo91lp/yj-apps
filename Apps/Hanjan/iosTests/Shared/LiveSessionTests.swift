@@ -68,3 +68,47 @@ struct LiveSessionTests {
                 .shouldAutoEnd(now: Date(timeIntervalSince1970: 10 + 10800)))
     }
 }
+
+struct ContractPersistenceTests {
+    @Test func absorbing_recordsLaterSessionId() {
+        let early = session(0); var late = session(10); late.ledger.add(entry(11, sessionId: late.id))
+        let merged = early.absorbing(late)
+        #expect(merged.id == early.id)
+        #expect(merged.owns(sessionId: late.id))
+        #expect(merged.merging(merged).mergedSessionIds == [late.id])
+    }
+
+    @Test func ledgerRestore_keepsRemovedIds() {
+        let e = entry(1); var ledger = DrinkLedger(); ledger.remove(id: e.id)
+        var restored = DrinkLedger(entries: [], removedIds: ledger.removedIds)
+        restored.add(e)
+        #expect(restored.activeEntries.isEmpty)
+    }
+
+    @Test @MainActor func sessionRecord_roundTripsRemovedAndMergedIds() {
+        var live = session(0); let kept = entry(1, sessionId: live.id); let gone = UUID(); let other = UUID()
+        live.ledger.add(kept); live.ledger.remove(id: gone); live.mergedSessionIds = [other]
+        let record = SessionRecord(); record.apply(live)
+        record.entries = [EntryRecord(
+            id: kept.id,
+            kindId: kept.kindId,
+            kindName: kept.kindName,
+            alcoholGrams: kept.alcoholGrams,
+            loggedAt: kept.loggedAt
+        )]
+        #expect(record.removedEntryIds == [gone])
+        #expect(record.owns(sessionId: other))
+        #expect(record.ledger.activeEntries.map(\.id) == [kept.id])
+        var late = record.ledger; late.add(DrinkEntry(
+            id: gone,
+            sessionId: live.id,
+            kindId: kept.kindId,
+            kindName: "소주",
+            alcoholGrams: 6,
+            loggedAt: Date(),
+            source: .watch,
+            isToastOnly: false
+        ))
+        #expect(late.activeEntries.count == 1)
+    }
+}

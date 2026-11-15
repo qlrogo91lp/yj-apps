@@ -228,6 +228,12 @@ enum SessionSnapshotStore { static let appGroup = "group.com.yj.Hanjan"; static 
 enum BrandColor { static let amber, danger, background, surface: Color }
 ```
 
+**계약 보강 (Wave 1 착수 후, 워커 보고 반영)**
+- `SojuFormat` · `LimitLevel` 은 `Common/` 에 있다 — 컴플리케이션·Live Activity 확장도 쓴다
+- `DrinkLedger(entries:removedIds:)` · `var removedIds: Set<UUID>` — 저장소에서 복원할 때 삭제 이력을 함께 넘긴다
+- `LiveSession.mergedSessionIds: Set<UUID>` · `owns(sessionId:) -> Bool` — `absorbing`/`merging` 이 흡수된 세션 id 를 기록한다. 늦게 온 메시지의 `sessionId` 는 `owns` 로 찾는다
+- `SessionRecord.removedEntryIds` · `mergedSessionIds`(쉼표 구분 문자열로 저장, `apply` 가 채운다) · `var ledger: DrinkLedger`(저장된 잔 + 삭제 이력으로 복원) · `owns(sessionId:)`. 보관된 세션에 늦은 메시지가 오면 `record.ledger` 에 병합한 뒤 다시 저장한다
+
 전송 규칙(T2·T3 공통): 변경 하나마다 **해당 이벤트 메시지를 `.reliable` 로**, 그리고 **`SessionStateMessage` 를 `.context` 로** 같이 보낸다.
 이벤트가 사라져도 다음 상태 메시지가 장부를 통째로 싣고 와 병합으로 복구된다. 수신 측은 언제나 `merging` / `absorbing` 만 쓴다 (덮어쓰기 금지).
 

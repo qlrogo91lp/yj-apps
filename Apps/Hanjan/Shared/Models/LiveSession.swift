@@ -19,6 +19,8 @@ nonisolated struct LiveSession: Identifiable, Codable, Equatable, Sendable {
     var latitude: Double?
     var longitude: Double?
     var ledger: DrinkLedger
+    /// absorbing 으로 이 세션에 합쳐진 다른 세션 id. 그 id 로 늦게 오는 메시지도 이 세션 것이다.
+    var mergedSessionIds: Set<UUID>
     init(
         id: UUID,
         startedAt: Date,
@@ -28,8 +30,10 @@ nonisolated struct LiveSession: Identifiable, Codable, Equatable, Sendable {
         toast: ToastSetting? = nil,
         latitude: Double? = nil,
         longitude: Double? = nil,
-        ledger: DrinkLedger = DrinkLedger()
+        ledger: DrinkLedger = DrinkLedger(),
+        mergedSessionIds: Set<UUID> = []
     ) {
+        self.mergedSessionIds = mergedSessionIds
         self.id = id; self.startedAt = startedAt; self.endedAt = endedAt; self.limit = limit; self.currentKindId = currentKindId
         self.toast = toast ?? ToastSetting(every: nil, changedAt: startedAt); self.latitude = latitude; self.longitude = longitude; self
             .ledger = ledger
@@ -57,6 +61,11 @@ nonisolated struct LiveSession: Identifiable, Codable, Equatable, Sendable {
         )
     }
 
+    /// 이 세션 id 이거나 이 세션에 합쳐진 세션 id 면 true.
+    func owns(sessionId: UUID) -> Bool {
+        sessionId == id || mergedSessionIds.contains(sessionId)
+    }
+
     var lastActivityAt: Date {
         ledger.last?.loggedAt ?? startedAt
     }
@@ -69,6 +78,8 @@ nonisolated struct LiveSession: Identifiable, Codable, Equatable, Sendable {
         var result = self; result.ledger.merge(other.ledger); result.endedAt = endedAt ?? other.endedAt
         result.latitude = latitude ?? other.latitude; result.longitude = longitude ?? other.longitude
         if other.toast.changedAt > toast.changedAt { result.toast = other.toast }
+        result.mergedSessionIds.formUnion(other.mergedSessionIds)
+        if other.id != id { result.mergedSessionIds.insert(other.id) }
         return result
     }
 

@@ -9,6 +9,22 @@ nonisolated struct KindCount: Codable, Equatable, Sendable {
 nonisolated struct DrinkLedger: Codable, Equatable, Sendable {
     private var entries: [UUID: DrinkEntry] = [:]
     private var removed: Set<UUID> = []
+
+    init() {}
+
+    /// 저장소에서 복원할 때 쓴다. 삭제 이력을 함께 넘겨야 늦게 도착한 추가를 계속 걸러낸다.
+    init(entries: [DrinkEntry], removedIds: Set<UUID>) {
+        removed = removedIds
+        for entry in entries {
+            add(entry)
+        }
+    }
+
+    /// 지금까지 삭제된 잔 id. 아직 도착하지 않은 잔의 id 도 포함된다.
+    var removedIds: Set<UUID> {
+        removed
+    }
+
     mutating func add(_ entry: DrinkEntry) {
         if !removed.contains(entry.id), entries[entry.id] == nil { entries[entry.id] = entry }
     }
