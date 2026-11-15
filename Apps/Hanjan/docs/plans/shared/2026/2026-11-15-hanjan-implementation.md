@@ -23,8 +23,9 @@
 - 이 플랜의 테스트 예시가 `func test_…()` · `XCTAssert…` 로 적혀 있어도 Swift Testing 으로 옮겨 쓴다 (이름과 단언 내용은 그대로)
 - `@Model` 은 CloudKit 규칙: 모든 속성 기본값 또는 옵셔널, `@Relationship` 은 옵셔널 + `inverse`, `.unique` 금지
 - `ConnectivityService` 는 프로세스당 하나. `onReceive` 등록은 생성한 그 main-queue turn 안에서 끝낸다
+- `BrandColor.danger` 는 메인 노란색과 확실히 구분되는 빨강(`Color.red` 계열)으로 둔다 — 한도 초과 경고가 메인 색에 묻히면 안 된다
 - UI 문구: 버튼 라벨은 글자만 (`한 잔`, `취소`, `짠만`). `+` `−` 이모지·아이콘 라벨 없음. 포인트 색 앰버, 경고만 빨강, 어두운 배경
-- **버튼 스타일은 Ralli 를 따른다** (참고: `Apps/TennisCounter/WatchApp/Features/Home/HomeView.swift` 의 시작 버튼, `…/Match/Score/Components/UndoButton.swift`, `…/Match/Result/Components/SaveButton.swift`). 메인 색은 앰버 — `BrandColor.amber` 하나만 쓰고 화면에서 색 값을 직접 적지 않는다
+- **버튼 스타일은 Ralli 를 따른다** (참고: `Apps/TennisCounter/WatchApp/Features/Home/HomeView.swift` 의 시작 버튼, `…/Match/Score/Components/UndoButton.swift`, `…/Match/Result/Components/SaveButton.swift`). 메인 색은 앱 아이콘의 노란색 — `BrandColor.amber` = Display P3 `(1.0, 0.8, 0.0)` (`Color(.displayP3, red: 1.0, green: 0.8, blue: 0.0)`, `Hanjan.icon` 배경과 같은 값). 토큰 이름은 `amber` 를 유지한다. 이 토큰 하나만 쓰고 화면에서 색 값을 직접 적지 않는다
   - 주 버튼(`시작` · `한 잔` · `저장` · `다음`): 시스템 `.borderedProminent` + `.tint(BrandColor.amber)`. 글자는 검정(앰버 위 흰 글자는 대비가 낮다)
   - `취소`: Ralli `UndoButton` 과 같은 캡슐 — `.buttonStyle(.plain)`, 흰색 10% 채움 + 흰색 20% 테두리. 비활성은 40% 불투명
   - `짠만`: 같은 캡슐 모양, 채움 없이 앰버 테두리 + 앰버 글자

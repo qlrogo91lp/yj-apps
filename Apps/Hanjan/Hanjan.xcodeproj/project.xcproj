@@ -17,6 +17,7 @@
     },
   ],
   "files": [
+    { "path": "Hanjan-Info.plist" },
     { "kind": "folder", "path": "iOSApp", "target-membership": [ "Hanjan" ] },
     { "kind": "folder", "path": "WatchApp", "target-membership": [ "Hanjan Watch App" ] },
     { "kind": "folder", "path": "Shared", "target-membership": [ "Hanjan", "Hanjan Watch App" ] },
@@ -71,6 +72,14 @@
         },
       ],
     }, {
+      "path": "Hanjan.icon",
+      "target-membership": [
+        "Hanjan/resources",
+        "Hanjan Watch App/resources",
+        "HanjanComplicationExtension/resources",
+        "HanjanLiveActivityExtension/resources",
+      ],
+    }, {
       "kind": "group",
       "name": "Products",
       "children": [
@@ -120,7 +129,7 @@
         },
       ],
       "build-settings": {
-        "ASSETCATALOG_COMPILER_APPICON_NAME": "AppIcon",
+        "ASSETCATALOG_COMPILER_APPICON_NAME": "Hanjan",
         "ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME": "AccentColor",
         "CODE_SIGN_ENTITLEMENTS": "Hanjan.entitlements",
         "CODE_SIGN_STYLE": "Automatic",
@@ -128,6 +137,7 @@
         "DEVELOPMENT_TEAM": "P2TU28W32L",
         "ENABLE_PREVIEWS": "YES",
         "GENERATE_INFOPLIST_FILE": "YES",
+        "INFOPLIST_FILE": "Hanjan-Info.plist",
         "INFOPLIST_KEY_CFBundleDisplayName": "한잔",
         "INFOPLIST_KEY_NSLocationWhenInUseUsageDescription": "술자리 장소를 기록에 남기는 데 사용합니다.",
         "INFOPLIST_KEY_NSSupportsLiveActivities": "YES",
