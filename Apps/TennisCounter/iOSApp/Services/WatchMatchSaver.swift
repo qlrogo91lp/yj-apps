@@ -46,7 +46,7 @@ final class WatchMatchSaver {
                 context: ["source": "watch", "sessionId": msg.sessionId.uuidString]
             )
         }
-        sendResult(MatchSaveResultMessage(sessionId: msg.sessionId, success: success))
+        sendResult(MatchSaveResultMessage(sessionId: msg.sessionId, success: success, matchId: msg.matchId))
     }
 
     private static func buildMatch(from msg: MatchEndMessage) -> Match {

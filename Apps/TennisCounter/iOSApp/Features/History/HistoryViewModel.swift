@@ -60,6 +60,13 @@ final class HistoryViewModel: ObservableObject {
         return true
     }
 
+    /// 저장 도착·포그라운드 복귀 때 저장소를 다시 읽는다. 아직 한 번도 읽지 않았으면 아무것도 하지 않는다 —
+    /// 첫 진입은 `activate` 가 맡는다. 날짜 선택·표시 모드·탭 진입 표식은 건드리지 않는다.
+    func reloadIfLoaded() {
+        guard hasLoadedInitial else { return }
+        refreshData()
+    }
+
     /// 최초 진입 또는 명시적인 새로고침에서만 탐색 상태를 초기화한다.
     func loadInitial() {
         guard modelContext != nil else { return }
