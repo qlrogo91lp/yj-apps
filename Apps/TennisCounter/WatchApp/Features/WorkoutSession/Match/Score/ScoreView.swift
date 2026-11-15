@@ -53,7 +53,8 @@ struct ScoreView: View {
                     GameScores(
                         myGameScore: viewModel.myGameScore,
                         yourGameScore: viewModel.yourGameScore,
-                        isTieBreak: viewModel.score.gameMode == .tieBreak
+                        isTieBreak: viewModel.score.gameMode == .tieBreak,
+                        showsGames: !viewModel.isMatchTieBreakShown
                     )
                 }
                 .padding(.top, isSmall ? 24 : 40)
@@ -140,10 +141,66 @@ struct ScoreView: View {
     }
 }
 
-#Preview {
-    ScoreView(
-        viewModel: ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false)),
-        isDriver: true,
-        onExit: {}
-    )
+private func previewScore(_ name: String) -> ScoreViewModel {
+    let single = name == "oneset" || name == "settb"
+    let vm = ScoreViewModel(options: MatchOptions(mode: single ? .oneSet : .bestOfThree, noAdRule: true, noTieRule: false, matchTieBreak: true))
+    func points(_ side: PlayerSide, _ count: Int) {
+        for _ in 0 ..< count {
+            vm.addPoint(side)
+        }
+    }
+    switch name {
+    case "oneset":
+        points(.me, 8); points(.opponent, 4); points(.me, 2); points(.opponent, 1)
+    case "bo3-set10":
+        points(.me, 28)
+    case "matchtb":
+        points(.me, 24); points(.opponent, 24); points(.me, 5); points(.opponent, 3)
+    default:
+        for _ in 0 ..< 6 {
+            points(.me, 4); points(.opponent, 4)
+        }
+        points(.me, 3); points(.opponent, 2)
+    }
+    return vm
+}
+
+#Preview("40mm oneset") {
+    ScoreView(viewModel: previewScore("oneset"), isDriver: true, onExit: {})
+        .previewDevice("Apple Watch SE 3 (40mm)")
+}
+
+#Preview("40mm bo3-set10") {
+    ScoreView(viewModel: previewScore("bo3-set10"), isDriver: true, onExit: {})
+        .previewDevice("Apple Watch SE 3 (40mm)")
+}
+
+#Preview("40mm matchtb") {
+    ScoreView(viewModel: previewScore("matchtb"), isDriver: true, onExit: {})
+        .previewDevice("Apple Watch SE 3 (40mm)")
+}
+
+#Preview("40mm settb") {
+    ScoreView(viewModel: previewScore("settb"), isDriver: true, onExit: {})
+        .previewDevice("Apple Watch SE 3 (40mm)")
+}
+
+#Preview("49mm oneset") {
+    ScoreView(viewModel: previewScore("oneset"), isDriver: true, onExit: {})
+        .previewDevice("Apple Watch Ultra 4 (49mm)")
+}
+
+#Preview("49mm bo3-set10") {
+    ScoreView(viewModel: previewScore("bo3-set10"), isDriver: true, onExit: {})
+        .previewDevice("Apple Watch Ultra 4 (49mm)")
+}
+
+#Preview("49mm matchtb") {
+    ScoreView(viewModel: previewScore("matchtb"), isDriver: true, onExit: {})
+        .previewDevice("Apple Watch Ultra 4 (49mm)")
+}
+
+#Preview("49mm settb") {
+    ScoreView(viewModel: previewScore("settb"), isDriver: true, onExit: {})
+        .previewDevice("Apple Watch Ultra 4 (49mm)")
 }

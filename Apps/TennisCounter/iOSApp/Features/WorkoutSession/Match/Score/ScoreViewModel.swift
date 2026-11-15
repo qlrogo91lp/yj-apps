@@ -46,6 +46,10 @@ final class ScoreViewModel: ObservableObject {
         score.gameMode == .tieBreak
     }
 
+    var isMatchTieBreakShown: Bool {
+        score.gameMode == .tieBreak && myGameScore == 0 && yourGameScore == 0
+    }
+
     var canUndo: Bool {
         !snapshots.isEmpty
     }
