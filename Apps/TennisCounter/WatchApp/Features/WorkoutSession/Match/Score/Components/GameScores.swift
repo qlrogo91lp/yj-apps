@@ -4,17 +4,22 @@ struct GameScores: View {
     let myGameScore: Int
     let yourGameScore: Int
     let isTieBreak: Bool
+    var showsGames: Bool = true
 
     var body: some View {
         HStack(spacing: 8) {
-            Text(verbatim: "\(myGameScore)")
-                .foregroundColor(.green)
-                .contentTransition(.numericText())
+            if showsGames {
+                Text(verbatim: "\(myGameScore)")
+                    .foregroundColor(.green)
+                    .contentTransition(.numericText())
+            }
             Text(isTieBreak ? String(localized: "set_tiebreak") : ":")
                 .foregroundColor(.white)
-            Text(verbatim: "\(yourGameScore)")
-                .foregroundColor(.orange)
-                .contentTransition(.numericText())
+            if showsGames {
+                Text(verbatim: "\(yourGameScore)")
+                    .foregroundColor(.orange)
+                    .contentTransition(.numericText())
+            }
         }
         .font(.system(size: 18, weight: .bold))
         .padding(.horizontal, 12)

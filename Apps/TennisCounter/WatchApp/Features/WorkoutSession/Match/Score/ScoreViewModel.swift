@@ -44,6 +44,10 @@ class ScoreViewModel: ObservableObject {
         return now().timeIntervalSince(lastUndoAt) < undoGuardInterval
     }
 
+    var isMatchTieBreakShown: Bool {
+        score.gameMode == .tieBreak && myGameScore == 0 && yourGameScore == 0
+    }
+
     var canUndo: Bool {
         !snapshots.isEmpty
     }

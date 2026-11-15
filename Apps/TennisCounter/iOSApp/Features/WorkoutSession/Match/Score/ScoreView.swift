@@ -51,7 +51,8 @@ struct ScoreView: View {
                 GameScores(
                     myGameScore: viewModel.myGameScore,
                     yourGameScore: viewModel.yourGameScore,
-                    isTieBreak: viewModel.isTieBreak
+                    isTieBreak: viewModel.isTieBreak,
+                    showsGames: !viewModel.isMatchTieBreakShown
                 )
             }
             .padding(.bottom, 300)

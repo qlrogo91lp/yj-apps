@@ -53,7 +53,8 @@ struct ScoreView: View {
                     GameScores(
                         myGameScore: viewModel.myGameScore,
                         yourGameScore: viewModel.yourGameScore,
-                        isTieBreak: viewModel.score.gameMode == .tieBreak
+                        isTieBreak: viewModel.score.gameMode == .tieBreak,
+                        showsGames: !viewModel.isMatchTieBreakShown
                     )
                 }
                 .padding(.top, isSmall ? 24 : 40)

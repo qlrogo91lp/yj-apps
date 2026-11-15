@@ -3,6 +3,44 @@ import Foundation
 import Testing
 
 struct ScoreViewModelTests {
+    @MainActor private func matchTieBreakDriver() -> ScoreViewModel {
+        let vm = ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false, matchTieBreak: true), undoGuardInterval: 0)
+        for _ in 0 ..< 24 { vm.addPoint(.me) }
+        for _ in 0 ..< 24 { vm.addPoint(.opponent) }
+        return vm
+    }
+
+    @Test @MainActor func matchTieBreakEntryShowsMatchTieBreak() {
+        #expect(matchTieBreakDriver().isMatchTieBreakShown)
+    }
+
+    @Test @MainActor func setTieBreakIsNotMatchTieBreakShown() {
+        let vm = ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false))
+        for _ in 0 ..< 6 { for side in [PlayerSide.me, .opponent] { for _ in 0 ..< 4 { vm.addPoint(side) } } }
+        #expect(vm.score.gameMode == .tieBreak)
+        #expect(!vm.isMatchTieBreakShown)
+    }
+
+    @Test @MainActor func oneSetTieBreakIsNotMatchTieBreakShown() {
+        let vm = ScoreViewModel(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        for _ in 0 ..< 6 { for side in [PlayerSide.me, .opponent] { for _ in 0 ..< 4 { vm.addPoint(side) } } }
+        #expect(vm.score.gameMode == .tieBreak)
+        #expect(!vm.isMatchTieBreakShown)
+    }
+
+    @Test @MainActor func mirrorAppliedMatchTieBreakStateShowsMatchTieBreak() {
+        let driver = matchTieBreakDriver()
+        let mirror = ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false))
+        mirror.applyRemoteState(driver.makeScoreState())
+        #expect(mirror.isMatchTieBreakShown)
+    }
+
+    @Test @MainActor func undoBeforeMatchTieBreakClearsMatchTieBreakShown() {
+        let vm = matchTieBreakDriver()
+        vm.undo()
+        #expect(!vm.isMatchTieBreakShown)
+    }
+
     @Test(arguments: [
         (0, 0, 0, 0, false),
         (0, 0, 1, 1, true),
