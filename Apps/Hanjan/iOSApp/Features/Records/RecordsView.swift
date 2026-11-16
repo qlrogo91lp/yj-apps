@@ -14,6 +14,7 @@ struct RecordsView: View {
                     Text("캘린더").tag(RecordsViewModel.Mode.calendar)
                 }
                 .pickerStyle(.segmented)
+                .controlSize(.large)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)
 
