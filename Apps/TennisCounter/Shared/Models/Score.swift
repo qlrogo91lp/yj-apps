@@ -51,6 +51,30 @@ class Score: ObservableObject {
         }
     }
 
+    enum ManualEditResult {
+        case unchanged
+        case changed(winner: PlayerSide?)
+    }
+
+    func manualEdit(_ side: PlayerSide, increment: Bool) -> ManualEditResult {
+        if gameMode == .tieBreak {
+            if increment { return .changed(winner: addTieBreakPoint(side)) }
+            if side == .me {
+                guard myTieBreak > 0 else { return .unchanged }
+                myTieBreak -= 1
+            } else {
+                guard yourTieBreak > 0 else { return .unchanged }
+                yourTieBreak -= 1
+            }
+            return .changed(winner: nil)
+        }
+        let index = side == .me ? myIndex : yourIndex
+        let next = min(4, max(0, index + (increment ? 1 : -1)))
+        guard next != index else { return .unchanged }
+        if side == .me { myIndex = next } else { yourIndex = next }
+        return .changed(winner: nil)
+    }
+
     func reset() {
         myNormal = .zero
         yourNormal = .zero

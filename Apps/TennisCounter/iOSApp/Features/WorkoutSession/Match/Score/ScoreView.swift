@@ -80,7 +80,13 @@ struct ScoreView: View {
             onProgressChanged(hasProgress)
         }
         .sheet(isPresented: $showEditSheet) {
-            ScoreEditSheet(score: viewModel.score, onChange: { viewModel.applyManualEdit() })
+            ScoreEditSheet(myScore: viewModel.score.myDisplayScore, yourScore: viewModel.score.yourDisplayScore) { side, increment in
+                guard isDriver else { return }
+                let wasTieBreak = viewModel.isTieBreak
+                let setNumber = viewModel.currentSetNumber
+                viewModel.applyManualEdit(side, increment: increment)
+                if wasTieBreak, !viewModel.isTieBreak || viewModel.isMatchOver || viewModel.currentSetNumber != setNumber { showEditSheet = false }
+            }
         }
     }
 }
