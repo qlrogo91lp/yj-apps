@@ -17,25 +17,100 @@ struct LimitStepPage: View {
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
             }
-            HStack(alignment: .firstTextBaseline, spacing: 6) {
-                Text(SojuFormat.string(limit))
-                    .font(.system(size: 72, weight: .bold).monospacedDigit())
-                    .foregroundStyle(BrandColor.amber)
-                Text("잔")
-                    .font(.system(size: 24, weight: .semibold))
-                    .foregroundStyle(.secondary)
+            HStack(spacing: 16) {
+                LimitAdjustButton(limit: limit, direction: -1, onChange: onChange)
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    Text(SojuFormat.string(limit))
+                        .font(.system(size: 72, weight: .bold).monospacedDigit())
+                        .foregroundStyle(BrandColor.amber)
+                    Text("잔")
+                        .font(.system(size: 24, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                }
+                .frame(minWidth: 140)
+                .accessibilityElement(children: .combine)
+                .accessibilityAdjustableAction { direction in
+                    switch direction {
+                    case .increment: adjust(1)
+                    case .decrement: adjust(-1)
+                    @unknown default: break
+                    }
+                }
+                LimitAdjustButton(limit: limit, direction: 1, onChange: onChange)
             }
-            Stepper(
-                "소주 \(SojuFormat.string(limit))잔",
-                value: Binding(get: { limit }, set: onChange),
-                in: OnboardingViewModel.limitRange,
-                step: OnboardingViewModel.limitStep
-            )
-            .labelsHidden()
+            .sensoryFeedback(.selection, trigger: limit)
             Spacer()
             Spacer()
         }
         .padding(.horizontal, 24)
+    }
+
+    private func adjust(_ direction: Double) {
+        let range = OnboardingViewModel.limitRange
+        onChange(min(range.upperBound, max(range.lowerBound, limit + direction * OnboardingViewModel.limitStep)))
+    }
+}
+
+private struct LimitAdjustButton: View {
+    let limit: Double
+    let direction: Double
+    let onChange: (Double) -> Void
+    @State private var repeatTask: Task<Void, Never>?
+    @State private var repeated = false
+    @State private var repeatValue = 0.0
+    @GestureState private var pressing = false
+
+    private var disabled: Bool {
+        direction < 0 ? limit <= OnboardingViewModel.limitRange.lowerBound : limit >= OnboardingViewModel.limitRange.upperBound
+    }
+
+    var body: some View {
+        Button {
+            if !repeated { change(from: limit) }
+            repeated = false
+        } label: {
+            Image(systemName: direction < 0 ? "minus" : "plus")
+                .font(.system(size: 24, weight: .semibold))
+                .foregroundStyle(direction < 0 ? Color.white : BrandColor.amber)
+                .frame(width: 64, height: 64)
+                .background(BrandColor.surface, in: Circle())
+                .contentShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .disabled(disabled)
+        .opacity(disabled ? 0.3 : 1)
+        .accessibilityLabel(direction < 0 ? "0.5잔 줄이기" : "0.5잔 늘리기")
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .updating($pressing) { _, state, _ in state = true }
+        )
+        .onChange(of: pressing) { _, isPressing in
+            if isPressing {
+                repeated = false
+                repeatValue = limit
+                repeatTask?.cancel()
+                repeatTask = Task { @MainActor in
+                    do {
+                        try await Task.sleep(for: .milliseconds(400))
+                        while !Task.isCancelled {
+                            repeated = true
+                            change(from: repeatValue)
+                            try await Task.sleep(for: .milliseconds(120))
+                        }
+                    } catch { return }
+                }
+            } else {
+                repeatTask?.cancel()
+                repeatTask = nil
+            }
+        }
+        .onDisappear { repeatTask?.cancel() }
+    }
+
+    private func change(from value: Double) {
+        let range = OnboardingViewModel.limitRange
+        repeatValue = min(range.upperBound, max(range.lowerBound, value + direction * OnboardingViewModel.limitStep))
+        if repeatValue != value { onChange(repeatValue) }
     }
 }
 
