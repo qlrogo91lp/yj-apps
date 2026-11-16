@@ -36,8 +36,6 @@ struct LimitStepPage: View {
                             .foregroundStyle(BrandColor.amber)
                             .lineLimit(1)
                             .minimumScaleFactor(0.5)
-                            .contentTransition(.numericText(value: limit))
-                            .animation(.easeInOut(duration: 0.2), value: limit)
                         Text("잔")
                             .font(.system(size: 24, weight: .semibold))
                             .foregroundStyle(.secondary)
