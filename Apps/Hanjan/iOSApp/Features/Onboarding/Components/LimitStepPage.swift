@@ -20,14 +20,21 @@ struct LimitStepPage: View {
             HStack(spacing: 16) {
                 LimitAdjustButton(limit: limit, direction: -1, onChange: onChange)
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
-                    Text(SojuFormat.string(limit))
-                        .font(.system(size: 72, weight: .bold).monospacedDigit())
-                        .foregroundStyle(BrandColor.amber)
+                    ZStack(alignment: .trailing) {
+                        Text("30.5")
+                            .hidden()
+                        Text(SojuFormat.string(limit))
+                            .foregroundStyle(BrandColor.amber)
+                            .contentTransition(.numericText(value: limit))
+                            .animation(.easeInOut(duration: 0.2), value: limit)
+                    }
+                    .font(.system(size: 72, weight: .bold).monospacedDigit())
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
                     Text("잔")
                         .font(.system(size: 24, weight: .semibold))
                         .foregroundStyle(.secondary)
                 }
-                .frame(minWidth: 140)
                 .accessibilityElement(children: .combine)
                 .accessibilityAdjustableAction { direction in
                     switch direction {
