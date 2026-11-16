@@ -116,15 +116,7 @@ final class ScoreViewModel: ObservableObject {
         guard !isWithinUndoGuard else { return }
         snapshots.append(captureSnapshot())
         let gameWon = score.addPoint(side)
-        if let winner = gameWon {
-            if matchTieBreakInProgress {
-                finalizeMatchTieBreak(winner: winner)
-            } else {
-                if side == .me { myGameScore += 1 } else { yourGameScore += 1 }
-                score.resetData()
-                checkSetUpdate()
-            }
-        }
+        if let winner = gameWon { finishGame(winner: winner) }
         onStateChanged?()
     }
 
@@ -136,11 +128,26 @@ final class ScoreViewModel: ObservableObject {
         onStateChanged?()
     }
 
-    /// ScoreEditSheet 수동 수정 경로. 수정은 새 기준점이므로 이전 스택을 버린다
-    /// (버리지 않으면 undo가 수정 이전 과거로 튄다).
-    func applyManualEdit() {
-        snapshots.removeAll()
-        onStateChanged?()
+    func applyManualEdit(_ side: PlayerSide, increment: Bool) {
+        guard !isMatchOver else { return }
+        switch score.manualEdit(side, increment: increment) {
+        case .unchanged:
+            return
+        case let .changed(winner):
+            snapshots.removeAll()
+            if let winner { finishGame(winner: winner) }
+            onStateChanged?()
+        }
+    }
+
+    private func finishGame(winner: PlayerSide) {
+        if matchTieBreakInProgress {
+            finalizeMatchTieBreak(winner: winner)
+        } else {
+            if winner == .me { myGameScore += 1 } else { yourGameScore += 1 }
+            score.resetData()
+            checkSetUpdate()
+        }
     }
 
     func resetAll(options: MatchOptions) {
