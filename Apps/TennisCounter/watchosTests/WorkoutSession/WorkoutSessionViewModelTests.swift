@@ -485,6 +485,39 @@ struct WorkoutSessionViewModelTests {
         #expect(vm.saveAckState == .idle) // 고아 타임아웃이 .idle을 .failed로 덮으면 안 된다
     }
 
+    // MARK: - Save Outbox
+
+    /// 저장은 보관함을 거친다 — 폰 ACK 가 올 때까지 워치가 기록을 갖고 있어야 다시 보낼 수 있다.
+    @Test @MainActor func saveCurrentMatchEnqueuesToOutbox() {
+        let spy = OutboxSpy()
+        let vm = WorkoutSessionViewModel(saveOutbox: spy)
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.finishMatch(result: .win, completedSets: [SetScore(my: 6, your: 3)])
+
+        vm.saveCurrentMatch()
+
+        #expect(spy.enqueued.count == 1)
+        #expect(spy.enqueued.first?.matchId == vm.currentSession()?.id)
+        #expect(vm.saveAckState == .pending)
+    }
+
+    /// 재시도 버튼은 같은 경기를 다시 넣는다 — 보관함이 matchId 로 교체한다.
+    @Test @MainActor func retryAfterFailureEnqueuesSameMatchIdAgain() {
+        let spy = OutboxSpy()
+        let vm = WorkoutSessionViewModel(saveOutbox: spy)
+        vm.startMatch(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        vm.finishMatch(result: .win, completedSets: [SetScore(my: 6, your: 3)])
+        vm.saveCurrentMatch()
+        vm.handleMatchSaveResultForTest(MatchSaveResultMessage(sessionId: vm.activeSessionId, success: false))
+        #expect(vm.saveAckState == .failed)
+
+        vm.saveCurrentMatch()
+
+        #expect(spy.enqueued.count == 2)
+        #expect(spy.enqueued[0].matchId != nil)
+        #expect(spy.enqueued[0].matchId == spy.enqueued[1].matchId)
+    }
+
     // MARK: - Save Ack
 
     @Test @MainActor func saveCurrentMatchStartsPending() {
@@ -960,5 +993,13 @@ struct WorkoutSessionViewModelTests {
         let healthKit = WorkoutSessionService(configuration: .tennis)
 
         #expect(WorkoutSessionViewModel.totalElapsedSeconds(from: healthKit) == nil)
+    }
+}
+
+@MainActor final class OutboxSpy: MatchSaveEnqueuing {
+    private(set) var enqueued: [MatchEndMessage] = []
+
+    func enqueue(_ message: MatchEndMessage) {
+        enqueued.append(message)
     }
 }

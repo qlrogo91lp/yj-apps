@@ -127,9 +127,11 @@ iOSApp/
 
 WatchApp/
 │  # Apple Watch 전용 타겟. HealthKit 통합 Workout 경험 제공.
-├── WatchApp.swift         # @main 진입점 → HomeView()
+├── WatchApp.swift         # @main 진입점 → HomeView(). MatchSaveOutbox.shared 를 앱 수명 내내 연결
 ├── Components/
 │   └── BackButton.swift   # 공통 뒤로가기 버튼
+├── Services/
+│   └── MatchSaveOutbox.swift  # 경기 저장 보관함 — 폰 ACK(matchId)를 받을 때까지 UserDefaults 에 두고 활성화·연결 복귀 때 재전송
 └── Features/
     ├── Home/
     │   └── HomeView.swift           # 워치 홈 화면 — Workout 진입 버튼
@@ -246,6 +248,8 @@ iosTests/
     └── MatchSaveResultMessageTests.swift
 
 watchosTests/
+├── Services/
+│   └── MatchSaveOutboxTests.swift       # WatchApp/Services/ 대응
 └── WorkoutSession/
     ├── WorkoutSessionViewModelTests.swift  # WatchApp/Features/WorkoutSession/ 대응
     └── Match/

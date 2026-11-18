@@ -1,8 +1,9 @@
 import SwiftUI
 
 struct ScoreEditSheet: View {
-    @ObservedObject var score: Score
-    var onChange: () -> Void = {}
+    let myScore: String
+    let yourScore: String
+    let onEdit: (PlayerSide, Bool) -> Void
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -15,16 +16,16 @@ struct ScoreEditSheet: View {
                 stepperGroup(
                     label: String(localized: "watch_score_me"),
                     color: .green,
-                    displayScore: score.myDisplayScore,
-                    onMinus: { score.myIndex = max(0, score.myIndex - 1); onChange() },
-                    onPlus: { score.myIndex = min(4, score.myIndex + 1); onChange() }
+                    displayScore: myScore,
+                    onMinus: { onEdit(.me, false) },
+                    onPlus: { onEdit(.me, true) }
                 )
                 stepperGroup(
                     label: String(localized: "watch_score_opp"),
                     color: .orange,
-                    displayScore: score.yourDisplayScore,
-                    onMinus: { score.yourIndex = max(0, score.yourIndex - 1); onChange() },
-                    onPlus: { score.yourIndex = min(4, score.yourIndex + 1); onChange() }
+                    displayScore: yourScore,
+                    onMinus: { onEdit(.opponent, false) },
+                    onPlus: { onEdit(.opponent, true) }
                 )
             }
             .padding(.horizontal, 32)

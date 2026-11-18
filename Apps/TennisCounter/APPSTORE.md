@@ -6,7 +6,7 @@
 이름·설명은 2026-10-12, 부제·프로모션 텍스트·스크린샷 캡션은 2026-10-22 에 공개 스토어(1.1.9)에서 가져온 실값이다.
 프로모션 텍스트는 공개 페이지가 설명 앞에 붙여 보여 주는 단락을 떼어 낸 것이다 — App Store Connect 와 한 번 맞춰 본다.
 키워드는 공개되지 않아 2026-10-25 에 App Store Connect 값을 옮겨 적고 다듬었다 — 이름·부제와 겹치는 단어를 빼고 빈 개념을 채웠다.
-출시 노트는 1.2.0 용으로 2026-10-26 에 짧게 다시 썼다.
+출시 노트는 1.3.0 용으로 2026-11-16 에 갱신했다.
 
 ## 이름 (30자)
 
@@ -157,15 +157,19 @@ Weekend tennis with friends — let Ralli keep it light.
 ### ko
 
 ```
-• 버그를 수정했어요.
-• 온보딩 페이지가 업데이트됐어요.
+• 3세트 경기의 마지막 세트를 10점 매치 타이브레이크로 진행하는 옵션을 추가했어요.
+• 경기 기록 저장과 폰 동기화의 안정성을 개선했어요.
+• 운동 시간 표시와 점수 되돌리기 동작을 개선했어요.
+• 타이브레이크 점수 수정과 점수 화면을 개선했어요.
 ```
 
 ### en-US
 
 ```
-• Bug fixes.
-• Updated the onboarding pages.
+• Added a 10-point match tiebreak option for the deciding set of a best-of-three match.
+• Improved match saving and syncing with iPhone.
+• Improved workout time display and score undo behavior.
+• Fixed manual tiebreak score editing and refined the score display.
 ```
 
 ## 스크린샷 캡션

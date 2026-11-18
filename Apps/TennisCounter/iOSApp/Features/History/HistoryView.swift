@@ -6,6 +6,7 @@ struct HistoryView: View {
     let activationID: Int
     let showListOnActivation: Bool
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.scenePhase) private var scenePhase
     @StateObject private var viewModel = HistoryViewModel()
     @State private var selectedSession: MatchSessionGroup?
     @State private var pendingDelete: MatchSessionGroup?
@@ -87,6 +88,14 @@ struct HistoryView: View {
             }
             .onChange(of: activationID) { _, value in
                 activate(value)
+            }
+            // 탭이 열린 채로 워치 저장이 도착하거나 앱이 앞으로 오면 다시 읽는다.
+            // 알림은 object 를 가리지 않는다 — 저장하는 서비스 인스턴스가 무엇이든 받는다.
+            .onReceive(NotificationCenter.default.publisher(for: .matchStoreDidChange)) { _ in
+                viewModel.reloadIfLoaded()
+            }
+            .onChange(of: scenePhase) { _, phase in
+                if phase == .active { viewModel.reloadIfLoaded() }
             }
         }
     }

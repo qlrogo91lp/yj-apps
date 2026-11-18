@@ -7,7 +7,7 @@
 - App Store: https://apps.apple.com/app/id6824680383
 - 리뷰 작성: https://apps.apple.com/app/id6824680383?action=write-review
 
-1.0 출시 전 초안이다. 스크린샷 캡션은 맨 아래 절에 있다 (피그마 작업 중 — 확정되면 고친다).
+출시 노트는 1.0.1 용으로 2026-11-16 에 갱신했다. 스크린샷 캡션은 맨 아래 절에 있다.
 
 ## 이름 (30자)
 
@@ -156,13 +156,15 @@ Made for people who go to the gym a few times a week and want to keep it simple.
 ### ko
 
 ```
-하루치 핏의 첫 버전입니다. 운동한 날마다 한 칸씩 채워 보세요.
+• 운동 종료 중 중복 입력을 방지하고 진행 상태를 표시해요.
+• 손목을 내린 동안에도 운동 시간이 더 일관되게 표시되도록 개선했어요.
 ```
 
 ### en-US
 
 ```
-The first version of Haruchi Fit. Fill in one square for every day you work out.
+• Prevented duplicate actions while ending a workout and added a progress indicator.
+• Improved workout time display consistency while your wrist is lowered.
 ```
 
 ## 스크린샷 캡션

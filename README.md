@@ -16,6 +16,69 @@ yj-apps/
 
 ---
 
+## 앱별 안내
+
+각 앱의 README는 기능, 데이터 흐름, 권한, 패키지와 Xcode 설정을 다시 찾아보기 위한 안내다.
+
+| 앱 | 안내 |
+|---|---|
+| GolfCounter | [골프 라운드 기록과 설정](Apps/GolfCounter/README.md) |
+| Ralli | [테니스 점수·운동 기록과 설정](Apps/TennisCounter/ReadMe.md) |
+| 하루치 핏 | [운동 구간·활동 격자와 설정](Apps/HaruchiFit/README.md) |
+
+## 설정을 다시 찾을 때
+
+Swift 코드만으로 앱의 모든 기능이 켜지는 것은 아니다. 프로젝트 설정, 사용자 동의, 패키지 연결을 함께 확인한다.
+
+| 무엇을 설정하는가 | 어디서 확인하는가 | 역할 |
+|---|---|---|
+| 앱 식별자·최소 OS·버전 | 타깃 General / Build Settings | Bundle Identifier, Deployment Target, Version·Build |
+| 언어·동시성 설정 | 타깃 Build Settings | Swift Language Version, Default Actor Isolation 등 |
+| HealthKit·iCloud·App Groups 사용 자격 | 타깃 Signing & Capabilities, `*.entitlements` | 서명된 앱이 사용할 시스템 기능과 컨테이너 선언 |
+| 권한 요청에 표시할 설명 | 타깃 Info / `INFOPLIST_KEY_*`, `InfoPlist.xcstrings` | `NSHealthShareUsageDescription` 같은 사용자 안내 문구 |
+| 실제 권한 요청 | 앱·YJKit의 서비스 코드 | `requestAuthorization`으로 필요한 데이터 종류에 대한 동의 요청 |
+| 패키지 의존성 | 프로젝트 Package Dependencies, `Packages/YJKit/Package.swift` | 패키지 위치와 버전 조건 |
+| 타깃에서 쓸 패키지 프로덕트 | 타깃 General의 Frameworks, Libraries, and Embedded Content / Build Phases | `WorkoutCore` 등 실제로 연결할 라이브러리 선택 |
+| 개인정보·API 사용 선언 | 각 타깃의 `PrivacyInfo.xcprivacy` | 데이터 수집·추적 및 신고 대상 API의 사용 사유 |
+
+권한 설명 문구, capability, 실제 요청 코드는 서로 다른 역할이다. 하나만 추가했다고 나머지가 자동으로 채워지지 않는다.
+`Info.plist` 원본이 비어 있어도 Build Settings의 `INFOPLIST_KEY_*` 값으로 최종 앱의 Info.plist가 생성될 수 있다.
+번역한 문구는 앱의 `InfoPlist.xcstrings`도 함께 확인한다. Developer Portal·App Store Connect의 상태는 별도 확인 대상이다.
+
+### UserDefaults와 프라이버시 매니페스트
+
+`UserDefaults`는 Foundation의 작은 설정·상태 저장소다. 이름(key)과 값(value)을 기기에 저장해 앱을 다시 열어도 기억한다.
+SwiftUI의 `@AppStorage`도 이를 사용한다. 웹의 `localStorage`와 비슷하며 저장 자체가 서버 전송을 뜻하지 않는다.
+운동 기록 전체를 관리하는 SwiftData, 건강 기록을 관리하는 HealthKit과 용도가 다르다.
+
+`UserDefaults.standard`는 앱 전용 저장소다. iPhone 앱과 Watch 앱은 각각 독립된 저장소를 갖고,
+Watch 앱과 같은 기기의 컴플리케이션은 App Group 저장소를 통해 데이터를 공유할 수 있다.
+App Group은 iPhone↔Watch 전송 수단이 아니며, 그 통신에는 WatchConnectivity를 쓴다.
+
+`PrivacyInfo.xcprivacy`는 실제 데이터 수집·추적·API 사용 목적을 선언하는 파일이다.
+UserDefaults 자체 저장은 `CA92.1`, 같은 App Group 안의 공유는 `1C8F.1`을 해당 사용처에 선언한다.
+파일은 해당 실행 파일의 번들에 포함되어야 하며, 별도 권한 팝업을 만드는 기능은 아니다.
+Ralli·HaruchiFit에는 iOS·Watch·컴플리케이션별 파일이 있다. GolfCounter는 아직 추가되지 않았다.
+
+Xcode에서 파일을 선택하면 Property List 표 편집기로 볼 수 있다. 생성 템플릿은 Resource의 App Privacy다.
+매니페스트 내용은 타깃 Build Settings의 설정 항목으로 나타나지 않는다.
+Organizer의 Generate Privacy Report는 수집 데이터 요약용이며 API 사용 사유 코드를 확인하는 화면은 아니다.
+
+- [Apple: UserDefaults](https://developer.apple.com/documentation/foundation/userdefaults)
+- [Apple: 프라이버시 매니페스트](https://developer.apple.com/documentation/bundleresources/privacy-manifest-files)
+- [Apple: API 사용 사유](https://developer.apple.com/documentation/bundleresources/app-privacy-configuration/nsprivacyaccessedapitypes/nsprivacyaccessedapitype)
+- [Apple: Xcode 표 편집기](https://developer.apple.com/documentation/xcode/editing-property-list-files)
+
+### 패키지를 추가하거나 연결할 때
+
+공용 인프라는 로컬 SPM 패키지 [YJKit](Packages/YJKit/README.md)에 둔다. 각 앱은 `../../Packages/YJKit`을 참조한다.
+공용 외부 라이브러리를 추가한다면 `Package.swift`의 `dependencies`와 이를 소비할 타깃의 `dependencies`를 함께 확인한다.
+새 프로덕트를 앱에서 쓰려면 앱 타깃에도 연결해야 한다. 코드에서는 패키지 이름 `YJKit` 대신 `WorkoutCore` 같은 모듈을 import한다.
+앱 전용 외부 패키지는 프로젝트 Package Dependencies와 소비할 앱 타깃의 연결을 함께 관리한다.
+시스템 프레임워크(HealthKit·SwiftData·WatchConnectivity)는 외부 SPM 패키지와 구분한다.
+현재 외부 의존성 Firebase는 YJKit의 `MonitoringCore`를 통해 Ralli에 연결된다. 패키지 버전 조건의 원본은
+[Package.swift](Packages/YJKit/Package.swift)이며, 앱별 실제 링크 목록은 각 README를 본다.
+
 ## 모노레포 전환
 
 세 개의 개별 레포(`golf_counter`, `tennis_counter`, `ralli-kit`)를 이 레포로 통합했다. 히스토리는 경로를

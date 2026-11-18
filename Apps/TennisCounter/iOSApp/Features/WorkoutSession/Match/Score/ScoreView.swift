@@ -51,18 +51,17 @@ struct ScoreView: View {
                 GameScores(
                     myGameScore: viewModel.myGameScore,
                     yourGameScore: viewModel.yourGameScore,
-                    isTieBreak: viewModel.isTieBreak
+                    isTieBreak: viewModel.isTieBreak,
+                    showsGames: !viewModel.isMatchTieBreakShown
                 )
             }
             .padding(.bottom, 300)
 
             if isDriver {
-                if viewModel.canUndo {
-                    VStack {
-                        Spacer()
-                        UndoButton(action: { viewModel.undo() })
-                            .padding(.bottom, 150)
-                    }
+                VStack {
+                    Spacer()
+                    UndoButton(isEnabled: viewModel.canUndo, action: { viewModel.undo() })
+                        .padding(.bottom, 150)
                 }
             } else {
                 VStack {
@@ -81,7 +80,13 @@ struct ScoreView: View {
             onProgressChanged(hasProgress)
         }
         .sheet(isPresented: $showEditSheet) {
-            ScoreEditSheet(score: viewModel.score, onChange: { viewModel.applyManualEdit() })
+            ScoreEditSheet(myScore: viewModel.score.myDisplayScore, yourScore: viewModel.score.yourDisplayScore) { side, increment in
+                guard isDriver else { return }
+                let wasTieBreak = viewModel.isTieBreak
+                let setNumber = viewModel.currentSetNumber
+                viewModel.applyManualEdit(side, increment: increment)
+                if wasTieBreak, !viewModel.isTieBreak || viewModel.isMatchOver || viewModel.currentSetNumber != setNumber { showEditSheet = false }
+            }
         }
     }
 }

@@ -3,6 +3,63 @@ import Foundation
 import Testing
 
 struct ScoreViewModelTests {
+    @MainActor private func matchTieBreakDriver() -> ScoreViewModel {
+        let vm = ScoreViewModel(
+            options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false, matchTieBreak: true),
+            undoGuardInterval: 0
+        )
+        for _ in 0 ..< 24 {
+            vm.addPoint(.me)
+        }
+        for _ in 0 ..< 24 {
+            vm.addPoint(.opponent)
+        }
+        return vm
+    }
+
+    @Test @MainActor func matchTieBreakEntryShowsMatchTieBreak() {
+        #expect(matchTieBreakDriver().isMatchTieBreakShown)
+    }
+
+    @Test @MainActor func setTieBreakIsNotMatchTieBreakShown() {
+        let vm = ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false))
+        for _ in 0 ..< 6 {
+            for side in [PlayerSide.me, .opponent] {
+                for _ in 0 ..< 4 {
+                    vm.addPoint(side)
+                }
+            }
+        }
+        #expect(vm.score.gameMode == .tieBreak)
+        #expect(!vm.isMatchTieBreakShown)
+    }
+
+    @Test @MainActor func oneSetTieBreakIsNotMatchTieBreakShown() {
+        let vm = ScoreViewModel(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false))
+        for _ in 0 ..< 6 {
+            for side in [PlayerSide.me, .opponent] {
+                for _ in 0 ..< 4 {
+                    vm.addPoint(side)
+                }
+            }
+        }
+        #expect(vm.score.gameMode == .tieBreak)
+        #expect(!vm.isMatchTieBreakShown)
+    }
+
+    @Test @MainActor func mirrorAppliedMatchTieBreakStateShowsMatchTieBreak() {
+        let driver = matchTieBreakDriver()
+        let mirror = ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false))
+        mirror.applyRemoteState(driver.makeScoreState())
+        #expect(mirror.isMatchTieBreakShown)
+    }
+
+    @Test @MainActor func undoBeforeMatchTieBreakClearsMatchTieBreakShown() {
+        let vm = matchTieBreakDriver()
+        vm.undo()
+        #expect(!vm.isMatchTieBreakShown)
+    }
+
     @Test(arguments: [
         (0, 0, 0, 0, false),
         (0, 0, 1, 1, true),
@@ -483,7 +540,10 @@ struct ScoreViewModelTests {
 
     @Test @MainActor func watchMatchTieBreak_undoOfWinningPointRestoresTarget() {
         var result: MatchResult?
-        let vm = ScoreViewModel(options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false, matchTieBreak: true))
+        let vm = ScoreViewModel(
+            options: MatchOptions(mode: .bestOfThree, noAdRule: true, noTieRule: false, matchTieBreak: true),
+            undoGuardInterval: 0
+        )
         vm.onMatchFinished = { value, _ in result = value }
         for _ in 0 ..< 6 {
             vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me); vm.addPoint(.me)
@@ -624,4 +684,46 @@ struct ScoreViewModelTests {
         #expect(weakVM == nil)
     }
 
+    @Test @MainActor func addPointRightAfterUndoIsIgnored() {
+        var clock = Date(timeIntervalSince1970: 1000)
+        let vm = ScoreViewModel(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false), now: { clock })
+        vm.addPoint(.me) // 15-0
+        clock += 1
+        vm.undo() // 0-0
+        clock += 0.1
+        vm.addPoint(.me)
+        #expect(vm.score.myDisplayScore == "0")
+        #expect(vm.canUndo == false)
+    }
+
+    @Test @MainActor func addPointRightAfterEmptyUndoIsIgnored() {
+        var clock = Date(timeIntervalSince1970: 1000)
+        let vm = ScoreViewModel(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false), now: { clock })
+        vm.undo() // 스택이 비어 있다
+        clock += 0.1
+        vm.addPoint(.opponent)
+        #expect(vm.score.yourDisplayScore == "0")
+    }
+
+    @Test @MainActor func addPointAfterUndoGuardIntervalIsAccepted() {
+        var clock = Date(timeIntervalSince1970: 1000)
+        let vm = ScoreViewModel(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false), now: { clock })
+        vm.undo()
+        clock += 0.41 // 0.4 정확히는 Date 부동소수점 오차로 경계가 흔들린다
+        vm.addPoint(.me)
+        #expect(vm.score.myDisplayScore == "15")
+    }
+
+    @Test @MainActor func alternatingUndoAndPointTapsKeepScoreAtZero() {
+        var clock = Date(timeIntervalSince1970: 1000)
+        let vm = ScoreViewModel(options: MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false), now: { clock })
+        for _ in 0 ..< 6 { // 0.15초 간격 연타가 undo·득점 버튼에 번갈아 떨어진다
+            vm.undo()
+            clock += 0.15
+            vm.addPoint(.me)
+            clock += 0.15
+        }
+        #expect(vm.score.myDisplayScore == "0")
+        #expect(vm.myGameScore == 0)
+    }
 }

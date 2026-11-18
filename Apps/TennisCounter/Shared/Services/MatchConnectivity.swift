@@ -10,6 +10,9 @@ final class MatchConnectivity: ObservableObject {
     static let shared = MatchConnectivity(service: ConnectivityService())
 
     @Published var isWatchReachable: Bool = false
+    /// WCSession 활성화 여부. 활성화 전에 보낸 저장 요청은 나가지 않으므로 워치 보관함이 이 값이
+    /// true 가 될 때 다시 보낸다.
+    @Published var isActivated: Bool = false
     @Published var receivedSessionStart: SessionStartMessage?
     @Published var receivedScoreState: ScoreState?
     @Published var receivedMatchEnd: MatchEndMessage?
@@ -31,6 +34,10 @@ final class MatchConnectivity: ObservableObject {
         service.$isCounterpartReachable
             .receive(on: DispatchQueue.main)
             .assign(to: &$isWatchReachable)
+
+        service.$isActivated
+            .receive(on: DispatchQueue.main)
+            .assign(to: &$isActivated)
 
         service.onReceive(SessionStartMessage.self) { [weak self] msg in
             // 죽은 세션 채택 방지: workoutStartDate가 비현실적으로 오래된 sessionStart는 버린다.
@@ -75,7 +82,9 @@ final class MatchConnectivity: ObservableObject {
     }
 
     /// 저장 버튼 전용. iOS가 이 메시지를 받을 때만 히스토리에 persist 한다. 기록이라 항상 큐로 보낸다.
-    func sendMatchSave(_ msg: MatchEndMessage) {
+    /// - Returns: WCSession 에 실제로 넘겼으면 true (활성화 전이면 false). 배달 확인은 폰의 ACK 다.
+    @discardableResult
+    func sendMatchSave(_ msg: MatchEndMessage) -> Bool {
         service.send(MatchSaveMessage(base: msg), via: .queued)
     }
 

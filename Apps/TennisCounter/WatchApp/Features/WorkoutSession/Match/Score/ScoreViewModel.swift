@@ -32,8 +32,21 @@ class ScoreViewModel: ObservableObject {
     private var matchResult: MatchResult?
     private var cancellables = Set<AnyCancellable>()
     private let haptics: MatchHapticsPlaying
+    private let undoGuardInterval: TimeInterval
+    private let now: () -> Date
+    private var lastUndoAt: Date?
 
     var onStateChanged: (() -> Void)?
+
+    /// undo 연타가 득점으로 떨어지지 않게, undo 직후 짧은 시간 득점 입력을 무시한다.
+    private var isWithinUndoGuard: Bool {
+        guard let lastUndoAt else { return false }
+        return now().timeIntervalSince(lastUndoAt) < undoGuardInterval
+    }
+
+    var isMatchTieBreakShown: Bool {
+        score.gameMode == .tieBreak && myGameScore == 0 && yourGameScore == 0
+    }
 
     var canUndo: Bool {
         !snapshots.isEmpty
@@ -64,9 +77,16 @@ class ScoreViewModel: ObservableObject {
         onMatchFinished?(.draw, completedSets)
     }
 
-    init(options: MatchOptions, haptics: MatchHapticsPlaying = MatchHaptics()) {
+    init(
+        options: MatchOptions,
+        haptics: MatchHapticsPlaying = MatchHaptics(),
+        undoGuardInterval: TimeInterval = 0.4,
+        now: @escaping () -> Date = Date.init
+    ) {
         self.options = options
         self.haptics = haptics
+        self.undoGuardInterval = undoGuardInterval
+        self.now = now
         score.noAdRule = options.noAdRule
 
         score.objectWillChange
@@ -76,6 +96,7 @@ class ScoreViewModel: ObservableObject {
 
     func addPoint(_ side: PlayerSide) {
         guard matchResult == nil else { return }
+        guard !isWithinUndoGuard else { return }
         snapshots.append(captureSnapshot())
         var event: MatchHapticEvent = .point
         if let winner = score.addPoint(side) {
@@ -96,6 +117,7 @@ class ScoreViewModel: ObservableObject {
 
     /// 경기 시작까지 되돌린다 — 게임·세트 경계를 넘는다.
     func undo() {
+        lastUndoAt = now()
         guard let snapshot = snapshots.popLast() else { return }
         apply(snapshot)
         haptics.play(.undo)
@@ -125,6 +147,7 @@ class ScoreViewModel: ObservableObject {
         matchTieBreakInProgress = false
         matchResult = nil
         snapshots.removeAll()
+        lastUndoAt = nil
         score.noAdRule = options.noAdRule
         score.reset()
     }

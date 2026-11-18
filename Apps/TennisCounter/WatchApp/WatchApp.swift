@@ -13,6 +13,8 @@ struct TennisCounter_Watch_AppApp: App {
 
     init() {
         AppCrashReporter.start()
+        // 앱 수명 내내 살아 있어야 운동 화면이 없을 때도 보관된 경기를 다시 보낸다.
+        MatchSaveOutbox.shared.bind(to: .shared)
     }
 
     var body: some Scene {

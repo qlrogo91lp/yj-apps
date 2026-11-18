@@ -474,6 +474,55 @@ struct HistoryViewModelTests {
         #expect(vm.selectedDate == nil)
     }
 
+    // MARK: - 저장 도착·포그라운드 복귀 재조회
+
+    /// 원인 5 재현: 기록 탭이 이미 열린 뒤 워치 저장이 도착하면 목록이 그대로였다.
+    @Test func reloadIfLoadedShowsMatchSavedAfterActivation() throws {
+        let (persistence, context) = try makeFixture()
+        let vm = HistoryViewModel(persistence: persistence)
+        vm.configure(modelContext: context)
+        vm.activate(1)
+        #expect(vm.listMatches.isEmpty)
+
+        let match = Match()
+        match.matchId = UUID()
+        match.workoutSessionId = UUID()
+        match.startedAt = Date()
+        try persistence.matches.upsert(match)
+        vm.reloadIfLoaded()
+
+        #expect(vm.listMatches.count == 1)
+    }
+
+    @Test func reloadIfLoadedBeforeFirstActivationDoesNothing() throws {
+        let (persistence, context) = try makeFixture()
+        _ = insertMatch(session: UUID(), startedAt: Date(), in: context)
+        try context.save()
+        let vm = HistoryViewModel(persistence: persistence)
+        vm.configure(modelContext: context)
+
+        vm.reloadIfLoaded()
+
+        #expect(vm.listMatches.isEmpty)
+        #expect(vm.activate(1) == true)
+    }
+
+    @Test func reloadIfLoadedKeepsSelectedDateAndViewMode() throws {
+        let (persistence, context) = try makeFixture()
+        let vm = HistoryViewModel(persistence: persistence)
+        vm.configure(modelContext: context)
+        vm.activate(1)
+        let lastMonth = try #require(Calendar.current.date(byAdding: .month, value: -1, to: Date()))
+        vm.selectedDate = lastMonth
+        // 기본값이 .list 라 그대로 두면 바뀌지 않았는지 볼 수 없다 — 기본값이 아닌 쪽으로 바꾼다
+        vm.viewMode = .calendar
+
+        vm.reloadIfLoaded()
+
+        #expect(vm.selectedDate == lastMonth)
+        #expect(vm.viewMode == .calendar)
+    }
+
     @Test func loadInitialSelectsToday() throws {
         let (persistence, context) = try makeFixture()
         let vm = HistoryViewModel(persistence: persistence)

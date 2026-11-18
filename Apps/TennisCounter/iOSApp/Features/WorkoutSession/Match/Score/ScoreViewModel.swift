@@ -30,6 +30,9 @@ final class ScoreViewModel: ObservableObject {
     }
 
     private var snapshots: [Snapshot] = []
+    private let undoGuardInterval: TimeInterval
+    private let now: () -> Date
+    private var lastUndoAt: Date?
 
     var isMatchOver: Bool {
         matchResult != nil
@@ -43,8 +46,18 @@ final class ScoreViewModel: ObservableObject {
         score.gameMode == .tieBreak
     }
 
+    var isMatchTieBreakShown: Bool {
+        score.gameMode == .tieBreak && myGameScore == 0 && yourGameScore == 0
+    }
+
     var canUndo: Bool {
         !snapshots.isEmpty
+    }
+
+    /// undo 연타가 득점으로 떨어지지 않게, undo 직후 짧은 시간 득점 입력을 무시한다.
+    private var isWithinUndoGuard: Bool {
+        guard let lastUndoAt else { return false }
+        return now().timeIntervalSince(lastUndoAt) < undoGuardInterval
     }
 
     var hasProgress: Bool {
@@ -83,8 +96,14 @@ final class ScoreViewModel: ObservableObject {
 
     var onStateChanged: (() -> Void)?
 
-    init(options: MatchOptions = MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false)) {
+    init(
+        options: MatchOptions = MatchOptions(mode: .oneSet, noAdRule: true, noTieRule: false),
+        undoGuardInterval: TimeInterval = 0.4,
+        now: @escaping () -> Date = Date.init
+    ) {
         self.options = options
+        self.undoGuardInterval = undoGuardInterval
+        self.now = now
         score.noAdRule = options.noAdRule
 
         score.objectWillChange
@@ -94,32 +113,41 @@ final class ScoreViewModel: ObservableObject {
 
     func addPoint(_ side: PlayerSide) {
         guard !isMatchOver else { return }
+        guard !isWithinUndoGuard else { return }
         snapshots.append(captureSnapshot())
         let gameWon = score.addPoint(side)
-        if let winner = gameWon {
-            if matchTieBreakInProgress {
-                finalizeMatchTieBreak(winner: winner)
-            } else {
-                if side == .me { myGameScore += 1 } else { yourGameScore += 1 }
-                score.resetData()
-                checkSetUpdate()
-            }
-        }
+        if let winner = gameWon { finishGame(winner: winner) }
         onStateChanged?()
     }
 
     /// 경기 시작까지 되돌린다 — 게임·세트 경계를 넘는다.
     func undo() {
+        lastUndoAt = now()
         guard let snapshot = snapshots.popLast() else { return }
         apply(snapshot)
         onStateChanged?()
     }
 
-    /// ScoreEditSheet 수동 수정 경로. 수정은 새 기준점이므로 이전 스택을 버린다
-    /// (버리지 않으면 undo가 수정 이전 과거로 튄다).
-    func applyManualEdit() {
-        snapshots.removeAll()
-        onStateChanged?()
+    func applyManualEdit(_ side: PlayerSide, increment: Bool) {
+        guard !isMatchOver else { return }
+        switch score.manualEdit(side, increment: increment) {
+        case .unchanged:
+            return
+        case let .changed(winner):
+            snapshots.removeAll()
+            if let winner { finishGame(winner: winner) }
+            onStateChanged?()
+        }
+    }
+
+    private func finishGame(winner: PlayerSide) {
+        if matchTieBreakInProgress {
+            finalizeMatchTieBreak(winner: winner)
+        } else {
+            if winner == .me { myGameScore += 1 } else { yourGameScore += 1 }
+            score.resetData()
+            checkSetUpdate()
+        }
     }
 
     func resetAll(options: MatchOptions) {
@@ -134,6 +162,7 @@ final class ScoreViewModel: ObservableObject {
         tieBreakInProgress = false
         matchTieBreakInProgress = false
         snapshots.removeAll()
+        lastUndoAt = nil
         score.noAdRule = options.noAdRule
         score.resetData()
     }

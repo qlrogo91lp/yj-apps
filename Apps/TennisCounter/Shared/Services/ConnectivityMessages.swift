@@ -295,13 +295,18 @@ struct MatchSaveResultMessage: ConnectivityMessage {
 
     let sessionId: UUID
     let success: Bool
+    /// 저장을 처리한 경기. 워치 보관함이 이 경기 하나만 지우는 키다.
+    /// 구버전 폰(1.2.0)은 싣지 않으므로 optional — nil 이면 워치는 같은 sessionId 전체로 본다.
+    let matchId: UUID?
 
     func toDictionary() -> [String: Any] {
-        [
+        var dict: [String: Any] = [
             "type": Self.messageType,
             "sessionId": sessionId.uuidString,
             "success": success,
         ]
+        if let matchId { dict["matchId"] = matchId.uuidString }
+        return dict
     }
 
     init?(from dict: [String: Any]) {
@@ -311,11 +316,13 @@ struct MatchSaveResultMessage: ConnectivityMessage {
               let success = dict["success"] as? Bool else { return nil }
         sessionId = id
         self.success = success
+        matchId = (dict["matchId"] as? String).flatMap(UUID.init(uuidString:))
     }
 
-    init(sessionId: UUID, success: Bool) {
+    init(sessionId: UUID, success: Bool, matchId: UUID? = nil) {
         self.sessionId = sessionId
         self.success = success
+        self.matchId = matchId
     }
 }
 
