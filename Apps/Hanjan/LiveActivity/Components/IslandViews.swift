@@ -15,15 +15,13 @@ struct IslandExpandedView: View {
         HStack {
             ProgressView(value: min(state.equivalent / max(state.limit, 1), 1))
                 .tint(LimitLevel.of(equivalent: state.equivalent, limit: state.limit) == .exceeded ? BrandColor.danger : BrandColor.amber)
-            if state.toastOnly {
-                Button(intent: AddDrinkIntent()) { Text("짠만").padding(.horizontal, 10).padding(.vertical, 6) }
-                    .buttonStyle(.plain).foregroundStyle(BrandColor.amber).overlay(Capsule().stroke(BrandColor.amber))
-            } else {
-                Button(intent: AddDrinkIntent()) { Text("한 잔") }
-                    .buttonStyle(.borderedProminent)
-                    .tint(LimitLevel.of(equivalent: state.equivalent, limit: state.limit) == .exceeded ? BrandColor.danger : BrandColor.amber)
-                    .foregroundStyle(.black)
+            Button(intent: AddDrinkIntent()) {
+                Text(state.toastOnly ? "짠만" : "한 잔").frame(width: 54, height: 32)
             }
+            .buttonStyle(.plain)
+            .foregroundStyle(state.toastOnly ? BrandColor.amber : Color.black)
+            .background(state.toastOnly ? BrandColor.amber.opacity(0.2) :
+                (LimitLevel.of(equivalent: state.equivalent, limit: state.limit) == .exceeded ? BrandColor.danger : BrandColor.amber), in: Capsule())
         }
     }
 }

@@ -14,21 +14,20 @@ struct LockScreenView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("\(SojuFormat.string(state.equivalent)) / \(SojuFormat.string(state.limit))잔").font(.title2.bold()).foregroundStyle(color)
                     if let filled = state.toastFilled, let total = state.toastTotal {
-                        HStack(spacing: 4) {
+                        HStack(spacing: 8) {
                             ForEach(0 ..< total, id: \.self) { index in
-                                Circle().fill(index < filled ? BrandColor.amber : BrandColor.amber.opacity(0.2)).frame(width: 7, height: 7)
+                                Circle().fill(index < filled ? BrandColor.amber : BrandColor.amber.opacity(0.2)).frame(width: 10, height: 10)
                             }
                         }.accessibilityLabel("\(total)번 중 \(filled)번째")
                     }
                 }
                 Spacer()
-                if state.toastOnly {
-                    Button(intent: AddDrinkIntent()) { Text("짠만").font(.headline).padding(.horizontal, 15).padding(.vertical, 8) }
-                        .buttonStyle(.plain).foregroundStyle(BrandColor.amber).overlay(Capsule().stroke(BrandColor.amber))
-                } else {
-                    Button(intent: AddDrinkIntent()) { Text("한 잔").font(.headline) }
-                        .buttonStyle(.borderedProminent).tint(color).foregroundStyle(.black)
+                Button(intent: AddDrinkIntent()) {
+                    Text(state.toastOnly ? "짠만" : "한 잔").font(.headline).frame(width: 64, height: 38)
                 }
+                .buttonStyle(.plain)
+                .foregroundStyle(state.toastOnly ? BrandColor.amber : Color.black)
+                .background(state.toastOnly ? BrandColor.amber.opacity(0.2) : color, in: Capsule())
             }
             ProgressView(value: min(state.equivalent / max(state.limit, 1), 1)).tint(color)
         }.padding()
