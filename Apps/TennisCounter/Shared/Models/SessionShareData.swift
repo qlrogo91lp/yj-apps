@@ -8,35 +8,30 @@ struct SessionShareData {
     let startedAt: Date
     let endedAt: Date?
 
-    init?(session: MatchSessionGroup) {
-        let elapsed: Int?
-        let calories: Double?
-        let totalCalories: Double?
-        if let record = session.record {
-            elapsed = record.elapsedSeconds
-            calories = record.activeCalories
-            totalCalories = record.totalCalories
-            startedAt = record.startedAt
-            endedAt = record.endedAt
-        } else {
-            elapsed = session.elapsedSeconds
-            calories = session.activeCalories
-            totalCalories = session.totalCalories
-            endedAt = session.matches.compactMap(\.endedAt).max()
-            if let end = endedAt, let elapsed {
-                startedAt = end.addingTimeInterval(-TimeInterval(elapsed))
-            } else {
-                startedAt = session.date
-            }
-        }
+    init?(record: WorkoutSessionRecord) {
+        guard let elapsed = record.elapsedSeconds, let calories = record.activeCalories else { return nil }
+        startedAt = record.startedAt
+        endedAt = record.endedAt
+        result = WorkoutResult(durationSeconds: elapsed, caloriesBurned: calories,
+                               averageHeartRate: record.averageHeartRate, totalCaloriesBurned: record.totalCalories ?? 0)
+    }
 
-        // 기존 공유 카드와 동일하게 시간·활동 칼로리가 있어야 공유할 수 있다.
-        guard let elapsed, let calories else { return nil }
-        result = WorkoutResult(
-            durationSeconds: elapsed,
-            caloriesBurned: calories,
-            averageHeartRate: session.averageHeartRate,
-            totalCaloriesBurned: totalCalories ?? 0
-        )
+    init?(session: MatchSessionGroup) {
+        if let record = session.record {
+            self.init(record: record)
+            return
+        }
+        guard let elapsed = session.elapsedSeconds, let calories = session.activeCalories else { return nil }
+        let end = session.matches.compactMap(\.endedAt).max()
+        let start = end.map { $0.addingTimeInterval(-TimeInterval(elapsed)) } ?? session.date
+        self.init(result: WorkoutResult(durationSeconds: elapsed, caloriesBurned: calories,
+                                        averageHeartRate: session.averageHeartRate, totalCaloriesBurned: session.totalCalories ?? 0),
+                  startedAt: start, endedAt: end)
+    }
+
+    private init(result: WorkoutResult, startedAt: Date, endedAt: Date?) {
+        self.result = result
+        self.startedAt = startedAt
+        self.endedAt = endedAt
     }
 }

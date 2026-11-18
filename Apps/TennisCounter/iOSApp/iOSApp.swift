@@ -4,7 +4,9 @@ import SwiftUI
 
 @main
 struct TennisCounterApp: App {
-    let container: ModelContainer
+    static let modelContainer = PersistenceContainerFactory.make(
+        for: [Match.self, SetRecord.self, WorkoutSessionRecord.self]
+    )
     private let watchConnectivity = MatchConnectivity.shared
     /// 경기 화면과 무관하게 세션 레코드를 저장한다. 앱 수명 내내 잡고 있어야 경기 없는
     /// 워크아웃의 기록을 놓치지 않는다 — WorkoutSessionRecorder 주석을 본다.
@@ -18,11 +20,8 @@ struct TennisCounterApp: App {
     init() {
         AppCrashReporter.start()
         // CloudKit 동기화 시도 → iCloud 미로그인·시뮬레이터 등 실패 시 로컬 폴백 (팩토리가 처리)
-        container = PersistenceContainerFactory.make(
-            for: [Match.self, SetRecord.self, WorkoutSessionRecord.self]
-        )
-        MatchPersistenceService.shared.configure(with: ModelContext(container))
-        SessionPersistenceService.shared.configure(with: ModelContext(container))
+        MatchPersistenceService.shared.configure(with: ModelContext(Self.modelContainer))
+        SessionPersistenceService.shared.configure(with: ModelContext(Self.modelContainer))
         sessionRecorder = WorkoutSessionRecorder()
         matchSaver = WatchMatchSaver()
         Task { @MainActor in LiveActivityService.shared.endAll() }
@@ -40,7 +39,7 @@ struct TennisCounterApp: App {
                 MainTabView()
             }
         }
-        .modelContainer(container)
+        .modelContainer(Self.modelContainer)
     }
 }
 

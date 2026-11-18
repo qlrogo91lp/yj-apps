@@ -17,6 +17,16 @@ final class SessionPersistenceService {
         return try context.fetch(FetchDescriptor<WorkoutSessionRecord>())
     }
 
+    func fetchLatestEnded() throws -> WorkoutSessionRecord? {
+        guard let context else { throw PersistenceError.notConfigured }
+        var descriptor = FetchDescriptor<WorkoutSessionRecord>(
+            predicate: #Predicate { $0.endedAt != nil },
+            sortBy: [SortDescriptor(\.endedAt, order: .reverse), SortDescriptor(\.startedAt, order: .reverse)]
+        )
+        descriptor.fetchLimit = 1
+        return try context.fetch(descriptor).first
+    }
+
     func upsert(_ record: WorkoutSessionRecord) throws {
         guard let context else { return }
         if let id = record.workoutSessionId {

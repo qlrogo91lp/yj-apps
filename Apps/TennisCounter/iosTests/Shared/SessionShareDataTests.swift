@@ -4,6 +4,27 @@ import Testing
 import WorkoutCore
 
 struct SessionShareDataTests {
+    @Test func shareDataUsesFinalRecordWithoutMatches() throws {
+        let record = WorkoutSessionRecord()
+        record.elapsedSeconds = 1200
+        record.activeCalories = 150
+        record.endedAt = Date(timeIntervalSince1970: 3000)
+        let share = try #require(SessionShareData(record: record))
+        #expect(share.result.durationSeconds == 1200)
+        #expect(share.result.caloriesBurned == 150)
+        #expect(share.endedAt == record.endedAt)
+    }
+
+    @Test func shareDataRequiresTimeAndActiveCalories() {
+        let record = WorkoutSessionRecord()
+        #expect(SessionShareData(record: record) == nil)
+        record.elapsedSeconds = 1200
+        #expect(SessionShareData(record: record) == nil)
+        record.elapsedSeconds = nil
+        record.activeCalories = 150
+        #expect(SessionShareData(record: record) == nil)
+    }
+
     @Test func recordUsesFinalMetricsAndActualWorkoutRange() throws {
         let start = Date(timeIntervalSince1970: 100_000)
         let match = Match()
