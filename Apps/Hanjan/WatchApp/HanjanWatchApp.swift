@@ -5,7 +5,25 @@ import SwiftUI
     @StateObject private var store: WatchSessionStore
     init() {
         let connectivity = ConnectivityService()
-        _store = StateObject(wrappedValue: WatchSessionStore(connectivity: connectivity))
+        let sessionStore = WatchSessionStore(connectivity: connectivity)
+        #if DEBUG
+            if let demo = DemoLaunch.state() {
+                sessionStore.end()
+                sessionStore.receive(ConfigMessage(kinds: DrinkPresets.all, limit: 8))
+                sessionStore.start()
+                sessionStore.selectKind(DrinkPresets.soju.id)
+                for _ in 0 ..< (demo == .over ? 9 : 2) {
+                    sessionStore.tapMain()
+                }
+                if demo != .over {
+                    sessionStore.selectKind(DrinkPresets.beer.id)
+                    sessionStore.tapMain()
+                    sessionStore.selectKind(DrinkPresets.soju.id)
+                }
+                if demo == .toast3 { sessionStore.cycleToast(); sessionStore.cycleToast() }
+            }
+        #endif
+        _store = StateObject(wrappedValue: sessionStore)
     }
 
     var body: some Scene {
