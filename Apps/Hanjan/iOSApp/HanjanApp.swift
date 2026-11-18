@@ -23,6 +23,25 @@ import UserNotifications
         AddDrinkIntent.handler = { [weak store] in store?.tapMain() }
         store.pushConfig()
         sync(store.session)
+        #if DEBUG
+            if let demo = DemoLaunch.state() {
+                settings.hasOnboarded = true
+                settings.limit = 8
+                store.end()
+                store.start()
+                store.selectKind(DrinkPresets.soju.id)
+                for _ in 0 ..< (demo == .over ? 9 : 2) {
+                    store.tapMain()
+                }
+                if demo != .over {
+                    store.selectKind(DrinkPresets.beer.id)
+                    store.tapMain()
+                    store.selectKind(DrinkPresets.soju.id)
+                }
+                if demo == .toast3 { store.cycleToast(); store.cycleToast() }
+                store.pushConfig()
+            }
+        #endif
     }
 
     func sync(_ session: LiveSession?) {
