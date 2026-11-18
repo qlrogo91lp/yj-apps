@@ -6,53 +6,21 @@
     {
       "layers" : [
         {
-          "image-name" : "layer1.svg",
-          "name" : "layer1"
-        },
-        {
           "fill-specializations" : [
             {
-              "appearance" : "tinted",
-              "value" : "automatic"
+              "appearance" : "dark",
+              "value" : {
+                "solid" : "srgb:1.00000,0.80000,0.00000,1.00000"
+              }
             }
           ],
-          "hidden" : false,
-          "image-name" : "layer2.svg",
-          "name" : "layer2",
-          "opacity-specializations" : [
-            {
-              "appearance" : "tinted",
-              "value" : 1
-            }
-          ],
-          "position" : {
-            "scale" : 0.97,
-            "translation-in-points" : [
-              -53.98632667140771,
-              -198.96959209310546
-            ]
-          }
-        }
-      ],
-      "shadow" : {
-        "kind" : "neutral",
-        "opacity" : 0.5
-      },
-      "translucency" : {
-        "enabled" : true,
-        "value" : 0.3
-      }
-    },
-    {
-      "layers" : [
-        {
-          "image-name" : "water.svg",
-          "name" : "water",
+          "image-name" : "hanjan.svg",
+          "name" : "hanjan",
           "position" : {
             "scale" : 1,
             "translation-in-points" : [
-              0.23814465096438653,
-              59
+              1,
+              3.8476883945858162
             ]
           }
         }
