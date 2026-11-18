@@ -10,6 +10,8 @@ nonisolated struct ToastProgress: Codable, Equatable, Sendable {
 }
 
 nonisolated struct LiveSession: Identifiable, Codable, Equatable, Sendable {
+    static let autoEndInterval: TimeInterval = 10800
+
     let id: UUID
     let startedAt: Date
     var endedAt: Date?
@@ -70,8 +72,13 @@ nonisolated struct LiveSession: Identifiable, Codable, Equatable, Sendable {
         ledger.last?.loggedAt ?? startedAt
     }
 
+    func overlaps(_ other: LiveSession) -> Bool {
+        lastActivityAt.addingTimeInterval(Self.autoEndInterval) >= other.startedAt &&
+            other.lastActivityAt.addingTimeInterval(Self.autoEndInterval) >= startedAt
+    }
+
     func shouldAutoEnd(now: Date) -> Bool {
-        now.timeIntervalSince(lastActivityAt) >= 10800
+        now.timeIntervalSince(lastActivityAt) >= Self.autoEndInterval
     }
 
     func merging(_ other: LiveSession) -> LiveSession {

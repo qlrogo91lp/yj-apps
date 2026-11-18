@@ -14,6 +14,7 @@ import WidgetKit
     private let haptics: WatchHaptics?
     private let sessionKey = "hanjan.watch.session"
     private let configKey = "hanjan.watch.config"
+    private let endedKey = "hanjan.watch.endedSessionIds"
 
     convenience init(connectivity: ConnectivityService, now: @escaping () -> Date = Date.init) {
         self.init(defaults: UserDefaults(suiteName: SessionSnapshotStore.appGroup) ?? .standard, now: now,
@@ -90,6 +91,9 @@ import WidgetKit
 
     private func finish(at date: Date) {
         guard let current = session else { return }
+        for id in current.mergedSessionIds.union([current.id]) {
+            rememberEnded(id)
+        }
         session = nil; publish(SessionEndMessage(sessionId: current.id, endedAt: date))
     }
 
@@ -103,7 +107,11 @@ import WidgetKit
     }
 
     func receive(_ message: SessionEndMessage) {
+        rememberEnded(message.sessionId)
         guard let current = session, current.owns(sessionId: message.sessionId) else { return }
+        for id in current.mergedSessionIds.union([current.id]) {
+            rememberEnded(id)
+        }
         session = nil; persist()
     }
 
@@ -123,7 +131,16 @@ import WidgetKit
         persist()
     }
 
+    private func rememberEnded(_ id: UUID) {
+        var ids = defaults.stringArray(forKey: endedKey) ?? []
+        ids.removeAll { $0 == id.uuidString }
+        ids.append(id.uuidString)
+        defaults.set(Array(ids.suffix(20)), forKey: endedKey)
+    }
+
     private func merge(_ incoming: LiveSession) {
+        guard incoming.endedAt == nil, !(defaults.stringArray(forKey: endedKey) ?? []).contains(incoming.id.uuidString) else { return }
+        if let current = session, !current.owns(sessionId: incoming.id), !incoming.owns(sessionId: current.id), !current.overlaps(incoming) { return }
         let merged = session
             .map { $0.owns(sessionId: incoming.id) || incoming.owns(sessionId: $0.id) ? $0.merging(incoming) : $0.absorbing(incoming) } ?? incoming
         session = merged.endedAt == nil ? merged : nil

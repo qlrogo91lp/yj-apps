@@ -6,14 +6,16 @@ import Foundation
     @Published private(set) var session: LiveSession? {
         didSet {
             if let session, let data = try? JSONEncoder().encode(session) {
-                UserDefaults.standard.set(data, forKey: "phoneLiveSession")
+                defaults.set(data, forKey: "phoneLiveSession")
             } else {
-                UserDefaults.standard.removeObject(forKey: "phoneLiveSession")
+                defaults.removeObject(forKey: "phoneLiveSession")
             }
         }
     }
 
     var onChange: ((LiveSession?) -> Void)?
+    private let defaults: UserDefaults
+    private let endedKey = "hanjan.phone.endedSessionIds"
     private let connectivity: ConnectivityService
     private let archive: SessionArchive
     private let settings: AppSettings
@@ -21,11 +23,14 @@ import Foundation
     private let location = PhoneLocationService()
     private let notifier = LimitNotifier()
     private let reminder = ReviewReminder()
-    private var pending = PendingEntries()
+    private var pending: PendingEntries
 
-    init(connectivity: ConnectivityService, archive: SessionArchive, settings: AppSettings, now: @escaping () -> Date = Date.init) {
-        self.connectivity = connectivity; self.archive = archive; self.settings = settings; self.now = now
-        session = UserDefaults.standard.data(forKey: "phoneLiveSession").flatMap { try? JSONDecoder().decode(LiveSession.self, from: $0) }
+    init(connectivity: ConnectivityService, archive: SessionArchive, settings: AppSettings, now: @escaping () -> Date = Date.init,
+         defaults: UserDefaults = .standard)
+    {
+        self.connectivity = connectivity; self.archive = archive; self.settings = settings; self.now = now; self.defaults = defaults
+        pending = PendingEntries(defaults: defaults)
+        session = defaults.data(forKey: "phoneLiveSession").flatMap { try? JSONDecoder().decode(LiveSession.self, from: $0) }
         connectivity.onReceive(SessionStartMessage.self) { [weak self] in self?.receive($0.session) }
         connectivity.onReceive(SessionStateMessage.self) { [weak self] in if let value = $0.session { self?.receive(value) } }
         connectivity.onReceive(EntryAddMessage.self) { [weak self] in self?.receiveEntry($0.entry) }
@@ -93,6 +98,9 @@ import Foundation
     private func finish(at date: Date) {
         guard var current = session else { return }
         current.endedAt = date
+        for id in current.mergedSessionIds.union([current.id]) {
+            rememberEnded(id)
+        }
         connectivity.send(SessionEndMessage(sessionId: current.id, endedAt: date), via: .reliable)
         save(current); if settings.alertsEnabled { reminder.schedule(sessionId: current.id, endedAt: date) }
         session = nil; connectivity.send(SessionStateMessage(session: nil), via: .context); onChange?(nil)
@@ -120,13 +128,16 @@ import Foundation
         if let record = try? archive.record(owning: incoming.id), record.endedAt != nil {
             save(incoming); return
         }
-        if let endedAt = incoming.endedAt, !(session?.owns(sessionId: incoming.id) ?? false),
-           !(session.map { incoming.owns(sessionId: $0.id) } ?? false)
-        {
-            save(incoming)
-            if settings.alertsEnabled { reminder.schedule(sessionId: incoming.id, endedAt: endedAt) }
+        if incoming.endedAt != nil {
+            rememberEnded(incoming.id)
+            if !(session?.owns(sessionId: incoming.id) ?? false) {
+                save(incoming)
+                if settings.alertsEnabled, let endedAt = incoming.endedAt { reminder.schedule(sessionId: incoming.id, endedAt: endedAt) }
+            }
             return
         }
+        guard !(defaults.stringArray(forKey: endedKey) ?? []).contains(incoming.id.uuidString) else { return }
+        if let current = session, !current.owns(sessionId: incoming.id), !incoming.owns(sessionId: current.id), !current.overlaps(incoming) { return }
         let old = session
         let before = old.map(level) ?? .normal
         if let current = session {
@@ -163,7 +174,15 @@ import Foundation
         return true
     }
 
-    private func receiveEnd(_ message: SessionEndMessage) {
+    private func rememberEnded(_ id: UUID) {
+        var ids = defaults.stringArray(forKey: endedKey) ?? []
+        ids.removeAll { $0 == id.uuidString }
+        ids.append(id.uuidString)
+        defaults.set(Array(ids.suffix(20)), forKey: endedKey)
+    }
+
+    func receiveEnd(_ message: SessionEndMessage) {
+        rememberEnded(message.sessionId)
         if let current = session, current.owns(sessionId: message.sessionId) { finish(at: message.endedAt); return }
         guard let record = try? archive.record(owning: message.sessionId) else {
             pending.end(sessionId: message.sessionId, at: message.endedAt)
