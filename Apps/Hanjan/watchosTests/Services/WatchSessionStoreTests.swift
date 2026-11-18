@@ -67,21 +67,25 @@ import Testing
         #expect(restored.session == fresh)
     }
 
-    @Test func overlappingSessionsMergeButAbsorbedEndDoesNotEndPrimary() throws {
+    @Test func sessionsStartedOneMinuteApartMergeAndAbsorbedEndFinishesSession() throws {
         let time = Date(timeIntervalSince1970: 100)
         let store = WatchSessionStore(defaults: defaults(), now: { time })
-        store.start(); store.tapMain()
+        store.start()
         let primary = try #require(store.session)
-        var other = LiveSession(id: UUID(), startedAt: time, limit: 8, currentKindId: DrinkPresets.soju.id)
-        other.ledger.add(other.makeEntry(id: UUID(), at: time, kind: DrinkPresets.soju, source: .phone))
+        let other = LiveSession(id: UUID(), startedAt: time.addingTimeInterval(60), limit: 8, currentKindId: DrinkPresets.soju.id)
         store.receive(SessionStateMessage(session: other))
-        #expect(store.session?.ledger.drinkEntries.count == 2)
-        store.receive(SessionEndMessage(sessionId: other.id, endedAt: time))
         #expect(store.session?.id == primary.id)
+        #expect(store.session?.owns(sessionId: other.id) == true)
+        store.receive(SessionEndMessage(sessionId: other.id, endedAt: time.addingTimeInterval(60)))
+        #expect(store.session == nil)
+        store.receive(SessionStateMessage(session: other))
+        #expect(store.session == nil)
+        store.receive(SessionStateMessage(session: primary))
+        #expect(store.session == nil)
     }
 
-    @Test func nonOverlappingAndEndedSnapshotsAreIgnored() throws {
-        let store = WatchSessionStore(defaults: defaults(), now: { Date(timeIntervalSince1970: 200) })
+    @Test func inactiveSessionAfterThreeHoursAndEndedSnapshotsAreIgnored() throws {
+        let store = WatchSessionStore(defaults: defaults(), now: { Date(timeIntervalSince1970: 10911) })
         store.start()
         let fresh = try #require(store.session)
         var old = LiveSession(id: UUID(), startedAt: Date(timeIntervalSince1970: 100), limit: 8, currentKindId: DrinkPresets.soju.id)
@@ -91,6 +95,14 @@ import Testing
         old.endedAt = Date(timeIntervalSince1970: 150)
         store.receive(SessionStateMessage(session: old))
         #expect(store.session == fresh)
+    }
+
+    @Test func overlapWindowIsSymmetricAtThreeHourBoundary() {
+        let first = LiveSession(id: UUID(), startedAt: Date(timeIntervalSince1970: 100), limit: 8, currentKindId: DrinkPresets.soju.id)
+        let boundary = LiveSession(id: UUID(), startedAt: Date(timeIntervalSince1970: 10900), limit: 8, currentKindId: DrinkPresets.soju.id)
+        let later = LiveSession(id: UUID(), startedAt: Date(timeIntervalSince1970: 10901), limit: 8, currentKindId: DrinkPresets.soju.id)
+        #expect(first.overlaps(boundary)); #expect(boundary.overlaps(first))
+        #expect(!first.overlaps(later)); #expect(!later.overlaps(first))
     }
 
     @Test func remembersOnlyTwentyEndedIds() throws {

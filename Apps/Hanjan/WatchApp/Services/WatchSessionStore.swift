@@ -108,8 +108,8 @@ import WidgetKit
 
     func receive(_ message: SessionEndMessage) {
         rememberEnded(message.sessionId)
-        guard let current = session, current.id == message.sessionId else { return }
-        for id in current.mergedSessionIds {
+        guard let current = session, current.owns(sessionId: message.sessionId) else { return }
+        for id in current.mergedSessionIds.union([current.id]) {
             rememberEnded(id)
         }
         session = nil; persist()

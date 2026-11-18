@@ -183,8 +183,7 @@ import Foundation
 
     func receiveEnd(_ message: SessionEndMessage) {
         rememberEnded(message.sessionId)
-        if let current = session, current.id == message.sessionId { finish(at: message.endedAt); return }
-        if session?.owns(sessionId: message.sessionId) == true { return }
+        if let current = session, current.owns(sessionId: message.sessionId) { finish(at: message.endedAt); return }
         guard let record = try? archive.record(owning: message.sessionId) else {
             pending.end(sessionId: message.sessionId, at: message.endedAt)
             return

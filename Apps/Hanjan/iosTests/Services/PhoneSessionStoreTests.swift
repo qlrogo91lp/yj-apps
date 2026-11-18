@@ -44,22 +44,26 @@ import Testing
         #expect(restored.session == fresh)
     }
 
-    @Test func overlappingSessionsMergeButAbsorbedEndDoesNotEndPrimary() throws {
+    @Test func sessionsStartedOneMinuteApartMergeAndAbsorbedEndFinishesSession() throws {
         let time = Date(timeIntervalSince1970: 100)
         let (store, container) = try makeStore(#require(UserDefaults(suiteName: UUID().uuidString)), now: { time })
         defer { withExtendedLifetime(container) {} }
-        store.start(); store.tapMain()
+        store.start()
         let primary = try #require(store.session)
-        var other = session(100)
-        other.ledger.add(other.makeEntry(id: UUID(), at: time, kind: DrinkPresets.soju, source: .watch))
+        let other = session(160)
         store.receive(other)
-        #expect(store.session?.ledger.drinkEntries.count == 2)
-        store.receiveEnd(SessionEndMessage(sessionId: other.id, endedAt: time))
         #expect(store.session?.id == primary.id)
+        #expect(store.session?.owns(sessionId: other.id) == true)
+        store.receiveEnd(SessionEndMessage(sessionId: other.id, endedAt: time.addingTimeInterval(60)))
+        #expect(store.session == nil)
+        store.receive(other)
+        #expect(store.session == nil)
+        store.receive(primary)
+        #expect(store.session == nil)
     }
 
-    @Test func nonOverlappingAndEndedSnapshotsAreIgnored() throws {
-        let (store, container) = try makeStore(#require(UserDefaults(suiteName: UUID().uuidString)), now: { Date(timeIntervalSince1970: 200) })
+    @Test func inactiveSessionAfterThreeHoursAndEndedSnapshotsAreIgnored() throws {
+        let (store, container) = try makeStore(#require(UserDefaults(suiteName: UUID().uuidString)), now: { Date(timeIntervalSince1970: 10911) })
         defer { withExtendedLifetime(container) {} }
         store.start()
         let fresh = try #require(store.session)
