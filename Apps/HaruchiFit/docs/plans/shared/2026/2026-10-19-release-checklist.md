@@ -12,7 +12,7 @@
 | 버전 | iOS · 워치 · 컴플리케이션 모두 `MARKETING_VERSION 1.0.0`, 빌드 번호 `1`. 세 타깃이 일치한다 |
 | 번들 ID · 팀 | `com.yj.HaruchiFit` · `.watchkitapp` · `.watchkitapp.ComplicationApp`, 팀 `P2TU28W32L` |
 | 최소 버전 | iOS 17 (iPhone 전용) · watchOS 10 |
-| 엔타이틀먼트 | HealthKit (iOS · 워치) · App Group `group.com.yj.HaruchiFit` (워치 · 컴플리케이션). **iCloud / CloudKit 없음** — 저장은 로컬 폴백이다 |
+| 엔타이틀먼트 | HealthKit (iOS · 워치) · App Group `group.com.yj.HaruchiFit` (워치 · 컴플리케이션). iCloud / CloudKit 은 1.0 에는 없었고 2026-11-19 에 iOS 앱에 켰다 (아래 결정 1) |
 | 프라이버시 매니페스트 | **없다** (`PrivacyInfo.xcprivacy` 가 세 타깃 어디에도 없다) |
 | 필수 사유 API | `UserDefaults` 를 쓴다 — 온보딩 `@AppStorage`, HealthKit 앵커 저장, 워치↔컴플리케이션 스냅샷(App Group) |
 | 외부 SDK | **없다** (Firebase · 분석 · 크래시 수집 없음). 데이터가 기기 밖으로 나가지 않는다 |
@@ -28,6 +28,7 @@
    - 폰을 바꿀 때는 기기 백업 · 이전으로 앱 데이터가 함께 넘어간다. 잃는 경우는 **앱을 지우고 다시 설치할 때뿐**이다
    - 그때 건강 앱의 운동은 다시 가져오므로 **잔디 · 횟수 · 시간 · 칼로리는 돌아온다.** 사라지는 것은 수동 기록, 부위 · 메모,
      근력 · 유산소 구간이다 (워치 운동은 건강 앱에 근력 한 종류로 저장돼 다시 가져오면 전부 근력 한 구간이 된다)
+   - **[2026-11-19 이 플랜으로 켬]** `Apps/HaruchiFit/docs/plans/shared/2026/2026-11-18-icloud-backup.md` (YJ-48). Production 스키마는 같은 날 배포했다
    - 미루는 이유: CloudKit 프로덕션 스키마는 배포 뒤 필드 삭제 · 타입 변경 · 이름 변경이 안 되고 추가만 된다. 1.0 피드백으로 모델이 바뀔 시기에 그 제약을 지지 않는다.
      모델은 이미 CloudKit 제약(기본값, `.unique` 없음)에 맞춰 있어 나중에 엔타이틀먼트만 더하면 기존 로컬 기록이 올라간다
 2. **[결정됨 · 10-19] 앱 안 개인정보처리방침 링크는 1.0 에 두지 않는다.** 가이드라인 5.1.1(i) 은 앱 안 링크를 요구하지만 Ralli · 골프는 링크 없이 통과했다.

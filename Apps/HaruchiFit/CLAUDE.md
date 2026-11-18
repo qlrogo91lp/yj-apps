@@ -152,6 +152,11 @@ APPSTORE.md                         App Store 문구 원본 (ko · en-US). 규�
 - 매칭 키는 `healthKitUUID`. CloudKit 제약으로 `.unique` 를 걸 수 없으므로
   **중복 방지는 앱 코드 책임**이다. HealthKit 메타데이터에 부위를 넣지 않는다.
   워치 재전송은 영속 ID와 부위·메모를 지킨 채 기존 레코드의 운동 데이터만 갱신한다.
+- **iCloud(CloudKit) 백업** (2026-11-19, YJ-48) — 재설치·기기 변경 대비용이고 여러 기기 동시 사용은 범위 밖이다. 컨테이너 `iCloud.com.yj.HaruchiFit`.
+  재설치 직후 HealthKit 재가져오기가 만든 임시 기록과 iCloud 에서 내려온 원래 기록이 `healthKitUUID` 로 겹치므로
+  `ModelContext.removeDuplicateWorkouts` 가 하나만 남긴다 (`WorkoutSyncCoordinator` 가 동기화 뒤와 원격 변경 때 부른다).
+  **모델에 필드를 추가하면 Development 에서 확인한 뒤 CloudKit Console 에서 Deploy Schema Changes 를 다시 해야 한다.**
+  배포 뒤에는 필드 삭제·이름 변경·타입 변경이 안 되고 추가만 된다
 
 ### 폰↔워치
 
