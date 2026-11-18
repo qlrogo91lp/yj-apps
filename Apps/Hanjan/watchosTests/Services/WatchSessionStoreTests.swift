@@ -50,4 +50,59 @@ import Testing
         let restored = WatchSessionStore(defaults: storage)
         #expect(restored.session == store.session)
     }
+
+    @Test func staleSnapshotAndEndDoNotAffectNewSession() throws {
+        var time = Date(timeIntervalSince1970: 100)
+        let storage = defaults()
+        let store = WatchSessionStore(defaults: storage, now: { time })
+        store.start(); store.tapMain()
+        let old = try #require(store.session)
+        store.end(); time.addTimeInterval(10); store.start()
+        let fresh = try #require(store.session)
+        store.receive(SessionStateMessage(session: old))
+        store.receive(SessionEndMessage(sessionId: old.id, endedAt: time))
+        #expect(store.session == fresh)
+        let restored = WatchSessionStore(defaults: storage, now: { time })
+        restored.receive(SessionStateMessage(session: old))
+        #expect(restored.session == fresh)
+    }
+
+    @Test func overlappingSessionsMergeButAbsorbedEndDoesNotEndPrimary() throws {
+        let time = Date(timeIntervalSince1970: 100)
+        let store = WatchSessionStore(defaults: defaults(), now: { time })
+        store.start(); store.tapMain()
+        let primary = try #require(store.session)
+        var other = LiveSession(id: UUID(), startedAt: time, limit: 8, currentKindId: DrinkPresets.soju.id)
+        other.ledger.add(other.makeEntry(id: UUID(), at: time, kind: DrinkPresets.soju, source: .phone))
+        store.receive(SessionStateMessage(session: other))
+        #expect(store.session?.ledger.drinkEntries.count == 2)
+        store.receive(SessionEndMessage(sessionId: other.id, endedAt: time))
+        #expect(store.session?.id == primary.id)
+    }
+
+    @Test func nonOverlappingAndEndedSnapshotsAreIgnored() throws {
+        let store = WatchSessionStore(defaults: defaults(), now: { Date(timeIntervalSince1970: 200) })
+        store.start()
+        let fresh = try #require(store.session)
+        var old = LiveSession(id: UUID(), startedAt: Date(timeIntervalSince1970: 100), limit: 8, currentKindId: DrinkPresets.soju.id)
+        old.ledger.add(old.makeEntry(id: UUID(), at: Date(timeIntervalSince1970: 110), kind: DrinkPresets.soju, source: .phone))
+        store.receive(SessionStateMessage(session: old))
+        #expect(store.session == fresh)
+        old.endedAt = Date(timeIntervalSince1970: 150)
+        store.receive(SessionStateMessage(session: old))
+        #expect(store.session == fresh)
+    }
+
+    @Test func remembersOnlyTwentyEndedIds() throws {
+        let storage = defaults()
+        let store = WatchSessionStore(defaults: storage)
+        var ids: [UUID] = []
+        for _ in 0 ..< 21 {
+            store.start(); try ids.append(#require(store.session?.id)); store.end()
+        }
+        let saved = try #require(storage.stringArray(forKey: "hanjan.watch.endedSessionIds"))
+        #expect(saved.count == 20)
+        #expect(!saved.contains(ids[0].uuidString))
+        #expect(saved.contains(ids[20].uuidString))
+    }
 }

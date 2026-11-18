@@ -70,6 +70,10 @@ nonisolated struct LiveSession: Identifiable, Codable, Equatable, Sendable {
         ledger.last?.loggedAt ?? startedAt
     }
 
+    func overlaps(_ other: LiveSession) -> Bool {
+        lastActivityAt >= other.startedAt && other.lastActivityAt >= startedAt
+    }
+
     func shouldAutoEnd(now: Date) -> Bool {
         now.timeIntervalSince(lastActivityAt) >= 10800
     }
