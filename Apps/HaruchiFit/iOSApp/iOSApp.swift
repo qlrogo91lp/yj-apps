@@ -5,7 +5,7 @@ import SwiftUI
 
 @main
 struct HaruchiFitApp: App {
-    /// CloudKit 엔타이틀먼트가 아직 없다 — 팩토리가 조용히 로컬로 폴백한다 (PersistenceCore README).
+    /// CloudKit 미러링 — iCloud 를 끈 기기는 팩토리가 조용히 로컬로 폴백한다 (PersistenceCore README).
     static let modelContainer = PersistenceContainerFactory.make(for: [WorkoutRecord.self, Segment.self])
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage("onboardingSeenVersion") private var onboardingSeenVersion = 0
