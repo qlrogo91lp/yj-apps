@@ -1,4 +1,5 @@
 import Combine
+import CoreData
 import Foundation
 import SwiftData
 
@@ -9,6 +10,9 @@ import SwiftData
 @MainActor
 final class WorkoutSyncCoordinator: ObservableObject {
     @Published private(set) var isSyncing = false
+    var protectedRecordID: PersistentIdentifier?
+
+    private var remoteChangeSubscription: AnyCancellable?
 
     private let importer: HealthKitWorkoutImporter
     private let anchors: WorkoutQueryAnchorStore
@@ -24,6 +28,14 @@ final class WorkoutSyncCoordinator: ObservableObject {
         self.anchors = anchors
         self.context = context
         self.alerts = alerts
+        remoteChangeSubscription = NotificationCenter.default.publisher(for: .NSPersistentStoreRemoteChange)
+            .debounce(for: .seconds(1), scheduler: RunLoop.main)
+            .sink { [weak self] _ in
+                Task { @MainActor [weak self] in
+                    guard let self, !self.isSyncing else { return }
+                    cleanUpDuplicates()
+                }
+            }
     }
 
     /// **동시에 두 번 돌지 않는다.** 앵커가 경합하면 같은 워크아웃이 두 배치에 나뉘어 들어온다.
@@ -41,9 +53,19 @@ final class WorkoutSyncCoordinator: ObservableObject {
             try apply(inserts)
             // **적용이 끝난 뒤에 앵커를 옮긴다.** 먼저 저장하면 실패한 배치를 영영 다시 못 읽는다.
             if let anchor = batch.anchor { anchors.save(anchor) }
+            cleanUpDuplicates()
         } catch {
             print("[HaruchiFit] HealthKit 동기화 실패 — \(error)")
             alerts.report(.syncFailed)
+        }
+    }
+
+    func cleanUpDuplicates() {
+        do {
+            let protected = protectedRecordID.map { Set([$0]) } ?? []
+            try context.removeDuplicateWorkouts(protecting: protected)
+        } catch {
+            print("[HaruchiFit] 중복 기록 정리 실패 — \(error)")
         }
     }
 
