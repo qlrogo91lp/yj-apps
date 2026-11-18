@@ -5,19 +5,33 @@ struct PrimaryButton: View {
     let title: String
     var isEnabled = true
     var isDanger = false
+    var isToast = false
+    var height: CGFloat?
     let action: () -> Void
 
     var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(.system(size: 17, weight: .semibold))
-                .foregroundStyle(.black)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 8)
+        Group {
+            if let height {
+                Button(action: action) {
+                    Text(title)
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(isToast ? BrandColor.amber : .black)
+                        .frame(maxWidth: .infinity).frame(height: height)
+                        .background(isToast ? BrandColor.amber.opacity(0.2) : (isDanger ? BrandColor.danger : BrandColor.amber), in: Capsule())
+                }.buttonStyle(.plain)
+            } else {
+                Button(action: action) {
+                    Text(title)
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(.black)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                }
+                .buttonStyle(.borderedProminent)
+                .buttonBorderShape(.capsule)
+                .tint(isDanger ? BrandColor.danger : BrandColor.amber)
+            }
         }
-        .buttonStyle(.borderedProminent)
-        .buttonBorderShape(.capsule)
-        .tint(isDanger ? BrandColor.danger : BrandColor.amber)
         .disabled(!isEnabled)
         .opacity(isEnabled ? 1 : 0.4)
     }

@@ -22,7 +22,6 @@ enum RecordFormat {
     private static let monthFormatter = formatter("yyyy년 M월")
     private static let dayFormatter = formatter("M월 d일 EEEE")
     private static let shortDayFormatter = formatter("M월 d일")
-    private static let timeFormatter = formatter("a h:mm")
 
     /// "2026년 11월"
     static func month(_ date: Date) -> String {
@@ -39,10 +38,10 @@ enum RecordFormat {
         shortDayFormatter.string(from: date)
     }
 
-    /// "오후 7:20 – 오후 10:04". 종료 전이면 시작 시각만.
+    /// "19:20 – 22:04". 종료 전이면 시작 시각만.
     static func timeRange(_ start: Date, _ end: Date?) -> String {
-        guard let end else { return timeFormatter.string(from: start) }
-        return "\(timeFormatter.string(from: start)) – \(timeFormatter.string(from: end))"
+        guard let end else { return ClockFormat.string(start) }
+        return "\(ClockFormat.string(start)) – \(ClockFormat.string(end))"
     }
 
     /// "5잔" — 소주 환산, 0.5 단위.
