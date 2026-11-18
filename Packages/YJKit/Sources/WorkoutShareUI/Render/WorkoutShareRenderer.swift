@@ -37,7 +37,6 @@
             guard let image = renderer.uiImage else {
                 // 조용히 실패하면 사용자는 버튼이 고장난 줄 안다.
                 logger.error("공유 카드 렌더에 실패했다")
-                assertionFailure("공유 카드 렌더에 실패했다")
                 return nil
             }
             return image

@@ -1,12 +1,25 @@
 #if os(iOS)
+    import SwiftUI
     import UIKit
+    import WorkoutCore
     import UniformTypeIdentifiers
 
     /// 구운 카드 이미지를 밖으로 내보내는 방법 두 가지 — 공유 시트용 PNG 파일, 스티커 붙여넣기용 클립보드.
     ///
     /// 둘 다 **PNG** 로 넘긴다. `UIImage` 를 그대로 넘기면 받는 쪽이 JPEG 로 바꿔 둥근 모서리 바깥의
     /// 투명이 검게 찬다.
-    enum WorkoutShareExport {
+    public enum WorkoutShareExport {
+        @MainActor
+        @discardableResult
+        public static func copySticker<Accessory: View>(result: WorkoutResult, header: WorkoutShareHeader,
+                                                        style: WorkoutShareStyle, accessory: Accessory?,
+                                                        to pasteboard: UIPasteboard = .general) -> Bool
+        {
+            guard let image = WorkoutShareRenderer.image(model: WorkoutShareCardModel(result: result, header: header),
+                                                         style: style, accessory: accessory, corners: .rounded) else { return false }
+            return copySticker(image, to: pasteboard)
+        }
+
         static func pngData(from image: UIImage) -> Data? {
             image.pngData()
         }

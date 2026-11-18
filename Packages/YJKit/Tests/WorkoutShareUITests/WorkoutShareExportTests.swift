@@ -34,6 +34,21 @@
             #expect(FileManager.default.fileExists(atPath: url.path))
         }
 
+        @Test func copyStickerFromCardPutsTransparentPNGOnPasteboard() throws {
+            let pasteboard = try #require(UIPasteboard(name: UIPasteboard.Name("WorkoutShareCardTests"), create: true))
+            defer { UIPasteboard.remove(withName: pasteboard.name) }
+            let result = WorkoutResult(durationSeconds: 2538, caloriesBurned: 312,
+                                       averageHeartRate: 148, totalCaloriesBurned: 400)
+            let header = WorkoutShareHeader(title: "테니스", startedAt: Date(timeIntervalSince1970: 0), endedAt: nil)
+            let style = WorkoutShareStyle(badgeColor: .green, logo: Image(systemName: "figure.tennis"))
+
+            #expect(WorkoutShareExport.copySticker(result: result, header: header, style: style,
+                                                   accessory: Optional<EmptyView>.none, to: pasteboard))
+            let data = try #require(pasteboard.data(forPasteboardType: UTType.png.identifier))
+            let decoded = try #require(UIImage(data: data)?.cgImage)
+            #expect(pixelAlpha(of: decoded, x: 0, y: 0) == 0)
+        }
+
         /// 인스타 스토리에 길게 눌러 붙여넣으면 스티커가 된다 — PNG 타입으로 넣어야 투명이 남는다.
         @Test func copyPutsPNGOnPasteboard() throws {
             let pasteboard = try #require(UIPasteboard(name: UIPasteboard.Name("WorkoutShareExportTests"), create: true))
