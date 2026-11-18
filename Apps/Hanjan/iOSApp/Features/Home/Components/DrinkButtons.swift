@@ -7,14 +7,13 @@ struct DrinkButtons: View {
     let onUndo: () -> Void
     let onDrink: () -> Void
     var body: some View {
-        HStack {
-            CapsuleButton(title: "취소", isEnabled: canUndo, action: onUndo)
-            if toastOnly {
-                CapsuleButton(title: "짠만", style: .toast, action: onDrink)
-            } else {
-                PrimaryButton(title: "한 잔", isDanger: exceeded, action: onDrink)
+        GeometryReader { geometry in
+            HStack(spacing: 8) {
+                CapsuleButton(title: "취소", isEnabled: canUndo, height: 56, action: onUndo)
+                    .frame(width: (geometry.size.width - 8) / 4, height: 56)
+                PrimaryButton(title: toastOnly ? "짠만" : "한 잔", isDanger: exceeded, isToast: toastOnly, height: 56, action: onDrink)
             }
-        }
+        }.frame(height: 56)
     }
 }
 
