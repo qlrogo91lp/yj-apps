@@ -13,19 +13,18 @@ struct SummaryPageView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 5) {
-                Text(elapsed).font(.headline)
-                Text("\(session.startedAt.formatted(date: .omitted, time: .shortened)) 시작").font(.caption2).foregroundStyle(.secondary)
+                Text(elapsed).font(.system(size: 26, weight: .semibold))
+                Text("\(ClockFormat.string(session.startedAt)) 시작").font(.caption2).foregroundStyle(.secondary)
                 ForEach(session.ledger.countsByKind(), id: \.kindId) { count in
-                    Text("\(count.name) \(count.count)잔").font(.caption)
+                    HStack {
+                        Text(count.name)
+                        Spacer()
+                        Text("\(count.count)잔")
+                    }.font(.caption)
+                    Divider()
                 }
-                Button("종료") { confirming = true }.buttonStyle(.plain).font(.caption.bold())
-                    .frame(maxWidth: .infinity).padding(.vertical, 8).foregroundStyle(BrandColor.danger)
-                    .overlay(Capsule().stroke(BrandColor.danger))
+                Button(role: .destructive) { confirming = true } label: { Label("종료", systemImage: "stop.fill") }
             }
         }.sheet(isPresented: $confirming) { EndConfirmView(onCancel: { confirming = false }, onEnd: { confirming = false; onEnd() }) }
     }
-}
-
-#Preview {
-    SummaryPageView(session: LiveSession(id: UUID(), startedAt: Date(), limit: 8, currentKindId: DrinkPresets.soju.id), now: Date(), onEnd: {})
 }
