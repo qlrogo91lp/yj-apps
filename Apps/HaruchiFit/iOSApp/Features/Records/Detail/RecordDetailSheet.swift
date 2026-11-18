@@ -13,6 +13,7 @@ private struct RecordDetailSheetModifier: ViewModifier {
     let onFinish: () -> Void
     @Environment(\.modelContext) private var modelContext
     @EnvironmentObject private var alerts: AppAlertCenter
+    @EnvironmentObject private var sync: WorkoutSyncCoordinator
     @State private var deleteAfterDismiss: WorkoutRecord?
     @State private var editAfterDismiss: WorkoutRecord?
     @State private var editing: WorkoutRecord?
@@ -41,6 +42,7 @@ private struct RecordDetailSheetModifier: ViewModifier {
                     item = nil
                 }
             )
+            .onAppear { sync.protectedRecordID = record.persistentModelID }
         }.sheet(item: $editing) { record in
             ManualRecordView(record: record, initialMemoDraft: memoDrafts[record.persistentModelID]) {
                 memoDrafts[record.persistentModelID] = nil
@@ -50,6 +52,7 @@ private struct RecordDetailSheetModifier: ViewModifier {
     }
 
     private func finish() {
+        sync.protectedRecordID = nil
         if let record = deleteAfterDismiss {
             deleteAfterDismiss = nil
             memoDrafts[record.persistentModelID] = nil
