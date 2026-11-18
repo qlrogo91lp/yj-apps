@@ -9,6 +9,40 @@ struct SessionPersistenceServiceTests {
         try TestPersistence.make().sessions
     }
 
+    @Test func fetchLatestEndedOrdersByEndDateThenStartDate() throws {
+        let service = try makeService()
+        let early = WorkoutSessionRecord()
+        early.startedAt = Date(timeIntervalSince1970: 10)
+        early.endedAt = Date(timeIntervalSince1970: 100)
+        let first = WorkoutSessionRecord()
+        first.startedAt = Date(timeIntervalSince1970: 20)
+        first.endedAt = Date(timeIntervalSince1970: 200)
+        let latest = WorkoutSessionRecord()
+        latest.startedAt = Date(timeIntervalSince1970: 30)
+        latest.endedAt = Date(timeIntervalSince1970: 200)
+        try service.upsert(early)
+        try service.upsert(first)
+        try service.upsert(latest)
+        #expect(try service.fetchLatestEnded()?.startedAt == latest.startedAt)
+        #expect(try service.fetchLatestEnded()?.activeCalories == nil)
+    }
+
+    @Test func fetchLatestEndedIgnoresMissingEndDate() throws {
+        let service = try makeService()
+        let ended = WorkoutSessionRecord()
+        ended.endedAt = Date(timeIntervalSince1970: 100)
+        let ongoing = WorkoutSessionRecord()
+        ongoing.startedAt = Date(timeIntervalSince1970: 200)
+        try service.upsert(ended)
+        try service.upsert(ongoing)
+        #expect(try service.fetchLatestEnded()?.endedAt == ended.endedAt)
+    }
+
+    @Test func fetchLatestEndedReturnsNilForEmptyStore() throws {
+        let service = try makeService()
+        #expect(try service.fetchLatestEnded() == nil)
+    }
+
     @Test func upsertThenFetch() throws {
         let service = try makeService()
         let id = UUID()

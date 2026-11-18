@@ -6,7 +6,7 @@ import SwiftUI
 @main
 struct HaruchiFitApp: App {
     /// CloudKit 엔타이틀먼트가 아직 없다 — 팩토리가 조용히 로컬로 폴백한다 (PersistenceCore README).
-    private let container = PersistenceContainerFactory.make(for: [WorkoutRecord.self, Segment.self])
+    static let modelContainer = PersistenceContainerFactory.make(for: [WorkoutRecord.self, Segment.self])
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage("onboardingSeenVersion") private var onboardingSeenVersion = 0
     @StateObject private var sync: WorkoutSyncCoordinator
@@ -16,7 +16,7 @@ struct HaruchiFitApp: App {
     init() {
         // 워치 기록 저장과 import 삽입이 같은 컨텍스트를 본다. 둘로 나누면
         // 서로의 변경을 못 보고 rollback 이 간섭할 수 있다 (PersistenceService — 단일 컨텍스트).
-        let context = container.mainContext
+        let context = Self.modelContainer.mainContext
         let alerts = AppAlertCenter()
         _alerts = StateObject(wrappedValue: alerts)
         _sync = StateObject(wrappedValue: WorkoutSyncCoordinator(context: context, alerts: alerts))
@@ -44,7 +44,7 @@ struct HaruchiFitApp: App {
                 }
             }
             .preferredColorScheme(.dark)
-            .modelContainer(container)
+            .modelContainer(Self.modelContainer)
             .environmentObject(sync)
             .environmentObject(alerts)
             .onChange(of: scenePhase, initial: true) { _, phase in

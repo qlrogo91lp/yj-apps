@@ -90,8 +90,8 @@
         /// 스티커층은 투명을 그대로 붙인다 — 둥근 모서리로 굽는다.
         @MainActor
         private func copySticker() {
-            guard let image = renderCard(corners: .rounded),
-                  WorkoutShareExport.copySticker(image) else { return }
+            guard WorkoutShareExport.copySticker(result: result, header: header, style: style,
+                                                  accessory: accessory) else { return }
             showCopied = true
         }
     }
