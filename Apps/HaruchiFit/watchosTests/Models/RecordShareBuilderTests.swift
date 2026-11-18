@@ -8,6 +8,31 @@ import WorkoutCore
 struct RecordShareBuilderTests {
     private let start = GrassFixture.date(2026, 9, 28, 19, 12)
 
+    @Test func latestRecordSelectsByEndDateAcrossDays() throws {
+        let context = try GrassFixture.makeContext()
+        let longer = GrassFixture.record(in: context, startedAt: start, totalSeconds: 90000)
+        let later = GrassFixture.record(in: context, startedAt: start.addingTimeInterval(86400), totalSeconds: 600)
+        #expect(RecordShareBuilder.latestRecord(in: [later, longer]) === longer)
+    }
+
+    @Test func latestRecordDerivesMissingEndDate() throws {
+        let context = try GrassFixture.makeContext()
+        let record = GrassFixture.record(in: context, startedAt: start, totalSeconds: 3600)
+        let other = GrassFixture.record(in: context, startedAt: start.addingTimeInterval(1800), totalSeconds: 600)
+        #expect(RecordShareBuilder.latestRecord(in: [record, other]) === record)
+    }
+
+    @Test func latestRecordUsesStartDateForEqualEndDates() throws {
+        let context = try GrassFixture.makeContext()
+        let first = GrassFixture.record(in: context, startedAt: start, totalSeconds: 3600)
+        let second = GrassFixture.record(in: context, startedAt: start.addingTimeInterval(1800), totalSeconds: 1800)
+        #expect(RecordShareBuilder.latestRecord(in: [first, second]) === second)
+    }
+
+    @Test func latestRecordReturnsNilForEmptyHistory() {
+        #expect(RecordShareBuilder.latestRecord(in: []) == nil)
+    }
+
     @Test func titleIsBrand() throws {
         let context = try GrassFixture.makeContext()
         let record = GrassFixture.record(in: context, startedAt: start, totalSeconds: 1800,
