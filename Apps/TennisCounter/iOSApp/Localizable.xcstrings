@@ -1,35 +1,35 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "Copy Last Workout Sticker" : {
+    "shortcut_copy_sticker_title" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : { "stringUnit" : { "state" : "translated", "value" : "Copy Last Workout Sticker" } },
         "ko" : { "stringUnit" : { "state" : "translated", "value" : "마지막 운동 스티커 복사" } }
       }
     },
-    "Copy the most recent workout as a sticker." : {
+    "shortcut_copy_sticker_description" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : { "stringUnit" : { "state" : "translated", "value" : "Copy the most recent workout as a sticker." } },
         "ko" : { "stringUnit" : { "state" : "translated", "value" : "가장 최근 운동을 스티커로 복사합니다." } }
       }
     },
-    "No saved workouts found." : {
+    "shortcut_copy_sticker_empty" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : { "stringUnit" : { "state" : "translated", "value" : "No saved workouts found." } },
         "ko" : { "stringUnit" : { "state" : "translated", "value" : "저장된 운동 기록이 없어요." } }
       }
     },
-    "Couldn't copy the last workout sticker." : {
+    "shortcut_copy_sticker_failed" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : { "stringUnit" : { "state" : "translated", "value" : "Couldn't copy the last workout sticker." } },
         "ko" : { "stringUnit" : { "state" : "translated", "value" : "마지막 운동 스티커를 복사하지 못했어요." } }
       }
     },
-    "Copied the workout that ended at %@ as a sticker." : {
+    "shortcut_copy_sticker_done %@" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : { "stringUnit" : { "state" : "translated", "value" : "Copied the workout that ended at %@ as a sticker." } },

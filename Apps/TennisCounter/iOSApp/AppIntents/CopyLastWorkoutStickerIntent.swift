@@ -2,8 +2,8 @@ import AppIntents
 import SwiftData
 
 struct CopyLastWorkoutStickerIntent: AppIntent {
-    static let title: LocalizedStringResource = "Copy Last Workout Sticker"
-    static let description = IntentDescription("Copy the most recent workout as a sticker.")
+    static let title: LocalizedStringResource = "shortcut_copy_sticker_title"
+    static let description = IntentDescription("shortcut_copy_sticker_description")
 
     @MainActor
     func perform() async throws -> some IntentResult & ProvidesDialog {
@@ -11,17 +11,17 @@ struct CopyLastWorkoutStickerIntent: AppIntent {
             let service = SessionPersistenceService()
             service.configure(with: ModelContext(TennisCounterApp.modelContainer))
             guard let record = try service.fetchLatestEnded() else {
-                return .result(dialog: "No saved workouts found.")
+                return .result(dialog: "shortcut_copy_sticker_empty")
             }
             guard let share = SessionShareData(record: record), SessionShareButton.copySticker(share),
                   let endedAt = record.endedAt
             else {
-                return .result(dialog: "Couldn't copy the last workout sticker.")
+                return .result(dialog: "shortcut_copy_sticker_failed")
             }
             let date = endedAt.formatted(date: .long, time: .shortened)
-            return .result(dialog: "Copied the workout that ended at \(date) as a sticker.")
+            return .result(dialog: "shortcut_copy_sticker_done \(date)")
         } catch {
-            return .result(dialog: "Couldn't copy the last workout sticker.")
+            return .result(dialog: "shortcut_copy_sticker_failed")
         }
     }
 }
