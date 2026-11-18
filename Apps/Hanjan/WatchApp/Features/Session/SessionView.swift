@@ -12,12 +12,14 @@ struct SessionView: View {
     var body: some View {
         Group {
             if let session = viewModel.store.session {
-                TabView {
-                    CounterPageView(session: session, kinds: viewModel.store.kinds, notice: viewModel.notice,
-                                    onSelect: viewModel.store.selectKind, onToast: viewModel.cycleToast,
-                                    onUndo: viewModel.undo, onDrink: viewModel.tapMain)
-                    SummaryPageView(session: session, now: viewModel.currentTime, onEnd: viewModel.store.end)
-                }.tabViewStyle(.page)
+                NavigationStack {
+                    TabView {
+                        CounterPageView(session: session, kinds: viewModel.store.kinds, notice: viewModel.notice,
+                                        onSelect: viewModel.store.selectKind, onToast: viewModel.cycleToast,
+                                        onUndo: viewModel.undo, onDrink: viewModel.tapMain)
+                        SummaryPageView(session: session, now: viewModel.currentTime, onEnd: viewModel.store.end)
+                    }.tabViewStyle(.page)
+                }
             } else { StartView(onStart: viewModel.store.start) }
         }
         .background(BrandColor.background)
