@@ -1,0 +1,10 @@
+parent_config: ../../.swiftlint.yml
+
+# included 는 이 앱 디렉터리 기준 상대 경로다. 앱 폴더에서 swiftlint 를 실행한다.
+included:
+  - iOSApp
+  - WatchApp
+  - ComplicationApp
+  - LiveActivity
+  - Shared
+  - Common

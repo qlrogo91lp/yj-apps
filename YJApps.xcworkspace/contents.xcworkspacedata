@@ -10,4 +10,7 @@
    <FileRef
       location = "group:Apps/GolfCounter/GolfCounter.xcodeproj">
    </FileRef>
+   <FileRef
+      location = "group:Apps/Hanjan/Hanjan.xcodeproj">
+   </FileRef>
 </Workspace>

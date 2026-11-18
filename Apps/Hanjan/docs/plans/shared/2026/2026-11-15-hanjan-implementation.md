@@ -15,13 +15,17 @@
 ## Global Constraints
 
 - 저장소 규약은 루트 `CLAUDE.md` 가 우선한다 (폴더 배치, ViewModel 은 SwiftUI import 금지, 컴포넌트에는 값과 콜백만, 한 파일 한 타입, gitmoji 커밋)
-- `project.pbxproj` 를 직접 고치지 않는다. 파일 추가·삭제는 파일시스템으로만. 타깃·폴더 소속 변경은 T0 에서 Xcode GUI 로 끝낸다
+- 프로젝트 파일은 Xcode 27 새 형식 `Hanjan.xcodeproj/project.xcproj` 다. 직접 고치지 않는다. 파일 추가·삭제는 파일시스템으로만. 타깃·폴더 소속 변경은 T0 에서 Xcode GUI 로 끝낸다
 - 빌드·테스트는 `-workspace YJApps.xcworkspace`, 시뮬레이터는 UDID (`.github/scripts/pick-simulator.sh`)
 - `WorkoutCore` · `WorkoutUI` · HealthKit 을 쓰지 않는다
+- **테스트는 Ralli 방식**: Swift Testing(`@Test`, `#expect`), ViewModel·순수 로직 우선, View 는 테스트하지 않는다. 테스트 폴더는 대상 폴더를 따라간다 —
+  `iosTests/` 는 `iOSApp/` 과 `Shared/` 를, `watchosTests/` 는 `WatchApp/` 을 거울처럼 따른다 (예: `iOSApp/Features/Records/…` → `iosTests/Records/…`, `Shared/Models/…` → `iosTests/Shared/…`, `WatchApp/Services/…` → `watchosTests/Services/…`). 공용 준비물은 `Support/`
+- 이 플랜의 테스트 예시가 `func test_…()` · `XCTAssert…` 로 적혀 있어도 Swift Testing 으로 옮겨 쓴다 (이름과 단언 내용은 그대로)
 - `@Model` 은 CloudKit 규칙: 모든 속성 기본값 또는 옵셔널, `@Relationship` 은 옵셔널 + `inverse`, `.unique` 금지
 - `ConnectivityService` 는 프로세스당 하나. `onReceive` 등록은 생성한 그 main-queue turn 안에서 끝낸다
+- `BrandColor.danger` 는 메인 노란색과 확실히 구분되는 빨강(`Color.red` 계열)으로 둔다 — 한도 초과 경고가 메인 색에 묻히면 안 된다
 - UI 문구: 버튼 라벨은 글자만 (`한 잔`, `취소`, `짠만`). `+` `−` 이모지·아이콘 라벨 없음. 포인트 색 앰버, 경고만 빨강, 어두운 배경
-- **버튼 스타일은 Ralli 를 따른다** (참고: `Apps/TennisCounter/WatchApp/Features/Home/HomeView.swift` 의 시작 버튼, `…/Match/Score/Components/UndoButton.swift`, `…/Match/Result/Components/SaveButton.swift`). 메인 색은 앰버 — `BrandColor.amber` 하나만 쓰고 화면에서 색 값을 직접 적지 않는다
+- **버튼 스타일은 Ralli 를 따른다** (참고: `Apps/TennisCounter/WatchApp/Features/Home/HomeView.swift` 의 시작 버튼, `…/Match/Score/Components/UndoButton.swift`, `…/Match/Result/Components/SaveButton.swift`). 메인 색은 앱 아이콘의 노란색 — `BrandColor.amber` = Display P3 `(1.0, 0.8, 0.0)` (`Color(.displayP3, red: 1.0, green: 0.8, blue: 0.0)`, `Hanjan.icon` 배경과 같은 값). 토큰 이름은 `amber` 를 유지한다. 이 토큰 하나만 쓰고 화면에서 색 값을 직접 적지 않는다
   - 주 버튼(`시작` · `한 잔` · `저장` · `다음`): 시스템 `.borderedProminent` + `.tint(BrandColor.amber)`. 글자는 검정(앰버 위 흰 글자는 대비가 낮다)
   - `취소`: Ralli `UndoButton` 과 같은 캡슐 — `.buttonStyle(.plain)`, 흰색 10% 채움 + 흰색 20% 테두리. 비활성은 40% 불투명
   - `짠만`: 같은 캡슐 모양, 채움 없이 앰버 테두리 + 앰버 글자
@@ -69,11 +73,11 @@ Wave 2 (직렬)   T9 조립 ──► T10 실기기 확인 ──► T11 TestFli
 
 | Task | 소유 폴더 |
 |---|---|
-| T1 | `Shared/` `Common/` `iosTests/` |
-| T2 | `WatchApp/` |
-| T3 | `iOSApp/Services/` `iOSApp/Features/Home/` |
-| T4 | `iOSApp/Features/Records/` |
-| T5 | `iOSApp/Features/Settings/` `iOSApp/Features/Onboarding/` |
+| T1 | `Shared/` `Common/` `iosTests/Shared/` `iosTests/Support/` |
+| T2 | `WatchApp/` `watchosTests/` |
+| T3 | `iOSApp/Services/` `iOSApp/Features/Home/` `iosTests/Services/` `iosTests/Home/` |
+| T4 | `iOSApp/Features/Records/` `iosTests/Records/` |
+| T5 | `iOSApp/Features/Settings/` `iOSApp/Features/Onboarding/` `iosTests/Settings/` |
 | T6 | `ComplicationApp/` |
 | T7 | `LiveActivity/` `iOSApp/LiveActivity/` |
 | T8 | `Hanjan.icon/` `APPSTORE.md` 각 타깃 `Assets.xcassets` |
@@ -97,7 +101,7 @@ PR 은 Wave 2 가 끝난 뒤 `feat/hanjan` → `main` 하나 (본문에 `YJ-42`)
 **Linear** — 플랜 승인 뒤 YJ-42 본문에 아래 체크리스트를 넣고, Task 가 merge 될 때마다 하나씩 체크한다.
 
 ```
-- [ ] T0 프로젝트 골격 (타깃 5개 · 스킴 · 엔타이틀먼트)
+- [ ] T0 프로젝트 골격 (타깃 6개 · 스킴 · 엔타이틀먼트)
 - [ ] T1 공용 계약 (장부 · 메시지 · 저장 모델 · 스냅샷)
 - [ ] T2 워치 앱
 - [ ] T3 폰 세션 · 홈
@@ -120,7 +124,7 @@ PR 은 Wave 2 가 끝난 뒤 `feat/hanjan` → `main` 하나 (본문에 `YJ-42`)
 **누가:** 사용자가 Xcode GUI 로 만든다 (타깃 생성은 스크립트로 하지 않는다 — 타깃 규약 문서 §1 의 이름 함정 때문). 워커 하나가 옆에서 검증 명령을 돌린다.
 
 **Files:**
-- Create: `Apps/Hanjan/Hanjan.xcodeproj`, `Apps/Hanjan/{iOSApp,WatchApp,Shared,Common,ComplicationApp,LiveActivity,iosTests}/`, 엔타이틀먼트 4개, `Apps/Hanjan/.swiftlint.yml`, `Apps/Hanjan/.swiftformat`, `Apps/Hanjan/CLAUDE.md`
+- Create: `Apps/Hanjan/Hanjan.xcodeproj`, `Apps/Hanjan/{iOSApp,WatchApp,Shared,Common,ComplicationApp,LiveActivity,iosTests,watchosTests}/`, 엔타이틀먼트 4개, `Apps/Hanjan/.swiftlint.yml`, `Apps/Hanjan/.swiftformat`, `Apps/Hanjan/CLAUDE.md`
 - Modify: `YJApps.xcworkspace/contents.xcworkspacedata`, `Makefile:1` (`APPS` 에 `Hanjan`), 루트 `CLAUDE.md` (저장소 구조 · 스킴 목록 · YJKit 링크 표)
 
 | 타깃 (= 공유 스킴) | 번들 ID | 동기화 폴더 | YJKit |
@@ -128,21 +132,22 @@ PR 은 Wave 2 가 끝난 뒤 `feat/hanjan` → `main` 하나 (본문에 `YJ-42`)
 | `Hanjan` | `com.yj.Hanjan` | `iOSApp` `Shared` `Common` | ConnectivityCore, PersistenceCore |
 | `Hanjan Watch App` | `com.yj.Hanjan.watchkitapp` | `WatchApp` `Shared` `Common` | ConnectivityCore |
 | `HanjanComplicationExtension` | `com.yj.Hanjan.watchkitapp.ComplicationApp` | `ComplicationApp` `Common` | — |
-| `HanjanLiveActivityExtension` | `com.yj.Hanjan.LiveActivity` | `LiveActivity` `Common` | — |
+| `HanjanLiveActivityExtension` | `com.yj.Hanjan.HanjanLiveActivity` | `LiveActivity` `Common` | — |
 | `HanjanTests` (iOS 단위 테스트, 호스트 `Hanjan`) | `com.yj.HanjanTests` | `iosTests` | — |
+| `HanjanWatchTests` (워치 단위 테스트, 호스트 `Hanjan Watch App`) | `com.yj.HanjanWatchTests` | `watchosTests` | — |
 
-- [ ] **Step 1:** 타깃 규약 문서(`docs/specs/2026/2026-09-03-xcode-target-conventions.md`) 절차대로 프로젝트와 타깃 5개를 만든다. 생성 시트에는 `Hanjan` / `HanjanComplication` / `HanjanLiveActivity` 만 입력한다 (Xcode 가 ` Watch App` · `Extension` 을 덧붙인다)
+- [ ] **Step 1:** 타깃 규약 문서(`docs/specs/2026/2026-09-03-xcode-target-conventions.md`) 절차대로 프로젝트와 타깃 6개를 만든다. 생성 시트에는 `Hanjan` / `HanjanComplication` / `HanjanLiveActivity` 만 입력한다 (Xcode 가 ` Watch App` · `Extension` 을 덧붙인다)
 - [ ] **Step 2:** Capability — iOS: iCloud(CloudKit, 컨테이너 `iCloud.com.yj.Hanjan`), Background Modes(Remote notifications), App Groups(`group.com.yj.Hanjan`), Push 없이 Live Activity(`NSSupportsLiveActivities = YES`). 워치·컴플리케이션: App Groups(`group.com.yj.Hanjan`)
 - [ ] **Step 3:** Info.plist 문구 — `NSLocationWhenInUseUsageDescription`: "술자리 장소를 기록에 남기는 데 사용합니다." (iOS · 워치 둘 다)
-- [ ] **Step 4:** 스킴 5개를 Shared 로 표시. 배포 타깃 iOS 17.0 / watchOS 10.0
+- [ ] **Step 4:** 스킴 6개를 Shared 로 표시. 배포 타깃 iOS 17.0 / watchOS 10.0
 - [ ] **Step 5:** 린트 설정은 HaruchiFit 의 `.swiftlint.yml`(`parent_config`) · `.swiftformat` 을 복사해 경로만 맞춘다. `Apps/Hanjan/CLAUDE.md` 에는 타깃 표와 이 플랜·스펙 경로만 적는다
 - [ ] **Step 6: 검증**
 
 ```bash
 P=Apps/Hanjan/Hanjan.xcodeproj/project.pbxproj
 grep -oE 'PRODUCT_BUNDLE_IDENTIFIER = [^;]+;' $P | sort -u          # 위 표의 5개와 일치
-grep -oE '(TEST_HOST|BUNDLE_LOADER|INFOPLIST_FILE) = [^;]+;' $P | sort -u
-ls Apps/Hanjan/Hanjan.xcodeproj/xcshareddata/xcschemes               # 스킴 5개
+grep -oE '(TEST_HOST|BUNDLE_LOADER|INFOPLIST_FILE) = [^;]+;' $P | sort -u   # TEST_HOST 2개: Hanjan.app, Hanjan Watch App.app
+ls Apps/Hanjan/Hanjan.xcodeproj/xcshareddata/xcschemes               # 스킴 6개
 IOS=$(.github/scripts/pick-simulator.sh iOS '^iPhone'); WATCH=$(.github/scripts/pick-simulator.sh watchOS '^Apple Watch')
 xcodebuild -workspace YJApps.xcworkspace -scheme Hanjan -destination "id=$IOS" build
 xcodebuild -workspace YJApps.xcworkspace -scheme "Hanjan Watch App" -destination "id=$WATCH" build
@@ -161,7 +166,7 @@ Wave 1 전체가 이 Task 의 타입 위에 선다. **여기 적힌 이름과 �
 - Create: `Shared/Services/Messages/{SessionStartMessage,SessionEndMessage,EntryAddMessage,EntryRemoveMessage,SessionStateMessage,ConfigMessage}.swift`
 - Create: `Shared/Persistence/{SessionRecord,EntryRecord,DrinkKindRecord,CompanionRecord,HanjanSchema}.swift`
 - Create: `Common/{SessionSnapshot,SessionSnapshotStore,BrandColor}.swift`
-- Test: `iosTests/{DrinkLedgerTests,LiveSessionTests,LimitLevelTests,SojuFormatTests,MessageRoundTripTests}.swift`
+- Test: `iosTests/Shared/{DrinkLedgerTests,LiveSessionTests,LimitLevelTests,SojuFormatTests,MessageRoundTripTests}.swift`, `iosTests/Support/Fixtures.swift`(테스트용 `DrinkEntry`·`LiveSession` 생성 헬퍼)
 
 **Interfaces — Produces:**
 
@@ -223,6 +228,12 @@ enum SessionSnapshotStore { static let appGroup = "group.com.yj.Hanjan"; static 
 enum BrandColor { static let amber, danger, background, surface: Color }
 ```
 
+**계약 보강 (Wave 1 착수 후, 워커 보고 반영)**
+- `SojuFormat` · `LimitLevel` 은 `Common/` 에 있다 — 컴플리케이션·Live Activity 확장도 쓴다
+- `DrinkLedger(entries:removedIds:)` · `var removedIds: Set<UUID>` — 저장소에서 복원할 때 삭제 이력을 함께 넘긴다
+- `LiveSession.mergedSessionIds: Set<UUID>` · `owns(sessionId:) -> Bool` — `absorbing`/`merging` 이 흡수된 세션 id 를 기록한다. 늦게 온 메시지의 `sessionId` 는 `owns` 로 찾는다
+- `SessionRecord.removedEntryIds` · `mergedSessionIds`(쉼표 구분 문자열로 저장, `apply` 가 채운다) · `var ledger: DrinkLedger`(저장된 잔 + 삭제 이력으로 복원) · `owns(sessionId:)`. 보관된 세션에 늦은 메시지가 오면 `record.ledger` 에 병합한 뒤 다시 저장한다
+
 전송 규칙(T2·T3 공통): 변경 하나마다 **해당 이벤트 메시지를 `.reliable` 로**, 그리고 **`SessionStateMessage` 를 `.context` 로** 같이 보낸다.
 이벤트가 사라져도 다음 상태 메시지가 장부를 통째로 싣고 와 병합으로 복구된다. 수신 측은 언제나 `merging` / `absorbing` 만 쓴다 (덮어쓰기 금지).
 
@@ -273,11 +284,12 @@ func test_toastOnly_excludedFromGramsAndKindCounts() { /* 짠만 2 + 소주 1 �
 - [ ] `tapMain()` 은 `session.makeEntry(...)` 로 만든 기록을 넣는다 (짠 모드면 차례에 따라 한 잔 또는 짠만).
 - [ ] 짠 모드 화면: 입력 페이지 맨 위 줄 오른쪽의 `짠` 캡슐로 켠다(`cycleToast()`). 바꾼 직후 "짠 모드 3번 중 1번" 2초, 끄면 "짠 모드 끔". 변경은 `SessionStateMessage` 로 전파된다. 켜져 있으면 숫자 옆에 원형 점(`toastProgress.filled` 개 채움 / `total` 개), 주 버튼은 마실 차례 `한 잔`(앰버 채움) · 아니면 `짠만`(테두리만). `짠만` 직후 "짠만 했어요" 2초. 햅틱은 `짠만` 도 `.click`. 시작 화면과 2페이지에는 짠 모드 UI 를 두지 않는다
 - [ ] 화면: 시작(앱 이름 + `시작`) / 진행 중(술 이름 ⌄, `5 / 8잔`, 막대, `[취소][한 잔]` 폭 1:3) / exceeded 는 숫자·막대·버튼 빨강 / 취소 직후 "소주 1잔 취소됨" 2초. 진행 중은 가로 페이지 2장(아래에 페이지 점): 1페이지 입력, 2페이지 경과 시간 · 시작 시각("19:30 시작") · 술별 잔 수 · `종료`(빨강 테두리) → 종료 확인. 1페이지에는 종료 버튼을 두지 않는다
-- [ ] 검증: `xcodebuild … -scheme "Hanjan Watch App" -destination "id=$WATCH" build`. `WatchSessionStore` 로직 중 시간·병합 분기는 `now` 주입으로 프리뷰/수동 확인 (워치 테스트 타깃은 만들지 않는다 — 병합 규칙 자체는 T1 테스트가 잡는다)
+- [ ] 테스트 먼저: `watchosTests/Services/WatchSessionStoreTests.swift` (전송은 가짜 `ConnectivityService` 대역 또는 전송 클로저 주입, `now` 주입) — `tapMain` 3번 뒤 `undo` → 잔 2개 / 짠 모드 3번 중 1번에서 `tapMain` 3번 → 마신 잔 1개 / 3시간 뒤 `tick()` → 세션 종료·로컬 비움 / 폰에서 온 같은 id 상태 메시지는 병합되고 잔이 줄지 않는다 / 재실행 복원(저장 → 새 인스턴스 → 같은 세션)
+- [ ] 검증: `xcodebuild … -scheme HanjanWatchTests -destination "id=$WATCH" test` → `TEST SUCCEEDED`, `… -scheme "Hanjan Watch App" … build`
 
 ### Task 3: 폰 세션 · 홈
 
-**Files:** Create `iOSApp/Services/{PhoneSessionStore,SessionArchive,LimitNotifier,ReviewReminder,PhoneLocationService,AppSettings}.swift`, `iOSApp/Features/Home/{HomeView,HomeViewModel}.swift`, `iOSApp/Features/Home/Components/{ActiveSessionCard,MonthSummaryCard,RecentSessionRow,KindChips,DrinkButtons}.swift`; Test `iosTests/{SessionArchiveTests,ReviewReminderTests,MonthSummaryTests}.swift`
+**Files:** Create `iOSApp/Services/{PhoneSessionStore,SessionArchive,LimitNotifier,ReviewReminder,PhoneLocationService,AppSettings}.swift`, `iOSApp/Features/Home/{HomeView,HomeViewModel}.swift`, `iOSApp/Features/Home/Components/{ActiveSessionCard,MonthSummaryCard,RecentSessionRow,KindChips,DrinkButtons}.swift`; Test `iosTests/Services/{SessionArchiveTests,ReviewReminderTests}.swift`, `iosTests/Home/MonthSummaryTests.swift`
 
 **Interfaces:**
 - Consumes: T1 전부, `ConnectivityService`, `PersistenceContainerFactory`
@@ -300,7 +312,7 @@ func test_toastOnly_excludedFromGramsAndKindCounts() { /* 짠만 2 + 소주 1 �
 
 ### Task 4: 폰 기록
 
-**Files:** Create `iOSApp/Features/Records/{RecordsView,RecordsViewModel}.swift`, `Records/List/RecordListView.swift`, `Records/Calendar/{RecordCalendarView,Components/CalendarGrid,Components/DaySummaryCard}.swift`, `Records/Detail/{RecordDetailView,Components/SessionMap,Components/KindCountList}.swift`, `Records/Edit/{EntryEditView,ReviewFormView,Components/ConditionPicker,Components/CompanionField}.swift`; Test `iosTests/{CalendarMarksTests,EntryEditTests}.swift`
+**Files:** Create `iOSApp/Features/Records/{RecordsView,RecordsViewModel}.swift`, `Records/List/RecordListView.swift`, `Records/Calendar/{RecordCalendarView,Components/CalendarGrid,Components/DaySummaryCard}.swift`, `Records/Detail/{RecordDetailView,Components/SessionMap,Components/KindCountList}.swift`, `Records/Edit/{EntryEditView,ReviewFormView,Components/ConditionPicker,Components/CompanionField}.swift`; Test `iosTests/Records/{CalendarMarksTests,EntryEditTests}.swift`
 
 **Interfaces:**
 - Consumes: T1 의 `@Model` · `LimitLevel` · `SojuFormat` · `DrinkLedger`. T3 의 타입은 쓰지 않는다 (SwiftData 를 직접 읽고 쓴다)
@@ -314,7 +326,7 @@ func test_toastOnly_excludedFromGramsAndKindCounts() { /* 짠만 2 + 소주 1 �
 
 ### Task 5: 폰 설정 · 온보딩
 
-**Files:** Create `iOSApp/Features/Settings/{SettingsView,SettingsViewModel,KindListView,KindEditView}.swift`, `iOSApp/Features/Onboarding/{OnboardingView,OnboardingViewModel}.swift`, `Onboarding/Components/{LimitStepPage,BothDevicesPage,ToastModePage,PermissionPage}.swift`; Test `iosTests/KindValidationTests.swift`
+**Files:** Create `iOSApp/Features/Settings/{SettingsView,SettingsViewModel,KindListView,KindEditView}.swift`, `iOSApp/Features/Onboarding/{OnboardingView,OnboardingViewModel}.swift`, `Onboarding/Components/{LimitStepPage,BothDevicesPage,ToastModePage,PermissionPage}.swift`; Test `iosTests/Settings/KindValidationTests.swift`
 
 **Interfaces:**
 - Consumes: T1 의 `DrinkKindRecord` · `DrinkKind` · `SojuFormat`
@@ -374,8 +386,9 @@ func test_toastOnly_excludedFromGramsAndKindCounts() { /* 짠만 2 + 소주 1 �
 - [ ] 탭: 홈 / 기록 / 설정. `hasOnboarded == false` 면 온보딩 → `onFinish` 에서 한도 저장. 설정의 `onKindsChanged` · 한도 변경 → `store.pushConfig()`
 - [ ] 회고 알림을 누르면 `ReviewFormView(sessionId:)` 를 시트로 띄운다
 - [ ] 앱이 활성화될 때와 1분 타이머로 `store.tick()` (양쪽)
+- [ ] Wave 1 보고에서 넘어온 것: 루트에 `.preferredColorScheme(.dark)` / `seedPresetsIfNeeded()` 를 화면보다 먼저 / 기록 삭제(`RecordStore`) → `SessionArchive.markDeleted(sessionId:)` 연결 / `PlaceNameLookup` · `SystemPermissionRequester` 를 `iOSApp/Services/` 로 이동 / 기능별 버튼(`RecordPrimaryButton` · `RecordCapsuleButton` · `OnboardingNextButton` 등)을 `iOSApp/Components/` 의 공용 버튼으로 통합 / `OnboardingViewModelTests` 를 `iosTests/Onboarding/` 으로 이동
 - [ ] 워치 루트: `ConnectivityService` 하나 → `WatchSessionStore` → `SessionView`
-- [ ] 검증: 스킴 5개 빌드, `HanjanTests` 전체, `make lint`, `make format`. 시뮬레이터 한 쌍(폰+워치)에서 시작 → 한 잔 3번 → 취소 → 종료가 양쪽에 같은 숫자로 보이는지
+- [ ] 검증: 스킴 6개 빌드, `HanjanTests` 전체, `make lint`, `make format`. 시뮬레이터 한 쌍(폰+워치)에서 시작 → 한 잔 3번 → 취소 → 종료가 양쪽에 같은 숫자로 보이는지
 
 ### Task 10: 실기기 확인 (사용자)
 

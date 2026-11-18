@@ -10,6 +10,7 @@ yj-apps/
 ├─ Apps/GolfCounter/     GolfCounter — iOS + Watch + Complication
 ├─ Apps/TennisCounter/   Ralli(TennisCounter) — iOS + Watch + Complication + LiveActivity
 ├─ Apps/HaruchiFit/      HaruchiFit — iOS + Watch + Complication
+├─ Apps/Hanjan/          한잔(Hanjan) — iOS + Watch + Complication + LiveActivity
 │  └─ APPSTORE.md        App Store 문구 원본. 세 앱 폴더에 하나씩 있다 (아래 "스토어 문구")
 ├─ YJApps.xcworkspace    이것 하나만 연다. 앱별 .xcodeproj 를 따로 열지 않는다
 ├─ Makefile              앱 순회 lint / format / fix
@@ -75,11 +76,12 @@ make kit-test  # Packages/YJKit 단독 테스트
 xcodebuild -workspace YJApps.xcworkspace -scheme "<스킴>" -destination "<대상>" build   # 또는 test
 ```
 
-공유 스킴 11개 — `GolfCounter` / `GolfCounter Watch App` / `GolfComplicationExtension` /
+공유 스킴 17개 — `GolfCounter` / `GolfCounter Watch App` / `GolfComplicationExtension` /
 `TennisCounter` / `TennisCounter Watch App` / `RalliComplicationExtension` / `TennisLiveActivityExtension` /
-`HaruchiFit` / `HaruchiFit Watch App` / `HaruchiComplicationExtension` / `HaruchiFitWatchTests`
+`HaruchiFit` / `HaruchiFit Watch App` / `HaruchiComplicationExtension` / `HaruchiFitWatchTests` /
+`Hanjan` / `Hanjan Watch App` / `HanjanComplicationExtension` / `HanjanLiveActivityExtension` / `HanjanTests` / `HanjanWatchTests`
 
-HaruchiFit만 **워치 테스트 전용 스킴**(`HaruchiFitWatchTests`)을 갖는다. 나머지 두 앱은 앱 스킴에
+HaruchiFit(`HaruchiFitWatchTests`)과 Hanjan(`HanjanTests` · `HanjanWatchTests`)은 **테스트 전용 스킴**을 갖는다. Golf·Tennis 는 앱 스킴에
 `-only-testing` 을 걸어 테스트한다 — 그쪽 워치 스킴에는 iOS 테스트 타깃까지 들어 있기 때문이다.
 
 > **시뮬레이터는 이름이 아니라 UDID로 지정한다.** 런타임이 둘 이상 설치되면 같은 이름의 기기가
@@ -115,6 +117,8 @@ override 붙였다 떼는 절차도 필요 없다.
 | TennisCounter | `TennisCounter Watch App` | ConnectivityCore, WorkoutCore, WorkoutUI |
 | HaruchiFit | `HaruchiFit` | ConnectivityCore, PersistenceCore, WorkoutCore, WorkoutUI, WorkoutShareUI |
 | HaruchiFit | `HaruchiFit Watch App` | ConnectivityCore, WorkoutCore, WorkoutUI |
+| Hanjan | `Hanjan` | ConnectivityCore, PersistenceCore |
+| Hanjan | `Hanjan Watch App` | ConnectivityCore |
 
 **코어는 도메인을 모른다.** 종목별 규칙·메시지·저장 정책은 앱 레이어가 소유한다.
 
@@ -130,6 +134,7 @@ override 붙였다 떼는 절차도 필요 없다.
 이 프로젝트는 **Xcode 16의 `PBXFileSystemSynchronizedRootGroup`** 방식을 사용한다.
 
 - Swift 파일을 생성하거나 삭제하면 Xcode가 폴더를 자동 스캔해서 빌드 대상에 포함/제외한다.
+- **Hanjan 만 Xcode 27 의 새 프로젝트 형식(`Hanjan.xcodeproj/project.xcproj`, JSON)** 이다. 나머지 세 앱은 `project.pbxproj`. 타깃 규약 문서의 `grep … project.pbxproj` 검증 명령은 Hanjan 에서 파일 이름과 표기(`"KEY": "value"`)를 바꿔 써야 한다
 - `.xcodeproj/project.pbxproj`를 직접 수정하거나 `xcodeproj` gem 등 프로젝트 파일 편집 도구를 사용할 필요가 없다.
 - 파일 이동/생성/삭제는 파일시스템 조작만으로 충분하다.
 - **폴더 rename은 Xcode 네비게이터에서 한다.** Finder에서 바꾸면 pbxproj의 `path` 가 남는다.
