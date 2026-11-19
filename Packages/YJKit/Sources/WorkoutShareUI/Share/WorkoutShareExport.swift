@@ -39,11 +39,14 @@
 
         /// 인스타 스토리에서 화면을 길게 눌러 붙여넣으면 배경 없는 스티커로 올라간다.
         /// Meta App ID 없이 스티커를 만드는 유일한 경로다.
+        ///
+        /// 앱이 백그라운드면(단축어 실행 등) iOS 가 쓰기를 에러 없이 무시한다. `changeCount` 가 그대로면 실패로 돌려준다.
         @discardableResult
         static func copySticker(_ image: UIImage, to pasteboard: UIPasteboard = .general) -> Bool {
             guard let data = pngData(from: image) else { return false }
+            let before = pasteboard.changeCount
             pasteboard.setData(data, forPasteboardType: UTType.png.identifier)
-            return true
+            return pasteboard.changeCount != before
         }
     }
 #endif
